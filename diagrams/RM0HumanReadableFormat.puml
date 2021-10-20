@@ -1,16 +1,19 @@
-@startjson
-{
+@startuml
+left to right direction
+
+!$data={
     "Metadata": {
         "Version": 0
-        },
-    "Vibrations": [
+    },
+    "Avatars": { },
+    "VibrationTracks": [
         {
             "EncodingModality": "Quantized: 0",
             "WindowLength": "float: ]0;x]",
             "WaveBands 0-N": [
                 {
-                    "Lower Frequency Limit": "float ]0; 1000]",
-                    "Higher Frequency Limit": "float ]0; 1000]",
+                    "LowerFrequencyLimit": "int ]0; 1000]",
+                    "HigherFrequencyLimit": "int ]0; 1000]",
                     "Streams": [
                         {
                             "Position": "float: [0;x]",
@@ -71,7 +74,16 @@
         },
         {}
     ],
-    "Textures": [],
-    "Stiffness": []
+    "KinaestheticTracks": []
 }
-@endjson
+
+
+
+title Human-readable MPEG Haptics RM0 format (//based on Json/GlTF structure//)
+
+rectangle json #white as "
+{{json
+$data
+}}
+"
+@enduml
