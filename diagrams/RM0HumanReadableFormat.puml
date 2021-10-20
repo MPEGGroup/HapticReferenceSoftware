@@ -21,7 +21,7 @@ left to right direction
                             "Waves": [
                                 {
                                     "AmplitudeValue": "float: [-1;1]",
-                                    "FrequencyValue": "float: ]0;1000]"
+                                    "RelativeFrequencyValue": "float: ]0;1000]"
                                 },
                                 "..."
                             ]
@@ -31,14 +31,18 @@ left to right direction
                 },
                 "..."
             ],
-            "TransientBands 0-N": [
-                {
-                    "AmplitudeValue": "float: [-1;1]",
-                    "FrequencyValue": "float: ]0;1000]",
-                    "RelativePosition": "float: [0-x]"
-                },
-                "..."
-            ],
+            "TransientBands 0-N": {
+                "LowerFrequencyLimit": "int ]0; 1000]",
+                "HigherFrequencyLimit": "int ]0; 1000]",
+                "Transients": [
+                    {
+                        "AmplitudeValue": "float: [-1;1]",
+                        "RelativeFrequencyValue": "float: ]0;1000]",
+                        "RelativePosition": "float: [0-x]"
+                    },
+                    "..."
+                ]
+            },
             "KeyframeBands 0-N": [
                 {
                     "AmplitudeValue": "float: [-1;1]",
@@ -47,6 +51,7 @@ left to right direction
                 "..."
             ]
         },
+        {},
         {
             "EncodingModality": "Vectorial: 1",
             "WaveBands 0-N": [
@@ -58,7 +63,7 @@ left to right direction
                             "Waves": [
                                 {
                                     "AmplitudeValue": "float: [-1;1]",
-                                    "FrequencyValue": "float: ]0;1000]",
+                                    "RelativeFrequencyValue": "float: ]0;1000]",
                                     "RelativePosition": "float: [0-x]"
                                 },
                                 "..."
@@ -71,8 +76,7 @@ left to right direction
             ],
             "TransientBands 0-N": [],
             "KeyframeBands 0-N": []
-        },
-        {}
+        }
     ],
     "KinaestheticTracks": []
 }
