@@ -51,7 +51,6 @@ left to right direction
                 "..."
             ]
         },
-        {},
         {
             "EncodingModality": "Vectorial: 1",
             "WaveBands 0-N": [
@@ -76,7 +75,8 @@ left to right direction
             ],
             "TransientBands 0-N": [],
             "KeyframeBands 0-N": []
-        }
+        },
+        "..."
     ],
     "KinaestheticTracks": []
 }
