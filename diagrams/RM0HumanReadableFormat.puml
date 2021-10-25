@@ -1,16 +1,19 @@
-@startjson
-{
+@startuml
+left to right direction
+
+!$data={
     "Metadata": {
         "Version": 0
-        },
-    "Vibrations": [
+    },
+    "Avatars": { },
+    "VibrationTracks": [
         {
             "EncodingModality": "Quantized: 0",
             "WindowLength": "float: ]0;x]",
             "WaveBands 0-N": [
                 {
-                    "Lower Frequency Limit": "float ]0; 1000]",
-                    "Higher Frequency Limit": "float ]0; 1000]",
+                    "LowerFrequencyLimit": "int ]0; 1000]",
+                    "HigherFrequencyLimit": "int ]0; 1000]",
                     "Streams": [
                         {
                             "Position": "float: [0;x]",
@@ -18,7 +21,7 @@
                             "Waves": [
                                 {
                                     "AmplitudeValue": "float: [-1;1]",
-                                    "FrequencyValue": "float: ]0;1000]"
+                                    "RelativeFrequencyValue": "float: ]0;1000]"
                                 },
                                 "..."
                             ]
@@ -28,14 +31,18 @@
                 },
                 "..."
             ],
-            "TransientBands 0-N": [
-                {
-                    "AmplitudeValue": "float: [-1;1]",
-                    "FrequencyValue": "float: ]0;1000]",
-                    "RelativePosition": "float: [0-x]"
-                },
-                "..."
-            ],
+            "TransientBands 0-N": {
+                "LowerFrequencyLimit": "int ]0; 1000]",
+                "HigherFrequencyLimit": "int ]0; 1000]",
+                "Transients": [
+                    {
+                        "AmplitudeValue": "float: [-1;1]",
+                        "RelativeFrequencyValue": "float: ]0;1000]",
+                        "RelativePosition": "float: [0-x]"
+                    },
+                    "..."
+                ]
+            },
             "KeyframeBands 0-N": [
                 {
                     "AmplitudeValue": "float: [-1;1]",
@@ -55,7 +62,7 @@
                             "Waves": [
                                 {
                                     "AmplitudeValue": "float: [-1;1]",
-                                    "FrequencyValue": "float: ]0;1000]",
+                                    "RelativeFrequencyValue": "float: ]0;1000]",
                                     "RelativePosition": "float: [0-x]"
                                 },
                                 "..."
@@ -69,9 +76,18 @@
             "TransientBands 0-N": [],
             "KeyframeBands 0-N": []
         },
-        {}
+        "..."
     ],
-    "Textures": [],
-    "Stiffness": []
+    "KinaestheticTracks": []
 }
-@endjson
+
+
+
+title Human-readable MPEG Haptics RM0 format (//based on Json/GlTF structure//)
+
+rectangle json #white as "
+{{json
+$data
+}}
+"
+@enduml
