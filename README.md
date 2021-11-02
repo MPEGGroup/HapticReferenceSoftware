@@ -1,8 +1,8 @@
 # MPEG Haptics Reference Model
 
 ![3 contributors](https://img.shields.io/badge/contributors-3-brightgreen.svg?style=flat-square)
-![C++ | Json language](https://img.shields.io/badge/type-C++%20|%20Json-blue.svg?style=flat-square)
-![Version](https://img.shields.io/badge/type-RM0-blueviolet.svg?style=flat-square)
+![C++ | Json language](https://img.shields.io/badge/type-C++%20|%20glTF-blue.svg?style=flat-square)
+![Version](https://img.shields.io/badge/version-RM0-blueviolet.svg?style=flat-square)
 
 
 > This project answer the Call for Proposals (CfP) on a Coded Representation of Haptics - Phase 1 (*refs. m56255_v6*).
@@ -13,21 +13,7 @@
 
 ## Table of Contents
 
-- [How to use](#how-to-use)
-  * [Clone](#clone)
-  * [Compilation](#compilation)
-- [File structure](#file-structure)
-  * [Human-readable format](#human-readable-format)
-  * [Binary bitstream format](#binary-bitstream-format)
-- [Software architecture](#software-architecture)
-  * [RM0 Encoder structure](#rm0-encoder-structure)
-  * [RM0 Decoder structure](#rm0-decoder-structure)
-- [Git notes](#git-notes)
-  * [Commit convention](#commit-convention)
-  * [Branch convention](#branch-convention)
-    + [Branch creation](#branch-creation)
-    + [Branch update](#branch-update)
-    + [Tree model](#tree-model)
+[[_TOC_]]
 
 ---
 
@@ -71,25 +57,25 @@ git clone git@github.com:Interhaptics/MPEG_Haptics_RM0.git
 
 ### Human-readable format
 
-![RM0-human-readable-format](diagrams/Rendered/RM0HumanReadableFormat.png)
+![RM0-human-readable-format](diagrams/Rendered/RM0HumanReadableFormat.png "RM0 human-readable format")
 
 ### Binary bitstream format
 
-![RM0-bitstream-format](diagrams/Rendered/RM0BitsreamFormat.png)
+![RM0-bitstream-format](diagrams/Rendered/RM0BitsreamFormat.png "bitstream structure")
 
 ---
 
 ## Software architecture
 
-![RM0-General-softwares](diagrams/Rendered/RM0GeneralSoftwares.png)
+![RM0-General-softwares](diagrams/Rendered/RM0GeneralSoftwares.png "General file software structure")
 
 ### RM0 Encoder structure
 
-![RM0-Encoder](diagrams/Rendered/RM0EncoderStructure.png)
+![RM0-Encoder](diagrams/Rendered/RM0EncoderStructure.png "RM0 Encoder structure")
 
 ### RM0 Decoder structure
 
-![RM0-Decoder](diagrams/Rendered/RM0DecoderStructure.png)
+![RM0-Decoder](diagrams/Rendered/RM0DecoderStructure.png "RM0 Decoder structure")
 
 ---
 
@@ -144,4 +130,4 @@ On the other hand, when a working branch is finished and needs to move into *dev
 
 #### Tree model
 
-![git- tree](diagrams/Rendered/git_tree_model.drawio.png)
+![git- tree](diagrams/Rendered/git_tree_model.drawio.png "Git tree")
