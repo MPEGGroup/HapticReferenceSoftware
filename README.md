@@ -131,3 +131,7 @@ On the other hand, when a working branch is finished and needs to move into *dev
 #### Tree model
 
 ![git- tree](diagrams/Rendered/git_tree_model.drawio.png "Git tree")
+
+## Coding style
+
+The coding style and rules can be found in [doc/coding_style.md](doc/coding_style.md). The use of the these rules is mandatory for all software implementation work. Changes that do not comply with these rules will not be accepted by the software coordinators.
