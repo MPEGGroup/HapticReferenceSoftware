@@ -38,20 +38,22 @@
 class InputParser {
 public:
   InputParser(int &argc, char **argv) {
-    for (int i = 1; i < argc; ++i)
-      this->tokens.emplace_back(argv[i]);
+    for (int i = 1; i < argc; ++i) {
+      this->tokens.emplace_back(argv[i]); // NOLINT - using pointer arithmetic for argv.
+    }
   }
 
-  const std::string &getCmdOption(const std::string &option) const {
+  [[nodiscard]] auto getCmdOption(const std::string &option) const -> const std::string & {
     std::vector<std::string>::const_iterator itr;
     itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-    if (itr != this->tokens.end() && ++itr != this->tokens.end())
+    if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
       return *itr;
+    }
     static const std::string empty_string;
     return empty_string;
   }
 
-  bool cmdOptionExists(const std::string &option) const {
+  [[nodiscard]] auto cmdOptionExists(const std::string &option) const -> bool {
     return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
   }
 
@@ -72,7 +74,7 @@ void help() {
             << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
 }
 
-int main(int argc, char *argv[]) {
+auto main(int argc, char *argv[]) -> int {
   InputParser inputParser(argc, argv);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
     help();
@@ -80,8 +82,9 @@ int main(int argc, char *argv[]) {
   }
 
   std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty())
+  if (filename.empty()) {
     filename = inputParser.getCmdOption("--file");
+  }
   if (filename.empty()) {
     help();
     return EXIT_FAILURE;
@@ -89,9 +92,11 @@ int main(int argc, char *argv[]) {
 
   std::cout << "The file to process is : " << filename << "\n";
   std::string output = inputParser.getCmdOption("-o");
-  if (output.empty())
+  if (output.empty()) {
     output = inputParser.getCmdOption("--output");
-  if (!output.empty())
+  }
+  if (!output.empty()) {
     std::cout << "The generated file will be : " << output << "\n";
+  }
   return EXIT_SUCCESS;
 }
