@@ -1,0 +1,31 @@
+Checks: '
+-*,
+bugprone-*,
+cppcoreguidelines-*,
+-cppcoreguidelines-avoid-magic-numbers,
+google-readability-braces-around-statements,
+google-build-using-namespace,
+misc-unused-parameters,
+modernize-*,
+performance-*,
+readability-*,
+-readability-magic-numbers
+'
+
+WarningsAsErrors: '*'
+
+FormatStyle: file
+
+CheckOptions:
+  - key:    readability-function-size.LineThreshold
+    value:  116
+  - key:    readability-function-size.StatementThreshold
+    value:  105
+  - key:    readability-function-size.ParameterThreshold
+    value:  6
+  - key:    readability-function-size.NestingThreshold
+    value:  7
+  - key:    readability-function-size.VariableThreshold
+    value:  32
+  - key:    readability-function-cognitive-complexity.Threshold
+    value:  47
