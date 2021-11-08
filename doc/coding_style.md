@@ -188,7 +188,7 @@ Contributed code must **NOT** produce compiler warnings when compiled with the f
 * gcc-10.x
 * clang-11.x
 
-By default, CMake is configured to run [**clang-tidy**](https://clang.llvm.org/extra/clang-tidy/) and will raise errors, if any, at compilation time.
+By default, CMake is configured to run [**clang-tidy**](https://clang.llvm.org/extra/clang-tidy/) and will raise errors, if any, at compilation time. The list of tests is configured in *.clang-tidy* file. Please refer to the [official website](https://clang.llvm.org/extra/clang-tidy/checks/list.html) for more details. The tests can be locally disabled in cmake but they will be checked before a branch merge by the software coordinator.
 
 ## Some recommendations for a better coding style
 ### Variable declaration

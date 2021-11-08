@@ -2,14 +2,12 @@ Checks: '
 -*,
 bugprone-*,
 cppcoreguidelines-*,
--cppcoreguidelines-avoid-magic-numbers,
 google-readability-braces-around-statements,
 google-build-using-namespace,
 misc-unused-parameters,
 modernize-*,
 performance-*,
 readability-*,
--readability-magic-numbers
 '
 
 WarningsAsErrors: '*'
