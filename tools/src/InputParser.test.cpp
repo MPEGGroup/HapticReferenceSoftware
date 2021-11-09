@@ -31,30 +31,26 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
+#include <catch2/catch.hpp>
 
-using namespace haptics::tools;
+#include "InputParser.h"
 
-int main(int argc, char *argv[]) {
-  InputParser inputParser(argc, argv);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(argv[0]);
-    return EXIT_SUCCESS;
+TEST_CASE("haptics::tools") {
+  using namespace haptics::tools;
+
+  SECTION("Command line arguments") {
+
+    std::vector<std::string> arguments = {"fake_prg", "-f", "input_file", "-o", "output_file"};
+
+    std::vector<char *> fake_argv;
+    for (const auto &arg : arguments)
+      fake_argv.push_back((char *)arg.data());
+    fake_argv.push_back(nullptr);
+    int fake_argc = fake_argv.size() - 1;
+
+    InputParser inputParser(fake_argc, fake_argv.data());
+    CHECK(inputParser.cmdOptionExists("-f"));
+    CHECK(inputParser.cmdOptionExists("-o"));
+    CHECK_FALSE(inputParser.cmdOptionExists("-q"));
   }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty())
-    filename = inputParser.getCmdOption("--file");
-  if (filename.empty()) {
-    InputParser::help(argv[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty())
-    output = inputParser.getCmdOption("--output");
-  if (!output.empty())
-    std::cout << "The generated file will be : " << output << "\n";
-  return EXIT_SUCCESS;
 }

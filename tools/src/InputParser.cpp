@@ -31,30 +31,39 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
+#include "InputParser.h"
 
-using namespace haptics::tools;
+namespace haptics::tools {
 
-int main(int argc, char *argv[]) {
-  InputParser inputParser(argc, argv);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(argv[0]);
-    return EXIT_SUCCESS;
-  }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty())
-    filename = inputParser.getCmdOption("--file");
-  if (filename.empty()) {
-    InputParser::help(argv[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty())
-    output = inputParser.getCmdOption("--output");
-  if (!output.empty())
-    std::cout << "The generated file will be : " << output << "\n";
-  return EXIT_SUCCESS;
+InputParser::InputParser(int &argc, char **argv) {
+  for (int i = 1; i < argc; ++i)
+    tokens.emplace_back(argv[i]);
 }
+
+const std::string &InputParser::getCmdOption(const std::string &option) const {
+  std::vector<std::string>::const_iterator itr;
+  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
+  if (itr != this->tokens.end() && ++itr != this->tokens.end())
+    return *itr;
+  static const std::string empty_string;
+  return empty_string;
+}
+
+bool InputParser::cmdOptionExists(const std::string &option) const {
+  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
+}
+
+void InputParser::help(const std::string &prg_name) {
+  std::cout << "usages: " << prg_name << " [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
+            << "This piece of software converts binary encoded RM0 files submitted to the MPEG CfP "
+               "call for Haptic standardization into their human-readable format\n"
+            << "\npositional arguments:\n"
+            << "\t-f, --file <FILE>\t\tfile to convert\n"
+            << "\noptional arguments:\n"
+            << "\t-h, --help\t\t\tshow this help message and exit\n"
+            << "\t-v, --verbose\t\t\tbe more verbose\n"
+            << "\t-q, --quiet\t\t\tbe more quiet\n"
+            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
+}
+
+} // namespace haptics::tools

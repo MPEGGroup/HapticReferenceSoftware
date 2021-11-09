@@ -1,6 +1,7 @@
 .idea/
 cmake-build-debug/
 [Bb]uild/
+.vscode/
 
 ## https://github.com/github/gitignore/blob/master/CMake.gitignore
 CMakeLists.txt.user
