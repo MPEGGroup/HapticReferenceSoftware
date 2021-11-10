@@ -74,6 +74,7 @@ void help() {
             << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
