@@ -37,9 +37,9 @@
 
 class InputParser {
 public:
-  InputParser(int &argc, char **argv) {
-    for (int i = 1; i < argc; ++i) { 
-      this->tokens.emplace_back(argv[i]); // NOLINT - using pointer arithmetic for argv.
+  InputParser(const std::vector<const char *> &args) {
+    for (const auto &a : args) {
+      this->tokens.emplace_back(a);
     }
   }
 
@@ -75,7 +75,8 @@ void help() {
 }
 
 auto main(int argc, char *argv[]) -> int {
-  InputParser inputParser(argc, argv);
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
     help();
     return EXIT_SUCCESS;
