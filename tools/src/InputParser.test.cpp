@@ -40,13 +40,7 @@ TEST_CASE("haptics::tools") {
 
   SECTION("Command line arguments") {
 
-    std::vector<std::string> arguments = {"fake_prg", "-f", "input_file", "-o", "output_file"};
-
-    std::vector<const char *> fake_argv;
-    for (const auto &arg : arguments)
-      fake_argv.push_back((char *)arg.data());
-    fake_argv.push_back(nullptr);
-    // int fake_argc = fake_argv.size() - 1;
+    std::vector<const char *> fake_argv = {"fake_prg", "-f", "input_file", "-o", "output_file"};
 
     InputParser inputParser(fake_argv);
     CHECK(inputParser.cmdOptionExists("-f"));
