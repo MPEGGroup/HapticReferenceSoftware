@@ -35,9 +35,9 @@
 
 namespace haptics::tools {
 
-InputParser::InputParser(int &argc, char **argv) {
-  for (int i = 1; i < argc; ++i)
-    tokens.emplace_back(argv[i]);
+InputParser::InputParser(const std::vector<const char *> &args) {
+  for (const auto &a : args)
+    tokens.emplace_back(a);
 }
 
 const std::string &InputParser::getCmdOption(const std::string &option) const {

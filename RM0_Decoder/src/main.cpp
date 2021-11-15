@@ -35,8 +35,10 @@
 
 using namespace haptics::tools;
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int argc, char *argv[]) {
-  InputParser inputParser(argc, argv);
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
     InputParser::help(argv[0]);
     return EXIT_SUCCESS;

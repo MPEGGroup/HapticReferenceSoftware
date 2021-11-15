@@ -42,7 +42,7 @@ namespace haptics::tools {
 
 class InputParser {
 public:
-  InputParser(int &argc, char **argv);
+  InputParser(const std::vector<const char *> &args);
   const std::string &getCmdOption(const std::string &option) const;
   bool cmdOptionExists(const std::string &option) const;
   void static help(const std::string &prg_name);
@@ -50,5 +50,5 @@ public:
 private:
   std::vector<std::string> tokens;
 };
-} // namespace Haptics::tools
+} // namespace haptics::tools
 #endif //_INPUTPARSER_H_
