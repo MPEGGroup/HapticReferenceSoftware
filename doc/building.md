@@ -33,3 +33,7 @@ mkdir build & cd build
 ccmake ..
 make
 ```
+
+## Testing
+
+Run [unit tests](testing.md) to make sure that everything is ok. Otherwise contact the software coordinator.
