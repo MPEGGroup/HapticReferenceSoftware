@@ -36,20 +36,23 @@
 namespace haptics::tools {
 
 InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args)
+  for (const auto &a : args) {
     tokens.emplace_back(a);
+  }
 }
 
-const std::string &InputParser::getCmdOption(const std::string &option) const {
+[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
+    -> const std::string & {
   std::vector<std::string>::const_iterator itr;
   itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end())
+  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
     return *itr;
+  }
   static const std::string empty_string;
   return empty_string;
 }
 
-bool InputParser::cmdOptionExists(const std::string &option) const {
+[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
   return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
 }
 

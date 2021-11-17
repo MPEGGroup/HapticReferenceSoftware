@@ -33,30 +33,33 @@
 
 #include <InputParser.h>
 
-using namespace haptics::tools;
+using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int argc, char *argv[]) {
+auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(argv[0]);
+    InputParser::help(args[0]);
     return EXIT_SUCCESS;
   }
 
   std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty())
-    filename = inputParser.getCmdOption("--file");
   if (filename.empty()) {
-    InputParser::help(argv[0]);
+    filename = inputParser.getCmdOption("--file");
+  }
+  if (filename.empty()) {
+    InputParser::help(args[0]);
     return EXIT_FAILURE;
   }
 
   std::cout << "The file to process is : " << filename << "\n";
   std::string output = inputParser.getCmdOption("-o");
-  if (output.empty())
+  if (output.empty()) {
     output = inputParser.getCmdOption("--output");
-  if (!output.empty())
+  }
+  if (!output.empty()) {
     std::cout << "The generated file will be : " << output << "\n";
+  }
   return EXIT_SUCCESS;
 }

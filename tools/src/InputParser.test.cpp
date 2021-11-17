@@ -36,7 +36,8 @@
 #include "InputParser.h"
 
 TEST_CASE("haptics::tools") {
-  using namespace haptics::tools;
+
+  using haptics::tools::InputParser;
 
   SECTION("Command line arguments") {
 

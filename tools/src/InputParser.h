@@ -43,8 +43,8 @@ namespace haptics::tools {
 class InputParser {
 public:
   InputParser(const std::vector<const char *> &args);
-  const std::string &getCmdOption(const std::string &option) const;
-  bool cmdOptionExists(const std::string &option) const;
+  [[nodiscard]] auto getCmdOption(const std::string &option) const -> const std::string &;
+  [[nodiscard]] auto cmdOptionExists(const std::string &option) const -> bool;
   void static help(const std::string &prg_name);
 
 private:
