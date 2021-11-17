@@ -188,7 +188,7 @@ Contributed code must **NOT** produce compiler warnings when compiled with the f
 * gcc-10.x
 * clang-11.x
 
-By default, CMake is configured to run [**clang-tidy**](https://clang.llvm.org/extra/clang-tidy/) and will raise errors, if any, at compilation time.
+By default, CMake is configured to run [**clang-tidy**](https://clang.llvm.org/extra/clang-tidy/) and will raise errors, if any, at compilation time. The list of tests is configured in *.clang-tidy* file. Please refer to the [official website](https://clang.llvm.org/extra/clang-tidy/checks/list.html) for more details. The tests can be locally disabled in cmake but they will be checked before a branch merge by the software coordinator.
 
 ## Some recommendations for a better coding style
 ### Variable declaration
@@ -207,3 +207,15 @@ Every switch statement should contain a default branch that handles unexpected c
 
 ### Functions
 Functions should be kept to a reasonable size. If a function exceeds 100 lines of code, consider splitting it into multiple smaller functions.
+
+## Technical hints
+
+### MS Visual Studio
+
+Since VS 2019 version 16.4, clang-tidy errors can be checked within the tool. Please refer to the [documentation](https://devblogs.microsoft.com/cppblog/code-analysis-with-clang-tidy-in-visual-studio/) to configure your editor.
+
+If the cmake project has been directly opened in VS, just add `enableClangTidyCodeAnalysis : true` to *CMakeSettings.json*. Information in *.clang-tidy* will be used to configure the linter (no need to specify the option *clangTidyChecks*).
+
+### MS Visual Code
+
+An extension such as [*Clang-Tidy for VSCode*](https://marketplace.visualstudio.com/items?itemName=notskm.clang-tidy) can be added to directly check clang-tidy errors within the editor.
