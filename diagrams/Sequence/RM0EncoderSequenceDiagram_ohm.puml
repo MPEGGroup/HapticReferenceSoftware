@@ -1,0 +1,24 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber "<b>[000]"
+skinparam style strictuml
+skinparam sequence {
+    responseMessageBelowArrow true
+    sequenceMessageAlign center
+    BoxBackgroundColor LightBlue
+    GroupBodyBackgroundColor transparent
+    actorStyle awesome
+}
+
+title **RM0 Encoder sequence diagram**\n<i>__Metadata Ingestion__</i>\n
+hide unlinked
+
+actor User
+
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
