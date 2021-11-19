@@ -1,24 +1,54 @@
 @startuml
 'https://plantuml.com/sequence-diagram
+!includesub style/style.puml!STYLE
 
-autonumber "<b>[000]"
-skinparam style strictuml
-skinparam sequence {
-    responseMessageBelowArrow true
-    sequenceMessageAlign center
-    BoxBackgroundColor LightBlue
-    GroupBodyBackgroundColor transparent
-    actorStyle awesome
-}
-
-title **RM0 Encoder sequence diagram**\n<i>__RM0 Serialization__</i>\n
+title **RM0 Encoder sequence diagram**\n<i>__RM0 File Generation__</i>\n
 hide unlinked
 
-actor User
+participant Main
+box "RM0 serialization"
+participant GltfIO
+participant RM0BinaryIO
+end box
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+...
+ref over Main, RM0BinaryIO
+<i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== RMO serialization ==
+
+alt is_binary == TRUE
+
+Main -> RM0BinaryIO ++: write(rm0Haptics, output_path, is_binary)
+|||
+RM0BinaryIO -> RM0BinaryIO: internal process to save\ndata inside a binary file
+|||
+return EXIT_SUCESS
+
+else is_binary == TRUE
+
+Main -> GltfIO ++: write(rm0Haptics, output_path, is_binary)
+|||
+GltfIO -> GltfIO: internal process to save data\ninside a glTF compliant file
+|||
+return EXIT_SUCESS
+
+end
+
+autonumber stop
+autonumber resume
+
+====
+
+...
+ref over Main, RM0BinaryIO
+<i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<- Main --: EXIT_SUCESS
 @enduml
