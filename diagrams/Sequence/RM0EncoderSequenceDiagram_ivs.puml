@@ -25,7 +25,7 @@ end ref
 
 Main -> IvsEncoder ++: <<static>>\nencode(encoding_quality, ohmData)
 
-IvsEncoder -> IvsEncoder: ExtractFilePath(metadata)
+IvsEncoder -> IvsEncoder: extractFilePath(metadata)
 IvsEncoder -> XmlIO ++: <<static>>\nread(file_path)
 XmlIO -> XmlData **: <<create>>
 XmlIO -> XmlIO: readXmlContent(file_path)
@@ -43,7 +43,7 @@ loop each launch_effect in xmlData
     return basis_effect
     IvsEncoder -> RM0_Haptics ++: findBandAvailable(launch_effect, basis_effect)
     return band_index
-    IvsEncoder -> RM0_Haptics ++: SaveEffect(launch_effect, basis_effect, band_index)
+    IvsEncoder -> RM0_Haptics ++: saveEffect(launch_effect, basis_effect, band_index)
     note right RM0_Haptics
         * 1 stream will be generated
         * It will contain at least 2 keyframes
@@ -56,7 +56,7 @@ loop each launch_effect in xmlData
 end
 
 ' TODO: add the repeat effect in this process
-IvsEncoder -> RM0_Haptics ++: GetBandCount()
+IvsEncoder -> RM0_Haptics ++: getBandCount()
 return band_count
 loop each repeat_event in xmlData
     loop each band_index in band_count
@@ -64,7 +64,7 @@ loop each repeat_event in xmlData
         return repeat_start_time
         IvsEncoder -> XmlData ++: getEndTime(repeat_event)
         return repeat_end_time
-        IvsEncoder -> XmlData ++: GetDuration(repeat_event)
+        IvsEncoder -> XmlData ++: getDuration(repeat_event)
         return repeat_duration
         IvsEncoder -> XmlData ++: getCount(repeat_event)
         return repeat_count
