@@ -1,24 +1,47 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-
-autonumber "<b>[000]"
-skinparam style strictuml
-skinparam sequence {
-    responseMessageBelowArrow true
-    sequenceMessageAlign center
-    BoxBackgroundColor LightBlue
-    GroupBodyBackgroundColor transparent
-    actorStyle awesome
-}
+!includesub style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n<i>__Metadata Ingestion__</i>\n
 hide unlinked
 
-actor User
+participant Main
+box "RM0 serialization"
+participant OhmIO
+participant Metadata
+end box
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+...
+ref over Main, Metadata
+<i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== Metadata parsing ==
+
+Main -> OhmIO ++: <<static>>\nread(ohm_path)
+
+OhmIO -> Metadata **: <<create>>
+
+OhmIO -> OhmIO: readBinaryContent(ohm_path)
+
+OhmIO -> Metadata ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+
+return metadata
+
+====
+
+...
+ref over Main, Metadata
+<i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<- Main --: EXIT_SUCESS
+destroy Metadata
 @enduml
