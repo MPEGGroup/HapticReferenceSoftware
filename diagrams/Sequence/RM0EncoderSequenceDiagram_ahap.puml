@@ -1,15 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-
-autonumber "<b>[000]"
-skinparam style strictuml
-skinparam sequence {
-    responseMessageBelowArrow true
-    sequenceMessageAlign center
-    BoxBackgroundColor LightBlue
-    GroupBodyBackgroundColor transparent
-    actorStyle awesome
-}
+!includesub style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n<i>__AHAP Transcoding__</i>\n
 hide unlinked
