@@ -54,8 +54,32 @@ loop each launch_effect in xmlData
     return
     autonumber resume
 end
-' TODO: add the repeat effect in this process
 
+' TODO: add the repeat effect in this process
+IvsEncoder -> RM0_Haptics ++: GetBandCount()
+return band_count
+loop each repeat_event in xmlData
+    loop each band_index in band_count
+        IvsEncoder -> XmlData ++: getStartTime(repeat_event)
+        return repeat_start_time
+        IvsEncoder -> XmlData ++: getEndTime(repeat_event)
+        return repeat_end_time
+        IvsEncoder -> XmlData ++: GetDuration(repeat_event)
+        return repeat_duration
+        IvsEncoder -> XmlData ++: getCount(repeat_event)
+        return repeat_count
+        IvsEncoder -> RM0_Haptics ++: delayStreamsAfter(repeat_end_time,\nrepeat_count * repeat_duration, band_index)
+        autonumber stop
+        return
+        autonumber resume
+        IvsEncoder -> RM0_Haptics ++: duplicateStreamsBetween(repeat_start_time,\nrepeat_end_time, repeat_count, band_index)
+        autonumber stop
+        return
+        autonumber resume
+    end
+end
+
+destroy XmlData
 return rm0Haptics
 
 ====
@@ -67,6 +91,5 @@ end ref
 ...
 
 [<- Main --: EXIT_SUCESS
-destroy XmlData
 destroy RM0_Haptics
 @enduml
