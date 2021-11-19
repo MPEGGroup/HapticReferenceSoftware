@@ -1,15 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-
-autonumber "<b>[000]"
-skinparam style strictuml
-skinparam sequence {
-    responseMessageBelowArrow true
-    sequenceMessageAlign center
-    BoxBackgroundColor LightBlue
-    GroupBodyBackgroundColor transparent
-    actorStyle awesome
-}
+!includesub style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n
 hide unlinked
@@ -37,7 +28,7 @@ The user want to encode any reference file
 So he needs to give the file path and its ohm file
 end note
 
-User -> Main ++: encode(file_path, ohm_path,\nencoding_quality, compress, output_path)
+User -> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
 
 == Metadata parsing ==
 
@@ -57,7 +48,7 @@ return metadata
 == File ingestion ==
 
 Main -> Main : CheckFileExtension(file_path)
-alt WAV_FILE
+alt extension is WAV_FILE
 Main -> PcmEncoderRelatedClasses ++: encode(file_path, encoding_quality, metadata)
 
 |||
@@ -72,7 +63,7 @@ end ref
 |||
 
 return rm0Haptics
-else AHAP_FILE
+else extension is AHAP_FILE
 Main -> AhapEncoderRelatedClasses ++: encode(file_path, metadata)
 
 |||
@@ -86,7 +77,7 @@ end ref
 |||
 
 return rm0Haptics
-else IVS_FILE
+else extension is IVS_FILE
 Main -> IvsEncoderRelatedClasses ++: encode(file_path, metadata)
 
 |||
@@ -104,7 +95,7 @@ end
 
 == RM0 serialization ==
 
-Main -> RM0SerializationRelatedClasses ++: write(rm0Haptics, output_path)
+Main -> RM0SerializationRelatedClasses ++: write(rm0Haptics, output_path, is_binary)
 
 |||
 ref over RM0SerializationRelatedClasses
