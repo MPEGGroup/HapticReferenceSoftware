@@ -8,24 +8,24 @@ hide unlinked
 actor User
 participant Main
 box "RM0 serialization"
-collections RM0SerializationRelatedClasses
+    collections RM0SerializationRelatedClasses
 end box
 box "Metadata processing"
-collections MetadataRelatedClasses
+    collections MetadataRelatedClasses
 end box
 box "PCM encoder"
-collections PcmEncoderRelatedClasses
+    collections PcmEncoderRelatedClasses
 end box
 box "AHAP encoder"
-collections AhapEncoderRelatedClasses
+    collections AhapEncoderRelatedClasses
 end box
 box "IVS encoder"
-collections IvsEncoderRelatedClasses
+    collections IvsEncoderRelatedClasses
 end box
 
 note over User
-The user want to encode any reference file
-So he needs to give the file path and its ohm file
+    The user want to encode any reference file
+    So he needs to give the file path and its ohm file
 end note
 
 User -> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
@@ -36,61 +36,61 @@ Main -> MetadataRelatedClasses ++: read(ohm_path)
 
 |||
 ref over MetadataRelatedClasses
-Here the ohm binary content
-will be interpreted and a
-metadata object is returned.
+    Here the ohm binary content
+    will be interpreted and a
+    ohmData object is returned.
 
-<i>cf. RM0EncoderSequence_ohm</i>
+    <i>cf. RM0EncoderSequence_ohm</i>
 end ref
 |||
 
-return metadata
+return ohmData
 == File ingestion ==
 
-Main -> Main : CheckFileExtension(file_path)
+Main -> Main : CheckFileExtension(ohmData)
 alt extension is WAV_FILE
-Main -> PcmEncoderRelatedClasses ++: encode(file_path, encoding_quality, metadata)
+    Main -> PcmEncoderRelatedClasses ++: encode(encoding_quality, ohmData)
 
-|||
-ref over PcmEncoderRelatedClasses
-Here the given wav file will be read
-and converted into by a frequency
-analysis process. At the end, a
-RM0_Haptics instance is returned.
+    |||
+    ref over PcmEncoderRelatedClasses
+        Here the given wav file will be read
+        and converted into by a frequency
+        analysis process. At the end, a
+        RM0_Haptics instance is returned.
 
-<i>cf. RM0EncoderSequence_wav</i>
-end ref
-|||
+        <i>cf. RM0EncoderSequence_wav</i>
+    end ref
+    |||
 
-return rm0Haptics
+    return rm0Haptics
 else extension is AHAP_FILE
-Main -> AhapEncoderRelatedClasses ++: encode(file_path, metadata)
+    Main -> AhapEncoderRelatedClasses ++: encode(ohmData)
 
-|||
-ref over AhapEncoderRelatedClasses
-Here the given AHAP file will be read
-and transcoded into a RM0_Haptics
-instance which will be returned.
+    |||
+    ref over AhapEncoderRelatedClasses
+        Here the given AHAP file will be read
+        and transcoded into a RM0_Haptics
+        instance which will be returned.
 
-<i>cf. RM0EncoderSequence_ahap</i>
-end ref
-|||
+        <i>cf. RM0EncoderSequence_ahap</i>
+    end ref
+    |||
 
-return rm0Haptics
+    return rm0Haptics
 else extension is IVS_FILE
-Main -> IvsEncoderRelatedClasses ++: encode(file_path, metadata)
+    Main -> IvsEncoderRelatedClasses ++: encode(ohmData)
 
-|||
-ref over IvsEncoderRelatedClasses
-Here the given IVS file will be read
-and transcoded into a RM0_Haptics
-instance which will be returned.
+    |||
+    ref over IvsEncoderRelatedClasses
+        Here the given IVS file will be read
+        and transcoded into a RM0_Haptics
+        instance which will be returned.
 
-<i>cf. RM0EncoderSequence_ivs</i>
-end ref
-|||
+        <i>cf. RM0EncoderSequence_ivs</i>
+    end ref
+    |||
 
-return rm0Haptics
+    return rm0Haptics
 end
 
 == RM0 serialization ==
@@ -99,10 +99,10 @@ Main -> RM0SerializationRelatedClasses ++: write(rm0Haptics, output_path, is_bin
 
 |||
 ref over RM0SerializationRelatedClasses
-Here the RM0_Haptics instance content
-will be writen inside an output file.
+    Here the RM0_Haptics instance content
+    will be writen inside an output file.
 
-<i>cf. RM0EncoderSequence_serialize</i>
+    <i>cf. RM0EncoderSequence_serialize</i>
 end ref
 |||
 

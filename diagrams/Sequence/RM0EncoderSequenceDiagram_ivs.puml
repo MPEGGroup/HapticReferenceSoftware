@@ -5,11 +5,68 @@
 title **RM0 Encoder sequence diagram**\n<i>__IVS Transcoding__</i>\n
 hide unlinked
 
-actor User
+participant Main
+box "IVS encoder"
+    participant IvsEncoder
+    participant RM0_Haptics
+    participant XmlIO
+    participant XmlData
+end box
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+...
+ref over Main, XmlData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== IVS File Ingestion ==
+
+Main -> IvsEncoder ++: <<static>>\nencode(encoding_quality, ohmData)
+
+IvsEncoder -> IvsEncoder: ExtractFilePath(metadata)
+IvsEncoder -> XmlIO ++: <<static>>\nread(file_path)
+XmlIO -> XmlData **: <<create>>
+XmlIO -> XmlIO: readXmlContent(file_path)
+XmlIO -> XmlData ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+return xmlData
+
+== IVS File Transcoding ==
+
+IvsEncoder -> RM0_Haptics **: <<create>>
+loop each launch_effect in xmlData
+    IvsEncoder -> XmlData ++: findBasisEffect(launch_effect)
+    return basis_effect
+    IvsEncoder -> RM0_Haptics ++: findBandAvailable(launch_effect, basis_effect)
+    return band_index
+    IvsEncoder -> RM0_Haptics ++: SaveEffect(launch_effect, basis_effect, band_index)
+    note right RM0_Haptics
+        * 1 stream will be generated
+        * It will contain at least 2 keyframes
+        * 1 should be added if the attack time is not 0
+        * Same with the fade time
+    end note
+    autonumber stop
+    return
+    autonumber resume
+end
+' TODO: add the repeat effect in this process
+
+return rm0Haptics
+
+====
+
+...
+ref over Main, XmlData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<- Main --: EXIT_SUCESS
+destroy XmlData
+destroy RM0_Haptics
 @enduml

@@ -7,15 +7,15 @@ hide unlinked
 
 participant Main
 box "RM0 serialization"
-participant OhmIO
-participant Metadata
+    participant OhmIO
+    participant OhmData
 end box
 
 [-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
 
 ...
-ref over Main, Metadata
-<i>cf. RM0EncoderSequence</i>
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
 end ref
 ...
 
@@ -23,25 +23,25 @@ end ref
 
 Main -> OhmIO ++: <<static>>\nread(ohm_path)
 
-OhmIO -> Metadata **: <<create>>
+OhmIO -> OhmData **: <<create>>
 
 OhmIO -> OhmIO: readBinaryContent(ohm_path)
 
-OhmIO -> Metadata ++: saveInformation()
+OhmIO -> OhmData ++: saveInformation()
 autonumber stop
 return
 autonumber resume
 
-return metadata
+return ohmData
 
 ====
 
 ...
-ref over Main, Metadata
-<i>cf. RM0EncoderSequence</i>
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
 end ref
 ...
 
 [<- Main --: EXIT_SUCESS
-destroy Metadata
+destroy OhmData
 @enduml
