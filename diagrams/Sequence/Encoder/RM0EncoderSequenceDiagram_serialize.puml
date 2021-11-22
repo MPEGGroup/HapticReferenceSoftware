@@ -1,6 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-!includesub style/style.puml!STYLE
+!includesub ../style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n<i>__RM0 File Generation__</i>\n
 hide unlinked
@@ -47,5 +47,5 @@ ref over Main, RM0BinaryIO
 end ref
 ...
 
-[<- Main --: EXIT_SUCESS
+[<-- Main --: EXIT_SUCESS
 @enduml

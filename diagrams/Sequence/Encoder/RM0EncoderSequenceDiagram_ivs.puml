@@ -1,6 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-!includesub style/style.puml!STYLE
+!includesub ../style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n<i>__IVS Transcoding__</i>\n
 hide unlinked
@@ -12,20 +12,22 @@ box "IVS encoder"
     participant XmlIO
     participant XmlData
 end box
+participant OhmData
 
 [-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
 
 ...
-ref over Main, XmlData
+ref over Main, OhmData
     <i>cf. RM0EncoderSequence</i>
 end ref
 ...
 
 == IVS File Ingestion ==
 
-Main -> IvsEncoder ++: <<static>>\nencode(encoding_quality, ohmData)
+Main -> IvsEncoder ++: <<static>>\nencode(ohmData)
 
-IvsEncoder -> IvsEncoder: extractFilePath(metadata)
+IvsEncoder -> OhmData ++: getFilePath(metadata)
+return file_path
 IvsEncoder -> XmlIO ++: <<static>>\nread(file_path)
 XmlIO -> XmlData **: <<create>>
 XmlIO -> XmlIO: readXmlContent(file_path)
@@ -55,7 +57,6 @@ loop each launch_effect in xmlData
     autonumber resume
 end
 
-' TODO: add the repeat effect in this process
 IvsEncoder -> RM0_Haptics ++: getBandCount()
 return band_count
 loop each repeat_event in xmlData
@@ -85,11 +86,12 @@ return rm0Haptics
 ====
 
 ...
-ref over Main, XmlData
+ref over Main, OhmData
     <i>cf. RM0EncoderSequence</i>
 end ref
 ...
 
-[<- Main --: EXIT_SUCESS
+[<-- Main --: EXIT_SUCESS
 destroy RM0_Haptics
+destroy OhmData
 @enduml

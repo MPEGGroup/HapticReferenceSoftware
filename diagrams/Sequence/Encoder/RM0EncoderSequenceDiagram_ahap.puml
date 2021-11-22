@@ -1,0 +1,63 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n<i>__AHAP Transcoding__</i>\n
+hide unlinked
+
+participant Main
+box "AHAP encoder"
+    participant AhapEncoder
+    participant RM0_Haptics
+    participant JsonIO
+    participant JsonData
+end box
+participant OhmData
+
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== AHAP File Ingestion ==
+
+Main -> AhapEncoder ++: <<static>>\nencode(ohmData)
+
+AhapEncoder -> OhmData ++: getFilePath(metadata)
+return file_path
+AhapEncoder -> JsonIO ++: <<static>>\nread(file_path)
+JsonIO -> JsonData **: <<create>>
+JsonIO -> JsonIO: readJsonContent(file_path)
+JsonIO -> JsonData ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+return jsonData
+
+== AHAP File Transcoding ==
+
+AhapEncoder -> RM0_Haptics **: <<create>>
+
+' TODO: encoder
+note right AhapEncoder
+**TODO:** encoder
+end note
+
+destroy JsonData
+return rm0Haptics
+
+====
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<-- Main --: EXIT_SUCESS
+destroy OhmData
+destroy RM0_Haptics
+@enduml

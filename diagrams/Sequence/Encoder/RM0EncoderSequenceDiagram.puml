@@ -1,6 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-!includesub style/style.puml!STYLE
+!includesub ../style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n
 hide unlinked

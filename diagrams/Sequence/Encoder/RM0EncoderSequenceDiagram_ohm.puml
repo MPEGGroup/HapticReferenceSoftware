@@ -1,6 +1,6 @@
 @startuml
 'https://plantuml.com/sequence-diagram
-!includesub style/style.puml!STYLE
+!includesub ../style/style.puml!STYLE
 
 title **RM0 Encoder sequence diagram**\n<i>__Metadata Ingestion__</i>\n
 hide unlinked
@@ -42,6 +42,6 @@ ref over Main, OhmData
 end ref
 ...
 
-[<- Main --: EXIT_SUCESS
+[<-- Main --: EXIT_SUCESS
 destroy OhmData
 @enduml

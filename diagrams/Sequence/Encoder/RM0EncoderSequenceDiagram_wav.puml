@@ -1,0 +1,62 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n<i>__WAV Encoding__</i>\n
+hide unlinked
+
+participant Main
+box "WAV encoder"
+    participant PcmEncoder
+    participant RM0_Haptics
+    participant WavIO
+    participant PcmData
+end box
+participant OhmData
+
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== WAV File Ingestion ==
+
+Main -> PcmEncoder ++: <<static>>\nencode(encoding_quality, ohmData)
+
+PcmEncoder -> OhmData ++: getFilePath(metadata)
+return file_path
+PcmEncoder -> WavIO ++: <<static>>\nread(file_path)
+WavIO -> PcmData **: <<create>>
+WavIO -> WavIO: readContent(file_path)
+WavIO -> PcmData ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+return PcmData
+
+== WAV Content Encoding ==
+
+PcmEncoder -> RM0_Haptics **: <<create>>
+
+' TODO: encoder
+note right PcmEncoder
+**TODO:** encoder
+end note
+
+destroy PcmData
+return rm0Haptics
+
+====
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<-- Main --: EXIT_SUCESS
+destroy RM0_Haptics
+@enduml
