@@ -9,6 +9,8 @@ participant Main
 box "WAV encoder"
     participant PcmEncoder
     participant RM0_Haptics
+    participant EncodingConfig
+    collections FilteredSignalCollection
     participant WavIO
     participant PcmData
 end box
@@ -39,15 +41,83 @@ return PcmData
 
 == WAV Content Encoding ==
 
+PcmEncoder -> EncodingConfig **: <<static>> generateConfig(encoding_quality)
 PcmEncoder -> RM0_Haptics **: <<create>>
 
-' TODO: encoder
-note right PcmEncoder
-**TODO:** encoder
-end note
-
+group Frequency band decomposition
+    PcmEncoder -> FilteredSignalCollection **: <<create>>
+    PcmEncoder -> EncodingConfig ++: getFrequencyBandLimit()
+    return frequency_band_limit
+    loop for each min_max_frequency_band in frequency_band_limit
+        PcmEncoder -> PcmEncoder ++: passBandFilter(min_max_frequency_band)
+        return filtered_signal
+        PcmEncoder -> FilteredSignalCollection ++: add(filtered_signal)
+        autonumber stop
+        return
+        autonumber resume
+    end
+end
 destroy PcmData
+
+group Keyframe Extraction in time basis
+    PcmEncoder -> FilteredSignalCollection ++: getFirst()
+    return first_filtered_signal
+    PcmEncoder -> PcmEncoder ++: extractKeyframes(first_filtered_signal)
+    return keyframe_list
+    note left
+        A local extrema algorithm is
+        used to extract every keyframes
+        in time basis
+    end note
+
+    PcmEncoder -> RM0_Haptics ++: saveKeyframes(keyframe_list)
+    autonumber stop
+    return
+    autonumber resume
+    note right
+        This keyframe list is stored in a
+        unique band which contains only one
+        stream
+    end note
+end
+
+group Wavelets Coefficient Extraction
+    PcmEncoder -> FilteredSignalCollection ++: getAllExceptFirst()
+    return filtered_signal_list
+    loop for each filtered_signal in filtered_signal_list
+        PcmEncoder -> EncodingConfig ++: getWindowLength()
+        return window_length
+        PcmEncoder -> PcmEncoder ++: cutInTime(window_length)
+        return windowed_signal_list
+        PcmEncoder -> RM0_Haptics ++: generateEmptyBand()
+        return band_index
+        loop for each windowed_signal in windowed_signal_list
+            PcmEncoder -> PcmEncoder ++: extractWTCoeff(windowed_signal, encoding_config)
+            return wt_coeff
+            alt wt_coeff amplitude is 0
+                PcmEncoder -> RM0_Haptics ++: generateEmptyStream(band_index)
+                autonumber stop
+                return
+                autonumber resume
+            else
+                PcmEncoder -> RM0_Haptics ++: saveInLastStream(band_index, wt_coeff)
+                autonumber stop
+                return
+                autonumber resume
+            end
+        end
+        alt last stream in band[band_index] is empty
+            PcmEncoder -> RM0_Haptics ++: deleteLastStream(band_index)
+            autonumber stop
+            return
+            autonumber resume
+        end
+    end
+end
+
 return rm0Haptics
+destroy FilteredSignalCollection
+destroy EncodingConfig
 
 ====
 
@@ -59,4 +129,5 @@ end ref
 
 [<-- Main --: EXIT_SUCESS
 destroy RM0_Haptics
+destroy OhmData
 @enduml
