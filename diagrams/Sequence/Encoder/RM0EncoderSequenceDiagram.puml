@@ -47,7 +47,7 @@ end ref
 return ohmData
 == File ingestion ==
 
-Main -> Main : CheckFileExtension(ohmData)
+Main -> Main : checkFileExtension(ohmData)
 alt extension is WAV_FILE
     Main -> PcmEncoderRelatedClasses ++: encode(encoding_quality, ohmData)
 
