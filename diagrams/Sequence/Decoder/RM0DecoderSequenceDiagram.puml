@@ -20,8 +20,8 @@ note over User
 end note
 
 User -> Main ++: decode(file_path, output_path)
-Main -> RM0Decoder ++: decode(file_path, output_path)
-RM0Decoder -> RM0BinaryIO ++: read(file_path)
+Main -> RM0Decoder ++: <<static>>\ndecode(file_path, output_path)
+RM0Decoder -> RM0BinaryIO ++: <<static>>\nread(file_path)
 RM0BinaryIO -> RM0_Haptics **: <<create>>
 
 loop while not EOF
@@ -39,8 +39,9 @@ loop while not EOF
 end
 
 return rm0Haptics
-RM0Decoder -> GltfIO ++: write(rm0Haptics, output_path)
+RM0Decoder -> GltfIO ++: <<static>>\nwrite(rm0Haptics, output_path)
 GltfIO -> GltfIO: internal process to save data\ninside a glTF compliant file
+destroy RM0_Haptics
 return EXIT_SUCCESS
 return EXIT_SUCCESS
 return EXIT_SUCCESS
