@@ -23,7 +23,7 @@ end ref
 
 alt is_binary == TRUE
 
-    Main -> RM0BinaryIO ++: write(rm0Haptics, output_path, is_binary)
+    Main -> RM0BinaryIO ++: write(rm0Haptics, output_path)
     |||
     RM0BinaryIO -> RM0BinaryIO: internal process to save\ndata inside a binary file
     |||
@@ -31,7 +31,7 @@ alt is_binary == TRUE
 
 else is_binary == TRUE
 
-    Main -> GltfIO ++: write(rm0Haptics, output_path, is_binary)
+    Main -> GltfIO ++: write(rm0Haptics, output_path)
     |||
     GltfIO -> GltfIO: internal process to save data\ninside a glTF compliant file
     |||

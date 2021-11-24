@@ -1,0 +1,47 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Decoder sequence diagram**\n
+hide unlinked
+
+actor User
+participant Main
+box "RM0 decoder"
+    participant RM0Decoder
+    participant RM0BinaryIO
+    participant GltfIO
+    participant RM0_Haptics
+end box
+
+note over User
+    The user want to decode a binary compressed file
+    So he needs to give its path
+end note
+
+User -> Main ++: decode(file_path, output_path)
+Main -> RM0Decoder ++: decode(file_path, output_path)
+RM0Decoder -> RM0BinaryIO ++: read(file_path)
+RM0BinaryIO -> RM0_Haptics **: <<create>>
+
+loop while not EOF
+    RM0BinaryIO -> RM0BinaryIO ++: readBinary(bin_size)
+    return content
+    note left
+        `bin_size` will be adapted to the codec specifications
+        `content` will be the interpreted result from the read
+        method and can be saved into the decoded file
+    end note
+    RM0BinaryIO -> RM0_Haptics ++: save(content)
+    autonumber stop
+    return
+    autonumber resume
+end
+
+return rm0Haptics
+RM0Decoder -> GltfIO ++: write(rm0Haptics, output_path)
+GltfIO -> GltfIO: internal process to save data\ninside a glTF compliant file
+return EXIT_SUCCESS
+return EXIT_SUCCESS
+return EXIT_SUCCESS
+@enduml
