@@ -35,11 +35,12 @@ If you are willing to contribute to the project, please follow this workflow:
 
 1. Create an issue with the appropriate label, documentation, contribution number, etc. Issues can be created from the left panel menu: [Issues/List](http://mpegx.int-evry.fr/software/haptics/rm0/-/issues), New issue button.
 2. Fork a branch from *develop* as indicated in the *Git* section
-3. Commit you work in this branch according to the commit convention
-4. Push your branch to the repo. A branch can be pushed at any time, no need for the task to be completed
-5. Once the task is complete and all the code committed, request a merge. Go the left panel menu: [Repository/Branches](http://mpegx.int-evry.fr/software/haptics/rm0/-/branches), Merge request button associated to your branch
-6. A software coordinator will review the code and merge the branch if all the rules are respected, and all the tests are ok. The branch will be then deleted.
-7. Close the issue.
+3. Work in your branch. Make sure that the code is compliant with the [coding style](doc/coding_style.md), and the [unit tests](doc/testing.md) are running. Add tests dedicated to your new code.
+4. Commit you work in this branch according to the commit convention
+5. Push your branch to the repo. A branch can be pushed at any time, no need for the task to be completed
+6. Once the task is complete and all the code committed, request a merge. Go the left panel menu: [Repository/Branches](http://mpegx.int-evry.fr/software/haptics/rm0/-/branches), Merge request button associated to your branch
+7. A software coordinator will review the code and merge the branch if all the rules are respected, and all the tests are ok. The branch will be then deleted.
+8. Close the issue.
 
 ### Coding style
 
@@ -49,6 +50,9 @@ The coding style and rules can be found in [doc/coding_style.md](doc/coding_styl
 
 Branching architecture and commmit convention are described in section [doc/git.md](doc/git.md).
 
+### Testing
+
+Unit tests are described in section [doc/testing.md](doc/testing.md).
 
 ## File structure
 

@@ -31,55 +31,16 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
-#include <iostream>
-#include <vector>
+#include <InputParser.h>
 
-class InputParser {
-public:
-  InputParser(const std::vector<const char *> &args) {
-    for (const auto &a : args) {
-      this->tokens.emplace_back(a);
-    }
-  }
-
-  [[nodiscard]] auto getCmdOption(const std::string &option) const -> const std::string & {
-    std::vector<std::string>::const_iterator itr;
-    itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-    if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-      return *itr;
-    }
-    static const std::string empty_string;
-    return empty_string;
-  }
-
-  [[nodiscard]] auto cmdOptionExists(const std::string &option) const -> bool {
-    return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
-  }
-
-private:
-  std::vector<std::string> tokens;
-};
-
-void help() {
-  std::cout << "usages: RM0_Encoder.exe [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
-            << "This piece of software encodes haptic files into the RM0 format submitted to the "
-               "MPEG CfP call for Haptic standardization\n"
-            << "\npositional arguments:\n"
-            << "\t-f, --file <FILE>\t\tfile to convert\n"
-            << "\noptional arguments:\n"
-            << "\t-h, --help\t\t\tshow this help message and exit\n"
-            << "\t-v, --verbose\t\t\tbe more verbose\n"
-            << "\t-q, --quiet\t\t\tbe more quiet\n"
-            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
-}
+using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    help();
+    InputParser::help(args[0]);
     return EXIT_SUCCESS;
   }
 
@@ -88,7 +49,7 @@ auto main(int argc, char *argv[]) -> int {
     filename = inputParser.getCmdOption("--file");
   }
   if (filename.empty()) {
-    help();
+    InputParser::help(args[0]);
     return EXIT_FAILURE;
   }
 
