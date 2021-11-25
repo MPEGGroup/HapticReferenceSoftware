@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
+#include "../../tools/include/InputParser.h"
 
 using haptics::tools::InputParser;
 
