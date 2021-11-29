@@ -1,0 +1,254 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+skinparam classAttributeIconSize 0
+skinparam TitleFontStyle bold
+
+title Class Diagram for data structure
+
+namespace haptic::tool::dataStructure #lightBlue {
+    enum LOD {
+        Low = 0
+        Average = 1
+        High = 2
+    }
+
+    enum AvatarType {
+        Vibration = 0
+        Pressure = 1
+        Temperature = 2
+        Custom = 3
+    }
+
+    enum BandType {
+        Wave = "Wave"
+        Keyframe = "Keyframe"
+        Transient = "Transient"
+    }
+
+    enum EncodingModality {
+        Quantized = "Quantized"
+        Vectorial = "Vectorial"
+    }
+
+    enum Shape {
+        Sphere = 0
+        Cube = 1
+        Custom = 2
+    }
+
+    enum SignalType {
+        Pressure = "Pressure"
+        Force = "Force"
+        Acceleration = "Acceleration"
+        Velocity = "Velocity"
+        Position = "Position"
+        Temperature = "Temperature"
+        Vibration = "Vibration"
+        Water = "Water"
+        Wind = "Wind"
+        Other = "Other"
+    }
+
+    enum Encoding {
+        Sinusoidal = "Sinusoidal"
+        Wavelet = "Wavelet"
+    }
+
+    enum BaseSignal {
+        Sine = "Sine"
+        Square = "Square"
+        Triangle = "Triangle"
+        SawtoothUp = "SawToothUp"
+        SawtoothDown = "SawToothDown"
+    }
+
+    enum ComponentType {
+        BYTE = 5120
+        UNSIGNED_BYTE = 5121
+        SHORT = 5122
+        UNSIGNED_SHORT = 5123
+        UNSIGNED_INT = 5125
+        FLOAT = 5126
+    }
+
+    enum AccessorType {
+        SCALAR = "SCALAR"
+        VEC2 = "VEC2"
+        VEC3 = "VEC3"
+        VEC4 = "VEC4"
+        MAT2 = "MAT2"
+        MAT3 = "MAT3"
+        MAT4 = "MAT4"
+    }
+
+    enum BufferViewTarget {
+        ARRAY_BUFFER = 34962
+        ELEMENT_ARRAY_BUFFER = 34963
+    }
+
+    enum MeshPrimitiveMode {
+        POINTS = 0
+        LINES = 1
+        LINE_LOOP = 2
+        LINE_STRIP = 3
+        TRIANGLES = 4
+        TRIANGLE_STRIP = 5
+        TRIANGLE_FAN = 6
+    }
+
+    class Avatar {
+        - id: int
+        - lod: LOD
+        - type: AvatarType
+        - mesh: Mesh
+        - name:
+        - extensions:
+        - extras:
+    }
+
+    class Band {
+        - bandType: BandType
+        - encodingModality: EncodingModality
+        - windowLength: int
+        - lowerFrequencyLimit: int
+        - upperFrequencyLimit: int
+        - stream: Stream[]
+    }
+
+    class Keyframe {
+        - amplitudeModulation: float
+        - frequencyModulation: int
+        - relativePosition: int
+    }
+
+    class Haptics {
+        - version: string
+        - date: string
+        - description: string
+        - avatars:  Avatar[]
+        - shape: Shape
+        - signals: Signal[]
+        - accessors: Accessor[]
+        - buffers: Buffer[]
+        - bufferViews: BufferView[]
+        - name:
+        - extensions:
+        - extras:
+    }
+
+    class Signal {
+        - signalType: SignalType
+        - description: string
+        - encoding: Encoding
+        - avatarId: int
+        - signalAccessor: int
+        - tracks: Track[]
+    }
+
+    class Stream {
+        - position: int
+        - phase: float
+        - keyframes: Keyframe[]
+        - baseSignal: BaseSignal
+    }
+
+    class Track {
+        - id: int
+        - description: string
+        - gain: float
+        - mixingWeight: float
+        - bodyPartMask: int
+        - vertices: int[]
+        - bands: Band[]
+    }
+
+    class Accessor {
+        - bufferView: int
+        - byteOffset: int
+        - componentType: ComponentType
+        - normalized: bool
+        - count: int
+        - type: AccessorType
+        - max: int[]
+        - min: int[]
+        - sparse: Sparse
+        - name:
+        - extensions:
+        - extras:
+    }
+
+    class Buffer {
+        - uri: string
+        - byteLength: int
+        - name:
+        - extensions:
+        - extras:
+    }
+
+    class BufferView {
+        - buffer: int
+        - byteOffset: int
+        - byteLength: int
+        - byteStride: int
+        - target: BufferViewTarget
+        - name:
+        - extensions:
+        - extras:
+    }
+
+    class MeshPrimitive {
+        - attributes: Dict<>
+        - indices: int
+        - mode: MeshPrimitiveMode
+        - extensions:
+        - extras:
+    }
+    note right of MeshPrimitive::attributes
+        Still need to define this
+    end note
+
+    class Mesh {
+        - primitive: MeshPrimitive[]
+        - weights: float[]
+        - name:
+        - extensions:
+        - extras:
+    }
+
+    Haptics "1"*--"1..*" Avatar
+    Haptics "1"*--"1" Shape
+    Haptics "1"*--"0..*" Signal
+    Haptics "1"*--"1..*" Accessor
+    Haptics "1"*--"1..*" Buffer
+    Haptics "1"*--"1..*" BufferView
+
+    Avatar "1"*--"1" LOD
+    Avatar "1"*--"1" AvatarType
+    Avatar "1"*--"1" Mesh
+
+    Band "1"*--"1" BandType
+    Band "1"*--"1" EncodingModality
+    Band "1"*--"1..*" Stream
+
+    Signal "1"*--"1" SignalType
+    Signal "1"*--"1" Encoding
+    Signal "1"*--"1..*" Track
+
+    Stream "1"*--"1" BaseSignal
+    Stream "1"*--"1..*" Keyframe
+
+    Track "1"*--"1..*" Band
+
+    Accessor "1"*--"1" ComponentType
+    Accessor "1"*--"1" AccessorType
+
+    BufferView "1"*--"1" BufferViewTarget
+
+    Mesh "1"*--"1..*" MeshPrimitive
+
+    MeshPrimitive "1"*--"1" MeshPrimitiveMode
+
+}
+
+@enduml
