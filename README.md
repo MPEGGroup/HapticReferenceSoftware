@@ -68,6 +68,8 @@ Unit tests are described in section [doc/testing.md](doc/testing.md).
 
 ## Software architecture
 
+A set of sequence diagrams was designed in [diagrams/Rendered/Sequence](diagrams/Rendered/Sequence) to give a first shot of the software architecture.
+
 ![RM0-General-softwares](diagrams/Rendered/RM0GeneralSoftwares.png "General file software structure")
 
 ### RM0 Encoder structure
