@@ -32,7 +32,9 @@
  */
 
 #include "../../tools/include/InputParser.h"
+#include "../include/AhapEncoder.h"
 
+using haptics::encoder::AhapEncoder;
 using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -49,17 +51,23 @@ auto main(int argc, char *argv[]) -> int {
     filename = inputParser.getCmdOption("--file");
   }
   if (filename.empty()) {
+    std::cout << "The file to process is : " << filename << "\n";
     InputParser::help(args[0]);
     return EXIT_FAILURE;
   }
 
-  std::cout << "The file to process is : " << filename << "\n";
   std::string output = inputParser.getCmdOption("-o");
   if (output.empty()) {
     output = inputParser.getCmdOption("--output");
   }
   if (!output.empty()) {
     std::cout << "The generated file will be : " << output << "\n";
+  }
+
+  std::string ext = InputParser::getFileExt(filename);
+  if (ext == "json" || ext == "ahap") {
+    std::cout << "The AHAP file to encode : " << filename << std::endl;
+    AhapEncoder::encode(filename);
   }
   return EXIT_SUCCESS;
 }

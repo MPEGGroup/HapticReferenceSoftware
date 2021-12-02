@@ -17,6 +17,8 @@ if (BUILD_CATCH2)
     enable_testing()
 endif()
 
+include(cmake/nlohmann_json.cmake)
+
 add_subdirectory("tools")
 
 include_directories("tools/src")
