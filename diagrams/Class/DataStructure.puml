@@ -37,7 +37,7 @@ namespace haptic::tool::dataStructure #lightBlue {
         Custom = 2
     }
 
-    enum SignalType {
+    enum PerceptionModality {
         Pressure = "Pressure"
         Force = "Force"
         Acceleration = "Acceleration"
@@ -128,7 +128,7 @@ namespace haptic::tool::dataStructure #lightBlue {
         - description: string
         - avatars:  Avatar[]
         - shape: Shape
-        - signals: Signal[]
+        - perceptions: Perception[]
         - accessors: Accessor[]
         - buffers: Buffer[]
         - bufferViews: BufferView[]
@@ -137,8 +137,8 @@ namespace haptic::tool::dataStructure #lightBlue {
         - extras:
     }
 
-    class Signal {
-        - signalType: SignalType
+    class Perception {
+        - perceptionModality: PerceptionModality
         - description: string
         - encoding: Encoding
         - avatarId: int
@@ -218,7 +218,7 @@ namespace haptic::tool::dataStructure #lightBlue {
 
     Haptics "1"*--"1..*" Avatar
     Haptics "1"*--"1" Shape
-    Haptics "1"*--"0..*" Signal
+    Haptics "1"*--"0..*" Perception
     Haptics "1"*--"1..*" Accessor
     Haptics "1"*--"1..*" Buffer
     Haptics "1"*--"1..*" BufferView
@@ -231,9 +231,9 @@ namespace haptic::tool::dataStructure #lightBlue {
     Band "1"*--"1" EncodingModality
     Band "1"*--"1..*" Stream
 
-    Signal "1"*--"1" SignalType
-    Signal "1"*--"1" Encoding
-    Signal "1"*--"1..*" Track
+    Perception "1"*--"1" PerceptionModality
+    Perception "1"*--"1" Encoding
+    Perception "1"*--"1..*" Track
 
     Stream "1"*--"1" BaseSignal
     Stream "1"*--"1..*" Keyframe
