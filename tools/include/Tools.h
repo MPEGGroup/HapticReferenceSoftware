@@ -69,4 +69,4 @@ namespace haptics::tools {
 
     return x_out;
   }
-  }
+}
