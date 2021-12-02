@@ -3,6 +3,7 @@ project(CODEC)
 
 #included here so it does not check anything else above source.
 include(../cmake/clang_tidy.cmake)
+include(../cmake/nlohmann_json.cmake)
 
 add_subdirectory("Tools")
 
