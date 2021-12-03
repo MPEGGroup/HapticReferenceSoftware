@@ -31,51 +31,16 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../tools/include/InputParser.h"
-#include "../include/AhapEncoder.h"
-#include "../include/IvsEncoder.h"
+#ifndef _IVSENCODER_H_
+#define _IVSENCODER_H_
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::tools::InputParser;
+#include <iostream>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+namespace haptics::encoder {
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    std::cout << "The file to process is : " << filename << "\n";
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-
-  std::string ext = InputParser::getFileExt(filename);
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    return AhapEncoder::encode(filename);
-  }
-  if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    return IvsEncoder::encode(filename);
-  }
-
-  std::cout << "File extension not supported" << std::endl;
-  return EXIT_FAILURE;
-}
+class IvsEncoder {
+public:
+  [[nodiscard]] auto static IvsEncoder::encode(std::string &filename) -> int;
+};
+} // namespace haptics::encoder
+#endif //_IVSENCODER_H_
