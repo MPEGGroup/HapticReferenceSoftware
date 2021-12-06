@@ -20,8 +20,10 @@ endif()
 include(cmake/nlohmann_json.cmake)
 
 add_subdirectory("tools")
+add_subdirectory("types")
 
 include_directories("tools/src")
+include_directories("types/src")
 
 if(BUILD_DECODER)
     add_subdirectory("RM0_Decoder")
