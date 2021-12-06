@@ -31,43 +31,31 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
-#include <Encoder/include/AhapEncoder.h>
+#ifndef _KEYFRAME_H_
+#define _KEYFRAME_H_
 
-using haptics::encoder::AhapEncoder;
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-    const auto args = std::vector<const char *>(argv, argv + argc);
-    InputParser inputParser(args);
-    if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-        InputParser::help(args[0]);
-        return EXIT_SUCCESS;
-    }
+class Keyframe {
+public:
+  explicit Keyframe() = default;
+  explicit Keyframe(int newRelativePosition, float newAmplitudeModulation,
+                    int newFrequencyModulation)
+      : relativePosition(newRelativePosition)
+      , amplitudeModulation(newAmplitudeModulation)
+      , frequencyModulation(newFrequencyModulation) {};
 
-    std::string filename = inputParser.getCmdOption("-f");
-    if (filename.empty()) {
-        filename = inputParser.getCmdOption("--file");
-    }
-    if (filename.empty()) {
-        std::cout << "The file to process is : " << filename << "\n";
-        InputParser::help(args[0]);
-        return EXIT_FAILURE;
-    }
+  [[nodiscard]] auto getRelativePosition() const -> int;
+  auto setRelativePosition(int newRelativePosition) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> float;
+  auto setAmplitudeModulation(float newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> int;
+  auto setFrequencyModulation(int newFrequencyModulation) -> void;
 
-    std::string output = inputParser.getCmdOption("-o");
-    if (output.empty()) {
-        output = inputParser.getCmdOption("--output");
-    }
-    if (!output.empty()) {
-        std::cout << "The generated file will be : " << output << "\n";
-    }
-
-    std::string ext = InputParser::getFileExt(filename);
-    if (ext == "json" || ext == "ahap") {
-        std::cout << "The AHAP file to encode : " << filename << std::endl;
-        AhapEncoder::encode(filename);
-    }
-    return EXIT_SUCCESS;
-}
+private:
+  int relativePosition = 0;
+  float amplitudeModulation = 0;
+  int frequencyModulation = 0;
+};
+} // namespace haptics::types
+#endif //_KEYFRAME_H_

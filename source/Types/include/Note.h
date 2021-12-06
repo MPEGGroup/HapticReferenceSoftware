@@ -31,43 +31,49 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
-#include <Encoder/include/AhapEncoder.h>
+#ifndef _NOTE_H_
+#define _NOTE_H_
 
-using haptics::encoder::AhapEncoder;
-using haptics::tools::InputParser;
+#include "Keyframe.h"
+#include <vector>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-    const auto args = std::vector<const char *>(argv, argv + argc);
-    InputParser inputParser(args);
-    if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-        InputParser::help(args[0]);
-        return EXIT_SUCCESS;
-    }
+using haptics::types::Keyframe;
 
-    std::string filename = inputParser.getCmdOption("-f");
-    if (filename.empty()) {
-        filename = inputParser.getCmdOption("--file");
-    }
-    if (filename.empty()) {
-        std::cout << "The file to process is : " << filename << "\n";
-        InputParser::help(args[0]);
-        return EXIT_FAILURE;
-    }
+namespace haptics::types {
 
-    std::string output = inputParser.getCmdOption("-o");
-    if (output.empty()) {
-        output = inputParser.getCmdOption("--output");
-    }
-    if (!output.empty()) {
-        std::cout << "The generated file will be : " << output << "\n";
-    }
+enum BaseSignal {
+  Sine = 0,
+  Square = Sine + 1,
+  Triangle = Square + 1,
+  SawToothUp = Triangle + 1,
+  SawToothDown = SawToothUp + 1,
+};
 
-    std::string ext = InputParser::getFileExt(filename);
-    if (ext == "json" || ext == "ahap") {
-        std::cout << "The AHAP file to encode : " << filename << std::endl;
-        AhapEncoder::encode(filename);
-    }
-    return EXIT_SUCCESS;
-}
+class Note {
+public:
+  explicit Note() = default;
+  explicit Note(int newPosition, float newPhase, BaseSignal newBaseSignal)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal) {};
+
+  [[nodiscard]] auto getPosition() const -> int;
+  auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getPhase() const -> float;
+
+  auto setPhase(float newPhase) -> void;
+  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  auto getKeyframesSize() -> size_t;
+  auto getKeyframeAt(int index) -> Keyframe&;
+  auto addKeyframe(Keyframe& newKeyframe) -> void;
+
+private:
+  int position = 0;
+  float phase = 0;
+  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  BaseSignal baseSignal = BaseSignal::Sine;
+};
+} // namespace haptics::types
+#endif //_NOTE_H_
