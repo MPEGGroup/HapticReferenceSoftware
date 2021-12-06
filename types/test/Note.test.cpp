@@ -31,40 +31,15 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Keyframe.h"
+#include <catch2/catch.hpp>
 
-namespace haptics::types {
+#include "../include/Note.h"
 
-[[nodiscard]] auto Keyframe::getRelativePosition() const -> int {
-  return relativePosition;
+using haptics::types::Note;
+using haptics::types::BaseSignal;
+
+TEST_CASE("haptics::types::Note", "[placeholder]") {
+  const Note n(0, .5, BaseSignal::SawToothUp);
+
+  CHECK(true);
 }
-
-auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
-  relativePosition = newRelativePosition;
-}
-
-[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> float {
-  if (amplitudeModulation.has_value()) {
-    return static_cast<float>(amplitudeModulation.value());
-}
-
-  return NAN;
-}
-
-auto Keyframe::setAmplitudeModulation(float newAmplitudeModulation) -> void {
-  amplitudeModulation = newAmplitudeModulation;
-}
-
-[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> int {
-  if (frequencyModulation.has_value()) {
-    return static_cast<int>(frequencyModulation.value());
-  }
-
-  return NAN;
-}
-
-auto Keyframe::setFrequencyModulation(int newFrequencyModulation) -> void {
-  frequencyModulation = newFrequencyModulation;
-}
-
-} // namespace haptics::types

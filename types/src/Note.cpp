@@ -31,40 +31,44 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Keyframe.h"
+#include "../include/Note.h"
 
 namespace haptics::types {
 
-[[nodiscard]] auto Keyframe::getRelativePosition() const -> int {
-  return relativePosition;
+[[nodiscard]] auto Note::getPosition() const -> int {
+  return position;
 }
 
-auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
-  relativePosition = newRelativePosition;
+auto Note::setPosition(int newPosition) -> void {
+  position = newPosition;
 }
 
-[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> float {
-  if (amplitudeModulation.has_value()) {
-    return static_cast<float>(amplitudeModulation.value());
+[[nodiscard]] auto Note::getPhase() const -> float {
+  return phase;
 }
 
-  return NAN;
+auto Note::setPhase(float newPhase) -> void {
+  phase = newPhase;
 }
 
-auto Keyframe::setAmplitudeModulation(float newAmplitudeModulation) -> void {
-  amplitudeModulation = newAmplitudeModulation;
+[[nodiscard]] auto Note::getBaseSignal() const -> BaseSignal {
+  return baseSignal;
 }
 
-[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> int {
-  if (frequencyModulation.has_value()) {
-    return static_cast<int>(frequencyModulation.value());
-  }
-
-  return NAN;
+auto Note::setBaseSignal(BaseSignal newBaseSignal) -> void {
+  baseSignal = newBaseSignal;
 }
 
-auto Keyframe::setFrequencyModulation(int newFrequencyModulation) -> void {
-  frequencyModulation = newFrequencyModulation;
+auto Note::getKeyframesSize() -> size_t {
+  return keyframes.size();
+}
+
+auto Note::getKeyframeAt(int index) -> haptics::types::Keyframe& {
+  return keyframes.at(index);
+}
+
+auto Note::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+  keyframes.push_back(newKeyframe);
 }
 
 } // namespace haptics::types

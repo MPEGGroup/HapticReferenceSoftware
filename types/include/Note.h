@@ -31,40 +31,49 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Keyframe.h"
+#ifndef _NOTE_H_
+#define _NOTE_H_
+
+#include "Keyframe.h"
+#include <vector>
+
+using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-[[nodiscard]] auto Keyframe::getRelativePosition() const -> int {
-  return relativePosition;
-}
+enum BaseSignal {
+  Sine = 0,
+  Square = Sine + 1,
+  Triangle = Square + 1,
+  SawToothUp = Triangle + 1,
+  SawToothDown = SawToothUp + 1,
+};
 
-auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
-  relativePosition = newRelativePosition;
-}
+class Note {
+public:
+  explicit Note() = default;
+  explicit Note(int newPosition, float newPhase, BaseSignal newBaseSignal)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal) {};
 
-[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> float {
-  if (amplitudeModulation.has_value()) {
-    return static_cast<float>(amplitudeModulation.value());
-}
+  [[nodiscard]] auto getPosition() const -> int;
+  auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getPhase() const -> float;
 
-  return NAN;
-}
+  auto setPhase(float newPhase) -> void;
+  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  auto getKeyframesSize() -> size_t;
+  auto getKeyframeAt(int index) -> Keyframe&;
+  auto addKeyframe(Keyframe& newKeyframe) -> void;
 
-auto Keyframe::setAmplitudeModulation(float newAmplitudeModulation) -> void {
-  amplitudeModulation = newAmplitudeModulation;
-}
-
-[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> int {
-  if (frequencyModulation.has_value()) {
-    return static_cast<int>(frequencyModulation.value());
-  }
-
-  return NAN;
-}
-
-auto Keyframe::setFrequencyModulation(int newFrequencyModulation) -> void {
-  frequencyModulation = newFrequencyModulation;
-}
-
+private:
+  int position = 0;
+  float phase = 0;
+  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  BaseSignal baseSignal = BaseSignal::Sine;
+};
 } // namespace haptics::types
+#endif //_NOTE_H_

@@ -96,7 +96,7 @@ auto Band::addEffect(Effect &newNote) -> void {
   } else {
     length =
         effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1).getRelativePosition();
-  }
+}
 
   return (position <= start && position + length >= start) ||
          (position <= stop && position + length >= stop) ||

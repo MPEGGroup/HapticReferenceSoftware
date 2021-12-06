@@ -35,40 +35,12 @@
 
 #include "../include/Band.h"
 
-using haptics::tools::InputParser;
+using haptics::types::Band;
+using haptics::types::BandType;
+using haptics::types::EncodingModality;
 
-TEST_CASE("haptics::tools") {
+TEST_CASE("haptics::types::Band", "[placeholder]") {
+  const Band b(BandType::Wave, EncodingModality::Quantized, 10, 70, 1000);
 
-  SECTION("Command line arguments") {
-
-    std::vector<const char *> fake_argv = {"fake_prg", "-f", "input_file", "-o", "output_file"};
-
-    InputParser inputParser(fake_argv);
-    CHECK(inputParser.cmdOptionExists("-f"));
-    CHECK(inputParser.cmdOptionExists("-o"));
-    CHECK_FALSE(inputParser.cmdOptionExists("-q"));
-  }
-}
-
-TEST_CASE("InputParser::getFileExt") {
-  const std::vector<std::vector<const char*>> testingValues = {
-    {"filename.ext", "ext"},
-    {"path/filename.json", "json"},
-    {"very/long/path/filename.xml", "xml"},
-    {"../../other/folder/filename.h", "h"},
-    {"multiple.test.cpp", "cpp"},
-    {"no/ext", ""}
-  };
-
-  for (std::vector<const char*> v : testingValues) {
-    REQUIRE(v.size() == 2);
-    
-    DYNAMIC_SECTION("Test getFileExtension in every cases") {
-      std::string filename = std::string(v[0]);
-      std::string res = InputParser::getFileExt(filename);
-      std::string expectedResult = std::string(v[1]);
-
-      CHECK_THAT(res, Catch::Matchers::Equals(expectedResult));
-    }
-  }
+  CHECK(true);
 }
