@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/AhapEncoder.h"
+#include <Encoder/include/AhapEncoder.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
 

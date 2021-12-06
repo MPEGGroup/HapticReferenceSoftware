@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _AHAPENCODER_H_
-#define _AHAPENCODER_H_
+#ifndef AHAPENCODER_H
+#define AHAPENCODER_H
 
 #include <iostream>
 
@@ -43,4 +43,4 @@ public:
   [[nodiscard]] auto static AhapEncoder::encode(std::string& filename) -> int;
 };
 } // namespace haptics::encoder
-#endif //_AHAPENCODER_H_
+#endif //AHAPENCODER_H

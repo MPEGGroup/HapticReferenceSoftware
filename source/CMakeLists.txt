@@ -6,6 +6,7 @@ include(../cmake/clang_tidy.cmake)
 include(../cmake/nlohmann_json.cmake)
 
 add_subdirectory("Tools")
+add_subdirectory("Types")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")
