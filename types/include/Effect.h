@@ -37,8 +37,6 @@
 #include "Keyframe.h"
 #include <vector>
 
-using haptics::types::Keyframe;
-
 namespace haptics::types {
 
 enum BaseSignal {
@@ -66,13 +64,13 @@ public:
   [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   auto getKeyframesSize() -> size_t;
-  auto getKeyframeAt(int index) -> Keyframe&;
-  auto addKeyframe(Keyframe& newKeyframe) -> void;
+  auto getKeyframeAt(int index) -> haptics::types::Keyframe&;
+  auto addKeyframe(haptics::types::Keyframe &newKeyframe) -> void;
 
 private:
   int position = 0;
   float phase = 0;
-  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  std::vector<haptics::types::Keyframe> keyframes = std::vector<haptics::types::Keyframe>{};
   BaseSignal baseSignal = BaseSignal::Sine;
 };
 } // namespace haptics::types

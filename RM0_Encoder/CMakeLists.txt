@@ -7,5 +7,6 @@ target_link_libraries(RM0_Encoder PUBLIC tools types)
 target_link_libraries(RM0_Encoder PRIVATE nlohmann_json::nlohmann_json pugixml::static)
 
 add_executable(test_RM0_Encoder test/PcmEncoder.test.cpp src/PcmEncoder.cpp test/AhapEncoder.test.cpp src/AhapEncoder.cpp test/IVSEncoder.test.cpp src/IVSEncoder.cpp)
-target_link_libraries(test_RM0_Encoder PRIVATE Catch2::Catch2WithMain nlohmann_json::nlohmann_json)
+target_link_libraries(test_RM0_Encoder PUBLIC types)
+target_link_libraries(test_RM0_Encoder PRIVATE Catch2::Catch2WithMain nlohmann_json::nlohmann_json pugixml::static)
 catch_discover_tests(test_RM0_Encoder)

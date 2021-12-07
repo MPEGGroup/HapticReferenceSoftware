@@ -35,12 +35,40 @@
 #define _IVSENCODER_H_
 
 #include <iostream>
+#include <vector>
+#include <pugixml.hpp>
+#include <Effect.h>
+#include <Keyframe.h>
 
 namespace haptics::encoder {
 
 class IvsEncoder {
 public:
-  [[nodiscard]] auto static IvsEncoder::encode(std::string &filename) -> int;
+  [[nodiscard]] auto static IvsEncoder::encode(const std::string &filename) -> int;
+  [[nodiscard]] auto static IvsEncoder::getLastModified(const pugi::xml_document *doc) -> std::string;
+  [[nodiscard]] auto static IvsEncoder::getBasisEffects(const  pugi::xml_document *doc)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static IvsEncoder::getLaunchEvents(const pugi::xml_document *doc)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static IvsEncoder::getLaunchedEffect(
+      const pugi::xml_object_range<pugi::xml_named_node_iterator> *basisEffects,
+      const pugi::xml_node *launchEvent, pugi::xml_node &out) -> bool;
+
+  [[nodiscard]] auto static IvsEncoder::convert(const pugi::xml_node *basisEffect,
+                                                const pugi::xml_node *launchEvent,
+                                                haptics::types::Effect *out) -> bool;
+
+  [[nodiscard]] auto static IvsEncoder::getDuration(const pugi::xml_node *basisEffect,
+                                                    const pugi::xml_node *launchEvent) -> int;
+  [[nodiscard]] auto static IvsEncoder::getMagnitude(const pugi::xml_node *basisEffect,
+                                                     const pugi::xml_node *launchEvent) -> int;
+  [[nodiscard]] auto static IvsEncoder::getWaveform(const pugi::xml_node *basisEffect)
+      -> haptics::types::BaseSignal;
+  [[nodiscard]] auto static IvsEncoder::getAttackTime(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static IvsEncoder::getAttackLevel(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static IvsEncoder::getFadeTime(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static IvsEncoder::getFadeLevel(const pugi::xml_node *basisEffect) -> int;
 };
+
 } // namespace haptics::encoder
 #endif //_IVSENCODER_H_

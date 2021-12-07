@@ -24,6 +24,7 @@ add_subdirectory("types")
 
 include_directories("tools/src")
 include_directories("types/src")
+include_directories("types/include")
 
 if(BUILD_DECODER)
     add_subdirectory("RM0_Decoder")

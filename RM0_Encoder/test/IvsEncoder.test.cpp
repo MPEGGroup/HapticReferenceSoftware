@@ -36,9 +36,489 @@
 
 using haptics::encoder::IvsEncoder;
 
-TEST_CASE("return true", "[placeholder]") {
-  std::string str("this/is/my/file/path.ext");
-  int exit_code = IvsEncoder::encode(str);
+TEST_CASE("IvsEncoder::getLastModified without node", "[getLastModified][withoutNode]") {
+  pugi::xml_document doc;
+  std::string res = IvsEncoder::getLastModified(&doc);
 
-  CHECK(exit_code == EXIT_FAILURE);
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getLastModified without attribute", "[getLastModified][withoutAttribute]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("ivs-file");
+  std::string res = IvsEncoder::getLastModified(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getLastModified with wrong node", "[getLastModified][wrongNode]") {
+  std::string testingValue("Sunday, April 11, 2021  10:39:06PM");
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("wrong ivs-file");
+  node.append_attribute("last-modified") = testingValue.c_str();
+
+  std::string res = IvsEncoder::getLastModified(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getLastModified with wrong attribute", "[getLastModified][wrongAttribute]") {
+  std::string testingValue("Sunday, April 11, 2021  10:39:06PM");
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("ivs-file");
+  node.append_attribute("wrong last-modified") = testingValue.c_str();
+
+  std::string res = IvsEncoder::getLastModified(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getLastModified", "[getLastModified][correctParam]") {
+  const std::vector<char *> testingValues = {"Hello World", "Sunday, April 11, 2021  10:39:06PM",
+                                             "42", "magic string", ""};
+
+  int16_t i = 0;
+  for (char *testingCase : testingValues) {
+    pugi::xml_document doc;
+    pugi::xml_node node = doc.append_child("ivs-file");
+    node.append_attribute("last-modified") = testingCase;
+
+    std::string expected(testingCase);
+    DYNAMIC_SECTION("getLastModified with configured date (TESTING CASE: " + std::to_string(i) +
+                    ")") {
+      std::string res = IvsEncoder::getLastModified(&doc);
+
+      REQUIRE(expected == res);
+    }
+
+    i++;
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getBasisEffects without node", "[getLastModified][withoutNode]") {
+  pugi::xml_document doc;
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getBasisEffects(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getBasisEffects with wrong node", "[getLastModified][wrongNode]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("ivs-file").append_child("wrong effects").append_child("basis-effect");
+  node.append_attribute("name") = "Hello World";
+  node.append_attribute("duration") = "42";
+
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getBasisEffects(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getBasisEffects", "[getLastModified][correctParam]") {
+  std::vector<std::vector<char *>> testingValues = {
+      {"ShortTransitionRampUp100_1", "500", "sine"},
+      {"Bump100_1", "50", "sine"},
+      {"ShortBuzz100_1", "250", "square"},
+  };
+
+  pugi::xml_document doc;
+  pugi::xml_node effectsNode = doc.append_child("ivs-file").append_child("effects");
+  pugi::xml_node timelineNode = effectsNode.append_child("timeline-effect");
+  pugi::xml_node launchNode;
+  pugi::xml_node effectNode;
+  std::vector<char *> testingEffectValue;
+  int16_t i;
+  for (i = 0; i < testingValues.size(); i++) {
+    testingEffectValue = testingValues[i];
+
+    launchNode = timelineNode.append_child("launch-effect");
+    launchNode.append_attribute("effect") = testingEffectValue[0];
+    launchNode.append_attribute("time") = i * 500;
+
+    effectNode = effectsNode.append_child("basis-effect");
+    effectNode.append_attribute("waveform") = testingEffectValue[2];
+    effectNode.append_attribute("name") = testingEffectValue[0];
+    effectNode.append_attribute("duration") = testingEffectValue[1];
+  }
+
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getBasisEffects(&doc);
+
+  i = 0;
+  for (pugi::xml_node n : res) {
+    testingEffectValue = testingValues[i];
+
+    REQUIRE(std::string(n.name()) == "basis-effect");
+    REQUIRE(std::string(n.attribute("name").value()) == testingEffectValue[0]);
+    REQUIRE(std::string(n.attribute("duration").value()) == testingEffectValue[1]);
+    REQUIRE(std::string(n.attribute("waveform").value()) == testingEffectValue[2]);
+
+    i++;
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getLaunchEvents without node", "[getLaunchEvents][withoutNode]") {
+  pugi::xml_document doc;
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getLaunchEvents with wrong node", "[getLaunchEvents][wrongNode]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("ivs-file")
+                            .append_child("effects")
+                            .append_child("wrong timeline-effect")
+                            .append_child("launch-event");
+  node.append_attribute("effect") = "Hello World";
+  node.append_attribute("time") = "42";
+
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getLaunchEvents", "[getLaunchEvents][correctParam]") {
+  std::vector<std::vector<char *>> testingValues = {
+      {"ShortTransitionRampUp100_1", "500"},
+      {"Bump100_1", "50"},
+      {"ShortBuzz100_1", "250"},
+  };
+
+  pugi::xml_document doc;
+  pugi::xml_node effectsNode = doc.append_child("ivs-file").append_child("effects");
+  pugi::xml_node timelineNode = effectsNode.append_child("timeline-effect");
+  pugi::xml_node launchNode;
+  pugi::xml_node effectNode;
+  std::vector<char *> testingEffectValue;
+  int16_t i;
+  for (i = 0; i < testingValues.size(); i++) {
+    testingEffectValue = testingValues[i];
+
+    launchNode = timelineNode.append_child("launch-effect");
+    launchNode.append_attribute("effect") = testingEffectValue[0];
+    launchNode.append_attribute("time") = testingEffectValue[1];
+
+    effectNode = effectsNode.append_child("basis-effect");
+    effectNode.append_attribute("waveform") = "sine";
+    effectNode.append_attribute("name") = testingEffectValue[0];
+    effectNode.append_attribute("duration") = 42 * i;
+  }
+
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
+
+  i = 0;
+  for (pugi::xml_node n : res) {
+    testingEffectValue = testingValues[i];
+
+    REQUIRE(std::string(n.name()) == "launch-effect");
+    REQUIRE(std::string(n.attribute("effect").value()) == testingEffectValue[0]);
+    REQUIRE(std::string(n.attribute("time").value()) == testingEffectValue[1]);
+
+    i++;
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getLaunchedEffect without launch", "[getLaunchedEffect][withoutNode]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "Hello World";
+  basisEffect.append_attribute("duration") = "42";
+  pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = node.children("basis-effect");
+
+  pugi::xml_node res = {};
+  REQUIRE_FALSE(IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, res));
+}
+
+TEST_CASE("IvsEncoder::getLaunchedEffect without basis", "[getLaunchedEffect][withoutNode]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("effect") = "Hello World";
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = node.children("basis-effect");
+
+  pugi::xml_node res = {};
+  REQUIRE_FALSE(IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, res));
+}
+
+TEST_CASE("IvsEncoder::getLaunchedEffect without launch/basis effect matching",
+          "[getLaunchedEffect][withoutMatching]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("effect") = "Hello World";
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "World Hello";
+  basisEffect.append_attribute("duration") = "42";
+  pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = node.children("basis-effect");
+
+  pugi::xml_node res = {};
+  REQUIRE_FALSE(IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, res));
+}
+
+TEST_CASE("IvsEncoder::getLaunchedEffect normal case",
+          "[getLaunchedEffect][correctParam]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("effect") = "Hello World";
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "World Hello";
+  basisEffect.append_attribute("duration") = "42";
+  basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "Hello World";
+  basisEffect.append_attribute("duration") = "24";
+  pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
+      node.children("basis-effect");
+
+  pugi::xml_node res = {};
+  REQUIRE(IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, res));
+  CHECK(std::string(res.name()) == "basis-effect");
+  CHECK(std::string(launchEvent.attribute("effect").as_string()) == std::string(res.attribute("name").as_string()));
+  CHECK(std::string(res.attribute("name").as_string()) == "Hello World");
+  CHECK(res.attribute("duration").as_int() == 24);
+}
+
+
+TEST_CASE("IvsEncoder::getDuration without value", "[getDuration][withoutValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getDuration without override", "[getDuration][withoutOverride]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("duration") = "24";
+
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
+
+  REQUIRE(res == 24);
+}
+
+TEST_CASE("IvsEncoder::getDuration with override", "[getDuration][withOverride]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("duration-override") = "42";
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("duration") = "24";
+
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
+
+  REQUIRE(res == 42);
+}
+
+
+TEST_CASE("IvsEncoder::getMagnitude without value", "[getMagnitude][withoutValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+
+  int res = IvsEncoder::getMagnitude(&basisEffect, &launchEvent);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getMagnitude without override", "[getMagnitude][withoutOverride]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("magnitude") = "24";
+
+  int res = IvsEncoder::getMagnitude(&basisEffect, &launchEvent);
+
+  REQUIRE(res == 24);
+}
+
+TEST_CASE("IvsEncoder::getMagnitude with override", "[getMagnitude][withOverride]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("magnitude-override") = "42";
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("magnitude") = "24";
+
+  int res = IvsEncoder::getMagnitude(&basisEffect, &launchEvent);
+
+  REQUIRE(res == 42);
+}
+
+
+TEST_CASE("IvsEncoder::getAttackTime without configured attribute", "[getAttackTime][withoutAttribute]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("wrong attack-time") = 42;
+
+  int res = IvsEncoder::getAttackTime(&basisEffect);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getAttackTime with configured attribute", "[getAttackTime][withAttribute]") {
+  std::vector<int> testingValues = {
+    42,
+    0,
+    350
+  };
+
+  for (int i = 0; i < testingValues.size(); i++) {
+    DYNAMIC_SECTION("IvsEncoder::getAttackTime with configured attribute (TESTING CASE: " +
+                    std::to_string(i) + ")") {
+      int testingCase = testingValues[i];
+      pugi::xml_document doc;
+      pugi::xml_node node = doc.append_child("root");
+      pugi::xml_node basisEffect = node.append_child("basis-effect");
+      basisEffect.append_attribute("attack-time") = testingCase;
+
+      int res = IvsEncoder::getAttackTime(&basisEffect);
+
+      REQUIRE(res == testingCase);
+    }
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getAttackLevel without configured attribute", "[getAttackLevel][withoutAttribute]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("wrong attack-level") = 42;
+
+  int res = IvsEncoder::getAttackLevel(&basisEffect);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getAttackLevel with configured attribute", "[getAttackLevel][withAttribute]") {
+  std::vector<int> testingValues = {42, 0, 350};
+
+  for (int i = 0; i < testingValues.size(); i++) {
+    DYNAMIC_SECTION("IvsEncoder::getAttackLevel with configured attribute (TESTING CASE: " +
+                    std::to_string(i) + ")") {
+      int testingCase = testingValues[i];
+      pugi::xml_document doc;
+      pugi::xml_node node = doc.append_child("root");
+      pugi::xml_node basisEffect = node.append_child("basis-effect");
+      basisEffect.append_attribute("attack-level") = testingCase;
+
+      int res = IvsEncoder::getAttackLevel(&basisEffect);
+
+      REQUIRE(res == testingCase);
+    }
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getFadeTime without configured attribute", "[getFadeTime][withoutAttribute]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("wrong fade-time") = 42;
+
+  int res = IvsEncoder::getFadeTime(&basisEffect);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getFadeTime with configured attribute", "[getFadeTime][withAttribute]") {
+  std::vector<int> testingValues = {42, 0, 350};
+
+  for (int i = 0; i < testingValues.size(); i++) {
+    DYNAMIC_SECTION("IvsEncoder::getFadeTime with configured attribute (TESTING CASE: " +
+                    std::to_string(i) + ")") {
+      int testingCase = testingValues[i];
+      pugi::xml_document doc;
+      pugi::xml_node node = doc.append_child("root");
+      pugi::xml_node basisEffect = node.append_child("basis-effect");
+      basisEffect.append_attribute("fade-time") = testingCase;
+
+      int res = IvsEncoder::getFadeTime(&basisEffect);
+
+      REQUIRE(res == testingCase);
+    }
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getFadeLevel without configured attribute", "[getFadeLevel][withoutAttribute]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("wrong fade-level") = 42;
+
+  int res = IvsEncoder::getFadeLevel(&basisEffect);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getFadeLevel with configured attribute", "[getFadeLevel][withAttribute]") {
+  std::vector<int> testingValues = {42, 0, 350};
+
+  for (int i = 0; i < testingValues.size(); i++) {
+    DYNAMIC_SECTION("IvsEncoder::getFadeLevel with configured attribute (TESTING CASE: " +
+                    std::to_string(i) + ")") {
+      int testingCase = testingValues[i];
+      pugi::xml_document doc;
+      pugi::xml_node node = doc.append_child("root");
+      pugi::xml_node basisEffect = node.append_child("basis-effect");
+      basisEffect.append_attribute("fade-level") = testingCase;
+
+      int res = IvsEncoder::getFadeLevel(&basisEffect);
+
+      REQUIRE(res == testingCase);
+    }
+  }
+}
+
+
+TEST_CASE("IvsEncoder::getWaveform without configured attribute", "[getWaveform][withoutAttribute]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("wrong waveform") = "sine";
+
+  haptics::types::BaseSignal res = IvsEncoder::getWaveform(&basisEffect);
+
+  REQUIRE(res == haptics::types::BaseSignal(-1));
+}
+
+TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][withAttribute]") {
+  std::vector<char *> testingValues = {
+    "something wrong",
+    "sine",
+    "square",
+    "triangle",
+    "sawtooth-up",
+    "sawtooth-down"
+  };
+
+  for (int i = 0; i < testingValues.size(); i++) {
+    DYNAMIC_SECTION("IvsEncoder::getWaveform with configured attribute (TESTING CASE: " +
+      std::to_string(i) + ")") {
+      char *testingCase = testingValues[i];
+      pugi::xml_document doc;
+      pugi::xml_node node = doc.append_child("root");
+      pugi::xml_node basisEffect = node.append_child("basis-effect");
+      basisEffect.append_attribute("waveform") = testingCase;
+
+      haptics::types::BaseSignal res = IvsEncoder::getWaveform(&basisEffect);
+
+      REQUIRE(res == haptics::types::BaseSignal(i - 1));
+    }
+  }
 }
