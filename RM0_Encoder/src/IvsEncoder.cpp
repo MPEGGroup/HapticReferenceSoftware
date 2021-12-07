@@ -32,12 +32,29 @@
  */
 
 #include "../include/IvsEncoder.h"
+#include <fstream>
+#include <pugixml.hpp>
 
 namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::encode(std::string &filename) -> int {
   if (filename.empty()) {
     return EXIT_FAILURE;
+  }
+
+  pugi::xml_document doc;
+  pugi::xml_parse_result result = doc.load_file(filename.c_str());
+  if (!result) {
+    return EXIT_FAILURE;
+  }
+
+  pugi::xml_node panels = doc.child("ivs-file");
+  std::cout << "\tIVS FILE : " << panels.attribute("last-modified").value() << std::endl;
+
+  for (pugi::xml_node effect : doc.child("ivs-file").child("effects").children("basis-effect")) {
+    std::cout << "\tEFFECT " << effect.attribute("name").value() << " duration "
+              << effect.attribute("duration").as_int()
+              << std::endl;
   }
 
   return EXIT_SUCCESS;
