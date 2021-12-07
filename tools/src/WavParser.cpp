@@ -39,40 +39,43 @@ WavParser::WavParser() {
     file.shouldLogErrorsToConsole(false);
 }
 
-bool WavParser::loadFile(std::string filename) {
-    return file.load(filename);
+auto WavParser::loadFile(std::string filename) -> bool {
+    return file.load(std::move(filename));
 }
 
-bool WavParser::saveFile(std::string filename,std::vector<double> &buffer, int sampleRate) {
+auto WavParser::saveFile(std::string &filename,std::vector<double> &buffer, int sampleRate) -> bool {
     file.setSampleRate(sampleRate);
-    file.setAudioBufferSize(1,buffer.size());
+    auto samples = static_cast<signed int>(buffer.size());
+    file.setAudioBufferSize(1,samples);
     std::copy(file.samples.at(0).begin(),file.samples.at(0).end(),buffer.begin());
     return file.save(filename);
 }
 
-bool WavParser::saveFile(std::string filename,std::vector<std::vector<double>> &buffer, int sampleRate) {
+auto WavParser::saveFile(std::string &filename,std::vector<std::vector<double>> &buffer, int sampleRate) -> bool {
     file.setSampleRate(sampleRate);
-    file.setAudioBufferSize(buffer.size(),buffer.at(0).size());
-    for(int i=0; i<buffer.size(); i++) {
+    auto channels = static_cast<signed int>(buffer.size());
+    auto samples = static_cast<signed int>(buffer.at(0).size());
+    file.setAudioBufferSize(channels,samples);
+    for(int i=0; i<channels; i++) {
         std::copy(file.samples.at(i).begin(),file.samples.at(i).end(),buffer.at(i).begin());
     }
     return file.save(filename);
 }
 
 
-uint32_t WavParser::getSamplerate() {
+auto WavParser::getSamplerate() -> uint32_t {
     return file.getSampleRate();
 }
 
-int WavParser::getNumChannels() {
+auto WavParser::getNumChannels() -> int {
     return file.getNumChannels();
 }
 
-int WavParser::getNumSamples() {
+auto WavParser::getNumSamples() -> int {
     return file.getNumSamplesPerChannel();
 }
 
-std::vector<double> WavParser::getSamples() {
+auto WavParser::getSamples() -> std::vector<double> {
     std::vector<double> buffer;
     buffer.resize(file.getNumSamplesPerChannel());
     std::copy(file.samples.at(0).begin(),file.samples.at(0).end(),buffer.begin());

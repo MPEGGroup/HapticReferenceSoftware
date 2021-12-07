@@ -44,13 +44,13 @@ class WavParser {
 public:
   WavParser();
 
-  bool loadFile(std::string filename);
-  bool saveFile(std::string filename, std::vector<double> &buffer, int sampleRate);
-  bool saveFile(std::string filename, std::vector<std::vector<double>> &buffer, int sampleRate);
-  uint32_t getSamplerate();
-  int getNumChannels();
-  int getNumSamples();
-  std::vector<double> getSamples();
+  auto loadFile(std::string filename) -> bool;
+  auto saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate) -> bool;
+  auto saveFile(std::string &filename, std::vector<std::vector<double>> &buffer, int sampleRate) -> bool;
+  auto getSamplerate() -> uint32_t;
+  auto getNumChannels() -> int;
+  auto getNumSamples() -> int;
+  auto getSamples() -> std::vector<double>;
 
 private:
   AudioFile<double> file;

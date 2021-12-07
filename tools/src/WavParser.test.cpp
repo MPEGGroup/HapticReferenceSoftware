@@ -37,21 +37,23 @@
 #include <filesystem>
 #include <vector>
 
+constexpr int fs = 8000;
+
 TEST_CASE("haptics::tools::WavParser") {
 
   using haptics::tools::WavParser;
 
   SECTION("Command line arguments") {
 
+    std::string filename = "test.wav";
     std::vector<double> buffer {0,1,0,1};
     WavParser wavParser;
-    int samplerate = 8000;
-    wavParser.saveFile("test.wav",buffer,samplerate);
-    CHECK(std::filesystem::is_regular_file("test.wav"));
+    wavParser.saveFile(filename,buffer,fs);
+    CHECK(std::filesystem::is_regular_file(filename));
     WavParser wavParser2;
-    wavParser2.loadFile("test.wav");
+    wavParser2.loadFile(filename);
     std::vector<double> buffer2 = wavParser2.getSamples();
     CHECK(buffer2.size()==buffer.size());
-    std::filesystem::remove("test.wav");
+    std::filesystem::remove(filename);
   }
 }
