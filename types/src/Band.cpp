@@ -83,8 +83,8 @@ auto Band::getEffectAt(int index) -> haptics::types::Effect& {
   return effects.at(index);
 }
 
-auto Band::addEffect(Effect &newNote) -> void {
-    effects.push_back(newNote);
+auto Band::addEffect(haptics::types::Effect &newEffect) -> void {
+  effects.push_back(newEffect);
 }
 
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,

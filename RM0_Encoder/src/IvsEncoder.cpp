@@ -54,6 +54,7 @@ namespace haptics::encoder {
   pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = IvsEncoder::getBasisEffects(&doc);
   pugi::xml_node basisEffect = {};
   int bandIndex = -1;
+  haptics::types::Band *myBand = nullptr;
   haptics::types::Effect *effect = nullptr;
   for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&doc)) {
     if (!IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, basisEffect)) {
@@ -66,6 +67,15 @@ namespace haptics::encoder {
     }
 
     // TODO : add bandIndex = myTrack.findBandAvailable(startTime, duration)
+    myBand = myTrack.findWaveBandAvailable(
+        effect->getPosition(),
+        effect->getKeyframeAt(effect->getKeyframesSize() - 1).getRelativePosition());
+    if (myBand == nullptr) {
+      myBand = new haptics::types::Band(haptics::types::BandType::Wave,
+                                        haptics::types::EncodingModality::Vectorial, 0, 0, 1000);
+      myTrack.addBand(*myBand);
+    }
+    myBand->addEffect(*effect);
 
     std::cout << "\tEFFECT (";
     std::cout << effect->getPosition() << ", ";
@@ -97,21 +107,22 @@ namespace haptics::encoder {
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
   int period = IvsEncoder::getPeriod(basisEffect, launchEvent);
   std::vector<haptics::types::Keyframe *> keyframeList = std::vector<haptics::types::Keyframe *>{
-      new haptics::types::Keyframe(0, magnitude, period),
-      new haptics::types::Keyframe(duration, magnitude, period)};
+      new haptics::types::Keyframe(0, magnitude / 10000.0, period),
+      new haptics::types::Keyframe(duration, magnitude / 10000.0, period)};
 
   int fadeTime = IvsEncoder::getFadeTime(basisEffect);
   if (fadeTime != -1) {
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     keyframeList[1]->setRelativePosition(duration - fadeTime);
-    keyframeList.push_back(new haptics::types::Keyframe(duration, fadeLevel, period));
+    keyframeList.push_back(new haptics::types::Keyframe(duration, fadeLevel / 10000.0, period));
   }
 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
     keyframeList[0]->setRelativePosition(attackTime);
-    keyframeList.insert(keyframeList.begin(), new haptics::types::Keyframe(0, attackLevel, period));
+    keyframeList.insert(keyframeList.begin(),
+                        new haptics::types::Keyframe(0, attackLevel / 10000.0, period));
   }
 
   for (haptics::types::Keyframe *kf : keyframeList) {

@@ -574,7 +574,7 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   basisEffect.append_attribute("name") = "Hello World";
   basisEffect.append_attribute("type") = "periodic";
   basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("magnitude") = 5000;
   basisEffect.append_attribute("waveform") = "sawtooth-down";
   basisEffect.append_attribute("period") = 80;
 
@@ -588,12 +588,12 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.5));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.5));
   CHECK(k.getFrequencyModulation() == 80);
 }
 
@@ -608,11 +608,11 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   basisEffect.append_attribute("name") = "Hello World";
   basisEffect.append_attribute("type") = "periodic";
   basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("magnitude") = 7500;
   basisEffect.append_attribute("waveform") = "sawtooth-down";
   basisEffect.append_attribute("period") = 80;
   basisEffect.append_attribute("attack-time") = 10;
-  basisEffect.append_attribute("attack-level") = 1;
+  basisEffect.append_attribute("attack-level") = 1000;
 
 
   haptics::types::Effect res;
@@ -625,17 +625,17 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(1));
+  CHECK(k.getAmplitudeModulation() == Approx(0.1));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == 10);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.75));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(2);
   CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.75));
   CHECK(k.getFrequencyModulation() == 80);
 }
 
@@ -650,11 +650,11 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   basisEffect.append_attribute("name") = "Hello World";
   basisEffect.append_attribute("type") = "periodic";
   basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("magnitude") = 2500;
   basisEffect.append_attribute("waveform") = "sawtooth-down";
   basisEffect.append_attribute("period") = 80;
   basisEffect.append_attribute("fade-time") = 1;
-  basisEffect.append_attribute("fade-level") = 10;
+  basisEffect.append_attribute("fade-level") = 10000;
 
   haptics::types::Effect res;
   REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
@@ -666,17 +666,17 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.25));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == 499);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.25));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(2);
   CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(10));
+  CHECK(k.getAmplitudeModulation() == Approx(1));
   CHECK(k.getFrequencyModulation() == 80);
 }
 
@@ -691,13 +691,13 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][wit
   basisEffect.append_attribute("name") = "Hello World";
   basisEffect.append_attribute("type") = "periodic";
   basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("magnitude") = 500;
   basisEffect.append_attribute("waveform") = "sawtooth-down";
   basisEffect.append_attribute("period") = 80;
   basisEffect.append_attribute("attack-time") = 1;
-  basisEffect.append_attribute("attack-level") = 10;
+  basisEffect.append_attribute("attack-level") = 1000;
   basisEffect.append_attribute("fade-time") = 20;
-  basisEffect.append_attribute("fade-level") = 42;
+  basisEffect.append_attribute("fade-level") = 10000;
 
   haptics::types::Effect res;
   REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
@@ -709,21 +709,21 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][wit
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(10));
+  CHECK(k.getAmplitudeModulation() == Approx(0.1));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == 1);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.05));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(2);
   CHECK(k.getRelativePosition() == 480);
-  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getAmplitudeModulation() == Approx(0.05));
   CHECK(k.getFrequencyModulation() == 80);
 
   k = res.getKeyframeAt(3);
   CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(42));
+  CHECK(k.getAmplitudeModulation() == Approx(1.0));
   CHECK(k.getFrequencyModulation() == 80);
 }
