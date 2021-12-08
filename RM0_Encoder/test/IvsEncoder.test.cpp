@@ -32,6 +32,8 @@
  */
 
 #include "../include/IvsEncoder.h"
+#include <Effect.h>
+#include <Keyframe.h>
 #include <catch2/catch.hpp>
 
 using haptics::encoder::IvsEncoder;
@@ -358,6 +360,43 @@ TEST_CASE("IvsEncoder::getMagnitude with override", "[getMagnitude][withOverride
 }
 
 
+TEST_CASE("IvsEncoder::getPeriod without value", "[getPeriod][withoutValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+
+  int res = IvsEncoder::getPeriod(&basisEffect, &launchEvent);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getPeriod without override", "[getPeriod][withoutOverride]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("period") = "24";
+
+  int res = IvsEncoder::getPeriod(&basisEffect, &launchEvent);
+
+  REQUIRE(res == 24);
+}
+
+TEST_CASE("IvsEncoder::getPeriod with override", "[getPeriod][withOverride]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("period-override") = "42";
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("period") = "24";
+
+  int res = IvsEncoder::getPeriod(&basisEffect, &launchEvent);
+
+  REQUIRE(res == 42);
+}
+
+
 TEST_CASE("IvsEncoder::getAttackTime without configured attribute", "[getAttackTime][withoutAttribute]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -521,4 +560,170 @@ TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][wi
       REQUIRE(res == haptics::types::BaseSignal(i - 1));
     }
   }
+}
+
+
+TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttack][withoutFade]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("time") = 42;
+  launchEvent.append_attribute("effect") = "Hello World";
+
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "Hello World";
+  basisEffect.append_attribute("type") = "periodic";
+  basisEffect.append_attribute("duration") = 500;
+  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("waveform") = "sawtooth-down";
+  basisEffect.append_attribute("period") = 80;
+
+  haptics::types::Effect res;
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+
+  CHECK(res.getPosition() == 42);
+  CHECK(res.getPhase() == Approx(0.0));
+  CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
+  CHECK(res.getKeyframesSize() == 2);
+
+  haptics::types::Keyframe k = res.getKeyframeAt(0);
+  CHECK(k.getRelativePosition() == 0);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(1);
+  CHECK(k.getRelativePosition() == 500);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+}
+
+TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][withoutFade]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("time") = 42;
+  launchEvent.append_attribute("effect") = "Hello World";
+
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "Hello World";
+  basisEffect.append_attribute("type") = "periodic";
+  basisEffect.append_attribute("duration") = 500;
+  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("waveform") = "sawtooth-down";
+  basisEffect.append_attribute("period") = 80;
+  basisEffect.append_attribute("attack-time") = 10;
+  basisEffect.append_attribute("attack-level") = 1;
+
+
+  haptics::types::Effect res;
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+
+  CHECK(res.getPosition() == 42);
+  CHECK(res.getPhase() == Approx(0.0));
+  CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
+  CHECK(res.getKeyframesSize() == 3);
+
+  haptics::types::Keyframe k = res.getKeyframeAt(0);
+  CHECK(k.getRelativePosition() == 0);
+  CHECK(k.getAmplitudeModulation() == Approx(1));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(1);
+  CHECK(k.getRelativePosition() == 10);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(2);
+  CHECK(k.getRelativePosition() == 500);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+}
+
+TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack][withFade]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("time") = 42;
+  launchEvent.append_attribute("effect") = "Hello World";
+
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "Hello World";
+  basisEffect.append_attribute("type") = "periodic";
+  basisEffect.append_attribute("duration") = 500;
+  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("waveform") = "sawtooth-down";
+  basisEffect.append_attribute("period") = 80;
+  basisEffect.append_attribute("fade-time") = 1;
+  basisEffect.append_attribute("fade-level") = 10;
+
+  haptics::types::Effect res;
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+
+  CHECK(res.getPosition() == 42);
+  CHECK(res.getPhase() == Approx(0.0));
+  CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
+  CHECK(res.getKeyframesSize() == 3);
+
+  haptics::types::Keyframe k = res.getKeyframeAt(0);
+  CHECK(k.getRelativePosition() == 0);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(1);
+  CHECK(k.getRelativePosition() == 499);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(2);
+  CHECK(k.getRelativePosition() == 500);
+  CHECK(k.getAmplitudeModulation() == Approx(10));
+  CHECK(k.getFrequencyModulation() == 80);
+}
+
+TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][withAttack][withFade]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node launchEvent = node.append_child("launch-effect");
+  launchEvent.append_attribute("time") = 42;
+  launchEvent.append_attribute("effect") = "Hello World";
+
+  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  basisEffect.append_attribute("name") = "Hello World";
+  basisEffect.append_attribute("type") = "periodic";
+  basisEffect.append_attribute("duration") = 500;
+  basisEffect.append_attribute("magnitude") = 1543;
+  basisEffect.append_attribute("waveform") = "sawtooth-down";
+  basisEffect.append_attribute("period") = 80;
+  basisEffect.append_attribute("attack-time") = 1;
+  basisEffect.append_attribute("attack-level") = 10;
+  basisEffect.append_attribute("fade-time") = 20;
+  basisEffect.append_attribute("fade-level") = 42;
+
+  haptics::types::Effect res;
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+
+  CHECK(res.getPosition() == 42);
+  CHECK(res.getPhase() == Approx(0.0));
+  CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
+  CHECK(res.getKeyframesSize() == 4);
+
+  haptics::types::Keyframe k = res.getKeyframeAt(0);
+  CHECK(k.getRelativePosition() == 0);
+  CHECK(k.getAmplitudeModulation() == Approx(10));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(1);
+  CHECK(k.getRelativePosition() == 1);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(2);
+  CHECK(k.getRelativePosition() == 480);
+  CHECK(k.getAmplitudeModulation() == Approx(1543));
+  CHECK(k.getFrequencyModulation() == 80);
+
+  k = res.getKeyframeAt(3);
+  CHECK(k.getRelativePosition() == 500);
+  CHECK(k.getAmplitudeModulation() == Approx(42));
+  CHECK(k.getFrequencyModulation() == 80);
 }

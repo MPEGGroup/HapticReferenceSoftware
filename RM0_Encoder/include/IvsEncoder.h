@@ -54,14 +54,16 @@ public:
       const pugi::xml_object_range<pugi::xml_named_node_iterator> *basisEffects,
       const pugi::xml_node *launchEvent, pugi::xml_node &out) -> bool;
 
-  [[nodiscard]] auto static IvsEncoder::convert(const pugi::xml_node *basisEffect,
-                                                const pugi::xml_node *launchEvent,
-                                                haptics::types::Effect *out) -> bool;
+  [[nodiscard]] auto static IvsEncoder::convertToEffect(const pugi::xml_node *basisEffect,
+                                                        const pugi::xml_node *launchEvent,
+                                                        haptics::types::Effect *out) -> bool;
 
   [[nodiscard]] auto static IvsEncoder::getDuration(const pugi::xml_node *basisEffect,
                                                     const pugi::xml_node *launchEvent) -> int;
   [[nodiscard]] auto static IvsEncoder::getMagnitude(const pugi::xml_node *basisEffect,
                                                      const pugi::xml_node *launchEvent) -> int;
+  [[nodiscard]] auto static IvsEncoder::getPeriod(const pugi::xml_node *basisEffect,
+                                                  const pugi::xml_node *launchEvent) -> int;
   [[nodiscard]] auto static IvsEncoder::getWaveform(const pugi::xml_node *basisEffect)
       -> haptics::types::BaseSignal;
   [[nodiscard]] auto static IvsEncoder::getAttackTime(const pugi::xml_node *basisEffect) -> int;
