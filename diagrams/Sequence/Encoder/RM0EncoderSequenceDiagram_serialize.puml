@@ -1,0 +1,51 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n<i>__RM0 File Generation__</i>\n
+hide unlinked
+
+participant Main
+box "RM0 serialization"
+    participant GltfIO
+    participant RM0BinaryIO
+end box
+
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+...
+ref over Main, RM0BinaryIO
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== RMO serialization ==
+
+alt is_binary == TRUE
+
+    Main -> RM0BinaryIO ++: <<static>>\nwrite(rm0Haptics, output_path)
+    |||
+    RM0BinaryIO -> RM0BinaryIO: internal process to save\ndata inside a binary file
+    |||
+    return EXIT_SUCESS
+
+else is_binary == TRUE
+
+    Main -> GltfIO ++: <<static>>\nwrite(rm0Haptics, output_path)
+    |||
+    GltfIO -> GltfIO: internal process to save data\ninside a glTF compliant file
+    |||
+    return EXIT_SUCESS
+
+end
+
+====
+
+...
+ref over Main, RM0BinaryIO
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<-- Main --: EXIT_SUCESS
+@enduml
