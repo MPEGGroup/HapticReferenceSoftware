@@ -41,8 +41,8 @@ namespace haptics::types {
 
 enum BandType {
   Wave = 0,
-  Keyframe = Wave + 1,
-  Transient = Keyframe + 1,
+  Curve = Wave + 1,
+  Transient = Curve + 1,
 };
 
 enum EncodingModality {
@@ -55,12 +55,12 @@ public:
   explicit Band() = default;
   explicit Band(BandType newBandType, EncodingModality newEncodingModality, int newWindowLength,
                 int newLowerFrequencyLimit, int newUpperFrequencyLimit)
-      : bandType(newBandType)
-      , encodingModality(newEncodingModality)
-      , windowLength(newWindowLength)
-      , lowerFrequencyLimit(newLowerFrequencyLimit)
-      , upperFrequencyLimit(newUpperFrequencyLimit)
-      , notes({}) {};
+    : bandType(newBandType)
+    , encodingModality(newEncodingModality)
+    , windowLength(newWindowLength)
+    , lowerFrequencyLimit(newLowerFrequencyLimit)
+    , upperFrequencyLimit(newUpperFrequencyLimit)
+    , notes({}) {};
 
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
