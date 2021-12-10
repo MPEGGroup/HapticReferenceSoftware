@@ -34,25 +34,55 @@
 #include <catch2/catch.hpp>
 
 #include <iostream>
+#include <vector>
 
 #include "PsychohapticModel.h"
 
 constexpr int bl = 512;
 constexpr int fs = 8000;
 constexpr int size = 8;
+constexpr int pos = 10;
+constexpr double peak = 20;
+constexpr int pos_time = 9;
 
 TEST_CASE("haptics::tools::PsychohapticModel") {
 
-  using haptics::tools::PsychohapticModel;
+    using haptics::tools::PsychohapticModel;
 
-  SECTION("Command line arguments") {
+    SECTION("Command line arguments") {
 
-    PsychohapticModel pm(bl,fs);
-    for(size_t i=0; i<bl; i++) {
-        std::cout << pm.percthres[i] << std::endl;
+
+        PsychohapticModel pm(bl,fs);
+
+        std::vector<double> spectrum(bl,0);
+        spectrum[pos] = peak;
+        std::vector<double> result_height;
+        std::vector<size_t> result_location;
+
+
+        PsychohapticModel::findPeaks(spectrum,MIN_PEAK_PROMINENCE,peak-MIN_PEAK_HEIGHT_DIFF,result_height,result_location);
+        /*for(size_t i=0; i<result_height.size(); i++) {
+            std::cout << "peak:" << std::endl;
+            std::cout << result_height[i] << std::endl;
+            std::cout << result_location[i] << std::endl;
+        }*/
+
+        CHECK(result_location[0]==pos);
+
+        //for additional evaluation:
+        /*std::vector<double> block(bl,0);
+        block[pos_time] = 1;
+        std::vector<double> SMR(0,1);
+        std::vector<double> bandenergy(0,1);
+        pm.getSMR(block,SMR,bandenergy);
+
+        std::cout << "SMR:" << std::endl;
+        for(size_t i=0; i<size; i++) {
+            std::cout << SMR[i] << std::endl;
+        }
+        std::cout << "bandenergy:" << std::endl;
+        for(size_t i=0; i<size; i++) {
+            std::cout << bandenergy[i] << std::endl;
+        }*/
     }
-    std::cout << std::endl;
-    CHECK(true);
-
-  }
 }

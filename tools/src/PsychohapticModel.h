@@ -38,6 +38,9 @@
 #include <vector>
 #include <math.h>
 
+#include </usr/local/include/fftw3.h> //working for mac
+//#include <fftw3.h>
+
 constexpr double a = 62;
 constexpr double c = (double)1/(double)550;
 constexpr double b = 1-(250*c);
@@ -52,6 +55,7 @@ constexpr double mask_c = 30;
 constexpr double PEAK_HUGE_VAL = 2147483647;  // 2^32 - 1
 constexpr double MIN_PEAK_PROMINENCE = 12;
 constexpr double MIN_PEAK_HEIGHT_DIFF = 45;
+//constexpr double PLATEAU_COMP_FACTOR = 10000;
 
 namespace haptics::tools {
 
@@ -61,28 +65,26 @@ public:
 
     void getSMR(std::vector<double> &block, std::vector<double> &SMR, std::vector<double> &bandenergy);
 
-    std::vector<double> freqs;
-    std::vector<double> percthres;
-    std::vector<int> book;
-    std::vector<int> book_cumulative;
+    static void findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height, std::vector<double> &result_height, std::vector<size_t> &result_location);
+    void peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc, std::vector<double> &mask);
 
 private:
     void globalMaskingThreshold(std::vector<double> &spect, std::vector<double> &globalmask);
     void perceptualThreshold();
 
-    static void FindAllPeakLocations(std::vector<double> &x, std::vector<double> &height, std::vector<size_t> &location);
-    static void PeakProminence(std::vector<double> &spectrum, std::vector<double> &peaks_height, std::vector<size_t> &peaks_location, std::vector<double> &prominences_height, std::vector<size_t> &prominences_location);
-    static void FilterPeakCriterion(std::vector<double> &input_height, std::vector<size_t> &input_location, std::vector<double> &result_height, std::vector<size_t> &result_location, double min_peak_val);
-    static void FindPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height, std::vector<double> &result_height, std::vector<size_t> &result_location);
-    void PeakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc, std::vector<double> &mask);
+    static void findAllPeakLocations(std::vector<double> &x, std::vector<double> &height, std::vector<size_t> &location);
+    static void peakProminence(std::vector<double> &spectrum, std::vector<double> &peaks_height, std::vector<size_t> &peaks_location, std::vector<double> &prominences_height, std::vector<size_t> &prominences_location);
+    static void filterPeakCriterion(std::vector<double> &input_height, std::vector<size_t> &input_location, std::vector<double> &result_height, std::vector<size_t> &result_location, double min_peak_val);
 
-    static auto Max(double v1, double v2) -> double;
+    static auto max(double v1, double v2) -> double;
     static auto findMaxVector(std::vector<double> &data) -> double;
 
     int bl;
     int fs;
-    //std::vector<double> freqs;
-    //std::vector<double> percthres;
+    std::vector<double> freqs;
+    std::vector<double> percthres;
+    std::vector<int> book;
+    std::vector<int> book_cumulative;
 
 };
 } // namespace haptics::tools
