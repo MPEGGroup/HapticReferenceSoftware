@@ -31,58 +31,50 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef _WAVELETENCODER_H_
+#define _WAVELETENCODER_H_
 
-#include <iostream>
 #include <vector>
+#include "../../tools/src/PsychohapticModel.h"
+//#include <PsychohapticModel.h>
 
-#include "PsychohapticModel.h"
+constexpr size_t WAVMAXLENGTH = 8;
+constexpr int MAXBITS = 15;
+constexpr int FRACTIONBITS_0 = 7;
+constexpr double LOGFACTOR = 10;
+constexpr double MAXQUANTFACTOR = 0.999;
+constexpr double QUANT_ADD = 0.5;
 
-constexpr int bl = 512;
-constexpr int fs = 8000;
-constexpr int size = 8;
-constexpr int pos = 10;
-constexpr double peak = 20;
-constexpr int pos_time = 9;
-
-TEST_CASE("haptics::tools::PsychohapticModel") {
-
-    using haptics::tools::PsychohapticModel;
-
-    SECTION("PsychohapticModel") {
+namespace haptics::encoder {
 
 
-        PsychohapticModel pm(bl,fs);
+class WaveletEncoder {
+public:
+    WaveletEncoder(int bl, int fs);
 
-        std::vector<double> spectrum(bl,0);
-        spectrum[pos] = peak;
-        std::vector<double> result_height;
-        std::vector<size_t> result_location;
+    void encodeBlock(std::vector<double> &block_time, std::vector<double> &block_dwt, int bitbudget);
+    static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax, std::vector<unsigned char> &bitwavmax);
+    void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy, std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
 
+    static void uniformQuant(std::vector<double> &in, std::vector<double> &out, size_t start, size_t length, double max, int bits);
+    static auto maxQuant(double in, int b1, int b2) -> double;
+    template <class T>
+    static auto findMax(std::vector<T> &data) -> T;
+    static auto findMinInd(std::vector<double> &data) -> size_t;
 
-        PsychohapticModel::findPeaks(spectrum,MIN_PEAK_PROMINENCE,peak-MIN_PEAK_HEIGHT_DIFF,result_height,result_location);
-        /*for(size_t i=0; i<result_height.size(); i++) {
-            std::cout << "peak:" << std::endl;
-            std::cout << result_height[i] << std::endl;
-            std::cout << result_location[i] << std::endl;
-        }*/
+    static auto sgn(double val) -> double;
+    static void de2bi(int val, std::vector<unsigned char> &outstream, int length);
 
-        CHECK(result_location[0]==pos);
+private:
 
-        //for additional evaluation:
-        /*std::vector<double> block(bl,0);
-        block[pos_time] = 1;
-        std::vector<double> SMR(0,1);
-        std::vector<double> bandenergy(0,1);
-        pm.getSMR(block,SMR,bandenergy);
+    int bl;
+    int fs;
+    int dwtlevel;
+    std::vector<int> book;
+    std::vector<int> book_cumulative;
 
-        std::cout << "SMR:" << std::endl;
-        for(size_t i=0; i<size; i++) {
-            std::cout << SMR[i] << std::endl;
-        }
-        std::cout << "bandenergy:" << std::endl;
-        for(size_t i=0; i<size; i++) {
-            std::cout << bandenergy[i] << std::endl;
-        }*/
-    }
-}
+    tools::PsychohapticModel pm;
+
+};
+} // namespace haptics::encoder
+#endif //_WAVELETENCODER_H_

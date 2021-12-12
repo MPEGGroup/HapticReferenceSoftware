@@ -33,6 +33,8 @@
 
 #include "PsychohapticModel.h"
 
+#include "dj_fft/dj_fft.h"
+
 namespace haptics::tools {
 
 PsychohapticModel::PsychohapticModel(int bl, int fs) {
@@ -70,40 +72,31 @@ PsychohapticModel::PsychohapticModel(int bl, int fs) {
 void PsychohapticModel::getSMR(std::vector<double> &block, std::vector<double> &SMR, std::vector<double> &bandenergy){
 
     std::vector<double> spect;
-    spect.reserve(bl);
-    //std::copy(block.begin(),block.end(),spect.begin());
+    spect.resize(bl);
+    std::copy(block.begin(),block.end(),spect.begin());
 
-    auto *in = static_cast<fftw_complex*> (fftw_malloc(sizeof(fftw_complex) * bl*2));
-    auto *out = static_cast<fftw_complex*> (fftw_malloc(sizeof(fftw_complex) * bl*2));
+    std::vector<std::complex<double>> block_complex(bl*2,0);
+    std::transform(block.begin(), block.end(), block_complex.begin(), [](double a) {
+        return std::complex<double>(a,0);
+    } );
 
-    //std::vector<fftw_complex> in_vector(in,in+bl*2);
-    //std::cout << in_vector[0] << std::endl;
-    //reinterpret_cast<fftw_complex*>
+    std::vector<std::complex<double>> spect_complex = dj::fft1d(block_complex,dj::fft_dir::DIR_FWD);
 
+    /*for(size_t i=0; i<block_complex.size(); i++){
+        std::cout << spect_complex[i].real() << ", " << spect_complex[i].imag() << std::endl;
+    }*/
 
-    for(int i=0; i<bl; i++){
-        in[i][0] = block[i];//NOLINT
-        in[i][1] = 0;//NOLINT
-    }
-    for(int i=bl; i<2*bl; i++){
-        in[i][0] = 0;//NOLINT
-        in[i][1] = 0;//NOLINT
-    }
+    std::vector<double> spect_real;
+    spect_real.resize(bl);
 
-    fftw_plan p = fftw_plan_dft_1d(bl*2,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
-    fftw_execute_dft(p,in,out);
+    static double correction = sqrt(2);
+    std::transform( spect_complex.begin(), spect_complex.end()-bl, spect_real.begin(), [](std::complex<double> a) {
+        return LOGFACTOR_SPECT*log10(abs(correction*a.real()));
+    } );
 
-    double temp = 1/sqrt(bl);
-    for(int i=0; i<bl; i++){
-        spect.push_back(20 * log10(temp*sqrt(out[i][0]*out[i][0]+out[i][1]*out[i][1])));//NOLINT
-    }
-
-
-    fftw_destroy_plan(p);
-    fftw_free(in);
-    fftw_free(out);
-
-
+    /*for(size_t i=0; i<bl; i++){
+        std::cout << spect_real[i] << std::endl;
+    }*/
 
     std::vector<double> globalmask(bl,0);
     globalMaskingThreshold(spect,globalmask);
@@ -115,15 +108,16 @@ void PsychohapticModel::getSMR(std::vector<double> &block, std::vector<double> &
         bandenergy[b] = 0;
         maskenergy[b] = 0;
         for(; i<book_cumulative[b+1]; i++){
-            //spect[i] = 20 * log10(temp*abs(spect_complex[i]));
             bandenergy[b] += pow(base,spect[i]/factor);
             maskenergy[b] += globalmask[i];
         }
         SMR[b] = factor * log10(bandenergy[b]/maskenergy[b]);
     }
+
 }
 
 void PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect, std::vector<double> &globalmask){
+
 
     double min_peak_height = findMaxVector(spect) - MIN_PEAK_HEIGHT_DIFF;
     std::vector<double> peaks_height;
@@ -140,6 +134,8 @@ void PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect, std::
             globalmask[i] = pow(base,mask.at(i)/factor)+percthres[i]; //percthres is in linear domain
         }
     }
+
+
 }
 
 void PsychohapticModel::perceptualThreshold() {
@@ -292,6 +288,10 @@ void PsychohapticModel::filterPeakCriterion(std::vector<double> &input_height, s
 }
 
 void PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height, std::vector<double> &result_height, std::vector<size_t> &result_location) {
+
+    if(spectrum.empty()) {
+        return;
+    }
 
     std::vector<double> peaks_all_height;
     std::vector<size_t> peaks_all_location;
