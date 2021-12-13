@@ -32,9 +32,23 @@
  */
 
 #include "../include/AhapEncoder.h"
+#include "../../tools/src/Tools.h"
 #include <fstream>
 
 const double SEC_TO_MSEC = 1000.0;
+const float DEFAULT_AMPLITUDE = 0.5;
+const int DEFAULT_FREQUENCY = 90;
+
+const double BASE_AMPLITUDE_MIN = 0;
+const double BASE_AMPLITUDE_MAX = 1;
+const double ACTUAL_AMPLITUDE_MIN = 0;
+const double ACTUAL_AMPLITUDE_MIN_C = 0.6138;
+const double ACTUAL_AMPLITUDE_MIN_T = 0.792;
+
+const int BASE_FREQUENCY_MIN = 0;
+const int BASE_FREQUENCY_MAX = 1;
+const int ACTUAL_FREQUENCY_MIN = 65;
+const int ACTUAL_FREQUENCY_MAX = 300;
 
 namespace haptics::encoder {
 
@@ -60,7 +74,6 @@ namespace haptics::encoder {
   //FOR LOOP ON KEYFRAMES
   for (nlohmann::json e : pattern) {
     if (e.contains("ParameterCurve")) {
-
       if (e.at("ParameterCurve").at("ParameterID") == "HapticIntensityControl") {
         ret = extractKeyframes(&(e.at("ParameterCurve")), &amplitudes);
         if (ret != 0) {
@@ -84,9 +97,8 @@ namespace haptics::encoder {
   for (nlohmann::json e : pattern) {
   
     if (e.contains("Event")) {
-    
-      if (e.at("EventType") == "HapticTransient") {
-        ret = extractTransients(&(e.at("Event")), &transients);
+      if (e.at("Event").at("EventType") == "HapticTransient") {
+        ret = extractTransients(&(e.at("Event")), &transients, &amplitudes, &frequencies);
         if (ret != 0) {
           std::cout << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -94,7 +106,10 @@ namespace haptics::encoder {
       }
 
     }
+  }
 
+  for (types::Effect t : transients) {
+    std::cout << t.getKeyframeAt(0).getAmplitudeModulation() << std::endl;
   }
 
   return EXIT_SUCCESS;
@@ -106,7 +121,7 @@ namespace haptics::encoder {
   for (nlohmann::json kahap : parameterCurve->at("ParameterCurveControlPoints")) {
     std::pair<int, double> k;
     // TIME + curve offset
-    k.first = (kahap.at("Time").get<double>() + parameterCurve->at("Time").get<double>()) * SEC_TO_MSEC;
+    k.first = static_cast<int>((kahap.at("Time").get<double>() + parameterCurve->at("Time").get<double>()) * SEC_TO_MSEC);
     // VALUE
     k.second = kahap.at("ParameterValue").get<double>();
 
@@ -120,15 +135,60 @@ namespace haptics::encoder {
                                                           std::vector<std::pair<int, double>> * amplitudes, 
                                                           std::vector<std::pair<int, double>> * frequencies) -> int {  
   
-  haptics::types::Effect t = haptics::types::Effect((event->at("Time").get<double>() * SEC_TO_MSEC), 
+  haptics::types::Effect t = haptics::types::Effect(static_cast<int>((event->at("Time").get<double>() * SEC_TO_MSEC)), 
                                                     0,
                                                     haptics::types::BaseSignal::Sine);
 
-  auto first_kf = std::find_if(amplitudes->begin(), amplitudes->end(), [t](std::pair<int, double> a) { return a.first >= t.getPosition(); });
 
-  if ((first_kf - amplitudes->begin()) >= 0) {
-    t.addKeyframe(haptics::types::Keyframe(0, 0, 0))
+  haptics::types::Keyframe k;
+  k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
+  k.setAmplitudeModulation(DEFAULT_FREQUENCY);
+  
+  //SET VALUES AS DEFINED
+  for (nlohmann::json param : event->at("EventParameters")) {
+    if (param.at("ParameterID") == "HapticIntensity") {
+      double amp = tools::genericNormalization(BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX,
+                                        ACTUAL_AMPLITUDE_MIN, ACTUAL_AMPLITUDE_MIN_T,
+                                        param.at("ParameterValue").get<double>());
+      k.setAmplitudeModulation(static_cast<float>(amp));
+    }
+
+    if (param.at("ParameterID") == "HapticSharpness") {
+      k.setFrequencyModulation(DEFAULT_FREQUENCY);
+    }
   }
+
+  //SET MODULATED VALUES IF APPLICABLE
+  if (!amplitudes->empty()) {
+    // FIND FIRST KEYFRAME AFTER THE EFFECT
+    auto first_kf_a = std::find_if(amplitudes->begin(), amplitudes->end(), [t](std::pair<int, double> a) { return a.first >= t.getPosition(); });
+
+    if (first_kf_a > amplitudes->begin() && first_kf_a < amplitudes->end()) {
+      //MULTIPLY AMPLITUDE MODULATION
+      k.setAmplitudeModulation(static_cast<float>(haptics::tools::linearInterpolation(*(first_kf_a - 1), *first_kf_a, t.getPosition())) * k.getAmplitudeModulation());
+    } else if(first_kf_a == amplitudes->begin()) {
+      k.setAmplitudeModulation(static_cast<float>(amplitudes->front().second) * k.getAmplitudeModulation());
+    }
+  }
+
+  if (!frequencies->empty()) {
+    auto first_kf_f = std::find_if(frequencies->begin(), frequencies->end(), [t](std::pair<int, double> f) { return f.first >= t.getPosition(); });
+
+    if (first_kf_f != frequencies->begin() && first_kf_f < frequencies->end()) {
+      //CONVERT FREQUENCY VALUE
+      double f = haptics::tools::linearInterpolation(*(first_kf_f - 1), *first_kf_f, t.getPosition());
+      int freq = static_cast<int>(haptics::tools::genericNormalization(BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX,
+                                                  ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX, f));
+      // SUM FREQUENCY MODULATION
+      k.setFrequencyModulation(freq + k.getFrequencyModulation());
+    } else if(first_kf_f == frequencies->begin()) {
+      k.setFrequencyModulation(BASE_FREQUENCY_MAX);
+    }
+  }
+
+  t.addKeyframe(k);
+
+  transients->push_back(t);
 
   return EXIT_SUCCESS;
 }

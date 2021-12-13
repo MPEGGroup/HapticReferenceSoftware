@@ -42,8 +42,9 @@ namespace haptics::tools {
     double start_a = a.second;
     double end_a = b.second;
 
-    if (x < start || x > end)
+    if (x < start || x > end) {
       return EXIT_FAILURE;
+    }
 
     if (end == start) {
       return (start_a + end_a) / 2.0;
@@ -57,4 +58,15 @@ namespace haptics::tools {
     return (start_a * (end - x) + end_a * (x - start)) / end - start;
   }
 
-}
+
+  [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
+
+    double x_out = -1;
+
+    if (end_in - start_in != 0) {
+      x_out = ((end_out - start_out) / (end_in - start_in)) * (x_in - end_in) + end_out;
+    }
+
+    return x_out;
+  }
+  }
