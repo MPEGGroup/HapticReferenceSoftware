@@ -35,12 +35,20 @@
 #define _AHAPENCODER_H_
 
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include "../../types/include/Note.h"
+#include "../../types/include/Band.h"
+#include "../../types/include/Keyframe.h"
 
 namespace haptics::encoder {
 
 class AhapEncoder {
 public:
   [[nodiscard]] auto static AhapEncoder::encode(std::string& filename) -> int;
+  [[nodiscard]] auto static AhapEncoder::extractTransients(nlohmann::json * pattern, std::vector<haptics::types::Note> * transients) -> int;
+  [[nodiscard]] auto static AhapEncoder::extractContinuous(nlohmann::json * pattern, std::vector<haptics::types::Note> * continuous) -> int;
+  [[nodiscard]] auto static AhapEncoder::extractKeyframes(nlohmann::json * parameterCurve, std::vector<std::pair<double,double>> * keyframes) -> int;
+
 };
 } // namespace haptics::encoder
 #endif //_AHAPENCODER_H_

@@ -33,7 +33,6 @@
 
 #include "../include/AhapEncoder.h"
 #include <fstream>
-#include <nlohmann/json.hpp>
 
 namespace haptics::encoder {
 
@@ -41,11 +40,62 @@ namespace haptics::encoder {
   std::ifstream ifs(filename);
   nlohmann::json json = nlohmann::json::parse(ifs);
 
-  std::cout << "get pi : " << json.at("pi") << std::endl;
-  std::cout << "get list : " << json.at("list") << std::endl;
-  std::cout << "get object : " << json.at("object") << std::endl;
+  std::cout << "get Version : " << json.at("Version") << std::endl;
+  std::cout << "get Metadata : " << json.at("Metadata") << std::endl;
+  std::cout << "get Pattern : " << json.at("Pattern") << std::endl;
+
+  nlohmann::json pattern = json.at("Pattern");
+
+  std::vector<std::pair<double,double>> amplitudes;
+  std::vector<std::pair<double, double>> frequencies;
+  std::vector<haptics::types::Note> continuous;
+  std::vector<haptics::types::Note> transient;
+
+  std::cout << "amplitudes size before" << amplitudes.size() << "\n" << std::endl;
+
+  int ret = 0;
+
+  //FOR LOOP ON KEYFRAMES
+  for (nlohmann::json e : pattern) {
+    if (e.contains("ParameterCurve")) {
+
+      if (e.at("ParameterCurve").at("ParameterID") == "HapticIntensityControl") {
+        ret = extractKeyframes(&(e.at("ParameterCurve")), &amplitudes);
+        if (ret != 0) {
+          std::cout << "ERROR IN AMPLITUDE EXTRACTION" << std::endl;
+          return EXIT_FAILURE;
+        }
+      }
+
+      if (e.at("ParameterCurve").at("ParameterID") == "HapticSharpnessControl") {
+        ret = extractKeyframes(&(e.at("ParameterCurve")), &frequencies);
+        if (ret != 0) {
+          std::cout << "ERROR IN FREQUENCY EXTRACTION" << std::endl;
+          return EXIT_FAILURE;
+        }
+      }
+    }
+  }
+  std::cout << "amplitudes size after" << amplitudes.size() << "\n" << std::endl;
+  std::cout << "frequencies size after" << frequencies.size() << "\n" << std::endl;
 
   return EXIT_SUCCESS;
+}
+
+
+[[nodiscard]] auto AhapEncoder::extractKeyframes(nlohmann::json *parameterCurve, std::vector<std::pair<double,double>> * keyframes) -> int {
+  
+  for (nlohmann::json kahap : parameterCurve->at("ParameterCurveControlPoints")) {
+    std::pair<double, double> k;
+    // TIME + curve offset
+    k.first = kahap.at("Time").get<double>() + parameterCurve->at("Time").get<double>();
+    // VALUE
+    k.second = kahap.at("ParameterValue").get<double>();
+
+    keyframes->push_back(k);
+  }
+
+  return 0;
 }
 
 } // namespace haptics::encoder
