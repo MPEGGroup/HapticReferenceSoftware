@@ -34,6 +34,8 @@
 #include "../include/AhapEncoder.h"
 #include <fstream>
 
+const double SEC_TO_MSEC = 1000.0;
+
 namespace haptics::encoder {
 
 [[nodiscard]] auto AhapEncoder::encode(std::string& filename) -> int {
@@ -46,10 +48,10 @@ namespace haptics::encoder {
 
   nlohmann::json pattern = json.at("Pattern");
 
-  std::vector<std::pair<double,double>> amplitudes;
-  std::vector<std::pair<double, double>> frequencies;
-  std::vector<haptics::types::Note> continuous;
-  std::vector<haptics::types::Note> transient;
+  std::vector<std::pair<int,double>> amplitudes;
+  std::vector<std::pair<int, double>> frequencies;
+  std::vector<haptics::types::Effect> continuous;
+  std::vector<haptics::types::Effect> transients;
 
   std::cout << "amplitudes size before" << amplitudes.size() << "\n" << std::endl;
 
@@ -79,23 +81,57 @@ namespace haptics::encoder {
   std::cout << "amplitudes size after" << amplitudes.size() << "\n" << std::endl;
   std::cout << "frequencies size after" << frequencies.size() << "\n" << std::endl;
 
+  for (nlohmann::json e : pattern) {
+  
+    if (e.contains("Event")) {
+    
+      if (e.at("EventType") == "HapticTransient") {
+        ret = extractTransients(&(e.at("Event")), &transients);
+        if (ret != 0) {
+          std::cout << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
+          return EXIT_FAILURE;
+        }
+      }
+
+    }
+
+  }
+
   return EXIT_SUCCESS;
 }
 
 
-[[nodiscard]] auto AhapEncoder::extractKeyframes(nlohmann::json *parameterCurve, std::vector<std::pair<double,double>> * keyframes) -> int {
+[[nodiscard]] auto AhapEncoder::extractKeyframes(nlohmann::json *parameterCurve, std::vector<std::pair<int,double>> * keyframes) -> int {
   
   for (nlohmann::json kahap : parameterCurve->at("ParameterCurveControlPoints")) {
-    std::pair<double, double> k;
+    std::pair<int, double> k;
     // TIME + curve offset
-    k.first = kahap.at("Time").get<double>() + parameterCurve->at("Time").get<double>();
+    k.first = (kahap.at("Time").get<double>() + parameterCurve->at("Time").get<double>()) * SEC_TO_MSEC;
     // VALUE
     k.second = kahap.at("ParameterValue").get<double>();
 
     keyframes->push_back(k);
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
+
+[[nodiscard]] auto AhapEncoder::extractTransients(nlohmann::json* event, std::vector<haptics::types::Effect>* transients, 
+                                                          std::vector<std::pair<int, double>> * amplitudes, 
+                                                          std::vector<std::pair<int, double>> * frequencies) -> int {  
+  
+  haptics::types::Effect t = haptics::types::Effect((event->at("Time").get<double>() * SEC_TO_MSEC), 
+                                                    0,
+                                                    haptics::types::BaseSignal::Sine);
+
+  auto first_kf = std::find_if(amplitudes->begin(), amplitudes->end(), [t](std::pair<int, double> a) { return a.first >= t.getPosition(); });
+
+  if ((first_kf - amplitudes->begin()) >= 0) {
+    t.addKeyframe(haptics::types::Keyframe(0, 0, 0))
+  }
+
+  return EXIT_SUCCESS;
+}
+
 
 } // namespace haptics::encoder
