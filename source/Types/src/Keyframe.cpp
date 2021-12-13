@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Keyframe.h"
+#include <Types/include/Keyframe.h>
 
 namespace haptics::types {
 
