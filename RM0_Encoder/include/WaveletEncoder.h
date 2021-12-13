@@ -52,7 +52,7 @@ class WaveletEncoder {
 public:
     WaveletEncoder(int bl, int fs);
 
-    void encodeBlock(std::vector<double> &block_time, std::vector<double> &block_dwt, int bitbudget);
+    auto encodeBlock(std::vector<double> &block_time, std::vector<double> &block_dwt, int bitbudget) -> std::vector<double>;
     static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax, std::vector<unsigned char> &bitwavmax);
     void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy, std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
 

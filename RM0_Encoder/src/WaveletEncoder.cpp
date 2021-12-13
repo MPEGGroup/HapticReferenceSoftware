@@ -57,10 +57,11 @@ WaveletEncoder::WaveletEncoder(int bl, int fs) : pm(bl,fs) {
         book_cumulative[i+1] = book_cumulative[i] << 1;
     }
 
-    //PsychohapticModel pm2(bl,fs);
 }
 
-void WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<double> &block_dwt, int bitbudget){
+//encode wavelet transformed signal; requires original signal as well as transformed; returns quantized signal, scaling has to be discussed.
+//parameter bitbudget is used to control the coarseness of the quantization; range :[0,(int)log2((double)bl/4)*15] (from 0 bits to max).
+auto WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<double> &block_dwt, int bitbudget) -> std::vector<double> {
 
     std::vector<double> SMR;
     std::vector<double> bandenergy;
@@ -128,7 +129,7 @@ void WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<dou
         block_intquant[i] = (int)round((block_dwt_quant[i] * multiplicator));
     }
 
-
+    return block_dwt_quant; //return statement should be adapted to correct specifications
 }
 
 void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax, std::vector<unsigned char> &bitwavmax){

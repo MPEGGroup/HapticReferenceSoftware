@@ -132,7 +132,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
         data_time[0] = 1;
         std::vector<double> data_dwt(bl_test,0);
         WaveletEncoder waveletEncoder(bl_test,fs_test);
-        waveletEncoder.encodeBlock(data_time,data_dwt,1);
+        std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time,data_dwt,1);
 
     }
 
