@@ -31,49 +31,44 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _NOTE_H_
-#define _NOTE_H_
-
-#include "Keyframe.h"
-#include <vector>
-
-using haptics::types::Keyframe;
+#include "../include/Effect.h"
 
 namespace haptics::types {
 
-enum BaseSignal {
-  Sine = 0,
-  Square = Sine + 1,
-  Triangle = Square + 1,
-  SawToothUp = Triangle + 1,
-  SawToothDown = SawToothUp + 1,
-};
+[[nodiscard]] auto Effect::getPosition() const -> int {
+  return position;
+}
 
-class Note {
-public:
-  explicit Note() = default;
-  explicit Note(int newPosition, float newPhase, BaseSignal newBaseSignal)
-      : position(newPosition)
-      , phase(newPhase)
-      , keyframes({})
-      , baseSignal(newBaseSignal) {};
+auto Effect::setPosition(int newPosition) -> void {
+  position = newPosition;
+}
 
-  [[nodiscard]] auto getPosition() const -> int;
-  auto setPosition(int newPosition) -> void;
-  [[nodiscard]] auto getPhase() const -> float;
+[[nodiscard]] auto Effect::getPhase() const -> float {
+  return phase;
+}
 
-  auto setPhase(float newPhase) -> void;
-  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
-  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
-  auto getKeyframesSize() -> size_t;
-  auto getKeyframeAt(int index) -> Keyframe&;
-  auto addKeyframe(Keyframe& newKeyframe) -> void;
+auto Effect::setPhase(float newPhase) -> void {
+  phase = newPhase;
+}
 
-private:
-  int position = 0;
-  float phase = 0;
-  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
-  BaseSignal baseSignal = BaseSignal::Sine;
-};
+[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
+  return baseSignal;
+}
+
+auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
+  baseSignal = newBaseSignal;
+}
+
+auto Effect::getKeyframesSize() -> size_t {
+  return keyframes.size();
+}
+
+auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
+  return keyframes.at(index);
+}
+
+auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+  keyframes.push_back(newKeyframe);
+}
+
 } // namespace haptics::types
-#endif //_NOTE_H_

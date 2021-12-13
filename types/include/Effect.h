@@ -31,60 +31,49 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _BAND_H_
-#define _BAND_H_
+#ifndef _EFFECT_H_
+#define _EFFECT_H_
 
-#include "Effect.h"
+#include "Keyframe.h"
 #include <vector>
+
+using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum BandType {
-  Wave = 0,
-  Curve = Wave + 1,
-  Transient = Curve + 1,
+enum BaseSignal {
+  Sine = 0,
+  Square = Sine + 1,
+  Triangle = Square + 1,
+  SawToothUp = Triangle + 1,
+  SawToothDown = SawToothUp + 1,
 };
 
-enum EncodingModality {
-  Quantized = 0,
-  Vectorial = Quantized + 1,
-};
-
-class Band {
+class Effect {
 public:
-  explicit Band() = default;
-  explicit Band(BandType newBandType, EncodingModality newEncodingModality, int newWindowLength,
-                int newLowerFrequencyLimit, int newUpperFrequencyLimit)
-      : bandType(newBandType)
-      , encodingModality(newEncodingModality)
-      , windowLength(newWindowLength)
-      , lowerFrequencyLimit(newLowerFrequencyLimit)
-      , upperFrequencyLimit(newUpperFrequencyLimit)
-      , effects({}) {};
+  explicit Effect() = default;
+  explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal) {};
 
-  [[nodiscard]] auto getBandType() const -> BandType;
-  auto setBandType(BandType newBandType) -> void;
-  [[nodiscard]] auto getEncodingModality() const -> EncodingModality;
-  auto setEncodingModality(EncodingModality newEncodingModality) -> void;
-  [[nodiscard]] auto getWindowLength() const -> int;
-  auto setWindowLength(int newWindowLength) -> void;
-  [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
-  auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
-  [[nodiscard]] auto getLowerFrequencyLimit() const -> int;
-  auto setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void;
-  auto getEffectsSize() -> size_t;
-  auto getEffectAt(int index) -> haptics::types::Effect&;
-  auto addEffect(haptics::types::Effect &newNote) -> void;
-  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start, const int stop)
-      -> bool;
+  [[nodiscard]] auto getPosition() const -> int;
+  auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getPhase() const -> float;
+
+  auto setPhase(float newPhase) -> void;
+  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  auto getKeyframesSize() -> size_t;
+  auto getKeyframeAt(int index) -> Keyframe&;
+  auto addKeyframe(Keyframe& newKeyframe) -> void;
 
 private:
-  BandType bandType = BandType::Wave;
-  EncodingModality encodingModality = EncodingModality::Quantized;
-  int windowLength = 0;
-  int lowerFrequencyLimit = 0;
-  int upperFrequencyLimit = 0;
-  std::vector<Effect> effects = std::vector<Effect>{};
+  int position = 0;
+  float phase = 0;
+  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  BaseSignal baseSignal = BaseSignal::Sine;
 };
 } // namespace haptics::types
-#endif //_BAND_H_
+#endif //_EFFECT_H_

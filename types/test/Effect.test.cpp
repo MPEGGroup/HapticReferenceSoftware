@@ -33,13 +33,13 @@
 
 #include <catch2/catch.hpp>
 
-#include "../include/Note.h"
+#include "../include/Effect.h"
 
-using haptics::types::Note;
+using haptics::types::Effect;
 using haptics::types::BaseSignal;
 
-TEST_CASE("haptics::types::Note", "[placeholder]") {
-  const Note n(0, .5, BaseSignal::SawToothUp);
+TEST_CASE("haptics::types::Effect", "[placeholder]") {
+  const Effect n(0, .5, BaseSignal::SawToothUp);
 
   CHECK(true);
 }

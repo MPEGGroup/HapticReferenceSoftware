@@ -75,16 +75,32 @@ auto Band::setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void {
   lowerFrequencyLimit = newLowerFrequencyLimit;
 }
 
-auto Band::getNotesSize() -> size_t {
-  return notes.size();
+auto Band::getEffectsSize() -> size_t {
+  return effects.size();
 }
 
-auto Band::getNoteAt(int index) -> haptics::types::Note& {
-  return notes.at(index);
+auto Band::getEffectAt(int index) -> haptics::types::Effect& {
+  return effects.at(index);
 }
 
-auto Band::addNote(haptics::types::Note &newNote) -> void {
-  notes.push_back(newNote);
+auto Band::addEffect(Effect &newNote) -> void {
+    effects.push_back(newNote);
 }
 
+[[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
+                                       const int stop) -> bool {
+  const int position = effect.getPosition();
+  int length = 0;
+  if (encodingModality == EncodingModality::Quantized) {
+    length = static_cast<int>(effect.getKeyframesSize()) * windowLength;
+  } else {
+    length =
+        effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1).getRelativePosition();
+  }
+
+  return (position <= start && position + length >= start) ||
+         (position <= stop && position + length >= stop) ||
+         (position >= start && position + length <= stop) ||
+         (position <= start && position + length >= stop);
+}
 } // namespace haptics::types
