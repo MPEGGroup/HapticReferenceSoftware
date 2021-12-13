@@ -50,6 +50,8 @@ public:
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
   [[nodiscard]] auto static IvsEncoder::getLaunchEvents(const pugi::xml_document *doc)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static IvsEncoder::getRepeatEvents(const pugi::xml_document *doc)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
   [[nodiscard]] auto static IvsEncoder::getLaunchedEffect(
       const pugi::xml_object_range<pugi::xml_named_node_iterator> *basisEffects,
       const pugi::xml_node *launchEvent, pugi::xml_node &out) -> bool;
@@ -58,6 +60,9 @@ public:
                                                         const pugi::xml_node *launchEvent,
                                                         haptics::types::Effect *out) -> bool;
 
+  [[nodiscard]] auto static IvsEncoder::getTime(const pugi::xml_node *node) -> int;
+  [[nodiscard]] auto static IvsEncoder::getCount(const pugi::xml_node *node) -> int;
+  [[nodiscard]] auto static IvsEncoder::getDuration(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static IvsEncoder::getDuration(const pugi::xml_node *basisEffect,
                                                     const pugi::xml_node *launchEvent) -> int;
   [[nodiscard]] auto static IvsEncoder::getMagnitude(const pugi::xml_node *basisEffect,

@@ -222,6 +222,66 @@ TEST_CASE("IvsEncoder::getLaunchEvents", "[getLaunchEvents][correctParam]") {
 }
 
 
+TEST_CASE("IvsEncoder::getRepeatEvents without node", "[getRepeatEvents][withoutNode]") {
+  pugi::xml_document doc;
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getRepeatEvents with wrong node", "[getRepeatEvents][wrongNode]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("ivs-file")
+                            .append_child("effects")
+                            .append_child("wrong timeline-effect")
+                            .append_child("repeat-event");
+  node.append_attribute("time") = 42;
+  node.append_attribute("count") = 5;
+  node.append_attribute("duration") = 1583;
+
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getRepeatEvents(&doc);
+
+  REQUIRE(res.empty());
+}
+
+TEST_CASE("IvsEncoder::getRepeatEvents", "[getRepeatEvents][correctParam]") {
+  std::vector<std::vector<int>> testingValues = {
+      {43, 54321, 543},
+      {0, 50, 0},
+      {250, 543, 43210},
+  };
+
+  pugi::xml_document doc;
+  pugi::xml_node node =
+      doc.append_child("ivs-file").append_child("effects").append_child("timeline-effect");
+  pugi::xml_node n;
+  std::vector<int> testingEffectValue;
+  int16_t i;
+  for (i = 0; i < testingValues.size(); i++) {
+    testingEffectValue = testingValues[i];
+
+    n = node.append_child("repeat-effect");
+    n.append_attribute("time") = testingEffectValue[0];
+    n.append_attribute("count") = testingEffectValue[1];
+    n.append_attribute("duration") = testingEffectValue[2];
+  }
+
+  pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getRepeatEvents(&doc);
+
+  i = 0;
+  for (pugi::xml_node n : res) {
+    testingEffectValue = testingValues[i];
+
+    REQUIRE(std::string(n.name()) == "launch-effect");
+    REQUIRE(n.attribute("time").as_int() == testingEffectValue[0]);
+    REQUIRE(n.attribute("count").as_int() == testingEffectValue[1]);
+    REQUIRE(n.attribute("duration").as_int() == testingEffectValue[2]);
+
+    i++;
+  }
+}
+
+
 TEST_CASE("IvsEncoder::getLaunchedEffect without launch", "[getLaunchedEffect][withoutNode]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -286,7 +346,72 @@ TEST_CASE("IvsEncoder::getLaunchedEffect normal case",
 }
 
 
-TEST_CASE("IvsEncoder::getDuration without value", "[getDuration][withoutValue]") {
+TEST_CASE("IvsEncoder::getTime without value", "[getTime][withoutValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node repeatEvent = node.append_child("repeat-event");
+
+  int res = IvsEncoder::getTime(&repeatEvent);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getTime without override", "[getTime][withValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node repeatEvent = node.append_child("basis-effect");
+  repeatEvent.append_attribute("time") = 3;
+
+  int res = IvsEncoder::getTime(&repeatEvent);
+
+  REQUIRE(res == 3);
+}
+
+
+TEST_CASE("IvsEncoder::getCount without value", "[getCount][withoutValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node repeatEvent = node.append_child("repeat-event");
+
+  int res = IvsEncoder::getCount(&repeatEvent);
+
+  REQUIRE(res == 0);
+}
+
+TEST_CASE("IvsEncoder::getCount without override", "[getCount][withValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node repeatEvent = node.append_child("basis-effect");
+  repeatEvent.append_attribute("count") = 3254;
+
+  int res = IvsEncoder::getCount(&repeatEvent);
+
+  REQUIRE(res == 3254);
+}
+
+
+TEST_CASE("IvsEncoder::getDuration(1 param) without value", "[getDuration][withoutValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node repeatEvent = node.append_child("repeat-event");
+
+  int res = IvsEncoder::getDuration(&repeatEvent);
+
+  REQUIRE(res == -1);
+}
+
+TEST_CASE("IvsEncoder::getDuration(1 param) without override", "[getDuration][withValue]") {
+  pugi::xml_document doc;
+  pugi::xml_node node = doc.append_child("root");
+  pugi::xml_node repeatEvent = node.append_child("repeat-event");
+  repeatEvent.append_attribute("duration") = 3;
+
+  int res = IvsEncoder::getDuration(&repeatEvent);
+
+  REQUIRE(res == 3);
+}
+
+TEST_CASE("IvsEncoder::getDuration(2 params) without value", "[getDuration][withoutValue]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
@@ -297,7 +422,7 @@ TEST_CASE("IvsEncoder::getDuration without value", "[getDuration][withoutValue]"
   REQUIRE(res == -1);
 }
 
-TEST_CASE("IvsEncoder::getDuration without override", "[getDuration][withoutOverride]") {
+TEST_CASE("IvsEncoder::getDuration(2 params) without override", "[getDuration][withoutOverride]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
@@ -309,7 +434,7 @@ TEST_CASE("IvsEncoder::getDuration without override", "[getDuration][withoutOver
   REQUIRE(res == 24);
 }
 
-TEST_CASE("IvsEncoder::getDuration with override", "[getDuration][withOverride]") {
+TEST_CASE("IvsEncoder::getDuration(2 params) with override", "[getDuration][withOverride]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
@@ -397,7 +522,8 @@ TEST_CASE("IvsEncoder::getPeriod with override", "[getPeriod][withOverride]") {
 }
 
 
-TEST_CASE("IvsEncoder::getAttackTime without configured attribute", "[getAttackTime][withoutAttribute]") {
+TEST_CASE("IvsEncoder::getAttackTime without configured attribute",
+          "[getAttackTime][withoutAttribute]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node basisEffect = node.append_child("basis-effect");
@@ -432,7 +558,8 @@ TEST_CASE("IvsEncoder::getAttackTime with configured attribute", "[getAttackTime
 }
 
 
-TEST_CASE("IvsEncoder::getAttackLevel without configured attribute", "[getAttackLevel][withoutAttribute]") {
+TEST_CASE("IvsEncoder::getAttackLevel without configured attribute",
+          "[getAttackLevel][withoutAttribute]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node basisEffect = node.append_child("basis-effect");
@@ -440,7 +567,7 @@ TEST_CASE("IvsEncoder::getAttackLevel without configured attribute", "[getAttack
 
   int res = IvsEncoder::getAttackLevel(&basisEffect);
 
-  REQUIRE(res == -1);
+  REQUIRE(res == 0);
 }
 
 TEST_CASE("IvsEncoder::getAttackLevel with configured attribute", "[getAttackLevel][withAttribute]") {
@@ -502,7 +629,7 @@ TEST_CASE("IvsEncoder::getFadeLevel without configured attribute", "[getFadeLeve
 
   int res = IvsEncoder::getFadeLevel(&basisEffect);
 
-  REQUIRE(res == -1);
+  REQUIRE(res == 0);
 }
 
 TEST_CASE("IvsEncoder::getFadeLevel with configured attribute", "[getFadeLevel][withAttribute]") {
@@ -680,7 +807,8 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   CHECK(k.getFrequencyModulation() == 80);
 }
 
-TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][withAttack][withFade]") {
+TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
+          "[getWaveform][withAttack][withFade]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
