@@ -33,7 +33,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "../include/Keyframe.h"
+#include <Types/include/Keyframe.h>
 
 using haptics::types::Keyframe;
 

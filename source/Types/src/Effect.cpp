@@ -31,31 +31,44 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef KEYFRAME_H
-#define KEYFRAME_H
+#include <Types/include/Effect.h>
 
 namespace haptics::types {
 
-class Keyframe {
-public:
-  explicit Keyframe() = default;
-  explicit Keyframe(int newRelativePosition, float newAmplitudeModulation,
-                    int newFrequencyModulation)
-      : relativePosition(newRelativePosition)
-      , amplitudeModulation(newAmplitudeModulation)
-      , frequencyModulation(newFrequencyModulation) {};
+[[nodiscard]] auto Effect::getPosition() const -> int {
+  return position;
+}
 
-  [[nodiscard]] auto getRelativePosition() const -> int;
-  auto setRelativePosition(int newRelativePosition) -> void;
-  [[nodiscard]] auto getAmplitudeModulation() const -> float;
-  auto setAmplitudeModulation(float newAmplitudeModulation) -> void;
-  [[nodiscard]] auto getFrequencyModulation() const -> int;
-  auto setFrequencyModulation(int newFrequencyModulation) -> void;
+auto Effect::setPosition(int newPosition) -> void {
+  position = newPosition;
+}
 
-private:
-  int relativePosition = 0;
-  float amplitudeModulation = 0;
-  int frequencyModulation = 0;
-};
+[[nodiscard]] auto Effect::getPhase() const -> float {
+  return phase;
+}
+
+auto Effect::setPhase(float newPhase) -> void {
+  phase = newPhase;
+}
+
+[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
+  return baseSignal;
+}
+
+auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
+  baseSignal = newBaseSignal;
+}
+
+auto Effect::getKeyframesSize() -> size_t {
+  return keyframes.size();
+}
+
+auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
+  return keyframes.at(index);
+}
+
+auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+  keyframes.push_back(newKeyframe);
+}
+
 } // namespace haptics::types
-#endif //KEYFRAME_H

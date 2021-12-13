@@ -31,15 +31,49 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef EFFECT_H
+#define EFFECT_H
 
-#include "../include/Note.h"
+#include <Types/include/Keyframe.h>
+#include <vector>
 
-using haptics::types::Note;
-using haptics::types::BaseSignal;
+using haptics::types::Keyframe;
 
-TEST_CASE("haptics::types::Note", "[placeholder]") {
-  const Note n(0, .5, BaseSignal::SawToothUp);
+namespace haptics::types {
 
-  CHECK(true);
-}
+enum BaseSignal {
+  Sine = 0,
+  Square = Sine + 1,
+  Triangle = Square + 1,
+  SawToothUp = Triangle + 1,
+  SawToothDown = SawToothUp + 1,
+};
+
+class Effect {
+public:
+  explicit Effect() = default;
+  explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal) {};
+
+  [[nodiscard]] auto getPosition() const -> int;
+  auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getPhase() const -> float;
+
+  auto setPhase(float newPhase) -> void;
+  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  auto getKeyframesSize() -> size_t;
+  auto getKeyframeAt(int index) -> Keyframe&;
+  auto addKeyframe(Keyframe& newKeyframe) -> void;
+
+private:
+  int position = 0;
+  float phase = 0;
+  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  BaseSignal baseSignal = BaseSignal::Sine;
+};
+} // namespace haptics::types
+#endif //EFFECT_H

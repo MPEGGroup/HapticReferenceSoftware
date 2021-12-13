@@ -31,44 +31,57 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Note.h"
+#ifndef TRACK_H
+#define TRACK_H
+
+#include <Types/include/Band.h>
+#include <fstream>
+#include <vector>
 
 namespace haptics::types {
 
-[[nodiscard]] auto Note::getPosition() const -> int {
-  return position;
-}
+class Track {
+public:
+  explicit Track() = default;
+  explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
+                     int newBodyPartMask)
+      : id(newId)
+      , description(newDescription)
+      , gain(newGain)
+      , mixingWeight(newMixingWeight)
+      , bodyPartMask(newBodyPartMask)
+      , vertices({})
+      , bands({}) {};
 
-auto Note::setPosition(int newPosition) -> void {
-  position = newPosition;
-}
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  [[nodiscard]] auto getGain() const -> float;
+  auto setGain(float newGain) -> void;
+  [[nodiscard]] auto getMixingWeight() const -> float;
+  auto setMixingWeight(float newMixingWeight) -> void;
+  [[nodiscard]] auto getBodyPartMask() const -> int;
+  auto setBodyPartMask(int newBodyPartMask) -> void;
+  auto getVerticesSize() -> size_t;
+  auto getVerticeAt(int index) -> int &;
+  auto addVertice(int &newVertice) -> void;
+  auto getBandsSize() -> size_t;
+  auto getBandAt(int index) -> haptics::types::Band &;
+  auto addBand(haptics::types::Band &newBand) -> void;
+  auto findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band *;
 
-[[nodiscard]] auto Note::getPhase() const -> float {
-  return phase;
-}
+private:
+  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start,
+                                   const int stop) -> bool;
+  int id = -1;
+  std::string description = "";
+  float gain = 1;
+  float mixingWeight = 1;
+  int bodyPartMask = 0;
+  std::vector<int> vertices = {};
+  std::vector<Band> bands = {};
 
-auto Note::setPhase(float newPhase) -> void {
-  phase = newPhase;
-}
-
-[[nodiscard]] auto Note::getBaseSignal() const -> BaseSignal {
-  return baseSignal;
-}
-
-auto Note::setBaseSignal(BaseSignal newBaseSignal) -> void {
-  baseSignal = newBaseSignal;
-}
-
-auto Note::getKeyframesSize() -> size_t {
-  return keyframes.size();
-}
-
-auto Note::getKeyframeAt(int index) -> haptics::types::Keyframe& {
-  return keyframes.at(index);
-}
-
-auto Note::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
-  keyframes.push_back(newKeyframe);
-}
-
+};
 } // namespace haptics::types
+#endif //TRACK_H
