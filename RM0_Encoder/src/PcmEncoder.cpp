@@ -31,35 +31,75 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../tools/include/InputParser.h"
+#include "../include/PcmEncoder.h"
 
-using haptics::tools::InputParser;
+namespace haptics::encoder {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
+[[nodiscard]] auto PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
+    -> std::vector<std::pair<int16_t, int16_t>> {
+  std::vector<std::pair<int16_t, int16_t>> extremaIndexes;
+  
+  auto it = signal.begin();
+  if (it == signal.end()) {
+    return {};
   }
 
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
+  int16_t lastValue = *it;
+  ++it;
+  if (it == signal.end()) {
+    if (includeBorder) {
+      std::pair<int16_t, int16_t> p1(0, signal[0]);
+      std::pair<int16_t, int16_t> p2(0, signal[0]);
+      extremaIndexes.push_back(p1);
+      extremaIndexes.push_back(p2);
+      return extremaIndexes;
+    }
+    return {};
   }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
+
+  int16_t value = *it;
+  ++it;
+  if (it == signal.end()) {
+    if (includeBorder) {
+      std::pair<int16_t, int16_t> p1(0, signal[0]);
+      std::pair<int16_t, int16_t> p2(1, signal[1]);
+      extremaIndexes.push_back(p1);
+      extremaIndexes.push_back(p2);
+      return extremaIndexes;
+    }
+    return {};
   }
-  return EXIT_SUCCESS;
+
+  std::pair<int16_t, int16_t> p;
+  int16_t i = 1;
+  int16_t nextValue = 0;
+  if (includeBorder) {
+    p = std::pair<int16_t, int16_t>(0, signal[0]);
+    extremaIndexes.push_back(p);
+  }
+  do {
+    nextValue = *it;
+    if (((value >= lastValue && value >= nextValue) ||
+         (value <= lastValue && value <= nextValue)) &&
+        (value != lastValue || value != nextValue)) {
+
+      p = std::pair<int16_t, int16_t>(i, value);
+      extremaIndexes.push_back(p);
+    }
+
+    lastValue = value;
+    value = nextValue;
+    ++it;
+    i++;
+  }
+  while (it != signal.end());
+
+  if (includeBorder) {
+    p = std::pair<int16_t, int16_t>(i, value);
+    extremaIndexes.push_back(p);
+  }
+
+  return extremaIndexes;
 }
+
+} // namespace haptics::encoder
