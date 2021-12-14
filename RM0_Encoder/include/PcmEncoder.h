@@ -35,18 +35,15 @@
 #define _PCMENCODER_H_
 
 #include <vector>
+#include <utility>
 #include <iostream>
 
-#include "../../tools/include/Point.h"
-
 namespace haptics::encoder {
-
-using haptics::tools::Point;
 
 class PcmEncoder {
 public:
   [[nodiscard]] auto static PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
-      -> std::vector<Point>;
+      -> std::vector<std::pair<int16_t, int16_t>>;
 };
 } // namespace haptics::encoder
 #endif //_PCMENCODER_H_

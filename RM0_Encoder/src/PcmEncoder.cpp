@@ -36,8 +36,8 @@
 namespace haptics::encoder {
 
 [[nodiscard]] auto PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
-    -> std::vector<Point> {
-  std::vector<Point> extremaIndexes;
+    -> std::vector<std::pair<int16_t, int16_t>> {
+  std::vector<std::pair<int16_t, int16_t>> extremaIndexes;
   
   auto it = signal.begin();
   if (it == signal.end()) {
@@ -48,13 +48,9 @@ namespace haptics::encoder {
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      Point p1 = Point();
-      p1.x = 0;
-      p1.y = signal[p1.x];
+      std::pair<int16_t, int16_t> p1(0, signal[0]);
+      std::pair<int16_t, int16_t> p2(0, signal[0]);
       extremaIndexes.push_back(p1);
-      Point p2 = Point();
-      p2.x = 0;
-      p2.y = signal[p2.x];
       extremaIndexes.push_back(p2);
       return extremaIndexes;
     }
@@ -65,24 +61,20 @@ namespace haptics::encoder {
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      Point p1 = Point();
-      p1.x = 0;
-      p1.y = signal[p1.x];
+      std::pair<int16_t, int16_t> p1(0, signal[0]);
+      std::pair<int16_t, int16_t> p2(1, signal[1]);
       extremaIndexes.push_back(p1);
-      Point p2 = Point();
-      p2.x = 1;
-      p2.y = signal[p2.x];
       extremaIndexes.push_back(p2);
       return extremaIndexes;
     }
     return {};
   }
 
-  Point p{};
+  std::pair<int16_t, int16_t> p;
   int16_t i = 1;
   int16_t nextValue = 0;
   if (includeBorder) {
-    p = Point(0, signal[0]);
+    p = std::pair<int16_t, int16_t>(0, signal[0]);
     extremaIndexes.push_back(p);
   }
   do {
@@ -91,7 +83,7 @@ namespace haptics::encoder {
          (value <= lastValue && value <= nextValue)) &&
         (value != lastValue || value != nextValue)) {
 
-      p = Point(i, value);
+      p = std::pair<int16_t, int16_t>(i, value);
       extremaIndexes.push_back(p);
     }
 
@@ -103,7 +95,7 @@ namespace haptics::encoder {
   while (it != signal.end());
 
   if (includeBorder) {
-    p = Point(i, value);
+    p = std::pair<int16_t, int16_t>(i, value);
     extremaIndexes.push_back(p);
   }
 

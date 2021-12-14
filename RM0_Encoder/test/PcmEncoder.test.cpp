@@ -33,20 +33,20 @@
 
 #include <catch2/catch.hpp>
 
-#include "../../tools/include/Point.h"
 #include "../include/PcmEncoder.h"
 
 using haptics::encoder::PcmEncoder;
-using haptics::tools::Point;
 
 TEST_CASE("localExtrema with empty input and no border", "[localExtrema][empty][withoutBorder]") {
-  std::vector<Point> res = PcmEncoder::localExtrema(std::vector<int16_t>{}, false);
+  std::vector<std::pair<int16_t, int16_t>> res =
+      PcmEncoder::localExtrema(std::vector<int16_t>{}, false);
 
   CHECK(res.empty());
 }
 
 TEST_CASE("localExtrema with empty input and border", "[localExtrema][empty][withBorder]") {
-  std::vector<Point> res = PcmEncoder::localExtrema(std::vector<int16_t>{}, true);
+  std::vector<std::pair<int16_t, int16_t>> res =
+      PcmEncoder::localExtrema(std::vector<int16_t>{}, true);
 
   CHECK(res.empty());
 }
@@ -60,18 +60,18 @@ TEST_CASE("localExtrema with entry of 1 point",
     std::vector<int16_t> v = {testingElement};
 
     DYNAMIC_SECTION("1 point entry without border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<Point> res = PcmEncoder::localExtrema(v, false);
+      std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(v, false);
 
       CHECK(res.empty());
     }
 
     DYNAMIC_SECTION("1 point entry with border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<Point> res = PcmEncoder::localExtrema(v, true);
+      std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(v, true);
 
       REQUIRE_FALSE(res.empty());
       int16_t pi = 0;
-      Point p1(pi, testingElement);
-      Point p2(pi, testingElement);
+      std::pair<int16_t, int16_t> p1(pi, testingElement);
+      std::pair<int16_t, int16_t> p2(pi, testingElement);
       REQUIRE(res.size() == 2);
       REQUIRE((res[0] == p1));
       REQUIRE((res[1] == p2));
@@ -88,19 +88,19 @@ TEST_CASE("localExtrema with entry of 2 point",
   int16_t i = 0;
   for (const auto &v : testingValues) {
     DYNAMIC_SECTION("2 points entry without border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<Point> res = PcmEncoder::localExtrema(v, false);
+      std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(v, false);
 
       CHECK(res.empty());
     }
 
     DYNAMIC_SECTION("2 points entry with border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<Point> res = PcmEncoder::localExtrema(v, true);
+      std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(v, true);
 
       REQUIRE_FALSE(res.empty());
       int16_t pi = 0;
-      Point p1(pi, v[pi]);
+      std::pair<int16_t, int16_t> p1(pi, v[pi]);
       pi = 1;
-      Point p2(pi, v[pi]);
+      std::pair<int16_t, int16_t> p2(pi, v[pi]);
       REQUIRE(res.size() == 2);
       REQUIRE((res[0] == p1));
       REQUIRE((res[1] == p2));
@@ -114,7 +114,7 @@ TEST_CASE("localExtrema without border every extremum are extracted",
   const std::vector<int16_t> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
                                               3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
 
-  std::vector<Point> res = PcmEncoder::localExtrema(testingValues, false);
+  std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(testingValues, false);
 
   REQUIRE_FALSE(res.empty());
 
@@ -134,9 +134,9 @@ TEST_CASE("localExtrema without border every extremum are extracted",
     isMinimum = previousValue >= currentValue && currentValue <= nextValue;
 
     if (!isFlat && (isMaximum || isMinimum)) {
-      Point p(i, testingValues[i]);
+      std::pair<int16_t, int16_t> p(i, testingValues[i]);
       bool contain = false;
-      for (Point element : res) {
+      for (std::pair<int16_t, int16_t> element : res) {
         if (element == p) {
           contain = true;
           break;
@@ -152,7 +152,7 @@ TEST_CASE("localExtrema without border extract only extremum",
   const std::vector<int16_t> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
                                               3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
 
-  std::vector<Point> res = PcmEncoder::localExtrema(testingValues, false);
+  std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(testingValues, false);
 
   REQUIRE_FALSE(res.empty());
 
@@ -164,12 +164,12 @@ TEST_CASE("localExtrema without border extract only extremum",
   int16_t currentValue = testingValues[i - 1];
   int16_t nextValue = testingValues[i];
   auto testingValuesSize = int16_t(testingValues.size());
-  for (Point extremumElement : res) {
-    previousValue = testingValues[extremumElement.x - 1];
-    currentValue = testingValues[extremumElement.x];
-    nextValue = testingValues[extremumElement.x + 1];
+  for (std::pair<int16_t, int16_t> extremumElement : res) {
+    previousValue = testingValues[extremumElement.first - 1];
+    currentValue = testingValues[extremumElement.first];
+    nextValue = testingValues[extremumElement.first + 1];
 
-    CHECK(currentValue == extremumElement.y);
+    CHECK(currentValue == extremumElement.second);
 
     isFlat = previousValue == currentValue && currentValue == nextValue;
     isMaximum = previousValue <= currentValue && currentValue >= nextValue;
@@ -185,26 +185,27 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
           "[localExtrema][N_points][withBorder]") {
   const std::vector<int16_t> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
                                               3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
-  std::vector<Point> res = PcmEncoder::localExtrema(testingValues, true);
+  std::vector<std::pair<int16_t, int16_t>> res = PcmEncoder::localExtrema(testingValues, true);
   auto resSize = int16_t(res.size());
 
   REQUIRE(resSize >= 2);
 
   SECTION("first and last values are the borders") {
-    Point first = res[0];
-    Point last = res[resSize - 1];
+    std::pair<int16_t, int16_t> first = res[0];
+    std::pair<int16_t, int16_t> last = res[resSize - 1];
     auto testingValuesSize = int16_t(testingValues.size());
 
-    CHECK(first.x == 0);
-    CHECK(first.y == testingValues[0]);
+    CHECK(first.first == 0);
+    CHECK(first.second == testingValues[0]);
 
-    CHECK(last.x == testingValuesSize - 1);
-    CHECK(last.y == testingValues[testingValuesSize - 1]);
+    CHECK(last.first == testingValuesSize - 1);
+    CHECK(last.second == testingValues[testingValuesSize - 1]);
   }
 
   SECTION("The rest is the same values as without border") {
-    std::vector<Point> resWithoutBorder = PcmEncoder::localExtrema(testingValues, false);
-    std::vector<Point> subRes(res.begin() + 1, res.begin() + resSize - 1);
+    std::vector<std::pair<int16_t, int16_t>> resWithoutBorder =
+        PcmEncoder::localExtrema(testingValues, false);
+    std::vector<std::pair<int16_t, int16_t>> subRes(res.begin() + 1, res.begin() + resSize - 1);
 
     REQUIRE(subRes.size() == resWithoutBorder.size());
 
