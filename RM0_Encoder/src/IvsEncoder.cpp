@@ -48,8 +48,8 @@ namespace haptics::encoder {
     return EXIT_FAILURE;
   }
 
-  std::string &date = IvsEncoder::getLastModified(&doc);
-  haptics::types::Track myTrack(0, date, 1.0f, 1.0f, 0);
+  const std::string date = IvsEncoder::getLastModified(&doc);
+  haptics::types::Track myTrack(0, date, 1, 1, 0);
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = IvsEncoder::getBasisEffects(&doc);
   pugi::xml_node basisEffect = {};
@@ -72,7 +72,8 @@ namespace haptics::encoder {
         myEffect->getKeyframeAt(myEffect->getKeyframesSize() - 1).getRelativePosition());
     if (myBand == nullptr) {
       myBand = new haptics::types::Band(haptics::types::BandType::Wave,
-                                        haptics::types::EncodingModality::Vectorial, 0, 0, 1000);
+                                        haptics::types::EncodingModality::Vectorial, 0,
+                                        IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
       myTrack.addBand(*myBand);
       myBand = &myTrack.getBandAt(myTrack.getBandsSize() - 1);
     }
@@ -104,7 +105,7 @@ namespace haptics::encoder {
         }
       }
 
-      for (haptics::types::Effect e: effectToRepeat) {
+      for (haptics::types::Effect &e: effectToRepeat) {
         for (effectIndex = 1; effectIndex <= count; effectIndex++) {
           myEffect = new haptics::types::Effect(e);
           myEffect->setPosition(myEffect->getPosition() + duration * effectIndex);
@@ -150,29 +151,34 @@ namespace haptics::encoder {
                                                const pugi::xml_node *launchEvent,
                                                haptics::types::Effect *out) -> bool {
   out->setPosition(IvsEncoder::getTime(launchEvent));
-  out->setPhase(0.0f);
+  out->setPhase(0);
   out->setBaseSignal(IvsEncoder::getWaveform(basisEffect));
 
   int duration = IvsEncoder::getDuration(basisEffect, launchEvent);
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
   int period = IvsEncoder::getPeriod(basisEffect, launchEvent);
   std::vector<haptics::types::Keyframe *> keyframeList = std::vector<haptics::types::Keyframe *>{
-      new haptics::types::Keyframe(0, magnitude / 10000.0, period),
-      new haptics::types::Keyframe(duration, magnitude / 10000.0, period)};
+      new haptics::types::Keyframe(
+          0, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period),
+      new haptics::types::Keyframe(
+          duration, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period)
+  };
 
   int fadeTime = IvsEncoder::getFadeTime(basisEffect);
   if (fadeTime != -1) {
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     keyframeList[1]->setRelativePosition(duration - fadeTime);
-    keyframeList.push_back(new haptics::types::Keyframe(duration, fadeLevel / 10000.0, period));
+    keyframeList.push_back(new haptics::types::Keyframe(
+        duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period));
   }
 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
     keyframeList[0]->setRelativePosition(attackTime);
-    keyframeList.insert(keyframeList.begin(),
-                        new haptics::types::Keyframe(0, attackLevel / 10000.0, period));
+    keyframeList.insert(
+        keyframeList.begin(),
+        new haptics::types::Keyframe(0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period));
   }
 
   for (haptics::types::Keyframe *kf : keyframeList) {
@@ -228,7 +234,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getCount(const pugi::xml_node *node) -> int {
   pugi::xml_attribute timeAttribute = node->attribute("count");
-  if (std::string(timeAttribute.name()) != "") {
+  if (!std::string(timeAttribute.name()).empty()) {
     return timeAttribute.as_int();
   }
 
@@ -237,7 +243,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getTime(const pugi::xml_node *node) -> int {
   pugi::xml_attribute timeAttribute = node->attribute("time");
-  if (std::string(timeAttribute.name()) != "") {
+  if (!std::string(timeAttribute.name()).empty()) {
     return timeAttribute.as_int();
   }
 
@@ -246,7 +252,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getDuration(const pugi::xml_node *node) -> int {
   pugi::xml_attribute durationAttribute = node->attribute("duration");
-  if (std::string(durationAttribute.name()) != "") {
+  if (!std::string(durationAttribute.name()).empty()) {
     return durationAttribute.as_int();
   }
 
@@ -257,7 +263,7 @@ namespace haptics::encoder {
                                            const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute durationAttribute = launchEvent->attribute("duration-override");
   const pugi::char_t *n = durationAttribute.name();
-  if (std::string(durationAttribute.name()) != "") {
+  if (!std::string(durationAttribute.name()).empty()) {
     return durationAttribute.as_int();
   }
 
@@ -268,12 +274,12 @@ namespace haptics::encoder {
                                            const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute magnitudeAttribute = launchEvent->attribute("magnitude-override");
   const pugi::char_t *n = magnitudeAttribute.name();
-  if (std::string(magnitudeAttribute.name()) != "") {
+  if (!std::string(magnitudeAttribute.name()).empty()) {
     return magnitudeAttribute.as_int();
   }
 
   magnitudeAttribute = basisEffect->attribute("magnitude");
-  if (std::string(magnitudeAttribute.name()) != "") {
+  if (!std::string(magnitudeAttribute.name()).empty()) {
     return magnitudeAttribute.as_int();
   }
 
@@ -284,12 +290,12 @@ namespace haptics::encoder {
                                          const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute periodAttribute = launchEvent->attribute("period-override");
   const pugi::char_t *n = periodAttribute.name();
-  if (std::string(periodAttribute.name()) != "") {
+  if (!std::string(periodAttribute.name()).empty()) {
     return periodAttribute.as_int();
   }
 
   periodAttribute = basisEffect->attribute("period");
-  if (std::string(periodAttribute.name()) != "") {
+  if (!std::string(periodAttribute.name()).empty()) {
     return periodAttribute.as_int();
   }
 
@@ -320,7 +326,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getAttackTime(const pugi::xml_node* basisEffect) -> int {
   pugi::xml_attribute attackTimeAttribute = basisEffect->attribute("attack-time");
-  if (std::string(attackTimeAttribute.name()) != "") {
+  if (!std::string(attackTimeAttribute.name()).empty()) {
     return attackTimeAttribute.as_int();
   }
 
@@ -329,7 +335,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getAttackLevel(const pugi::xml_node *basisEffect) -> int {
   pugi::xml_attribute attackLevelAttribute = basisEffect->attribute("attack-level");
-  if (std::string(attackLevelAttribute.name()) != "") {
+  if (!std::string(attackLevelAttribute.name()).empty()) {
     return attackLevelAttribute.as_int();
   }
 
@@ -338,7 +344,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getFadeTime(const pugi::xml_node *basisEffect) -> int {
   pugi::xml_attribute fadeTimeAttribute = basisEffect->attribute("fade-time");
-  if (std::string(fadeTimeAttribute.name()) != "") {
+  if (!std::string(fadeTimeAttribute.name()).empty()) {
     return fadeTimeAttribute.as_int();
   }
 
@@ -347,7 +353,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto IvsEncoder::getFadeLevel(const pugi::xml_node *basisEffect) -> int {
   pugi::xml_attribute fadeLevelAttribute = basisEffect->attribute("fade-level");
-  if (std::string(fadeLevelAttribute.name()) != "") {
+  if (!std::string(fadeLevelAttribute.name()).empty()) {
     return fadeLevelAttribute.as_int();
   }
 

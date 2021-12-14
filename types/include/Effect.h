@@ -63,7 +63,7 @@ public:
   auto setPhase(float newPhase) -> void;
   [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
-  auto getKeyframesSize() -> size_t;
+  auto getKeyframesSize() -> int;
   auto getKeyframeAt(int index) -> haptics::types::Keyframe&;
   auto addKeyframe(haptics::types::Keyframe &newKeyframe) -> void;
 

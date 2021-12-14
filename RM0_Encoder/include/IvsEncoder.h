@@ -75,6 +75,11 @@ public:
   [[nodiscard]] auto static IvsEncoder::getAttackLevel(const pugi::xml_node *basisEffect) -> int;
   [[nodiscard]] auto static IvsEncoder::getFadeTime(const pugi::xml_node *basisEffect) -> int;
   [[nodiscard]] auto static IvsEncoder::getFadeLevel(const pugi::xml_node *basisEffect) -> int;
+
+private:
+  static constexpr float MAGNITUDE_2_AMPLITUDE = .0001f;
+  static const int MIN_FREQUENCY = 0;
+  static const int MAX_FREQUENCY = 1000;
 };
 
 } // namespace haptics::encoder

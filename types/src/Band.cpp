@@ -75,8 +75,8 @@ auto Band::setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void {
   lowerFrequencyLimit = newLowerFrequencyLimit;
 }
 
-auto Band::getEffectsSize() -> size_t {
-  return effects.size();
+auto Band::getEffectsSize() -> int {
+  return static_cast<int>(effects.size());
 }
 
 auto Band::getEffectAt(int index) -> haptics::types::Effect& {

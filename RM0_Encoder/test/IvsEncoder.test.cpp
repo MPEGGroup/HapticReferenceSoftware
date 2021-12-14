@@ -76,21 +76,20 @@ TEST_CASE("IvsEncoder::getLastModified with wrong attribute", "[getLastModified]
 }
 
 TEST_CASE("IvsEncoder::getLastModified", "[getLastModified][correctParam]") {
-  const std::vector<char *> testingValues = {"Hello World", "Sunday, April 11, 2021  10:39:06PM",
+  const std::vector<const std::string> testingValues = {"Hello World", "Sunday, April 11, 2021  10:39:06PM",
                                              "42", "magic string", ""};
 
   int16_t i = 0;
-  for (char *testingCase : testingValues) {
+  for (const std::string testingCase : testingValues) {
     pugi::xml_document doc;
     pugi::xml_node node = doc.append_child("ivs-file");
-    node.append_attribute("last-modified") = testingCase;
+    node.append_attribute("last-modified") = testingCase.c_str();
 
-    std::string expected(testingCase);
     DYNAMIC_SECTION("getLastModified with configured date (TESTING CASE: " + std::to_string(i) +
                     ")") {
       std::string res = IvsEncoder::getLastModified(&doc);
 
-      REQUIRE(expected == res);
+      REQUIRE(testingCase == res);
     }
 
     i++;
@@ -117,7 +116,7 @@ TEST_CASE("IvsEncoder::getBasisEffects with wrong node", "[getLastModified][wron
 }
 
 TEST_CASE("IvsEncoder::getBasisEffects", "[getLastModified][correctParam]") {
-  std::vector<std::vector<char *>> testingValues = {
+  const std::vector<std::vector<char *>> testingValues = {
       {"ShortTransitionRampUp100_1", "500", "sine"},
       {"Bump100_1", "50", "sine"},
       {"ShortBuzz100_1", "250", "square"},
@@ -128,14 +127,14 @@ TEST_CASE("IvsEncoder::getBasisEffects", "[getLastModified][correctParam]") {
   pugi::xml_node timelineNode = effectsNode.append_child("timeline-effect");
   pugi::xml_node launchNode;
   pugi::xml_node effectNode;
-  std::vector<char *> testingEffectValue;
-  int16_t i;
-  for (i = 0; i < testingValues.size(); i++) {
+  std::vector<char *> testingEffectValue = {};
+  int16_t i = 0;
+  for (; i < static_cast<int16_t>(testingValues.size()); i++) {
     testingEffectValue = testingValues[i];
 
     launchNode = timelineNode.append_child("launch-effect");
     launchNode.append_attribute("effect") = testingEffectValue[0];
-    launchNode.append_attribute("time") = i * 500;
+    launchNode.append_attribute("time") = i;
 
     effectNode = effectsNode.append_child("basis-effect");
     effectNode.append_attribute("waveform") = testingEffectValue[2];
@@ -193,8 +192,8 @@ TEST_CASE("IvsEncoder::getLaunchEvents", "[getLaunchEvents][correctParam]") {
   pugi::xml_node launchNode;
   pugi::xml_node effectNode;
   std::vector<char *> testingEffectValue;
-  int16_t i;
-  for (i = 0; i < testingValues.size(); i++) {
+  int16_t i = 0;
+  for (; i < static_cast<int16_t>(testingValues.size()); i++) {
     testingEffectValue = testingValues[i];
 
     launchNode = timelineNode.append_child("launch-effect");
@@ -204,7 +203,7 @@ TEST_CASE("IvsEncoder::getLaunchEvents", "[getLaunchEvents][correctParam]") {
     effectNode = effectsNode.append_child("basis-effect");
     effectNode.append_attribute("waveform") = "sine";
     effectNode.append_attribute("name") = testingEffectValue[0];
-    effectNode.append_attribute("duration") = 42 * i;
+    effectNode.append_attribute("duration") = i;
   }
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
@@ -230,14 +229,17 @@ TEST_CASE("IvsEncoder::getRepeatEvents without node", "[getRepeatEvents][without
 }
 
 TEST_CASE("IvsEncoder::getRepeatEvents with wrong node", "[getRepeatEvents][wrongNode]") {
+  const int time = 42;
+  const int count = 5;
+  const int duration = 1583;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("ivs-file")
                             .append_child("effects")
                             .append_child("wrong timeline-effect")
                             .append_child("repeat-event");
-  node.append_attribute("time") = 42;
-  node.append_attribute("count") = 5;
-  node.append_attribute("duration") = 1583;
+  node.append_attribute("time") = time;
+  node.append_attribute("count") = count;
+  node.append_attribute("duration") = duration;
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getRepeatEvents(&doc);
 
@@ -245,7 +247,7 @@ TEST_CASE("IvsEncoder::getRepeatEvents with wrong node", "[getRepeatEvents][wron
 }
 
 TEST_CASE("IvsEncoder::getRepeatEvents", "[getRepeatEvents][correctParam]") {
-  std::vector<std::vector<int>> testingValues = {
+  const std::vector<std::vector<int>> testingValues = {
       {43, 54321, 543},
       {0, 50, 0},
       {250, 543, 43210},
@@ -256,8 +258,8 @@ TEST_CASE("IvsEncoder::getRepeatEvents", "[getRepeatEvents][correctParam]") {
       doc.append_child("ivs-file").append_child("effects").append_child("timeline-effect");
   pugi::xml_node n;
   std::vector<int> testingEffectValue;
-  int16_t i;
-  for (i = 0; i < testingValues.size(); i++) {
+  int16_t i = 0;
+  for (; i < static_cast<int16_t>(testingValues.size()); i++) {
     testingEffectValue = testingValues[i];
 
     n = node.append_child("repeat-effect");
@@ -379,14 +381,15 @@ TEST_CASE("IvsEncoder::getCount without value", "[getCount][withoutValue]") {
 }
 
 TEST_CASE("IvsEncoder::getCount without override", "[getCount][withValue]") {
+  const int count = 3254;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node repeatEvent = node.append_child("basis-effect");
-  repeatEvent.append_attribute("count") = 3254;
+  repeatEvent.append_attribute("count") = count;
 
   int res = IvsEncoder::getCount(&repeatEvent);
 
-  REQUIRE(res == 3254);
+  REQUIRE(res == count);
 }
 
 
@@ -524,10 +527,11 @@ TEST_CASE("IvsEncoder::getPeriod with override", "[getPeriod][withOverride]") {
 
 TEST_CASE("IvsEncoder::getAttackTime without configured attribute",
           "[getAttackTime][withoutAttribute]") {
+  const int attackTime = 42;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("wrong attack-time") = 42;
+  basisEffect.append_attribute("wrong attack-time") = attackTime;
 
   int res = IvsEncoder::getAttackTime(&basisEffect);
 
@@ -535,7 +539,7 @@ TEST_CASE("IvsEncoder::getAttackTime without configured attribute",
 }
 
 TEST_CASE("IvsEncoder::getAttackTime with configured attribute", "[getAttackTime][withAttribute]") {
-  std::vector<int> testingValues = {
+  const std::vector<int> testingValues = {
     42,
     0,
     350
@@ -560,10 +564,11 @@ TEST_CASE("IvsEncoder::getAttackTime with configured attribute", "[getAttackTime
 
 TEST_CASE("IvsEncoder::getAttackLevel without configured attribute",
           "[getAttackLevel][withoutAttribute]") {
+  const int attackLevel = 42;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("wrong attack-level") = 42;
+  basisEffect.append_attribute("wrong attack-level") = attackLevel;
 
   int res = IvsEncoder::getAttackLevel(&basisEffect);
 
@@ -571,7 +576,7 @@ TEST_CASE("IvsEncoder::getAttackLevel without configured attribute",
 }
 
 TEST_CASE("IvsEncoder::getAttackLevel with configured attribute", "[getAttackLevel][withAttribute]") {
-  std::vector<int> testingValues = {42, 0, 350};
+  const std::vector<int> testingValues = {42, 0, 350};
 
   for (int i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getAttackLevel with configured attribute (TESTING CASE: " +
@@ -591,10 +596,11 @@ TEST_CASE("IvsEncoder::getAttackLevel with configured attribute", "[getAttackLev
 
 
 TEST_CASE("IvsEncoder::getFadeTime without configured attribute", "[getFadeTime][withoutAttribute]") {
+  const int attackFade = 42;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("wrong fade-time") = 42;
+  basisEffect.append_attribute("wrong fade-time") = attackFade;
 
   int res = IvsEncoder::getFadeTime(&basisEffect);
 
@@ -602,7 +608,7 @@ TEST_CASE("IvsEncoder::getFadeTime without configured attribute", "[getFadeTime]
 }
 
 TEST_CASE("IvsEncoder::getFadeTime with configured attribute", "[getFadeTime][withAttribute]") {
-  std::vector<int> testingValues = {42, 0, 350};
+  const std::vector<int> testingValues = {42, 0, 350};
 
   for (int i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getFadeTime with configured attribute (TESTING CASE: " +
@@ -622,10 +628,11 @@ TEST_CASE("IvsEncoder::getFadeTime with configured attribute", "[getFadeTime][wi
 
 
 TEST_CASE("IvsEncoder::getFadeLevel without configured attribute", "[getFadeLevel][withoutAttribute]") {
+  const int fadeLevel = 42;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("wrong fade-level") = 42;
+  basisEffect.append_attribute("wrong fade-level") = fadeLevel;
 
   int res = IvsEncoder::getFadeLevel(&basisEffect);
 
@@ -633,7 +640,7 @@ TEST_CASE("IvsEncoder::getFadeLevel without configured attribute", "[getFadeLeve
 }
 
 TEST_CASE("IvsEncoder::getFadeLevel with configured attribute", "[getFadeLevel][withAttribute]") {
-  std::vector<int> testingValues = {42, 0, 350};
+  const std::vector<int> testingValues = {42, 0, 350};
 
   for (int i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getFadeLevel with configured attribute (TESTING CASE: " +
@@ -664,7 +671,7 @@ TEST_CASE("IvsEncoder::getWaveform without configured attribute", "[getWaveform]
 }
 
 TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][withAttribute]") {
-  std::vector<char *> testingValues = {
+  const std::vector<std::string> testingValues = {
     "something wrong",
     "sine",
     "square",
@@ -673,14 +680,15 @@ TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][wi
     "sawtooth-down"
   };
 
+  std::string testingCase;
   for (int i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getWaveform with configured attribute (TESTING CASE: " +
       std::to_string(i) + ")") {
-      char *testingCase = testingValues[i];
+      testingCase = std::string(testingValues[i]);
       pugi::xml_document doc;
       pugi::xml_node node = doc.append_child("root");
       pugi::xml_node basisEffect = node.append_child("basis-effect");
-      basisEffect.append_attribute("waveform") = testingCase;
+      basisEffect.append_attribute("waveform") = testingCase.c_str();
 
       haptics::types::BaseSignal res = IvsEncoder::getWaveform(&basisEffect);
 
@@ -691,97 +699,131 @@ TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][wi
 
 
 TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttack][withoutFade]") {
+  const int launchTime = 42;
+  const char *effectName = "Hello World";
+  const char *effectType = "periodic";
+  const int effectDuration = 500;
+  const int effectMagnitude = 5000;
+  const char *effectWaveform = "sawtooth-down";
+  const int effectPeriod = 80;
+  const float expectedAmplitude = .5;
+
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
-  launchEvent.append_attribute("time") = 42;
-  launchEvent.append_attribute("effect") = "Hello World";
+  launchEvent.append_attribute("time") = launchTime;
+  launchEvent.append_attribute("effect") = effectName;
 
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("name") = "Hello World";
-  basisEffect.append_attribute("type") = "periodic";
-  basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 5000;
-  basisEffect.append_attribute("waveform") = "sawtooth-down";
-  basisEffect.append_attribute("period") = 80;
+  basisEffect.append_attribute("name") = effectName;
+  basisEffect.append_attribute("type") = effectType;
+  basisEffect.append_attribute("duration") = effectDuration;
+  basisEffect.append_attribute("magnitude") = effectMagnitude;
+  basisEffect.append_attribute("waveform") = effectWaveform;
+  basisEffect.append_attribute("period") = effectPeriod;
 
   haptics::types::Effect res;
   REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
 
-  CHECK(res.getPosition() == 42);
+  CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
   CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
   CHECK(res.getKeyframesSize() == 2);
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(0.5));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(0.5));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 }
 
+// NOLINTNEXTLINE(readability-function-size)
 TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][withoutFade]") {
+  const int launchTime = 42;
+  const char *effectName = "Hello World";
+  const char *effectType = "periodic";
+  const int effectDuration = 500;
+  const int effectMagnitude = 7500;
+  const char *effectWaveform = "sawtooth-down";
+  const int effectPeriod = 80;
+  const int effectAttackTime = 10;
+  const int effectAttackLevel = 1000;
+  const float expectedAmplitude = .75;
+  const float expectedAttackAmplitude = .1;
+
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
-  launchEvent.append_attribute("time") = 42;
-  launchEvent.append_attribute("effect") = "Hello World";
+  launchEvent.append_attribute("time") = launchTime;
+  launchEvent.append_attribute("effect") = effectName;
 
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("name") = "Hello World";
-  basisEffect.append_attribute("type") = "periodic";
-  basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 7500;
-  basisEffect.append_attribute("waveform") = "sawtooth-down";
-  basisEffect.append_attribute("period") = 80;
-  basisEffect.append_attribute("attack-time") = 10;
-  basisEffect.append_attribute("attack-level") = 1000;
-
+  basisEffect.append_attribute("name") = effectName;
+  basisEffect.append_attribute("type") = effectType;
+  basisEffect.append_attribute("duration") = effectDuration;
+  basisEffect.append_attribute("magnitude") = effectMagnitude;
+  basisEffect.append_attribute("waveform") = effectWaveform;
+  basisEffect.append_attribute("period") = effectPeriod;
+  basisEffect.append_attribute("attack-time") = effectAttackTime;
+  basisEffect.append_attribute("attack-level") = effectAttackLevel;
 
   haptics::types::Effect res;
   REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
 
-  CHECK(res.getPosition() == 42);
+  CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
   CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
   CHECK(res.getKeyframesSize() == 3);
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(0.1));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAttackAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == 10);
-  CHECK(k.getAmplitudeModulation() == Approx(0.75));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectAttackTime);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(2);
-  CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(0.75));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 }
 
+// NOLINTNEXTLINE(readability-function-size)
 TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack][withFade]") {
+  const int launchTime = 42;
+  const char *effectName = "Hello World";
+  const char *effectType = "periodic";
+  const int effectDuration = 500;
+  const int effectMagnitude = 2500;
+  const char *effectWaveform = "sawtooth-down";
+  const int effectPeriod = 80;
+  const int effectFadeTime = 1;
+  const int effectFadeLevel = 10000;
+  const float expectedAmplitude = .25;
+  const float expectedFadeAmplitude = 1;
+
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
-  launchEvent.append_attribute("time") = 42;
-  launchEvent.append_attribute("effect") = "Hello World";
+  launchEvent.append_attribute("time") = launchTime;
+  launchEvent.append_attribute("effect") = effectName;
 
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("name") = "Hello World";
-  basisEffect.append_attribute("type") = "periodic";
-  basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 2500;
-  basisEffect.append_attribute("waveform") = "sawtooth-down";
-  basisEffect.append_attribute("period") = 80;
-  basisEffect.append_attribute("fade-time") = 1;
-  basisEffect.append_attribute("fade-level") = 10000;
+  basisEffect.append_attribute("name") = effectName;
+  basisEffect.append_attribute("type") = effectType;
+  basisEffect.append_attribute("duration") = effectDuration;
+  basisEffect.append_attribute("magnitude") = effectMagnitude;
+  basisEffect.append_attribute("waveform") = effectWaveform;
+  basisEffect.append_attribute("period") = effectPeriod;
+  basisEffect.append_attribute("fade-time") = effectFadeTime;
+  basisEffect.append_attribute("fade-level") = effectFadeLevel;
 
   haptics::types::Effect res;
   REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
@@ -793,65 +835,80 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(0.25));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == 499);
-  CHECK(k.getAmplitudeModulation() == Approx(0.25));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(2);
-  CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(1));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedFadeAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 }
 
-TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
-          "[getWaveform][withAttack][withFade]") {
+// NOLINTNEXTLINE(readability-function-size)
+TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][withAttack][withFade]") {
+  const int launchTime = 42;
+  const char *effectName = "Hello World";
+  const char *effectType = "periodic";
+  const int effectDuration = 500;
+  const int effectMagnitude = 500;
+  const char *effectWaveform = "sawtooth-down";
+  const int effectPeriod = 80;
+  const int effectAttackTime = 1;
+  const int effectAttackLevel = 1000;
+  const int effectFadeTime = 20;
+  const int effectFadeLevel = 10000;
+  const float expectedAmplitude = .25;
+  const float expectedAttackAmplitude = .1;
+  const float expectedFadeAmplitude = 1;
+
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
-  launchEvent.append_attribute("time") = 42;
-  launchEvent.append_attribute("effect") = "Hello World";
+  launchEvent.append_attribute("time") = launchTime;
+  launchEvent.append_attribute("effect") = effectName;
 
   pugi::xml_node basisEffect = node.append_child("basis-effect");
-  basisEffect.append_attribute("name") = "Hello World";
-  basisEffect.append_attribute("type") = "periodic";
-  basisEffect.append_attribute("duration") = 500;
-  basisEffect.append_attribute("magnitude") = 500;
-  basisEffect.append_attribute("waveform") = "sawtooth-down";
-  basisEffect.append_attribute("period") = 80;
-  basisEffect.append_attribute("attack-time") = 1;
-  basisEffect.append_attribute("attack-level") = 1000;
-  basisEffect.append_attribute("fade-time") = 20;
-  basisEffect.append_attribute("fade-level") = 10000;
+  basisEffect.append_attribute("name") = effectName;
+  basisEffect.append_attribute("type") = effectType;
+  basisEffect.append_attribute("duration") = effectDuration;
+  basisEffect.append_attribute("magnitude") = effectMagnitude;
+  basisEffect.append_attribute("waveform") = effectWaveform;
+  basisEffect.append_attribute("period") = effectPeriod;
+  basisEffect.append_attribute("attack-time") = effectAttackTime;
+  basisEffect.append_attribute("attack-level") = effectAttackLevel;
+  basisEffect.append_attribute("fade-time") = effectFadeTime;
+  basisEffect.append_attribute("fade-level") = effectFadeLevel;
 
   haptics::types::Effect res;
   REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
 
-  CHECK(res.getPosition() == 42);
+  CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
   CHECK(res.getBaseSignal() == haptics::types::BaseSignal::SawToothDown);
   CHECK(res.getKeyframesSize() == 4);
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(0.1));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAttackAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == 1);
-  CHECK(k.getAmplitudeModulation() == Approx(0.05));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectAttackTime);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(2);
-  CHECK(k.getRelativePosition() == 480);
-  CHECK(k.getAmplitudeModulation() == Approx(0.05));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 
   k = res.getKeyframeAt(3);
-  CHECK(k.getRelativePosition() == 500);
-  CHECK(k.getAmplitudeModulation() == Approx(1.0));
-  CHECK(k.getFrequencyModulation() == 80);
+  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getAmplitudeModulation() == Approx(expectedFadeAmplitude));
+  CHECK(k.getFrequencyModulation() == effectPeriod);
 }

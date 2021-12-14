@@ -63,10 +63,10 @@ public:
   auto setMixingWeight(float newMixingWeight) -> void;
   [[nodiscard]] auto getBodyPartMask() const -> int;
   auto setBodyPartMask(int newBodyPartMask) -> void;
-  auto getVerticesSize() -> size_t;
+  auto getVerticesSize() -> int;
   auto getVerticeAt(int index) -> int &;
   auto addVertice(int &newVertice) -> void;
-  auto getBandsSize() -> size_t;
+  auto getBandsSize() -> int;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto addBand(haptics::types::Band &newBand) -> void;
   auto findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band *;
