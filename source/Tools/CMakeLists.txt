@@ -1,6 +1,6 @@
 project(tools)
 
-add_library(tools src/InputParser.cpp src/WavParser.cpp)
+add_library(tools src/InputParser.cpp src/WavParser.cpp include/Tools.h)
 #add_library(dr_wav INTERFACE)
 #target_include_directories(dr_wav INTERFACE ${CMAKE_BINARY_DIR}/_deps/dr_libs-src/)
 #target_link_libraries(tools dr_wav)
