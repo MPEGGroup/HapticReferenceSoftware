@@ -32,7 +32,7 @@
  */
 
 #include "../include/AhapEncoder.h"
-#include "../../tools/src/Tools.h"
+#include "../../tools/include/Tools.h"
 #include <fstream>
 
 const double SEC_TO_MSEC = 1000.0;
