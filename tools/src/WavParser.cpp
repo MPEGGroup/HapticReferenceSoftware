@@ -31,55 +31,46 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "WavParser.h"
+#include <WavParser.h>
 
 namespace haptics::tools {
 
-WavParser::WavParser() {
-    file.shouldLogErrorsToConsole(false);
+WavParser::WavParser() { file.shouldLogErrorsToConsole(false); }
+
+auto WavParser::loadFile(std::string filename) -> bool { return file.load(std::move(filename)); }
+
+auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate)
+    -> bool {
+  file.setSampleRate(sampleRate);
+  auto samples = static_cast<signed int>(buffer.size());
+  file.setAudioBufferSize(1, samples);
+  std::copy(file.samples.at(0).begin(), file.samples.at(0).end(), buffer.begin());
+  return file.save(filename);
 }
 
-auto WavParser::loadFile(std::string filename) -> bool {
-    return file.load(std::move(filename));
+auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buffer,
+                         int sampleRate) -> bool {
+  file.setSampleRate(sampleRate);
+  auto channels = static_cast<signed int>(buffer.size());
+  auto samples = static_cast<signed int>(buffer.at(0).size());
+  file.setAudioBufferSize(channels, samples);
+  for (int i = 0; i < channels; i++) {
+    std::copy(file.samples.at(i).begin(), file.samples.at(i).end(), buffer.at(i).begin());
+  }
+  return file.save(filename);
 }
 
-auto WavParser::saveFile(std::string &filename,std::vector<double> &buffer, int sampleRate) -> bool {
-    file.setSampleRate(sampleRate);
-    auto samples = static_cast<signed int>(buffer.size());
-    file.setAudioBufferSize(1,samples);
-    std::copy(file.samples.at(0).begin(),file.samples.at(0).end(),buffer.begin());
-    return file.save(filename);
-}
+auto WavParser::getSamplerate() -> uint32_t { return file.getSampleRate(); }
 
-auto WavParser::saveFile(std::string &filename,std::vector<std::vector<double>> &buffer, int sampleRate) -> bool {
-    file.setSampleRate(sampleRate);
-    auto channels = static_cast<signed int>(buffer.size());
-    auto samples = static_cast<signed int>(buffer.at(0).size());
-    file.setAudioBufferSize(channels,samples);
-    for(int i=0; i<channels; i++) {
-        std::copy(file.samples.at(i).begin(),file.samples.at(i).end(),buffer.at(i).begin());
-    }
-    return file.save(filename);
-}
+auto WavParser::getNumChannels() -> int { return file.getNumChannels(); }
 
-
-auto WavParser::getSamplerate() -> uint32_t {
-    return file.getSampleRate();
-}
-
-auto WavParser::getNumChannels() -> int {
-    return file.getNumChannels();
-}
-
-auto WavParser::getNumSamples() -> int {
-    return file.getNumSamplesPerChannel();
-}
+auto WavParser::getNumSamples() -> int { return file.getNumSamplesPerChannel(); }
 
 auto WavParser::getSamples() -> std::vector<double> {
-    std::vector<double> buffer;
-    buffer.resize(file.getNumSamplesPerChannel());
-    std::copy(file.samples.at(0).begin(),file.samples.at(0).end(),buffer.begin());
-    return buffer;
+  std::vector<double> buffer;
+  buffer.resize(file.getNumSamplesPerChannel());
+  std::copy(file.samples.at(0).begin(), file.samples.at(0).end(), buffer.begin());
+  return buffer;
 }
 
 } // namespace haptics::tools

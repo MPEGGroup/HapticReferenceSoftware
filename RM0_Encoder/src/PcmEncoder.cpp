@@ -31,14 +31,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/PcmEncoder.h"
+#include <PcmEncoder.h>
 
 namespace haptics::encoder {
 
 [[nodiscard]] auto PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
     -> std::vector<std::pair<int16_t, int16_t>> {
   std::vector<std::pair<int16_t, int16_t>> extremaIndexes;
-  
+
   auto it = signal.begin();
   if (it == signal.end()) {
     return {};
@@ -91,8 +91,7 @@ namespace haptics::encoder {
     value = nextValue;
     ++it;
     i++;
-  }
-  while (it != signal.end());
+  } while (it != signal.end());
 
   if (includeBorder) {
     p = std::pair<int16_t, int16_t>(i, value);

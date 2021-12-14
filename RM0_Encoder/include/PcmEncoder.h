@@ -34,15 +34,15 @@
 #ifndef _PCMENCODER_H_
 #define _PCMENCODER_H_
 
-#include <vector>
-#include <utility>
 #include <iostream>
+#include <utility>
+#include <vector>
 
 namespace haptics::encoder {
 
 class PcmEncoder {
 public:
-  [[nodiscard]] auto static PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
+  [[nodiscard]] auto static localExtrema(std::vector<int16_t> signal, bool includeBorder)
       -> std::vector<std::pair<int16_t, int16_t>>;
 };
 } // namespace haptics::encoder

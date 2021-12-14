@@ -33,7 +33,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "../include/InputParser.h"
+#include <InputParser.h>
 
 TEST_CASE("haptics::tools") {
 

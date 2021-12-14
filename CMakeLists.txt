@@ -19,7 +19,8 @@ endif()
 
 add_subdirectory("external/AudioFile" EXCLUDE_FROM_ALL)
 
-include_directories("tools/src")
+include_directories("tools/include")
+include_directories("RM0_Encoder/include")
 include_directories("external")
 
 add_subdirectory("tools")
