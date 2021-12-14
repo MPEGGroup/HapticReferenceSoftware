@@ -55,7 +55,7 @@ namespace haptics::tools {
       std::swap(start_a, end_a);
     }
 
-    return (start_a * (end - x) + end_a * (x - start)) / end - start;
+    return (start_a * (end - x) + end_a * (x - start)) / (end - start);
   }
 
 
