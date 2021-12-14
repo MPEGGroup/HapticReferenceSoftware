@@ -17,9 +17,12 @@ if (BUILD_CATCH2)
     enable_testing()
 endif()
 
-add_subdirectory("tools")
+add_subdirectory("external/AudioFile" EXCLUDE_FROM_ALL)
 
 include_directories("tools/src")
+include_directories("external")
+
+add_subdirectory("tools")
 
 if(BUILD_DECODER)
     add_subdirectory("RM0_Decoder")
