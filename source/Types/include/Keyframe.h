@@ -34,13 +34,15 @@
 #ifndef KEYFRAME_H
 #define KEYFRAME_H
 
+#include <optional>
+
 namespace haptics::types {
 
 class Keyframe {
 public:
   explicit Keyframe() = default;
-  explicit Keyframe(int newRelativePosition, float newAmplitudeModulation,
-                    int newFrequencyModulation)
+  explicit Keyframe(int newRelativePosition, std::optional<float> newAmplitudeModulation,
+                    std::optional<int> newFrequencyModulation)
       : relativePosition(newRelativePosition)
       , amplitudeModulation(newAmplitudeModulation)
       , frequencyModulation(newFrequencyModulation) {};
@@ -54,8 +56,8 @@ public:
 
 private:
   int relativePosition = 0;
-  float amplitudeModulation = 0;
-  int frequencyModulation = 0;
+  std::optional<float> amplitudeModulation;
+  std::optional<int> frequencyModulation;
 };
 } // namespace haptics::types
 #endif //KEYFRAME_H
