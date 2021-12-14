@@ -56,18 +56,12 @@ namespace haptics::encoder {
   std::ifstream ifs(filename);
   nlohmann::json json = nlohmann::json::parse(ifs);
 
-  std::cout << "get Version : " << json.at("Version") << std::endl;
-  std::cout << "get Metadata : " << json.at("Metadata") << std::endl;
-  std::cout << "get Pattern : " << json.at("Pattern") << std::endl;
-
   nlohmann::json pattern = json.at("Pattern");
 
   std::vector<std::pair<int,double>> amplitudes;
   std::vector<std::pair<int, double>> frequencies;
   std::vector<haptics::types::Effect> continuous;
   std::vector<haptics::types::Effect> transients;
-
-  std::cout << "amplitudes size before" << amplitudes.size() << "\n" << std::endl;
 
   int ret = 0;
 
@@ -91,8 +85,6 @@ namespace haptics::encoder {
       }
     }
   }
-  std::cout << "amplitudes size after" << amplitudes.size() << "\n" << std::endl;
-  std::cout << "frequencies size after" << frequencies.size() << "\n" << std::endl;
 
   for (nlohmann::json e : pattern) {
   
@@ -105,11 +97,14 @@ namespace haptics::encoder {
         }
       }
 
+      if (e.at("Event").at("EventType") == "HapticContinuous") {
+        ret = extractContinuous(&(e.at("Event")), &continuous, &amplitudes, &frequencies);
+        if (ret != 0) {
+          std::cout << "ERROR IN CONTINUOUS EXTRACTION" << std::endl;
+          return EXIT_FAILURE;
+        }
+      }
     }
-  }
-
-  for (types::Effect t : transients) {
-    std::cout << t.getKeyframeAt(0).getAmplitudeModulation() << std::endl;
   }
 
   return EXIT_SUCCESS;
@@ -192,6 +187,94 @@ namespace haptics::encoder {
 
   return EXIT_SUCCESS;
 }
+[[nodiscard]] auto AhapEncoder::extractContinuous(nlohmann::json* event,
+  std::vector<haptics::types::Effect>* continuous,
+  std::vector<std::pair<int, double>>* amplitudes,
+  std::vector<std::pair<int, double>>* frequencies) -> int {
 
+  haptics::types::Effect c =
+      haptics::types::Effect(static_cast<int>(event->at("Time").get<double>() * SEC_TO_MSEC), 0,
+                             haptics::types::BaseSignal::Sine);
+
+  haptics::types::Keyframe k_start;
+  haptics::types::Keyframe k_end;
+  k_end.setRelativePosition(static_cast<int>(event->at("EventDuration").get<double>() * SEC_TO_MSEC));
+  // SET VALUES AS DEFINED
+  for (nlohmann::json param : event->at("EventParameters")) {
+    if (param.at("ParameterID") == "HapticIntensity") {
+      double amp = tools::genericNormalization(BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX,
+                                               ACTUAL_AMPLITUDE_MIN, ACTUAL_AMPLITUDE_MIN_C,
+                                               param.at("ParameterValue").get<double>());
+      k_start.setAmplitudeModulation(static_cast<float>(amp));
+      k_end.setAmplitudeModulation(k_start.getAmplitudeModulation());
+    }
+
+    if (param.at("ParameterID") == "HapticSharpness") {
+      double freq = tools::genericNormalization(BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX,
+                                                ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
+                                                param.at("ParameterValue").get<double>());
+      k_start.setFrequencyModulation(static_cast<int>(freq));
+      k_end.setFrequencyModulation(k_start.getFrequencyModulation());
+    }
+  }
+
+  float base_amp = k_start.getAmplitudeModulation();
+  c.addKeyframe(k_start);
+
+  // SET MODULATED VALUES IF APPLICABLE
+  if (!amplitudes->empty()) {
+    // FIND FIRST KEYFRAME AFTER THE EFFECT
+    auto first_kf_a = std::find_if(amplitudes->begin(), amplitudes->end(), [c](std::pair<int, double> a) { return a.first >= c.getPosition(); });
+
+    //IF FIRST KEYFRAME ON START OF EVENT, UPDATE EVENT
+    if (first_kf_a->first == c.getPosition()) {
+      c.getKeyframeAt(0).setAmplitudeModulation(c.getKeyframeAt(0).getAmplitudeModulation() * static_cast<float>(first_kf_a->second));
+      first_kf_a++;
+    } else if ((c.getPosition() < first_kf_a->first) &&
+               first_kf_a != amplitudes->begin()) {
+      float amp = static_cast<float>(haptics::tools::linearInterpolation(
+                       *(first_kf_a - 1), *first_kf_a, c.getPosition())) *
+                   c.getKeyframeAt(0).getAmplitudeModulation();
+      c.getKeyframeAt(0).setAmplitudeModulation(amp);
+    }
+
+    for (auto it = first_kf_a; it < amplitudes->end(); it++) {
+      //IF AFTER OR ON THE END OF THE EFFECT, UPDATE END
+      if (it->first >= (c.getPosition() + k_end.getRelativePosition())) {
+        float amp = static_cast<float>(haptics::tools::linearInterpolation(
+            *(it - 1), *it, c.getPosition() + k_end.getRelativePosition()));
+        k_end.setAmplitudeModulation(amp * k_end.getAmplitudeModulation());
+        break;
+      }
+      //IF IN THE MIDDLE OF THE EFFECT, ADD KEYFRAME
+      if (c.getPosition() < it->first &&
+          it->first < (c.getPosition() + k_end.getRelativePosition())) {
+        //IF NO KEYFRAME BEFORE, BEGIN MODULATION
+        haptics::types::Keyframe ka;
+        if (it == amplitudes->begin()) {
+          ka.setRelativePosition(it->first - c.getPosition());
+          ka.setAmplitudeModulation(base_amp);
+          c.addKeyframe(ka);
+        }
+        ka.setRelativePosition(it->first - c.getPosition());
+        ka.setAmplitudeModulation(static_cast<float>(it->second) * base_amp);
+        c.addKeyframe(ka);
+        // IF NO KEYFRAME AFTER BUT STILL INSIDE, END MODULATION SWITCH BACK TO BASE AMPLITUDE
+        if (it == amplitudes->end() - 1) {
+          ka.setRelativePosition(it->first - c.getPosition());
+          ka.setAmplitudeModulation(base_amp);
+          c.addKeyframe(ka);
+        }
+      }
+    }
+  }
+  size_t s = frequencies->size();
+
+  c.addKeyframe(k_end);
+
+  continuous->push_back(c);
+
+  return EXIT_SUCCESS;
+}
 
 } // namespace haptics::encoder
