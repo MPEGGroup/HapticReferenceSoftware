@@ -35,42 +35,73 @@
 
 namespace haptics::tools {
 
-WavParser::WavParser() { file.shouldLogErrorsToConsole(false); }
+auto WavParser::loadFile(const std::string &filename) -> bool {
 
-auto WavParser::loadFile(std::string filename) -> bool { return file.load(std::move(filename)); }
+    drwav wav;
+    if (!(bool)drwav_init_file(&wav, filename.c_str(), nullptr)) {
+        return false;
+    }
 
-auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate)
-    -> bool {
-  file.setSampleRate(sampleRate);
-  auto samples = static_cast<signed int>(buffer.size());
-  file.setAudioBufferSize(1, samples);
-  std::copy(file.samples.at(0).begin(), file.samples.at(0).end(), buffer.begin());
-  return file.save(filename);
+    numSamples = (size_t) wav.totalPCMFrameCount;
+    numChannels = (int) wav.channels;
+    auto samplesPerChannel = numSamples/(size_t)numChannels;
+    buffer.clear();
+    buffer.reserve(numChannels);
+    for(int c=0; c<numChannels; c++) {
+        std::vector<float> b;
+        b.resize(numSamples);
+        drwav_read_pcm_frames_f32(&wav,samplesPerChannel,b.data());
+        std::vector<double> b_double;
+        b_double.resize(samplesPerChannel);
+        std::transform(b.begin(), b.end(), b_double.begin(), [](float v) -> double { return (double)v; });
+        buffer.push_back(b_double);
+    }
+
+    return true;
+}
+
+auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate) -> bool {
+
+    drwav wav;
+    drwav_data_format format;
+    format.container = drwav_container_riff;
+    format.format = DR_WAVE_FORMAT_PCM;
+    format.channels = 1;
+    format.sampleRate = sampleRate;
+    format.bitsPerSample = BITS_PER_SAMPLE;
+    drwav_init_file_write(&wav,filename.c_str(),&format,nullptr);
+
+    drwav_write_pcm_frames(&wav,buffer.size(),buffer.data());
+
+    return true;
 }
 
 auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buffer,
                          int sampleRate) -> bool {
-  file.setSampleRate(sampleRate);
-  auto channels = static_cast<signed int>(buffer.size());
-  auto samples = static_cast<signed int>(buffer.at(0).size());
-  file.setAudioBufferSize(channels, samples);
-  for (int i = 0; i < channels; i++) {
-    std::copy(file.samples.at(i).begin(), file.samples.at(i).end(), buffer.at(i).begin());
-  }
-  return file.save(filename);
+    drwav wav;
+    drwav_data_format format;
+    format.container = drwav_container_riff;
+    format.format = DR_WAVE_FORMAT_PCM;
+    format.channels = buffer.size();
+    format.sampleRate = sampleRate;
+    format.bitsPerSample = BITS_PER_SAMPLE;
+    drwav_init_file_write(&wav,filename.c_str(),&format,nullptr);
+
+    for(auto &b : buffer) {
+        drwav_write_pcm_frames(&wav,b.size(),b.data());
+    }
+
+    return true;
 }
 
-auto WavParser::getSamplerate() -> uint32_t { return file.getSampleRate(); }
+auto WavParser::getSamplerate() const -> uint32_t { return sampleRate; }
 
-auto WavParser::getNumChannels() -> int { return file.getNumChannels(); }
+auto WavParser::getNumChannels() const -> size_t { return numChannels; }
 
-auto WavParser::getNumSamples() -> int { return file.getNumSamplesPerChannel(); }
+auto WavParser::getNumSamples() const -> size_t { return numSamples; }
 
-auto WavParser::getSamples() -> std::vector<double> {
-  std::vector<double> buffer;
-  buffer.resize(file.getNumSamplesPerChannel());
-  std::copy(file.samples.at(0).begin(), file.samples.at(0).end(), buffer.begin());
-  return buffer;
-}
+auto WavParser::getSamplesChannel(size_t channel) const -> std::vector<double> { return buffer.at(channel); }
+
+auto WavParser::getAllSamples() const -> std::vector<std::vector<double>> { return buffer; }
 
 } // namespace haptics::tools

@@ -48,11 +48,11 @@ TEST_CASE("haptics::tools::WavParser") {
     std::string filename = "test.wav";
     std::vector<double> buffer{0, 1, 0, 1};
     WavParser wavParser;
-    wavParser.saveFile(filename, buffer, fs);
+    WavParser::saveFile(filename, buffer, fs);
     CHECK(std::filesystem::is_regular_file(filename));
     WavParser wavParser2;
     wavParser2.loadFile(filename);
-    std::vector<double> buffer2 = wavParser2.getSamples();
+    std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
     std::filesystem::remove(filename);
   }

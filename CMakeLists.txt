@@ -10,6 +10,7 @@ option(BUILD_ENCODER "Enable building Encoder" ON)
 option(NO_INTERNET "Use pre-downloaded source archives for external libraries, e.g. Catch2" OFF)
 
 include(cmake/catch2.cmake)
+include(cmake/dr_libs.cmake)
 
 if (BUILD_CATCH2)
     include(CTest)
@@ -17,11 +18,8 @@ if (BUILD_CATCH2)
     enable_testing()
 endif()
 
-add_subdirectory("external/AudioFile" EXCLUDE_FROM_ALL)
-
 include_directories("tools/include")
 include_directories("RM0_Encoder/include")
-include_directories("external")
 
 add_subdirectory("tools")
 
