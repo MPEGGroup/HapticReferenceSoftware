@@ -36,7 +36,6 @@
 
 #include <iostream>
 #include <vector>
-#include <dr_wav.h>
 
 namespace haptics::tools {
 
@@ -44,11 +43,10 @@ constexpr uint32_t BITS_PER_SAMPLE = 16;
 
 class WavParser {
 public:
-  WavParser();
-
   auto loadFile(const std::string &filename) -> bool;
   static auto saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate) -> bool;
-  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buffer, int sampleRate) -> bool;
+  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buffer,
+                       int sampleRate) -> bool;
   auto getSamplerate() const -> uint32_t;
   auto getNumChannels() const -> size_t;
   auto getNumSamples() const -> size_t;
@@ -60,7 +58,6 @@ private:
   size_t numChannels = 0;
   size_t numSamples = 0;
   std::vector<std::vector<double>> buffer;
-
 };
 } // namespace haptics::tools
 #endif //_WAVPARSER_H_

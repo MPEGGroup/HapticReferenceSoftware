@@ -32,66 +32,71 @@
  */
 
 #include <WavParser.h>
+#include <algorithm>
+#define DR_WAV_IMPLEMENTATION
+#include <dr_wav.h>
 
 namespace haptics::tools {
 
 auto WavParser::loadFile(const std::string &filename) -> bool {
 
-    drwav wav;
-    if (!(bool)drwav_init_file(&wav, filename.c_str(), nullptr)) {
-        return false;
-    }
+  drwav wav;
+  if (!(bool)drwav_init_file(&wav, filename.c_str(), nullptr)) {
+    return false;
+  }
 
-    numSamples = (size_t) wav.totalPCMFrameCount;
-    numChannels = (int) wav.channels;
-    auto samplesPerChannel = numSamples/(size_t)numChannels;
-    buffer.clear();
-    buffer.reserve(numChannels);
-    for(int c=0; c<numChannels; c++) {
-        std::vector<float> b;
-        b.resize(numSamples);
-        drwav_read_pcm_frames_f32(&wav,samplesPerChannel,b.data());
-        std::vector<double> b_double;
-        b_double.resize(samplesPerChannel);
-        std::transform(b.begin(), b.end(), b_double.begin(), [](float v) -> double { return (double)v; });
-        buffer.push_back(b_double);
-    }
+  numSamples = (size_t)wav.totalPCMFrameCount;
+  numChannels = (int)wav.channels;
+  auto samplesPerChannel = numSamples / (size_t)numChannels;
+  buffer.clear();
+  buffer.reserve(numChannels);
+  for (int c = 0; c < numChannels; c++) {
+    std::vector<float> b;
+    b.resize(numSamples);
+    drwav_read_pcm_frames_f32(&wav, samplesPerChannel, b.data());
+    std::vector<double> b_double;
+    b_double.resize(samplesPerChannel);
+    std::transform(b.begin(), b.end(), b_double.begin(),
+                   [](float v) -> double { return (double)v; });
+    buffer.push_back(b_double);
+  }
 
-    return true;
+  return true;
 }
 
-auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate) -> bool {
+auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate)
+    -> bool {
 
-    drwav wav;
-    drwav_data_format format;
-    format.container = drwav_container_riff;
-    format.format = DR_WAVE_FORMAT_PCM;
-    format.channels = 1;
-    format.sampleRate = sampleRate;
-    format.bitsPerSample = BITS_PER_SAMPLE;
-    drwav_init_file_write(&wav,filename.c_str(),&format,nullptr);
+  drwav wav;
+  drwav_data_format format;
+  format.container = drwav_container_riff;
+  format.format = DR_WAVE_FORMAT_PCM;
+  format.channels = 1;
+  format.sampleRate = sampleRate;
+  format.bitsPerSample = BITS_PER_SAMPLE;
+  drwav_init_file_write(&wav, filename.c_str(), &format, nullptr);
 
-    drwav_write_pcm_frames(&wav,buffer.size(),buffer.data());
+  drwav_write_pcm_frames(&wav, buffer.size(), buffer.data());
 
-    return true;
+  return true;
 }
 
 auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buffer,
                          int sampleRate) -> bool {
-    drwav wav;
-    drwav_data_format format;
-    format.container = drwav_container_riff;
-    format.format = DR_WAVE_FORMAT_PCM;
-    format.channels = buffer.size();
-    format.sampleRate = sampleRate;
-    format.bitsPerSample = BITS_PER_SAMPLE;
-    drwav_init_file_write(&wav,filename.c_str(),&format,nullptr);
+  drwav wav;
+  drwav_data_format format;
+  format.container = drwav_container_riff;
+  format.format = DR_WAVE_FORMAT_PCM;
+  format.channels = buffer.size();
+  format.sampleRate = sampleRate;
+  format.bitsPerSample = BITS_PER_SAMPLE;
+  drwav_init_file_write(&wav, filename.c_str(), &format, nullptr);
 
-    for(auto &b : buffer) {
-        drwav_write_pcm_frames(&wav,b.size(),b.data());
-    }
+  for (auto &b : buffer) {
+    drwav_write_pcm_frames(&wav, b.size(), b.data());
+  }
 
-    return true;
+  return true;
 }
 
 auto WavParser::getSamplerate() const -> uint32_t { return sampleRate; }
@@ -100,7 +105,9 @@ auto WavParser::getNumChannels() const -> size_t { return numChannels; }
 
 auto WavParser::getNumSamples() const -> size_t { return numSamples; }
 
-auto WavParser::getSamplesChannel(size_t channel) const -> std::vector<double> { return buffer.at(channel); }
+auto WavParser::getSamplesChannel(size_t channel) const -> std::vector<double> {
+  return buffer.at(channel);
+}
 
 auto WavParser::getAllSamples() const -> std::vector<std::vector<double>> { return buffer; }
 
