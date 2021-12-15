@@ -45,16 +45,13 @@ namespace haptics::tools {
 
 class Filterbank {
 public:
+  Filterbank(double fs);
 
-    Filterbank(double fs);
-
-    auto LP(std::vector<double> &in , double f) const -> std::vector<double>;
-    auto HP(std::vector<double> &in , double f) const -> std::vector<double>;
+  auto LP(std::vector<double> &in, double f) const -> std::vector<double>;
+  auto HP(std::vector<double> &in, double f) const -> std::vector<double>;
 
 private:
-
-    double fs;
-
+  double fs;
 };
 } // namespace haptics::tools
 #endif //_FILTERBANK_H_

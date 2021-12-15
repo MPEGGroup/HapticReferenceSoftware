@@ -32,119 +32,117 @@
  */
 
 #include "Wavelet.h"
+#include <algorithm>
 
 namespace haptics::tools {
 
-void Wavelet::DWT(std::vector<double> &in, std::vector<double> &out, int levels){
+void Wavelet::DWT(std::vector<double> &in, std::vector<double> &out, int levels) {
 
-    std::vector<double> x(in.begin(),in.end());
-    for(int i=0; i<levels; i++){
-        auto len = in.size() >> i;
-        std::vector<double> l(len,0);
-        std::vector<double> h(len,0);
+  std::vector<double> x(in.begin(), in.end());
+  for (int i = 0; i < levels; i++) {
+    auto len = in.size() >> i;
+    std::vector<double> l(len, 0);
+    std::vector<double> h(len, 0);
 
-        symconv1D(x,hp,h);
-        symconv1D(x,lp,l);
+    symconv1D(x, hp, h);
+    symconv1D(x, lp, l);
 
-        auto out_ind = 0;
-        auto out_add = len >> 1;
-        for(int j=0; j<len; j+=2){
-            out[out_ind] = l[j];
-            out[out_ind+out_add] = h[j+1];
-            x[out_ind] = l[j];
-            out_ind++;
-        }
+    auto out_ind = 0;
+    auto out_add = len >> 1;
+    for (int j = 0; j < len; j += 2) {
+      out[out_ind] = l[j];
+      out[out_ind + out_add] = h[j + 1];
+      x[out_ind] = l[j];
+      out_ind++;
     }
+  }
 }
 
-void Wavelet::inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels){
+void Wavelet::inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels) {
 
-    std::copy(in.begin(),in.end(),out.begin());
+  std::copy(in.begin(), in.end(), out.begin());
 
-
-    for(int i=levels-1; i>=0; i--){
-        auto len = in.size() >> i;
-        std::vector<double> l(len,0);
-        std::vector<double> h(len,0);
-        for(int j=0; j<len; j+=2){
-            l[j] = out[j/2];
-            h[j+1] = out[j/2+(len/2)];
-        }
-        for(int j=0; j<len; j+=2){
-            l[j+1] = 0;
-            h[j] = 0;
-        }
-
-
-        symconv1D(h,hpr,out);
-        symconv1DAdd(l,lpr,out);
-
+  for (int i = levels - 1; i >= 0; i--) {
+    auto len = in.size() >> i;
+    std::vector<double> l(len, 0);
+    std::vector<double> h(len, 0);
+    for (int j = 0; j < len; j += 2) {
+      l[j] = out[j / 2];
+      h[j + 1] = out[j / 2 + (len / 2)];
     }
+    for (int j = 0; j < len; j += 2) {
+      l[j + 1] = 0;
+      h[j] = 0;
+    }
+
+    symconv1D(h, hpr, out);
+    symconv1DAdd(l, lpr, out);
+  }
 }
 
-void Wavelet::symconv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out){
+void Wavelet::symconv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out) {
 
-    size_t inSize = in.size();
-    size_t hSize = h.size();
+  size_t inSize = in.size();
+  size_t hSize = h.size();
 
+  // symmetric extension
+  auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
+  std::vector<double> temp(in.begin(), in.end());
+  std::vector<double> temp_l(in.begin() + 1, in.begin() + lext + 1);
+  std::vector<double> temp_r(in.end() - lext - 1, in.end() - 1);
 
-    //symmetric extension
-    auto lext = (long)floor((double)hSize/2); //floor: if h has odd length
-    std::vector<double> temp(in.begin(),in.end());
-    std::vector<double> temp_l(in.begin()+1,in.begin()+lext+1);
-    std::vector<double> temp_r(in.end()-lext-1,in.end()-1);
+  std::reverse(temp_l.begin(), temp_l.end());
+  std::reverse(temp_r.begin(), temp_r.end());
+  temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
+  temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-    std::reverse(temp_l.begin(),temp_l.end());
-    std::reverse(temp_r.begin(),temp_r.end());
-    temp.insert(temp.begin(),temp_l.begin(),temp_l.end());
-    temp.insert(temp.end(),temp_r.begin(),temp_r.end());
-
-    std::vector<double> conv(inSize+hSize-1+2*lext,0);
-    conv1D(temp,h,conv);
-    out.resize(inSize);
-    std::copy(conv.begin()+lext*2,conv.end()-lext*2,out.begin());
+  std::vector<double> conv(inSize + hSize - 1 + 2 * lext, 0);
+  conv1D(temp, h, conv);
+  out.resize(inSize);
+  std::copy(conv.begin() + lext * 2, conv.end() - lext * 2, out.begin());
 }
 
-void Wavelet::symconv1DAdd(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out){
+void Wavelet::symconv1DAdd(std::vector<double> &in, std::vector<double> &h,
+                           std::vector<double> &out) {
 
-    size_t inSize = in.size();
-    size_t hSize = h.size();
+  size_t inSize = in.size();
+  size_t hSize = h.size();
 
-    //symmetric extension
-    auto lext = (long)floor((double)hSize/2); //floor: if h has odd length
-    std::vector<double> temp(in.begin(),in.end());
-    std::vector<double> temp_l(in.begin()+1,in.begin()+lext+1);
-    std::vector<double> temp_r(in.end()-lext-1,in.end()-1);
+  // symmetric extension
+  auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
+  std::vector<double> temp(in.begin(), in.end());
+  std::vector<double> temp_l(in.begin() + 1, in.begin() + lext + 1);
+  std::vector<double> temp_r(in.end() - lext - 1, in.end() - 1);
 
-    std::reverse(temp_l.begin(),temp_l.end());
-    std::reverse(temp_r.begin(),temp_r.end());
-    temp.insert(temp.begin(),temp_l.begin(),temp_l.end());
-    temp.insert(temp.end(),temp_r.begin(),temp_r.end());
+  std::reverse(temp_l.begin(), temp_l.end());
+  std::reverse(temp_r.begin(), temp_r.end());
+  temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
+  temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-    std::vector<double> conv(inSize+hSize-1+2*lext,0);
-    conv1D(temp,h,conv);
-    out.resize(inSize);
-    for(int i=0; i<inSize; i++){
-        out[i] += conv[i+hSize-1];
-    }
+  std::vector<double> conv(inSize + hSize - 1 + 2 * lext, 0);
+  conv1D(temp, h, conv);
+  out.resize(inSize);
+  for (int i = 0; i < inSize; i++) {
+    out[i] += conv[i + hSize - 1];
+  }
 }
 
-void Wavelet::conv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out){
+void Wavelet::conv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out) {
 
-    size_t j=0;
-    size_t inSize = in.size();
-    size_t hSize = h.size();
-    for(j=0; j<inSize; j++){
-        out[j] = in[j] * h[0];
+  size_t j = 0;
+  size_t inSize = in.size();
+  size_t hSize = h.size();
+  for (j = 0; j < inSize; j++) {
+    out[j] = in[j] * h[0];
+  }
+  for (; j < inSize + hSize - 1; j++) {
+    out[j] = 0;
+  }
+  for (int i = 1; i < hSize; i++) {
+    for (j = i; j < inSize + i; j++) {
+      out[j] += in[j - i] * h[i];
     }
-    for(;j<inSize+hSize-1;j++){
-        out[j] = 0;
-    }
-    for(int i=1; i<hSize; i++){
-        for(j=i; j<inSize+i; j++){
-            out[j] += in[j-i] * h[i];
-        }
-    }
+  }
 }
 
 } // namespace haptics::tools
