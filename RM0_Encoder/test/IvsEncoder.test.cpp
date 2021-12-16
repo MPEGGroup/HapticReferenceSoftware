@@ -76,14 +76,14 @@ TEST_CASE("IvsEncoder::getLastModified with wrong attribute", "[getLastModified]
 }
 
 TEST_CASE("IvsEncoder::getLastModified", "[getLastModified][correctParam]") {
-  const std::vector<const std::string> testingValues = {"Hello World", "Sunday, April 11, 2021  10:39:06PM",
+  const std::vector<const char *> testingValues = {"Hello World", "Sunday, April 11, 2021  10:39:06PM",
                                              "42", "magic string", ""};
 
   int16_t i = 0;
-  for (const std::string testingCase : testingValues) {
+  for (const char *testingCase : testingValues) {
     pugi::xml_document doc;
     pugi::xml_node node = doc.append_child("ivs-file");
-    node.append_attribute("last-modified") = testingCase.c_str();
+    node.append_attribute("last-modified") = testingCase;
 
     DYNAMIC_SECTION("getLastModified with configured date (TESTING CASE: " + std::to_string(i) +
                     ")") {
@@ -271,13 +271,13 @@ TEST_CASE("IvsEncoder::getRepeatEvents", "[getRepeatEvents][correctParam]") {
   pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getRepeatEvents(&doc);
 
   i = 0;
-  for (pugi::xml_node n : res) {
+  for (pugi::xml_node node : res) {
     testingEffectValue = testingValues[i];
 
     REQUIRE(std::string(n.name()) == "launch-effect");
-    REQUIRE(n.attribute("time").as_int() == testingEffectValue[0]);
-    REQUIRE(n.attribute("count").as_int() == testingEffectValue[1]);
-    REQUIRE(n.attribute("duration").as_int() == testingEffectValue[2]);
+    REQUIRE(node.attribute("time").as_int() == testingEffectValue[0]);
+    REQUIRE(node.attribute("count").as_int() == testingEffectValue[1]);
+    REQUIRE(node.attribute("duration").as_int() == testingEffectValue[2]);
 
     i++;
   }
@@ -680,11 +680,11 @@ TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][wi
     "sawtooth-down"
   };
 
-  std::string testingCase;
+  std::string testingCase = "placeholder";
   for (int i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getWaveform with configured attribute (TESTING CASE: " +
       std::to_string(i) + ")") {
-      testingCase = std::string(testingValues[i]);
+      testingCase = testingValues[i];
       pugi::xml_document doc;
       pugi::xml_node node = doc.append_child("root");
       pugi::xml_node basisEffect = node.append_child("basis-effect");
@@ -698,6 +698,7 @@ TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][wi
 }
 
 
+// NOLINTNEXTLINE(readability-function-size)
 TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttack][withoutFade]") {
   const int launchTime = 42;
   const char *effectName = "Hello World";
@@ -741,7 +742,7 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   CHECK(k.getFrequencyModulation() == effectPeriod);
 }
 
-// NOLINTNEXTLINE(readability-function-size)
+// NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
 TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][withoutFade]") {
   const int launchTime = 42;
   const char *effectName = "Hello World";
@@ -752,8 +753,8 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   const int effectPeriod = 80;
   const int effectAttackTime = 10;
   const int effectAttackLevel = 1000;
-  const float expectedAmplitude = .75;
-  const float expectedAttackAmplitude = .1;
+  const float expectedAmplitude = .75F;
+  const float expectedAttackAmplitude = .1F;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -795,7 +796,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   CHECK(k.getFrequencyModulation() == effectPeriod);
 }
 
-// NOLINTNEXTLINE(readability-function-size)
+// NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
 TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack][withFade]") {
   const int launchTime = 42;
   const char *effectName = "Hello World";
@@ -806,8 +807,8 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   const int effectPeriod = 80;
   const int effectFadeTime = 1;
   const int effectFadeLevel = 10000;
-  const float expectedAmplitude = .25;
-  const float expectedFadeAmplitude = 1;
+  const float expectedAmplitude = .25F;
+  const float expectedFadeAmplitude = 1.0F;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -849,7 +850,7 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   CHECK(k.getFrequencyModulation() == effectPeriod);
 }
 
-// NOLINTNEXTLINE(readability-function-size)
+// NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
 TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][withAttack][withFade]") {
   const int launchTime = 42;
   const char *effectName = "Hello World";
@@ -862,9 +863,9 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][wit
   const int effectAttackLevel = 1000;
   const int effectFadeTime = 20;
   const int effectFadeLevel = 10000;
-  const float expectedAmplitude = .25;
-  const float expectedAttackAmplitude = .1;
-  const float expectedFadeAmplitude = 1;
+  const float expectedAmplitude = .05F;
+  const float expectedAttackAmplitude = .1F;
+  const float expectedFadeAmplitude = 1.0F;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");

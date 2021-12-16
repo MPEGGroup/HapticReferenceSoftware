@@ -55,29 +55,28 @@ namespace haptics::encoder {
   pugi::xml_node basisEffect = {};
   int bandIndex = -1;
   haptics::types::Band *myBand = nullptr;
-  haptics::types::Effect *myEffect = nullptr;
+  haptics::types::Effect myEffect;
   for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&doc)) {
     if (!IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, basisEffect)) {
       continue;
     }
 
-    myEffect = new haptics::types::Effect();
-    if (!IvsEncoder::convertToEffect(&basisEffect, &launchEvent, myEffect)) {
+    myEffect = haptics::types::Effect();
+    if (!IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &myEffect)) {
       continue;
     }
 
 
     myBand = myTrack.findWaveBandAvailable(
-        myEffect->getPosition(),
-        myEffect->getKeyframeAt(myEffect->getKeyframesSize() - 1).getRelativePosition());
+        myEffect.getPosition(),
+        myEffect.getKeyframeAt(myEffect.getKeyframesSize() - 1).getRelativePosition());
     if (myBand == nullptr) {
-      myBand = new haptics::types::Band(haptics::types::BandType::Wave,
-                                        haptics::types::EncodingModality::Vectorial, 0,
-                                        IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
-      myTrack.addBand(*myBand);
+      myTrack.addBand(*(new haptics::types::Band(
+          haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,
+          IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY)));
       myBand = &myTrack.getBandAt(myTrack.getBandsSize() - 1);
     }
-    myBand->addEffect(*myEffect);
+    myBand->addEffect(myEffect);
   }
 
   int time = -1;
@@ -97,19 +96,19 @@ namespace haptics::encoder {
       myBand = &myTrack.getBandAt(bandIndex);
 
       for (effectIndex = 0; effectIndex < myBand->getEffectsSize(); effectIndex++) {
-        myEffect = &myBand->getEffectAt(effectIndex);
-        if (time <= myEffect->getPosition() && myEffect->getPosition() < time + duration) {
-          effectToRepeat.push_back(*myEffect);
-        } else if (time + duration <= myEffect->getPosition()) {
-          myEffect->setPosition(myEffect->getPosition() + count * duration);
+        myEffect = myBand->getEffectAt(effectIndex);
+        if (time <= myEffect.getPosition() && myEffect.getPosition() < time + duration) {
+          effectToRepeat.push_back(myEffect);
+        } else if (time + duration <= myEffect.getPosition()) {
+          myEffect.setPosition(myEffect.getPosition() + count * duration);
         }
       }
 
       for (haptics::types::Effect &e: effectToRepeat) {
         for (effectIndex = 1; effectIndex <= count; effectIndex++) {
-          myEffect = new haptics::types::Effect(e);
-          myEffect->setPosition(myEffect->getPosition() + duration * effectIndex);
-          myBand->addEffect(*myEffect);
+          myEffect = haptics::types::Effect(e);
+          myEffect.setPosition(myEffect.getPosition() + duration * effectIndex);
+          myBand->addEffect(myEffect);
         }
       }
     }
@@ -168,17 +167,16 @@ namespace haptics::encoder {
   if (fadeTime != -1) {
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     keyframeList[1]->setRelativePosition(duration - fadeTime);
-    keyframeList.push_back(new haptics::types::Keyframe(
-        duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period));
+    keyframeList.push_back(&*(new haptics::types::Keyframe(
+        duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period)));
   }
 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
     keyframeList[0]->setRelativePosition(attackTime);
-    keyframeList.insert(
-        keyframeList.begin(),
-        new haptics::types::Keyframe(0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period));
+    out->addKeyframe(*(new haptics::types::Keyframe(
+        0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period)));
   }
 
   for (haptics::types::Keyframe *kf : keyframeList) {
