@@ -59,6 +59,30 @@ namespace haptics::tools {
   }
 
 
+  [[nodiscard]] auto chirpInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
+
+    int start_t = a.first;
+    int end_t = b.first;
+    double start_f = a.second;
+    double end_f = b.second;
+
+    if (start_t == end_t) {
+      return (start_f + end_f) / 0.2;
+    }
+
+    if (end_t > start_t) {
+      std::swap(start_t, end_t);
+      std::swap(start_f, end_f);
+    }
+
+    if (x < start_t && x > end_t) {
+      return EXIT_FAILURE;
+    }
+
+    return x * (end_f - start_f) / (end_t - start_t) + start_f;
+  }
+
+
   [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
 
     double x_out = -1;
