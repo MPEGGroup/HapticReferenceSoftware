@@ -23,26 +23,13 @@
         {
             "Event":
             {
-                "Time": 0,
+                "Time": 2,
                 "EventType": "HapticContinuous",
-                "EventDuration": 3.5,
+                "EventDuration": 5,
                 "EventParameters":
                 [
                     { "ParameterID": "HapticIntensity", "ParameterValue": 0.5 },
-                    { "ParameterID": "HapticSharpness", "ParameterValue": 0.4 }
-                ]
-            }
-        },
-        {
-            "Event":
-            {
-                "Time": 3.5,
-                "EventType": "HapticContinuous",
-                "EventDuration": 5.7,
-                "EventParameters":
-                [
-                    { "ParameterID": "HapticIntensity", "ParameterValue": 1.0 },
-                    { "ParameterID": "HapticSharpness", "ParameterValue": 0.4 }
+                    { "ParameterID": "HapticSharpness", "ParameterValue": 0.5 }
                 ]
             }
         },
@@ -50,13 +37,12 @@
             "ParameterCurve":
             {
                 "ParameterID": "HapticIntensityControl",
-                "Time": 1.5,
+                "Time": 0,
                 "ParameterCurveControlPoints":
                 [
                     { "Time": 0, "ParameterValue": 0.0 },
                     { "Time": 1.0, "ParameterValue": 1.0 },
-                    { "Time": 2.0, "ParameterValue": 0.5 },
-                    { "Time": 4.0, "ParameterValue": 0.8 }
+                    { "Time": 2.0, "ParameterValue": 0.5 }
                 ]
             }
         },
@@ -64,11 +50,15 @@
             "ParameterCurve":
             {
                 "ParameterID": "HapticSharpnessControl",
-                "Time": 0.015,
+                "Time": 0,
                 "ParameterCurveControlPoints":
                 [
                     { "Time": 0, "ParameterValue": 0.0 },
-                    { "Time": 0.25, "ParameterValue": -0.3 }
+                    { "Time": 0.5, "ParameterValue": -1 },
+                    { "Time": 2, "ParameterValue": 0.4 },
+                    { "Time": 2.5, "ParameterValue": 1 },
+                    { "Time": 2.8, "ParameterValue": 0.5 },
+                    { "Time": 4, "ParameterValue": -0.5 }
                 ]
             }
         }
