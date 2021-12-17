@@ -33,7 +33,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "../include/PcmEncoder.h"
+#include <Encoder/include/PcmEncoder.h>
 
 using haptics::encoder::PcmEncoder;
 
