@@ -34,6 +34,7 @@
 #ifndef PCMENCODER_H
 #define PCMENCODER_H
 
+#include <Tools/include/WavParser.h>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -42,8 +43,9 @@ namespace haptics::encoder {
 
 class PcmEncoder {
 public:
-  [[nodiscard]] auto static localExtrema(std::vector<int16_t> signal, bool includeBorder)
-      -> std::vector<std::pair<int16_t, int16_t>>;
+  auto static encode(std::string &filename) -> int;
+  [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
+      -> std::vector<std::pair<int16_t, double>>;
 };
 } // namespace haptics::encoder
 #endif // PCMENCODER_H

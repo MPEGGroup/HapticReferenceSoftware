@@ -33,10 +33,12 @@
 
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
+#include <Encoder/include/PcmEncoder.h>
 #include <Tools/include/InputParser.h>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
+using haptics::encoder::PcmEncoder;
 using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -74,6 +76,8 @@ auto main(int argc, char *argv[]) -> int {
     IvsEncoder::encode(filename);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
+    PcmEncoder::encode(filename);
   }
+
   return EXIT_SUCCESS;
 }

@@ -33,23 +33,44 @@
 
 #include <Encoder/include/PcmEncoder.h>
 
+using haptics::tools::WavParser;
+
 namespace haptics::encoder {
 
-[[nodiscard]] auto PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
-    -> std::vector<std::pair<int16_t, int16_t>> {
-  std::vector<std::pair<int16_t, int16_t>> extremaIndexes;
+auto PcmEncoder::encode(std::string &filename) -> int {
+  WavParser wavParser;
+  wavParser.loadFile(filename);
+
+  std::cout << std::endl << std::endl;
+  std::cout << wavParser.getSamplerate() << std::endl;
+  std::cout << wavParser.getNumSamples() << std::endl;
+  std::cout << wavParser.getNumChannels() << std::endl;
+
+  std::vector<std::vector<std::pair<int16_t, double>>> extractedKeyframes;
+  size_t channelIndex = 0;
+  for (; channelIndex < wavParser.getNumChannels(); channelIndex++) {
+    extractedKeyframes.push_back(PcmEncoder::localExtrema(wavParser.getSamplesChannel(channelIndex), true));
+  }
+
+  return EXIT_SUCCESS;
+}
+
+
+[[nodiscard]] auto PcmEncoder::localExtrema(std::vector<double> signal, bool includeBorder)
+    -> std::vector<std::pair<int16_t, double>> {
+  std::vector<std::pair<int16_t, double>> extremaIndexes;
   
   auto it = signal.begin();
   if (it == signal.end()) {
     return {};
   }
 
-  int16_t lastValue = *it;
+  double lastValue = *it;
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      std::pair<int16_t, int16_t> p1(0, signal[0]);
-      std::pair<int16_t, int16_t> p2(0, signal[0]);
+      std::pair<int16_t, double> p1(0, signal[0]);
+      std::pair<int16_t, double> p2(0, signal[0]);
       extremaIndexes.push_back(p1);
       extremaIndexes.push_back(p2);
       return extremaIndexes;
@@ -57,12 +78,12 @@ namespace haptics::encoder {
     return {};
   }
 
-  int16_t value = *it;
+  double value = *it;
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      std::pair<int16_t, int16_t> p1(0, signal[0]);
-      std::pair<int16_t, int16_t> p2(1, signal[1]);
+      std::pair<int16_t, double> p1(0, signal[0]);
+      std::pair<int16_t, double> p2(1, signal[1]);
       extremaIndexes.push_back(p1);
       extremaIndexes.push_back(p2);
       return extremaIndexes;
@@ -70,11 +91,11 @@ namespace haptics::encoder {
     return {};
   }
 
-  std::pair<int16_t, int16_t> p;
+  std::pair<int16_t, double> p;
   int16_t i = 1;
-  int16_t nextValue = 0;
+  double nextValue = 0;
   if (includeBorder) {
-    p = std::pair<int16_t, int16_t>(0, signal[0]);
+    p = std::pair<int16_t, double>(0, signal[0]);
     extremaIndexes.push_back(p);
   }
   do {
@@ -83,7 +104,7 @@ namespace haptics::encoder {
          (value <= lastValue && value <= nextValue)) &&
         (value != lastValue || value != nextValue)) {
 
-      p = std::pair<int16_t, int16_t>(i, value);
+      p = std::pair<int16_t, double>(i, value);
       extremaIndexes.push_back(p);
     }
 
@@ -95,7 +116,7 @@ namespace haptics::encoder {
   while (it != signal.end());
 
   if (includeBorder) {
-    p = std::pair<int16_t, int16_t>(i, value);
+    p = std::pair<int16_t, double>(i, value);
     extremaIndexes.push_back(p);
   }
 
