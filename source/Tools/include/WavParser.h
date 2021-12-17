@@ -31,75 +31,35 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/PcmEncoder.h>
+#ifndef WAVPARSER_H
+#define WAVPARSER_H
 
-namespace haptics::encoder {
+#include <cmath>
+#include <iostream>
+#include <vector>
 
-[[nodiscard]] auto PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
-    -> std::vector<std::pair<int16_t, int16_t>> {
-  std::vector<std::pair<int16_t, int16_t>> extremaIndexes;
-  
-  auto it = signal.begin();
-  if (it == signal.end()) {
-    return {};
-  }
+namespace haptics::tools {
 
-  int16_t lastValue = *it;
-  ++it;
-  if (it == signal.end()) {
-    if (includeBorder) {
-      std::pair<int16_t, int16_t> p1(0, signal[0]);
-      std::pair<int16_t, int16_t> p2(0, signal[0]);
-      extremaIndexes.push_back(p1);
-      extremaIndexes.push_back(p2);
-      return extremaIndexes;
-    }
-    return {};
-  }
+constexpr uint32_t BITS_PER_SAMPLE = 16;
+constexpr double SCALING = 32767;
 
-  int16_t value = *it;
-  ++it;
-  if (it == signal.end()) {
-    if (includeBorder) {
-      std::pair<int16_t, int16_t> p1(0, signal[0]);
-      std::pair<int16_t, int16_t> p2(1, signal[1]);
-      extremaIndexes.push_back(p1);
-      extremaIndexes.push_back(p2);
-      return extremaIndexes;
-    }
-    return {};
-  }
+class WavParser {
+public:
+  auto loadFile(const std::string &filename) -> bool;
+  static auto saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool;
+  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
+                       int sampleRate) -> bool;
+  [[nodiscard]] auto getSamplerate() const -> uint32_t;
+  [[nodiscard]] auto getNumChannels() const -> size_t;
+  [[nodiscard]] auto getNumSamples() const -> size_t;
+  [[nodiscard]] auto getSamplesChannel(size_t channel = 0) const -> std::vector<double>;
+  [[nodiscard]] auto getAllSamples() const -> std::vector<std::vector<double>>;
 
-  std::pair<int16_t, int16_t> p;
-  int16_t i = 1;
-  int16_t nextValue = 0;
-  if (includeBorder) {
-    p = std::pair<int16_t, int16_t>(0, signal[0]);
-    extremaIndexes.push_back(p);
-  }
-  do {
-    nextValue = *it;
-    if (((value >= lastValue && value >= nextValue) ||
-         (value <= lastValue && value <= nextValue)) &&
-        (value != lastValue || value != nextValue)) {
-
-      p = std::pair<int16_t, int16_t>(i, value);
-      extremaIndexes.push_back(p);
-    }
-
-    lastValue = value;
-    value = nextValue;
-    ++it;
-    i++;
-  }
-  while (it != signal.end());
-
-  if (includeBorder) {
-    p = std::pair<int16_t, int16_t>(i, value);
-    extremaIndexes.push_back(p);
-  }
-
-  return extremaIndexes;
-}
-
-} // namespace haptics::encoder
+private:
+  int sampleRate = 0;
+  size_t numChannels = 0;
+  size_t numSamples = 0;
+  std::vector<std::vector<double>> buffer;
+};
+} // namespace haptics::tools
+#endif // WAVPARSER_H
