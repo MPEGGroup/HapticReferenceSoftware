@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PCMENCODER_H_
-#define _PCMENCODER_H_
+#ifndef PCMENCODER_H
+#define PCMENCODER_H
 
 #include <iostream>
 #include <utility>
@@ -46,4 +46,4 @@ public:
       -> std::vector<std::pair<int16_t, int16_t>>;
 };
 } // namespace haptics::encoder
-#endif //_PCMENCODER_H_
+#endif // PCMENCODER_H
