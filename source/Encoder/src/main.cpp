@@ -31,19 +31,35 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PCMENCODER_H_
-#define _PCMENCODER_H_
+#include <Tools/include/InputParser.h>
 
-#include <vector>
-#include <utility>
-#include <iostream>
+using haptics::tools::InputParser;
 
-namespace haptics::encoder {
+// NOLINTNEXTLINE(bugprone-exception-escape)
+auto main(int argc, char *argv[]) -> int {
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
+  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
+    InputParser::help(args[0]);
+    return EXIT_SUCCESS;
+  }
 
-class PcmEncoder {
-public:
-  [[nodiscard]] auto static PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
-      -> std::vector<std::pair<int16_t, int16_t>>;
-};
-} // namespace haptics::encoder
-#endif //_PCMENCODER_H_
+  std::string filename = inputParser.getCmdOption("-f");
+  if (filename.empty()) {
+    filename = inputParser.getCmdOption("--file");
+  }
+  if (filename.empty()) {
+    InputParser::help(args[0]);
+    return EXIT_FAILURE;
+  }
+
+  std::cout << "The file to process is : " << filename << "\n";
+  std::string output = inputParser.getCmdOption("-o");
+  if (output.empty()) {
+    output = inputParser.getCmdOption("--output");
+  }
+  if (!output.empty()) {
+    std::cout << "The generated file will be : " << output << "\n";
+  }
+  return EXIT_SUCCESS;
+}
