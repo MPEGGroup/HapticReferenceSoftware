@@ -45,27 +45,30 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
     return false;
   }
 
-  numSamples = (size_t)wav.totalPCMFrameCount;
-  numChannels = (int)wav.channels;
-  auto samplesPerChannel = numSamples / (size_t)numChannels;
+  auto samplesPerChannel = (size_t)wav.totalPCMFrameCount;
+  numChannels = (size_t)wav.channels;
+  numSamples = samplesPerChannel * numChannels;
   buffer.clear();
   buffer.reserve(numChannels);
-  for (int c = 0; c < numChannels; c++) {
-    std::vector<float> b;
-    b.resize(numSamples);
-    drwav_read_pcm_frames_f32(&wav, samplesPerChannel, b.data());
+  std::vector<float> b;
+  b.resize(numSamples);
+  drwav_read_pcm_frames_f32(&wav, samplesPerChannel, b.data());
+  for (size_t c = 0; c < numChannels; c++) {
     std::vector<double> b_double;
-    b_double.resize(samplesPerChannel);
-    std::transform(b.begin(), b.end(), b_double.begin(),
-                   [](float v) -> double { return (double)v; });
+    b_double.reserve(samplesPerChannel);
+
+
+    for (auto it = b.cbegin() + (long)c; it < b.cend(); it+=(long)numChannels) {
+      std::cout << it-b.cbegin() << std::endl;
+      b_double.push_back((double)*it);
+    }
+
     buffer.push_back(b_double);
   }
-
   return true;
 }
 
-auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate)
-    -> bool {
+auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool {
 
   drwav wav;
   drwav_data_format format;
@@ -75,27 +78,39 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buffer, int
   format.sampleRate = sampleRate;
   format.bitsPerSample = BITS_PER_SAMPLE;
   drwav_init_file_write(&wav, filename.c_str(), &format, nullptr);
-
-  drwav_write_pcm_frames(&wav, buffer.size(), buffer.data());
-
+  std::vector<uint16_t> b_int;
+  b_int.resize(buff.size());
+  std::transform(buff.begin(), buff.end(), b_int.begin(),
+                 [](double v) -> uint16_t { return (uint16_t)(round((v)*SCALING)); });
+  drwav_write_pcm_frames(&wav, b_int.size(), b_int.data());
+  drwav_uninit(&wav);
   return true;
 }
 
-auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buffer,
-                         int sampleRate) -> bool {
+auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buff, int sampleRate) -> bool {
   drwav wav;
   drwav_data_format format;
   format.container = drwav_container_riff;
   format.format = DR_WAVE_FORMAT_PCM;
-  format.channels = buffer.size();
+  format.channels = buff.size();
   format.sampleRate = sampleRate;
   format.bitsPerSample = BITS_PER_SAMPLE;
   drwav_init_file_write(&wav, filename.c_str(), &format, nullptr);
 
-  for (auto &b : buffer) {
-    drwav_write_pcm_frames(&wav, b.size(), b.data());
+  std::vector<uint16_t> b_int;
+  b_int.resize(buff.size()*buff.at(0).size());
+  long c = 0;
+  for (auto &b : buff) {
+
+    for (std::pair<std::vector<uint16_t>::iterator,std::vector<double>::iterator> it(b_int.begin()+(long)c,b.begin()); it.first < b_int.end(); it.first+=(long)buff.size(), it.second++) {
+      *it.first = ((uint16_t)(round((*it.second)*SCALING)));
+    }
+    c++;
+
   }
 
+  drwav_write_pcm_frames(&wav, b_int.size()/buff.size(), b_int.data());
+  drwav_uninit(&wav);
   return true;
 }
 

@@ -36,16 +36,18 @@
 
 #include <iostream>
 #include <vector>
+#include <math.h>
 
 namespace haptics::tools {
 
 constexpr uint32_t BITS_PER_SAMPLE = 16;
+constexpr double SCALING = 32767;
 
 class WavParser {
 public:
   auto loadFile(const std::string &filename) -> bool;
-  static auto saveFile(std::string &filename, std::vector<double> &buffer, int sampleRate) -> bool;
-  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buffer,
+  static auto saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool;
+  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
                        int sampleRate) -> bool;
   auto getSamplerate() const -> uint32_t;
   auto getNumChannels() const -> size_t;

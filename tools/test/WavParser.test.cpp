@@ -43,11 +43,10 @@ TEST_CASE("haptics::tools::WavParser") {
 
   using haptics::tools::WavParser;
 
-  SECTION("Command line arguments") {
+  SECTION("Output to Input test") {
 
     std::string filename = "test.wav";
-    std::vector<double> buffer{0, 1, 0, 1};
-    WavParser wavParser;
+    std::vector<double> buffer{0, 1, 0, 2};
     WavParser::saveFile(filename, buffer, fs);
     CHECK(std::filesystem::is_regular_file(filename));
     WavParser wavParser2;
@@ -55,5 +54,6 @@ TEST_CASE("haptics::tools::WavParser") {
     std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
     std::filesystem::remove(filename);
+
   }
 }
