@@ -1,0 +1,12 @@
+@startuml
+!startsub STYLE
+autonumber "<b>[000]"
+skinparam style strictuml
+skinparam responseMessageBelowArrow true
+skinparam sequence {
+    MessageAlign center
+    BoxBackgroundColor LightBlue
+    actorStyle awesome
+}
+!endsub
+@enduml

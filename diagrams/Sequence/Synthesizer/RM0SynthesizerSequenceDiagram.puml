@@ -1,0 +1,142 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Synthesizer sequence diagram**\n
+hide unlinked
+
+actor User
+participant Main
+box "RM0 synthesizer"
+    participant OhmIO
+    participant OhmData
+    participant RM0Synthesizer
+    participant RM0Synthesizer
+    participant GltfIO
+    participant RM0_Haptics
+    participant WavIO
+end box
+
+note over User
+    The user want to synthesize a human-readable file
+    So he needs to give its path and the sampling frequency
+    of the generated PCM file
+end note
+
+User -> Main ++: <<static>>\nsynthesize(file_path, frequency_sampling, output_path)
+Main -> RM0Synthesizer ++: <<static>>\nsynthesize(file_path, frequency_sampling, output_path)
+RM0Synthesizer -> GltfIO ++: <<static>>\nread(file_path)
+GltfIO -> RM0_Haptics **: <<create>>
+GltfIO -> GltfIO ++: readGltfContent()
+return content
+GltfIO -> RM0_Haptics ++: save(content)
+autonumber stop
+return
+autonumber resume
+return rm0Haptics
+
+RM0Synthesizer -> RM0_Haptics ++: getTotalLength()
+RM0_Haptics -> RM0_Haptics: total_length = 0
+
+loop for each track in rm0Haptics
+    loop for each band in track
+        RM0_Haptics -> RM0_Haptics ++: getLastStream(band)
+        return stream
+        RM0_Haptics -> RM0_Haptics ++: getPosition(stream)
+        return starting_point
+        RM0_Haptics -> RM0_Haptics ++: getDuration(stream)
+        return duration
+        RM0_Haptics -> RM0_Haptics: total_length = max(total_length, starting_point+duration)
+    end
+end
+
+return total_length
+RM0Synthesizer -> RM0Synthesizer: timestamp = 0
+RM0Synthesizer -> RM0_Haptics ++: getNbTracks()
+return nb_tracks
+RM0Synthesizer -> WavIO ++: <<static>>\ngenerateFile(output_path, file_path)
+autonumber stop
+return
+autonumber resume
+
+loop while timestamp <= total_length
+    loop track_index in range(0, nb_tracks)
+        RM0Synthesizer -> RM0_Haptics ++: getNbBands(track_index)
+        return nb_bands
+        RM0Synthesizer -> RM0Synthesizer: evaluated_point = 0
+        loop band_index in range(0, nb_bands)
+            RM0Synthesizer -> RM0_Haptics ++: getBandType(track_index, band_index)
+            return band_type
+            alt band_type == TRANSIENT
+                RM0Synthesizer -> RM0_Haptics ++: getTransientBetween(timestamp-1/frequency_sampling, timestamp)
+                return transient
+                alt transient is not NULL
+                    RM0Synthesizer -> RM0Synthesizer ++: evaluateTransient(transient, timestamp)
+                    return evaluated_transient
+                    RM0Synthesizer -> RM0Synthesizer: evaluated_point = RM0Synthesizer + evaluated_transient
+                end
+            else band_type == KEYFRAME
+                RM0Synthesizer -> RM0_Haptics ++: getLastKeyframeBefore(timestamp)
+                return keyframe_1
+                RM0Synthesizer -> RM0_Haptics ++: getFirstKeyframeAfter(timestamp)
+                return keyframe_2
+                RM0Synthesizer -> RM0Synthesizer ++: CubicInterpolation(keyframe_1, keyframe_2, timestamp)
+                return evaluated_keyframe
+                RM0Synthesizer -> RM0Synthesizer: evaluated_point = RM0Synthesizer + evaluated_keyframe
+            else band_type == WAVE
+                RM0Synthesizer -> RM0_Haptics ++: getEncodingModality(track_index, band_index)
+                return encoding_melody
+                RM0Synthesizer -> RM0_Haptics ++: getNbStream(track_index, band_index)
+                return nb_stream
+                RM0Synthesizer -> RM0_Haptics ++: getWindowLength(track_index, band_index)
+                return window_length
+                loop for stream_index in range(0, nb_stream)
+                    RM0Synthesizer -> RM0_Haptics ++: getPosition(track_index, band_index, stream_index)
+                    return stream_position
+                    alt encoding_melody == QUANTIZED
+                        RM0Synthesizer -> RM0_Haptics ++: getNbWave(track_index, band_index, stream_index)
+                        return nb_wave
+                        alt timestamp >= stream_position and timestamp <= stream_position + nb_wave*window_length
+                            RM0Synthesizer -> RM0_Haptics ++: getWaveAt(track_index, band_index, stream_index, timestamp)
+                            return wave
+                            RM0Synthesizer -> RM0Synthesizer ++: evaluateWave(wave, timestamp)
+                            return evaluated_wave
+                            RM0Synthesizer -> RM0Synthesizer: evaluated_point = evaluated_point + evaluated_wave
+                            RM0Synthesizer -> RM0Synthesizer: break loop into stream list
+                        end
+                    else encoding_melody == VECTORIAL
+                        RM0Synthesizer -> RM0_Haptics ++: getLastWave(track_index, band_index, stream_index)
+                        return wave_index
+                        RM0Synthesizer -> RM0_Haptics ++: getWavePosition(track_index, band_index, stream_index, wave_index)
+                        return wave_position
+                        alt timestamp >= stream_position and timestamp <= stream_position + wave_position
+                            RM0Synthesizer -> RM0_Haptics ++: getLastWaveBefore(track_index, band_index, stream_index, timestamp)
+                            return wave_1
+                            RM0Synthesizer -> RM0_Haptics ++: getFirstWaveAfter(track_index, band_index, stream_index, timestamp)
+                            return wave_2
+                            RM0Synthesizer -> RM0Synthesizer ++: evaluateInterpolatedWave(wave_1, wave_2, timestamp)
+                            return evaluated_wave
+                            RM0Synthesizer -> RM0Synthesizer: evaluated_point = evaluated_point + evaluated_wave
+                            RM0Synthesizer -> RM0Synthesizer: break loop into stream list
+                        end
+                    end
+                end
+            end
+        end
+        RM0Synthesizer -> WavIO ++: <<static>>\nwritePoint(output_path, track_index, evaluated_point)
+        autonumber stop
+        return
+        autonumber resume
+    end
+    RM0Synthesizer -> RM0Synthesizer: timestamp = timestamp + 1/frequency_sampling
+end
+
+destroy RM0_Haptics
+return EXIT_SUCCESS
+Main -> OhmData **: <<static>>\ngenerate(rm0Haptics)
+Main -> OhmIO ++: <<static>>\nwrite(ohmData)
+OhmIO -> OhmIO: Internal process to save\nmetadata into an ohm file
+destroy OhmData
+return EXIT_SUCCESS
+return EXIT_SUCCESS
+@enduml

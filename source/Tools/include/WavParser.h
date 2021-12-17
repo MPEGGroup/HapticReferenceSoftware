@@ -31,21 +31,35 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef WAVPARSER_H
+#define WAVPARSER_H
 
-#include "InputParser.h"
+#include <cmath>
+#include <iostream>
+#include <vector>
 
-TEST_CASE("haptics::tools") {
+namespace haptics::tools {
 
-  using haptics::tools::InputParser;
+constexpr uint32_t BITS_PER_SAMPLE = 16;
+constexpr double SCALING = 32767;
 
-  SECTION("Command line arguments") {
+class WavParser {
+public:
+  auto loadFile(const std::string &filename) -> bool;
+  static auto saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool;
+  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
+                       int sampleRate) -> bool;
+  [[nodiscard]] auto getSamplerate() const -> uint32_t;
+  [[nodiscard]] auto getNumChannels() const -> size_t;
+  [[nodiscard]] auto getNumSamples() const -> size_t;
+  [[nodiscard]] auto getSamplesChannel(size_t channel = 0) const -> std::vector<double>;
+  [[nodiscard]] auto getAllSamples() const -> std::vector<std::vector<double>>;
 
-    std::vector<const char *> fake_argv = {"fake_prg", "-f", "input_file", "-o", "output_file"};
-
-    InputParser inputParser(fake_argv);
-    CHECK(inputParser.cmdOptionExists("-f"));
-    CHECK(inputParser.cmdOptionExists("-o"));
-    CHECK_FALSE(inputParser.cmdOptionExists("-q"));
-  }
-}
+private:
+  int sampleRate = 0;
+  size_t numChannels = 0;
+  size_t numSamples = 0;
+  std::vector<std::vector<double>> buffer;
+};
+} // namespace haptics::tools
+#endif // WAVPARSER_H

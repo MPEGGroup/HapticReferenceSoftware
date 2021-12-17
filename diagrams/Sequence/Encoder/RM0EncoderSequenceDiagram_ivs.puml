@@ -1,0 +1,97 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n<i>__IVS Transcoding__</i>\n
+hide unlinked
+
+participant Main
+box "IVS encoder"
+    participant IvsEncoder
+    participant RM0_Haptics
+    participant XmlIO
+    participant XmlData
+end box
+participant OhmData
+
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== IVS File Ingestion ==
+
+Main -> IvsEncoder ++: <<static>>\nencode(ohmData)
+
+IvsEncoder -> OhmData ++: getFilePath(metadata)
+return file_path
+IvsEncoder -> XmlIO ++: <<static>>\nread(file_path)
+XmlIO -> XmlData **: <<create>>
+XmlIO -> XmlIO: readXmlContent(file_path)
+XmlIO -> XmlData ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+return xmlData
+
+== IVS File Transcoding ==
+
+IvsEncoder -> RM0_Haptics **: <<create>>
+loop each launch_effect in xmlData
+    IvsEncoder -> XmlData ++: findBasisEffect(launch_effect)
+    return basis_effect
+    IvsEncoder -> RM0_Haptics ++: findBandAvailable(launch_effect, basis_effect)
+    return band_index
+    IvsEncoder -> RM0_Haptics ++: saveEffect(launch_effect, basis_effect, band_index)
+    note right RM0_Haptics
+        * 1 stream will be generated
+        * It will contain at least 2 keyframes
+        * 1 should be added if the attack time is not 0
+        * Same with the fade time
+    end note
+    autonumber stop
+    return
+    autonumber resume
+end
+
+IvsEncoder -> RM0_Haptics ++: getBandCount()
+return band_count
+loop each repeat_event in xmlData
+    loop each band_index in band_count
+        IvsEncoder -> XmlData ++: getStartTime(repeat_event)
+        return repeat_start_time
+        IvsEncoder -> XmlData ++: getEndTime(repeat_event)
+        return repeat_end_time
+        IvsEncoder -> XmlData ++: getDuration(repeat_event)
+        return repeat_duration
+        IvsEncoder -> XmlData ++: getCount(repeat_event)
+        return repeat_count
+        IvsEncoder -> RM0_Haptics ++: delayStreamsAfter(repeat_end_time,\nrepeat_count * repeat_duration, band_index)
+        autonumber stop
+        return
+        autonumber resume
+        IvsEncoder -> RM0_Haptics ++: duplicateStreamsBetween(repeat_start_time,\nrepeat_end_time, repeat_count, band_index)
+        autonumber stop
+        return
+        autonumber resume
+    end
+end
+
+destroy XmlData
+return rm0Haptics
+
+====
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<-- Main --: EXIT_SUCESS
+destroy RM0_Haptics
+destroy OhmData
+@enduml
