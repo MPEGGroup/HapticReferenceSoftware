@@ -46,40 +46,40 @@ namespace haptics::tools {
       return EXIT_FAILURE;
     }
 
-    if (end == start) {
-      return (start_a + end_a) / 2.0;
-    }
-
     if (start >= end) {
       std::swap(start, end);
       std::swap(start_a, end_a);
+    }
+
+    if (end == start) {
+      return end_a;
     }
 
     return (start_a * (end - x) + end_a * (x - start)) / (end - start);
   }
 
 
-  [[nodiscard]] auto chirpInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
+  [[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency, double end_frequency, int position) -> double {
 
-    int start_t = a.first;
-    int end_t = b.first;
-    double start_f = a.second;
-    double end_f = b.second;
-
-    if (start_t == end_t) {
-      return (start_f + end_f) / 0.2;
-    }
+    int start_t = start_time;
+    int end_t = end_time;
+    double start_f = start_frequency;
+    double end_f = end_frequency;
 
     if (end_t > start_t) {
       std::swap(start_t, end_t);
       std::swap(start_f, end_f);
     }
 
-    if (x < start_t && x > end_t) {
+    if (start_t == end_t) {
+      return end_f;
+    }
+
+    if (position < start_t && position > end_t) {
       return EXIT_FAILURE;
     }
 
-    return x * (end_f - start_f) / (end_t - start_t) + start_f;
+    return position * (end_f - start_f) / (end_t - start_t) + start_f;
   }
 
 

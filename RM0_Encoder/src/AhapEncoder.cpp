@@ -159,7 +159,7 @@ namespace haptics::encoder {
     auto first_kf_a = std::find_if(amplitudes->begin(), amplitudes->end(), [t](std::pair<int, double> a) { return a.first >= t.getPosition(); });
 
     //IF NOT FIRST KEY FRAME && THERE IS A KEYFRAME && KEYFRAME IS NOT THE LAST ONE AND ON THE EVENT BEGINNING
-    if (first_kf_a > amplitudes->begin() && first_kf_a < amplitudes->end() && (first_kf_a->first != t.getPosition() || first_kf_a != amplitudes->end() - 1)) {
+    if (first_kf_a > amplitudes->begin() && first_kf_a < amplitudes->end()) {
       //MULTIPLY AMPLITUDE MODULATION
       k.setAmplitudeModulation(static_cast<float>(haptics::tools::linearInterpolation(*(first_kf_a - 1), *first_kf_a, t.getPosition())) * k.getAmplitudeModulation());
     } else if(first_kf_a == amplitudes->begin()) {
@@ -291,7 +291,9 @@ namespace haptics::encoder {
       c.getKeyframeAt(0).setFrequencyModulation(std::clamp(freq, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX));
       first_kf_f++;
     } else if ((c.getPosition() < first_kf_f->first) && first_kf_f != frequencies->begin()) {
-      double freq = haptics::tools::chirpInterpolation(*(first_kf_f - 1), *first_kf_f, c.getPosition()) + base_freq;
+      double freq = haptics::tools::chirpInterpolation(
+          (first_kf_f - 1)->first, (first_kf_f)->first, (first_kf_f - 1)->second + base_freq,
+          (first_kf_f)->second + base_freq, c.getPosition());
       freq = std::clamp(freq, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
       c.getKeyframeAt(0).setFrequencyModulation(static_cast<int>(
           haptics::tools::genericNormalization(BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX,
@@ -301,7 +303,9 @@ namespace haptics::encoder {
     for (auto it = first_kf_f; it < frequencies->end(); it++) {
       // IF AFTER OR ON THE END OF THE EFFECT, UPDATE END
       if (it->first >= (c.getPosition() + k_end.getRelativePosition())) {
-        double freq = haptics::tools::chirpInterpolation(*(it - 1), *it, c.getPosition() + k_end.getRelativePosition());
+        double freq = haptics::tools::chirpInterpolation(
+            (it - 1)->first, it->first, (it - 1)->second + base_freq,
+            it->second + base_freq, c.getPosition() + k_end.getRelativePosition());
         freq = std::clamp(freq + base_freq, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
         k_end.setFrequencyModulation(static_cast<int>(haptics::tools::genericNormalization(
             BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
