@@ -80,10 +80,10 @@ void Wavelet::inv_DWT(std::vector<double> &in, std::vector<double> &out, int lev
   }
 }
 
-void Wavelet::symconv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out) {
+template <size_t hSize>
+void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out) {
 
   size_t inSize = in.size();
-  size_t hSize = h.size();
 
   // symmetric extension
   auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
@@ -102,11 +102,11 @@ void Wavelet::symconv1D(std::vector<double> &in, std::vector<double> &h, std::ve
   std::copy(conv.begin() + lext * 2, conv.end() - lext * 2, out.begin());
 }
 
-void Wavelet::symconv1DAdd(std::vector<double> &in, std::vector<double> &h,
+template <size_t hSize>
+void Wavelet::symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h,
                            std::vector<double> &out) {
 
   size_t inSize = in.size();
-  size_t hSize = h.size();
 
   // symmetric extension
   auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
@@ -127,11 +127,11 @@ void Wavelet::symconv1DAdd(std::vector<double> &in, std::vector<double> &h,
   }
 }
 
-void Wavelet::conv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out) {
+template <size_t hSize>
+void Wavelet::conv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out) {
 
   size_t j = 0;
   size_t inSize = in.size();
-  size_t hSize = h.size();
   for (j = 0; j < inSize; j++) {
     out[j] = in[j] * h[0];
   }
@@ -140,7 +140,7 @@ void Wavelet::conv1D(std::vector<double> &in, std::vector<double> &h, std::vecto
   }
   for (int i = 1; i < hSize; i++) {
     for (j = i; j < inSize + i; j++) {
-      out[j] += in[j - i] * h[i];
+      out[j] += in[j - i] * h.at(i);
     }
   }
 }

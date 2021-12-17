@@ -42,7 +42,7 @@ constexpr size_t bl = 512;
 constexpr int levels = 1;
 constexpr int hSize = 7;
 constexpr int prec = 15;
-constexpr double prec_comparison = 0.001;
+constexpr double prec_comparison = 0.00001;
 
 TEST_CASE("haptics::filterbank::Wavelet") {
 
@@ -65,9 +65,12 @@ TEST_CASE("haptics::filterbank::Wavelet") {
     for (size_t i = 0; i < bl; i++) {
       if (abs(in_rec[i] - in[i]) > prec_comparison) {
         equal = false;
-        ;
+        break;
       }
     }
+    /*for (size_t i = 0; i < bl; i++) {
+      std::cout << in[i] << ", " << in_rec[i] << std::endl;
+    }*/
     CHECK(equal);
   }
 }
