@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.13)
 project(RM0)
 
 set(CMAKE_CXX_STANDARD 17)
-include(cmake/clang_tidy.cmake)
 
 option(BUILD_DECODER "Enable building Decoder" ON)
 option(BUILD_ENCODER "Enable building Encoder" ON)
@@ -17,18 +16,6 @@ if (BUILD_CATCH2)
     enable_testing()
 endif()
 
-include(cmake/nlohmann_json.cmake)
+include_directories("source")
 
-add_subdirectory("tools")
-add_subdirectory("types")
-
-include_directories("tools/src")
-include_directories("types/src")
-include_directories("types/include")
-
-if(BUILD_DECODER)
-    add_subdirectory("RM0_Decoder")
-endif()
-if(BUILD_ENCODER)
-    add_subdirectory("RM0_Encoder")
-endif()
+add_subdirectory("source")
