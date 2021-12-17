@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _INPUTPARSER_H_
-#define _INPUTPARSER_H_
+#ifndef INPUTPARSER_H
+#define INPUTPARSER_H
 
 #include <algorithm>
 #include <iostream>
@@ -51,4 +51,4 @@ private:
   std::vector<std::string> tokens;
 };
 } // namespace haptics::tools
-#endif //_INPUTPARSER_H_
+#endif // INPUTPARSER_H
