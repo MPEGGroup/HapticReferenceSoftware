@@ -18,6 +18,7 @@ if (BUILD_CATCH2)
 endif()
 
 add_subdirectory("tools")
+add_subdirectory("types")
 
 include_directories("tools/src")
 

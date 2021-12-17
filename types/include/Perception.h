@@ -31,36 +31,37 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#ifndef _PERCEPTION_H_
+#define _PERCEPTION_H_
 
-using haptics::tools::InputParser;
+#include "track.h"
+#include <fstream>
+#include <vector>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+namespace haptics::types {
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+class Perception {
+public:
+  explicit Perception() = default;
+  explicit Perception(int newId, std::string newDescription,
+                   std::vector<Track> newTracks)
+      : id(newId)
+      , description(newDescription)
+      , tracks(newTracks){};
 
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
-}
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  auto getTracksSize() -> size_t;
+  auto getTrackAt(int index) -> haptics::types::Track &;
+  auto addTrack(haptics::types::Track &newBand) -> void;
+
+private:
+  int id = -1;
+  std::string description = "";
+  std::vector<Track> tracks = {};
+
+};
+} // namespace haptics::types
+#endif //_PERCEPTION_H_

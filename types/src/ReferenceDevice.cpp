@@ -31,36 +31,32 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#include "../include/Avatar.h"
 
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
+[[nodiscard]] auto Avatar::getId() const -> int {
+  return id;
 }
+
+auto Avatar::setId(int newId) -> void {
+  id = newId;
+}
+
+[[nodiscard]] auto Avatar::getLod() const -> int {
+	return lod;
+}
+
+auto Avatar::setLod(int newLod) -> void {
+	lod = newLod;
+}
+
+[[nodiscard]] auto Avatar::getType() const -> int {
+	return type;
+}
+
+auto Avatar::setType(int newType) -> void {
+	type = newType;
+}
+
+} // namespace haptics::types

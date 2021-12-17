@@ -31,36 +31,31 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#ifndef _KEYFRAME_H_
+#define _KEYFRAME_H_
 
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+class Keyframe {
+public:
+  explicit Keyframe() = default;
+  explicit Keyframe(int newRelativePosition, float newAmplitudeModulation,
+                    int newFrequencyModulation)
+      : relativePosition(newRelativePosition)
+      , amplitudeModulation(newAmplitudeModulation)
+      , frequencyModulation(newFrequencyModulation) {};
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+  [[nodiscard]] auto getRelativePosition() const -> int;
+  auto setRelativePosition(int newRelativePosition) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> float;
+  auto setAmplitudeModulation(float newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> int;
+  auto setFrequencyModulation(int newFrequencyModulation) -> void;
 
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
-}
+private:
+  int relativePosition = 0;
+  float amplitudeModulation = 0;
+  int frequencyModulation = 0;
+};
+} // namespace haptics::types
+#endif //_KEYFRAME_H_

@@ -31,36 +31,68 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#include "../include/Haptics.h"
+#include <ctime>
 
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
+[[nodiscard]] auto Haptics::getVersion() const -> std::string {
+    return version;
 }
+
+auto Haptics::setVersion(std::string& newVersion) -> void {
+    version = newVersion;
+}
+
+[[nodiscard]] auto Haptics::getDate() const -> std::string {
+    return date;
+}
+auto Haptics::setDate(std::string& newDate) -> void {
+    date = newDate;
+}
+
+[[nodiscard]] auto Haptics::getDescription() const -> std::string {
+  return description;
+}
+
+auto Haptics::setDescription(std::string &newDescription) -> void {
+  description = newDescription;
+}
+
+auto Haptics::getPerceptionsSize() -> size_t {
+  return perceptions.size();
+}
+
+auto Haptics::getPerceptionAt(int index) -> Perception& {
+  return perceptions.at(index);
+
+}
+
+auto Haptics::addPerception(Perception& newBand) -> void {
+  perceptions.push_back(newBand);
+}
+
+auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
+    version = std::to_string(data.getVersion());
+    time_t now = time(0);
+    date = ctime(&now);
+    description = data.getDescription();
+    short numElements = data.getNumElements();
+    for (int i = 0 ; i < numElements ; i++ ) {
+      auto element = data.getHapticElementMetadataAt(i);
+      std::string elemDescription = element.elementDescription;
+      short numChannels = element.numHapticChannels;
+      std::vector<Track> tracks;
+      for (int j = 0; j < numElements; j++) {
+        auto channel = element.channelsMetadata[j];
+        Track track(j, channel.channelDescription, channel.gain, 1,
+                    static_cast<uint32_t>(channel.bodyPartMask));
+        tracks.push_back(track);
+      }
+      Perception perception(i, elemDescription, tracks);
+      perceptions.push_back(perception);
+    }
+}
+
+} // namespace haptics::types

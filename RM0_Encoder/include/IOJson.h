@@ -31,36 +31,22 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#ifndef _IOJSON_H_
+#define _IOJSON_H_
 
-using haptics::tools::InputParser;
+#include <string>
+#include "../../types/include/Haptics.h"
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+namespace haptics::encoder {
+class IOJson {
+public:
+  explicit IOJson() = default;
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+  auto loadFile(const std::string filePath) -> haptics::types::Haptics;
+  auto writeFile(haptics::types::Haptics haptic, const std::string filePath) -> void;
 
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
-}
+private:
+};
+
+} // namespace haptics::encoder
+#endif //_IOJSON_H_

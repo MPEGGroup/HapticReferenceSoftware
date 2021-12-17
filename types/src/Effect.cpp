@@ -31,36 +31,44 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#include "../include/Effect.h"
 
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
+[[nodiscard]] auto Effect::getPosition() const -> int {
+  return position;
 }
+
+auto Effect::setPosition(int newPosition) -> void {
+  position = newPosition;
+}
+
+[[nodiscard]] auto Effect::getPhase() const -> float {
+  return phase;
+}
+
+auto Effect::setPhase(float newPhase) -> void {
+  phase = newPhase;
+}
+
+[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
+  return baseSignal;
+}
+
+auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
+  baseSignal = newBaseSignal;
+}
+
+auto Effect::getKeyframesSize() -> size_t {
+  return keyframes.size();
+}
+
+auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
+  return keyframes.at(index);
+}
+
+auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+  keyframes.push_back(newKeyframe);
+}
+
+} // namespace haptics::types

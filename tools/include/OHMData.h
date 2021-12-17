@@ -117,6 +117,16 @@ namespace haptics::tools {
         auto loadFile(const std::string filePath) -> void;
         auto writeFile(const std::string filePath) -> void;
 
+        [[nodiscard]] auto getVersion() const -> short;
+        auto setVersion(short newVersion) -> void;
+        [[nodiscard]] auto getNumElements() const -> short;
+        auto setNumElements(short newNumElements) -> void;
+        [[nodiscard]] auto getDescription() const -> std::string;
+        auto setDescription(std::string &newDescription) -> void;
+        auto getHapticElementMetadataSize() -> size_t;
+        auto getHapticElementMetadataAt(int index) -> HapticElementMetadata &;
+        auto addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void;
+
 	};
 }
 #endif

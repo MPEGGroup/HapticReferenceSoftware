@@ -31,36 +31,37 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <InputParser.h>
-//#include <Haptics.h>
+#include "../include/Perception.h"
 
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::cout << "The file to process is : " << filename << "\n";
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-  return EXIT_SUCCESS;
+[[nodiscard]] auto Perception::getId() const -> int {
+    return id;
 }
+
+auto Perception::setId(int newId) -> void {
+    id = newId;
+}
+
+[[nodiscard]] auto Perception::getDescription() const -> std::string {
+    return description;
+}
+
+auto Perception::setDescription(std::string &newDescription) -> void {
+    description = newDescription;
+}
+
+
+auto Perception::getTracksSize() -> size_t {
+    return tracks.size();
+}
+
+auto Perception::getTrackAt(int index) -> haptics::types::Track& {
+    return tracks.at(index);
+}
+
+auto Perception::addTrack(haptics::types::Track& newBand) -> void {
+    tracks.push_back(newBand);
+}
+
+} // namespace haptics::types
