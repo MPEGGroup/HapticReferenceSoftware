@@ -33,7 +33,7 @@
 
 #include <catch2/catch.hpp>
 
-#include <WavParser.h>
+#include <Tools/include/WavParser.h>
 #include <filesystem>
 #include <vector>
 
@@ -54,6 +54,5 @@ TEST_CASE("haptics::tools::WavParser") {
     std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
     std::filesystem::remove(filename);
-
   }
 }

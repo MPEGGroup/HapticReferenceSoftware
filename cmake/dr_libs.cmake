@@ -20,6 +20,4 @@ if(BUILD_DR_LIBS)
 
     # Make DR_LIBS header files available
     include_directories(${CMAKE_BINARY_DIR}/_deps/dr_libs-src/)
-    #add_library(dr_libs INTERFACE)
-    #target_include_directories(dr_libs INTERFACE ${CMAKE_BINARY_DIR}/_deps/dr_libs-src/)
 endif()

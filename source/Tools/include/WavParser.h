@@ -31,12 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _WAVPARSER_H_
-#define _WAVPARSER_H_
+#ifndef WAVPARSER_H
+#define WAVPARSER_H
 
+#include <cmath>
 #include <iostream>
 #include <vector>
-#include <math.h>
 
 namespace haptics::tools {
 
@@ -49,11 +49,11 @@ public:
   static auto saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool;
   static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
                        int sampleRate) -> bool;
-  auto getSamplerate() const -> uint32_t;
-  auto getNumChannels() const -> size_t;
-  auto getNumSamples() const -> size_t;
-  auto getSamplesChannel(size_t channel = 0) const -> std::vector<double>;
-  auto getAllSamples() const -> std::vector<std::vector<double>>;
+  [[nodiscard]] auto getSamplerate() const -> uint32_t;
+  [[nodiscard]] auto getNumChannels() const -> size_t;
+  [[nodiscard]] auto getNumSamples() const -> size_t;
+  [[nodiscard]] auto getSamplesChannel(size_t channel = 0) const -> std::vector<double>;
+  [[nodiscard]] auto getAllSamples() const -> std::vector<std::vector<double>>;
 
 private:
   int sampleRate = 0;
@@ -62,4 +62,4 @@ private:
   std::vector<std::vector<double>> buffer;
 };
 } // namespace haptics::tools
-#endif //_WAVPARSER_H_
+#endif // WAVPARSER_H
