@@ -31,30 +31,52 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _WAVELET_H_
-#define _WAVELET_H_
+#include <FilterBank/include/Filterbank.h>
 
-#include <iostream>
-#include <vector>
-#include <math.h>
+namespace haptics::filterbank {
 
-namespace haptics::tools {
+constexpr int ORDER = 8;
 
-class Wavelet {
-public:
+Filterbank::Filterbank(double fs) { this->fs = fs; }
 
-    void DWT(std::vector<double> &in, std::vector<double> &out, int levels);
-    void inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels);
+auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
+  Iir::Butterworth::LowPass<ORDER> filter;
+  filter.setup(fs, f);
 
-    static void symconv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out);
-    static void symconv1DAdd(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out);
-    static void conv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out);
+  std::vector<double> out;
+  out.resize(in.size());
 
-private:
-    std::vector<double> lp = {0.037828455506995,-0.023849465019380,-0.110624404418423,0.377402855612654,0.852698679009404,0.377402855612654,-0.110624404418423,-0.023849465019380,0.037828455506995};
-    std::vector<double> hp = {-0.064538882628938,0.040689417609559,0.418092273222212,-0.788485616405665,0.418092273222212,0.040689417609559,-0.064538882628938};
-    std::vector<double> lpr = {-0.0645388826289385,-0.0406894176095585,0.418092273222212,0.788485616405665,0.418092273222212,-0.0406894176095585,-0.0645388826289385};
-    std::vector<double> hpr = {-0.0378284555069954,-0.0238494650193800,0.110624404418423,0.377402855612654,-0.852698679009404,0.377402855612654,0.110624404418423,-0.0238494650193800,-0.0378284555069954};
-};
-} // namespace haptics::tools
-#endif //_WAVELET_H_
+  for (size_t i = 0; i < in.size(); i++) {
+    out[i] = filter.filter(in[i]);
+  }
+
+  filter.reset();
+
+  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
+    *ri = filter.filter(*ri);
+  }
+
+  return out;
+}
+
+auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
+  Iir::Butterworth::HighPass<ORDER> filter;
+  filter.setup(fs, f);
+
+  std::vector<double> out;
+  out.resize(in.size());
+
+  for (size_t i = 0; i < in.size(); i++) {
+    out[i] = filter.filter(in[i]);
+  }
+
+  filter.reset();
+
+  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
+    *ri = filter.filter(*ri);
+  }
+
+  return out;
+}
+
+} // namespace haptics::filterbank

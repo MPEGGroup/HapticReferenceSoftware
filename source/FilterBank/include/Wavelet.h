@@ -31,67 +31,38 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef WAVELET_H
+#define WAVELET_H
 
-#include "Filterbank.h"
-#include <vector>
+#include <cmath>
 #include <iostream>
+#include <vector>
 
-constexpr size_t BL = 25;
-constexpr double FS = 8000;
+namespace haptics::filterbank {
 
-TEST_CASE("haptics::tools::Filterbank") {
+class Wavelet {
+public:
+  void DWT(std::vector<double> &in, std::vector<double> &out, int levels);
+  void inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels);
 
-    using haptics::tools::Filterbank;
+  static void symconv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out);
+  static void symconv1DAdd(std::vector<double> &in, std::vector<double> &h,
+                           std::vector<double> &out);
+  static void conv1D(std::vector<double> &in, std::vector<double> &h, std::vector<double> &out);
 
-    SECTION("LP") {
-
-        std::vector<double> in(BL,0);
-        in[(BL+1)/2-1] = 1;
-        Filterbank fb(FS);
-        std::vector<double> out = fb.LP(in,FS/4);
-
-        /*for(int i=0; i<BL; i++){
-            std::cout << out[i] << std::endl;
-        }*/
-
-        CHECK(true);
-
-
-    }
-
-    SECTION("HP") {
-
-        std::vector<double> in(BL,0);
-        in[(BL+1)/2-1] = 1;
-        Filterbank fb(FS);
-        std::vector<double> out = fb.HP(in,FS/4);
-
-        /*for(int i=0; i<BL; i++){
-            std::cout << out[i] << std::endl;
-        }*/
-
-        CHECK(true);
-
-
-    }
-
-    SECTION("LP+HP") {
-
-        std::vector<double> in(BL,0);
-        in[(BL+1)/2-1] = 1;
-        Filterbank fb(FS);
-        std::vector<double> out1 = fb.HP(in,FS/4);
-
-        std::vector<double> out2 = fb.LP(in,FS/4);
-
-        /*for(int i=0; i<BL; i++){
-            std::cout << out1[i] +out2[i] << std::endl;
-        }*/
-
-        CHECK(true);
-
-
-
-    }
-}
+private:
+  std::vector<double> lp = {0.037828455506995,  -0.023849465019380, -0.110624404418423,
+                            0.377402855612654,  0.852698679009404,  0.377402855612654,
+                            -0.110624404418423, -0.023849465019380, 0.037828455506995};
+  std::vector<double> hp = {-0.064538882628938, 0.040689417609559, 0.418092273222212,
+                            -0.788485616405665, 0.418092273222212, 0.040689417609559,
+                            -0.064538882628938};
+  std::vector<double> lpr = {-0.0645388826289385, -0.0406894176095585, 0.418092273222212,
+                             0.788485616405665,   0.418092273222212,   -0.0406894176095585,
+                             -0.0645388826289385};
+  std::vector<double> hpr = {-0.0378284555069954, -0.0238494650193800, 0.110624404418423,
+                             0.377402855612654,   -0.852698679009404,  0.377402855612654,
+                             0.110624404418423,   -0.0238494650193800, -0.0378284555069954};
+};
+} // namespace haptics::filterbank
+#endif // WAVELET_H

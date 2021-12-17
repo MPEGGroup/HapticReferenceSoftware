@@ -31,17 +31,15 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FILTERBANK_H_
-#define _FILTERBANK_H_
+#ifndef FILTERBANK_H
+#define FILTERBANK_H
 
 #include <iostream>
 #include <vector>
 
-//#include "iir1/Iir.h"
-//#include <iir1/Iir.h>
 #include <Iir.h>
 
-namespace haptics::tools {
+namespace haptics::filterbank {
 
 class Filterbank {
 public:
@@ -53,5 +51,5 @@ public:
 private:
   double fs;
 };
-} // namespace haptics::tools
-#endif //_FILTERBANK_H_
+} // namespace haptics::filterbank
+#endif // FILTERBANK_H

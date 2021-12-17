@@ -31,10 +31,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Wavelet.h"
+#include <FilterBank/include/Wavelet.h>
 #include <algorithm>
 
-namespace haptics::tools {
+namespace haptics::filterbank {
 
 void Wavelet::DWT(std::vector<double> &in, std::vector<double> &out, int levels) {
 
@@ -145,4 +145,4 @@ void Wavelet::conv1D(std::vector<double> &in, std::vector<double> &h, std::vecto
   }
 }
 
-} // namespace haptics::tools
+} // namespace haptics::filterbank

@@ -5,6 +5,7 @@ project(CODEC)
 include(../cmake/clang_tidy.cmake)
 
 add_subdirectory("Tools")
+add_subdirectory("FilterBank")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")

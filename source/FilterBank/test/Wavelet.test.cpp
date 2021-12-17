@@ -33,10 +33,10 @@
 
 #include <catch2/catch.hpp>
 
-#include "Wavelet.h"
-#include <vector>
-#include <iostream>
+#include <FilterBank/include/Wavelet.h>
 #include <iomanip>
+#include <iostream>
+#include <vector>
 
 constexpr size_t bl = 512;
 constexpr int levels = 1;
@@ -44,31 +44,30 @@ constexpr int hSize = 7;
 constexpr int prec = 15;
 constexpr double prec_comparison = 0.001;
 
-TEST_CASE("haptics::tools::Wavelet") {
+TEST_CASE("haptics::filterbank::Wavelet") {
 
-  using haptics::tools::Wavelet;
+  using haptics::filterbank::Wavelet;
 
   SECTION("DWT") {
 
     Wavelet wavelet;
-    std::vector<double> in(bl,0);
-    std::vector<double> out(bl,0);
-    std::vector<double> in_rec(bl,0);
-    for (size_t i=0; i<bl; i++) {
-        in[i] = (double)i;
+    std::vector<double> in(bl, 0);
+    std::vector<double> out(bl, 0);
+    std::vector<double> in_rec(bl, 0);
+    for (size_t i = 0; i < bl; i++) {
+      in[i] = (double)i;
     }
 
-    wavelet.DWT(in,out,levels);
-    wavelet.inv_DWT(out,in_rec,levels);
+    wavelet.DWT(in, out, levels);
+    wavelet.inv_DWT(out, in_rec, levels);
 
     bool equal = true;
-    for (size_t i=0; i<bl; i++){
-        if (abs(in_rec[i]-in[i])>prec_comparison) {
-            equal = false;;
-        }
+    for (size_t i = 0; i < bl; i++) {
+      if (abs(in_rec[i] - in[i]) > prec_comparison) {
+        equal = false;
+        ;
+      }
     }
     CHECK(equal);
-
-
   }
 }

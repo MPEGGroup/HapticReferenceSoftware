@@ -31,54 +31,60 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Filterbank.h"
+#include <catch2/catch.hpp>
 
-namespace haptics::tools {
+#include <FilterBank/include/Filterbank.h>
+#include <iostream>
+#include <vector>
 
-constexpr int ORDER = 8;
+constexpr size_t BL = 25;
+constexpr double FS = 8000;
 
-Filterbank::Filterbank(double fs) {
-    this->fs = fs;
+TEST_CASE("haptics::filterbank::Filterbank") {
+
+  using haptics::filterbank::Filterbank;
+
+  SECTION("LP") {
+
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.LP(in, FS / 4);
+
+    /*for(int i=0; i<BL; i++){
+        std::cout << out[i] << std::endl;
+    }*/
+
+    CHECK(true);
+  }
+
+  SECTION("HP") {
+
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.HP(in, FS / 4);
+
+    /*for(int i=0; i<BL; i++){
+        std::cout << out[i] << std::endl;
+    }*/
+
+    CHECK(true);
+  }
+
+  SECTION("LP+HP") {
+
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out1 = fb.HP(in, FS / 4);
+
+    std::vector<double> out2 = fb.LP(in, FS / 4);
+
+    /*for(int i=0; i<BL; i++){
+        std::cout << out1[i] +out2[i] << std::endl;
+    }*/
+
+    CHECK(true);
+  }
 }
-
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-    Iir::Butterworth::LowPass<ORDER> filter;
-    filter.setup(fs,f);
-
-    std::vector<double> out;
-    out.resize(in.size());
-
-    for(size_t i=0; i<in.size(); i++) {
-        out[i] = filter.filter(in[i]);
-    }
-
-    filter.reset();
-
-    for (auto ri = out.rbegin(); ri != out.rend(); ++ri ) {
-        *ri = filter.filter(*ri);
-    }
-
-    return out;
-}
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-    Iir::Butterworth::HighPass<ORDER> filter;
-    filter.setup(fs,f);
-
-    std::vector<double> out;
-    out.resize(in.size());
-
-    for(size_t i=0; i<in.size(); i++) {
-        out[i] = filter.filter(in[i]);
-    }
-
-    filter.reset();
-
-    for (auto ri = out.rbegin(); ri != out.rend(); ++ri ) {
-        *ri = filter.filter(*ri);
-    }
-
-    return out;
-}
-
-} // namespace haptics::tools
