@@ -63,7 +63,7 @@ TEST_CASE("haptics::filterbank::Wavelet") {
 
     bool equal = true;
     for (size_t i = 0; i < bl; i++) {
-      if (abs(in_rec[i] - in[i]) > prec_comparison) {
+      if (fabs(in_rec[i] - in[i]) > prec_comparison) {
         equal = false;
         break;
       }
