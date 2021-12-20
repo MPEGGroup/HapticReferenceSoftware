@@ -1,0 +1,47 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n<i>__Metadata Ingestion__</i>\n
+hide unlinked
+
+participant Main
+box "RM0 serialization"
+    participant OhmIO
+    participant OhmData
+end box
+
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== Metadata parsing ==
+
+Main -> OhmIO ++: <<static>>\nread(ohm_path)
+
+OhmIO -> OhmData **: <<create>>
+
+OhmIO -> OhmIO: readBinaryContent(ohm_path)
+
+OhmIO -> OhmData ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+
+return ohmData
+
+====
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<-- Main --: EXIT_SUCESS
+destroy OhmData
+@enduml

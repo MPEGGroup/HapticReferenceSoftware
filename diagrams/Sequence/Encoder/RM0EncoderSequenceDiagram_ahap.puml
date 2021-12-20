@@ -1,0 +1,146 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n<i>__AHAP Transcoding__</i>\n
+hide unlinked
+
+participant Main
+box "AHAP encoder"
+    participant AhapEncoder
+    participant RM0_Haptics
+    participant JsonIO
+    participant JsonData
+end box
+participant OhmData
+
+[-> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+== AHAP File Ingestion ==
+
+Main -> AhapEncoder ++: <<static>>\nencode(ohmData)
+
+AhapEncoder -> OhmData ++: getFilePath(metadata)
+return file_path
+AhapEncoder -> JsonIO ++: <<static>>\nread(file_path)
+JsonIO -> JsonData **: <<create>>
+JsonIO -> JsonIO: readJsonContent(file_path)
+JsonIO -> JsonData ++: saveInformation()
+autonumber stop
+return
+autonumber resume
+return jsonData
+
+== AHAP File Transcoding ==
+
+AhapEncoder -> RM0_Haptics **: <<create>>
+AhapEncoder -> JsonData ++: getParameterCurves()
+return parameter_curves_list
+
+group Transient Transcoding
+    AhapEncoder -> RM0_Haptics ++: generateEmptyTransientBand()
+    autonumber stop
+    return
+    autonumber resume
+
+    AhapEncoder -> JsonData ++: getTransients()
+    return transient_list
+    loop for each transient in transient_list
+        loop for each parameter_curve in parameter_curves_list
+            alt transient is inside parameter_curve
+                AhapEncoder -> AhapEncoder: updateTransientValue(transient, parameter_curve)
+            end
+        end
+        AhapEncoder -> RM0_Haptics ++: addTransient(transient)
+        autonumber stop
+        return
+        autonumber resume
+    end
+end
+
+group Continuous Transcoding
+    AhapEncoder -> JsonData ++: getContinuous()
+    return continuous_list
+
+    loop for each continuous in continuous_list
+        AhapEncoder -> RM0_Haptics ++: findBandAvailable(continous)
+        return band_index
+        alt band_index == -1
+            AhapEncoder -> RM0_Haptics ++: generateEmptyBand(continous)
+            return band_index
+        end
+        AhapEncoder -> RM0_Haptics ++: save(continous, band_index)
+        return stream_index
+        note right
+            * 1 stream will be generated
+            * It will contain 2 keyframes
+            * Position will be the Time and Time+EventDuration parameters
+            * Frequency and Amplitude will be constant
+        end note
+
+        loop for each parameter_curve in parameter_curves_list
+            alt continous is overlapping parameter_curve
+                loop for each control_point in parameter_curve
+                    alt control_point is last before the stream
+                        AhapEncoder -> RM0_Haptics ++: updateFirstKeyframe(parameter_curve, control_point, band_index, stream_index)
+                        autonumber stop
+                        return
+                        autonumber resume
+                        note right
+                            The first keyframe should be updated to fit with the interpolation function
+                            corresponding to the current parameter_curve
+                        end note
+                    else control_point is first after the stream
+                        AhapEncoder -> RM0_Haptics ++: updateLastKeyframe(parameter_curve, control_point, band_index, stream_index)
+                        autonumber stop
+                        return
+                        autonumber resume
+                        note right
+                            The last keyframe should be updated to fit with the interpolation function
+                            corresponding to the current parameter_curve
+                        end note
+                    else control_point is inside the stream
+                        AhapEncoder -> RM0_Haptics ++: getKeyframeAtPosition(control_point, band_index, stream_index)
+                        return keyframe_index
+                        alt keyframe_index == -1
+                            AhapEncoder -> RM0_Haptics ++: insertKeyframe(parameter_curve, control_point, band_index, stream_index)
+                            autonumber stop
+                            return
+                            autonumber resume
+                            note right
+                                The keyframe should be inserted in a way to keep the list sorted by time
+                            end note
+                        else
+                            AhapEncoder -> RM0_Haptics ++: updateKeyframe(parameter_curve, control_point, band_index, stream_index)
+                            autonumber stop
+                            return
+                            autonumber resume
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+destroy JsonData
+return rm0Haptics
+
+====
+
+...
+ref over Main, OhmData
+    <i>cf. RM0EncoderSequence</i>
+end ref
+...
+
+[<-- Main --: EXIT_SUCESS
+destroy OhmData
+destroy RM0_Haptics
+@enduml

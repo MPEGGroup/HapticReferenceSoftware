@@ -1,0 +1,114 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+!includesub ../style/style.puml!STYLE
+
+title **RM0 Encoder sequence diagram**\n
+hide unlinked
+
+actor User
+participant Main
+box "RM0 serialization"
+    collections RM0SerializationRelatedClasses
+end box
+box "Metadata processing"
+    collections MetadataRelatedClasses
+end box
+box "PCM encoder"
+    collections PcmEncoderRelatedClasses
+end box
+box "AHAP encoder"
+    collections AhapEncoderRelatedClasses
+end box
+box "IVS encoder"
+    collections IvsEncoderRelatedClasses
+end box
+
+note over User
+    The user want to encode any reference file
+    So he needs to give the file path and its ohm file
+end note
+
+User -> Main ++: encode(ohm_path, encoding_quality,\nis_binary, output_path)
+
+== Metadata parsing ==
+
+Main -> MetadataRelatedClasses ++: read(ohm_path)
+
+|||
+ref over MetadataRelatedClasses
+    Here the ohm binary content
+    will be interpreted and a
+    ohmData object is returned.
+
+    <i>cf. RM0EncoderSequence_ohm</i>
+end ref
+|||
+
+return ohmData
+== File ingestion ==
+
+Main -> Main : checkFileExtension(ohmData)
+alt extension is WAV_FILE
+    Main -> PcmEncoderRelatedClasses ++: encode(encoding_quality, ohmData)
+
+    |||
+    ref over PcmEncoderRelatedClasses
+        Here the given wav file will be read
+        and converted into by a frequency
+        analysis process. At the end, a
+        RM0_Haptics instance is returned.
+
+        <i>cf. RM0EncoderSequence_wav</i>
+    end ref
+    |||
+
+    return rm0Haptics
+else extension is AHAP_FILE
+    Main -> AhapEncoderRelatedClasses ++: encode(ohmData)
+
+    |||
+    ref over AhapEncoderRelatedClasses
+        Here the given AHAP file will be read
+        and transcoded into a RM0_Haptics
+        instance which will be returned.
+
+        <i>cf. RM0EncoderSequence_ahap</i>
+    end ref
+    |||
+
+    return rm0Haptics
+else extension is IVS_FILE
+    Main -> IvsEncoderRelatedClasses ++: encode(ohmData)
+
+    |||
+    ref over IvsEncoderRelatedClasses
+        Here the given IVS file will be read
+        and transcoded into a RM0_Haptics
+        instance which will be returned.
+
+        <i>cf. RM0EncoderSequence_ivs</i>
+    end ref
+    |||
+
+    return rm0Haptics
+end
+
+== RM0 serialization ==
+
+Main -> RM0SerializationRelatedClasses ++: write(rm0Haptics, output_path, is_binary)
+
+|||
+ref over RM0SerializationRelatedClasses
+    Here the RM0_Haptics instance content
+    will be writen inside an output file.
+
+    <i>cf. RM0EncoderSequence_serialize</i>
+end ref
+|||
+
+return EXIT_SUCCESS
+
+====
+
+return EXIT_SUCCESS
+@enduml
