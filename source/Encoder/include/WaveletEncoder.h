@@ -37,7 +37,7 @@
 #include <vector>
 #include <cmath>
 
-#include "../../Tools/include/PsychohapticModel.h"
+#include "PsychohapticModel/include/PsychohapticModel.h"
 
 constexpr size_t WAVMAXLENGTH = 8;
 constexpr int MAXBITS = 15;

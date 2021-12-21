@@ -6,6 +6,7 @@ include(../cmake/clang_tidy.cmake)
 
 add_subdirectory("Tools")
 add_subdirectory("FilterBank")
+add_subdirectory("PsychohapticModel")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")

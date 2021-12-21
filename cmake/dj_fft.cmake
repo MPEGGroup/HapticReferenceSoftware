@@ -18,6 +18,6 @@ if(BUILD_DJ_FFT)
 
     fetchcontent_makeavailable(DJ_FFT)
 
-    # Make DR_LIBS header files available
+    # Make DJ_FFT header files available
     include_directories(${CMAKE_BINARY_DIR}/_deps/dj_fft-src/)
 endif()

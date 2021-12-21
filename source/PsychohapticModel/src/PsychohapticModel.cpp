@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/PsychohapticModel.h>
+#include <PsychohapticModel/include/PsychohapticModel.h>
 
 #include <dj_fft.h>
 
