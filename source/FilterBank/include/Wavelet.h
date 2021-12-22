@@ -31,49 +31,48 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
-#include <Tools/include/InputParser.h>
+#ifndef WAVELET_H
+#define WAVELET_H
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::tools::InputParser;
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <array>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+namespace haptics::filterbank {
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+constexpr double LP_0 = 0.852698679009404;
+constexpr double LP_1 = 0.377402855612654;
+constexpr double LP_2 = -0.110624404418423;
+constexpr double LP_3 = -0.023849465019380;
+constexpr double LP_4 = 0.037828455506995;
+constexpr size_t LP_SIZE = 9;
 
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
+constexpr double HP_0 = -0.788485616405665;
+constexpr double HP_1 = 0.418092273222212;
+constexpr double HP_2 = 0.040689417609559;
+constexpr double HP_3 = -0.064538882628938;
+constexpr size_t HP_SIZE = 7;
 
-  std::string ext = InputParser::getFileExt(filename);
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    AhapEncoder::encode(filename);
-  } else if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    IvsEncoder::encode(filename);
-  } else if (ext == "wav") {
-    std::cout << "The WAV file to encode : " << filename << std::endl;
-  }
-  return EXIT_SUCCESS;
-}
+class Wavelet {
+public:
+  void DWT(std::vector<double> &in, std::vector<double> &out, int levels);
+  void inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels);
+
+  template <size_t hSize>
+  static void symconv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out);
+  template <size_t hSize>
+  static void symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h,
+                           std::vector<double> &out);
+  template <size_t hSize>
+  static void conv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out);
+
+private:
+  std::array<double,LP_SIZE> lp = {LP_4,  LP_3, LP_2, LP_1, LP_0, LP_1, LP_2, LP_3, LP_4};
+  std::array<double,HP_SIZE> hp = {HP_3, HP_2, HP_1, HP_0, HP_1, HP_2, HP_3};
+  std::array<double,HP_SIZE> lpr = {HP_3, -HP_2, HP_1, -HP_0, HP_1, -HP_2, HP_3};
+  std::array<double,LP_SIZE> hpr = {-LP_4,  LP_3, -LP_2, LP_1, -LP_0, LP_1, -LP_2, LP_3, -LP_4};
+
+};
+} // namespace haptics::filterbank
+#endif // WAVELET_H

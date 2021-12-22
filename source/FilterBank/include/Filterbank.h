@@ -31,49 +31,25 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
-#include <Tools/include/InputParser.h>
+#ifndef FILTERBANK_H
+#define FILTERBANK_H
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::tools::InputParser;
+#include <iostream>
+#include <vector>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+#include <Iir.h>
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+namespace haptics::filterbank {
 
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
+class Filterbank {
+public:
+  Filterbank(double fs);
 
-  std::string ext = InputParser::getFileExt(filename);
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    AhapEncoder::encode(filename);
-  } else if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    IvsEncoder::encode(filename);
-  } else if (ext == "wav") {
-    std::cout << "The WAV file to encode : " << filename << std::endl;
-  }
-  return EXIT_SUCCESS;
-}
+  auto LP(std::vector<double> &in, double f) const -> std::vector<double>;
+  auto HP(std::vector<double> &in, double f) const -> std::vector<double>;
+
+private:
+  double fs;
+};
+} // namespace haptics::filterbank
+#endif // FILTERBANK_H

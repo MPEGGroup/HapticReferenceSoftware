@@ -31,49 +31,52 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
-#include <Tools/include/InputParser.h>
+#include <FilterBank/include/Filterbank.h>
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::tools::InputParser;
+namespace haptics::filterbank {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+constexpr int ORDER = 8;
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
+Filterbank::Filterbank(double fs) { this->fs = fs; }
+
+auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
+  Iir::Butterworth::LowPass<ORDER> filter;
+  filter.setup(fs, f);
+
+  std::vector<double> out;
+  out.resize(in.size());
+
+  for (size_t i = 0; i < in.size(); i++) {
+    out[i] = filter.filter(in[i]);
   }
 
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
+  filter.reset();
+
+  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
+    *ri = filter.filter(*ri);
   }
 
-  std::string ext = InputParser::getFileExt(filename);
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    AhapEncoder::encode(filename);
-  } else if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    IvsEncoder::encode(filename);
-  } else if (ext == "wav") {
-    std::cout << "The WAV file to encode : " << filename << std::endl;
-  }
-  return EXIT_SUCCESS;
+  return out;
 }
+
+auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
+  Iir::Butterworth::HighPass<ORDER> filter;
+  filter.setup(fs, f);
+
+  std::vector<double> out;
+  out.resize(in.size());
+
+  for (size_t i = 0; i < in.size(); i++) {
+    out[i] = filter.filter(in[i]);
+  }
+
+  filter.reset();
+
+  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
+    *ri = filter.filter(*ri);
+  }
+
+  return out;
+}
+
+} // namespace haptics::filterbank

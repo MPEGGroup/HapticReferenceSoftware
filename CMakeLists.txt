@@ -11,6 +11,7 @@ option(NO_INTERNET "Use pre-downloaded source archives for external libraries, e
 include(cmake/dr_libs.cmake)
 
 include(cmake/catch2.cmake)
+include(cmake/iir.cmake)
 
 if (BUILD_CATCH2)
     include(CTest)

@@ -31,49 +31,46 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
-#include <Tools/include/InputParser.h>
+#include <catch2/catch.hpp>
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::tools::InputParser;
+#include <FilterBank/include/Wavelet.h>
+#include <iomanip>
+#include <iostream>
+#include <vector>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+constexpr size_t bl = 512;
+constexpr int levels = 1;
+constexpr int hSize = 7;
+constexpr int prec = 15;
+constexpr double prec_comparison = 0.00001;
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+TEST_CASE("haptics::filterbank::Wavelet") {
 
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
+  using haptics::filterbank::Wavelet;
 
-  std::string ext = InputParser::getFileExt(filename);
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    AhapEncoder::encode(filename);
-  } else if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    IvsEncoder::encode(filename);
-  } else if (ext == "wav") {
-    std::cout << "The WAV file to encode : " << filename << std::endl;
+  SECTION("DWT") {
+
+    Wavelet wavelet;
+    std::vector<double> in(bl, 0);
+    std::vector<double> out(bl, 0);
+    std::vector<double> in_rec(bl, 0);
+    for (size_t i = 0; i < bl; i++) {
+      in[i] = (double)i;
+    }
+
+    wavelet.DWT(in, out, levels);
+    wavelet.inv_DWT(out, in_rec, levels);
+
+    bool equal = true;
+    for (size_t i = 0; i < bl; i++) {
+      if (fabs(in_rec[i] - in[i]) > prec_comparison) {
+        equal = false;
+        break;
+      }
+    }
+    /*for (size_t i = 0; i < bl; i++) {
+      std::cout << in[i] << ", " << in_rec[i] << std::endl;
+    }*/
+    CHECK(equal);
   }
-  return EXIT_SUCCESS;
 }

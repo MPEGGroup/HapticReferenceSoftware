@@ -8,6 +8,7 @@ include(../cmake/pugixml.cmake)
 
 add_subdirectory("Tools")
 add_subdirectory("Types")
+add_subdirectory("FilterBank")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")
