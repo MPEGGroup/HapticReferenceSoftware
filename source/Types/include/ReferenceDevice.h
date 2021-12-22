@@ -31,32 +31,31 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _AVATARH_
-#define _AVATAR_H_
+#ifndef _REFERENCE_DEVICE_
+#define _REFERENCE_DEVICE_
 
 
 namespace haptics::types {
 
-class Avatar {
+class ReferenceDevice {
 public:
-  explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, int newType)
-      : id(newId), lod(newLod), type(newType) {};
+  explicit ReferenceDevice() = default;
+  //explicit ReferenceDevice(int newId, int newLod, int newType)
+  //    : id(newId), lod(newLod), type(newType) {};
 
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getLod() const -> int;
-  auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> int;
-  auto setType(int newType) -> void;
+  //[[nodiscard]] auto getId() const -> int;
+  //auto setId(int newId) -> void;
+  //[[nodiscard]] auto getLod() const -> int;
+  //auto setLod(int newLod) -> void;
+  //[[nodiscard]] auto getType() const -> int;
+  //auto setType(int newType) -> void;
 
 
-private:
-  int id = -1;
-  int lod = 0;
-  int type = 0;
-  //TODO : Mesh
+//private:
+//  int id = -1;
+//  int lod = 0;
+//  int type = 0;
 
 };
 } // namespace haptics::types
-#endif //_AVATAR_H_
+#endif //_REFERENCE_DEVICE_

@@ -31,9 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <catch2/catch.hpp>
 #include "../include/ReferenceDevice.h"
 
-namespace haptics::types {
-
-
-} // namespace haptics::types
+TEST_CASE("haptics::types::ReferenceDevice") {
+  using haptics::types::ReferenceDevice;
+  const ReferenceDevice h;
+  // TODO : some tests
+  CHECK(true);
+}

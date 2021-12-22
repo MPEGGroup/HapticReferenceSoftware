@@ -75,7 +75,7 @@ auto Haptics::addPerception(Perception& newBand) -> void {
 
 auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     version = std::to_string(data.getVersion());
-    time_t now = time(0);
+    time_t now = time(nullptr);
     date = ctime(&now);
     description = data.getDescription();
     short numElements = data.getNumElements();
@@ -84,7 +84,7 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
       std::string elemDescription = element.elementDescription;
       short numChannels = element.numHapticChannels;
       std::vector<Track> tracks;
-      for (int j = 0; j < numElements; j++) {
+      for (int j = 0; j < numChannels; j++) {
         auto channel = element.channelsMetadata[j];
         Track track(j, channel.channelDescription, channel.gain, 1,
                     static_cast<uint32_t>(channel.bodyPartMask));
