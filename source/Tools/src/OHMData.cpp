@@ -34,13 +34,15 @@
 #include "../include/OHMData.h"
 #include <iostream>
 #include <fstream>
+#include <array>
 
 namespace haptics::tools {
-	OHMData::OHMData(const std::string filePath) {
+	OHMData::OHMData(const std::string &filePath) {
 		loadFile(filePath);
 	}
 
-	auto OHMData::loadFile(const std::string filePath) -> void {
+	auto OHMData::loadFile(const std::string &filePath) -> void {
+        version = 1;
         std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
         if (!file)
         {
@@ -49,9 +51,9 @@ namespace haptics::tools {
             return;
         }
 
-        file.seekg(0, file.end);
+        file.seekg(0, std::ios::end);
         unsigned int length = static_cast<unsigned int>(file.tellg());
-        file.seekg(0, file.beg);
+        file.seekg(0, std::ios::beg);
 
 
         std::cout << "Open: " << length << std::endl;
@@ -61,9 +63,9 @@ namespace haptics::tools {
         }
 
         // Get the header and check its value
-        char headerBytes[4];
-        file.read(headerBytes, 4);
-        header = std::string(headerBytes, 4);
+        std::array<char, 4> headerBytes{};
+        file.read(headerBytes.data(), 4);
+        header = std::string(headerBytes.data(), 4);
         if (header != "OHM ")
         {
             std::cout << "Incorrect header: " << header << std::endl;
@@ -72,61 +74,70 @@ namespace haptics::tools {
         }
 
         // Get the OHM version
-        char versionBytes[2];
-        file.read(versionBytes, 2);
-        version = ((versionBytes[0] << 8) | versionBytes[1]);
+        std::array<char, 2> versionBytes{};
+        file.read(versionBytes.data(), 2);
+        std::reverse(versionBytes.begin(), versionBytes.end());
+        memcpy(&version, &versionBytes, sizeof(version));
+        // version = ((versionBytes[0] << oneByteShift) | versionBytes[1]);
         std::cout << "Version: " << version << std::endl;
 
         // Get the number of elements
-        char numElementsBytes[2];
-        file.read(numElementsBytes, 2);
-        numElements = ((numElementsBytes[0] << 8) | numElementsBytes[1]);
+        std::array<char, 2> numElementsBytes{};
+        file.read(numElementsBytes.data(), 2);
+        std::reverse(numElementsBytes.begin(), numElementsBytes.end());
+        memcpy(&numElements, &numElementsBytes, sizeof(numElements));
+        //numElements = ((numElementsBytes[0] << oneByteShift) | numElementsBytes[1]);
         std::cout << "Number of elements: " << numElements << std::endl;
 
         // Get the file description
-        char descriptionBytes[32];
-        file.read(descriptionBytes, 32);
-        description = std::string(descriptionBytes, 32);
+        std::array<char, descriptionByteSize> descriptionBytes{};
+        file.read(descriptionBytes.data(), descriptionByteSize);
+        description = std::string(descriptionBytes.data(), descriptionByteSize);
         description.erase(description.find_last_not_of('\x00') + 1);
 
         for (int i = 0; i < numElements; i++)
         {
             HapticElementMetadata element;
-            char hapticObjectFileNameBytes[64];
-            file.read(hapticObjectFileNameBytes, 64);
-            element.elementFilename = std::string(hapticObjectFileNameBytes, 64);
+          std::array<char, fileNameByteSize> hapticObjectFileNameBytes{};
+            file.read(hapticObjectFileNameBytes.data(), fileNameByteSize);
+            element.elementFilename = std::string(hapticObjectFileNameBytes.data(), fileNameByteSize);
             element.elementFilename.erase(element.elementFilename.find_last_not_of('\x00') + 1);
             std::cout << "Filename: " << element.elementFilename << std::endl;
 
-            char elementDescriptionBytes[32];
-            file.read(elementDescriptionBytes, 32);
-            element.elementDescription = std::string(elementDescriptionBytes, 32);
+            std::array<char, descriptionByteSize> elementDescriptionBytes{};
+            file.read(elementDescriptionBytes.data(), descriptionByteSize);
+            element.elementDescription =
+                std::string(elementDescriptionBytes.data(), descriptionByteSize);
             element.elementDescription.erase(element.elementDescription.find_last_not_of('\x00') + 1);
             std::cout << "Element description: " << element.elementDescription << std::endl;
 
-            char numHapticChannelsBytes[2];
-            file.read(numHapticChannelsBytes, 2);
-            element.numHapticChannels = ((numHapticChannelsBytes[0] << 8) | numHapticChannelsBytes[1]);
+            std::array<char, 2> numHapticChannelsBytes{};
+            file.read(numHapticChannelsBytes.data(), 2);
+            std::reverse(numHapticChannelsBytes.begin(), numHapticChannelsBytes.end());
+            memcpy(&element.numHapticChannels, &numHapticChannelsBytes,
+                   sizeof(element.numHapticChannels));
+            //element.numHapticChannels = ((numHapticChannelsBytes[0] << oneByteShift) | numHapticChannelsBytes[1]);
             std::cout << "Number of haptic channels: " << element.numHapticChannels << std::endl;
 
             for (int j = 0; j < element.numHapticChannels; j++)
             {
                 HapticChannelMetadata channel;
-                char channelDescriptionBytes[32];
-                file.read(channelDescriptionBytes, 32);
-                channel.channelDescription = std::string(channelDescriptionBytes, 32);
+                std::array<char, descriptionByteSize> channelDescriptionBytes{};
+                file.read(channelDescriptionBytes.data(), descriptionByteSize);
+                channel.channelDescription =
+                    std::string(channelDescriptionBytes.data(), descriptionByteSize);
                 channel.channelDescription.erase(channel.channelDescription.find_last_not_of('\x00') + 1);
                 std::cout << "Channel description: " << channel.channelDescription << std::endl;
 
-                char gainBytes[4];
-                file.read(gainBytes, 4);
+                std::array<char, 4> gainBytes{};
+                file.read(gainBytes.data(), 4);
                 channel.gain = 0;
                 memcpy(&channel.gain, &gainBytes, sizeof(channel.gain));
                 std::cout << "Channel gain: " << channel.gain << std::endl;
 
-                char bodyPartMaskBytes[4];
-                file.read(bodyPartMaskBytes, 4);
-                channel.bodyPartMask = static_cast<Body>((bodyPartMaskBytes[0] << 24) | (bodyPartMaskBytes[1] << 16) | (bodyPartMaskBytes[2] << 8) | bodyPartMaskBytes[3]);
+                std::array<char, 4> bodyPartMaskBytes{};
+                file.read(bodyPartMaskBytes.data(), 4);
+                channel.bodyPartMask = static_cast<Body>((bodyPartMaskBytes[0] << threeBytesShift) | (bodyPartMaskBytes[1] << twoBytesShift) | (bodyPartMaskBytes[2] << oneByteShift) | bodyPartMaskBytes[3]);
                 //std::cout << "Channel body part mask: " << channel.bodyPartMask << std::endl;
                 
                 element.channelsMetadata.push_back(channel);
@@ -136,7 +147,7 @@ namespace haptics::tools {
         file.close();
 	}
 
-    auto OHMData::fillString(const std::string text, const unsigned int numCharacters)->std::string
+    auto OHMData::fillString(const std::string &text, const unsigned int numCharacters)->std::string
     {
         std::string res = text.length() <= numCharacters ? text : text.substr(0, numCharacters);
         unsigned int numPad = numCharacters - static_cast<unsigned int>(res.length());
@@ -144,7 +155,7 @@ namespace haptics::tools {
         return res;
     }
 
-	auto OHMData::writeFile(const std::string filePath) -> void {
+	auto OHMData::writeFile(const std::string &filePath) -> void {
         std::ofstream file(filePath, std::ios::out | std::ios::binary);
         if (!file)
         {
@@ -155,50 +166,52 @@ namespace haptics::tools {
         file.write(header.c_str(), 4);
 
         // Writing the version
-        char versionBytes[2];
-        versionBytes[0] = ((char*)&version)[1];
-        versionBytes[1] = ((char*)&version)[0];
-        file.write(versionBytes, 2);
+        std::array<char, 2> versionBytes{};
+        memcpy(&versionBytes, &version, sizeof(version));
+        std::reverse(versionBytes.begin(), versionBytes.end());
+        file.write(versionBytes.data(), 2);
 
         // Writing the number of elements
-        char numElementsBytes[2];
-        numElementsBytes[0] = ((char*)&numElements)[1];
-        numElementsBytes[1] = ((char*)&numElements)[0];
-        file.write(numElementsBytes, 2);
+        std::array<char, 2> numElementsBytes{};
+        memcpy(&numElementsBytes, &numElements, sizeof(numElements));
+        std::reverse(numElementsBytes.begin(), numElementsBytes.end());
+        file.write(numElementsBytes.data(), 2);
 
         // Writing the description
-        file.write(fillString(description, 32).c_str(), 32);
+        file.write(fillString(description, descriptionByteSize).c_str(), descriptionByteSize);
         
         // Looping through the list of elements in the file
         for (auto& element : elementsMetadata) {
             // Writing the filename
-            file.write(fillString(element.elementFilename, 64).c_str(), 64);
+          file.write(fillString(element.elementFilename, fileNameByteSize).c_str(),
+                     fileNameByteSize);
             // Writing the element description
-            file.write(fillString(element.elementDescription, 32).c_str(), 32);
+            file.write(fillString(element.elementDescription, descriptionByteSize).c_str(),
+                       descriptionByteSize);
 
             // Writing the number of channels
-            char numHapticChannelsBytes[2];
-            numHapticChannelsBytes[0] = ((char*)&element.numHapticChannels)[1];
-            numHapticChannelsBytes[1] = ((char*)&element.numHapticChannels)[0];
-            file.write(numHapticChannelsBytes, 2);
+            std::array<char, 2> numHapticChannelsBytes{};
+            memcpy(&numHapticChannelsBytes, &element.numHapticChannels,
+                   sizeof(element.numHapticChannels));
+            std::reverse(numHapticChannelsBytes.begin(), numHapticChannelsBytes.end());
+            file.write(numHapticChannelsBytes.data(), 2);
 
             // Looping through the list of channels in the element
             for (auto& channel : element.channelsMetadata) {
                 // Writing the channel description
-                file.write(fillString(channel.channelDescription, 32).c_str(), 32);
+              file.write(fillString(channel.channelDescription, descriptionByteSize).c_str(),
+                         descriptionByteSize);
 
                 // Writing the channel gain
-                char gainBytes[4];
+                std::array<char, 4> gainBytes{};
                 memcpy(&gainBytes, &channel.gain, sizeof(channel.gain));
-                file.write(gainBytes, 4);
+                file.write(gainBytes.data(), 4);
 
                 // Writing the channel mask
-                char bodyPartMaskBytes[4];
-                bodyPartMaskBytes[0] = ((char*)&channel.bodyPartMask)[3];
-                bodyPartMaskBytes[1] = ((char*)&channel.bodyPartMask)[2];
-                bodyPartMaskBytes[2] = ((char*)&channel.bodyPartMask)[1];
-                bodyPartMaskBytes[3] = ((char*)&channel.bodyPartMask)[0];
-                file.write(bodyPartMaskBytes, 4);
+                std::array<char, 4> bodyPartMaskBytes{};
+                memcpy(&bodyPartMaskBytes, &channel.bodyPartMask, sizeof(channel.bodyPartMask));
+                std::reverse(bodyPartMaskBytes.begin(), bodyPartMaskBytes.end());
+                file.write(bodyPartMaskBytes.data(), 4);
             }
 
         }   

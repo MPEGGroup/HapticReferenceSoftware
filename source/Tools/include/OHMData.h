@@ -41,6 +41,11 @@ namespace haptics::tools {
 
 	class OHMData
 	{
+        static constexpr int oneByteShift = 8;
+        static constexpr int twoBytesShift = 16;
+        static constexpr int threeBytesShift = 24;
+        static constexpr int descriptionByteSize = 32;
+        static constexpr int fileNameByteSize = 64;
         enum class Body : uint32_t {
             UNSPECIFIED = 0x00000000,
             HEAD_FRONT = 0x00000001,
@@ -104,18 +109,18 @@ namespace haptics::tools {
 
     private:
         std::string header;
-        short version;
-        short numElements;
+        short version = 1;
+        short numElements = 0;
         std::string description;
         std::vector<HapticElementMetadata> elementsMetadata;
 
-        static auto fillString(const std::string text, const unsigned int numCharacters)->std::string;
+        static auto fillString(const std::string &text, const unsigned int numCharacters)->std::string;
         
     public:
         explicit OHMData() = default;
-        explicit OHMData(const std::string filePath);
-        auto loadFile(const std::string filePath) -> void;
-        auto writeFile(const std::string filePath) -> void;
+        explicit OHMData(const std::string &filePath);
+        auto loadFile(const std::string &filePath) -> void;
+        auto writeFile(const std::string &filePath) -> void;
 
         [[nodiscard]] auto getVersion() const -> short;
         auto setVersion(short newVersion) -> void;
