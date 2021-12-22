@@ -31,51 +31,33 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
+#ifndef KEYFRAME_H
+#define KEYFRAME_H
 
-namespace haptics::tools {
+#include <optional>
 
-InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args) {
-    tokens.emplace_back(a);
-  }
-}
+namespace haptics::types {
 
-[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
-    -> const std::string & {
-  std::vector<std::string>::const_iterator itr;
-  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-    return *itr;
-  }
-  static const std::string empty_string;
-  return empty_string;
-}
+class Keyframe {
+public:
+  explicit Keyframe() = default;
+  explicit Keyframe(int newRelativePosition, std::optional<float> newAmplitudeModulation,
+                    std::optional<int> newFrequencyModulation)
+      : relativePosition(newRelativePosition)
+      , amplitudeModulation(newAmplitudeModulation)
+      , frequencyModulation(newFrequencyModulation) {};
 
-[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
-  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
-}
+  [[nodiscard]] auto getRelativePosition() const -> int;
+  auto setRelativePosition(int newRelativePosition) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> std::optional<float>;
+  auto setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
+  auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
-void InputParser::help(const std::string &prg_name) {
-  std::cout << "usages: " << prg_name << " [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
-            << "This piece of software converts binary encoded RM0 files submitted to the MPEG CfP "
-               "call for Haptic standardization into their human-readable format\n"
-            << "\npositional arguments:\n"
-            << "\t-f, --file <FILE>\t\tfile to convert\n"
-            << "\noptional arguments:\n"
-            << "\t-h, --help\t\t\tshow this help message and exit\n"
-            << "\t-v, --verbose\t\t\tbe more verbose\n"
-            << "\t-q, --quiet\t\t\tbe more quiet\n"
-            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
-}
-
-auto InputParser::getFileExt(std::string &filename) -> std::string {
-  size_t i = filename.rfind('.', filename.length());
-  if (i != std::string::npos) {
-    return (filename.substr(i + 1, filename.length() - i));
-  }
-
-  return std::string("");
-}
-
-} // namespace haptics::tools
+private:
+  int relativePosition = 0;
+  std::optional<float> amplitudeModulation;
+  std::optional<int> frequencyModulation;
+};
+} // namespace haptics::types
+#endif //KEYFRAME_H

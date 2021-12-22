@@ -31,51 +31,49 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
+#ifndef EFFECT_H
+#define EFFECT_H
 
-namespace haptics::tools {
+#include <Types/include/Keyframe.h>
+#include <vector>
 
-InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args) {
-    tokens.emplace_back(a);
-  }
-}
+using haptics::types::Keyframe;
 
-[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
-    -> const std::string & {
-  std::vector<std::string>::const_iterator itr;
-  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-    return *itr;
-  }
-  static const std::string empty_string;
-  return empty_string;
-}
+namespace haptics::types {
 
-[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
-  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
-}
+enum BaseSignal {
+  Sine = 0,
+  Square = Sine + 1,
+  Triangle = Square + 1,
+  SawToothUp = Triangle + 1,
+  SawToothDown = SawToothUp + 1,
+};
 
-void InputParser::help(const std::string &prg_name) {
-  std::cout << "usages: " << prg_name << " [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
-            << "This piece of software converts binary encoded RM0 files submitted to the MPEG CfP "
-               "call for Haptic standardization into their human-readable format\n"
-            << "\npositional arguments:\n"
-            << "\t-f, --file <FILE>\t\tfile to convert\n"
-            << "\noptional arguments:\n"
-            << "\t-h, --help\t\t\tshow this help message and exit\n"
-            << "\t-v, --verbose\t\t\tbe more verbose\n"
-            << "\t-q, --quiet\t\t\tbe more quiet\n"
-            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
-}
+class Effect {
+public:
+  explicit Effect() = default;
+  explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal) {};
 
-auto InputParser::getFileExt(std::string &filename) -> std::string {
-  size_t i = filename.rfind('.', filename.length());
-  if (i != std::string::npos) {
-    return (filename.substr(i + 1, filename.length() - i));
-  }
+  [[nodiscard]] auto getPosition() const -> int;
+  auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getPhase() const -> float;
 
-  return std::string("");
-}
+  auto setPhase(float newPhase) -> void;
+  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  auto getKeyframesSize() -> size_t;
+  auto getKeyframeAt(int index) -> Keyframe&;
+  auto addKeyframe(Keyframe& newKeyframe) -> void;
 
-} // namespace haptics::tools
+private:
+  int position = 0;
+  float phase = 0;
+  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  BaseSignal baseSignal = BaseSignal::Sine;
+};
+} // namespace haptics::types
+#endif //EFFECT_H

@@ -31,51 +31,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
+#include <catch2/catch.hpp>
+#include <Encoder/include/IvsEncoder.h>
 
-namespace haptics::tools {
+using haptics::encoder::IvsEncoder;
 
-InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args) {
-    tokens.emplace_back(a);
-  }
+TEST_CASE("IvsEncoder : return true", "[placeholder]") {
+  std::string str("this/is/my/file/path.ext");
+  int exit_code = IvsEncoder::encode(str);
+
+  CHECK(exit_code == EXIT_FAILURE);
 }
-
-[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
-    -> const std::string & {
-  std::vector<std::string>::const_iterator itr;
-  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-    return *itr;
-  }
-  static const std::string empty_string;
-  return empty_string;
-}
-
-[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
-  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
-}
-
-void InputParser::help(const std::string &prg_name) {
-  std::cout << "usages: " << prg_name << " [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
-            << "This piece of software converts binary encoded RM0 files submitted to the MPEG CfP "
-               "call for Haptic standardization into their human-readable format\n"
-            << "\npositional arguments:\n"
-            << "\t-f, --file <FILE>\t\tfile to convert\n"
-            << "\noptional arguments:\n"
-            << "\t-h, --help\t\t\tshow this help message and exit\n"
-            << "\t-v, --verbose\t\t\tbe more verbose\n"
-            << "\t-q, --quiet\t\t\tbe more quiet\n"
-            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
-}
-
-auto InputParser::getFileExt(std::string &filename) -> std::string {
-  size_t i = filename.rfind('.', filename.length());
-  if (i != std::string::npos) {
-    return (filename.substr(i + 1, filename.length() - i));
-  }
-
-  return std::string("");
-}
-
-} // namespace haptics::tools

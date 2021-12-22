@@ -8,7 +8,7 @@ if (ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY_PATH NAMES "clang-tidy")
 
     if(CLANG_TIDY_PATH)
-        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_PATH}")
+        set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_PATH}" --extra-arg=/EHsc)
         message(STATUS "The clang-tidy path is set to ${CLANG_TIDY_PATH}")
     else()
         message(STATUS "clang-tidy could not be found")

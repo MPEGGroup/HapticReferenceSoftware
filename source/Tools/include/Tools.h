@@ -31,51 +31,42 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
+#include <iostream>
 
 namespace haptics::tools {
 
-InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args) {
-    tokens.emplace_back(a);
-  }
-}
+	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
 
-[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
-    -> const std::string & {
-  std::vector<std::string>::const_iterator itr;
-  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-    return *itr;
-  }
-  static const std::string empty_string;
-  return empty_string;
-}
+    int start = a.first;
+    int end = b.first;
+    double start_a = a.second;
+    double end_a = b.second;
 
-[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
-  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
-}
+    if (x < start || x > end) {
+      return EXIT_FAILURE;
+    }
 
-void InputParser::help(const std::string &prg_name) {
-  std::cout << "usages: " << prg_name << " [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
-            << "This piece of software converts binary encoded RM0 files submitted to the MPEG CfP "
-               "call for Haptic standardization into their human-readable format\n"
-            << "\npositional arguments:\n"
-            << "\t-f, --file <FILE>\t\tfile to convert\n"
-            << "\noptional arguments:\n"
-            << "\t-h, --help\t\t\tshow this help message and exit\n"
-            << "\t-v, --verbose\t\t\tbe more verbose\n"
-            << "\t-q, --quiet\t\t\tbe more quiet\n"
-            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
-}
+    if (end == start) {
+      return (start_a + end_a) / 2.0;
+    }
 
-auto InputParser::getFileExt(std::string &filename) -> std::string {
-  size_t i = filename.rfind('.', filename.length());
-  if (i != std::string::npos) {
-    return (filename.substr(i + 1, filename.length() - i));
+    if (start >= end) {
+      std::swap(start, end);
+      std::swap(start_a, end_a);
+    }
+
+    return (start_a * (end - x) + end_a * (x - start)) / (end - start);
   }
 
-  return std::string("");
-}
 
-} // namespace haptics::tools
+  [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
+
+    double x_out = -1;
+
+    if (end_in - start_in != 0) {
+      x_out = ((end_out - start_out) / (end_in - start_in)) * (x_in - end_in) + end_out;
+    }
+
+    return x_out;
+  }
+  }

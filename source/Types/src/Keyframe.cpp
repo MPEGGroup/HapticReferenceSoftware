@@ -31,51 +31,32 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
+#include <Types/include/Keyframe.h>
 
-namespace haptics::tools {
+namespace haptics::types {
 
-InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args) {
-    tokens.emplace_back(a);
-  }
+[[nodiscard]] auto Keyframe::getRelativePosition() const -> int {
+  return relativePosition;
 }
 
-[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
-    -> const std::string & {
-  std::vector<std::string>::const_iterator itr;
-  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-    return *itr;
-  }
-  static const std::string empty_string;
-  return empty_string;
+auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
+  relativePosition = newRelativePosition;
 }
 
-[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
-  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
+[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> std::optional<float> {
+  return amplitudeModulation;
 }
 
-void InputParser::help(const std::string &prg_name) {
-  std::cout << "usages: " << prg_name << " [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]\n\n"
-            << "This piece of software converts binary encoded RM0 files submitted to the MPEG CfP "
-               "call for Haptic standardization into their human-readable format\n"
-            << "\npositional arguments:\n"
-            << "\t-f, --file <FILE>\t\tfile to convert\n"
-            << "\noptional arguments:\n"
-            << "\t-h, --help\t\t\tshow this help message and exit\n"
-            << "\t-v, --verbose\t\t\tbe more verbose\n"
-            << "\t-q, --quiet\t\t\tbe more quiet\n"
-            << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
+auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void {
+  amplitudeModulation = newAmplitudeModulation;
 }
 
-auto InputParser::getFileExt(std::string &filename) -> std::string {
-  size_t i = filename.rfind('.', filename.length());
-  if (i != std::string::npos) {
-    return (filename.substr(i + 1, filename.length() - i));
-  }
-
-  return std::string("");
+[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> std::optional<int> {
+  return frequencyModulation;
 }
 
-} // namespace haptics::tools
+auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void {
+  frequencyModulation = newFrequencyModulation;
+}
+
+} // namespace haptics::types

@@ -31,25 +31,60 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INPUTPARSER_H
-#define INPUTPARSER_H
+#ifndef BAND_H
+#define BAND_H
 
-#include <algorithm>
-#include <iostream>
+#include <Types/include/Effect.h>
 #include <vector>
 
-namespace haptics::tools {
+namespace haptics::types {
 
-class InputParser {
+enum BandType {
+  Wave = 0,
+  Curve = Wave + 1,
+  Transient = Curve + 1,
+};
+
+enum EncodingModality {
+  Quantized = 0,
+  Vectorial = Quantized + 1,
+};
+
+class Band {
 public:
-  InputParser(const std::vector<const char *> &args);
-  [[nodiscard]] auto getCmdOption(const std::string &option) const -> const std::string &;
-  [[nodiscard]] auto cmdOptionExists(const std::string &option) const -> bool;
-  void static help(const std::string &prg_name);
-  auto static getFileExt(std::string &filename) -> std::string;
+  explicit Band() = default;
+  explicit Band(BandType newBandType, EncodingModality newEncodingModality, int newWindowLength,
+                int newLowerFrequencyLimit, int newUpperFrequencyLimit)
+      : bandType(newBandType)
+      , encodingModality(newEncodingModality)
+      , windowLength(newWindowLength)
+      , lowerFrequencyLimit(newLowerFrequencyLimit)
+      , upperFrequencyLimit(newUpperFrequencyLimit)
+      , effects({}) {};
+
+  [[nodiscard]] auto getBandType() const -> BandType;
+  auto setBandType(BandType newBandType) -> void;
+  [[nodiscard]] auto getEncodingModality() const -> EncodingModality;
+  auto setEncodingModality(EncodingModality newEncodingModality) -> void;
+  [[nodiscard]] auto getWindowLength() const -> int;
+  auto setWindowLength(int newWindowLength) -> void;
+  [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
+  auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
+  [[nodiscard]] auto getLowerFrequencyLimit() const -> int;
+  auto setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void;
+  auto getEffectsSize() -> size_t;
+  auto getEffectAt(int index) -> haptics::types::Effect&;
+  auto addEffect(haptics::types::Effect &newEffect) -> void;
+  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start, const int stop)
+      -> bool;
 
 private:
-  std::vector<std::string> tokens;
+  BandType bandType = BandType::Wave;
+  EncodingModality encodingModality = EncodingModality::Quantized;
+  int windowLength = 0;
+  int lowerFrequencyLimit = 0;
+  int upperFrequencyLimit = 0;
+  std::vector<Effect> effects = std::vector<Effect>{};
 };
-} // namespace haptics::tools
-#endif // INPUTPARSER_H
+} // namespace haptics::types
+#endif //BAND_H
