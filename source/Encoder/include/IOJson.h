@@ -35,6 +35,7 @@
 #define _IOJSON_H_
 
 #include <string>
+#include <nlohmann/json.hpp>
 #include "../../types/include/Haptics.h"
 
 namespace haptics::encoder {
@@ -42,8 +43,8 @@ class IOJson {
 public:
   explicit IOJson() = default;
 
-  auto loadFile(const std::string filePath) -> haptics::types::Haptics;
-  auto writeFile(haptics::types::Haptics haptic, const std::string filePath) -> void;
+  static auto loadFile(const std::string &filePath) -> haptics::types::Haptics;
+  static auto writeFile(haptics::types::Haptics &haptic, const std::string &filePath) -> void;
 
 private:
 };
