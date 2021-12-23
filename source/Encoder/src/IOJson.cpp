@@ -42,19 +42,23 @@ auto IOJson::loadFile(const std::string &filePath) -> haptics::types::Haptics {
   std::ifstream ifs(filePath);
   json jsonTree = json::parse(ifs);
   if (!(jsonTree.contains("version") && jsonTree.contains("date") &&
-        jsonTree.contains("description") && jsonTree.contains("perceptions"))) {
+        jsonTree.contains("description") && jsonTree.contains("perceptions") &&
+        jsonTree["perceptions"].is_array() && jsonTree.contains("avatars") &&
+        jsonTree["avatars"].is_array())) {
       //TODO invalid input file
   }
   auto version = jsonTree["version"].get<std::string>();
   auto date = jsonTree["date"].get<std::string>();
   auto description = jsonTree["description"].get<std::string>();
 
-  if (!(jsonTree.contains("perceptions") && jsonTree["perceptions"].is_array())) {
-    //TODO invalid json file
-  }
-  auto jsonPerceptions = jsonTree["perceptions"];
   haptics::types::Haptics haptic(version, date, description);
+  auto jsonAvatars = jsonTree["avatars"];
+  loadAvatars(jsonAvatars, haptic);
+  auto jsonPerceptions = jsonTree["perceptions"];
   loadPerceptions(jsonPerceptions, haptic);
+  if (haptic.getAvatarsSize() == 0 || haptic.getPerceptionsSize() == 0) {
+    // TODO invalid input file
+  }
   return haptic;
 }
 
@@ -200,11 +204,86 @@ auto IOJson::loadEffects(const nlohmann::json& jsonEffects, types::Band& band) -
 
 
 auto IOJson::loadAvatars(const nlohmann::json& jsonAvatars, types::Haptics& haptic) -> void {
-    //TODO
+  for (auto it = jsonAvatars.begin(); it != jsonAvatars.end(); ++it) {
+    auto jsonAvatar = it.value();
+
+    if (!jsonAvatar.contains("id") || !jsonAvatar["id"].is_number_integer()) {
+      continue;
+    }
+    if (!jsonAvatar.contains("lod") || !jsonAvatar["lod"].is_number_integer()) {
+      continue;
+    }
+    if (!jsonAvatar.contains("type") || !jsonAvatar["type"].is_string()) {
+      continue;
+    }
+    auto id = jsonAvatar["id"].get<int>();
+    auto lod = jsonAvatar["lod"].get<int>();
+    auto type = stringToAvatarType.at(jsonAvatar["type"]);
+
+    types::Avatar avatar(id, lod, type);
+    haptic.addAvatar(avatar);
+  }
 }
-auto IOJson::loadReferenceDevices(const nlohmann::json& jsonAvatars, types::Perception& perception)
+auto IOJson::loadReferenceDevices(const nlohmann::json& jsonReferenceDevices, types::Perception& perception)
 -> void {
-    //TODO
+  for (auto it = jsonReferenceDevices.begin(); it != jsonReferenceDevices.end(); ++it) {
+    auto jsonReferenceDevice = it.value();
+
+    if (!jsonReferenceDevice.contains("id") || !jsonReferenceDevice["id"].is_number_integer()) {
+      continue;
+    }
+    if (!jsonReferenceDevice.contains("name") || !jsonReferenceDevice["lod"].is_string()) {
+      continue;
+    }
+    auto id = jsonReferenceDevice["id"].get<int>();
+    auto name = jsonReferenceDevice["name"].get<std::string>();
+
+    types::ReferenceDevice referenceDevice(id, name);
+    if (!jsonReferenceDevice.contains("body_part_mask") || !jsonReferenceDevice["body_part_mask"].is_number_integer()) {
+      referenceDevice.setBodyPartMask(jsonReferenceDevice["body_part_mask"].get<uint32_t>());
+    }
+    if (!jsonReferenceDevice.contains("maximum_frequency") ||
+        !jsonReferenceDevice["maximum_frequency"].is_number()) {
+      referenceDevice.setMaximumFrequency(jsonReferenceDevice["maximum_frequency"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("minimum_frequency") ||
+        !jsonReferenceDevice["minimum_frequency"].is_number()) {
+      referenceDevice.setMinimumFrequency(jsonReferenceDevice["minimum_frequency"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("resonance_frequency") ||
+        !jsonReferenceDevice["resonance_frequency"].is_number()) {
+      referenceDevice.setResonanceFrequency(jsonReferenceDevice["resonance_frequency"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("maximum_amplitude") ||
+        !jsonReferenceDevice["maximum_amplitude"].is_number()) {
+      referenceDevice.setMaximumAmplitude(jsonReferenceDevice["maximum_amplitude"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("impedance") ||
+        !jsonReferenceDevice["impedance"].is_number()) {
+      referenceDevice.setImpedance(jsonReferenceDevice["impedance"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("maximum_voltage") ||
+        !jsonReferenceDevice["maximum_voltage"].is_number()) {
+      referenceDevice.setMaximumVoltage(jsonReferenceDevice["maximum_voltage"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("maximum_current") ||
+        !jsonReferenceDevice["maximum_current"].is_number()) {
+      referenceDevice.setMaximumCurrent(jsonReferenceDevice["maximum_current"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("maximum_displacement") ||
+        !jsonReferenceDevice["maximum_displacement"].is_number()) {
+      referenceDevice.setMaximumDisplacement(jsonReferenceDevice["maximum_displacement"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("weight") ||
+        !jsonReferenceDevice["weight"].is_number()) {
+      referenceDevice.setWeight(
+          jsonReferenceDevice["weight"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("size") || !jsonReferenceDevice["size"].is_number()) {
+      referenceDevice.setSize(jsonReferenceDevice["size"].get<float>());
+    }
+    perception.addReferenceDevice(referenceDevice);
+  }
 }
 
 auto IOJson::loadKeyframes(const nlohmann::json& jsonKeyframes, types::Effect& effect) -> void {
@@ -234,89 +313,157 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   jsonTree["version"] = haptic.getVersion();
   jsonTree["description"] = haptic.getDescription();
   jsonTree["date"] = haptic.getDate();
-
+  auto jsonAvatars = json::array();
+  extractAvatars(haptic, jsonAvatars);
   auto jsonPerceptions = json::array();  
-  auto numPerceptions = haptic.getPerceptionsSize();
-  for (int i = 0; i < numPerceptions; i++) {
-    haptics::types::Perception perception = haptic.getPerceptionAt(i);
-    auto jsonPerception = json::object();
-    jsonPerception["id"] = perception.getId();
-    jsonPerception["description"] = perception.getDescription();
-    
-    auto jsonTracks = json::array();
-    auto numTracks = perception.getTracksSize();
-    for (int j = 0; j < numTracks; j++) {
-      haptics::types::Track track = perception.getTrackAt(j);
-      auto jsonTrack = json::object();
-      jsonTrack["id"] = track.getId();
-      jsonTrack["description"] = track.getDescription();
-      jsonTrack["gain"] = track.getGain();
-      jsonTrack["mixing_weight"] = track.getMixingWeight();
-      jsonTrack["body_part_mask"] = track.getBodyPartMask();
-
-      auto jsonVertices = json::array();
-      auto numVertices = track.getVerticesSize();
-      for (int k = 0; k < numVertices; k++) {
-          jsonVertices.push_back(track.getVertexAt(k));
-      }
-      if (numVertices > 0) {
-        jsonTrack["vertices"] = jsonVertices;
-      }
-
-      auto jsonBands = json::array();
-      auto numBands = track.getBandsSize();
-      for (int l = 0; l < numBands; l++) {
-        auto band = track.getBandAt(l);
-        auto jsonBand = json::object();
-        jsonBand["band_type"] = bandTypeToString.at(band.getBandType());
-        jsonBand["encoding_modality"] = modalityToString.at(band.getEncodingModality());
-        jsonBand["window_length"] = band.getWindowLength();
-        jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
-        jsonBand["upper_frequency_limit"] = band.getUpperFrequencyLimit();
-
-        auto jsonEffects = json::array();
-        auto numEffects = band.getEffectsSize();
-        for (int m = 0; m < numEffects; m++) {
-          auto effect = band.getEffectAt(m);
-          auto jsonEffect = json::object();
-          jsonEffect["position"] = effect.getPosition();
-          jsonEffect["phase"] = effect.getPhase();
-          jsonEffect["base_signal"] = baseSignalToString.at(effect.getBaseSignal());
-
-          
-          auto jsonKeyframes = json::array();
-          auto numKeyframes = effect.getKeyframesSize();
-          for (int n = 0; n < numKeyframes; n++) {
-            const auto &keyframe = effect.getKeyframeAt(n);
-            auto jsonKeyframe = json::object();
-            jsonKeyframe["relative_position"] = keyframe.getRelativePosition();
-            if (keyframe.getAmplitudeModulation().has_value()) {
-              jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
-            }
-            if (keyframe.getFrequencyModulation().has_value()) {
-              jsonKeyframe["frequencyModulation"] = keyframe.getFrequencyModulation().value();
-            }
-            jsonKeyframes.push_back(jsonKeyframe);
-          }
-          jsonEffect["keyframes"] = jsonKeyframes;
-          jsonEffects.push_back(jsonEffect);
-        }
-        jsonBand["effects"] = jsonEffects;
-        jsonBands.push_back(jsonBand);
-      }
-      jsonTrack["bands"] = jsonBands;
-      //TODO bands
-      jsonTracks.push_back(jsonTrack);
-    }
-    jsonPerception["tracks"] = jsonTracks;
-    jsonPerceptions.push_back(jsonPerception);
-  }
+  extractPerceptions(haptic, jsonPerceptions);
   jsonTree["perceptions"] = jsonPerceptions;
 
   std::ofstream file(filePath);
   file << jsonTree;
+}
+auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions)
+    -> void {
+  auto numPerceptions = haptic.getPerceptionsSize();
+  for (int i = 0; i < numPerceptions; i++) {
+    auto perception = haptic.getPerceptionAt(i);
+    auto jsonPerception = json::object();
+    jsonPerception["id"] = perception.getId();
+    jsonPerception["description"] = perception.getDescription();
 
+    auto jsonReferenceDevices = json::array();
+    extractReferenceDevices(perception, jsonReferenceDevices);
+    jsonPerception["reference_devices"] = jsonReferenceDevices;
 
+    auto jsonTracks = json::array();
+    extractTracks(perception, jsonTracks);
+    jsonPerception["tracks"] = jsonTracks;
+
+    jsonPerceptions.push_back(jsonPerception);
+  }
 }
 
+
+auto IOJson::extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void {
+  auto numAvatars = haptic.getAvatarsSize();
+  for (int i = 0; i < numAvatars; i++) {
+    auto avatar = haptic.getAvatarAt(i);
+    auto jsonAvatar = json::object();
+    jsonAvatar["id"] = avatar.getId();
+    jsonAvatar["lod"] = avatar.getLod();
+    jsonAvatar["type"] = avatarTypeToString.at(avatar.getType());
+    jsonAvatars.push_back(jsonAvatar);
+  }
+}
+auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void {
+  auto numTracks = perception.getTracksSize();
+  for (int j = 0; j < numTracks; j++) {
+    haptics::types::Track track = perception.getTrackAt(j);
+    auto jsonTrack = json::object();
+    jsonTrack["id"] = track.getId();
+    jsonTrack["description"] = track.getDescription();
+    jsonTrack["gain"] = track.getGain();
+    jsonTrack["mixing_weight"] = track.getMixingWeight();
+    jsonTrack["body_part_mask"] = track.getBodyPartMask();
+
+    auto jsonVertices = json::array();
+    auto numVertices = track.getVerticesSize();
+    for (int k = 0; k < numVertices; k++) {
+      jsonVertices.push_back(track.getVertexAt(k));
+    }
+    if (numVertices > 0) {
+      jsonTrack["vertices"] = jsonVertices;
+    }
+
+    auto jsonBands = json::array();
+    auto numBands = track.getBandsSize();
+    for (int l = 0; l < numBands; l++) {
+      auto band = track.getBandAt(l);
+      auto jsonBand = json::object();
+      jsonBand["band_type"] = bandTypeToString.at(band.getBandType());
+      jsonBand["encoding_modality"] = modalityToString.at(band.getEncodingModality());
+      jsonBand["window_length"] = band.getWindowLength();
+      jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
+      jsonBand["upper_frequency_limit"] = band.getUpperFrequencyLimit();
+
+      auto jsonEffects = json::array();
+      auto numEffects = band.getEffectsSize();
+      for (int m = 0; m < numEffects; m++) {
+        auto effect = band.getEffectAt(m);
+        auto jsonEffect = json::object();
+        jsonEffect["position"] = effect.getPosition();
+        jsonEffect["phase"] = effect.getPhase();
+        jsonEffect["base_signal"] = baseSignalToString.at(effect.getBaseSignal());
+
+        auto jsonKeyframes = json::array();
+        auto numKeyframes = effect.getKeyframesSize();
+        for (int n = 0; n < numKeyframes; n++) {
+          const auto &keyframe = effect.getKeyframeAt(n);
+          auto jsonKeyframe = json::object();
+          jsonKeyframe["relative_position"] = keyframe.getRelativePosition();
+          if (keyframe.getAmplitudeModulation().has_value()) {
+            jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
+          }
+          if (keyframe.getFrequencyModulation().has_value()) {
+            jsonKeyframe["frequencyModulation"] = keyframe.getFrequencyModulation().value();
+          }
+          jsonKeyframes.push_back(jsonKeyframe);
+        }
+        jsonEffect["keyframes"] = jsonKeyframes;
+        jsonEffects.push_back(jsonEffect);
+      }
+      jsonBand["effects"] = jsonEffects;
+      jsonBands.push_back(jsonBand);
+    }
+    jsonTrack["bands"] = jsonBands;
+    // TODO bands
+    jsonTracks.push_back(jsonTrack);
+  }
+}
+auto IOJson::extractReferenceDevices(types::Perception &perception,
+                                     nlohmann::json &jsonReferenceDevices) -> void {
+  auto numReferenceDevices = perception.getReferenceDevicesSize();
+  for (int i = 0; i < numReferenceDevices; i++) {
+    auto referenceDevice = perception.getReferenceDeviceAt(i);
+    auto jsonReferenceDevice = json::object();
+    jsonReferenceDevice["id"] = referenceDevice.getId();
+    jsonReferenceDevice["name"] = referenceDevice.getName();
+
+    if (referenceDevice.getBodyPartMask().has_value()) {
+      jsonReferenceDevice["body_part_mask"] = referenceDevice.getBodyPartMask().value();
+    }
+    if (referenceDevice.getMaximumFrequency().has_value()) {
+      jsonReferenceDevice["maximum_frequency"] = referenceDevice.getMaximumFrequency().value();
+    }
+    if (referenceDevice.getMinimumFrequency().has_value()) {
+      jsonReferenceDevice["minimum_frequency"] = referenceDevice.getMinimumFrequency().value();
+    }
+    if (referenceDevice.getResonanceFrequency().has_value()) {
+      jsonReferenceDevice["resonance_frequency"] = referenceDevice.getResonanceFrequency().value();
+    }
+    if (referenceDevice.getMaximumAmplitude().has_value()) {
+      jsonReferenceDevice["maximum_amplitude"] = referenceDevice.getMaximumAmplitude().value();
+    }
+    if (referenceDevice.getImpedance().has_value()) {
+      jsonReferenceDevice["impedance"] = referenceDevice.getImpedance().value();
+    }
+    if (referenceDevice.getMaximumVoltage().has_value()) {
+      jsonReferenceDevice["maximum_voltage"] = referenceDevice.getMaximumVoltage().value();
+    }
+    if (referenceDevice.getMaximumCurrent().has_value()) {
+      jsonReferenceDevice["maximum_current"] = referenceDevice.getMaximumCurrent().value();
+    }
+    if (referenceDevice.getMaximumDisplacement().has_value()) {
+      jsonReferenceDevice["maximum_displacement"] = referenceDevice.getMaximumDisplacement().value();
+    }
+    if (referenceDevice.getWeight().has_value()) {
+      jsonReferenceDevice["weight"] = referenceDevice.getWeight().value();
+    }
+    if (referenceDevice.getSize().has_value()) {
+      jsonReferenceDevice["size"] = referenceDevice.getSize().value();
+    }
+
+    jsonReferenceDevices.push_back(jsonReferenceDevice);
+  }
+}
 } // namespace haptics::encoder

@@ -71,6 +71,18 @@ namespace haptics::encoder {
       {types::BaseSignal::SawToothUp, "SawToothUp"},
       {types::BaseSignal::SawToothDown, "SawToothDown"}};
 
+  
+  static const std::map<std::string, types::AvatarType> stringToAvatarType = {
+      {"Vibration", types::AvatarType::Vibration},
+      {"Pressure", types::AvatarType::Pressure},
+      {"Temperature", types::AvatarType::Temperature},
+      {"Custom", types::AvatarType::Custom}};
+  static const std::map<types::AvatarType, std::string> avatarTypeToString = {
+      {types::AvatarType::Vibration, "Vibration"},
+      {types::AvatarType::Pressure, "Pressure"},
+      {types::AvatarType::Temperature, "Temperature"},
+      {types::AvatarType::Custom, "Custom"}};
+
   class IOJson {
 public:
   static auto loadFile(const std::string &filePath) -> types::Haptics;
@@ -78,10 +90,21 @@ public:
       -> void;
   static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> void;
   static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> void;
-  static auto loadReferenceDevices(const nlohmann::json &jsonAvatars, types::Perception &perception) -> void;
+  static auto loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
+                                   types::Perception &perception) -> void;
   static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> void;
   static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> void;
   static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> void;
+
+  static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions)
+      -> void;
+  static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars)
+      -> void;
+  static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks)
+      -> void;
+  static auto
+  extractReferenceDevices(types::Perception &perception, nlohmann::json &jsonReferenceDevices) -> void;
+
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
 } // namespace encoder
