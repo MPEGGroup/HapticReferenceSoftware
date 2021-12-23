@@ -31,50 +31,49 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#ifndef EFFECT_H
+#define EFFECT_H
 
-namespace haptics::filterbank {
+#include <Types/include/Keyframe.h>
+#include <vector>
 
-constexpr int ORDER = 8;
+using haptics::types::Keyframe;
 
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
+namespace haptics::types {
 
-  std::vector<double> out;
-  out.resize(in.size());
+enum BaseSignal {
+  Sine = 0,
+  Square = Sine + 1,
+  Triangle = Square + 1,
+  SawToothUp = Triangle + 1,
+  SawToothDown = SawToothUp + 1,
+};
 
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
+class Effect {
+public:
+  explicit Effect() = default;
+  explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal) {};
 
-  filter.reset();
+  [[nodiscard]] auto getPosition() const -> int;
+  auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getPhase() const -> float;
 
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
+  auto setPhase(float newPhase) -> void;
+  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  auto getKeyframesSize() -> size_t;
+  auto getKeyframeAt(int index) -> Keyframe&;
+  auto addKeyframe(Keyframe& newKeyframe) -> void;
 
-  return out;
-}
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-} // namespace haptics::filterbank
+private:
+  int position = 0;
+  float phase = 0;
+  std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
+  BaseSignal baseSignal = BaseSignal::Sine;
+};
+} // namespace haptics::types
+#endif //EFFECT_H

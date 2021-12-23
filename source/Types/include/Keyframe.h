@@ -31,50 +31,33 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#ifndef KEYFRAME_H
+#define KEYFRAME_H
 
-namespace haptics::filterbank {
+#include <optional>
 
-constexpr int ORDER = 8;
+namespace haptics::types {
 
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
+class Keyframe {
+public:
+  explicit Keyframe() = default;
+  explicit Keyframe(int newRelativePosition, std::optional<float> newAmplitudeModulation,
+                    std::optional<int> newFrequencyModulation)
+      : relativePosition(newRelativePosition)
+      , amplitudeModulation(newAmplitudeModulation)
+      , frequencyModulation(newFrequencyModulation) {};
 
-  std::vector<double> out;
-  out.resize(in.size());
+  [[nodiscard]] auto getRelativePosition() const -> int;
+  auto setRelativePosition(int newRelativePosition) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> std::optional<float>;
+  auto setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
+  auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-} // namespace haptics::filterbank
+private:
+  int relativePosition = 0;
+  std::optional<float> amplitudeModulation;
+  std::optional<int> frequencyModulation;
+};
+} // namespace haptics::types
+#endif //KEYFRAME_H

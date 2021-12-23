@@ -69,4 +69,13 @@ void InputParser::help(const std::string &prg_name) {
             << "\t-o, --output<OUTPUT_FILE>\toutput file\n";
 }
 
+auto InputParser::getFileExt(std::string &filename) -> std::string {
+  size_t i = filename.rfind('.', filename.length());
+  if (i != std::string::npos) {
+    return (filename.substr(i + 1, filename.length() - i));
+  }
+
+  return std::string{""};
+}
+
 } // namespace haptics::tools

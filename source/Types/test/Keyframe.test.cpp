@@ -31,50 +31,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#include <catch2/catch.hpp>
 
-namespace haptics::filterbank {
+#include <Types/include/Keyframe.h>
 
-constexpr int ORDER = 8;
+using haptics::types::Keyframe;
 
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
+TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
+  const Keyframe kf(10, .8, 500);
 
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
+  CHECK(true);
 }
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-} // namespace haptics::filterbank

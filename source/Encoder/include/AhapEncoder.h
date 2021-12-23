@@ -31,50 +31,16 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#ifndef AHAPENCODER_H
+#define AHAPENCODER_H
 
-namespace haptics::filterbank {
+#include <iostream>
 
-constexpr int ORDER = 8;
+namespace haptics::encoder {
 
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-} // namespace haptics::filterbank
+class AhapEncoder {
+public:
+  [[nodiscard]] auto static AhapEncoder::encode(std::string& filename) -> int;
+};
+} // namespace haptics::encoder
+#endif //AHAPENCODER_H

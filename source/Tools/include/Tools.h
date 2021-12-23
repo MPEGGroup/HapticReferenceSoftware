@@ -31,50 +31,42 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#include <iostream>
 
-namespace haptics::filterbank {
+namespace haptics::tools {
 
-constexpr int ORDER = 8;
+	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
 
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
+    int start = a.first;
+    int end = b.first;
+    double start_a = a.second;
+    double end_a = b.second;
 
-  std::vector<double> out;
-  out.resize(in.size());
+    if (x < start || x > end) {
+      return EXIT_FAILURE;
+    }
 
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
+    if (end == start) {
+      return (start_a + end_a) / 2.0;
+    }
+
+    if (start >= end) {
+      std::swap(start, end);
+      std::swap(start_a, end_a);
+    }
+
+    return (start_a * (end - x) + end_a * (x - start)) / (end - start);
   }
 
-  filter.reset();
 
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
+  [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
+
+    double x_out = -1;
+
+    if (end_in - start_in != 0) {
+      x_out = ((end_out - start_out) / (end_in - start_in)) * (x_in - end_in) + end_out;
+    }
+
+    return x_out;
   }
-
-  return out;
-}
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
   }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-} // namespace haptics::filterbank

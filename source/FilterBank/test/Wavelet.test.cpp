@@ -58,8 +58,8 @@ TEST_CASE("haptics::filterbank::Wavelet") {
       in[i] = (double)i;
     }
 
-    wavelet.DWT(in, out, levels);
-    wavelet.inv_DWT(out, in_rec, levels);
+    wavelet.DWT(in, levels, out);
+    wavelet.inv_DWT(out, levels, in_rec);
 
     bool equal = true;
     for (size_t i = 0; i < bl; i++) {

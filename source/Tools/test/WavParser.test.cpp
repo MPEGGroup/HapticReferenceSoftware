@@ -53,6 +53,5 @@ TEST_CASE("haptics::tools::WavParser") {
     wavParser2.loadFile(filename);
     std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
-    std::filesystem::remove(filename);
   }
 }

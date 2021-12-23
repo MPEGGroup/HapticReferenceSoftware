@@ -31,50 +31,44 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#include <Types/include/Effect.h>
 
-namespace haptics::filterbank {
+namespace haptics::types {
 
-constexpr int ORDER = 8;
-
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
+[[nodiscard]] auto Effect::getPosition() const -> int {
+  return position;
 }
 
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
+auto Effect::setPosition(int newPosition) -> void {
+  position = newPosition;
 }
 
-} // namespace haptics::filterbank
+[[nodiscard]] auto Effect::getPhase() const -> float {
+  return phase;
+}
+
+auto Effect::setPhase(float newPhase) -> void {
+  phase = newPhase;
+}
+
+[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
+  return baseSignal;
+}
+
+auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
+  baseSignal = newBaseSignal;
+}
+
+auto Effect::getKeyframesSize() -> size_t {
+  return keyframes.size();
+}
+
+auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
+  return keyframes.at(index);
+}
+
+auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+  keyframes.push_back(newKeyframe);
+}
+
+} // namespace haptics::types

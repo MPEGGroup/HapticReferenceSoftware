@@ -31,50 +31,57 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <FilterBank/include/Filterbank.h>
+#ifndef TRACK_H
+#define TRACK_H
 
-namespace haptics::filterbank {
+#include <Types/include/Band.h>
+#include <fstream>
+#include <vector>
 
-constexpr int ORDER = 8;
+namespace haptics::types {
 
-auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::LowPass<ORDER> filter;
-  filter.setup(fs, f);
+class Track {
+public:
+  explicit Track() = default;
+  explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
+                     int newBodyPartMask)
+      : id(newId)
+      , description(newDescription)
+      , gain(newGain)
+      , mixingWeight(newMixingWeight)
+      , bodyPartMask(newBodyPartMask)
+      , vertices({})
+      , bands({}) {};
 
-  std::vector<double> out;
-  out.resize(in.size());
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  [[nodiscard]] auto getGain() const -> float;
+  auto setGain(float newGain) -> void;
+  [[nodiscard]] auto getMixingWeight() const -> float;
+  auto setMixingWeight(float newMixingWeight) -> void;
+  [[nodiscard]] auto getBodyPartMask() const -> int;
+  auto setBodyPartMask(int newBodyPartMask) -> void;
+  auto getVerticesSize() -> size_t;
+  auto getVerticeAt(int index) -> int &;
+  auto addVertice(int &newVertice) -> void;
+  auto getBandsSize() -> size_t;
+  auto getBandAt(int index) -> haptics::types::Band &;
+  auto addBand(haptics::types::Band &newBand) -> void;
+  auto findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band *;
 
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
+private:
+  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start,
+                                   const int stop) -> bool;
+  int id = -1;
+  std::string description = "";
+  float gain = 1;
+  float mixingWeight = 1;
+  int bodyPartMask = 0;
+  std::vector<int> vertices = {};
+  std::vector<Band> bands = {};
 
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-auto Filterbank::HP(std::vector<double> &in, double f) const -> std::vector<double> {
-  Iir::Butterworth::HighPass<ORDER> filter;
-  filter.setup(fs, f);
-
-  std::vector<double> out;
-  out.resize(in.size());
-
-  for (size_t i = 0; i < in.size(); i++) {
-    out[i] = filter.filter(in[i]);
-  }
-
-  filter.reset();
-
-  for (auto ri = out.rbegin(); ri != out.rend(); ++ri) {
-    *ri = filter.filter(*ri);
-  }
-
-  return out;
-}
-
-} // namespace haptics::filterbank
+};
+} // namespace haptics::types
+#endif //TRACK_H
