@@ -35,25 +35,30 @@
 #define AVATAR_H
 
 namespace haptics::types {
-
+enum class AvatarType {
+  Vibration = 0,
+  Pressure = Vibration + 1,
+  Temperature = Pressure + 1,
+  Custom = Temperature + 1,
+};
 class Avatar {
 public:
   explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, int newType)
+  explicit Avatar(int newId, int newLod, AvatarType newType)
       : id(newId), lod(newLod), type(newType) {};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
   [[nodiscard]] auto getLod() const -> int;
   auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> int;
-  auto setType(int newType) -> void;
+  [[nodiscard]] auto getType() const -> AvatarType;
+  auto setType(AvatarType newType) -> void;
 
 
 private:
   int id = -1;
   int lod = 0;
-  int type = 0;
+  AvatarType type = AvatarType::Custom;
   //TODO : Mesh
 
 };

@@ -46,7 +46,7 @@ enum class BaseSignal {
   Square = Sine + 1,
   Triangle = Square + 1,
   SawToothUp = Triangle + 1,
-  SawToothDown = SawToothUp + 1,
+  SawToothDown = SawToothUp + 1
 };
 
 class Effect {

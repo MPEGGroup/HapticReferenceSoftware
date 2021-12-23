@@ -51,11 +51,11 @@ auto Avatar::setLod(int newLod) -> void {
 	lod = newLod;
 }
 
-[[nodiscard]] auto Avatar::getType() const -> int {
+[[nodiscard]] auto Avatar::getType() const -> AvatarType {
 	return type;
 }
 
-auto Avatar::setType(int newType) -> void {
+auto Avatar::setType(AvatarType newType) -> void {
 	type = newType;
 }
 

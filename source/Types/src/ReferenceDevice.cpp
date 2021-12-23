@@ -35,5 +35,104 @@
 
 namespace haptics::types {
 
+[[nodiscard]] auto ReferenceDevice::getId() const -> int {
+    return id;
+}
+auto ReferenceDevice::setId(int newId) -> void { 
+    id = newId;
+}
+
+[[nodiscard]] auto ReferenceDevice::getName() const -> std::string {
+            return name; 
+}
+
+auto ReferenceDevice::setName(std::string &newName) -> void {
+    name = newName;
+}
+
+[[nodiscard]] auto ReferenceDevice::getBodyPartMask() const -> std::optional<uint32_t> {
+  return bodyPartMask;
+}
+
+auto ReferenceDevice::setBodyPartMask(uint32_t newBodyPartMask) -> void {
+  bodyPartMask = newBodyPartMask;
+}
+
+[[nodiscard]] auto ReferenceDevice::getMaximumFrequency() const -> std::optional<float> {
+  return maximumFrequency;
+}
+
+auto ReferenceDevice::setMaximumFrequency(float newMaximumFrequency) -> void {
+  maximumFrequency = newMaximumFrequency;
+}
+
+[[nodiscard]] auto ReferenceDevice::getMinimumFrequency() const -> std::optional<float> {
+  return minimumFrequency;
+}
+auto ReferenceDevice::setMinimumFrequency(float newMinimumFrequency) -> void {
+  minimumFrequency = newMinimumFrequency;
+}
+[[nodiscard]] auto ReferenceDevice::getResonanceFrequency() const -> std::optional<float> {
+  return resonanceFrequency;
+}
+auto ReferenceDevice::setResonanceFrequency(float newResonanceFrequency) -> void {
+  resonanceFrequency = newResonanceFrequency;
+}
+
+[[nodiscard]] auto ReferenceDevice::getMaximumAmplitude() const -> std::optional<float> {
+  return maximumAmplitude;
+}
+
+auto ReferenceDevice::setMaximumAmplitude(float newMaximumAmplitude) -> void {
+  maximumAmplitude = newMaximumAmplitude;
+}
+
+[[nodiscard]] auto ReferenceDevice::getImpedance() const -> std::optional<float> {
+  return impedance;
+}
+
+auto ReferenceDevice::setImpedance(float newImpedance) -> void {
+  impedance = newImpedance;
+}
+
+[[nodiscard]] auto ReferenceDevice::getMaximumVoltage() const -> std::optional<float> {
+  return maximumVoltage;
+}
+
+auto ReferenceDevice::setMaximumVoltage(float newMaximumVoltage) -> void {
+  maximumVoltage = newMaximumVoltage;
+}
+
+[[nodiscard]] auto ReferenceDevice::getMaximumCurrent() const -> std::optional<float> {
+  return maximumCurrent;
+}
+
+auto ReferenceDevice::setMaximumCurrent(float newMaximumCurrent) -> void {
+  maximumCurrent = newMaximumCurrent;
+}
+
+[[nodiscard]] auto ReferenceDevice::getMaximumDisplacement() const -> std::optional<float> {
+  return maximumDisplacement;
+}
+
+auto ReferenceDevice::setMaximumDisplacement(float newMaximumDisplacement) -> void {
+  maximumDisplacement = newMaximumDisplacement;
+}
+
+[[nodiscard]] auto ReferenceDevice::getWeight() const -> std::optional<float> {
+    return weight;
+}
+
+auto ReferenceDevice::setWeight(float newWeight) -> void {
+    weight = newWeight;
+}
+
+[[nodiscard]] auto ReferenceDevice::getSize() const -> std::optional<float> {
+    return size;
+}
+
+auto ReferenceDevice::setSize(float newSize) -> void {
+    size = newSize;
+}
 
 } // namespace haptics::types
