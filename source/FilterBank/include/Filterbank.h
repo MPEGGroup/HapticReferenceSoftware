@@ -43,7 +43,7 @@ namespace haptics::filterbank {
 
 class Filterbank {
 public:
-  Filterbank(double fs);
+  Filterbank(double newFs) : fs(newFs){};
 
   auto LP(std::vector<double> &in, double f) const -> std::vector<double>;
   auto HP(std::vector<double> &in, double f) const -> std::vector<double>;
