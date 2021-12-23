@@ -58,7 +58,6 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
     b_double.reserve(samplesPerChannel);
 
     for (auto it = b.cbegin() + (long)c; it < b.cend(); it += (long)numChannels) {
-      std::cout << it - b.cbegin() << std::endl;
       b_double.push_back((double)*it);
     }
 

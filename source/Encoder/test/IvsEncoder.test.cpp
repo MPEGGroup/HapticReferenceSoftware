@@ -32,17 +32,13 @@
  */
 
 #include <catch2/catch.hpp>
+#include <Encoder/include/IvsEncoder.h>
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+using haptics::encoder::IvsEncoder;
 
-using haptics::types::Keyframe;
+TEST_CASE("IvsEncoder : return true", "[placeholder]") {
+  std::string str("this/is/my/file/path.ext");
+  int exit_code = IvsEncoder::encode(str);
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
-
-  CHECK(true);
+  CHECK(exit_code == EXIT_FAILURE);
 }

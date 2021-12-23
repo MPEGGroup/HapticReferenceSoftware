@@ -31,7 +31,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<< HEAD
 #include "../include/Track.h"
+=======
+#include <Types/include/Track.h>
+>>>>>>> develop
 
 namespace haptics::types {
 
@@ -67,11 +71,19 @@ auto Track::setMixingWeight(float newMixingWeight) -> void {
   mixingWeight = newMixingWeight;
 }
 
+<<<<<<< HEAD
 [[nodiscard]] auto Track::getBodyPartMask() const -> uint32_t {
   return bodyPartMask;
 }
 
 auto Track::setBodyPartMask(uint32_t newBodyPartMask) -> void {
+=======
+[[nodiscard]] auto Track::getBodyPartMask() const -> int {
+  return bodyPartMask;
+}
+
+auto Track::setBodyPartMask(int newBodyPartMask) -> void {
+>>>>>>> develop
   bodyPartMask = newBodyPartMask;
 }
 

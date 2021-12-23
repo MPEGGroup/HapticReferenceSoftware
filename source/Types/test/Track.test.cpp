@@ -33,9 +33,15 @@
 
 #include <catch2/catch.hpp>
 
+<<<<<<< HEAD
 #include "../include/Track.h"
 #include "../include/Band.h"
 #include "../include/Effect.h"
+=======
+#include <Types/include/Track.h>
+#include <Types/include/Band.h>
+#include <Types/include/Effect.h>
+>>>>>>> develop
 
 const int id = -1;
 const std::string desctription = "placeholder";

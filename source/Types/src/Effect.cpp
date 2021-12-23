@@ -31,7 +31,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<< HEAD
 #include "../include/Effect.h"
+=======
+#include <Types/include/Effect.h>
+>>>>>>> develop
 
 namespace haptics::types {
 

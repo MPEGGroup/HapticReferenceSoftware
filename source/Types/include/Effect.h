@@ -31,10 +31,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _EFFECT_H_
-#define _EFFECT_H_
+#ifndef EFFECT_H
+#define EFFECT_H
 
-#include "Keyframe.h"
+#include <Types/include/Keyframe.h>
 #include <vector>
 
 using haptics::types::Keyframe;
@@ -76,4 +76,5 @@ private:
   BaseSignal baseSignal = BaseSignal::Sine;
 };
 } // namespace haptics::types
-#endif //_EFFECT_H_
+
+#endif //EFFECT_H

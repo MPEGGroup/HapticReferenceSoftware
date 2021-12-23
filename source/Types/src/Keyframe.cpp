@@ -31,7 +31,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<< HEAD
 #include "../include/Keyframe.h"
+=======
+#include <Types/include/Keyframe.h>
+>>>>>>> develop
 
 namespace haptics::types {
 
@@ -43,6 +47,7 @@ auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
   relativePosition = newRelativePosition;
 }
 
+<<<<<<< HEAD
 [[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> float {
   return amplitudeModulation;
 }
@@ -56,6 +61,21 @@ auto Keyframe::setAmplitudeModulation(float newAmplitudeModulation) -> void {
 }
 
 auto Keyframe::setFrequencyModulation(int newFrequencyModulation) -> void {
+=======
+[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> std::optional<float> {
+  return amplitudeModulation;
+}
+
+auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void {
+  amplitudeModulation = newAmplitudeModulation;
+}
+
+[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> std::optional<int> {
+  return frequencyModulation;
+}
+
+auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void {
+>>>>>>> develop
   frequencyModulation = newFrequencyModulation;
 }
 

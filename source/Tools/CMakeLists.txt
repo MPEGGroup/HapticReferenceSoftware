@@ -1,11 +1,7 @@
 project(tools)
 
-add_library(tools src/InputParser.cpp src/WavParser.cpp src/OHMData.cpp include/OHMData.h)
-#add_library(dr_wav INTERFACE)
-#target_include_directories(dr_wav INTERFACE ${CMAKE_BINARY_DIR}/_deps/dr_libs-src/)
-#target_link_libraries(tools dr_wav)
+add_library(tools src/InputParser.cpp src/WavParser.cpp include/Tools.h src/OHMData.cpp include/OHMData.h)
 
 add_executable(test_tools test/InputParser.test.cpp test/WavParser.test.cpp test/OHMData.test.cpp)
 target_link_libraries(test_tools PRIVATE Catch2::Catch2WithMain tools)
-#target_link_libraries(test_tools PRIVATE Catch2::Catch2WithMain tools dr_libs)
 catch_discover_tests(test_tools)

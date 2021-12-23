@@ -31,18 +31,21 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#include <Encoder/include/AhapEncoder.h>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+namespace haptics::encoder {
 
-using haptics::types::Keyframe;
+[[nodiscard]] auto AhapEncoder::encode(std::string& filename) -> int {
+  std::ifstream ifs(filename);
+  nlohmann::json json = nlohmann::json::parse(ifs);
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
+  std::cout << "get pi : " << json.at("pi") << std::endl;
+  std::cout << "get list : " << json.at("list") << std::endl;
+  std::cout << "get object : " << json.at("object") << std::endl;
 
-  CHECK(true);
+  return EXIT_SUCCESS;
 }
+
+} // namespace haptics::encoder

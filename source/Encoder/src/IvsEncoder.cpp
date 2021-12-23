@@ -31,18 +31,22 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#include <Encoder/include/IvsEncoder.h>
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+namespace haptics::encoder {
 
-using haptics::types::Keyframe;
+[[nodiscard]] auto IvsEncoder::encode(std::string& filename) -> int {
+    if (filename.empty()) {
+        return EXIT_FAILURE;
+    }
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(filename.c_str());
+    if (!result) {
+        return EXIT_FAILURE;
+    }
 
-  CHECK(true);
+    return EXIT_SUCCESS;
 }
+
+} // namespace haptics::encoder

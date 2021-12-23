@@ -31,31 +31,34 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _KEYFRAME_H_
-#define _KEYFRAME_H_
+#ifndef KEYFRAME_H
+#define KEYFRAME_H
+
+#include <optional>
 
 namespace haptics::types {
 
 class Keyframe {
 public:
   explicit Keyframe() = default;
-  explicit Keyframe(int newRelativePosition, float newAmplitudeModulation,
-                    int newFrequencyModulation)
+
+  explicit Keyframe(int newRelativePosition, std::optional<float> newAmplitudeModulation,
+                    std::optional<int> newFrequencyModulation)
       : relativePosition(newRelativePosition)
       , amplitudeModulation(newAmplitudeModulation)
       , frequencyModulation(newFrequencyModulation) {};
 
   [[nodiscard]] auto getRelativePosition() const -> int;
   auto setRelativePosition(int newRelativePosition) -> void;
-  [[nodiscard]] auto getAmplitudeModulation() const -> float;
-  auto setAmplitudeModulation(float newAmplitudeModulation) -> void;
-  [[nodiscard]] auto getFrequencyModulation() const -> int;
-  auto setFrequencyModulation(int newFrequencyModulation) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> std::optional<float>;
+  auto setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
+  auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
 private:
   int relativePosition = 0;
-  float amplitudeModulation = 0;
-  int frequencyModulation = 0;
+  std::optional<float> amplitudeModulation;
+  std::optional<int> frequencyModulation;
 };
 } // namespace haptics::types
-#endif //_KEYFRAME_H_
+#endif //KEYFRAME_H

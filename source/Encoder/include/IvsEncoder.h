@@ -31,18 +31,17 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef IVSENCODER_H
+#define IVSENCODER_H
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+#include <pugixml.hpp>
+#include <iostream>
 
-using haptics::types::Keyframe;
+namespace haptics::encoder {
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
-
-  CHECK(true);
-}
+class IvsEncoder {
+public:
+  [[nodiscard]] auto static IvsEncoder::encode(std::string& filename) -> int;
+};
+} // namespace haptics::encoder
+#endif //IVSENCODER_H

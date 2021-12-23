@@ -31,18 +31,16 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef AHAPENCODER_H
+#define AHAPENCODER_H
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+#include <iostream>
 
-using haptics::types::Keyframe;
+namespace haptics::encoder {
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
-
-  CHECK(true);
-}
+class AhapEncoder {
+public:
+  [[nodiscard]] auto static AhapEncoder::encode(std::string& filename) -> int;
+};
+} // namespace haptics::encoder
+#endif //AHAPENCODER_H

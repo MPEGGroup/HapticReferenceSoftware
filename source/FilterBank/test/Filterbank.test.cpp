@@ -33,16 +33,58 @@
 
 #include <catch2/catch.hpp>
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+#include <FilterBank/include/Filterbank.h>
+#include <iostream>
+#include <vector>
 
-using haptics::types::Keyframe;
+constexpr size_t BL = 25;
+constexpr double FS = 8000;
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
+TEST_CASE("haptics::filterbank::Filterbank") {
 
-  CHECK(true);
+  using haptics::filterbank::Filterbank;
+
+  SECTION("LP") {
+
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.LP(in, FS / 4);
+
+    /*for(int i=0; i<BL; i++){
+        std::cout << out[i] << std::endl;
+    }*/
+
+    CHECK(true);
+  }
+
+  SECTION("HP") {
+
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.HP(in, FS / 4);
+
+    /*for(int i=0; i<BL; i++){
+        std::cout << out[i] << std::endl;
+    }*/
+
+    CHECK(true);
+  }
+
+  SECTION("LP+HP") {
+
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out1 = fb.HP(in, FS / 4);
+
+    std::vector<double> out2 = fb.LP(in, FS / 4);
+
+    /*for(int i=0; i<BL; i++){
+        std::cout << out1[i] +out2[i] << std::endl;
+    }*/
+
+    CHECK(true);
+  }
 }

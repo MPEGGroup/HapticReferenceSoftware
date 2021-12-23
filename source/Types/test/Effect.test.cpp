@@ -33,7 +33,11 @@
 
 #include <catch2/catch.hpp>
 
+<<<<<<< HEAD
 #include "../include/Effect.h"
+=======
+#include <Types/include/Effect.h>
+>>>>>>> develop
 
 using haptics::types::Effect;
 using haptics::types::BaseSignal;

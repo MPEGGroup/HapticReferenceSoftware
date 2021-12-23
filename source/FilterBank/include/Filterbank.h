@@ -31,18 +31,25 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#ifndef FILTERBANK_H
+#define FILTERBANK_H
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+#include <iostream>
+#include <vector>
 
-using haptics::types::Keyframe;
+#include <Iir.h>
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
+namespace haptics::filterbank {
 
-  CHECK(true);
-}
+class Filterbank {
+public:
+  Filterbank(double fs);
+
+  auto LP(std::vector<double> &in, double f) const -> std::vector<double>;
+  auto HP(std::vector<double> &in, double f) const -> std::vector<double>;
+
+private:
+  double fs;
+};
+} // namespace haptics::filterbank
+#endif // FILTERBANK_H

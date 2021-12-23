@@ -31,10 +31,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _BAND_H_
-#define _BAND_H_
+#ifndef BAND_H
+#define BAND_H
 
-#include "Effect.h"
+#include <Types/include/Effect.h>
 #include <vector>
 
 namespace haptics::types {
@@ -74,7 +74,7 @@ public:
   auto setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void;
   auto getEffectsSize() -> size_t;
   auto getEffectAt(int index) -> haptics::types::Effect&;
-  auto addEffect(haptics::types::Effect &newNote) -> void;
+  auto addEffect(haptics::types::Effect &newEffect) -> void;
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start, const int stop)
       -> bool;
 
@@ -87,4 +87,5 @@ private:
   std::vector<Effect> effects = std::vector<Effect>{};
 };
 } // namespace haptics::types
-#endif //_BAND_H_
+
+#endif //BAND_H

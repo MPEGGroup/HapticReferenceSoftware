@@ -31,8 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <Encoder/include/AhapEncoder.h>
+#include <Encoder/include/IvsEncoder.h>
 #include <Tools/include/InputParser.h>
 
+using haptics::encoder::AhapEncoder;
+using haptics::encoder::IvsEncoder;
 using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -53,13 +57,23 @@ auto main(int argc, char *argv[]) -> int {
     return EXIT_FAILURE;
   }
 
-  std::cout << "The file to process is : " << filename << "\n";
   std::string output = inputParser.getCmdOption("-o");
   if (output.empty()) {
     output = inputParser.getCmdOption("--output");
   }
   if (!output.empty()) {
     std::cout << "The generated file will be : " << output << "\n";
+  }
+
+  std::string ext = InputParser::getFileExt(filename);
+  if (ext == "json" || ext == "ahap") {
+    std::cout << "The AHAP file to encode : " << filename << std::endl;
+    AhapEncoder::encode(filename);
+  } else if (ext == "xml" || ext == "ivs") {
+    std::cout << "The IVS file to encode : " << filename << std::endl;
+    IvsEncoder::encode(filename);
+  } else if (ext == "wav") {
+    std::cout << "The WAV file to encode : " << filename << std::endl;
   }
   return EXIT_SUCCESS;
 }

@@ -31,18 +31,42 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
+#include <iostream>
 
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
-#include <Types/include/Keyframe.h>
->>>>>>> develop
+namespace haptics::tools {
 
-using haptics::types::Keyframe;
+	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
 
-TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-  const Keyframe kf(10, .8, 500);
+    int start = a.first;
+    int end = b.first;
+    double start_a = a.second;
+    double end_a = b.second;
 
-  CHECK(true);
-}
+    if (x < start || x > end) {
+      return EXIT_FAILURE;
+    }
+
+    if (end == start) {
+      return (start_a + end_a) / 2.0;
+    }
+
+    if (start >= end) {
+      std::swap(start, end);
+      std::swap(start_a, end_a);
+    }
+
+    return (start_a * (end - x) + end_a * (x - start)) / (end - start);
+  }
+
+
+  [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
+
+    double x_out = -1;
+
+    if (end_in - start_in != 0) {
+      x_out = ((end_out - start_out) / (end_in - start_in)) * (x_in - end_in) + end_out;
+    }
+
+    return x_out;
+  }
+  }

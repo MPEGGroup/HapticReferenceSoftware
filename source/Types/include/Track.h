@@ -31,10 +31,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _TRACK_H_
-#define _TRACK_H_
+#ifndef TRACK_H
+#define TRACK_H
 
-#include "Band.h"
+#include <Types/include/Band.h>
 #include <fstream>
 #include <vector>
 
@@ -44,7 +44,7 @@ class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                 uint32_t newBodyPartMask)
+                     int newBodyPartMask)
       : id(newId)
       , description(newDescription)
       , gain(newGain)
@@ -84,4 +84,4 @@ private:
 
 };
 } // namespace haptics::types
-#endif //_TRACK_H_
+#endif //TRACK_H
