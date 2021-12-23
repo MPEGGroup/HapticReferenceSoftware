@@ -36,6 +36,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 
 constexpr double a = 62;
@@ -58,27 +59,37 @@ constexpr double LOGFACTOR_SPECT = 20;
 
 namespace haptics::tools {
 
+struct peaks {
+  std::vector<size_t> locations;
+  std::vector<double> heights;
+};
+
+struct modelResult {
+  std::vector<double> SMR;
+  std::vector<double> bandenergy;
+};
+
 class PsychohapticModel {
 public:
-    PsychohapticModel(int bl, int fs);
+    PsychohapticModel(size_t bl_new, int fs_new);
 
-    void getSMR(std::vector<double> &block, std::vector<double> &SMR, std::vector<double> &bandenergy);
+    auto getSMR(std::vector<double> &block) -> modelResult;
 
-    static void findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height, std::vector<double> &result_height, std::vector<size_t> &result_location);
+    static auto findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height) -> peaks;
     void peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc, std::vector<double> &mask);
 
 private:
-    void globalMaskingThreshold(std::vector<double> &spect, std::vector<double> &globalmask);
+    auto globalMaskingThreshold(std::vector<double> &spect) -> std::vector<double>;
     void perceptualThreshold();
 
-    static void findAllPeakLocations(std::vector<double> &x, std::vector<double> &height, std::vector<size_t> &location);
-    static void peakProminence(std::vector<double> &spectrum, std::vector<double> &peaks_height, std::vector<size_t> &peaks_location, std::vector<double> &prominences_height, std::vector<size_t> &prominences_location);
-    static void filterPeakCriterion(std::vector<double> &input_height, std::vector<size_t> &input_location, std::vector<double> &result_height, std::vector<size_t> &result_location, double min_peak_val);
+    static auto findAllPeakLocations(std::vector<double> &x) -> peaks;
+    static auto peakProminence(std::vector<double> &spectrum, peaks input) -> peaks;
+    static auto filterPeakCriterion(peaks &input, double min_peak_val) -> peaks;
 
     static auto max(double v1, double v2) -> double;
     static auto findMaxVector(std::vector<double> &data) -> double;
 
-    int bl;
+    size_t bl;
     int fs;
     std::vector<double> freqs;
     std::vector<double> percthres;

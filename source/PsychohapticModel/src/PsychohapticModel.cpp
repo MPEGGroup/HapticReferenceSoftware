@@ -37,13 +37,10 @@
 
 namespace haptics::tools {
 
-PsychohapticModel::PsychohapticModel(int bl, int fs) {
-
-    this->bl = bl;
-    this->fs = fs;
+PsychohapticModel::PsychohapticModel(size_t bl_new, int fs_new) : bl(bl_new), fs(fs_new) {
 
     freqs.resize(bl);
-    double step = ((double)fs) / (double)(2*bl - 1); //correct stepsize?
+    double step = ((double)fs) / (double)(2*bl - 1);
     double freq_cur = 0.0;
     for (size_t i = 0; i < bl; ++i) {
         freqs[i] = freq_cur;
@@ -57,7 +54,7 @@ PsychohapticModel::PsychohapticModel(int bl, int fs) {
 
     int l_book = dwtlevel + 1;
     book.resize(l_book);
-    book[0] = bl >> dwtlevel;
+    book[0] = (int)bl >> dwtlevel;
     book[1] = book[0];
     book_cumulative.resize(l_book+1);
     book_cumulative[0] = 0;
@@ -69,7 +66,7 @@ PsychohapticModel::PsychohapticModel(int bl, int fs) {
     }
 }
 
-void PsychohapticModel::getSMR(std::vector<double> &block, std::vector<double> &SMR, std::vector<double> &bandenergy){
+auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
 
     std::vector<double> spect;
     spect.resize(bl);
@@ -90,7 +87,7 @@ void PsychohapticModel::getSMR(std::vector<double> &block, std::vector<double> &
     spect_real.resize(bl);
 
     static double correction = sqrt(2);
-    std::transform( spect_complex.begin(), spect_complex.end()-bl, spect_real.begin(), [](std::complex<double> a) {
+    std::transform( spect_complex.begin(), spect_complex.end()-(long long)bl, spect_real.begin(), [](std::complex<double> a) {
         return LOGFACTOR_SPECT*log10(abs(correction*a.real()));
     } );
 
@@ -98,33 +95,31 @@ void PsychohapticModel::getSMR(std::vector<double> &block, std::vector<double> &
         std::cout << spect_real[i] << std::endl;
     }*/
 
-    std::vector<double> globalmask(bl,0);
-    globalMaskingThreshold(spect,globalmask);
-    SMR.resize(book.size());
-    bandenergy.resize(book.size());
+    std::vector<double> globalmask = globalMaskingThreshold(spect);
+    modelResult result;
+    result.SMR.resize(book.size());
+    result.bandenergy.resize(book.size());
     std::vector<double> maskenergy(bl,0);
     int i = 0;
     for(int b = 0; b<book.size(); b++){
-        bandenergy[b] = 0;
+        result.bandenergy[b] = 0;
         maskenergy[b] = 0;
         for(; i<book_cumulative[b+1]; i++){
-            bandenergy[b] += pow(base,spect[i]/factor);
+            result.bandenergy[b] += pow(base,spect[i]/factor);
             maskenergy[b] += globalmask[i];
         }
-        SMR[b] = factor * log10(bandenergy[b]/maskenergy[b]);
+        result.SMR[b] = factor * log10(result.bandenergy[b]/maskenergy[b]);
     }
-
+    return result;
 }
 
-void PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect, std::vector<double> &globalmask){
+auto PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect) -> std::vector<double> {
 
-
+    std::vector<double> globalmask(bl, 0);
     double min_peak_height = findMaxVector(spect) - MIN_PEAK_HEIGHT_DIFF;
-    std::vector<double> peaks_height;
-    std::vector<size_t> peaks_location;
-    findPeaks(spect,MIN_PEAK_PROMINENCE,min_peak_height,peaks_height,peaks_location);
+    peaks p = findPeaks(spect,MIN_PEAK_PROMINENCE,min_peak_height);
     std::vector<double> mask;
-    peakMask(peaks_height,peaks_location,mask);
+    peakMask(p.heights,p.locations,mask);
     if(mask.empty()){
         for(int i=0; i<bl; i++){
             globalmask[i] = percthres[i]; //percthres is in linear domain
@@ -134,7 +129,7 @@ void PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect, std::
             globalmask[i] = pow(base,mask.at(i)/factor)+percthres[i]; //percthres is in linear domain
         }
     }
-
+    return globalmask;
 
 }
 
@@ -158,49 +153,52 @@ void PsychohapticModel::perceptualThreshold() {
 
 }
 
-void PsychohapticModel::findAllPeakLocations(std::vector<double> &x, std::vector<double> &height, std::vector<size_t> &location) {
+auto PsychohapticModel::findAllPeakLocations(std::vector<double> &x) -> peaks {
 
-    location.reserve(x.size()/2);
-    height.reserve(x.size()/2);
-      size_t num_peaks = 0;
-      size_t i = 1;
-      size_t i_max = x.size() - 1;
-      size_t i_plateau = 0;
-      while (i < i_max) {
-          if ((i == 0) || (x[i-1] < x[i])) {
-              if (x[i+1] < x[i]) {
-                  height.push_back(x[i]);
-                  location.push_back(i);
-                  ++num_peaks;
-              }
-              else if (x[i+1] == x[i]) {
-              //else if (abs(x[i+1] - x[i]) < abs(x[i]/PLATEAU_COMP_FACTOR)) {
-                  i_plateau = i + 1;
-                  while (x[i_plateau] == x[i]) {
-                  //while (abs(x[i_plateau] - x[i]) < abs(x[i]/PLATEAU_COMP_FACTOR)) {
-                      ++i_plateau;
-                  }
-                  if (x[i_plateau+1] < x[i]) {
-                      height.push_back(x[i]);
-                      location.push_back((i + i_plateau) / 2);
-                      ++num_peaks;
-                      i = i_plateau;
-                  }
-              }
-          }
-          ++i;
-      }
-    height.resize(num_peaks);
-    location.resize(num_peaks);
+    peaks p;
+    p.locations.reserve(x.size()/2);
+    p.heights.reserve(x.size()/2);
+    size_t num_peaks = 0;
+    size_t i = 1;
+    size_t i_max = x.size() - 1;
+    size_t i_plateau = 0;
+    while (i < i_max) {
+        if ((i == 0) || (x[i-1] < x[i])) {
+            if (x[i+1] < x[i]) {
+                p.heights.push_back(x[i]);
+                p.locations.push_back(i);
+                ++num_peaks;
+            }
+            else if (x[i+1] == x[i]) {
+            //else if (abs(x[i+1] - x[i]) < abs(x[i]/PLATEAU_COMP_FACTOR)) {
+                i_plateau = i + 1;
+                while (x[i_plateau] == x[i]) {
+                //while (abs(x[i_plateau] - x[i]) < abs(x[i]/PLATEAU_COMP_FACTOR)) {
+                    ++i_plateau;
+                }
+                if (x[i_plateau+1] < x[i]) {
+                    p.heights.push_back(x[i]);
+                    p.locations.push_back((i + i_plateau) / 2);
+                    ++num_peaks;
+                    i = i_plateau;
+                }
+            }
+        }
+        ++i;
+    }
+    p.heights.resize(num_peaks);
+    p.locations.resize(num_peaks);
+    return p;
 }
 
-void PsychohapticModel::peakProminence(std::vector<double> &spectrum, std::vector<double> &peaks_height, std::vector<size_t> &peaks_location, std::vector<double> &prominences_height, std::vector<size_t> &prominences_location) {
+auto PsychohapticModel::peakProminence(std::vector<double> &spectrum, peaks input) -> peaks {
 
-    size_t num_peaks = peaks_location.size();
-    prominences_height.reserve(num_peaks);
-    prominences_location.reserve(num_peaks);
+    peaks prominences;
+    size_t num_peaks = input.locations.size();
+    prominences.heights.reserve(num_peaks);
+    prominences.locations.reserve(num_peaks);
     for(size_t i = 0; i<num_peaks; i++){
-        prominences_height.push_back(0); //simple init instead?
+        prominences.heights.push_back(0); //simple init instead?
     }
     std::vector<size_t> valley_left(num_peaks,0);
     std::vector<size_t> valley_right(num_peaks,0);
@@ -208,16 +206,16 @@ void PsychohapticModel::peakProminence(std::vector<double> &spectrum, std::vecto
     for (size_t i = 0; i < num_peaks; ++i) {
       size_t j_min = 0;
       for (int k = (int)i-1; k >= 0; --k) {
-          if (peaks_height[k] > peaks_height[i]) {
-              j_min = peaks_location[k];
+          if (input.heights[k] > input.heights[i]) {
+              j_min = input.locations[k];
               break;
           }
       }
-      size_t j_max = peaks_location[i] - 1;
+      size_t j_max =input.locations[i] - 1;
       size_t j = j_max;
-      double min_val_left = peaks_height[i];
+      double min_val_left = input.heights[i];
       while ((j >= j_min) && (j <= j_max)) {
-          if (peaks_location[i] == 0) {
+          if (input.locations[i] == 0) {
               valley_left[i] = -1;
               break;
           }
@@ -230,16 +228,16 @@ void PsychohapticModel::peakProminence(std::vector<double> &spectrum, std::vecto
 
       j_max = spectrum.size() - 1;
       for (size_t k = i+1; k < num_peaks; ++k) {
-          if (peaks_height[k] > peaks_height[i]) {
-              j_max = peaks_location[k];
+          if (input.heights[k] > input.heights[i]) {
+              j_max = input.locations[k];
               break;
           }
       }
-      j_min = peaks_location[i] + 1;
+      j_min = input.locations[i] + 1;
       j = j_min;
-      double min_val_right = peaks_height[i];
+      double min_val_right = input.heights[i];
       while ((j >= j_min) && (j <= j_max)) {
-          if (peaks_location[i] == (int32_t)(j_max)) {
+          if (input.locations[i] == (int32_t)(j_max)) {
               valley_right[i] = -1;
               break;
           }
@@ -265,66 +263,64 @@ void PsychohapticModel::peakProminence(std::vector<double> &spectrum, std::vecto
       else {
           valley_right_height_cur = spectrum[valley_right[i]];
       }
-      prominences_height[i] = peaks_height[i] - max(valley_left_height_cur, valley_right_height_cur);
+      prominences.heights[i] = input.heights[i] - max(valley_left_height_cur, valley_right_height_cur);
     }
-    std::copy(peaks_location.begin(),peaks_location.end(),std::back_inserter(prominences_location));
+    std::copy(input.locations.begin(),input.locations.end(),std::back_inserter(prominences.locations));
+    return prominences;
 }
 
-void PsychohapticModel::filterPeakCriterion(std::vector<double> &input_height, std::vector<size_t> &input_location, std::vector<double> &result_height, std::vector<size_t> &result_location, double min_peak_val) {
+auto PsychohapticModel::filterPeakCriterion(peaks &input, double min_peak_val) -> peaks {
 
-    size_t length = input_height.size();
-    result_height.reserve(length);
-    result_location.reserve(length);
+    size_t length = input.heights.size();
+    peaks output;
+    output.heights.reserve(length);
+    output.locations.reserve(length);
     size_t num_peaks = 0;
     for (size_t i = 0; i < length; ++i) {
-        if (input_height[i] >= min_peak_val) {
-            result_height.push_back(input_height[i]);
-            result_location.push_back(input_location[i]);
+        if (input.heights[i] >= min_peak_val) {
+            output.heights.push_back(input.heights[i]);
+            output.locations.push_back(input.locations[i]);
             ++num_peaks;
         }
     }
-    result_height.resize(num_peaks);
-    result_location.resize(num_peaks);
+    output.heights.resize(num_peaks);
+    output.locations.resize(num_peaks);
+    return output;
 }
 
-void PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height, std::vector<double> &result_height, std::vector<size_t> &result_location) {
+auto PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height) -> peaks {
 
     if(spectrum.empty()) {
-        return;
+        peaks p;
+        return p;
     }
 
-    std::vector<double> peaks_all_height;
-    std::vector<size_t> peaks_all_location;
-    findAllPeakLocations(spectrum,peaks_all_height,peaks_all_location);
+    peaks peaks_all = findAllPeakLocations(spectrum);
 
-    if (peaks_all_height.empty()) {
-        return;
+    if (peaks_all.heights.empty()) {
+        return peaks_all;
     }
 
-    std::vector<double> peaks_min_h_height;
-    std::vector<size_t> peaks_min_h_location;
-    filterPeakCriterion(peaks_all_height,peaks_all_location,peaks_min_h_height,peaks_min_h_location,min_peak_height);
+    peaks peaks_min_h = filterPeakCriterion(peaks_all,min_peak_height);
 
-    if (peaks_min_h_height.empty()) {
-        return;
+    if (peaks_min_h.heights.empty()) {
+        return peaks_min_h;
     }
 
-    std::vector<double> prominences_height;
-    std::vector<size_t> prominences_location;
-    peakProminence(spectrum,peaks_min_h_height,peaks_min_h_location,prominences_height,prominences_location);
+    peaks prominences = peakProminence(spectrum,peaks_min_h);
 
-    std::vector<double> peaks_min_prominence_height;
-    std::vector<size_t> peaks_min_prominence_location;
-    filterPeakCriterion(prominences_height,prominences_location,peaks_min_prominence_height,peaks_min_prominence_location,min_peak_prominence);
+    peaks peaks_min_prominence = filterPeakCriterion(prominences, min_peak_prominence);
 
-    size_t prominences_length = peaks_min_prominence_height.size();
+    size_t prominences_length = peaks_min_prominence.heights.size();
 
-    result_location.reserve(prominences_length);
-    result_height.reserve(prominences_length);
-    std::copy(peaks_min_prominence_location.begin(),peaks_min_prominence_location.end(),std::back_inserter(result_location));
+    peaks result;
+    result.locations.reserve(prominences_length);
+    result.heights.reserve(prominences_length);
+    std::copy(peaks_min_prominence.locations.begin(),peaks_min_prominence.locations.end(),std::back_inserter(result.locations));
     for (size_t i = 0; i < prominences_length; ++i) {
-        result_height.push_back(spectrum[peaks_min_prominence_location[i]]);
+        result.heights.push_back(spectrum[peaks_min_prominence.locations[i]]);
     }
+    return result;
 }
 
 void PsychohapticModel::peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc, std::vector<double> &mask) {

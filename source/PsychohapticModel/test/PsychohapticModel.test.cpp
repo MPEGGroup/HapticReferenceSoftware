@@ -56,18 +56,16 @@ TEST_CASE("haptics::tools::PsychohapticModel") {
 
         std::vector<double> spectrum(bl,0);
         spectrum[pos] = peak;
-        std::vector<double> result_height;
-        std::vector<size_t> result_location;
 
 
-        PsychohapticModel::findPeaks(spectrum,MIN_PEAK_PROMINENCE,peak-MIN_PEAK_HEIGHT_DIFF,result_height,result_location);
-        /*for(size_t i=0; i<result_height.size(); i++) {
+        haptics::tools::peaks p = PsychohapticModel::findPeaks(spectrum,MIN_PEAK_PROMINENCE,peak-MIN_PEAK_HEIGHT_DIFF);
+        /*for(size_t i=0; i<p.heights.size(); i++) {
             std::cout << "peak:" << std::endl;
-            std::cout << result_height[i] << std::endl;
-            std::cout << result_location[i] << std::endl;
+            std::cout << p.heights[i] << std::endl;
+            std::cout << p.locations[i] << std::endl;
         }*/
 
-        CHECK(result_location[0]==pos);
+        CHECK(p.locations[0]==pos);
 
         //for additional evaluation:
         /*std::vector<double> block(bl,0);

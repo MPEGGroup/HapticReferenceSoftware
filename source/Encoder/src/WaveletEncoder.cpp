@@ -36,13 +36,11 @@
 namespace haptics::encoder {
 
 using haptics::tools::PsychohapticModel;
+using haptics::tools::modelResult;
+using haptics::filterbank::Wavelet;
 
-WaveletEncoder::WaveletEncoder(int bl, int fs) : pm(bl,fs) {
-
-    this->bl = bl;
-    this->fs = fs;
-
-    dwtlevel = (int)log2((double)bl/4);
+WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
+    : pm(bl_new, fs_new), bl(bl_new), fs(fs_new), dwtlevel((int)log2((double)bl / 4)) {
 
     int l_book = dwtlevel + 1;
     book.resize(l_book);
@@ -61,12 +59,12 @@ WaveletEncoder::WaveletEncoder(int bl, int fs) : pm(bl,fs) {
 
 //encode wavelet transformed signal; requires original signal as well as transformed; returns quantized signal, scaling has to be discussed.
 //parameter bitbudget is used to control the coarseness of the quantization; range :[0,(int)log2((double)bl/4)*15] (from 0 bits to max).
-auto WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<double> &block_dwt, int bitbudget) -> std::vector<double> {
+auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget) -> std::vector<double> {
 
-    std::vector<double> SMR;
-    std::vector<double> bandenergy;
-
-    pm.getSMR(block_time,SMR,bandenergy);
+    std::vector<double> block_dwt(bl, 0);
+    Wavelet wavelet;
+    wavelet.DWT(block_time, dwtlevel, block_dwt);
+    modelResult pm_result = pm.getSMR(block_time);
 
     std::vector<double> block_dwt_quant(bl,0);
     std::vector<int> block_intquant(bl,0);
@@ -94,7 +92,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<dou
 
     while(bitalloc_sum < bitbudget){
 
-        updateNoise(bandenergy,noiseenergy,SNR,MNR,SMR);
+        updateNoise(pm_result.bandenergy,noiseenergy,SNR,MNR,pm_result.SMR);
         for(int i=0; i<book.size(); i++){
             if(bitalloc[i]>=MAXBITS){
                 MNR[i] = INFINITY;
@@ -110,7 +108,8 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<dou
             bitalloc_sum++;
         }
 
-        uniformQuant(block_dwt,block_dwt_quant,book_cumulative[index], book[index],qwavmax,bitalloc[index]);
+        uniformQuant(block_dwt, book_cumulative[index], qwavmax, bitalloc[index], book[index],
+                     block_dwt_quant);
 
         noiseenergy[index] = 0;
         int i = book_cumulative[index];
@@ -132,7 +131,8 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time,std::vector<dou
     return block_dwt_quant; //return statement should be adapted to correct specifications
 }
 
-void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax, std::vector<unsigned char> &bitwavmax){
+void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
+                                               std::vector<unsigned char> &bitwavmax) {
 
     double wavmax = findMax(sig);
 
@@ -140,20 +140,23 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
     int integerbits = 0;
     int fractionbits = 0;
     char mode = 0;
+    quantMode m = {0,0};
     if(wavmax<1){
         fractionbits = FRACTIONBITS_0;
+        m.integerbits = 0;
+        m.fractionbits = FRACTIONBITS_0; 
     }else{
         integerpart = 1;
-        integerbits = 3;
-        fractionbits = 4;
+        m.integerbits = 3;
+        m.fractionbits = 4; 
         mode = 1;
     }
 
-    qwavmax = maxQuant(wavmax-(double)integerpart,integerbits,fractionbits) + integerpart;
+    qwavmax = maxQuant(wavmax-(double)integerpart,m) + integerpart;
     bitwavmax.clear();
     bitwavmax.reserve(WAVMAXLENGTH);
     bitwavmax.push_back(mode);
-    de2bi((int)((qwavmax-(double)integerpart)*pow(2,(double)fractionbits)),bitwavmax,integerbits+fractionbits);
+    de2bi((int)((qwavmax-(double)integerpart)*pow(2,(double)m.fractionbits)),bitwavmax,m.integerbits+m.fractionbits);
 
 
 }
@@ -166,7 +169,7 @@ void WaveletEncoder::updateNoise(std::vector<double> &bandenergy, std::vector<do
     }
 }
 
-void WaveletEncoder::uniformQuant(std::vector<double> &in, std::vector<double> &out, size_t start, size_t length, double max, int bits){
+void WaveletEncoder::uniformQuant(std::vector<double> &in, size_t start, double max, int bits, size_t length, std::vector<double> &out) {
     double delta = max/(1<<bits);
     double max_q = delta * ((1<<bits)-1);
     for(size_t i=start; i<start+length; i++){
@@ -180,15 +183,15 @@ void WaveletEncoder::uniformQuant(std::vector<double> &in, std::vector<double> &
     }
 }
 
-auto WaveletEncoder::maxQuant(double in, int b1, int b2) -> double {
+auto WaveletEncoder::maxQuant(double in, quantMode m) -> double {
 
-    double max = ((double)(1<<(b1+b2))-1) / (1<<b2);
+    double max = ((double)(1<<(m.integerbits+m.fractionbits))-1) / (1<<m.fractionbits);
 
     double q = in;
     if(q>=max){
         q = sgn(q) * max * MAXQUANTFACTOR;
     }
-    double delta = pow(2,(double)-b2);
+    double delta = pow(2,(double)-m.fractionbits);
     return ceil(abs(q)/delta) * delta;
 
 }

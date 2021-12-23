@@ -38,6 +38,7 @@
 #include <cmath>
 
 #include "PsychohapticModel/include/PsychohapticModel.h"
+#include "FilterBank/include/Wavelet.h"
 
 constexpr size_t WAVMAXLENGTH = 8;
 constexpr int MAXBITS = 15;
@@ -48,17 +49,24 @@ constexpr double QUANT_ADD = 0.5;
 
 namespace haptics::encoder {
 
+struct quantMode {
+  int integerbits;
+  int fractionbits;
+};
 
 class WaveletEncoder {
 public:
-    WaveletEncoder(int bl, int fs);
+    WaveletEncoder(int bl_new, int fs_new);
 
-    auto encodeBlock(std::vector<double> &block_time, std::vector<double> &block_dwt, int bitbudget) -> std::vector<double>;
-    static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax, std::vector<unsigned char> &bitwavmax);
-    void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy, std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
+    auto encodeBlock(std::vector<double> &block_time, int bitbudget) -> std::vector<double>;
+    static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
+                                          std::vector<unsigned char> &bitwavmax);
+    void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
+                     std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
 
-    static void uniformQuant(std::vector<double> &in, std::vector<double> &out, size_t start, size_t length, double max, int bits);
-    static auto maxQuant(double in, int b1, int b2) -> double;
+    static void uniformQuant(std::vector<double> &in, size_t start, double max, int bits,
+                             size_t length, std::vector<double> &out);
+    static auto maxQuant(double in, quantMode m) -> double;
     template <class T>
     static auto findMax(std::vector<T> &data) -> T;
     static auto findMinInd(std::vector<double> &data) -> size_t;
