@@ -36,7 +36,7 @@
 
 namespace haptics::filterbank {
 
-void Wavelet::DWT(std::vector<double> &in, std::vector<double> &out, int levels) {
+void Wavelet::DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
 
   std::vector<double> x(in.begin(), in.end());
   for (int i = 0; i < levels; i++) {
@@ -58,7 +58,7 @@ void Wavelet::DWT(std::vector<double> &in, std::vector<double> &out, int levels)
   }
 }
 
-void Wavelet::inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels) {
+void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
 
   std::copy(in.begin(), in.end(), out.begin());
 
@@ -96,10 +96,10 @@ void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h, s
   temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
   temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-  std::vector<double> conv(inSize + hSize - 1 + 2 * lext, 0);
+  std::vector<double> conv(inSize + hSize - 1 + 2 * (size_t)lext, 0);
   conv1D(temp, h, conv);
   out.resize(inSize);
-  std::copy(conv.begin() + lext * 2, conv.end() - lext * 2, out.begin());
+  std::copy(conv.begin() + (long long)lext * 2, conv.end() - (long long)lext * 2, out.begin());
 }
 
 template <size_t hSize>
@@ -119,7 +119,7 @@ void Wavelet::symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h
   temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
   temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-  std::vector<double> conv(inSize + hSize - 1 + 2 * lext, 0);
+  std::vector<double> conv(inSize + hSize - 1 + 2 * (size_t)lext, 0);
   conv1D(temp, h, conv);
   out.resize(inSize);
   for (int i = 0; i < inSize; i++) {

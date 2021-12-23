@@ -56,8 +56,8 @@ constexpr size_t HP_SIZE = 7;
 
 class Wavelet {
 public:
-  void DWT(std::vector<double> &in, std::vector<double> &out, int levels);
-  void inv_DWT(std::vector<double> &in, std::vector<double> &out, int levels);
+  void DWT(std::vector<double> &in, int levels, std::vector<double> &out);
+  void inv_DWT(std::vector<double> &in, int levels, std::vector<double> &out);
 
   template <size_t hSize>
   static void symconv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out);
