@@ -68,16 +68,18 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   std::string ext = InputParser::getFileExt(filename);
+  int exitCode = -1;
   if (ext == "json" || ext == "ahap") {
     std::cout << "The AHAP file to encode : " << filename << std::endl;
-    AhapEncoder::encode(filename);
+    exitCode  = AhapEncoder::encode(filename);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
-    IvsEncoder::encode(filename);
+    exitCode  = IvsEncoder::encode(filename);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
-    PcmEncoder::encode(filename);
+    const double curveFrequency = 72.5;
+    exitCode = PcmEncoder::encode(filename, curveFrequency);
   }
 
-  return EXIT_SUCCESS;
+  return exitCode;
 }

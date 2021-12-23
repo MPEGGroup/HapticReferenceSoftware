@@ -70,4 +70,8 @@ auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
 }
 
+auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {
+  this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
+}
+
 } // namespace haptics::types

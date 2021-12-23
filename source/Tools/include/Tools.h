@@ -69,4 +69,8 @@ namespace haptics::tools {
 
     return x_out;
   }
+
+  [[nodiscard]] auto is_eq(double a, double b) -> bool {
+    return std::fabs(a - b) <= std::numeric_limits<double>::epsilon();
+  }
   }

@@ -32,27 +32,65 @@
  */
 
 #include <Encoder/include/PcmEncoder.h>
+#include <Tools/include/Tools.h>
 
+using haptics::filterbank::Filterbank;
+using haptics::types::EncodingModality;
+using haptics::types::BaseSignal;
 using haptics::tools::WavParser;
+using haptics::types::BandType;
+using haptics::types::Keyframe;
+using haptics::types::Effect;
+using haptics::types::Track;
+using haptics::types::Band;
 
 namespace haptics::encoder {
 
-auto PcmEncoder::encode(std::string &filename) -> int {
+auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit) -> int {
   WavParser wavParser;
   wavParser.loadFile(filename);
 
-  std::cout << std::endl << std::endl;
-  std::cout << wavParser.getSamplerate() << std::endl;
-  std::cout << wavParser.getNumSamples() << std::endl;
-  std::cout << wavParser.getNumChannels() << std::endl;
-
-  std::vector<std::vector<std::pair<int16_t, double>>> extractedKeyframes;
+  std::vector<Track> res = {};
+  
+  Track myTrack;
+  Band myBand;
+  std::vector<double> signal;
+  std::vector<std::pair<int16_t, double>> points;
+  Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   size_t channelIndex = 0;
   for (; channelIndex < wavParser.getNumChannels(); channelIndex++) {
-    extractedKeyframes.push_back(PcmEncoder::localExtrema(wavParser.getSamplesChannel(channelIndex), true));
+    myTrack = Track(0, filename, 1, 1, 0);
+    signal = wavParser.getSamplesChannel(channelIndex);
+    signal = filterbank.LP(signal, curveFrequencyLimit);
+    points = PcmEncoder::localExtrema(signal, true);
+    if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(), curveFrequencyLimit,
+                                       &myBand)) {
+      myTrack.addBand(myBand);
+    }
+    res.push_back(myTrack);
   }
 
   return EXIT_SUCCESS;
+}
+
+[[nodiscard]] auto PcmEncoder::convertToCurveBand(std::vector<std::pair<int16_t, double>> &points,
+                                                  const double samplerate,
+                                                  const double curveFrequencyLimit, Band *out)
+    -> bool {
+  out->setBandType(BandType::Curve);
+  out->setEncodingModality(EncodingModality::Quantized);
+  out->setWindowLength(0);
+  out->setLowerFrequencyLimit(0);
+  out->setUpperFrequencyLimit((int)curveFrequencyLimit);
+  Effect myEffect(0, 0, BaseSignal::Sine);
+  Keyframe myKeyframe;
+  for (std::pair<int16_t, double> p : points) {
+    std::optional<int> f;
+    myEffect.addKeyframe(static_cast<int>(S_2_MS * p.first / samplerate), p.second, f);
+  }
+  out->addEffect(myEffect);
+
+  return true;
 }
 
 
@@ -102,8 +140,7 @@ auto PcmEncoder::encode(std::string &filename) -> int {
     nextValue = *it;
     if (((value >= lastValue && value >= nextValue) ||
          (value <= lastValue && value <= nextValue)) &&
-        (value != lastValue || value != nextValue)) {
-
+        !(haptics::tools::is_eq(value, lastValue) && haptics::tools::is_eq(value, nextValue))) {
       p = std::pair<int16_t, double>(i, value);
       extremaIndexes.push_back(p);
     }
