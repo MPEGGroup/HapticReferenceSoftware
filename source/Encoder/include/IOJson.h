@@ -36,18 +36,53 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-#include "../../types/include/Haptics.h"
+#include <Types/include/Haptics.h>
+#include <map>
 
 namespace haptics::encoder {
-class IOJson {
+  static const std::map<std::string, types::EncodingModality> stringToModality = {
+    {"Quantized", types::EncodingModality::Quantized},
+    {"Vectorial", types::EncodingModality::Vectorial}};
+  static const std::map<types::EncodingModality, std::string> modalityToString = {
+    {types::EncodingModality::Quantized, "Quantized"},
+    {types::EncodingModality::Vectorial, "Vectorial"}};
+
+  
+  static const std::map<std::string, types::BandType> stringToBandType = {
+      {"Wave", types::BandType::Wave},
+      {"Curve", types::BandType::Curve},
+      {"Transient", types::BandType::Transient}};
+  static const std::map<types::BandType, std::string> bandTypeToString = {
+      {types::BandType::Wave, "Wave"},
+      {types::BandType::Curve, "Curve"},
+      {types::BandType::Transient, "Transient"}};
+
+  
+  static const std::map<std::string, types::BaseSignal> stringToBaseSignal = {
+      {"Sine", types::BaseSignal::Sine},
+      {"Square", types::BaseSignal::Square},
+      {"Triangle", types::BaseSignal::Triangle},
+      {"SawToothUp", types::BaseSignal::SawToothUp},
+      {"SawToothDown", types::BaseSignal::SawToothDown}};
+  static const std::map<types::BaseSignal, std::string> baseSignalToString = {
+      {types::BaseSignal::Sine, "Sine"},
+      {types::BaseSignal::Square, "Square"},
+      {types::BaseSignal::Triangle, "Triangle"},
+      {types::BaseSignal::SawToothUp, "SawToothUp"},
+      {types::BaseSignal::SawToothDown, "SawToothDown"}};
+
+  class IOJson {
 public:
-  explicit IOJson() = default;
-
-  static auto loadFile(const std::string &filePath) -> haptics::types::Haptics;
-  static auto writeFile(haptics::types::Haptics &haptic, const std::string &filePath) -> void;
-
-private:
+  static auto loadFile(const std::string &filePath) -> types::Haptics;
+  static auto loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
+      -> void;
+  static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> void;
+  static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> void;
+  static auto loadReferenceDevices(const nlohmann::json &jsonAvatars, types::Perception &perception) -> void;
+  static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> void;
+  static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> void;
+  static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> void;
+  static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
-
-} // namespace haptics::encoder
+} // namespace encoder
 #endif //_IOJSON_H_
