@@ -37,8 +37,6 @@ namespace haptics::filterbank {
 
 constexpr int ORDER = 8;
 
-Filterbank::Filterbank(double fs) { this->fs = fs; }
-
 auto Filterbank::LP(std::vector<double> &in, double f) const -> std::vector<double> {
   Iir::Butterworth::LowPass<ORDER> filter;
   filter.setup(fs, f);
