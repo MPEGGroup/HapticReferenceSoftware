@@ -31,11 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-<<<<<<< HEAD
-#include "../include/Band.h"
-=======
 #include <Types/include/Band.h>
->>>>>>> develop
 
 namespace haptics::types {
 
@@ -87,13 +83,8 @@ auto Band::getEffectAt(int index) -> haptics::types::Effect& {
   return effects.at(index);
 }
 
-<<<<<<< HEAD
-auto Band::addEffect(Effect &newNote) -> void {
-    effects.push_back(newNote);
-=======
 auto Band::addEffect(Effect &newEffect) -> void {
     effects.push_back(newEffect);
->>>>>>> develop
 }
 
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,

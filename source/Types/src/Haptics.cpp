@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Haptics.h"
+#include <Types/include/Haptics.h>
 #include <ctime>
 
 namespace haptics::types {
@@ -66,11 +66,22 @@ auto Haptics::getPerceptionsSize() -> size_t {
 
 auto Haptics::getPerceptionAt(int index) -> Perception& {
   return perceptions.at(index);
-
 }
 
-auto Haptics::addPerception(Perception& newBand) -> void {
-  perceptions.push_back(newBand);
+auto Haptics::addPerception(Perception& newPerception) -> void {
+  perceptions.push_back(newPerception);
+}
+
+auto Haptics::getAvatarsSize() -> size_t { 
+    return avatars.size(); 
+}
+
+auto Haptics::getAvatarAt(int index) -> Avatar & {
+    return avatars.at(index);
+}
+
+auto Haptics::addAvatar(Avatar &newAvatar) -> void {
+    avatars.push_back(newAvatar);
 }
 
 auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
@@ -82,15 +93,14 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     for (int i = 0 ; i < numElements ; i++ ) {
       auto element = data.getHapticElementMetadataAt(i);
       std::string elemDescription = element.elementDescription;
+      Perception perception(i, elemDescription);
       short numChannels = element.numHapticChannels;
-      std::vector<Track> tracks;
       for (int j = 0; j < numChannels; j++) {
         auto channel = element.channelsMetadata[j];
         Track track(j, channel.channelDescription, channel.gain, 1,
                     static_cast<uint32_t>(channel.bodyPartMask));
-        tracks.push_back(track);
+        perception.addTrack(track);
       }
-      Perception perception(i, elemDescription, tracks);
       perceptions.push_back(perception);
     }
 }

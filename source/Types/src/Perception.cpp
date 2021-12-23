@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Perception.h"
+#include <Types/include/Perception.h>
 
 namespace haptics::types {
 
@@ -62,6 +62,17 @@ auto Perception::getTrackAt(int index) -> haptics::types::Track& {
 
 auto Perception::addTrack(haptics::types::Track& newBand) -> void {
     tracks.push_back(newBand);
+}
+
+auto Perception::getReferenceDevicesSize() -> size_t {
+    return referenceDevices.size();
+}
+
+auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice& {
+  return referenceDevices.at(index);
+}
+auto Perception::addReferenceDevice(haptics::types::ReferenceDevice& newReferenceDevice) -> void {
+  referenceDevices.push_back(newReferenceDevice);
 }
 
 } // namespace haptics::types

@@ -31,9 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _AVATARH_
-#define _AVATAR_H_
-
+#ifndef AVATAR_H
+#define AVATAR_H
 
 namespace haptics::types {
 
@@ -59,4 +58,4 @@ private:
 
 };
 } // namespace haptics::types
-#endif //_AVATAR_H_
+#endif //AVATAR_H

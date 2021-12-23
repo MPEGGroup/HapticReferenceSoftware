@@ -32,12 +32,7 @@
  */
 
 #include <catch2/catch.hpp>
-
-<<<<<<< HEAD
-#include "../include/Band.h"
-=======
 #include <Types/include/Band.h>
->>>>>>> develop
 
 using haptics::types::Band;
 using haptics::types::BandType;

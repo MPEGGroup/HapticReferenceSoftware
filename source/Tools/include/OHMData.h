@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _OHMDATA_H_
-#define _OHMDATA_H_
+#ifndef OHMDATA_H
+#define OHMDATA_H
 
 #include <string>
 #include <vector>
@@ -133,5 +133,5 @@ namespace haptics::tools {
         auto addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void;
 
 	};
-}
-#endif
+} //namespace haptics::tools
+#endif //OHMDATA_H

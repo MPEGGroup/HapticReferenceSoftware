@@ -30,12 +30,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-<<<<<<< HEAD
-#include "../include/Track.h"
-=======
 #include <Types/include/Track.h>
->>>>>>> develop
 
 namespace haptics::types {
 
@@ -71,19 +66,11 @@ auto Track::setMixingWeight(float newMixingWeight) -> void {
   mixingWeight = newMixingWeight;
 }
 
-<<<<<<< HEAD
 [[nodiscard]] auto Track::getBodyPartMask() const -> uint32_t {
   return bodyPartMask;
 }
 
 auto Track::setBodyPartMask(uint32_t newBodyPartMask) -> void {
-=======
-[[nodiscard]] auto Track::getBodyPartMask() const -> int {
-  return bodyPartMask;
-}
-
-auto Track::setBodyPartMask(int newBodyPartMask) -> void {
->>>>>>> develop
   bodyPartMask = newBodyPartMask;
 }
 
@@ -91,11 +78,11 @@ auto Track::getVerticesSize() -> size_t {
   return vertices.size();
 }
 
-auto Track::getVerticeAt(int index) -> int& {
+auto Track::getVertexAt(int index) -> int& {
   return vertices.at(index);
 }
 
-auto Track::addVertice(int& newVertice) -> void {
+auto Track::addVertex(int& newVertice) -> void {
   vertices.push_back(newVertice);
 }
 

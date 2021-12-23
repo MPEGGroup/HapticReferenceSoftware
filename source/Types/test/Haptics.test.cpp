@@ -32,12 +32,11 @@
  */
 
 #include <catch2/catch.hpp>
-
-#include "../include/Haptics.h"
+#include <Types/include/Haptics.h>
 
 TEST_CASE("haptics::types::Haptics") {
     using haptics::types::Haptics;
-    const Haptics h("1.0", "15/12/2021", "Some test content", {});
+    const Haptics h("1.0", "15/12/2021", "Some test content");
     // TODO : some tests
     CHECK(true);
 }

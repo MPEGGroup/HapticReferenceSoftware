@@ -31,11 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _HAPTICS_H_
-#define _HAPTICS_H_
+#ifndef HAPTICS_H
+#define HAPTICS_H
 
-#include "Perception.h"
-#include "../../tools/include/OHMData.h"
+#include <Types/include/Perception.h>
+#include <Types/include/Avatar.h>
+#include <Tools/include/OHMData.h>
 #include <fstream>
 #include <vector>
 
@@ -44,9 +45,8 @@ namespace haptics::types {
 class Haptics {
 public:
   explicit Haptics() = default;
-  explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription,
-                   std::vector<Perception> newPerceptions)
-      : version(newVersion), date(newDate), description(newDescription), perceptions(newPerceptions) {};
+  explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
+      : version(newVersion), date(newDate), description(newDescription), perceptions({}), avatars({}){};
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
@@ -56,7 +56,10 @@ public:
   auto setDescription(std::string &newDescription) -> void;
   auto getPerceptionsSize() -> size_t;
   auto getPerceptionAt(int index) -> Perception &;
-  auto addPerception(Perception &newBand) -> void;
+  auto addPerception(Perception &newPerception) -> void;
+  auto getAvatarsSize() -> size_t;
+  auto getAvatarAt(int index) -> Avatar &;
+  auto addAvatar(Avatar &newAvatar) -> void;
   auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
 
 private:
@@ -64,7 +67,8 @@ private:
   std::string date = "";
   std::string description = "";
   std::vector<Perception> perceptions = {};
+  std::vector<Avatar> avatars = {};
 
 };
 } // namespace haptics::types
-#endif //_HAPTICS_H_
+#endif //HAPTICS_H

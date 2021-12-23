@@ -32,7 +32,7 @@
  */
 
 #include <catch2/catch.hpp>
-#include "../include/ReferenceDevice.h"
+#include <Types/include/ReferenceDevice.h>
 
 TEST_CASE("haptics::types::ReferenceDevice") {
   using haptics::types::ReferenceDevice;

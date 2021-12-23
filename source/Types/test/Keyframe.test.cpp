@@ -32,12 +32,7 @@
  */
 
 #include <catch2/catch.hpp>
-
-<<<<<<< HEAD
-#include "../include/Keyframe.h"
-=======
 #include <Types/include/Keyframe.h>
->>>>>>> develop
 
 using haptics::types::Keyframe;
 

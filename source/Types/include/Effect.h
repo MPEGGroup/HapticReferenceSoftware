@@ -41,7 +41,7 @@ using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum BaseSignal {
+enum class BaseSignal {
   Sine = 0,
   Square = Sine + 1,
   Triangle = Square + 1,

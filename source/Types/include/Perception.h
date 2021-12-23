@@ -31,10 +31,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PERCEPTION_H_
-#define _PERCEPTION_H_
+#ifndef PERCEPTION_H
+#define PERCEPTION_H
 
-#include "track.h"
+#include <Types/include/Track.h>
+#include <Types/include/ReferenceDevice.h>
 #include <fstream>
 #include <vector>
 
@@ -43,25 +44,27 @@ namespace haptics::types {
 class Perception {
 public:
   explicit Perception() = default;
-  explicit Perception(int newId, std::string newDescription,
-                   std::vector<Track> newTracks)
+  explicit Perception(int newId, std::string newDescription)
       : id(newId)
-      , description(newDescription)
-      , tracks(newTracks){};
+      , description(newDescription), tracks({}){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
   auto getTracksSize() -> size_t;
-  auto getTrackAt(int index) -> haptics::types::Track &;
+  auto getTrackAt(int index) -> Track &;
   auto addTrack(haptics::types::Track &newBand) -> void;
+  auto getReferenceDevicesSize() -> size_t;
+  auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
+  auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
 
 private:
   int id = -1;
   std::string description = "";
   std::vector<Track> tracks = {};
+  std::vector<ReferenceDevice> referenceDevices;
 
 };
 } // namespace haptics::types
-#endif //_PERCEPTION_H_
+#endif //PERCEPTION_H

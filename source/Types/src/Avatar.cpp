@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/Avatar.h"
+#include <Types/include/Avatar.h>
 
 namespace haptics::types {
 

@@ -39,13 +39,13 @@
 
 namespace haptics::types {
 
-enum BandType {
+enum class BandType {
   Wave = 0,
   Curve = Wave + 1,
   Transient = Curve + 1,
 };
 
-enum EncodingModality {
+enum class EncodingModality {
   Quantized = 0,
   Vectorial = Quantized + 1,
 };

@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/ReferenceDevice.h"
+#include <Types/include/ReferenceDevice.h>
 
 namespace haptics::types {
 

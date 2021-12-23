@@ -32,12 +32,11 @@
  */
 
 #include <catch2/catch.hpp>
-
-#include "../include/Perception.h"
+#include <Types/include/Perception.h>
 
 TEST_CASE("haptics::types::Perception") {
 using haptics::types::Perception;
-const Perception h(0, "Some perception test content", {});
+const Perception h(0, "Some perception test content");
 // TODO : some tests
 CHECK(true);
 }

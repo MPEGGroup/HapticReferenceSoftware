@@ -44,14 +44,14 @@ class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                     int newBodyPartMask)
+                     uint32_t newBodyPartMask)
       : id(newId)
       , description(newDescription)
       , gain(newGain)
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
       , vertices({})
-      , bands({}) {};
+      , bands({}){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -64,8 +64,8 @@ public:
   [[nodiscard]] auto getBodyPartMask() const -> uint32_t;
   auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
   auto getVerticesSize() -> size_t;
-  auto getVerticeAt(int index) -> int &;
-  auto addVertice(int &newVertice) -> void;
+  auto getVertexAt(int index) -> int &;
+  auto addVertex(int &newVertice) -> void;
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto addBand(haptics::types::Band &newBand) -> void;

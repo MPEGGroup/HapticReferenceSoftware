@@ -32,8 +32,8 @@
  */
 
 #include <catch2/catch.hpp>
+#include <Types/include/Avatar.h>
 
-#include "../include/Avatar.h"
 TEST_CASE("haptics::tools::OHMData") {
 
   using haptics::types::Avatar;

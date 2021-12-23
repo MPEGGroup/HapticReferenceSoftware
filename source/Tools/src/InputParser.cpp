@@ -75,7 +75,7 @@ auto InputParser::getFileExt(std::string &filename) -> std::string {
     return (filename.substr(i + 1, filename.length() - i));
   }
 
-  return std::string("");
+  return std::string{""};
 }
 
 } // namespace haptics::tools
