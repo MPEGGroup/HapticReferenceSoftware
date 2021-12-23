@@ -56,7 +56,7 @@ auto IOJson::loadFile(const std::string &filePath) -> haptics::types::Haptics {
   loadAvatars(jsonAvatars, haptic);
   auto jsonPerceptions = jsonTree["perceptions"];
   loadPerceptions(jsonPerceptions, haptic);
-  if (haptic.getAvatarsSize() == 0 || haptic.getPerceptionsSize() == 0) {
+  if (haptic.getPerceptionsSize() == 0) {
     // TODO invalid input file
   }
   return haptic;
@@ -72,6 +72,9 @@ auto IOJson::loadPerceptions(const nlohmann::json& jsonPerceptions, types::Hapti
     if (!jsonPerception.contains("id") || !jsonPerception["id"].is_number_integer()) {
       continue;
     }
+    if (!jsonPerception.contains("avatar_id") || !jsonPerception["avatar_id"].is_number_integer()) {
+      continue;
+    }
     if (!jsonPerception.contains("description") || !jsonPerception["description"].is_string()) {
       continue;
     }
@@ -80,9 +83,10 @@ auto IOJson::loadPerceptions(const nlohmann::json& jsonPerceptions, types::Hapti
     }
 
     auto perceptionId = jsonPerception["id"].get<int>();
+    auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
     auto perceptionDescription = jsonPerception["description"].get<std::string>();
 
-    haptics::types::Perception perception(perceptionId, perceptionDescription);
+    haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription);
     auto jsonTracks = jsonPerception["tracks"];
     loadTracks(jsonTracks, perception);
     haptic.addPerception(perception);
@@ -107,7 +111,7 @@ auto IOJson::loadTracks(const nlohmann::json& jsonTracks, types::Perception& per
     if (!jsonTrack.contains("body_part_mask") || !jsonTrack["body_part_mask"].is_number_integer()) {
       continue;
     }
-    if (!jsonTrack.contains("bands") || !jsonTrack["vertices"].is_array()) {
+    if (!jsonTrack.contains("bands") || !jsonTrack["bands"].is_array()) {
       continue;
     }
 
@@ -143,15 +147,15 @@ auto IOJson::loadBands(const nlohmann::json& jsonBands, types::Track& track) -> 
     if (!jsonBand.contains("encoding_modality") || !jsonBand["encoding_modality"].is_string()) {
       continue;
     }
-    if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_string()) {
+    if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_number_integer()) {
       continue;
     }
     if (!jsonBand.contains("lower_frequency_limit") ||
-        !jsonBand["lower_frequency_limit"].is_string()) {
+        !jsonBand["lower_frequency_limit"].is_number_integer()) {
       continue;
     }
     if (!jsonBand.contains("upper_frequency_limit") ||
-        !jsonBand["upper_frequency_limit"].is_string()) {
+        !jsonBand["upper_frequency_limit"].is_number_integer()) {
       continue;
     }
     if (!jsonBand.contains("effects") || !jsonBand["effects"].is_array()) {
@@ -315,6 +319,7 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   jsonTree["date"] = haptic.getDate();
   auto jsonAvatars = json::array();
   extractAvatars(haptic, jsonAvatars);
+  jsonTree["avatars"] = jsonAvatars;
   auto jsonPerceptions = json::array();  
   extractPerceptions(haptic, jsonPerceptions);
   jsonTree["perceptions"] = jsonPerceptions;
@@ -329,6 +334,7 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerc
     auto perception = haptic.getPerceptionAt(i);
     auto jsonPerception = json::object();
     jsonPerception["id"] = perception.getId();
+    jsonPerception["avatar_id"] = perception.getAvatarId();
     jsonPerception["description"] = perception.getDescription();
 
     auto jsonReferenceDevices = json::array();
@@ -377,6 +383,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
 
     auto jsonBands = json::array();
     auto numBands = track.getBandsSize();
+      std::cout << "Actual Num Bands : " << numBands << std::endl;
     for (int l = 0; l < numBands; l++) {
       auto band = track.getBandAt(l);
       auto jsonBand = json::object();

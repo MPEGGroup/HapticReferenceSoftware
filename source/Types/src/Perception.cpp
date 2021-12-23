@@ -43,6 +43,14 @@ auto Perception::setId(int newId) -> void {
     id = newId;
 }
 
+[[nodiscard]] auto Perception::getAvatarId() const -> int {
+    return avatarId;
+}
+
+auto Perception::setAvatarId(int newAvatarId) -> void {
+    avatarId = newAvatarId;
+}
+
 [[nodiscard]] auto Perception::getDescription() const -> std::string {
     return description;
 }

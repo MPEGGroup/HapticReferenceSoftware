@@ -44,10 +44,12 @@ namespace haptics::types {
 class Perception {
 public:
   explicit Perception() = default;
-  explicit Perception(int newId, std::string newDescription)
-      : id(newId)
+  explicit Perception(int newId, int newAvatarId, std::string newDescription)
+      : id(newId), avatarId(newAvatarId)
       , description(newDescription), tracks({}){};
 
+  [[nodiscard]] auto getAvatarId() const -> int;
+  auto setAvatarId(int newAvatarId) -> void;
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
@@ -61,6 +63,7 @@ public:
 
 private:
   int id = -1;
+  int avatarId = -1;
   std::string description = "";
   std::vector<Track> tracks = {};
   std::vector<ReferenceDevice> referenceDevices;

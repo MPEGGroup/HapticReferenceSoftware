@@ -36,7 +36,7 @@
 
 TEST_CASE("haptics::types::Perception") {
 using haptics::types::Perception;
-const Perception h(0, "Some perception test content");
+const Perception h(0, 0, "Some perception test content");
 // TODO : some tests
 CHECK(true);
 }
