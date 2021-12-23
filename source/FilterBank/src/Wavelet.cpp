@@ -96,10 +96,11 @@ void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h, s
   temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
   temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-  std::vector<double> conv(inSize + hSize - 1 + 2 * (size_t)lext, 0);
+  auto extension = 2 * lext;
+  std::vector<double> conv(inSize + hSize - 1 + extension, 0);
   conv1D(temp, h, conv);
   out.resize(inSize);
-  std::copy(conv.begin() + (long long)lext * 2, conv.end() - (long long)lext * 2, out.begin());
+  std::copy(conv.begin() + extension, conv.end() - extension, out.begin());
 }
 
 template <size_t hSize>
@@ -119,7 +120,8 @@ void Wavelet::symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h
   temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
   temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-  std::vector<double> conv(inSize + hSize - 1 + 2 * (size_t)lext, 0);
+  auto extension = 2 * lext;
+  std::vector<double> conv(inSize + hSize - 1 + extension, 0);
   conv1D(temp, h, conv);
   out.resize(inSize);
   for (int i = 0; i < inSize; i++) {
