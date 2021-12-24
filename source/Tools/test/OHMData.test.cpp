@@ -33,7 +33,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "../include/OHMData.h"
+#include <Tools/include/OHMData.h>
 
 TEST_CASE("haptics::tools::OHMData") {
 

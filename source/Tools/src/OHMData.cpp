@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/OHMData.h"
+#include <Tools/include/OHMData.h>
 #include <iostream>
 #include <fstream>
 #include <array>

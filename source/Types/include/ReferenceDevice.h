@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef REFERENCE_DEVICE
-#define REFERENCE_DEVICE
+#ifndef REFERENCEDEVICE_H
+#define REFERENCEDEVICE_H
 
 #include <string>
 #include <optional>
@@ -90,4 +90,4 @@ private:
 
 };
 } // namespace haptics::types
-#endif //REFERENCE_DEVICE
+#endif //REFERENCEDEVICE_H

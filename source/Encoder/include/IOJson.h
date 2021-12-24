@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _IOJSON_H_
-#define _IOJSON_H_
+#ifndef IOJSON_H
+#define IOJSON_H
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -108,4 +108,4 @@ public:
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
 } // namespace encoder
-#endif //_IOJSON_H_
+#endif //IOJSON_H
