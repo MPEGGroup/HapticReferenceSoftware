@@ -35,11 +35,15 @@
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
 #include <Tools/include/InputParser.h>
+#include <Tools/include/OHMData.h>
+#include <Types/include/Haptics.h>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
 using haptics::tools::InputParser;
+using haptics::tools::OHMData;
+using haptics::types::Haptics;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
@@ -69,18 +73,27 @@ auto main(int argc, char *argv[]) -> int {
     }
 
   std::string ext = InputParser::getFileExt(filename);
-  int exitCode = -1;
-  if (ext == "json" || ext == "ahap") {
+  int codeExit = -1;
+  if (ext == "ohm") {
+    std::cout << "The OHM file to process : " << filename << std::endl;
+    OHMData ohmData;
+    if (!ohmData.loadFile(filename)) {
+      std::cerr << "ERROR : impossible to read the OHM file : " << std::endl << filename << std::endl;
+      return EXIT_FAILURE;
+    }
+    Haptics hapticFile;
+    hapticFile.loadMetadataFromOHM(ohmData);
+    codeExit = EXIT_SUCCESS;
+  } else if (ext == "json" || ext == "ahap") {
     std::cout << "The AHAP file to encode : " << filename << std::endl;
-    exitCode  = AhapEncoder::encode(filename);
+    codeExit = AhapEncoder::encode(filename);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
-    exitCode  = IvsEncoder::encode(filename);
+    codeExit = IvsEncoder::encode(filename);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
     const double curveFrequency = 72.5;
     exitCode = PcmEncoder::encode(filename, curveFrequency);
   }
-
-  return exitCode;
+  return codeExit;
 }
