@@ -119,8 +119,8 @@ namespace haptics::tools {
     public:
         explicit OHMData() = default;
         explicit OHMData(const std::string &filePath);
-        auto loadFile(const std::string &filePath) -> void;
-        auto writeFile(const std::string &filePath) -> void;
+        auto loadFile(const std::string &filePath) -> bool;
+        auto writeFile(const std::string &filePath) -> bool;
 
         [[nodiscard]] auto getVersion() const -> short;
         auto setVersion(short newVersion) -> void;
