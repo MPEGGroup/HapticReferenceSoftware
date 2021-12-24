@@ -41,6 +41,7 @@ namespace haptics::types {
 class Keyframe {
 public:
   explicit Keyframe() = default;
+
   explicit Keyframe(int newRelativePosition, std::optional<float> newAmplitudeModulation,
                     std::optional<int> newFrequencyModulation)
       : relativePosition(newRelativePosition)

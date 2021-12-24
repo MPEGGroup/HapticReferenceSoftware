@@ -41,12 +41,12 @@ using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum BaseSignal {
+enum class BaseSignal {
   Sine = 0,
   Square = Sine + 1,
   Triangle = Square + 1,
   SawToothUp = Triangle + 1,
-  SawToothDown = SawToothUp + 1,
+  SawToothDown = SawToothUp + 1
 };
 
 class Effect {
@@ -76,4 +76,5 @@ private:
   BaseSignal baseSignal = BaseSignal::Sine;
 };
 } // namespace haptics::types
+
 #endif //EFFECT_H

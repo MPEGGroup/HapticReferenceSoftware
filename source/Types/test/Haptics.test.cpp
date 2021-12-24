@@ -32,13 +32,11 @@
  */
 
 #include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#include <Types/include/Haptics.h>
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
-
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
-
-  CHECK(true);
+TEST_CASE("haptics::types::Haptics") {
+    using haptics::types::Haptics;
+    const Haptics h("1.0", "15/12/2021", "Some test content");
+    // TODO : some tests
+    CHECK(true);
 }

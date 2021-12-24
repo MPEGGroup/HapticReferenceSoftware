@@ -32,7 +32,6 @@
  */
 
 #include <catch2/catch.hpp>
-
 #include <Types/include/Track.h>
 #include <Types/include/Band.h>
 #include <Types/include/Effect.h>

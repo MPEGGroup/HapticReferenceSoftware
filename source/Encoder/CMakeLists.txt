@@ -1,6 +1,6 @@
 project(Encoder)
 
-add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/AhapEncoder.cpp include/AhapEncoder.h src/IvsEncoder.cpp include/IvsEncoder.h)
+add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/AhapEncoder.cpp include/AhapEncoder.h src/IvsEncoder.cpp include/IvsEncoder.h src/IOJson.cpp include/IOJson.h)
 target_link_libraries(Encoder PUBLIC tools types)
 target_link_libraries(Encoder PRIVATE nlohmann_json::nlohmann_json pugixml::static)
 

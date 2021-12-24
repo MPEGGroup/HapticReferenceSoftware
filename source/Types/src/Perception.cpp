@@ -31,14 +31,56 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#include <Types/include/Perception.h>
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
+namespace haptics::types {
 
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
-
-  CHECK(true);
+[[nodiscard]] auto Perception::getId() const -> int {
+    return id;
 }
+
+auto Perception::setId(int newId) -> void {
+    id = newId;
+}
+
+[[nodiscard]] auto Perception::getAvatarId() const -> int {
+    return avatarId;
+}
+
+auto Perception::setAvatarId(int newAvatarId) -> void {
+    avatarId = newAvatarId;
+}
+
+[[nodiscard]] auto Perception::getDescription() const -> std::string {
+    return description;
+}
+
+auto Perception::setDescription(std::string &newDescription) -> void {
+    description = newDescription;
+}
+
+
+auto Perception::getTracksSize() -> size_t {
+    return tracks.size();
+}
+
+auto Perception::getTrackAt(int index) -> haptics::types::Track& {
+    return tracks.at(index);
+}
+
+auto Perception::addTrack(haptics::types::Track& newBand) -> void {
+    tracks.push_back(newBand);
+}
+
+auto Perception::getReferenceDevicesSize() -> size_t {
+    return referenceDevices.size();
+}
+
+auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice& {
+  return referenceDevices.at(index);
+}
+auto Perception::addReferenceDevice(haptics::types::ReferenceDevice& newReferenceDevice) -> void {
+  referenceDevices.push_back(newReferenceDevice);
+}
+
+} // namespace haptics::types

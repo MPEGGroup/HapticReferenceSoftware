@@ -32,13 +32,11 @@
  */
 
 #include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#include <Types/include/Perception.h>
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
-
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
-
-  CHECK(true);
+TEST_CASE("haptics::types::Perception") {
+using haptics::types::Perception;
+const Perception h(0, 0, "Some perception test content");
+// TODO : some tests
+CHECK(true);
 }

@@ -31,14 +31,32 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#include <Types/include/Avatar.h>
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
+namespace haptics::types {
 
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
-
-  CHECK(true);
+[[nodiscard]] auto Avatar::getId() const -> int {
+  return id;
 }
+
+auto Avatar::setId(int newId) -> void {
+  id = newId;
+}
+
+[[nodiscard]] auto Avatar::getLod() const -> int {
+	return lod;
+}
+
+auto Avatar::setLod(int newLod) -> void {
+	lod = newLod;
+}
+
+[[nodiscard]] auto Avatar::getType() const -> AvatarType {
+	return type;
+}
+
+auto Avatar::setType(AvatarType newType) -> void {
+	type = newType;
+}
+
+} // namespace haptics::types

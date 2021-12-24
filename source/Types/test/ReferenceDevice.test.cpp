@@ -32,13 +32,11 @@
  */
 
 #include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#include <Types/include/ReferenceDevice.h>
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
-
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
-
+TEST_CASE("haptics::types::ReferenceDevice") {
+  using haptics::types::ReferenceDevice;
+  const ReferenceDevice h;
+  // TODO : some tests
   CHECK(true);
 }

@@ -32,13 +32,17 @@
  */
 
 #include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
+#include <Tools/include/OHMData.h>
 
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
+TEST_CASE("haptics::tools::OHMData") {
 
-  CHECK(true);
+  using haptics::tools::OHMData;
+
+  SECTION("Loading OHM File") {
+
+    // TODO : some tests
+    CHECK(true);
+    
+  }
 }

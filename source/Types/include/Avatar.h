@@ -31,14 +31,36 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#ifndef AVATAR_H
+#define AVATAR_H
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
+namespace haptics::types {
+enum class AvatarType {
+  Vibration = 0,
+  Pressure = Vibration + 1,
+  Temperature = Pressure + 1,
+  Custom = Temperature + 1,
+};
+class Avatar {
+public:
+  explicit Avatar() = default;
+  explicit Avatar(int newId, int newLod, AvatarType newType)
+      : id(newId), lod(newLod), type(newType) {};
 
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
+  [[nodiscard]] auto getLod() const -> int;
+  auto setLod(int newLod) -> void;
+  [[nodiscard]] auto getType() const -> AvatarType;
+  auto setType(AvatarType newType) -> void;
 
-  CHECK(true);
-}
+
+private:
+  int id = -1;
+  int lod = 0;
+  AvatarType type = AvatarType::Custom;
+  //TODO : Mesh
+
+};
+} // namespace haptics::types
+#endif //AVATAR_H

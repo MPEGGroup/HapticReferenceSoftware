@@ -31,14 +31,43 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
-#include <Types/include/Effect.h>
+#ifndef PERCEPTION_H
+#define PERCEPTION_H
 
-using haptics::types::Effect;
-using haptics::types::BaseSignal;
+#include <Types/include/Track.h>
+#include <Types/include/ReferenceDevice.h>
+#include <fstream>
+#include <vector>
 
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
+namespace haptics::types {
 
-  CHECK(true);
-}
+class Perception {
+public:
+  explicit Perception() = default;
+  explicit Perception(int newId, int newAvatarId, std::string newDescription)
+      : id(newId), avatarId(newAvatarId)
+      , description(newDescription), tracks({}){};
+
+  [[nodiscard]] auto getAvatarId() const -> int;
+  auto setAvatarId(int newAvatarId) -> void;
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  auto getTracksSize() -> size_t;
+  auto getTrackAt(int index) -> Track &;
+  auto addTrack(haptics::types::Track &newBand) -> void;
+  auto getReferenceDevicesSize() -> size_t;
+  auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
+  auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
+
+private:
+  int id = -1;
+  int avatarId = -1;
+  std::string description = "";
+  std::vector<Track> tracks = {};
+  std::vector<ReferenceDevice> referenceDevices;
+
+};
+} // namespace haptics::types
+#endif //PERCEPTION_H
