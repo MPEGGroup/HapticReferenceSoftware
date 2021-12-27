@@ -137,7 +137,7 @@ namespace haptics::encoder {
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
-  k.setAmplitudeModulation(DEFAULT_FREQUENCY);
+  k.setFrequencyModulation(DEFAULT_FREQUENCY);
   
   //SET VALUES AS DEFINED
   for (nlohmann::json param : event->at("EventParameters")) {
@@ -161,9 +161,9 @@ namespace haptics::encoder {
     //IF NOT FIRST KEY FRAME && THERE IS A KEYFRAME && KEYFRAME IS NOT THE LAST ONE AND ON THE EVENT BEGINNING
     if (first_kf_a > amplitudes->begin() && first_kf_a < amplitudes->end()) {
       //MULTIPLY AMPLITUDE MODULATION
-      k.setAmplitudeModulation(static_cast<float>(haptics::tools::linearInterpolation(*(first_kf_a - 1), *first_kf_a, t.getPosition())) * k.getAmplitudeModulation());
+        k.setAmplitudeModulation(static_cast<float>(haptics::tools::linearInterpolation(*(first_kf_a - 1), *first_kf_a, t.getPosition())) * k.getAmplitudeModulation().value());
     } else if(first_kf_a == amplitudes->begin()) {
-      k.setAmplitudeModulation(static_cast<float>(amplitudes->front().second) * k.getAmplitudeModulation());
+      k.setAmplitudeModulation(static_cast<float>(amplitudes->front().second) * k.getAmplitudeModulation().value());
     }
   }
 
@@ -176,7 +176,7 @@ namespace haptics::encoder {
       int freq = static_cast<int>(haptics::tools::genericNormalization(BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX,
                                                   ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX, f));
       // SUM FREQUENCY MODULATION
-      k.setFrequencyModulation(freq + k.getFrequencyModulation());
+      k.setFrequencyModulation(freq + k.getFrequencyModulation().value());
     } else if(first_kf_f == frequencies->begin()) {
       k.setFrequencyModulation(ACTUAL_FREQUENCY_MAX);
     }
@@ -202,6 +202,10 @@ namespace haptics::encoder {
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;
+  k_start.setAmplitudeModulation(DEFAULT_AMPLITUDE);
+  k_start.setFrequencyModulation(DEFAULT_FREQUENCY);
+  k_end.setAmplitudeModulation(DEFAULT_AMPLITUDE);
+  k_end.setFrequencyModulation(DEFAULT_FREQUENCY);
   double base_freq = BASE_FREQUENCY_MAX;
 
   k_end.setRelativePosition(static_cast<int>(event->at("EventDuration").get<double>() * SEC_TO_MSEC));
@@ -230,20 +234,20 @@ namespace haptics::encoder {
   // SET MODULATED VALUES IF APPLICABLE
   //AMPLITUDE
   if (!amplitudes->empty()) {
-    float base_amp = k_start.getAmplitudeModulation();
+    float base_amp = k_start.getAmplitudeModulation().value();
     // FIND FIRST KEYFRAME AFTER THE EFFECT
     auto first_kf_a = std::find_if(amplitudes->begin(), amplitudes->end(), [c](std::pair<int, double> a) { return a.first >= c.getPosition(); });
 
 
     //IF FIRST KEYFRAME ON START OF EVENT, UPDATE EVENT
     if (first_kf_a->first == c.getPosition() && first_kf_a != amplitudes->end() -1) {
-      c.getKeyframeAt(0).setAmplitudeModulation(c.getKeyframeAt(0).getAmplitudeModulation() * static_cast<float>(first_kf_a->second));
+      c.getKeyframeAt(0).setAmplitudeModulation(c.getKeyframeAt(0).getAmplitudeModulation().value() * static_cast<float>(first_kf_a->second));
       first_kf_a++;
     } else if ((c.getPosition() < first_kf_a->first) &&
                first_kf_a != amplitudes->begin()) {
       float amp = static_cast<float>(haptics::tools::linearInterpolation(
                        *(first_kf_a - 1), *first_kf_a, c.getPosition())) *
-                   c.getKeyframeAt(0).getAmplitudeModulation();
+                   c.getKeyframeAt(0).getAmplitudeModulation().value();
       c.getKeyframeAt(0).setAmplitudeModulation(amp);
     }
 
@@ -252,7 +256,7 @@ namespace haptics::encoder {
       if (it->first >= (c.getPosition() + k_end.getRelativePosition())) {
         float amp = static_cast<float>(haptics::tools::linearInterpolation(
             *(it - 1), *it, c.getPosition() + k_end.getRelativePosition()));
-        k_end.setAmplitudeModulation(amp * k_end.getAmplitudeModulation());
+        k_end.setAmplitudeModulation(amp * k_end.getAmplitudeModulation().value());
         break;
       }
       //IF IN THE MIDDLE OF THE EFFECT, ADD KEYFRAME
