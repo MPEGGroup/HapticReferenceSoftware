@@ -44,9 +44,6 @@
 #include <utility>
 #include <vector>
 
-const double S_2_MS = 1000.0;
-const double MS_2_S = .001;
-
 namespace haptics::encoder {
 
 class PcmEncoder {

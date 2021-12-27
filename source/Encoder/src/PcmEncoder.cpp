@@ -77,6 +77,10 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit)
                                                   const double samplerate,
                                                   const double curveFrequencyLimit, Band *out)
     -> bool {
+  if (out == nullptr) {
+    return false;
+  }
+
   out->setBandType(BandType::Curve);
   out->setEncodingModality(EncodingModality::Quantized);
   out->setWindowLength(0);
@@ -86,7 +90,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit)
   Keyframe myKeyframe;
   for (std::pair<int16_t, double> p : points) {
     std::optional<int> f;
-    myEffect.addKeyframe(static_cast<int>(S_2_MS * p.first / samplerate), p.second, f);
+    myEffect.addKeyframe(static_cast<int>(haptics::tools::S_2_MS * p.first / samplerate), p.second, f);
   }
   out->addEffect(myEffect);
 
