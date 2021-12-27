@@ -34,6 +34,8 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Tools/include/InputParser.h>
+#include <Encoder/include/AhapEncoder.h>
+#include <Encoder/include/IvsEncoder.h>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
@@ -41,12 +43,12 @@ using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+    const auto args = std::vector<const char *>(argv, argv + argc);
+    InputParser inputParser(args);
+    if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
+        InputParser::help(args[0]);
+        return EXIT_SUCCESS;
+    }
 
   std::string filename = inputParser.getCmdOption("-f");
   if (filename.empty()) {
@@ -57,13 +59,13 @@ auto main(int argc, char *argv[]) -> int {
     return EXIT_FAILURE;
   }
 
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
+    std::string output = inputParser.getCmdOption("-o");
+    if (output.empty()) {
+        output = inputParser.getCmdOption("--output");
+    }
+    if (!output.empty()) {
+        std::cout << "The generated file will be : " << output << "\n";
+    }
 
   std::string ext = InputParser::getFileExt(filename);
   if (ext == "json" || ext == "ahap") {

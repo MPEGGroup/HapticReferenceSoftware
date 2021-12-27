@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../include/AhapEncoder.h"
-#include "../../tools/include/Tools.h"
+#include <Encoder/include/AhapEncoder.h>
+#include <Tools/include/Tools.h>
 #include <fstream>
 
 const double SEC_TO_MSEC = 1000.0;
