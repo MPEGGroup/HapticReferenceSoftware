@@ -67,7 +67,8 @@ public:
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe&;
-  auto addKeyframe(Keyframe& newKeyframe) -> void;
+  auto addKeyframe(Keyframe &newKeyframe) -> void;
+  auto addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void;
 
 private:
   int position = 0;

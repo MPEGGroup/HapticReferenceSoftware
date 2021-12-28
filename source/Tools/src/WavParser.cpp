@@ -48,6 +48,7 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
   auto samplesPerChannel = (size_t)wav.totalPCMFrameCount;
   numChannels = (size_t)wav.channels;
   numSamples = samplesPerChannel * numChannels;
+  sampleRate = static_cast<int>(wav.sampleRate);
   buffer.clear();
   buffer.reserve(numChannels);
   std::vector<float> b;
