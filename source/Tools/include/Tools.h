@@ -35,6 +35,9 @@
 
 namespace haptics::tools {
 
+  const double S_2_MS = 1000.0;
+  const double MS_2_S = .001;
+
 	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
 
     int start = a.first;
@@ -49,10 +52,6 @@ namespace haptics::tools {
     if (start >= end) {
       std::swap(start, end);
       std::swap(start_a, end_a);
-    }
-
-    if (end == start) {
-      return end_a;
     }
 
     return (start_a * (end - x) + end_a * (x - start)) / (end - start);
@@ -93,4 +92,9 @@ namespace haptics::tools {
 
     return x_out;
   }
-}
+
+  [[nodiscard]] auto is_eq(double a, double b) -> bool {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    return std::fabs(a - b) <= std::numeric_limits<double>::epsilon() * 100;
+  }
+  }

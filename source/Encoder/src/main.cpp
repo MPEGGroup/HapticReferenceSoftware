@@ -33,10 +33,12 @@
 
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
+#include <Encoder/include/PcmEncoder.h>
 #include <Tools/include/InputParser.h>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
+using haptics::encoder::PcmEncoder;
 using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -67,14 +69,18 @@ auto main(int argc, char *argv[]) -> int {
     }
 
   std::string ext = InputParser::getFileExt(filename);
+  int exitCode = -1;
   if (ext == "json" || ext == "ahap") {
     std::cout << "The AHAP file to encode : " << filename << std::endl;
-    AhapEncoder::encode(filename);
+    exitCode  = AhapEncoder::encode(filename);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
-    IvsEncoder::encode(filename);
+    exitCode  = IvsEncoder::encode(filename);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
+    const double curveFrequency = 72.5;
+    exitCode = PcmEncoder::encode(filename, curveFrequency);
   }
-  return EXIT_SUCCESS;
+
+  return exitCode;
 }

@@ -34,6 +34,12 @@
 #ifndef PCMENCODER_H
 #define PCMENCODER_H
 
+#include <Filterbank/include/FilterBank.h>
+#include <Tools/include/WavParser.h>
+#include <Types/include/Keyframe.h>
+#include <Types/include/Effect.h>
+#include <Types/include/Track.h>
+#include <Types/include/Band.h>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -42,8 +48,12 @@ namespace haptics::encoder {
 
 class PcmEncoder {
 public:
-  [[nodiscard]] auto static localExtrema(std::vector<int16_t> signal, bool includeBorder)
-      -> std::vector<std::pair<int16_t, int16_t>>;
+  auto static encode(std::string &filename, double curveFrequencyLimit) -> int;
+  [[nodiscard]] auto static PcmEncoder::convertToCurveBand(
+      std::vector<std::pair<int16_t, double>> &points, double samplerate,
+      double curveFrequencyLimit, haptics::types::Band *out) -> bool;
+  [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
+      -> std::vector<std::pair<int16_t, double>>;
 };
 } // namespace haptics::encoder
 #endif // PCMENCODER_H

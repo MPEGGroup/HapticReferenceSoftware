@@ -127,4 +127,8 @@ auto Effect::addFrequencyAt(int frequency, int position) -> bool {
   return true;
 }
 
+auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {
+  this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
+}
+
 } // namespace haptics::types
