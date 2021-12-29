@@ -32,11 +32,13 @@
  */
 
 #include <iostream>
+#define M_PI 3.14159265359
 
 namespace haptics::tools {
 
   const double S_2_MS = 1000.0;
   const double MS_2_S = .001;
+
 
 	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
 

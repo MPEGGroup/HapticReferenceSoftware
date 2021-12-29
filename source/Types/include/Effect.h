@@ -69,6 +69,10 @@ public:
   auto getKeyframeAt(int index) -> Keyframe&;
   auto addKeyframe(Keyframe &newKeyframe) -> void;
   auto addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void;
+  auto EvaluateVectorial(int position) -> double;
+  auto EvaluateQuantized(int position) -> double;
+  auto EvaluateTransient(int position) -> double;
+  auto EvaluateKeyframes(int position) -> double;
 
 private:
   int position = 0;

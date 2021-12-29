@@ -31,6 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <Types/include/Effect.h>
+#include <Tools/include/Tools.h>
+#include <cmath>
 
 namespace haptics::types {
 
@@ -72,6 +74,100 @@ auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
 
 auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {
   this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
+}
+
+auto Effect::EvaluateVectorial(int position) -> double {
+  double res = 0;
+
+  if (position < this->position) {
+    return res;
+  }
+
+  if (keyframes.empty()) {
+    return res;
+  }
+
+  int relativePosition = position - this->position;
+
+  //res = linearAmplitudeModulation blabla
+  double amp_modulation = 1;
+  
+  //First KF AFTER
+  auto k_a_after = std::find_if(keyframes.begin(), keyframes.end(),
+                                    [relativePosition](haptics::types::Keyframe k) { 
+                                      return k.getAmplitudeModulation().has_value() && k.getRelativePosition() >= relativePosition; 
+                                    }); 
+
+
+  //IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
+  if (k_a_after < keyframes.end()) {
+    // first KF before position
+    auto k_a_before = keyframes.begin();
+    for (auto it = k_a_after - 1; it >= keyframes.begin(); it--) {
+      if (it->getAmplitudeModulation().has_value())
+        k_a_before = it;
+    }
+
+    amp_modulation = haptics::tools::linearInterpolation(
+        {k_a_before->getRelativePosition(), k_a_before->getAmplitudeModulation().value()},
+        {k_a_after->getRelativePosition(), k_a_after->getAmplitudeModulation().value()}, relativePosition);
+  }
+
+  // IF FREQUENCY MODULATION (SHOULD BE BUT TO BE SURE)
+
+  double freq_modulation = 1;
+  // first KF after position
+  auto k_f_after = std::find_if(keyframes.begin(), keyframes.end(),
+                                [relativePosition](haptics::types::Keyframe k) {
+                                  return k.getFrequencyModulation().has_value() &&
+                                         k.getRelativePosition() >= relativePosition;
+                                });
+  if (k_f_after < keyframes.end()) {
+    // first KF before position
+    auto k_f_before = keyframes.begin();
+    for (auto it = k_f_after - 1; it >= keyframes.begin(); it--) {
+      if (it->getFrequencyModulation().has_value())
+        k_f_before = it;
+    }
+
+    // Modulation
+    int f0 = k_f_before->getFrequencyModulation().value();
+    int f1 = k_f_after->getFrequencyModulation().value();
+    int t = relativePosition - k_f_before->getRelativePosition();
+    float DeltaT = k_f_after->getRelativePosition() - k_f_before->getRelativePosition();
+
+    freq_modulation = (M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
+    freq_modulation = std::sin(freq_modulation);
+  }
+  //-----
+  
+  return amp_modulation * freq_modulation;
+}
+
+auto Effect::EvaluateQuantized(int position) -> double {
+  double res = 0;
+
+  //freq = first KF before position
+  //amp = first KF before position
+  //res = sine(freq,amp)
+
+  return res;
+}
+
+auto Effect::EvaluateTransient(int position) -> double {
+  double res = 0;
+
+  //?
+
+  return res;
+}
+
+auto Effect::EvaluateKeyframes(int position) -> double {
+  double res = 0;
+
+  // res = haptics::tools::cubicInterpolation(kf_before, kf_after, position)
+
+  return res;
 }
 
 } // namespace haptics::types
