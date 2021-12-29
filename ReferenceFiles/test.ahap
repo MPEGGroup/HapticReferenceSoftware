@@ -37,7 +37,7 @@
             "ParameterCurve":
             {
                 "ParameterID": "HapticIntensityControl",
-                "Time": 0,
+                "Time": 2,
                 "ParameterCurveControlPoints":
                 [
                     { "Time": 0, "ParameterValue": 0.0 },
@@ -50,15 +50,12 @@
             "ParameterCurve":
             {
                 "ParameterID": "HapticSharpnessControl",
-                "Time": 0,
+                "Time": 3,
                 "ParameterCurveControlPoints":
                 [
                     { "Time": 0, "ParameterValue": 0.0 },
-                    { "Time": 0.5, "ParameterValue": -1 },
-                    { "Time": 2, "ParameterValue": 0.4 },
-                    { "Time": 2.5, "ParameterValue": 1 },
-                    { "Time": 2.8, "ParameterValue": 0.5 },
-                    { "Time": 4, "ParameterValue": -0.5 }
+                    { "Time": 1, "ParameterValue": -1 },
+                    { "Time": 2, "ParameterValue": 0.4 }
                 ]
             }
         }

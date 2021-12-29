@@ -263,20 +263,13 @@ namespace haptics::encoder {
       if (c.getPosition() < it->first &&
           it->first < (c.getPosition() + k_end.getRelativePosition())) {
         //IF NO KEYFRAME BEFORE, BEGIN MODULATION
-        haptics::types::Keyframe ka;
         if (it == amplitudes->begin()) {
-          ka.setRelativePosition(it->first - c.getPosition());
-          ka.setAmplitudeModulation(base_amp);
-          c.addKeyframe(ka);
+          c.addAmplitudeAt(base_amp, it->first - c.getPosition());
         }
-        ka.setRelativePosition(it->first - c.getPosition());
-        ka.setAmplitudeModulation(static_cast<float>(it->second) * base_amp);
-        c.addKeyframe(ka);
+        c.addAmplitudeAt(static_cast<float>(it->second) * base_amp, it->first - c.getPosition());
         // IF NO KEYFRAME AFTER BUT STILL INSIDE, END MODULATION SWITCH BACK TO BASE AMPLITUDE
         if (it == amplitudes->end() - 1) {
-          ka.setRelativePosition(it->first - c.getPosition());
-          ka.setAmplitudeModulation(base_amp);
-          c.addKeyframe(ka);
+          c.addAmplitudeAt(base_amp, it->first - c.getPosition());
         }
       }
     }
@@ -320,29 +313,23 @@ namespace haptics::encoder {
       if (c.getPosition() < it->first &&
           it->first < (c.getPosition() + k_end.getRelativePosition())) {
         // IF NO KEYFRAME BEFORE, BEGIN MODULATION
-        haptics::types::Keyframe ka;
         if (it == frequencies->begin()) {
-          ka.setRelativePosition(it->first - c.getPosition());
           int freq = static_cast<int>(haptics::tools::genericNormalization(
               BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
               base_freq));
-          ka.setFrequencyModulation(freq);
-          c.addKeyframe(ka);
+          c.addFrequencyAt(freq, it->first - c.getPosition());
         }
-        ka.setRelativePosition(it->first - c.getPosition());
-        double freq = std::clamp(it->second + base_freq, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
-        ka.setFrequencyModulation(static_cast<int>(haptics::tools::genericNormalization(
+        double freq_d = std::clamp(it->second + base_freq, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
+        int freq = static_cast<int>(haptics::tools::genericNormalization(
             BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
-            freq)));
-        c.addKeyframe(ka);
+            freq_d));
+        c.addFrequencyAt(freq, it->first - c.getPosition());
         // IF NO KEYFRAME AFTER BUT STILL INSIDE, END MODULATION SWITCH BACK TO BASE FREQUENCY
         if (it == frequencies->end() - 1) {
-          ka.setRelativePosition(it->first - c.getPosition());
           int freq = static_cast<int>(haptics::tools::genericNormalization(
               BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
               base_freq));
-          ka.setFrequencyModulation(freq);
-          c.addKeyframe(ka);
+          c.addFrequencyAt(freq, it->first - c.getPosition());
         }
       }
     }

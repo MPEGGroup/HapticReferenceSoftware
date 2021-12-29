@@ -32,9 +32,7 @@
  */
 
 #include <Tools/include/InputParser.h>
-#include <Encoder/include/AhapEncoder.h>
 
-using haptics::encoder::AhapEncoder;
 using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

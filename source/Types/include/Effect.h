@@ -67,7 +67,9 @@ public:
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe&;
-  auto addKeyframe(Keyframe& newKeyframe) -> void;
+  auto addKeyframe(Keyframe &newKeyframe) -> void;
+  auto addAmplitudeAt(float amplitude, int position) -> bool;
+  auto addFrequencyAt(int frequency, int position) -> bool;
 
 private:
   int position = 0;

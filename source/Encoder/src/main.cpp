@@ -34,8 +34,6 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Tools/include/InputParser.h>
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
@@ -51,6 +49,7 @@ auto main(int argc, char *argv[]) -> int {
     }
 
   std::string filename = inputParser.getCmdOption("-f");
+  //std::string filename = "D:/Gits/rm0/ReferenceFiles/test.ahap";
   if (filename.empty()) {
     filename = inputParser.getCmdOption("--file");
   }
