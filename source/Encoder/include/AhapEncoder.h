@@ -36,9 +36,9 @@
 
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include "../../types/include/Effect.h"
-#include "../../types/include/Band.h"
-#include "../../types/include/Keyframe.h"
+#include <Types/include/Effect.h>
+#include <Types/include/Band.h>
+#include <Types/include/Keyframe.h>
 
 namespace haptics::encoder {
 

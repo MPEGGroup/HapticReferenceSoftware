@@ -31,14 +31,17 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef TOOLS_H
+#define TOOLS_H
+
 #include <iostream>
 
 namespace haptics::tools {
 
-  const double S_2_MS = 1000.0;
-  const double MS_2_S = .001;
+  extern const double S_2_MS = 1000.0;
+  extern const double MS_2_S = .001;
 
-	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
+	[[nodiscard]] extern auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
 
     int start = a.first;
     int end = b.first;
@@ -58,7 +61,8 @@ namespace haptics::tools {
   }
 
 
-  [[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency, double end_frequency, int position) -> double {
+  [[nodiscard]] extern auto chirpInterpolation(int start_time, int end_time, double start_frequency,
+                                               double end_frequency, int position) -> double {
 
     int start_t = start_time;
     int end_t = end_time;
@@ -82,7 +86,8 @@ namespace haptics::tools {
   }
 
 
-  [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
+  [[nodiscard]] extern auto genericNormalization(double start_in, double end_in, double start_out,
+                                                 double end_out, double x_in) -> double {
 
     double x_out = -1;
 
@@ -93,8 +98,9 @@ namespace haptics::tools {
     return x_out;
   }
 
-  [[nodiscard]] auto is_eq(double a, double b) -> bool {
+  [[nodiscard]] extern auto is_eq(double a, double b) -> bool {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     return std::fabs(a - b) <= std::numeric_limits<double>::epsilon() * 100;
   }
   }
+#endif
