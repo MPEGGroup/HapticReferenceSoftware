@@ -104,8 +104,10 @@ auto Effect::EvaluateVectorial(int position) -> double {
     // first KF before position
     auto k_a_before = keyframes.begin();
     for (auto it = k_a_after - 1; it >= keyframes.begin(); it--) {
-      if (it->getAmplitudeModulation().has_value())
+      if (it->getAmplitudeModulation().has_value()) {
         k_a_before = it;
+        break;
+      }
     }
 
     amp_modulation = haptics::tools::linearInterpolation(
@@ -126,8 +128,10 @@ auto Effect::EvaluateVectorial(int position) -> double {
     // first KF before position
     auto k_f_before = keyframes.begin();
     for (auto it = k_f_after - 1; it >= keyframes.begin(); it--) {
-      if (it->getFrequencyModulation().has_value())
+      if (it->getFrequencyModulation().has_value()) {
         k_f_before = it;
+        break;
+      }
     }
 
     // Modulation
@@ -137,6 +141,7 @@ auto Effect::EvaluateVectorial(int position) -> double {
     float DeltaT = k_f_after->getRelativePosition() - k_f_before->getRelativePosition();
 
     freq_modulation = (M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
+    //TODO CHANGE BASE SIGNAL
     freq_modulation = std::sin(freq_modulation);
   }
   //-----
@@ -150,6 +155,19 @@ auto Effect::EvaluateQuantized(int position) -> double {
   //freq = first KF before position
   //amp = first KF before position
   //res = sine(freq,amp)
+
+  int relativePosition = position - this->position;
+
+  auto k_before = keyframes.begin();
+
+  for (auto it = keyframes.end(); it >= keyframes.begin(); it--) {
+    if (it->getRelativePosition() <= relativePosition) {
+      k_before = it;
+      break;
+    }
+  }
+
+
 
   return res;
 }
@@ -165,7 +183,25 @@ auto Effect::EvaluateTransient(int position) -> double {
 auto Effect::EvaluateKeyframes(int position) -> double {
   double res = 0;
 
-  // res = haptics::tools::cubicInterpolation(kf_before, kf_after, position)
+  float x0 = m_keyFrames[_KeyframeBeforePointIndex].m_time;
+  float f0 = m_keyFrames[_KeyframeBeforePointIndex].m_value;
+  float t0 = m_keyFrames[_KeyframeBeforePointIndex].m_outSlope; // *m_Curve[k - 1].outWeight;
+  float x1 = m_keyFrames[_KeyframeAfterPointIndex].m_time;
+  float f1 = m_keyFrames[_KeyframeAfterPointIndex].m_value;
+  float t1 = m_keyFrames[_KeyframeAfterPointIndex].m_inSlope; // *m_Curve[k].inWeight;
+
+  double c2;
+  double c3;
+  double df;
+  double h;
+  h = x1 - x0;
+  df = (f1 - f0) / h;
+
+  c2 = -(2.0 * t0 - 3.0 * df + t1) / h;
+  c3 = (t0 - 2.0 * df + t1) / h / h;
+
+  float result = f0 + (_position - x0) * (t0 + (_position - x0) * (c2 + (_position - x0) * c3));
+  return std::max(std::min(1.0f, result), -1.0f);
 
   return res;
 }
