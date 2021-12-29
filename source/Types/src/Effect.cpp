@@ -101,7 +101,6 @@ auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
 }
 
 auto Effect::addFrequencyAt(int frequency, int position) -> bool {
-
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
