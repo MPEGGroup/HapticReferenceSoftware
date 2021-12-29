@@ -78,7 +78,7 @@ auto main(int argc, char *argv[]) -> int {
     }
 
   Haptics hapticFile;
-  Perception myPerception(0, 0, std::string());
+  Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
   if (ext == "ohm") {

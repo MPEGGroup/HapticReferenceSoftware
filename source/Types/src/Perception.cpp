@@ -59,6 +59,13 @@ auto Perception::setDescription(std::string &newDescription) -> void {
     description = newDescription;
 }
 
+[[nodiscard]] auto Perception::getPerceptionModality() const -> PerceptionModality {
+  return perceptionModality;
+}
+
+auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality) -> void {
+  perceptionModality = newPerceptionModality;
+}
 
 auto Perception::getTracksSize() -> size_t {
     return tracks.size();

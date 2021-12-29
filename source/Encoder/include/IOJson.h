@@ -71,6 +71,28 @@ namespace haptics::encoder {
       {types::BaseSignal::SawToothUp, "SawToothUp"},
       {types::BaseSignal::SawToothDown, "SawToothDown"}};
 
+
+  static const std::map<std::string, types::PerceptionModality> stringToPerceptionModality = {
+      {"Other", types::PerceptionModality::Other},
+      {"Pressure", types::PerceptionModality::Pressure},
+      {"Acceleration", types::PerceptionModality::Acceleration},
+      {"Velocity", types::PerceptionModality::Velocity},
+      {"Position", types::PerceptionModality::Position},
+      {"Temperature", types::PerceptionModality::Temperature},
+      {"Vibration", types::PerceptionModality::Vibration},
+      {"Water", types::PerceptionModality::Water},
+      {"Wind", types::PerceptionModality::Wind}};
+  static const std::map<types::PerceptionModality, std::string> perceptionModalityToString = {
+      {types::PerceptionModality::Other, "Other"},
+      {types::PerceptionModality::Pressure, "Pressure"},
+      {types::PerceptionModality::Acceleration, "Acceleration"},
+      {types::PerceptionModality::Velocity, "Velocity"},
+      {types::PerceptionModality::Position, "Position"},
+      {types::PerceptionModality::Temperature, "Temperature"},
+      {types::PerceptionModality::Vibration, "Vibration"},
+      {types::PerceptionModality::Water, "Water"},
+      {types::PerceptionModality::Wind, "Wind"}};
+
   
   static const std::map<std::string, types::AvatarType> stringToAvatarType = {
       {"Vibration", types::AvatarType::Vibration},

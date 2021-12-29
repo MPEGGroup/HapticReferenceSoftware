@@ -41,12 +41,26 @@
 
 namespace haptics::types {
 
+enum class PerceptionModality {
+  Other = 0,
+  Pressure = Other + 1,
+  Acceleration = Pressure + 1,
+  Velocity = Acceleration + 1,
+  Position = Velocity + 1,
+  Temperature = Position + 1,
+  Vibration = Temperature + 1,
+  Water = Vibration + 1,
+  Wind = Water + 1
+};
+
 class Perception {
 public:
   explicit Perception() = default;
-  explicit Perception(int newId, int newAvatarId, std::string newDescription)
+  explicit Perception(int newId, int newAvatarId, std::string newDescription, PerceptionModality newPerceptionModality)
       : id(newId), avatarId(newAvatarId)
-      , description(newDescription), tracks({}){};
+      , description(newDescription)
+      , perceptionModality(newPerceptionModality)
+      , tracks({}){};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
@@ -54,6 +68,8 @@ public:
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
+  [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
+  auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
   auto getTracksSize() -> size_t;
   auto getTrackAt(int index) -> Track &;
   auto addTrack(haptics::types::Track &newBand) -> void;
@@ -65,6 +81,7 @@ private:
   int id = -1;
   int avatarId = -1;
   std::string description = "";
+  PerceptionModality perceptionModality;
   std::vector<Track> tracks = {};
   std::vector<ReferenceDevice> referenceDevices;
 
