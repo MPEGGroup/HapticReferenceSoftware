@@ -34,6 +34,7 @@
 #ifndef IVSENCODER_H
 #define IVSENCODER_H
 
+#include <Types/include/Perception.h>
 #include <pugixml.hpp>
 #include <iostream>
 
@@ -41,7 +42,8 @@ namespace haptics::encoder {
 
 class IvsEncoder {
 public:
-  [[nodiscard]] auto static IvsEncoder::encode(std::string& filename) -> int;
+  [[nodiscard]] auto static IvsEncoder::encode(std::string &filename, types::Perception &out)
+      -> int;
 };
 } // namespace haptics::encoder
 #endif //IVSENCODER_H

@@ -34,16 +34,21 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
+#include <Encoder/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
+#include <Types/include/Perception.h>
+#include <functional>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
+using haptics::encoder::IOJson;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
+using haptics::types::Perception;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
@@ -72,6 +77,8 @@ auto main(int argc, char *argv[]) -> int {
         std::cout << "The generated file will be : " << output << "\n";
     }
 
+  Haptics hapticFile;
+  Perception myPerception(0, 0, std::string());
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
   if (ext == "ohm") {
@@ -81,19 +88,60 @@ auto main(int argc, char *argv[]) -> int {
       std::cerr << "ERROR : impossible to read the OHM file : " << std::endl << filename << std::endl;
       return EXIT_FAILURE;
     }
-    Haptics hapticFile;
     hapticFile.loadMetadataFromOHM(ohmData);
+
     codeExit = EXIT_SUCCESS;
+    if (ohmData.getHapticElementMetadataSize() != hapticFile.getPerceptionsSize()) {
+      codeExit = EXIT_FAILURE;
+    }
+    for (int i = 0; i < ohmData.getHapticElementMetadataSize() && codeExit == EXIT_SUCCESS; i++) {
+      OHMData::HapticElementMetadata metadata = ohmData.getHapticElementMetadataAt(i);
+
+      filename = metadata.elementFilename;
+      ext = InputParser::getFileExt(filename);
+      std::function<int(std::string &, Perception &)> encodingFunction =
+          // NOLINTNEXTLINE(misc-unused-parameters)
+          [](std::string &filename, Perception &out) { return EXIT_FAILURE; };
+      if (ext == "json" || ext == "ahap") {
+        std::cout << "The AHAP file to encode : " << filename << std::endl;
+        encodingFunction = AhapEncoder::encode;
+      } else if (ext == "xml" || ext == "ivs") {
+        std::cout << "The IVS file to encode : " << filename << std::endl;
+        encodingFunction = IvsEncoder::encode;
+      } else if (ext == "wav") {
+        std::cout << "The WAV file to encode : " << filename << std::endl;
+        encodingFunction = [](std::string &filename, Perception &out) {
+          const double curveFrequency = 72.5;
+          return PcmEncoder::encode(filename, curveFrequency, out);
+        };
+
+        myPerception = hapticFile.getPerceptionAt(i);
+        codeExit = encodingFunction(filename, myPerception);
+      }
+    }
   } else if (ext == "json" || ext == "ahap") {
     std::cout << "The AHAP file to encode : " << filename << std::endl;
-    codeExit = AhapEncoder::encode(filename);
+    codeExit = AhapEncoder::encode(filename, myPerception);
+    hapticFile.addPerception(myPerception);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
-    codeExit = IvsEncoder::encode(filename);
+    codeExit = IvsEncoder::encode(filename, myPerception);
+    hapticFile.addPerception(myPerception);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
     const double curveFrequency = 72.5;
-    exitCode = PcmEncoder::encode(filename, curveFrequency);
+    codeExit = PcmEncoder::encode(filename, curveFrequency, myPerception);
+    hapticFile.addPerception(myPerception);
   }
+  else {
+    InputParser::help(args[0]);
+    return EXIT_FAILURE;
+  }
+
+  if (codeExit == EXIT_FAILURE) {
+    return codeExit;
+  }
+
+  IOJson::writeFile(hapticFile, output);
   return codeExit;
 }

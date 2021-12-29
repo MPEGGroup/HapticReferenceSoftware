@@ -39,6 +39,7 @@ using haptics::types::EncodingModality;
 using haptics::types::BaseSignal;
 using haptics::tools::WavParser;
 using haptics::types::BandType;
+using haptics::types::Perception;
 using haptics::types::Keyframe;
 using haptics::types::Effect;
 using haptics::types::Track;
@@ -46,12 +47,10 @@ using haptics::types::Band;
 
 namespace haptics::encoder {
 
-auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit) -> int {
+auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit, Perception &out) -> int {
   WavParser wavParser;
   wavParser.loadFile(filename);
 
-  std::vector<Track> res = {};
-  
   Track myTrack;
   Band myBand;
   std::vector<double> signal;
@@ -59,7 +58,6 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit)
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   size_t channelIndex = 0;
   for (; channelIndex < wavParser.getNumChannels(); channelIndex++) {
-    myTrack = Track(0, filename, 1, 1, 0);
     signal = wavParser.getSamplesChannel(channelIndex);
     signal = filterbank.LP(signal, curveFrequencyLimit);
     points = PcmEncoder::localExtrema(signal, true);
@@ -67,7 +65,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit)
                                        &myBand)) {
       myTrack.addBand(myBand);
     }
-    res.push_back(myTrack);
+    out.addTrack(myTrack);
   }
 
   return EXIT_SUCCESS;

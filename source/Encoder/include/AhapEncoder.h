@@ -31,9 +31,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _AHAPENCODER_H_
-#define _AHAPENCODER_H_
+#ifndef AHAPENCODER_H
+#define AHAPENCODER_H
 
+#include <Types/include/Perception.h>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <Types/include/Effect.h>
@@ -44,16 +45,16 @@ namespace haptics::encoder {
 
 class AhapEncoder {
 public:
-  [[nodiscard]] auto static AhapEncoder::encode(std::string& filename) -> int;
-  [[nodiscard]] auto static AhapEncoder::extractTransients(nlohmann::json * event, 
+  [[nodiscard]] auto static AhapEncoder::encode(std::string& filename, types::Perception &out) -> int;
+  [[nodiscard]] auto static AhapEncoder::extractTransients(nlohmann::json * event,
                                                           std::vector<haptics::types::Effect> * transients,
-                                                          std::vector<std::pair<int, double>> * amplitudes, 
+                                                          std::vector<std::pair<int, double>> * amplitudes,
                                                           std::vector<std::pair<int, double>> * frequencies) -> int;
-  [[nodiscard]] auto static AhapEncoder::extractContinuous(nlohmann::json * event, 
+  [[nodiscard]] auto static AhapEncoder::extractContinuous(nlohmann::json * event,
                                                           std::vector<haptics::types::Effect> * continuous,
-                                                          std::vector<std::pair<int, double>> * amplitudes, 
+                                                          std::vector<std::pair<int, double>> * amplitudes,
                                                           std::vector<std::pair<int, double>> * frequencies) -> int;
   [[nodiscard]] auto static AhapEncoder::extractKeyframes(nlohmann::json * parameterCurve, std::vector<std::pair<int,double>> * keyframes) -> int;
 };
 } // namespace haptics::encoder
-#endif //_AHAPENCODER_H_
+#endif //AHAPENCODER_H
