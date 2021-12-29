@@ -41,6 +41,7 @@
                 "ParameterCurveControlPoints":
                 [
                     { "Time": 0, "ParameterValue": 0.0 },
+                    { "Time": 0.5, "ParameterValue": 0.5 },
                     { "Time": 1.0, "ParameterValue": 1.0 },
                     { "Time": 2.0, "ParameterValue": 0.5 }
                 ]
@@ -55,6 +56,7 @@
                 [
                     { "Time": 0, "ParameterValue": 0.0 },
                     { "Time": 1, "ParameterValue": -1 },
+                    { "Time": 1.5, "ParameterValue": 1 },
                     { "Time": 2, "ParameterValue": 0.4 }
                 ]
             }
