@@ -32,14 +32,73 @@
  */
 
 #include <catch2/catch.hpp>
-
+#include <Types/include/Keyframe.h>
 #include <Types/include/Effect.h>
 
-using haptics::types::Effect;
 using haptics::types::BaseSignal;
+using haptics::types::Keyframe;
+using haptics::types::Effect;
 
-TEST_CASE("haptics::types::Effect", "[placeholder]") {
-  const Effect n(0, .5, BaseSignal::SawToothUp);
+TEST_CASE("addKeyframe with only position", "[addKeyframe]") {
+  Effect e(0, 1, BaseSignal::SawToothUp);
+  const size_t n = e.getKeyframesSize();
 
-  CHECK(true);
+  const int testingPosition = 42;
+  e.addKeyframe(testingPosition, std::nullopt, std::nullopt);
+
+  REQUIRE(e.getKeyframesSize() == n + 1);
+  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+  CHECK_FALSE(testedKeyframe.getAmplitudeModulation().has_value());
+  CHECK_FALSE(testedKeyframe.getFrequencyModulation().has_value());
+}
+
+TEST_CASE("addKeyframe with amplitude", "[addKeyframe]") {
+  Effect e(0, 1, BaseSignal::SawToothUp);
+  const size_t n = e.getKeyframesSize();
+
+  const int testingPosition = 42;
+  const double testingAmplitude = .7654;
+  e.addKeyframe(testingPosition, testingAmplitude, std::nullopt);
+
+  REQUIRE(e.getKeyframesSize() == n + 1);
+  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+  CHECK_FALSE(testedKeyframe.getFrequencyModulation().has_value());
+  REQUIRE(testedKeyframe.getAmplitudeModulation().has_value());
+  CHECK(testedKeyframe.getAmplitudeModulation().value() == Approx(testingAmplitude));
+}
+
+TEST_CASE("addKeyframe with frequency", "[addKeyframe]") {
+  Effect e(0, 1, BaseSignal::SawToothUp);
+  const size_t n = e.getKeyframesSize();
+
+  const int testingPosition = 42;
+  const double testingFrequency = 357;
+  e.addKeyframe(testingPosition, std::nullopt, testingFrequency);
+
+  REQUIRE(e.getKeyframesSize() == n + 1);
+  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+  CHECK_FALSE(testedKeyframe.getAmplitudeModulation().has_value());
+  REQUIRE(testedKeyframe.getFrequencyModulation().has_value());
+  CHECK(testedKeyframe.getFrequencyModulation().value() == testingFrequency);
+}
+
+TEST_CASE("addKeyframe with amplitude and frequency", "[addKeyframe]") {
+  Effect e(0, 1, BaseSignal::SawToothUp);
+  const size_t n = e.getKeyframesSize();
+
+  const int testingPosition = 24;
+  const double testingAmplitude = .9543;
+  const int testingFrequency = 0;
+  e.addKeyframe(testingPosition, testingAmplitude, NULL);
+
+  REQUIRE(e.getKeyframesSize() == n + 1);
+  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+  REQUIRE(testedKeyframe.getAmplitudeModulation().has_value());
+  CHECK(testedKeyframe.getAmplitudeModulation().value() == Approx(testingAmplitude));
+  REQUIRE(testedKeyframe.getFrequencyModulation().has_value());
+  CHECK(testedKeyframe.getFrequencyModulation().value() == Approx(testingFrequency));
 }

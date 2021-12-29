@@ -1,7 +1,7 @@
 project(tools)
 
-add_library(tools src/InputParser.cpp src/WavParser.cpp include/Tools.h)
+add_library(tools src/InputParser.cpp src/WavParser.cpp include/Tools.h src/OHMData.cpp include/OHMData.h)
 
-add_executable(test_tools test/InputParser.test.cpp test/WavParser.test.cpp)
+add_executable(test_tools test/InputParser.test.cpp test/WavParser.test.cpp test/OHMData.test.cpp)
 target_link_libraries(test_tools PRIVATE Catch2::Catch2WithMain tools)
 catch_discover_tests(test_tools)

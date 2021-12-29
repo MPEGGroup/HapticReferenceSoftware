@@ -30,7 +30,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <Types/include/Effect.h>
 
 namespace haptics::types {
@@ -69,6 +68,10 @@ auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
 
 auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
+}
+
+auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {
+  this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
 }
 
 } // namespace haptics::types

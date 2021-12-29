@@ -31,55 +31,44 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
-#include <Encoder/include/PcmEncoder.h>
-#include <Tools/include/InputParser.h>
+#ifndef HAPTICS_H
+#define HAPTICS_H
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::encoder::PcmEncoder;
-using haptics::tools::InputParser;
+#include <Types/include/Perception.h>
+#include <Types/include/Avatar.h>
+#include <Tools/include/OHMData.h>
+#include <fstream>
+#include <vector>
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
+namespace haptics::types {
 
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
+class Haptics {
+public:
+  explicit Haptics() = default;
+  explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
+      : version(newVersion), date(newDate), description(newDescription), perceptions({}), avatars({}){};
 
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
+  [[nodiscard]] auto getVersion() const -> std::string;
+  auto setVersion(std::string &newVersion) -> void;
+  [[nodiscard]] auto getDate() const -> std::string;
+  auto setDate(std::string &newDate) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  auto getPerceptionsSize() -> size_t;
+  auto getPerceptionAt(int index) -> Perception &;
+  auto addPerception(Perception &newPerception) -> void;
+  auto getAvatarsSize() -> size_t;
+  auto getAvatarAt(int index) -> Avatar &;
+  auto addAvatar(Avatar &newAvatar) -> void;
+  auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
 
-  std::string ext = InputParser::getFileExt(filename);
-  int exitCode = -1;
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    exitCode  = AhapEncoder::encode(filename);
-  } else if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    exitCode  = IvsEncoder::encode(filename);
-  } else if (ext == "wav") {
-    std::cout << "The WAV file to encode : " << filename << std::endl;
-    const double curveFrequency = 72.5;
-    exitCode = PcmEncoder::encode(filename, curveFrequency);
-  }
+private:
+  std::string version = "";
+  std::string date = "";
+  std::string description = "";
+  std::vector<Perception> perceptions = {};
+  std::vector<Avatar> avatars = {};
 
-  return exitCode;
-}
+};
+} // namespace haptics::types
+#endif //HAPTICS_H

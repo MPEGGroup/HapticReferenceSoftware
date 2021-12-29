@@ -31,55 +31,56 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/AhapEncoder.h>
-#include <Encoder/include/IvsEncoder.h>
-#include <Encoder/include/PcmEncoder.h>
-#include <Tools/include/InputParser.h>
+#include <Types/include/Perception.h>
 
-using haptics::encoder::AhapEncoder;
-using haptics::encoder::IvsEncoder;
-using haptics::encoder::PcmEncoder;
-using haptics::tools::InputParser;
+namespace haptics::types {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, char *argv[]) -> int {
-  const auto args = std::vector<const char *>(argv, argv + argc);
-  InputParser inputParser(args);
-  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
-    return EXIT_SUCCESS;
-  }
-
-  std::string filename = inputParser.getCmdOption("-f");
-  if (filename.empty()) {
-    filename = inputParser.getCmdOption("--file");
-  }
-  if (filename.empty()) {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
-  }
-
-  std::string output = inputParser.getCmdOption("-o");
-  if (output.empty()) {
-    output = inputParser.getCmdOption("--output");
-  }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
-  }
-
-  std::string ext = InputParser::getFileExt(filename);
-  int exitCode = -1;
-  if (ext == "json" || ext == "ahap") {
-    std::cout << "The AHAP file to encode : " << filename << std::endl;
-    exitCode  = AhapEncoder::encode(filename);
-  } else if (ext == "xml" || ext == "ivs") {
-    std::cout << "The IVS file to encode : " << filename << std::endl;
-    exitCode  = IvsEncoder::encode(filename);
-  } else if (ext == "wav") {
-    std::cout << "The WAV file to encode : " << filename << std::endl;
-    const double curveFrequency = 72.5;
-    exitCode = PcmEncoder::encode(filename, curveFrequency);
-  }
-
-  return exitCode;
+[[nodiscard]] auto Perception::getId() const -> int {
+    return id;
 }
+
+auto Perception::setId(int newId) -> void {
+    id = newId;
+}
+
+[[nodiscard]] auto Perception::getAvatarId() const -> int {
+    return avatarId;
+}
+
+auto Perception::setAvatarId(int newAvatarId) -> void {
+    avatarId = newAvatarId;
+}
+
+[[nodiscard]] auto Perception::getDescription() const -> std::string {
+    return description;
+}
+
+auto Perception::setDescription(std::string &newDescription) -> void {
+    description = newDescription;
+}
+
+
+auto Perception::getTracksSize() -> size_t {
+    return tracks.size();
+}
+
+auto Perception::getTrackAt(int index) -> haptics::types::Track& {
+    return tracks.at(index);
+}
+
+auto Perception::addTrack(haptics::types::Track& newBand) -> void {
+    tracks.push_back(newBand);
+}
+
+auto Perception::getReferenceDevicesSize() -> size_t {
+    return referenceDevices.size();
+}
+
+auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice& {
+  return referenceDevices.at(index);
+}
+auto Perception::addReferenceDevice(haptics::types::ReferenceDevice& newReferenceDevice) -> void {
+  referenceDevices.push_back(newReferenceDevice);
+}
+
+} // namespace haptics::types

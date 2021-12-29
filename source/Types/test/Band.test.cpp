@@ -32,7 +32,6 @@
  */
 
 #include <catch2/catch.hpp>
-
 #include <Types/include/Band.h>
 
 using haptics::types::Band;
