@@ -145,7 +145,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
       }
       break;
     case BandType::Transient:
-      return effect->EvaluateVectorial(position);
+      return effect->EvaluateTransient(position);
       break;
     default:
       break;
