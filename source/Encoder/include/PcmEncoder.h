@@ -51,10 +51,10 @@ class PcmEncoder {
 public:
   auto static encode(std::string &filename, double curveFrequencyLimit, types::Perception &out) -> int;
   [[nodiscard]] auto static PcmEncoder::convertToCurveBand(
-      std::vector<std::pair<int16_t, double>> &points, double samplerate,
+      std::vector<std::pair<int, double>> &points, double samplerate,
       double curveFrequencyLimit, haptics::types::Band *out) -> bool;
   [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
-      -> std::vector<std::pair<int16_t, double>>;
+      -> std::vector<std::pair<int, double>>;
 };
 } // namespace haptics::encoder
 #endif // PCMENCODER_H

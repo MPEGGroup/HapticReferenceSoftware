@@ -114,7 +114,7 @@ namespace haptics::types {
       return -1;
     }
 
-    for (auto it = effects.end(); it >= effects.begin(); it--) {
+    for (auto it = effects.end()-1; it >= effects.begin(); it--) {
       if (it->getPosition() <= position) {
         return EvaluationSwitch(position, &*it);
       }

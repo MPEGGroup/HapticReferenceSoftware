@@ -58,7 +58,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   Track myTrack;
   Band myBand;
   std::vector<double> signal;
-  std::vector<std::pair<int16_t, double>> points;
+  std::vector<std::pair<int, double>> points;
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
     myTrack = out.getTrackAt(channelIndex);
@@ -75,7 +75,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto PcmEncoder::convertToCurveBand(std::vector<std::pair<int16_t, double>> &points,
+[[nodiscard]] auto PcmEncoder::convertToCurveBand(std::vector<std::pair<int, double>> &points,
                                                   const double samplerate,
                                                   const double curveFrequencyLimit, Band *out)
     -> bool {
@@ -90,7 +90,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   out->setUpperFrequencyLimit((int)curveFrequencyLimit);
   Effect myEffect(0, 0, BaseSignal::Sine);
   Keyframe myKeyframe;
-  for (std::pair<int16_t, double> p : points) {
+  for (std::pair<int, double> p : points) {
     std::optional<int> f;
     myEffect.addKeyframe(static_cast<int>(S_2_MS * p.first / samplerate), p.second, f);
   }
@@ -101,8 +101,8 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
 
 
 [[nodiscard]] auto PcmEncoder::localExtrema(std::vector<double> signal, bool includeBorder)
-    -> std::vector<std::pair<int16_t, double>> {
-  std::vector<std::pair<int16_t, double>> extremaIndexes;
+    -> std::vector<std::pair<int, double>> {
+  std::vector<std::pair<int, double>> extremaIndexes;
   
   auto it = signal.begin();
   if (it == signal.end()) {
@@ -113,8 +113,8 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      std::pair<int16_t, double> p1(0, signal[0]);
-      std::pair<int16_t, double> p2(0, signal[0]);
+      std::pair<int, double> p1(0, signal[0]);
+      std::pair<int, double> p2(0, signal[0]);
       extremaIndexes.push_back(p1);
       extremaIndexes.push_back(p2);
       return extremaIndexes;
@@ -126,8 +126,8 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      std::pair<int16_t, double> p1(0, signal[0]);
-      std::pair<int16_t, double> p2(1, signal[1]);
+      std::pair<int, double> p1(0, signal[0]);
+      std::pair<int, double> p2(1, signal[1]);
       extremaIndexes.push_back(p1);
       extremaIndexes.push_back(p2);
       return extremaIndexes;
@@ -135,11 +135,11 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
     return {};
   }
 
-  std::pair<int16_t, double> p;
-  int16_t i = 1;
+  std::pair<int, double> p;
+  int i = 1;
   double nextValue = 0;
   if (includeBorder) {
-    p = std::pair<int16_t, double>(0, signal[0]);
+    p = std::pair<int, double>(0, signal[0]);
     extremaIndexes.push_back(p);
   }
   do {
@@ -147,7 +147,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
     if (((value >= lastValue && value >= nextValue) ||
          (value <= lastValue && value <= nextValue)) &&
         !(haptics::tools::is_eq(value, lastValue) && haptics::tools::is_eq(value, nextValue))) {
-      p = std::pair<int16_t, double>(i, value);
+      p = std::pair<int, double>(i, value);
       extremaIndexes.push_back(p);
     }
 
@@ -159,7 +159,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   while (it != signal.end());
 
   if (includeBorder) {
-    p = std::pair<int16_t, double>(i, value);
+    p = std::pair<int, double>(i, value);
     extremaIndexes.push_back(p);
   }
 

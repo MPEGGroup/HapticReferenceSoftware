@@ -91,8 +91,8 @@ auto main(int argc, char *argv[]) -> int {
   Haptics hapticFile = IOJson::loadFile(filename);
   const double timeLength = Helper::getTimeLength(hapticFile);
 
-  if (!Helper::playFile(hapticFile, timeLength)) {
-    return EXIT_SUCCESS;
+  if (!Helper::playFile(hapticFile, timeLength, fs, output)) {
+    return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;

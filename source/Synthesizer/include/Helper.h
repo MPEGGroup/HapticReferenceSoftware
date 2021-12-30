@@ -35,13 +35,15 @@
 #define HELPER_H
 
 #include <Types/include/Haptics.h>
+#include <vector>
 
 namespace haptics::synthesizer {
 
 class Helper {
 public:
   [[nodiscard]] auto static getTimeLength(types::Haptics &haptic) -> double;
-  [[nodiscard]] auto static playFile(types::Haptics &haptic, double timeLength) -> bool;
+  [[nodiscard]] auto static playFile(types::Haptics &haptic, const double timeLength, const int fs,
+                                     std::string &filename) -> bool;
 
 private:
   [[nodiscard]] auto static getEffectTimeLength(types::Effect &effect, types::BandType bandType,

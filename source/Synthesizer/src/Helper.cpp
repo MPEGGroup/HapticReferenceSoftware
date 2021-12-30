@@ -32,73 +32,96 @@
 */
 
 #include <Synthesizer/include/Helper.h>
+#include <Tools/include/Tools.h>
+#include <Tools/include/WavParser.h>
 
 using haptics::synthesizer::Helper;
 using haptics::types::Haptics;
 
 namespace haptics::synthesizer {
 
-[[nodiscard]] auto Helper::getTimeLength(types::Haptics &haptic) -> double {
-  types::Perception perception;
-  types::Track track;
-  types::Band band;
-  types::Effect effect;
-  double maxLength = 0;
-  double currentLength = 0;
-  for (int perceptionIndex = 0; perceptionIndex < haptic.getPerceptionsSize(); perceptionIndex++) {
-    perception = haptic.getPerceptionAt(perceptionIndex);
-    for (int trackIndex = 0; trackIndex < perception.getTracksSize(); trackIndex++) {
-      track = perception.getTrackAt(trackIndex);
-      for (int bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
-        band = track.getBandAt(bandIndex);
-        if (band.getEffectsSize() == 0) {
-          continue;
-        }
-        effect = band.getEffectAt(static_cast<int>(band.getEffectsSize()) - 1);
-        currentLength = Helper::getEffectTimeLength(
-            effect, band.getBandType(), band.getEncodingModality(), band.getWindowLength());
-        if (currentLength > maxLength) {
-          maxLength = currentLength;
+  [[nodiscard]] auto Helper::getTimeLength(types::Haptics &haptic) -> double {
+    types::Perception perception;
+    types::Track track;
+    types::Band band;
+    types::Effect effect;
+    double maxLength = 0;
+    double currentLength = 0;
+    for (int perceptionIndex = 0; perceptionIndex < haptic.getPerceptionsSize(); perceptionIndex++) {
+      perception = haptic.getPerceptionAt(perceptionIndex);
+      for (int trackIndex = 0; trackIndex < perception.getTracksSize(); trackIndex++) {
+        track = perception.getTrackAt(trackIndex);
+        for (int bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
+          band = track.getBandAt(bandIndex);
+          if (band.getEffectsSize() == 0) {
+            continue;
+          }
+          effect = band.getEffectAt(static_cast<int>(band.getEffectsSize()) - 1);
+          currentLength = Helper::getEffectTimeLength(
+              effect, band.getBandType(), band.getEncodingModality(), band.getWindowLength());
+          if (currentLength > maxLength) {
+            maxLength = currentLength;
+          }
         }
       }
     }
-  }
-  return maxLength;
-}
-
-[[nodiscard]] auto Helper::getEffectTimeLength(types::Effect &effect, types::BandType bandType,
-                                               types::EncodingModality encodingModality,
-                                               int windowLength) -> double {
-
-  double length = effect.getPosition();
-  if (effect.getKeyframesSize() == 0) {
-    return length;
+    return maxLength;
   }
 
-  types::Keyframe lastKeyframe =
-      effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1);
-  switch (bandType) {
-  case types::BandType::Transient:
-  case types::BandType::Curve:
-    return length + lastKeyframe.getRelativePosition();
-  case types::BandType::Wave:
-    switch (encodingModality) {
-    case types::EncodingModality::Quantized:
-      return length + static_cast<int>(effect.getKeyframesSize()) * windowLength;
-    case types::EncodingModality::Vectorial:
+  [[nodiscard]] auto Helper::getEffectTimeLength(types::Effect &effect, types::BandType bandType,
+                                                 types::EncodingModality encodingModality,
+                                                 int windowLength) -> double {
+
+    double length = effect.getPosition();
+    if (effect.getKeyframesSize() == 0) {
+      return length;
+    }
+
+    types::Keyframe lastKeyframe =
+        effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1);
+    switch (bandType) {
+    case types::BandType::Transient:
+    case types::BandType::Curve:
       return length + lastKeyframe.getRelativePosition();
+    case types::BandType::Wave:
+      switch (encodingModality) {
+      case types::EncodingModality::Quantized:
+        return length + static_cast<int>(effect.getKeyframesSize()) * windowLength;
+      case types::EncodingModality::Vectorial:
+        return length + lastKeyframe.getRelativePosition();
+      default:
+        break;
+      }
     default:
       break;
     }
-  default:
-    break;
+    return length;
   }
-  return length;
-}
 
-// NOLINTNEXTLINE(misc-unused-parameters)
-[[nodiscard]] auto Helper::playFile(types::Haptics &haptic, const double timeLength) -> bool {
-  return false;
-}
+  // NOLINTNEXTLINE(misc-unused-parameters)
+  [[nodiscard]] auto Helper::playFile(types::Haptics &haptic, const double timeLength, const int fs,
+                                      std::string &filename) -> bool {
+  
+    std::vector<std::vector<double>> amplitudes;
 
+    int index = 0;
+
+    for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
+      for (int j = 0; j < haptic.getPerceptionAt(i).getTracksSize(); j++) {
+        double t = 0;
+        std::vector<double> trackAmp;
+        while (t < (timeLength * MS_2_S)) {
+          if (t >= (timeLength * MS_2_S) / 2) {
+            index = 2;
+          }
+          double amp = haptic.getPerceptionAt(i).getTrackAt(j).Evaluate(static_cast<int>(t * S_2_MS));
+          trackAmp.push_back(amp);
+          t += 1.0 / static_cast<double>(fs);
+        }
+        amplitudes.push_back(trackAmp);
+      }
+    }
+
+    return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
+  }
 }

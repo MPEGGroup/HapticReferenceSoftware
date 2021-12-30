@@ -242,15 +242,15 @@ namespace haptics::types {
 
     auto k_after = std::find_if(keyframes.begin(), keyframes.end(),
                                   [position](haptics::types::Keyframe k) {
-                                    return k.getFrequencyModulation().has_value() &&
-                                           k.getRelativePosition() >= position;
+                                    return k.getAmplitudeModulation().has_value() &&
+                                           k.getRelativePosition() > position;
                                   });
 
     if (k_after < keyframes.end()) {
       // first KF before position
       auto k_before = keyframes.begin();
       for (auto it = k_after - 1; it >= keyframes.begin(); it--) {
-        if (it->getFrequencyModulation().has_value()) {
+        if (it->getAmplitudeModulation().has_value()) {
           k_before = it;
           break;
         }
