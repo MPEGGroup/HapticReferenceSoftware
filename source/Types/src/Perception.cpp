@@ -59,6 +59,13 @@ auto Perception::setDescription(std::string &newDescription) -> void {
     description = newDescription;
 }
 
+[[nodiscard]] auto Perception::getPerceptionModality() const -> PerceptionModality {
+  return perceptionModality;
+}
+
+auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality) -> void {
+  perceptionModality = newPerceptionModality;
+}
 
 auto Perception::getTracksSize() -> size_t {
     return tracks.size();
@@ -68,8 +75,16 @@ auto Perception::getTrackAt(int index) -> haptics::types::Track& {
     return tracks.at(index);
 }
 
-auto Perception::addTrack(haptics::types::Track& newBand) -> void {
-    tracks.push_back(newBand);
+auto Perception::replaceTrackAt(int index, haptics::types::Track& newTrack) -> bool {
+  if (index < 0 || index >= tracks.size()) {
+    return false;
+  }
+  tracks[index] = newTrack;
+  return true;
+}
+
+auto Perception::addTrack(haptics::types::Track& newTrack) -> void {
+    tracks.push_back(newTrack);
 }
 
 auto Perception::getReferenceDevicesSize() -> size_t {

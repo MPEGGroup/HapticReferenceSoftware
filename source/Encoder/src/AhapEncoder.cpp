@@ -52,7 +52,8 @@ const int ACTUAL_FREQUENCY_MAX = 300;
 
 namespace haptics::encoder {
 
-[[nodiscard]] auto AhapEncoder::encode(std::string& filename) -> int {
+// NOLINTNEXTLINE(misc-unused-parameters)
+[[nodiscard]] auto AhapEncoder::encode(std::string& filename, haptics::types::Perception &out) -> int {
   std::ifstream ifs(filename);
   nlohmann::json json = nlohmann::json::parse(ifs);
 

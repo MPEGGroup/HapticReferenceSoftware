@@ -35,7 +35,8 @@
 
 namespace haptics::encoder {
 
-[[nodiscard]] auto IvsEncoder::encode(std::string& filename) -> int {
+// NOLINTNEXTLINE(misc-unused-parameters)
+[[nodiscard]] auto IvsEncoder::encode(std::string& filename, types::Perception &out) -> int {
     if (filename.empty()) {
         return EXIT_FAILURE;
     }

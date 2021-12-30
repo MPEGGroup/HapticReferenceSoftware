@@ -68,6 +68,15 @@ auto Haptics::getPerceptionAt(int index) -> Perception& {
   return perceptions.at(index);
 }
 
+auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool {
+  if (index < 0 || index >= perceptions.size()) {
+    return false;
+  }
+
+  perceptions[index] = newPerception;
+  return true;
+}
+
 auto Haptics::addPerception(Perception& newPerception) -> void {
   perceptions.push_back(newPerception);
 }
@@ -93,7 +102,7 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     for (int i = 0 ; i < numElements ; i++ ) {
       auto element = data.getHapticElementMetadataAt(i);
       std::string elemDescription = element.elementDescription;
-      Perception perception(i, 0, elemDescription);
+      Perception perception(i, 0, elemDescription, PerceptionModality::Other);
       short numChannels = element.numHapticChannels;
       for (int j = 0; j < numChannels; j++) {
         auto channel = element.channelsMetadata[j];

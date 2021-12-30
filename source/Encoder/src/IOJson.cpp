@@ -78,6 +78,10 @@ auto IOJson::loadPerceptions(const nlohmann::json& jsonPerceptions, types::Hapti
     if (!jsonPerception.contains("description") || !jsonPerception["description"].is_string()) {
       continue;
     }
+    if (!jsonPerception.contains("perception_modality") ||
+        !jsonPerception["perception_modality"].is_string()) {
+      continue;
+    }
     if (!jsonPerception.contains("tracks") || !jsonPerception["tracks"].is_array()) {
       continue;
     }
@@ -85,8 +89,11 @@ auto IOJson::loadPerceptions(const nlohmann::json& jsonPerceptions, types::Hapti
     auto perceptionId = jsonPerception["id"].get<int>();
     auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
     auto perceptionDescription = jsonPerception["description"].get<std::string>();
+    auto perceptionPerceptionModality =
+        stringToPerceptionModality.at(jsonPerception["perception_modality"].get<std::string>());
 
-    haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription);
+    haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
+                                          perceptionPerceptionModality);
     auto jsonTracks = jsonPerception["tracks"];
     loadTracks(jsonTracks, perception);
     haptic.addPerception(perception);
@@ -336,6 +343,7 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerc
     jsonPerception["id"] = perception.getId();
     jsonPerception["avatar_id"] = perception.getAvatarId();
     jsonPerception["description"] = perception.getDescription();
+    jsonPerception["perception_modality"] = perceptionModalityToString.at(perception.getPerceptionModality());
 
     auto jsonReferenceDevices = json::array();
     extractReferenceDevices(perception, jsonReferenceDevices);

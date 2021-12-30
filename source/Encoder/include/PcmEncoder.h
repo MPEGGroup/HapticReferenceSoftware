@@ -36,6 +36,7 @@
 
 #include <Filterbank/include/FilterBank.h>
 #include <Tools/include/WavParser.h>
+#include <Types/include/Perception.h>
 #include <Types/include/Keyframe.h>
 #include <Types/include/Effect.h>
 #include <Types/include/Track.h>
@@ -48,7 +49,7 @@ namespace haptics::encoder {
 
 class PcmEncoder {
 public:
-  auto static encode(std::string &filename, double curveFrequencyLimit) -> int;
+  auto static encode(std::string &filename, double curveFrequencyLimit, types::Perception &out) -> int;
   [[nodiscard]] auto static PcmEncoder::convertToCurveBand(
       std::vector<std::pair<int16_t, double>> &points, double samplerate,
       double curveFrequencyLimit, haptics::types::Band *out) -> bool;

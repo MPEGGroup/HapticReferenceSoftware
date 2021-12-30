@@ -99,13 +99,14 @@ namespace haptics::tools {
 			Body bodyPartMask = Body::UNSPECIFIED;
 		};
 
-		struct HapticElementMetadata
-		{
-			std::string elementFilename;
-			std::string elementDescription;
-			short numHapticChannels = 0;
-			std::vector<HapticChannelMetadata> channelsMetadata;
-		};
+    public:
+		  struct HapticElementMetadata
+		  {
+			  std::string elementFilename;
+			  std::string elementDescription;
+			  short numHapticChannels = 0;
+			  std::vector<HapticChannelMetadata> channelsMetadata;
+		  };
 
     private:
         std::string header;
