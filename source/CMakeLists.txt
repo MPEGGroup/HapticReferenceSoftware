@@ -9,6 +9,7 @@ include(../cmake/pugixml.cmake)
 add_subdirectory("Tools")
 add_subdirectory("Types")
 add_subdirectory("FilterBank")
+add_subdirectory("PsychohapticModel")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")
