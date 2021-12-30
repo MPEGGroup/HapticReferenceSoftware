@@ -54,4 +54,19 @@ TEST_CASE("haptics::tools::WavParser") {
     std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
   }
+
+  /*SECTION("Bugfix load MD file") {
+
+    std::string filename = "IDCC-kin-ForceXSlow-8kHz-16-nopad.wav";
+    CHECK(std::filesystem::is_regular_file(filename));
+    WavParser wavParser;
+    wavParser.loadFile(filename);
+    std::vector<double> buffer2 = wavParser.getSamplesChannel(0);
+
+    for (const auto& v : buffer2) {
+      std::cout << v << std::endl;
+    }
+
+  }*/
+
 }
