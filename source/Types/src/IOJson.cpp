@@ -310,9 +310,9 @@ auto IOJson::loadKeyframes(const nlohmann::json& jsonKeyframes, types::Effect& e
     if (jsonKeyframe.contains("amplitude_modulation") && jsonKeyframe["amplitude_modulation"].is_number()) {
       amplitudeModulation = jsonKeyframe["amplitude_modulation"].get<float>();
     }
-    if (jsonKeyframe.contains("frequencyModulation") &&
-        jsonKeyframe["frequencyModulation"].is_number_integer()) {
-      frequencyModulation = jsonKeyframe["frequencyModulation"].get<int>();
+    if (jsonKeyframe.contains("frequency_modulation") &&
+        jsonKeyframe["frequency_modulation"].is_number_integer()) {
+      frequencyModulation = jsonKeyframe["frequency_modulation"].get<int>();
     }
     types::Keyframe keyframe(relativePosition, amplitudeModulation, frequencyModulation);
     effect.addKeyframe(keyframe);

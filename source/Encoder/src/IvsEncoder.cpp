@@ -144,7 +144,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int fadeTime = IvsEncoder::getFadeTime(basisEffect);
   if (fadeTime != -1) {
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
-    keyframeList[1]->setRelativePosition(duration - fadeTime);
+    keyframeList[1]->setRelativePosition(std::max(duration - fadeTime, 0));
     keyframeList.push_back(&*(new haptics::types::Keyframe(
         duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }
@@ -152,7 +152,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
-    keyframeList[0]->setRelativePosition(attackTime);
+    keyframeList[0]->setRelativePosition(std::min(attackTime,duration));
     out->addKeyframe(*(new haptics::types::Keyframe(
         0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }

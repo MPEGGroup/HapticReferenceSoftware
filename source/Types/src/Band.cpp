@@ -116,7 +116,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
         effects.back().getPosition() + effects.back()
                                            .getKeyframeAt(static_cast<int>(effects.back().getKeyframesSize()) - 1)
                                            .getRelativePosition() || position < 0) {
-      return -1;
+      return 0;
     }
 
     for (auto it = effects.end()-1; it >= effects.begin(); it--) {
