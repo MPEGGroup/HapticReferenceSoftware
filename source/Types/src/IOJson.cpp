@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/IOJson.h>
+#include <Types/include/IOJson.h>
 #include <iostream>
 
 using json = nlohmann::json;

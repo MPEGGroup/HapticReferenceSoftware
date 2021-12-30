@@ -34,7 +34,7 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
-#include <Encoder/include/IOJson.h>
+#include <Types/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>

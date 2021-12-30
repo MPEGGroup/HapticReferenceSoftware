@@ -1,6 +1,6 @@
 project(Encoder)
 
-add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/AhapEncoder.cpp include/AhapEncoder.h src/IvsEncoder.cpp include/IvsEncoder.h src/IOJson.cpp include/IOJson.h src/WaveletEncoder.cpp include/WaveletEncoder.h)
+add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/AhapEncoder.cpp include/AhapEncoder.h src/IvsEncoder.cpp include/IvsEncoder.h src/WaveletEncoder.cpp include/WaveletEncoder.h)
 target_link_libraries(Encoder PUBLIC tools types psychohapticModel filterbank)
 target_link_libraries(Encoder PRIVATE nlohmann_json::nlohmann_json pugixml::static iir::iir_static)
 
