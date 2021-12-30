@@ -77,10 +77,11 @@ public:
   auto addEffect(haptics::types::Effect &newEffect) -> void;
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop)
       -> bool;
-  auto Evaluate(double position) -> double;
+  auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
 
 private:
-  auto EvaluationSwitch(double position, haptics::types::Effect *effect) -> double;
+  auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
+                        int highFrequencyLimit) -> double;
 
   BandType bandType = BandType::Wave;
   EncodingModality encodingModality = EncodingModality::Quantized;

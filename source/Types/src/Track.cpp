@@ -133,7 +133,7 @@ auto Track::findBandAvailable(const int position, const int duration,
     double res = 0;
 
     for (haptics::types::Band b : bands) {
-      res += b.Evaluate(position);
+      res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
     }
 
     return res;

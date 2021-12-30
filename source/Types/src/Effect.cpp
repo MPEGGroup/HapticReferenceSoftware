@@ -34,6 +34,7 @@
 #include <Types/include/Effect.h>
 #include <Tools/include/Tools.h>
 #include <cmath>
+#include <algorithm>
 
 namespace haptics::types {
 
@@ -132,7 +133,8 @@ namespace haptics::types {
     this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
   }
 
-  auto Effect::EvaluateVectorial(double position) -> double {
+  auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
+      -> double {
     double res = 0;
 
     if (position < this->position || position > this->position + this->keyframes.back().getRelativePosition()) {
@@ -197,9 +199,9 @@ namespace haptics::types {
                              static_cast<double>(k_f_before->getRelativePosition()));
 
       // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      freq_modulation = (2 * M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
+      freq_modulation = std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit), static_cast<double>(highFrequencyLimit));
       //TODO CHANGE BASE SIGNAL
-      freq_modulation = std::sin(freq_modulation);
+      freq_modulation = std::sin(M_PI * t * (freq_modulation + f0));
     }
     //-----
 

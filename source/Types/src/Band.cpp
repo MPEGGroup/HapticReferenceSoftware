@@ -109,7 +109,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
            (position <= start && position + length >= stop);
   }
 
-  auto Band::Evaluate(double position) -> double {
+  auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double {
 
     //OUT OUF BOUND CHECK
     if (effects.empty() || position >
@@ -121,7 +121,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
 
     for (auto it = effects.end()-1; it >= effects.begin(); it--) {
       if (it->getPosition() <= position) {
-        return EvaluationSwitch(position, &*it);
+        return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
       }
       if (it == effects.begin()) {
         break;
@@ -131,7 +131,8 @@ auto Band::addEffect(Effect &newEffect) -> void {
     return 0;
   }
 
-  auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect) -> double {
+  auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect,
+                              int lowFrequencyLimit, int highFrequencyLimit) -> double {
 
     switch (this->bandType) {
     case BandType::Curve:
@@ -141,7 +142,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
       if (encodingModality == EncodingModality::Quantized) {
         return effect->EvaluateQuantized(position);
       } else if (encodingModality == EncodingModality::Vectorial) {
-        return effect->EvaluateVectorial(position);
+        return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
       }
       break;
     case BandType::Transient:
