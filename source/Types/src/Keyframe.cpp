@@ -43,27 +43,19 @@ auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
   relativePosition = newRelativePosition;
 }
 
-[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> float {
-  if (amplitudeModulation.has_value()) {
-    return static_cast<float>(amplitudeModulation.value());
+[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> std::optional<float> {
+  return amplitudeModulation;
   }
 
-  return NAN;
-}
-
-auto Keyframe::setAmplitudeModulation(float newAmplitudeModulation) -> void {
+auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void {
   amplitudeModulation = newAmplitudeModulation;
 }
 
-[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> int {
-  if (frequencyModulation.has_value()) {
-    return static_cast<int>(frequencyModulation.value());
+[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> std::optional<int> {
+  return frequencyModulation;
   }
 
-  return NAN;
-}
-
-auto Keyframe::setFrequencyModulation(int newFrequencyModulation) -> void {
+auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void {
   frequencyModulation = newFrequencyModulation;
 }
 

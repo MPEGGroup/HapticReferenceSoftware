@@ -34,6 +34,7 @@
 #ifndef IVSENCODER_H
 #define IVSENCODER_H
 
+#include <Types/include/Perception.h>
 #include <pugixml.hpp>
 #include <iostream>
 #include <vector>
@@ -46,7 +47,7 @@ namespace haptics::encoder {
 
 class IvsEncoder {
 public:
-  auto static IvsEncoder::encode(const std::string &filename) -> int;
+  auto static IvsEncoder::encode(const std::string &filename, types::Perception &out) -> int;
   [[nodiscard]] auto static IvsEncoder::getLastModified(const pugi::xml_document *doc) -> std::string;
   [[nodiscard]] auto static IvsEncoder::getBasisEffects(const  pugi::xml_document *doc)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;

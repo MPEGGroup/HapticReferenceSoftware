@@ -32,24 +32,89 @@
  */
 
 #include <Encoder/include/PcmEncoder.h>
+#include <Tools/include/Tools.h>
+
+using haptics::filterbank::Filterbank;
+using haptics::types::EncodingModality;
+using haptics::types::BaseSignal;
+using haptics::tools::WavParser;
+using haptics::types::BandType;
+using haptics::types::Perception;
+using haptics::types::Keyframe;
+using haptics::types::Effect;
+using haptics::types::Track;
+using haptics::types::Band;
 
 namespace haptics::encoder {
 
-[[nodiscard]] auto PcmEncoder::localExtrema(std::vector<int16_t> signal, bool includeBorder)
-    -> std::vector<std::pair<int16_t, int16_t>> {
-  std::vector<std::pair<int16_t, int16_t>> extremaIndexes;
+auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit, Perception &out) -> int {
+  WavParser wavParser;
+  wavParser.loadFile(filename);
+  size_t numChannels = wavParser.getNumChannels();
+  if (out.getTracksSize() != numChannels) {
+    return EXIT_FAILURE;
+  }
 
+  Track myTrack;
+  Band myBand;
+  std::vector<double> signal;
+  std::vector<std::pair<int16_t, double>> points;
+  Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
+  for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
+    myTrack = out.getTrackAt(channelIndex);
+    signal = wavParser.getSamplesChannel(channelIndex);
+    signal = filterbank.LP(signal, curveFrequencyLimit);
+    points = PcmEncoder::localExtrema(signal, true);
+    if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(), curveFrequencyLimit,
+                                       &myBand)) {
+      myTrack.addBand(myBand);
+    }
+    out.replaceTrackAt(channelIndex, myTrack);
+  }
+
+  return EXIT_SUCCESS;
+}
+
+[[nodiscard]] auto PcmEncoder::convertToCurveBand(std::vector<std::pair<int16_t, double>> &points,
+                                                  const double samplerate,
+                                                  const double curveFrequencyLimit, Band *out)
+    -> bool {
+  if (out == nullptr) {
+    return false;
+  }
+
+  out->setBandType(BandType::Curve);
+  out->setEncodingModality(EncodingModality::Quantized);
+  out->setWindowLength(0);
+  out->setLowerFrequencyLimit(0);
+  out->setUpperFrequencyLimit((int)curveFrequencyLimit);
+  Effect myEffect(0, 0, BaseSignal::Sine);
+  Keyframe myKeyframe;
+  for (std::pair<int16_t, double> p : points) {
+    std::optional<int> f;
+    myEffect.addKeyframe(static_cast<int>(S_2_MS * p.first / samplerate), p.second, f);
+  }
+  out->addEffect(myEffect);
+
+  return true;
+}
+
+
+[[nodiscard]] auto PcmEncoder::localExtrema(std::vector<double> signal, bool includeBorder)
+    -> std::vector<std::pair<int16_t, double>> {
+  std::vector<std::pair<int16_t, double>> extremaIndexes;
+  
   auto it = signal.begin();
   if (it == signal.end()) {
     return {};
   }
 
-  int16_t lastValue = *it;
+  double lastValue = *it;
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      std::pair<int16_t, int16_t> p1(0, signal[0]);
-      std::pair<int16_t, int16_t> p2(0, signal[0]);
+      std::pair<int16_t, double> p1(0, signal[0]);
+      std::pair<int16_t, double> p2(0, signal[0]);
       extremaIndexes.push_back(p1);
       extremaIndexes.push_back(p2);
       return extremaIndexes;
@@ -57,12 +122,12 @@ namespace haptics::encoder {
     return {};
   }
 
-  int16_t value = *it;
+  double value = *it;
   ++it;
   if (it == signal.end()) {
     if (includeBorder) {
-      std::pair<int16_t, int16_t> p1(0, signal[0]);
-      std::pair<int16_t, int16_t> p2(1, signal[1]);
+      std::pair<int16_t, double> p1(0, signal[0]);
+      std::pair<int16_t, double> p2(1, signal[1]);
       extremaIndexes.push_back(p1);
       extremaIndexes.push_back(p2);
       return extremaIndexes;
@@ -70,20 +135,19 @@ namespace haptics::encoder {
     return {};
   }
 
-  std::pair<int16_t, int16_t> p;
+  std::pair<int16_t, double> p;
   int16_t i = 1;
-  int16_t nextValue = 0;
+  double nextValue = 0;
   if (includeBorder) {
-    p = std::pair<int16_t, int16_t>(0, signal[0]);
+    p = std::pair<int16_t, double>(0, signal[0]);
     extremaIndexes.push_back(p);
   }
   do {
     nextValue = *it;
     if (((value >= lastValue && value >= nextValue) ||
          (value <= lastValue && value <= nextValue)) &&
-        (value != lastValue || value != nextValue)) {
-
-      p = std::pair<int16_t, int16_t>(i, value);
+        !(haptics::tools::is_eq(value, lastValue) && haptics::tools::is_eq(value, nextValue))) {
+      p = std::pair<int16_t, double>(i, value);
       extremaIndexes.push_back(p);
     }
 
@@ -91,10 +155,11 @@ namespace haptics::encoder {
     value = nextValue;
     ++it;
     i++;
-  } while (it != signal.end());
+  }
+  while (it != signal.end());
 
   if (includeBorder) {
-    p = std::pair<int16_t, int16_t>(i, value);
+    p = std::pair<int16_t, double>(i, value);
     extremaIndexes.push_back(p);
   }
 

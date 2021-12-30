@@ -32,7 +32,7 @@
  */
 
 #include <catch2/catch.hpp>
-#include "../include/AhapEncoder.h"
+#include <Encoder/include/AhapEncoder.h>
 
 using haptics::encoder::AhapEncoder;
 

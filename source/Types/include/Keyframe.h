@@ -41,6 +41,7 @@ namespace haptics::types {
 class Keyframe {
 public:
   explicit Keyframe() = default;
+
   explicit Keyframe(int newRelativePosition, std::optional<float> newAmplitudeModulation,
                     std::optional<int> newFrequencyModulation)
       : relativePosition(newRelativePosition)
@@ -49,10 +50,10 @@ public:
 
   [[nodiscard]] auto getRelativePosition() const -> int;
   auto setRelativePosition(int newRelativePosition) -> void;
-  [[nodiscard]] auto getAmplitudeModulation() const -> float;
-  auto setAmplitudeModulation(float newAmplitudeModulation) -> void;
-  [[nodiscard]] auto getFrequencyModulation() const -> int;
-  auto setFrequencyModulation(int newFrequencyModulation) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> std::optional<float>;
+  auto setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
+  auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
 private:
   int relativePosition = 0;

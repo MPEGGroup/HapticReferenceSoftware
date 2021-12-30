@@ -36,8 +36,8 @@
 
 namespace haptics::encoder {
 
-auto IvsEncoder::encode(const std::string &filename) -> int {
-  if (filename.empty()) {
+auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> int {
+  if (filename.empty() || out.getTracksSize() > 1) {
     return EXIT_FAILURE;
   }
 
@@ -49,6 +49,10 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
 
   std::string date = IvsEncoder::getLastModified(&doc);
   haptics::types::Track myTrack(0, date, 1, 1, 0);
+  if (out.getTracksSize() == 0) {
+    out.addTrack(myTrack);
+  }
+  myTrack = out.getTrackAt(0);
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = IvsEncoder::getBasisEffects(&doc);
   pugi::xml_node basisEffect = {};
@@ -73,7 +77,7 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
       myTrack.addBand(*(new haptics::types::Band(
           haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,
           IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY)));
-      myBand = &myTrack.getBandAt(myTrack.getBandsSize() - 1);
+      myBand = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
     }
     myBand->addEffect(myEffect);
   }
@@ -113,35 +117,7 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
     }
   }
 
-  /////////////////////////////////
-  /////////////////////////////////
-  for (int i = 0; i < myTrack.getBandsSize(); i++) {
-    haptics::types::Band b = myTrack.getBandAt(i);
-    std::cout << "BAND " << i << std::endl;
-    std::cout << "\tband type=" << b.getBandType() << std::endl;
-    std::cout << "\tencodin modality=" << b.getEncodingModality() << std::endl;
-    std::cout << "\tlower=" << b.getLowerFrequencyLimit() << std::endl;
-    std::cout << "\tupper=" << b.getUpperFrequencyLimit() << std::endl;
-    std::cout << "\teffects=" << std::endl;
-    for (int j = 0; j < b.getEffectsSize(); j++) {
-      haptics::types::Effect e = b.getEffectAt(j);
-      std::cout << "\t\tEFFECT " << j << std::endl;
-      std::cout << "\t\t\tbase signal=" << e.getBaseSignal() << std::endl;
-      std::cout << "\t\t\tphase=" << e.getPhase() << std::endl;
-      std::cout << "\t\t\tposition=" << e.getPosition() << std::endl;
-      std::cout << "\t\t\tkeyframes=" << std::endl;
-      for (int k = 0; k < e.getKeyframesSize(); k++) {
-        haptics::types::Keyframe kf = e.getKeyframeAt(k);
-        std::cout << "\t\t\t\tKEYFRAME " << k << std::endl;
-        std::cout << "\t\t\t\t\tposition=" << kf.getRelativePosition() << std::endl;
-        std::cout << "\t\t\t\t\tamplitude=" << kf.getAmplitudeModulation() << std::endl;
-        std::cout << "\t\t\t\t\tfrequency=" << kf.getFrequencyModulation() << std::endl;
-      }
-    }
-  }
-  /////////////////////////////////
-  /////////////////////////////////
-
+  out.replaceTrackAt(0, myTrack);
   return EXIT_SUCCESS;
 }
 
@@ -360,7 +336,7 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
   return 0;
 }
 [[nodiscard]] auto IvsEncoder::floatToInt(const int f) -> int {
-  
+
   if (f < 0) {
     int res = (f + MAX_INT) / MAX_FREQUENCY;
     return res;

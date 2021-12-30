@@ -1,4 +1,4 @@
-project(RM0_Decoder)
+project(Decoder)
 
-add_executable(RM0_Decoder src/main.cpp)
-target_link_libraries(RM0_Decoder tools)
+add_executable(Decoder src/main.cpp)
+target_link_libraries(Decoder tools)

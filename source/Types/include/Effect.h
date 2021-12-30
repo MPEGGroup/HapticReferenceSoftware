@@ -41,12 +41,12 @@ using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum BaseSignal {
+enum class BaseSignal {
   Sine = 0,
   Square = Sine + 1,
   Triangle = Square + 1,
   SawToothUp = Triangle + 1,
-  SawToothDown = SawToothUp + 1,
+  SawToothDown = SawToothUp + 1
 };
 
 class Effect {
@@ -67,7 +67,10 @@ public:
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   auto getKeyframesSize() -> int;
   auto getKeyframeAt(int index) -> Keyframe&;
-  auto addKeyframe(Keyframe& newKeyframe) -> void;
+  auto addKeyframe(Keyframe &newKeyframe) -> void;
+  auto addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void;
+  auto addAmplitudeAt(float amplitude, int position) -> bool;
+  auto addFrequencyAt(int frequency, int position) -> bool;
 
 private:
   int position = 0;
@@ -76,4 +79,5 @@ private:
   BaseSignal baseSignal = BaseSignal::Sine;
 };
 } // namespace haptics::types
+
 #endif //EFFECT_H
