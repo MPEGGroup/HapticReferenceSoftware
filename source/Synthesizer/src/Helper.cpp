@@ -79,19 +79,14 @@ namespace haptics::synthesizer {
       effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1);
   switch (bandType) {
   case types::BandType::Transient:
-    length += lastKeyframe.getRelativePosition();
-    break;
   case types::BandType::Curve:
-    length += lastKeyframe.getRelativePosition();
-    break;
+    return length + lastKeyframe.getRelativePosition();
   case types::BandType::Wave:
     switch (encodingModality) {
     case types::EncodingModality::Quantized:
-      length += effect.getKeyframesSize() * windowLength;
-      break;
+      return length + static_cast<int>(effect.getKeyframesSize()) * windowLength;
     case types::EncodingModality::Vectorial:
-      length += lastKeyframe.getRelativePosition();
-      break;
+      return length + lastKeyframe.getRelativePosition();
     default:
       break;
     }
@@ -101,6 +96,7 @@ namespace haptics::synthesizer {
   return length;
 }
 
+// NOLINTNEXTLINE(misc-unused-parameters)
 [[nodiscard]] auto Helper::playFile(types::Haptics &haptic, const double timeLength) -> bool {
   return false;
 }
