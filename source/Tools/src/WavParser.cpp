@@ -47,6 +47,7 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
 
   auto samplesPerChannel = (size_t)wav.totalPCMFrameCount;
   numChannels = (size_t)wav.channels;
+
   numSamples = samplesPerChannel * numChannels;
   sampleRate = static_cast<int>(wav.sampleRate);
   buffer.clear();
@@ -54,16 +55,22 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
   std::vector<float> b;
   b.resize(numSamples);
   drwav_read_pcm_frames_f32(&wav, samplesPerChannel, b.data());
+  
+
+
+
   for (size_t c = 0; c < numChannels; c++) {
     std::vector<double> b_double;
     b_double.reserve(samplesPerChannel);
-
-    for (auto it = b.cbegin() + (long)c; it < b.cend(); it += (long)numChannels) {
-      b_double.push_back((double)*it);
-    }
-
     buffer.push_back(b_double);
   }
+
+  for (auto it = b.begin(); it < b.end(); it++) {
+    auto diff = it - b.begin();
+    auto c = diff % (long)numChannels;
+    buffer.at(c).push_back(*it);
+  }
+
   return true;
 }
 
