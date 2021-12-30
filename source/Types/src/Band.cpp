@@ -75,8 +75,8 @@ auto Band::setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void {
   lowerFrequencyLimit = newLowerFrequencyLimit;
 }
 
-auto Band::getEffectsSize() -> int {
-  return static_cast<int>(effects.size());
+auto Band::getEffectsSize() -> size_t {
+  return effects.size();
 }
 
 auto Band::getEffectAt(int index) -> haptics::types::Effect& {
@@ -97,10 +97,10 @@ auto Band::addEffect(Effect &newEffect) -> void {
   const int position = effect.getPosition();
   int length = 0;
   if (encodingModality == EncodingModality::Quantized) {
-    length = effect.getKeyframesSize() * windowLength;
+    length = static_cast<int>(effect.getKeyframesSize()) * windowLength;
   } else {
     length =
-        effect.getKeyframeAt(effect.getKeyframesSize() - 1).getRelativePosition();
+        effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1).getRelativePosition();
   }
 
   return (position <= start && position + length >= start) ||

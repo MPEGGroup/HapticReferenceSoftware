@@ -65,7 +65,7 @@ public:
   auto setPhase(float newPhase) -> void;
   [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
-  auto getKeyframesSize() -> int;
+  auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe&;
   auto addKeyframe(Keyframe &newKeyframe) -> void;
   auto addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void;

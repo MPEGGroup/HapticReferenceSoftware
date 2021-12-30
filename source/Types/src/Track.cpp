@@ -87,7 +87,6 @@ auto Track::addVertex(int& newVertice) -> void {
   vertices.push_back(newVertice);
 }
 
-
 auto Track::getBandsSize() -> size_t {
   return bands.size();
 }

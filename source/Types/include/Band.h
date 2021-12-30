@@ -72,7 +72,7 @@ public:
   auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
   [[nodiscard]] auto getLowerFrequencyLimit() const -> int;
   auto setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void;
-  auto getEffectsSize() -> int;
+  auto getEffectsSize() -> size_t;
   auto getEffectAt(int index) -> haptics::types::Effect&;
   auto addEffect(haptics::types::Effect &newEffect) -> void;
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop)

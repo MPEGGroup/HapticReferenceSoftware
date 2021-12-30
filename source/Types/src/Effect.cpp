@@ -59,8 +59,8 @@ auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
   baseSignal = newBaseSignal;
 }
 
-auto Effect::getKeyframesSize() -> int {
-  return static_cast<int>(keyframes.size());
+auto Effect::getKeyframesSize() -> size_t {
+  return keyframes.size();
 }
 
 auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
