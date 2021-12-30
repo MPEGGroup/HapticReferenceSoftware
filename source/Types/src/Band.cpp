@@ -84,7 +84,12 @@ auto Band::getEffectAt(int index) -> haptics::types::Effect& {
 }
 
 auto Band::addEffect(Effect &newEffect) -> void {
-    effects.push_back(newEffect);
+  auto it = std::find_if(effects.begin(), effects.end(), [newEffect](Effect &e) {
+    return e.getPosition() > newEffect.getPosition();
+  });
+
+  effects.insert(it, newEffect);
+  //effects.push_back(newEffect);
 }
 
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
