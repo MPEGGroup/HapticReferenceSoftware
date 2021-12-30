@@ -112,7 +112,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
   auto Band::Evaluate(double position) -> double {
 
     //OUT OUF BOUND CHECK
-    if (position >
+    if (effects.empty() || position >
         effects.back().getPosition() + effects.back()
                                            .getKeyframeAt(static_cast<int>(effects.back().getKeyframesSize()) - 1)
                                            .getRelativePosition() || position < 0) {

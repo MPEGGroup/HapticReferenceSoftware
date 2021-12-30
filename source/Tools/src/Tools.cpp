@@ -43,10 +43,6 @@ namespace haptics::tools {
       return end_f;
     }
 
-    if (position < start_t && position > end_t) {
-      return EXIT_FAILURE;
-    }
-
     return position * (end_f - start_f) / (end_t - start_t) + start_f;
   }
 

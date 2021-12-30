@@ -190,8 +190,8 @@ namespace haptics::types {
       }
 
       // Modulation
-      double f0 = k_f_before->getFrequencyModulation().value();
-      double f1 = k_f_after->getFrequencyModulation().value();
+      double f0 = std::max(k_f_before->getFrequencyModulation().value(),0);
+      double f1 = std::max(k_f_after->getFrequencyModulation().value(),0);
       double t = MS_2_S * relativePosition;
       double DeltaT = MS_2_S * (static_cast<double>(k_f_after->getRelativePosition()) -
                              static_cast<double>(k_f_before->getRelativePosition()));
