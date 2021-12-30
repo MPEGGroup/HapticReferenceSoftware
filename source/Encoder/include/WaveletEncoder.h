@@ -39,6 +39,9 @@
 
 #include "PsychohapticModel/include/PsychohapticModel.h"
 #include "FilterBank/include/Wavelet.h"
+#include "Types/include/Band.h"
+#include "Types/include/Effect.h"
+#include "Types/include/Keyframe.h"
 
 constexpr size_t WAVMAXLENGTH = 8;
 constexpr int MAXBITS = 15;
@@ -58,6 +61,7 @@ class WaveletEncoder {
 public:
     WaveletEncoder(int bl_new, int fs_new);
 
+    void encodeSignal(std::vector<double> &sig_time, int bitbudget);
     auto encodeBlock(std::vector<double> &block_time, int bitbudget) -> std::vector<double>;
     static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
                                           std::vector<unsigned char> &bitwavmax);

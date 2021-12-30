@@ -38,6 +38,10 @@ namespace haptics::encoder {
 using haptics::tools::PsychohapticModel;
 using haptics::tools::modelResult;
 using haptics::filterbank::Wavelet;
+using haptics::types::Band;
+using haptics::types::BandType;
+using haptics::types::EncodingModality;
+using haptics::types::Effect;
 
 WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
     : pm(bl_new, fs_new), bl(bl_new), fs(fs_new), dwtlevel((int)log2((double)bl / 4)) {
@@ -54,6 +58,38 @@ WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
         book[i] = book[i-1] << 1;
         book_cumulative[i+1] = book_cumulative[i] << 1;
     }
+
+}
+
+
+void WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget) {
+
+  int numBlocks = (int)ceil((double)sig_time.size() / (double)bl);
+  Band band(BandType::Wave, EncodingModality::Quantized, bl, 0, fs);
+
+  int pos_effect = 0;
+
+  for (int b = 0; b < numBlocks; b++) {
+    Effect effect;
+    auto start = sig_time.begin() + (long long)b * bl;
+    auto end = start + bl;
+
+    std::vector<double> block_time(bl, 0);
+    if (end - sig_time.begin() > sig_time.size()) {
+      end = sig_time.end();
+    }
+    std::copy(start, end, block_time.begin());
+    std::vector<double> block_quant = encodeBlock(block_time, bitbudget);
+    int pos = 0;
+    for (auto v : block_quant) {
+      Keyframe keyframe(pos, (float)v, 0);
+      effect.addKeyframe(keyframe);
+      pos++;
+    }
+    effect.setPosition(pos_effect);
+    band.addEffect(effect);
+    pos_effect += bl;
+  }
 
 }
 
