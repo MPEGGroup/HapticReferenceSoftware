@@ -40,6 +40,7 @@
 #include <Types/include/Haptics.h>
 #include <Types/include/Perception.h>
 #include <functional>
+#include <filesystem>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
@@ -52,30 +53,30 @@ using haptics::types::Perception;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
-    const auto args = std::vector<const char *>(argv, argv + argc);
-    InputParser inputParser(args);
-    if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-        InputParser::help(args[0]);
-        return EXIT_SUCCESS;
-    }
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
+  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
+    InputParser::help(args[0]);
+    return EXIT_SUCCESS;
+  }
 
   std::string filename = inputParser.getCmdOption("-f");
-  //std::string filename = "D:/Gits/rm0/ReferenceFiles/test.ahap";
   if (filename.empty()) {
     filename = inputParser.getCmdOption("--file");
   }
-  if (filename.empty()) {
+  if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
     InputParser::help(args[0]);
     return EXIT_FAILURE;
   }
 
-    std::string output = inputParser.getCmdOption("-o");
-    if (output.empty()) {
-        output = inputParser.getCmdOption("--output");
-    }
-    if (!output.empty()) {
-        std::cout << "The generated file will be : " << output << "\n";
-    }
+  std::string output = inputParser.getCmdOption("-o");
+  if (output.empty()) {
+    output = inputParser.getCmdOption("--output");
+  }
+  if (output.empty()) {
+    output = "out.impg";
+  }
+  std::cout << "The generated file will be : " << output << "\n";
 
   Haptics hapticFile;
   Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
@@ -94,10 +95,17 @@ auto main(int argc, char *argv[]) -> int {
     if (ohmData.getHapticElementMetadataSize() != hapticFile.getPerceptionsSize()) {
       codeExit = EXIT_FAILURE;
     }
+    std::filesystem::path folderPath = std::filesystem::path(filename);
+    folderPath = folderPath.parent_path();
     for (int i = 0; i < ohmData.getHapticElementMetadataSize() && codeExit == EXIT_SUCCESS; i++) {
       OHMData::HapticElementMetadata metadata = ohmData.getHapticElementMetadataAt(i);
 
-      filename = metadata.elementFilename;
+      filename = (folderPath / metadata.elementFilename).string();
+      if (!std::filesystem::is_regular_file(filename)) {
+        codeExit = EXIT_FAILURE;
+        break;
+      }
+
       ext = InputParser::getFileExt(filename);
       std::function<int(std::string &, Perception &)> encodingFunction =
           // NOLINTNEXTLINE(misc-unused-parameters)
@@ -117,6 +125,9 @@ auto main(int argc, char *argv[]) -> int {
 
         myPerception = hapticFile.getPerceptionAt(i);
         codeExit = encodingFunction(filename, myPerception);
+        if (codeExit == EXIT_SUCCESS) {
+          hapticFile.replacePerceptionAt(i, myPerception);
+        }
       }
     }
   } else if (ext == "json" || ext == "ahap") {
@@ -134,11 +145,11 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   }
   else {
-    InputParser::help(args[0]);
-    return EXIT_FAILURE;
+    codeExit = EXIT_FAILURE;
   }
 
   if (codeExit == EXIT_FAILURE) {
+    InputParser::help(args[0]);
     return codeExit;
   }
 

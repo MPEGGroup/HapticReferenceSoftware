@@ -72,9 +72,10 @@ public:
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
   auto getTracksSize() -> size_t;
   auto getTrackAt(int index) -> Track &;
-  auto addTrack(haptics::types::Track &newBand) -> void;
+  auto addTrack(haptics::types::Track &newTrack) -> void;
   auto getReferenceDevicesSize() -> size_t;
   auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
+  auto replaceTrackAt(int index, Track &newTrack) -> bool;
   auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
 
 private:
