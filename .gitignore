@@ -407,3 +407,6 @@ FodyWeavers.xsd
 
 # Mac-specific files
 .DS_Store
+
+
+CMakeSettings.json
