@@ -45,7 +45,7 @@ auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
 
 [[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> std::optional<float> {
   return amplitudeModulation;
-}
+  }
 
 auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void {
   amplitudeModulation = newAmplitudeModulation;
@@ -53,7 +53,7 @@ auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulatio
 
 [[nodiscard]] auto Keyframe::getFrequencyModulation() const -> std::optional<int> {
   return frequencyModulation;
-}
+  }
 
 auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void {
   frequencyModulation = newFrequencyModulation;

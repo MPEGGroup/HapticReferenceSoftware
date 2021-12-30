@@ -30,6 +30,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <Types/include/Effect.h>
 
 namespace haptics::types {
@@ -68,6 +69,61 @@ auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
 
 auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
+}
+
+auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
+
+  bool ret = false;
+  
+  auto kit =
+      std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
+        return k.getRelativePosition() >= position;
+      });
+
+  if (kit == keyframes.begin()) {
+    return ret;
+  }
+
+  if (kit == keyframes.end()) {
+    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
+    keyframes.push_back(kf);
+    return true;
+  }
+
+  if ((kit)->getRelativePosition() == position && !(kit)->getAmplitudeModulation().has_value()) {
+    (kit)->setAmplitudeModulation(amplitude);
+  } else {
+    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
+    keyframes.insert(kit+1, kf);
+  }
+
+  return true;
+}
+
+auto Effect::addFrequencyAt(int frequency, int position) -> bool {
+  auto kit =
+      std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
+        return k.getRelativePosition() >= position;
+      });
+
+  if (kit == keyframes.begin()) {
+    return false;
+  }
+
+  if (kit == keyframes.end()) {
+    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
+    keyframes.push_back(kf);
+    return true;
+  }
+
+  if (kit->getRelativePosition() == position && !kit->getFrequencyModulation().has_value()) {
+    kit->setFrequencyModulation(frequency);
+  } else {
+    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
+    keyframes.insert(kit + 1, kf);
+  }
+
+  return true;
 }
 
 auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {

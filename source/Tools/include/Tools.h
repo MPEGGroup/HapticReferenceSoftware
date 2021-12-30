@@ -31,50 +31,27 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef TOOLS_H
+#define TOOLS_H
+
+constexpr auto S_2_MS = 1000.0;
+constexpr auto MS_2_S = .001;
+
 #include <iostream>
 
 namespace haptics::tools {
 
-  const double S_2_MS = 1000.0;
-  const double MS_2_S = .001;
+	[[nodiscard]] extern auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b,
+                                                int x) -> double;
 
-	[[nodiscard]] auto linearInterpolation(std::pair<int,double> a, std::pair<int,double> b, int x) -> double {
+  [[nodiscard]] extern auto chirpInterpolation(int start_time, int end_time,
+                                                     double start_frequency, double end_frequency,
+                                                     int position) -> double;
 
-    int start = a.first;
-    int end = b.first;
-    double start_a = a.second;
-    double end_a = b.second;
+  [[nodiscard]] extern auto genericNormalization(double start_in, double end_in, double start_out,
+                                                 double end_out, double x_in) -> double;
 
-    if (x < start || x > end) {
-      return EXIT_FAILURE;
-    }
+  [[nodiscard]] extern auto is_eq(double a, double b) -> bool;
 
-    if (end == start) {
-      return (start_a + end_a) / 2.0;
-    }
-
-    if (start >= end) {
-      std::swap(start, end);
-      std::swap(start_a, end_a);
-    }
-
-    return (start_a * (end - x) + end_a * (x - start)) / (end - start);
-  }
-
-
-  [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out, double end_out, double x_in) -> double {
-
-    double x_out = -1;
-
-    if (end_in - start_in != 0) {
-      x_out = ((end_out - start_out) / (end_in - start_in)) * (x_in - end_in) + end_out;
-    }
-
-    return x_out;
-  }
-
-  [[nodiscard]] auto is_eq(double a, double b) -> bool {
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    return std::fabs(a - b) <= std::numeric_limits<double>::epsilon() * 100;
-  }
-  }
+}
+#endif
