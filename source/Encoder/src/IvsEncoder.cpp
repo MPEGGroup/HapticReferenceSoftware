@@ -69,10 +69,11 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       continue;
     }
 
-
-    myBand = myTrack.findWaveBandAvailable(
+    myBand = myTrack.findBandAvailable(
         myEffect.getPosition(),
-        myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1).getRelativePosition());
+        myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
+            .getRelativePosition(),
+        types::BandType::Wave, types::EncodingModality::Vectorial);
     if (myBand == nullptr) {
       myTrack.addBand(*(new haptics::types::Band(
           haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,

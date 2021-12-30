@@ -50,7 +50,9 @@ TEST_CASE("Track::findWaveBandAvailable without band", "[findWaveBandAvailable][
 
   const int testingStart = 42;
   const int testingLength = 24;
-  haptics::types::Band *res = t.findWaveBandAvailable(testingStart, testingLength);
+  haptics::types::Band *res =
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
+                          haptics::types::EncodingModality::Vectorial);
 
   CHECK(res == nullptr);
 }
@@ -75,7 +77,9 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
 
   const int testingStart = 42;
   const int testingLength = 24;
-  haptics::types::Band *res = t.findWaveBandAvailable(testingStart, testingLength);
+  haptics::types::Band *res =
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
+                          haptics::types::EncodingModality::Vectorial);
 
   CHECK(res == nullptr);
 }
@@ -92,7 +96,9 @@ TEST_CASE("Track::findWaveBandAvailable band available but with types",
 
   const int testingStart = 42;
   const int testingLength = 24;
-  haptics::types::Band *res = t.findWaveBandAvailable(testingStart, testingLength);
+  haptics::types::Band *res =
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
+                          haptics::types::EncodingModality::Vectorial);
 
   CHECK(res == nullptr);
 }
@@ -105,7 +111,9 @@ TEST_CASE("Track::findWaveBandAvailable empty band available", "[findWaveBandAva
 
   const int testingStart = 42;
   const int testingLength = 24;
-  haptics::types::Band *res = t.findWaveBandAvailable(testingStart, testingLength);
+  haptics::types::Band *res =
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
+                          haptics::types::EncodingModality::Vectorial);
 
   REQUIRE(res != nullptr);
   CHECK(res == &t.getBandAt(0));
@@ -156,7 +164,9 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
 
   const int testingPosition = 100;
   const int testingDuration = 24;
-  haptics::types::Band *res = t.findWaveBandAvailable(testingPosition, testingDuration);
+  haptics::types::Band *res =
+      t.findBandAvailable(testingPosition, testingDuration, haptics::types::BandType::Wave,
+                          haptics::types::EncodingModality::Vectorial);
 
   REQUIRE(res != nullptr);
   CHECK(res == &t.getBandAt(1));

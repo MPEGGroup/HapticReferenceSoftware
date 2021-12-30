@@ -708,6 +708,7 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   const char *effectWaveform = "sawtooth-down";
   const int effectPeriod = 80;
   const float expectedAmplitude = .5;
+  const int expectedFrequency = 12;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -733,13 +734,13 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == effectDuration);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
 
 // NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
@@ -755,6 +756,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   const int effectAttackLevel = 1000;
   const float expectedAmplitude = .75F;
   const float expectedAttackAmplitude = .1F;
+  const int expectedFrequency = 12;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -782,18 +784,18 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAttackAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAttackAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == effectAttackTime);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(2);
   CHECK(k.getRelativePosition() == effectDuration);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
 
 // NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
@@ -809,6 +811,7 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   const int effectFadeLevel = 10000;
   const float expectedAmplitude = .25F;
   const float expectedFadeAmplitude = 1.0F;
+  const int expectedFrequency = 12;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -836,18 +839,18 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(2);
   CHECK(k.getRelativePosition() == effectDuration);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedFadeAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedFadeAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
 
 // NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
@@ -866,6 +869,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][wit
   const float expectedAmplitude = .05F;
   const float expectedAttackAmplitude = .1F;
   const float expectedFadeAmplitude = 1.0F;
+  const int expectedFrequency = 12;
 
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
@@ -895,21 +899,21 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade", "[getWaveform][wit
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
   CHECK(k.getRelativePosition() == 0);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAttackAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAttackAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
   CHECK(k.getRelativePosition() == effectAttackTime);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(2);
   CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(3);
   CHECK(k.getRelativePosition() == effectDuration);
-  CHECK(k.getAmplitudeModulation() == Approx(expectedFadeAmplitude));
-  CHECK(k.getFrequencyModulation() == effectPeriod);
+  CHECK(k.getAmplitudeModulation().value() == Approx(expectedFadeAmplitude));
+  CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
