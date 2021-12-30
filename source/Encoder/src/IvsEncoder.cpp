@@ -154,12 +154,14 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
 
   int duration = IvsEncoder::getDuration(basisEffect, launchEvent);
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
-  int period = IvsEncoder::getPeriod(basisEffect, launchEvent);
+  int periodLength = IvsEncoder::getPeriod(basisEffect, launchEvent);
+  int freq = static_cast<int>(1.0/(static_cast<float>(periodLength) / MAX_FREQUENCY));
+
   std::vector<haptics::types::Keyframe *> keyframeList = std::vector<haptics::types::Keyframe *>{
       new haptics::types::Keyframe(
-          0, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period),
+          0, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq),
       new haptics::types::Keyframe(
-          duration, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period)
+          duration, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)
   };
 
   int fadeTime = IvsEncoder::getFadeTime(basisEffect);
@@ -167,7 +169,7 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     keyframeList[1]->setRelativePosition(duration - fadeTime);
     keyframeList.push_back(&*(new haptics::types::Keyframe(
-        duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period)));
+        duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }
 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
@@ -175,7 +177,7 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
     keyframeList[0]->setRelativePosition(attackTime);
     out->addKeyframe(*(new haptics::types::Keyframe(
-        0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, period)));
+        0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }
 
   for (haptics::types::Keyframe *kf : keyframeList) {
@@ -287,13 +289,14 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
                                          const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute periodAttribute = launchEvent->attribute("period-override");
   const pugi::char_t *n = periodAttribute.name();
+
   if (!std::string(periodAttribute.name()).empty()) {
-    return periodAttribute.as_int();
+    return floatToInt(periodAttribute.as_int());
   }
 
   periodAttribute = basisEffect->attribute("period");
   if (!std::string(periodAttribute.name()).empty()) {
-    return periodAttribute.as_int();
+    return floatToInt(periodAttribute.as_int());
   }
 
   return -1;
@@ -355,6 +358,15 @@ auto IvsEncoder::encode(const std::string &filename) -> int {
   }
 
   return 0;
+}
+[[nodiscard]] auto IvsEncoder::floatToInt(const int f) -> int {
+  
+  if (f < 0) {
+    int res = (f + MAX_INT) / MAX_FREQUENCY;
+    return res;
+  }
+
+  return f;
 }
 
 } // namespace haptics::encoder
