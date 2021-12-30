@@ -231,7 +231,14 @@ namespace haptics::types {
   auto Effect::EvaluateTransient(double position) -> double {
     double res = 0;
 
-    //?
+    //find first KF before
+    //check if in 22ms range
+    //if in range
+    // * Compute a 22ms long 90hz sine from the keyframe and get the amplitude from the KF amplitude value
+    //if not
+    // * return 0 (or res)
+
+    // TODO : overlapping transients (not sure if an issue for the input files)
 
     return res;
   }
