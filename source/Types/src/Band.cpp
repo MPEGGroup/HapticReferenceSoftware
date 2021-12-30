@@ -109,7 +109,7 @@ namespace haptics::types {
     //OUT OUF BOUND CHECK
     if (position >
         effects.back().getPosition() + effects.back()
-                                           .getKeyframeAt(effects.back().getKeyframesSize() - 1)
+                                           .getKeyframeAt(static_cast<int>(effects.back().getKeyframesSize()) - 1)
                                            .getRelativePosition() || position < 0) {
       return -1;
     }

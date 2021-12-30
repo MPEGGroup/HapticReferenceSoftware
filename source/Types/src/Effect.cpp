@@ -193,9 +193,11 @@ namespace haptics::types {
       // Modulation
       double f0 = k_f_before->getFrequencyModulation().value();
       double f1 = k_f_after->getFrequencyModulation().value();
-      double t = relativePosition / 1000.0;
-      double DeltaT = (static_cast<double>(k_f_after->getRelativePosition()) - static_cast<double>(k_f_before->getRelativePosition())) / 1000.0;
+      double t = MS_2_S * relativePosition;
+      double DeltaT = MS_2_S * (static_cast<double>(k_f_after->getRelativePosition()) -
+                             static_cast<double>(k_f_before->getRelativePosition()));
 
+      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
       freq_modulation = (M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
       //TODO CHANGE BASE SIGNAL
       freq_modulation = std::sin(freq_modulation);
@@ -219,13 +221,14 @@ namespace haptics::types {
       }
     }
 
-    double t = relativePosition / 1000.0;
+    double t = MS_2_S * relativePosition;
     // TODO PHASE MATCHING
     res = std::sin(t * k_before->getFrequencyModulation().value() * M_PI) * k_before->getAmplitudeModulation().value();
 
     return res;
   }
 
+  // NOLINTNEXTLINE(misc-unused-parameters,readability-convert-member-functions-to-static)
   auto Effect::EvaluateTransient(int position) -> double {
     double res = 0;
 
@@ -253,27 +256,29 @@ namespace haptics::types {
         }
       }
 
-      double x0 = k_before->getRelativePosition() / 1000.0;
+      double x0 = MS_2_S * k_before->getRelativePosition();
       double f0 = k_before->getAmplitudeModulation().value();
       double t0 = 0;
-      double x1 = k_after->getRelativePosition() / 1000.0;
+      double x1 = MS_2_S * k_after->getRelativePosition();
       double f1 = k_after->getAmplitudeModulation().value();
       double t1 = 0;
 
-      double t = position / 1000.0;
+      double t = MS_2_S * position;
 
-      double c2;
-      double c3;
-      double df;
-      double h;
+      double c2 = 0;
+      double c3 = 0;
+      double df = 0;
+      double h = 0;
       h = x1 - x0;
       df = (f1 - f0) / h;
 
+      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
       c2 = -(2.0 * t0 - 3.0 * df + t1) / h;
+      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
       c3 = (t0 - 2.0 * df + t1) / h / h;
 
-      float result = f0 + (t - x0) * (t0 + (t - x0) * (c2 + (t - x0) * c3));
-      return std::max(std::min(1.0f, result), -1.0f);
+      auto result = static_cast<float>(f0 + (t - x0) * (t0 + (t - x0) * (c2 + (t - x0) * c3)));
+      return std::max(std::min(1.0F, result), -1.0F);
     }
 
     return res;

@@ -31,14 +31,19 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <Synthesizer/include/Helper.h>
 #include <Tools/include/InputParser.h>
 #include <Types/include/Haptics.h>
 #include <Types/include/IOJson.h>
 #include <filesystem>
 
+using haptics::synthesizer::Helper;
 using haptics::encoder::IOJson;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
+
+
+const int DEFAULT_FS = 8000;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
@@ -67,6 +72,28 @@ auto main(int argc, char *argv[]) -> int {
   }
   std::cout << "The generated file will be : " << output << "\n";
 
+  std::string fsStr = inputParser.getCmdOption("-fs");
+  if (fsStr.empty()) {
+    fsStr = inputParser.getCmdOption("--sampling_frequency");
+  }
+  int fs = 0;
+  if (fsStr.empty()) {
+    fs = DEFAULT_FS;
+  } else {
+    fs = std::stoi(fsStr);
+    if (fs <= 0) {
+      InputParser::help(args[0]);
+      return EXIT_FAILURE;
+    }
+  }
+  std::cout << "The sampling frequency used will be : " << fs << "\n";
+
   Haptics hapticFile = IOJson::loadFile(filename);
+  const double timeLength = Helper::getTimeLength(hapticFile);
+
+  if (!Helper::playFile(hapticFile, timeLength)) {
+    return EXIT_SUCCESS;
+  }
+
   return EXIT_SUCCESS;
 }
