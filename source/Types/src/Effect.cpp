@@ -35,6 +35,7 @@
 #include <Tools/include/Tools.h>
 #include <cmath>
 #include <algorithm>
+#include <functional>
 
 namespace haptics::types {
 
@@ -229,18 +230,27 @@ namespace haptics::types {
     return res;
   }
 
-  // NOLINTNEXTLINE(misc-unused-parameters,readability-convert-member-functions-to-static)
-  auto Effect::EvaluateTransient(double position) -> double {
+  auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
+    const double relativePosition = position - this->getPosition();
+
+    auto checkingFunction = [&](Keyframe kf) {
+      return kf.getRelativePosition() <= relativePosition &&
+             kf.getRelativePosition() + transientDuration >= relativePosition;
+    };
+    auto it = std::find_if(keyframes.rbegin(), keyframes.rend(), checkingFunction);
+
     double res = 0;
+    while (it != keyframes.rend() && checkingFunction(*it)) {
+      if (!it->getAmplitudeModulation().has_value()) {
+        continue;
+      }
 
-    //find first KF before
-    //check if in 22ms range
-    //if in range
-    // * Compute a 22ms long 90hz sine from the keyframe and get the amplitude from the KF amplitude value
-    //if not
-    // * return 0 (or res)
-
-    // TODO : overlapping transients (not sure if an issue for the input files)
+      res +=
+          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+          std::sin(4 * M_PI * (relativePosition - it->getRelativePosition()) / transientDuration) *
+          it->getAmplitudeModulation().value();
+      it++;
+    }
 
     return res;
   }

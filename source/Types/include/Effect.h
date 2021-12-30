@@ -74,7 +74,7 @@ public:
   //Use Absolute position not relative
   auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluateQuantized(double position) -> double;
-  auto EvaluateTransient(double position) -> double;
+  auto EvaluateTransient(double position, double transientDuration) -> double;
   auto EvaluateKeyframes(double position) -> double;
 
 private:

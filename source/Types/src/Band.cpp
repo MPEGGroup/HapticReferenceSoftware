@@ -145,10 +145,18 @@ auto Band::addEffect(Effect &newEffect) -> void {
         return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
       }
       break;
-    case BandType::Transient:
-      return effect->EvaluateTransient(position);
+    case BandType::Transient: {
+      double res = 0;
+      for (Effect e : effects) {
+        if (e.getPosition() <= position && position <= e.getPosition() + TRANSIENT_DURATION_MS) {
+          res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
+        }
+      }
+      return res;
       break;
+    }
     default:
+      return 0;
       break;
     }
 

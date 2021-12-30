@@ -80,6 +80,7 @@ public:
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
 
 private:
+  static constexpr double TRANSIENT_DURATION_MS = 22;
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit) -> double;
 
