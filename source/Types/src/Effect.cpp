@@ -145,16 +145,14 @@ namespace haptics::types {
 
     double relativePosition = position - this->position;
 
-    //res = linearAmplitudeModulation blabla
-    double amp_modulation = 0;
+    // IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
 
+    double amp_modulation = 0;
     //First KF AFTER
     auto k_a_after = std::find_if(keyframes.begin(), keyframes.end(),
                                       [relativePosition](haptics::types::Keyframe k) {
                                         return k.getAmplitudeModulation().has_value() && k.getRelativePosition() > relativePosition;
                                       });
-
-    //IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
     if (k_a_after < keyframes.end()) {
       // first KF before position
       auto k_a_before = keyframes.begin();
@@ -199,7 +197,7 @@ namespace haptics::types {
                              static_cast<double>(k_f_before->getRelativePosition()));
 
       // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      freq_modulation = (M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
+      freq_modulation = (2 * M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
       //TODO CHANGE BASE SIGNAL
       freq_modulation = std::sin(freq_modulation);
     }
@@ -224,7 +222,7 @@ namespace haptics::types {
 
     double t = MS_2_S * relativePosition;
     // TODO PHASE MATCHING
-    res = std::sin(t * k_before->getFrequencyModulation().value() * M_PI) * k_before->getAmplitudeModulation().value();
+    res = std::sin(t * k_before->getFrequencyModulation().value() * 2 * M_PI) * k_before->getAmplitudeModulation().value();
 
     return res;
   }
