@@ -38,12 +38,12 @@
 #define M_PI 3.14159265359
 
 constexpr auto S_2_MS = 1000.0;
-constexpr auto MS_2_S = .001;
+constexpr auto MS_2_S = 0.001;
 
 namespace haptics::tools {
 
   [[nodiscard]] extern auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b,
-                                                int x) -> double;
+                                              double x) -> double;
 
   [[nodiscard]] extern auto chirpInterpolation(int start_time, int end_time,
                                                      double start_frequency, double end_frequency,

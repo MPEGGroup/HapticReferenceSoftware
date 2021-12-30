@@ -125,7 +125,7 @@ namespace haptics::types {
     return nullptr;
   }
 
-  auto Track::Evaluate(int position) -> double {
+  auto Track::Evaluate(double position) -> double {
 
     double res = 0;
 

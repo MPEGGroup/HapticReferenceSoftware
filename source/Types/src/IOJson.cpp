@@ -310,9 +310,9 @@ auto IOJson::loadKeyframes(const nlohmann::json& jsonKeyframes, types::Effect& e
     if (jsonKeyframe.contains("amplitude_modulation") && jsonKeyframe["amplitude_modulation"].is_number()) {
       amplitudeModulation = jsonKeyframe["amplitude_modulation"].get<float>();
     }
-    if (jsonKeyframe.contains("frequency_modulation") &&
-        jsonKeyframe["frequency_modulation"].is_number_integer()) {
-      frequencyModulation = jsonKeyframe["frequency_modulation"].get<int>();
+    if (jsonKeyframe.contains("frequencyModulation") &&
+        jsonKeyframe["frequencyModulation"].is_number_integer()) {
+      frequencyModulation = jsonKeyframe["frequencyModulation"].get<int>();
     }
     types::Keyframe keyframe(relativePosition, amplitudeModulation, frequencyModulation);
     effect.addKeyframe(keyframe);
@@ -420,7 +420,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
             jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
           }
           if (keyframe.getFrequencyModulation().has_value()) {
-            jsonKeyframe["frequencyModulation"] = keyframe.getFrequencyModulation().value();
+            jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
           }
           jsonKeyframes.push_back(jsonKeyframe);
         }

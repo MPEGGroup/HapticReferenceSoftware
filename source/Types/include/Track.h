@@ -70,7 +70,7 @@ public:
   auto getBandAt(int index) -> haptics::types::Band &;
   auto addBand(haptics::types::Band &newBand) -> void;
   auto findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band *;
-  auto Evaluate(int position) -> double;
+  auto Evaluate(double position) -> double;
 
 private:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start,

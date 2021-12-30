@@ -72,10 +72,10 @@ public:
   auto addAmplitudeAt(float amplitude, int position) -> bool;
   auto addFrequencyAt(int frequency, int position) -> bool;
   //Use Absolute position not relative
-  auto EvaluateVectorial(int position) -> double;
-  auto EvaluateQuantized(int position) -> double;
-  auto EvaluateTransient(int position) -> double;
-  auto EvaluateKeyframes(int position) -> double;
+  auto EvaluateVectorial(double position) -> double;
+  auto EvaluateQuantized(double position) -> double;
+  auto EvaluateTransient(double position) -> double;
+  auto EvaluateKeyframes(double position) -> double;
 
 private:
   int position = 0;

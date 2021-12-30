@@ -111,10 +111,7 @@ namespace haptics::synthesizer {
         double t = 0;
         std::vector<double> trackAmp;
         while (t < (timeLength * MS_2_S)) {
-          if (t >= (timeLength * MS_2_S) / 2) {
-            index = 2;
-          }
-          double amp = haptic.getPerceptionAt(i).getTrackAt(j).Evaluate(static_cast<int>(t * S_2_MS));
+          double amp = haptic.getPerceptionAt(i).getTrackAt(j).Evaluate(t * S_2_MS);
           trackAmp.push_back(amp);
           t += 1.0 / static_cast<double>(fs);
         }

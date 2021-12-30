@@ -104,7 +104,7 @@ namespace haptics::types {
            (position <= start && position + length >= stop);
   }
 
-  auto Band::Evaluate(int position) -> double {
+  auto Band::Evaluate(double position) -> double {
 
     //OUT OUF BOUND CHECK
     if (position >
@@ -118,12 +118,15 @@ namespace haptics::types {
       if (it->getPosition() <= position) {
         return EvaluationSwitch(position, &*it);
       }
+      if (it == effects.begin()) {
+        break;
+      }
     }
 
     return 0;
   }
 
-  auto Band::EvaluationSwitch(int position, haptics::types::Effect * effect) -> double {
+  auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect) -> double {
 
     switch (this->bandType) {
     case BandType::Curve:

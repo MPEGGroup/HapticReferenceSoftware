@@ -132,10 +132,10 @@ namespace haptics::types {
     this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
   }
 
-  auto Effect::EvaluateVectorial(int position) -> double {
+  auto Effect::EvaluateVectorial(double position) -> double {
     double res = 0;
 
-    if (position < this->position) {
+    if (position < this->position || position > this->position + this->keyframes.back().getRelativePosition()) {
       return res;
     }
 
@@ -143,24 +143,23 @@ namespace haptics::types {
       return res;
     }
 
-    int relativePosition = position - this->position;
+    double relativePosition = position - this->position;
 
     //res = linearAmplitudeModulation blabla
-    double amp_modulation = 1;
+    double amp_modulation = 0;
 
     //First KF AFTER
     auto k_a_after = std::find_if(keyframes.begin(), keyframes.end(),
                                       [relativePosition](haptics::types::Keyframe k) {
-                                        return k.getAmplitudeModulation().has_value() && k.getRelativePosition() >= relativePosition;
+                                        return k.getAmplitudeModulation().has_value() && k.getRelativePosition() > relativePosition;
                                       });
-
 
     //IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
     if (k_a_after < keyframes.end()) {
       // first KF before position
       auto k_a_before = keyframes.begin();
-      for (auto it = k_a_after - 1; it >= keyframes.begin(); it--) {
-        if (it->getAmplitudeModulation().has_value()) {
+      for (auto it = k_a_after; it >= keyframes.begin(); it--) {
+        if (it->getRelativePosition() <= relativePosition && it->getAmplitudeModulation().has_value()) {
           k_a_before = it;
           break;
         }
@@ -169,6 +168,8 @@ namespace haptics::types {
       amp_modulation = haptics::tools::linearInterpolation(
           {k_a_before->getRelativePosition(), k_a_before->getAmplitudeModulation().value()},
           {k_a_after->getRelativePosition(), k_a_after->getAmplitudeModulation().value()}, relativePosition);
+    } else {
+      amp_modulation = (keyframes.end() - 1)->getAmplitudeModulation().value();
     }
 
     // IF FREQUENCY MODULATION (SHOULD BE BUT TO BE SURE)
@@ -178,13 +179,13 @@ namespace haptics::types {
     auto k_f_after = std::find_if(keyframes.begin(), keyframes.end(),
                                   [relativePosition](haptics::types::Keyframe k) {
                                     return k.getFrequencyModulation().has_value() &&
-                                           k.getRelativePosition() >= relativePosition;
+                                           k.getRelativePosition() > relativePosition;
                                   });
     if (k_f_after < keyframes.end()) {
       // first KF before position
       auto k_f_before = keyframes.begin();
-      for (auto it = k_f_after - 1; it >= keyframes.begin(); it--) {
-        if (it->getFrequencyModulation().has_value()) {
+      for (auto it = k_f_after; it >= keyframes.begin(); it--) {
+        if (it->getRelativePosition() <= relativePosition && it->getFrequencyModulation().has_value()) {
           k_f_before = it;
           break;
         }
@@ -207,10 +208,10 @@ namespace haptics::types {
     return amp_modulation * freq_modulation;
   }
 
-  auto Effect::EvaluateQuantized(int position) -> double {
+  auto Effect::EvaluateQuantized(double position) -> double {
     double res = 0;
 
-    int relativePosition = position - this->position;
+    double relativePosition = position - this->position;
 
     auto k_before = keyframes.begin();
 
@@ -229,7 +230,7 @@ namespace haptics::types {
   }
 
   // NOLINTNEXTLINE(misc-unused-parameters,readability-convert-member-functions-to-static)
-  auto Effect::EvaluateTransient(int position) -> double {
+  auto Effect::EvaluateTransient(double position) -> double {
     double res = 0;
 
     //?
@@ -237,7 +238,7 @@ namespace haptics::types {
     return res;
   }
 
-  auto Effect::EvaluateKeyframes(int position) -> double {
+  auto Effect::EvaluateKeyframes(double position) -> double {
     double res = 0;
 
     auto k_after = std::find_if(keyframes.begin(), keyframes.end(),
