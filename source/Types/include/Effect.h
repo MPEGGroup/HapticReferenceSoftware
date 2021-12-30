@@ -71,6 +71,11 @@ public:
   auto addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void;
   auto addAmplitudeAt(float amplitude, int position) -> bool;
   auto addFrequencyAt(int frequency, int position) -> bool;
+  //Use Absolute position not relative
+  auto EvaluateVectorial(int position) -> double;
+  auto EvaluateQuantized(int position) -> double;
+  auto EvaluateTransient(int position) -> double;
+  auto EvaluateKeyframes(int position) -> double;
 
 private:
   int position = 0;

@@ -32,102 +32,251 @@
  */
 
 #include <Types/include/Effect.h>
+#include <Tools/include/Tools.h>
+#include <cmath>
 
 namespace haptics::types {
 
-[[nodiscard]] auto Effect::getPosition() const -> int {
-  return position;
-}
-
-auto Effect::setPosition(int newPosition) -> void {
-  position = newPosition;
-}
-
-[[nodiscard]] auto Effect::getPhase() const -> float {
-  return phase;
-}
-
-auto Effect::setPhase(float newPhase) -> void {
-  phase = newPhase;
-}
-
-[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
-  return baseSignal;
-}
-
-auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
-  baseSignal = newBaseSignal;
-}
-
-auto Effect::getKeyframesSize() -> size_t {
-  return keyframes.size();
-}
-
-auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
-  return keyframes.at(index);
-}
-
-auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
-  keyframes.push_back(newKeyframe);
-}
-
-auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
-
-  bool ret = false;
-  
-  auto kit =
-      std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
-        return k.getRelativePosition() >= position;
-      });
-
-  if (kit == keyframes.begin()) {
-    return ret;
+  [[nodiscard]] auto Effect::getPosition() const -> int {
+    return position;
   }
 
-  if (kit == keyframes.end()) {
-    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
-    keyframes.push_back(kf);
+  auto Effect::setPosition(int newPosition) -> void {
+    position = newPosition;
+  }
+
+  [[nodiscard]] auto Effect::getPhase() const -> float {
+    return phase;
+  }
+
+  auto Effect::setPhase(float newPhase) -> void {
+    phase = newPhase;
+  }
+
+  [[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
+    return baseSignal;
+  }
+
+  auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
+    baseSignal = newBaseSignal;
+  }
+
+  auto Effect::getKeyframesSize() -> size_t {
+    return keyframes.size();
+  }
+
+  auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
+    return keyframes.at(index);
+  }
+
+  auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+    keyframes.push_back(newKeyframe);
+  }
+
+  auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
+
+    bool ret = false;
+
+    auto kit =
+        std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
+          return k.getRelativePosition() >= position;
+        });
+
+    if (kit == keyframes.begin()) {
+      return ret;
+    }
+
+    if (kit == keyframes.end()) {
+      Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
+      keyframes.push_back(kf);
+      return true;
+    }
+
+    if ((kit)->getRelativePosition() == position && !(kit)->getAmplitudeModulation().has_value()) {
+      (kit)->setAmplitudeModulation(amplitude);
+    } else {
+      Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
+      keyframes.insert(kit+1, kf);
+    }
+
     return true;
   }
 
-  if ((kit)->getRelativePosition() == position && !(kit)->getAmplitudeModulation().has_value()) {
-    (kit)->setAmplitudeModulation(amplitude);
-  } else {
-    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
-    keyframes.insert(kit+1, kf);
-  }
+  auto Effect::addFrequencyAt(int frequency, int position) -> bool {
+    auto kit =
+        std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
+          return k.getRelativePosition() >= position;
+        });
 
-  return true;
-}
+    if (kit == keyframes.begin()) {
+      return false;
+    }
 
-auto Effect::addFrequencyAt(int frequency, int position) -> bool {
-  auto kit =
-      std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
-        return k.getRelativePosition() >= position;
-      });
+    if (kit == keyframes.end()) {
+      Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
+      keyframes.push_back(kf);
+      return true;
+    }
 
-  if (kit == keyframes.begin()) {
-    return false;
-  }
+    if (kit->getRelativePosition() == position && !kit->getFrequencyModulation().has_value()) {
+      kit->setFrequencyModulation(frequency);
+    } else {
+      Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
+      keyframes.insert(kit + 1, kf);
+    }
 
-  if (kit == keyframes.end()) {
-    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
-    keyframes.push_back(kf);
     return true;
   }
 
-  if (kit->getRelativePosition() == position && !kit->getFrequencyModulation().has_value()) {
-    kit->setFrequencyModulation(frequency);
-  } else {
-    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
-    keyframes.insert(kit + 1, kf);
+  auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {
+    this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
   }
 
-  return true;
-}
+  auto Effect::EvaluateVectorial(int position) -> double {
+    double res = 0;
 
-auto Effect::addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void {
-  this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
-}
+    if (position < this->position) {
+      return res;
+    }
+
+    if (keyframes.empty()) {
+      return res;
+    }
+
+    int relativePosition = position - this->position;
+
+    //res = linearAmplitudeModulation blabla
+    double amp_modulation = 1;
+
+    //First KF AFTER
+    auto k_a_after = std::find_if(keyframes.begin(), keyframes.end(),
+                                      [relativePosition](haptics::types::Keyframe k) {
+                                        return k.getAmplitudeModulation().has_value() && k.getRelativePosition() >= relativePosition;
+                                      });
+
+
+    //IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
+    if (k_a_after < keyframes.end()) {
+      // first KF before position
+      auto k_a_before = keyframes.begin();
+      for (auto it = k_a_after - 1; it >= keyframes.begin(); it--) {
+        if (it->getAmplitudeModulation().has_value()) {
+          k_a_before = it;
+          break;
+        }
+      }
+
+      amp_modulation = haptics::tools::linearInterpolation(
+          {k_a_before->getRelativePosition(), k_a_before->getAmplitudeModulation().value()},
+          {k_a_after->getRelativePosition(), k_a_after->getAmplitudeModulation().value()}, relativePosition);
+    }
+
+    // IF FREQUENCY MODULATION (SHOULD BE BUT TO BE SURE)
+
+    double freq_modulation = 1;
+    // first KF after position
+    auto k_f_after = std::find_if(keyframes.begin(), keyframes.end(),
+                                  [relativePosition](haptics::types::Keyframe k) {
+                                    return k.getFrequencyModulation().has_value() &&
+                                           k.getRelativePosition() >= relativePosition;
+                                  });
+    if (k_f_after < keyframes.end()) {
+      // first KF before position
+      auto k_f_before = keyframes.begin();
+      for (auto it = k_f_after - 1; it >= keyframes.begin(); it--) {
+        if (it->getFrequencyModulation().has_value()) {
+          k_f_before = it;
+          break;
+        }
+      }
+
+      // Modulation
+      double f0 = k_f_before->getFrequencyModulation().value();
+      double f1 = k_f_after->getFrequencyModulation().value();
+      double t = relativePosition / 1000.0;
+      double DeltaT = (static_cast<double>(k_f_after->getRelativePosition()) - static_cast<double>(k_f_before->getRelativePosition())) / 1000.0;
+
+      freq_modulation = (M_PI * (f0 * t + 0.5 * t * t * (f1 - f0) / DeltaT));
+      //TODO CHANGE BASE SIGNAL
+      freq_modulation = std::sin(freq_modulation);
+    }
+    //-----
+
+    return amp_modulation * freq_modulation;
+  }
+
+  auto Effect::EvaluateQuantized(int position) -> double {
+    double res = 0;
+
+    int relativePosition = position - this->position;
+
+    auto k_before = keyframes.begin();
+
+    for (auto it = keyframes.end(); it >= keyframes.begin(); it--) {
+      if (it->getRelativePosition() <= relativePosition) {
+        k_before = it;
+        break;
+      }
+    }
+
+    double t = relativePosition / 1000.0;
+    // TODO PHASE MATCHING
+    res = std::sin(t * k_before->getFrequencyModulation().value() * M_PI) * k_before->getAmplitudeModulation().value();
+
+    return res;
+  }
+
+  auto Effect::EvaluateTransient(int position) -> double {
+    double res = 0;
+
+    //?
+
+    return res;
+  }
+
+  auto Effect::EvaluateKeyframes(int position) -> double {
+    double res = 0;
+
+    auto k_after = std::find_if(keyframes.begin(), keyframes.end(),
+                                  [position](haptics::types::Keyframe k) {
+                                    return k.getFrequencyModulation().has_value() &&
+                                           k.getRelativePosition() >= position;
+                                  });
+
+    if (k_after < keyframes.end()) {
+      // first KF before position
+      auto k_before = keyframes.begin();
+      for (auto it = k_after - 1; it >= keyframes.begin(); it--) {
+        if (it->getFrequencyModulation().has_value()) {
+          k_before = it;
+          break;
+        }
+      }
+
+      double x0 = k_before->getRelativePosition() / 1000.0;
+      double f0 = k_before->getAmplitudeModulation().value();
+      double t0 = 0;
+      double x1 = k_after->getRelativePosition() / 1000.0;
+      double f1 = k_after->getAmplitudeModulation().value();
+      double t1 = 0;
+
+      double t = position / 1000.0;
+
+      double c2;
+      double c3;
+      double df;
+      double h;
+      h = x1 - x0;
+      df = (f1 - f0) / h;
+
+      c2 = -(2.0 * t0 - 3.0 * df + t1) / h;
+      c3 = (t0 - 2.0 * df + t1) / h / h;
+
+      float result = f0 + (t - x0) * (t0 + (t - x0) * (c2 + (t - x0) * c3));
+      return std::max(std::min(1.0f, result), -1.0f);
+    }
+
+    return res;
+  }
 
 } // namespace haptics::types

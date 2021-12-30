@@ -35,94 +35,105 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Track::getId() const -> int {
-  return id;
-}
-
-auto Track::setId(int newId) -> void {
-  id = newId;
-}
-
-[[nodiscard]] auto Track::getDescription() const -> std::string {
-  return description;
-}
-
-auto Track::setDescription(std::string &newDescription) -> void {
-  description = newDescription;
-}
-
-[[nodiscard]] auto Track::getGain() const -> float {
-  return gain;
-}
-
-auto Track::setGain(float newGain) -> void {
-  gain = newGain;
-}
-
-[[nodiscard]] auto Track::getMixingWeight() const -> float {
-  return mixingWeight;
-}
-
-auto Track::setMixingWeight(float newMixingWeight) -> void {
-  mixingWeight = newMixingWeight;
-}
-
-[[nodiscard]] auto Track::getBodyPartMask() const -> uint32_t {
-  return bodyPartMask;
-}
-
-auto Track::setBodyPartMask(uint32_t newBodyPartMask) -> void {
-  bodyPartMask = newBodyPartMask;
-}
-
-auto Track::getVerticesSize() -> size_t {
-  return vertices.size();
-}
-
-auto Track::getVertexAt(int index) -> int& {
-  return vertices.at(index);
-}
-
-auto Track::addVertex(int& newVertice) -> void {
-  vertices.push_back(newVertice);
-}
-
-auto Track::getBandsSize() -> size_t {
-  return bands.size();
-}
-
-auto Track::getBandAt(int index) -> haptics::types::Band& {
-  return bands.at(index);
-}
-
-auto Track::addBand(haptics::types::Band& newBand) -> void {
-  bands.push_back(newBand);
-}
-
-auto Track::findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band * {
-  haptics::types::Effect e;
-  int start = 0;
-  int stop = 0;
-  bool bandIsAvailable = true;
-  for (haptics::types::Band &b : bands) {
-    if (b.getBandType() != haptics::types::BandType::Wave) {
-      continue;
-    }
-
-    bandIsAvailable = true;
-    for (int i = 0; i < b.getEffectsSize(); i++) {
-      e = b.getEffectAt(i);
-      if (b.isOverlapping(e, position, position+duration)) {
-        bandIsAvailable = false;
-        break;
-      }
-    }
-    if (bandIsAvailable) {
-      return &b;
-    }
+  [[nodiscard]] auto Track::getId() const -> int {
+    return id;
   }
 
-  return nullptr;
-}
+  auto Track::setId(int newId) -> void {
+    id = newId;
+  }
+
+  [[nodiscard]] auto Track::getDescription() const -> std::string {
+    return description;
+  }
+
+  auto Track::setDescription(std::string &newDescription) -> void {
+    description = newDescription;
+  }
+
+  [[nodiscard]] auto Track::getGain() const -> float {
+    return gain;
+  }
+
+  auto Track::setGain(float newGain) -> void {
+    gain = newGain;
+  }
+
+  [[nodiscard]] auto Track::getMixingWeight() const -> float {
+    return mixingWeight;
+  }
+
+  auto Track::setMixingWeight(float newMixingWeight) -> void {
+    mixingWeight = newMixingWeight;
+  }
+
+  [[nodiscard]] auto Track::getBodyPartMask() const -> uint32_t {
+    return bodyPartMask;
+  }
+
+  auto Track::setBodyPartMask(uint32_t newBodyPartMask) -> void {
+    bodyPartMask = newBodyPartMask;
+  }
+
+  auto Track::getVerticesSize() -> size_t {
+    return vertices.size();
+  }
+
+  auto Track::getVertexAt(int index) -> int& {
+    return vertices.at(index);
+  }
+
+  auto Track::addVertex(int& newVertice) -> void {
+    vertices.push_back(newVertice);
+  }
+
+  auto Track::getBandsSize() -> size_t {
+    return bands.size();
+  }
+
+  auto Track::getBandAt(int index) -> haptics::types::Band& {
+    return bands.at(index);
+  }
+
+  auto Track::addBand(haptics::types::Band& newBand) -> void {
+    bands.push_back(newBand);
+  }
+
+  auto Track::findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band * {
+    haptics::types::Effect e;
+    int start = 0;
+    int stop = 0;
+    bool bandIsAvailable = true;
+    for (haptics::types::Band &b : bands) {
+      if (b.getBandType() != haptics::types::BandType::Wave) {
+        continue;
+      }
+
+      bandIsAvailable = true;
+      for (int i = 0; i < b.getEffectsSize(); i++) {
+        e = b.getEffectAt(i);
+        if (b.isOverlapping(e, position, position+duration)) {
+          bandIsAvailable = false;
+          break;
+        }
+      }
+      if (bandIsAvailable) {
+        return &b;
+      }
+    }
+
+    return nullptr;
+  }
+
+  auto Track::Evaluate(int position) -> double {
+
+    double res = 0;
+
+    for (haptics::types::Band b : bands) {
+      res += b.Evaluate(position);
+    }
+
+    return res;
+  }
 
 } // namespace haptics::types

@@ -35,72 +35,114 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Band::getBandType() const -> BandType {
-  return bandType;
-}
-
-auto Band::setBandType(BandType newBandType) -> void {
-  bandType = newBandType;
-}
-
-[[nodiscard]] auto Band::getEncodingModality() const -> EncodingModality {
-  return encodingModality;
-}
-
-auto Band::setEncodingModality(EncodingModality newEncodingModality) -> void {
-  encodingModality = newEncodingModality;
-}
-
-[[nodiscard]] auto Band::getWindowLength() const -> int {
-  return windowLength;
-}
-
-auto Band::setWindowLength(int newWindowLength) -> void {
-  windowLength = newWindowLength;
-}
-
-[[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int {
-  return upperFrequencyLimit;
-}
-
-auto Band::setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void {
-  upperFrequencyLimit = newUpperFrequencyLimit;
-}
-
-[[nodiscard]] auto Band::getLowerFrequencyLimit() const -> int {
-  return lowerFrequencyLimit;
-}
-
-auto Band::setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void {
-  lowerFrequencyLimit = newLowerFrequencyLimit;
-}
-
-auto Band::getEffectsSize() -> size_t {
-  return effects.size();
-}
-
-auto Band::getEffectAt(int index) -> haptics::types::Effect& {
-  return effects.at(index);
-}
-
-auto Band::addEffect(Effect &newEffect) -> void {
-    effects.push_back(newEffect);
-}
-
-[[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
-                                       const int stop) -> bool {
-  const int position = effect.getPosition();
-  int length = 0;
-  if (encodingModality == EncodingModality::Quantized) {
-    length = static_cast<int>(effect.getKeyframesSize()) * windowLength;
-  } else {
-    length =
-        effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1).getRelativePosition();
+  [[nodiscard]] auto Band::getBandType() const -> BandType {
+    return bandType;
   }
 
-  return (position <= start && position + length >= start) ||
-         (position <= stop && position + length >= stop) ||
-         (position >= start && position + length <= stop) ||
-         (position <= start && position + length >= stop);
-}
+  auto Band::setBandType(BandType newBandType) -> void {
+    bandType = newBandType;
+  }
+
+  [[nodiscard]] auto Band::getEncodingModality() const -> EncodingModality {
+    return encodingModality;
+  }
+
+  auto Band::setEncodingModality(EncodingModality newEncodingModality) -> void {
+    encodingModality = newEncodingModality;
+  }
+
+  [[nodiscard]] auto Band::getWindowLength() const -> int {
+    return windowLength;
+  }
+
+  auto Band::setWindowLength(int newWindowLength) -> void {
+    windowLength = newWindowLength;
+  }
+
+  [[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int {
+    return upperFrequencyLimit;
+  }
+
+  auto Band::setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void {
+    upperFrequencyLimit = newUpperFrequencyLimit;
+  }
+
+  [[nodiscard]] auto Band::getLowerFrequencyLimit() const -> int {
+    return lowerFrequencyLimit;
+  }
+
+  auto Band::setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void {
+    lowerFrequencyLimit = newLowerFrequencyLimit;
+  }
+
+  auto Band::getEffectsSize() -> size_t {
+    return effects.size();
+  }
+
+  auto Band::getEffectAt(int index) -> haptics::types::Effect& {
+    return effects.at(index);
+  }
+
+  auto Band::addEffect(Effect &newEffect) -> void {
+      effects.push_back(newEffect);
+  }
+
+  [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
+                                         const int stop) -> bool {
+    const int position = effect.getPosition();
+    int length = 0;
+    if (encodingModality == EncodingModality::Quantized) {
+      length = static_cast<int>(effect.getKeyframesSize()) * windowLength;
+    } else {
+      length = effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1)
+                   .getRelativePosition();
+    }
+
+    return (position <= start && position + length >= start) ||
+           (position <= stop && position + length >= stop) ||
+           (position >= start && position + length <= stop) ||
+           (position <= start && position + length >= stop);
+  }
+
+  auto Band::Evaluate(int position) -> double {
+
+    //OUT OUF BOUND CHECK
+    if (position >
+        effects.back().getPosition() + effects.back()
+                                           .getKeyframeAt(effects.back().getKeyframesSize() - 1)
+                                           .getRelativePosition() || position < 0) {
+      return -1;
+    }
+
+    for (auto it = effects.end(); it >= effects.begin(); it--) {
+      if (it->getPosition() <= position) {
+        return EvaluationSwitch(position, &*it);
+      }
+    }
+
+    return 0;
+  }
+
+  auto Band::EvaluationSwitch(int position, haptics::types::Effect * effect) -> double {
+
+    switch (this->bandType) {
+    case BandType::Curve:
+      return effect->EvaluateKeyframes(position);
+      break;
+    case BandType::Wave:
+      if (encodingModality == EncodingModality::Quantized) {
+        return effect->EvaluateQuantized(position);
+      } else if (encodingModality == EncodingModality::Vectorial) {
+        return effect->EvaluateVectorial(position);
+      }
+      break;
+    case BandType::Transient:
+      return effect->EvaluateVectorial(position);
+      break;
+    default:
+      break;
+    }
+
+    return -1;
+  }
 } // namespace haptics::types
