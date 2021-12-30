@@ -69,13 +69,12 @@ public:
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto addBand(haptics::types::Band &newBand) -> void;
-  auto findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band *;
+  auto findWaveBandAvailable(int position, int duration) -> haptics::types::Band *;
 
 private:
-  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, const int start,
-                                   const int stop) -> bool;
+  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   int id = -1;
-  std::string description = "";
+  std::string description;
   float gain = 1;
   float mixingWeight = 1;
   uint32_t bodyPartMask = 0;
