@@ -99,28 +99,31 @@ namespace haptics::types {
     bands.push_back(newBand);
   }
 
-  auto Track::findWaveBandAvailable(const int position, const int duration) -> haptics::types::Band * {
-    haptics::types::Effect e;
-    int start = 0;
-    int stop = 0;
-    bool bandIsAvailable = true;
-    for (haptics::types::Band &b : bands) {
-      if (b.getBandType() != haptics::types::BandType::Wave) {
-        continue;
-      }
+auto Track::findBandAvailable(const int position, const int duration,
+                              const types::BandType bandType,
+                              const types::EncodingModality encodingModality)
+    -> haptics::types::Band * {
+  haptics::types::Effect e;
+  int start = 0;
+  int stop = 0;
+  bool bandIsAvailable = true;
+  for (haptics::types::Band &b : bands) {
+    if (b.getBandType() != bandType || b.getEncodingModality() != encodingModality) {
+      continue;
+    }
 
-      bandIsAvailable = true;
-      for (int i = 0; i < b.getEffectsSize(); i++) {
-        e = b.getEffectAt(i);
-        if (b.isOverlapping(e, position, position+duration)) {
-          bandIsAvailable = false;
-          break;
-        }
-      }
-      if (bandIsAvailable) {
-        return &b;
+    bandIsAvailable = true;
+    for (int i = 0; i < b.getEffectsSize(); i++) {
+      e = b.getEffectAt(i);
+      if (b.isOverlapping(e, position, position + duration)) {
+        bandIsAvailable = false;
+        break;
       }
     }
+    if (bandIsAvailable) {
+      return &b;
+    }
+  }
 
     return nullptr;
   }

@@ -122,12 +122,12 @@ auto main(int argc, char *argv[]) -> int {
           const double curveFrequency = 72.5;
           return PcmEncoder::encode(filename, curveFrequency, out);
         };
+      }
 
-        myPerception = hapticFile.getPerceptionAt(i);
-        codeExit = encodingFunction(filename, myPerception);
-        if (codeExit == EXIT_SUCCESS) {
-          hapticFile.replacePerceptionAt(i, myPerception);
-        }
+      myPerception = hapticFile.getPerceptionAt(i);
+      codeExit = encodingFunction(filename, myPerception);
+      if (codeExit == EXIT_SUCCESS) {
+        hapticFile.replacePerceptionAt(i, myPerception);
       }
     }
   } else if (ext == "json" || ext == "ahap") {

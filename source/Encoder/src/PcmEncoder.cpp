@@ -65,6 +65,7 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
     signal = wavParser.getSamplesChannel(channelIndex);
     signal = filterbank.LP(signal, curveFrequencyLimit);
     points = PcmEncoder::localExtrema(signal, true);
+    myBand = Band();
     if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(), curveFrequencyLimit,
                                        &myBand)) {
       myTrack.addBand(myBand);
