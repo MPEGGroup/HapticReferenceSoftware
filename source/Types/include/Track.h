@@ -69,7 +69,8 @@ public:
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto addBand(haptics::types::Band &newBand) -> void;
-  auto findWaveBandAvailable(int position, int duration) -> haptics::types::Band *;
+  auto findBandAvailable(int position, int duration, types::BandType bandType,
+                         types::EncodingModality encodingModality) -> haptics::types::Band *;
 
 private:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;

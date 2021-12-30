@@ -54,6 +54,10 @@ namespace haptics::encoder {
 
 // NOLINTNEXTLINE(misc-unused-parameters)
 [[nodiscard]] auto AhapEncoder::encode(std::string& filename, haptics::types::Perception &out) -> int {
+  if (out.getTracksSize() > 1) {
+    return EXIT_FAILURE;
+  }
+
   std::ifstream ifs(filename);
   nlohmann::json json = nlohmann::json::parse(ifs);
 
@@ -108,6 +112,33 @@ namespace haptics::encoder {
     }
   }
 
+  haptics::types::Track myTrack(0, "placeholder description", 1, 1, 0);
+  if (out.getTracksSize() == 0) {
+    out.addTrack(myTrack);
+  }
+  myTrack = out.getTrackAt(0);
+
+  // TRANSIENTS
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+  types::Band myBand = types::Band(types::BandType::Transient, types::EncodingModality::Vectorial, 0, 0, 1000);
+  for (types::Effect e : transients) {
+    myBand.addEffect(e);
+  }
+  myTrack.addBand(myBand);
+
+  // CONTINUOUS
+  types::Band *b = nullptr;
+  for (types::Effect e : continuous) {
+    b = myTrack.findBandAvailable(e.getPosition(), e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition(), types::BandType::Wave, types::EncodingModality::Vectorial);
+    if (b == nullptr) {
+      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      myTrack.addBand(*(new haptics::types::Band(haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0, 0, 1000)));
+      b = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
+    }
+    b->addEffect(e);
+  }
+
+  out.replaceTrackAt(0, myTrack);
   return EXIT_SUCCESS;
 }
 
