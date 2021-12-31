@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "../include/WaveletEncoder.h"
+#include "WaveletDecoder/include/WaveletDecoder.h"
 
 constexpr int val = 3;
 constexpr int bits = 3;
@@ -52,109 +53,169 @@ constexpr size_t bl_test = 512;
 constexpr int fs_test = 8000;
 constexpr size_t book_size = 8;
 
+constexpr int FS = 8000;
+constexpr size_t BL = 128;
+constexpr size_t BITS = 20;
+constexpr double F_CUTOFF = 72;
+
+constexpr size_t bl = 128;
+constexpr int levels = 1;
+constexpr int hSize = 7;
+constexpr int prec = 15;
+constexpr double prec_comparison = 0.00001;
+
 TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
-    using haptics::encoder::WaveletEncoder;
+  using haptics::encoder::WaveletEncoder;
 
-    SECTION("Encoder tools") {
+  SECTION("Encoder tools") {
 
-        std::vector<unsigned char> outstream(1,'0');
-        WaveletEncoder::de2bi(val,outstream,bits);
-        CHECK(outstream.size() == bits+1);
-        CHECK(outstream[1] == 1);
-        CHECK(outstream[2] == 1);
-        CHECK(outstream[3] == 0);
+    std::vector<unsigned char> outstream(1, '0');
+    WaveletEncoder::de2bi(val, outstream, bits);
+    CHECK(outstream.size() == bits + 1);
+    CHECK(outstream[1] == 1);
+    CHECK(outstream[2] == 1);
+    CHECK(outstream[3] == 0);
 
-        auto sign = WaveletEncoder::sgn(positive);
-        CHECK(sign == 1);
-        sign = WaveletEncoder::sgn(negative);
-        CHECK(sign == -1);
-
-    }
-
+    auto sign = WaveletEncoder::sgn(positive);
+    CHECK(sign == 1);
+    sign = WaveletEncoder::sgn(negative);
+    CHECK(sign == -1);
+  }
 }
 
 TEST_CASE("haptics::encoder::WaveletEncoder,2") {
 
-    using haptics::encoder::WaveletEncoder;
-    using haptics::encoder::quantMode;
+  using haptics::encoder::quantMode;
+  using haptics::encoder::WaveletEncoder;
 
-    SECTION("Encoder tools") {
+  SECTION("Encoder tools") {
 
-        std::vector<double> data(size,1);
-        data[pos] = negative;
-        size_t pos_found = WaveletEncoder::findMinInd(data);
-        CHECK(pos_found == pos);
+    std::vector<double> data(size, 1);
+    data[pos] = negative;
+    size_t pos_found = WaveletEncoder::findMinInd(data);
+    CHECK(pos_found == pos);
 
-        std::vector<double> data2(size,1);
-        data2[pos] = positive;
-        double max = WaveletEncoder::findMax(data2);
-        CHECK(max == positive);
+    std::vector<double> data2(size, 1);
+    data2[pos] = positive;
+    double max = WaveletEncoder::findMax(data2);
+    CHECK(max == positive);
 
+    quantMode mode{0, FRACTIONBITS_0};
+    double quant = WaveletEncoder::maxQuant(unquantized, mode);
+    CHECK(quant == quantized);
+    quantMode mode2{3, 4};
+    quant = WaveletEncoder::maxQuant(unquantized + 1, mode2);
+    CHECK(quant == quantized + 1);
 
-        quantMode mode{0, FRACTIONBITS_0};
-        double quant = WaveletEncoder::maxQuant(unquantized,mode);
-        CHECK(quant == quantized);
-        quantMode mode2{3,4};
-        quant = WaveletEncoder::maxQuant(unquantized+1,mode2);
-        CHECK(quant == quantized+1);
-
-        std::vector<double> v_unquantized(3,unquantized);
-        std::vector<double> v_quantized(3,0);
-        WaveletEncoder::uniformQuant(v_unquantized, 1, 1, bits, 1, v_quantized);
-        CHECK(v_quantized[0] == 0);
-        CHECK(v_quantized[1] == quantized);
-        CHECK(v_quantized[2] == 0);
-
-    }
-
+    std::vector<double> v_unquantized(3, unquantized);
+    std::vector<double> v_quantized(3, 0);
+    WaveletEncoder::uniformQuant(v_unquantized, 1, 1, bits, 1, v_quantized);
+    CHECK(v_quantized[0] == 0);
+    CHECK(v_quantized[1] == quantized);
+    CHECK(v_quantized[2] == 0);
+  }
 }
 
 TEST_CASE("haptics::encoder::WaveletEncoder,3") {
 
-    using haptics::encoder::WaveletEncoder;
-    using haptics::types::Band;
+  using haptics::encoder::WaveletEncoder;
+  using haptics::types::Band;
 
-    SECTION("Encoder tools") {
+  SECTION("Encoder tools") {
 
-        std::vector<double> v_unquantized(3,unquantized);
-        double qwavmax = 0;
-        std::vector<unsigned char> bitwavmax;
-        std::vector<unsigned char> bitwavmax_compare = {0,0,0,0,0,0,1,1};
-        WaveletEncoder::maximumWaveletCoefficient(v_unquantized,qwavmax,bitwavmax);
-        CHECK(qwavmax == quantized);
-        CHECK(std::equal(bitwavmax.begin(),bitwavmax.end(),bitwavmax_compare.begin()));
+    std::vector<double> v_unquantized(3, unquantized);
+    double qwavmax = 0;
+    std::vector<unsigned char> bitwavmax;
+    std::vector<unsigned char> bitwavmax_compare = {0, 0, 0, 0, 0, 0, 1, 1};
+    WaveletEncoder::maximumWaveletCoefficient(v_unquantized, qwavmax, bitwavmax);
+    CHECK(qwavmax == quantized);
+    CHECK(std::equal(bitwavmax.begin(), bitwavmax.end(), bitwavmax_compare.begin()));
 
-        /*for(size_t i=0; i<WAVMAXLENGTH; i++){
-            std::cout << (int)bitwavmax[i] << std::endl;
-        }*/
+    /*for(size_t i=0; i<WAVMAXLENGTH; i++){
+        std::cout << (int)bitwavmax[i] << std::endl;
+    }*/
+  }
 
-    }
+  SECTION("Encoder") {
 
-    SECTION("Encoder") {
+    std::vector<double> data_time(bl_test, 0);
+    data_time[0] = 1;
+    WaveletEncoder waveletEncoder(bl_test, fs_test);
+    double scalar = 0;
+    std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar);
+  }
 
-        std::vector<double> data_time(bl_test,0);
-        data_time[0] = 1;
-        WaveletEncoder waveletEncoder(bl_test,fs_test);
-        double scalar = 0;
-        std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time,1,scalar);
+  SECTION("Encoder Integration") {
+    std::vector<double> data_time(bl_test, 0);
+    data_time[0] = 1;
+    WaveletEncoder waveletEncoder(bl_test / 2, fs_test);
+    Band band;
+    bool success = false;
+    success = waveletEncoder.encodeSignal(data_time, 1, 0, band);
+    CHECK(success);
 
-    }
-
-    SECTION("Encoder Integration") {
-      std::vector<double> data_time(bl_test, 0);
-      data_time[0] = 1;
-      WaveletEncoder waveletEncoder(bl_test/2, fs_test);
-      Band band;
-      bool success = false;
-      success = waveletEncoder.encodeSignal(data_time, 1, 0, band);
-      CHECK(success);
-
-      /*std::cout << "number of effects: " << band.getEffectsSize() << std::endl;
-      Effect effect = band.getEffectAt(0);
-      std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;
-      effect = band.getEffectAt(1);
-      std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;*/
-    }
-
+    /*std::cout << "number of effects: " << band.getEffectsSize() << std::endl;
+    Effect effect = band.getEffectAt(0);
+    std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;
+    effect = band.getEffectAt(1);
+    std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;*/
+  }
 }
+
+TEST_CASE("Encoder/Decoder Integration") {
+
+  using haptics::encoder::WaveletEncoder;
+  using haptics::waveletdecoder::WaveletDecoder;
+
+  SECTION("Input/Output test") {
+
+    WaveletEncoder enc(BL, FS);
+    std::vector<double> sig_time(BL * 2, 0);
+    sig_time[0] = 1;
+    Band b;
+    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
+
+    WaveletDecoder dec(b);
+
+    std::vector<double> sig_rec = dec.getSignal();
+    CHECK(sig_time.size() == sig_rec.size());
+
+    for (auto v : sig_rec) {
+      std::cout << v << std::endl;
+    }
+  }
+}
+
+/*TEST_CASE("haptics::filterbank::Wavelet") {
+
+  using haptics::filterbank::Wavelet;
+
+  SECTION("DWT") {
+
+    Wavelet wavelet;
+    std::vector<double> in(bl, 0);
+    std::vector<double> out(bl, 0);
+    std::vector<double> in_rec(bl, 0);
+    for (size_t i = 0; i < bl; i++) {
+      in[i] = (double)i;
+    }
+    //in.at(0) = 1;
+
+    wavelet.DWT(in, levels, out);
+    wavelet.inv_DWT(out, levels, in_rec);
+
+    bool equal = true;
+    for (size_t i = 0; i < bl; i++) {
+      if (fabs(in_rec[i] - in[i]) > prec_comparison) {
+        equal = false;
+        break;
+      }
+    }
+    std::cout << "outputTest" << std::endl;
+    for (size_t i = 0; i < bl; i++) {
+      std::cout << in[i] << ", " << in_rec[i] << std::endl;
+    }
+    CHECK(equal);
+  }
+}*/

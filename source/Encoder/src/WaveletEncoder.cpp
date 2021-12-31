@@ -92,8 +92,6 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   return true;
 }
 
-//encode wavelet transformed signal; requires original signal as well as transformed; returns quantized signal, scaling has to be discussed.
-//parameter bitbudget is used to control the coarseness of the quantization; range :[0,(int)log2((double)bl/4)*15] (from 0 bits to max).
 auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar) -> std::vector<double> {
 
     std::vector<double> block_dwt(bl, 0);
@@ -158,12 +156,23 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     //scale signal to int values
     int bitmax = findMax(bitalloc);
     int intmax = 1 << bitmax;
-    //double multiplicator = (double)intmax/(double)qwavmax;
-    double multiplicator = (double)1 / qwavmax;
-    for(int i=0; i<bl; i++){
+    double multiplicator = (double)intmax/(double)qwavmax;
+    //double multiplicator = (double)1 / qwavmax;
+
+    std::vector<double> test(bl, 0);
+    wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);
+    /*for (auto v : block_dwt) {
+      std::cout << v << std::endl;
+    }*/
+
+    if (qwavmax != 0) {
+      for (int i = 0; i < bl; i++) {
         block_intquant[i] = (int)round((block_dwt_quant[i] * multiplicator));
+        block_dwt_quant[i] = block_dwt_quant[i] / qwavmax;
+      }
     }
     scalar = qwavmax;
+    //std::cout << "scalar encoder: " << scalar << std::endl;
     return block_dwt_quant;
 }
 
@@ -210,11 +219,16 @@ void WaveletEncoder::uniformQuant(std::vector<double> &in, size_t start, double 
     double max_q = delta * ((1<<bits)-1);
     for(size_t i=start; i<start+length; i++){
         double sign = sgn(in[i]);
-        double q = sign * delta * floor(abs(in[i])/delta + QUANT_ADD);
-        if(abs(q)>max_q){
+        //std::cout << "quant: " << floor(abs(in[i]) / delta + QUANT_ADD) << ", " << in[i] << ", " << abs(in[i]) / delta << ", " << delta << ", " << max << std::endl;
+        if (max == 0) {
+          out[i] = 0;
+        } else {
+          double q = sign * delta * floor(abs(in[i]) / delta + QUANT_ADD);
+          if (abs(q) > max_q) {
             out[i] = sign * max_q;
-        }else{
+          } else {
             out[i] = q;
+          }
         }
     }
 }

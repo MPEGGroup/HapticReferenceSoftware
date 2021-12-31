@@ -43,16 +43,24 @@ WaveletDecoder::WaveletDecoder(Band band)
   Wavelet wavelet;
   size_t numBlocks = band.getEffectsSize();
   sig_rec.resize(numBlocks * bl, 0);
+
   for (int b = 0; b < numBlocks; b++) {
     Effect effect = band.getEffectAt(b);
     std::vector<double> block_dwt(bl, 0);
     Keyframe keyframe = effect.getKeyframeAt(bl);
     auto scalar = (double)keyframe.getAmplitudeModulation().value();
+    //std::cout << "scalar decoder: " << scalar << std::endl;
     for (int i = 0; i < bl; i++) {
       Keyframe keyframe = effect.getKeyframeAt(i);
       block_dwt[i] = (double)keyframe.getAmplitudeModulation().value() * scalar;
     }
+
+    /*for (auto v : block_dwt) {
+      std::cout << v << std::endl;
+    }*/
+
     std::vector<double> block_time(bl, 0);
+
     wavelet.inv_DWT(block_dwt, dwtlevel, block_time);
     std::copy(block_time.begin(), block_time.end(), sig_rec.begin() + effect.getPosition());
   }
