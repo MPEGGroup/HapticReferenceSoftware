@@ -93,8 +93,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     if (count == 0) {
       continue;
     }
+
+    effectToRepeat = {};
     for (bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
-      effectToRepeat = {};
       time = IvsEncoder::getTime(&repeatEvent);
       duration = IvsEncoder::getDuration(&repeatEvent);
       myBand = &myTrack.getBandAt(bandIndex);
@@ -105,15 +106,27 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
           effectToRepeat.push_back(myEffect);
         } else if (time + duration <= myEffect.getPosition()) {
           myEffect.setPosition(myEffect.getPosition() + count * duration);
+          myBand->replaceEffectAt(effectIndex, myEffect);
         }
       }
+    }
 
-      for (haptics::types::Effect &e: effectToRepeat) {
-        for (effectIndex = 1; effectIndex <= count; effectIndex++) {
-          myEffect = haptics::types::Effect(e);
-          myEffect.setPosition(myEffect.getPosition() + duration * effectIndex);
-          myBand->addEffect(myEffect);
+    for (haptics::types::Effect &e : effectToRepeat) {
+      for (effectIndex = 1; effectIndex <= count; effectIndex++) {
+        myEffect = haptics::types::Effect(e);
+        myEffect.setPosition(myEffect.getPosition() + duration * effectIndex);
+        myBand = myTrack.findBandAvailable(
+            myEffect.getPosition(),
+            myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
+                .getRelativePosition(),
+            types::BandType::Wave, types::EncodingModality::Vectorial);
+        if (myBand == nullptr) {
+          myTrack.addBand(*(new haptics::types::Band(
+              haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,
+              IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY)));
+          myBand = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
         }
+        myBand->addEffect(myEffect);
       }
     }
   }

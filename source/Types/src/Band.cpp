@@ -83,14 +83,22 @@ namespace haptics::types {
     return effects.at(index);
   }
 
-auto Band::addEffect(Effect &newEffect) -> void {
-  auto it = std::find_if(effects.begin(), effects.end(), [newEffect](Effect &e) {
-    return e.getPosition() > newEffect.getPosition();
-  });
+  auto Band::addEffect(Effect &newEffect) -> void {
+    auto it = std::find_if(effects.begin(), effects.end(), [newEffect](Effect &e) {
+      return e.getPosition() > newEffect.getPosition();
+    });
 
-  effects.insert(it, newEffect);
-  //effects.push_back(newEffect);
-}
+    effects.insert(it, newEffect);
+    //effects.push_back(newEffect);
+  }
+
+  auto Band::replaceEffectAt(int index, haptics::types::Effect& newEffect) -> bool {
+    if (index < 0 || index >= this->getEffectsSize()) {
+      return false;
+    }
+    this->effects[index] = newEffect;
+    return true;
+  }
 
   [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
                                          const int stop) -> bool {
