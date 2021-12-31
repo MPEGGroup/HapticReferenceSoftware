@@ -35,14 +35,6 @@
 
 namespace haptics::encoder {
 
-using haptics::tools::PsychohapticModel;
-using haptics::tools::modelResult;
-using haptics::filterbank::Wavelet;
-using haptics::types::Band;
-using haptics::types::BandType;
-using haptics::types::EncodingModality;
-using haptics::types::Effect;
-
 WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
     : pm(bl_new, fs_new), bl(bl_new), fs(fs_new), dwtlevel((int)log2((double)bl / 4)) {
 
@@ -62,10 +54,14 @@ WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
 }
 
 
-void WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget) {
+auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band) -> bool {
 
   int numBlocks = (int)ceil((double)sig_time.size() / (double)bl);
-  Band band(BandType::Wave, EncodingModality::Quantized, bl, 0, fs);
+  band.setBandType(BandType::Wave);
+  band.setEncodingModality(EncodingModality::Quantized);
+  band.setLowerFrequencyLimit((int)f_cutoff);
+  band.setUpperFrequencyLimit((int)fs);
+  band.setWindowLength(bl);
 
   int pos_effect = 0;
 
@@ -79,7 +75,10 @@ void WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget) 
       end = sig_time.end();
     }
     std::copy(start, end, block_time.begin());
-    std::vector<double> block_quant = encodeBlock(block_time, bitbudget);
+    double scalar = 0;
+    std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar);
+    Keyframe keyframe(-1, (float)scalar, 0); // add scalar of block to block data for now
+    effect.addKeyframe(keyframe);
     int pos = 0;
     for (auto v : block_quant) {
       Keyframe keyframe(pos, (float)v, 0);
@@ -90,12 +89,12 @@ void WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget) 
     band.addEffect(effect);
     pos_effect += bl;
   }
-
+  return true;
 }
 
 //encode wavelet transformed signal; requires original signal as well as transformed; returns quantized signal, scaling has to be discussed.
 //parameter bitbudget is used to control the coarseness of the quantization; range :[0,(int)log2((double)bl/4)*15] (from 0 bits to max).
-auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget) -> std::vector<double> {
+auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar) -> std::vector<double> {
 
     std::vector<double> block_dwt(bl, 0);
     Wavelet wavelet;
@@ -159,12 +158,13 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget)
     //scale signal to int values
     int bitmax = findMax(bitalloc);
     int intmax = 1 << bitmax;
-    double multiplicator = (double)intmax/(double)qwavmax;
+    //double multiplicator = (double)intmax/(double)qwavmax;
+    double multiplicator = (double)1 / qwavmax;
     for(int i=0; i<bl; i++){
         block_intquant[i] = (int)round((block_dwt_quant[i] * multiplicator));
     }
-
-    return block_dwt_quant; //return statement should be adapted to correct specifications
+    scalar = qwavmax;
+    return block_dwt_quant;
 }
 
 void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,

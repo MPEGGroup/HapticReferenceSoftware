@@ -77,6 +77,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 TEST_CASE("haptics::encoder::WaveletEncoder,2") {
 
     using haptics::encoder::WaveletEncoder;
+    using haptics::encoder::quantMode;
 
     SECTION("Encoder tools") {
 
@@ -90,14 +91,17 @@ TEST_CASE("haptics::encoder::WaveletEncoder,2") {
         double max = WaveletEncoder::findMax(data2);
         CHECK(max == positive);
 
-        double quant = WaveletEncoder::maxQuant(unquantized,0,FRACTIONBITS_0);
+
+        quantMode mode{0, FRACTIONBITS_0};
+        double quant = WaveletEncoder::maxQuant(unquantized,mode);
         CHECK(quant == quantized);
-        quant = WaveletEncoder::maxQuant(unquantized+1,3,4);
+        quantMode mode2{3,4};
+        quant = WaveletEncoder::maxQuant(unquantized+1,mode2);
         CHECK(quant == quantized+1);
 
         std::vector<double> v_unquantized(3,unquantized);
         std::vector<double> v_quantized(3,0);
-        WaveletEncoder::uniformQuant(v_unquantized,v_quantized,1,1,1,bits);
+        WaveletEncoder::uniformQuant(v_unquantized, 1, 1, bits, 1, v_quantized);
         CHECK(v_quantized[0] == 0);
         CHECK(v_quantized[1] == quantized);
         CHECK(v_quantized[2] == 0);
@@ -109,6 +113,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,2") {
 TEST_CASE("haptics::encoder::WaveletEncoder,3") {
 
     using haptics::encoder::WaveletEncoder;
+    using haptics::types::Band;
 
     SECTION("Encoder tools") {
 
@@ -131,8 +136,25 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
         std::vector<double> data_time(bl_test,0);
         data_time[0] = 1;
         WaveletEncoder waveletEncoder(bl_test,fs_test);
-        std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time,1);
+        double scalar = 0;
+        std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time,1,scalar);
 
+    }
+
+    SECTION("Encoder Integration") {
+      std::vector<double> data_time(bl_test, 0);
+      data_time[0] = 1;
+      WaveletEncoder waveletEncoder(bl_test/2, fs_test);
+      Band band;
+      bool success = false;
+      success = waveletEncoder.encodeSignal(data_time, 1, 0, band);
+      CHECK(success);
+
+      /*std::cout << "number of effects: " << band.getEffectsSize() << std::endl;
+      Effect effect = band.getEffectAt(0);
+      std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;
+      effect = band.getEffectAt(1);
+      std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;*/
     }
 
 }

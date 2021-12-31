@@ -50,6 +50,15 @@ constexpr double LOGFACTOR = 10;
 constexpr double MAXQUANTFACTOR = 0.999;
 constexpr double QUANT_ADD = 0.5;
 
+
+using haptics::tools::PsychohapticModel;
+using haptics::tools::modelResult;
+using haptics::filterbank::Wavelet;
+using haptics::types::Band;
+using haptics::types::BandType;
+using haptics::types::EncodingModality;
+using haptics::types::Effect;
+
 namespace haptics::encoder {
 
 struct quantMode {
@@ -61,8 +70,9 @@ class WaveletEncoder {
 public:
     WaveletEncoder(int bl_new, int fs_new);
 
-    void encodeSignal(std::vector<double> &sig_time, int bitbudget);
-    auto encodeBlock(std::vector<double> &block_time, int bitbudget) -> std::vector<double>;
+    auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band) -> bool;
+    auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar)
+        -> std::vector<double>;
     static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
                                           std::vector<unsigned char> &bitwavmax);
     void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
