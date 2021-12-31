@@ -77,14 +77,14 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     std::copy(start, end, block_time.begin());
     double scalar = 0;
     std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar);
-    Keyframe keyframe(-1, (float)scalar, 0); // add scalar of block to block data for now
-    effect.addKeyframe(keyframe);
     int pos = 0;
     for (auto v : block_quant) {
       Keyframe keyframe(pos, (float)v, 0);
       effect.addKeyframe(keyframe);
       pos++;
     }
+    Keyframe keyframe(bl, (float)scalar, 0); // add scalar of block to block data for now
+    effect.addKeyframe(keyframe);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
     pos_effect += bl;
