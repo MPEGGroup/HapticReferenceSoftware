@@ -199,10 +199,38 @@ namespace haptics::types {
       double DeltaT = MS_2_S * (static_cast<double>(k_f_after->getRelativePosition()) -
                              static_cast<double>(k_f_before->getRelativePosition()));
 
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      freq_modulation = std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit), static_cast<double>(highFrequencyLimit));
-      //TODO CHANGE BASE SIGNAL
-      freq_modulation = std::sin(M_PI * t * (freq_modulation + f0));
+      freq_modulation =
+          std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit),
+                     static_cast<double>(highFrequencyLimit)) +
+          f0;
+
+      double phase = this->getPhase();
+      switch (this->getBaseSignal()) {
+      case BaseSignal::Sine:
+        freq_modulation = std::sin(M_PI * t * freq_modulation + phase);
+        break;
+      case BaseSignal::Square:
+        freq_modulation = std::copysign(1, std::sin(M_PI * t * freq_modulation + phase));
+        break;
+      case BaseSignal::Triangle:
+        t += phase / (2 * M_PI * freq_modulation);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+        freq_modulation = 1 - 4 * std::abs(std::round(t * freq_modulation - .25) - (t * freq_modulation - .25));
+        break;
+      case BaseSignal::SawToothUp:
+        t += phase / (2 * M_PI * freq_modulation);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+        freq_modulation = 2 * (t * freq_modulation - std::floor(t * freq_modulation + .5));
+        break;
+      case BaseSignal::SawToothDown:
+        t += phase / (2 * M_PI * freq_modulation);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+        freq_modulation = 2 * (std::floor(t * freq_modulation + .5) - t * freq_modulation);
+        break;
+      default:
+        freq_modulation = 1;
+        break;
+      }
     }
     //-----
 
@@ -225,7 +253,7 @@ namespace haptics::types {
 
     double t = MS_2_S * relativePosition;
     // TODO PHASE MATCHING
-    res = std::sin(t * k_before->getFrequencyModulation().value() * 2 * M_PI) * k_before->getAmplitudeModulation().value();
+    res = std::sin(t * k_before->getFrequencyModulation().value() * 2 * M_PI + this->getPhase()) * k_before->getAmplitudeModulation().value();
 
     return res;
   }
