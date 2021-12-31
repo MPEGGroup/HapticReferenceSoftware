@@ -140,7 +140,7 @@ auto Band::addEffect(Effect &newEffect) -> void {
       break;
     case BandType::Wave:
       if (encodingModality == EncodingModality::Quantized) {
-        return effect->EvaluateQuantized(position);
+        return effect->EvaluateQuantized(position, this->getWindowLength());
       } else if (encodingModality == EncodingModality::Vectorial) {
         return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
       }

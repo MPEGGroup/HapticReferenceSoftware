@@ -237,25 +237,22 @@ namespace haptics::types {
     return amp_modulation * freq_modulation;
   }
 
-  auto Effect::EvaluateQuantized(double position) -> double {
-    double res = 0;
+  auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
+    double relativePosition = position - this->getPosition();
+    int index = std::floor(relativePosition / windowLength);
+    if (index >= this->getKeyframesSize()) {
+      return 0;
+    }
 
-    double relativePosition = position - this->position;
-
-    auto k_before = keyframes.begin();
-
-    for (auto it = keyframes.end(); it >= keyframes.begin(); it--) {
-      if (it->getRelativePosition() <= relativePosition) {
-        k_before = it;
-        break;
-      }
+    auto myKeyframe = keyframes.begin() + index;
+    if (!myKeyframe->getAmplitudeModulation().has_value() ||
+        !myKeyframe->getFrequencyModulation().has_value()) {
+      return 0;
     }
 
     double t = MS_2_S * relativePosition;
-    // TODO PHASE MATCHING
-    res = std::sin(t * k_before->getFrequencyModulation().value() * 2 * M_PI + this->getPhase()) * k_before->getAmplitudeModulation().value();
-
-    return res;
+    return std::sin(t * myKeyframe->getFrequencyModulation().value() * 2 * M_PI + this->getPhase()) *
+           myKeyframe->getAmplitudeModulation().value();
   }
 
   auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
