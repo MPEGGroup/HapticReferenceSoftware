@@ -71,6 +71,7 @@ public:
   auto addBand(haptics::types::Band &newBand) -> void;
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
+  auto Evaluate(double position) -> double;
 
 private:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;

@@ -42,14 +42,14 @@ using haptics::types::Effect;
 using haptics::types::Band;
 
 TEST_CASE("localExtrema with empty input and no border", "[localExtrema][empty][withoutBorder]") {
-  std::vector<std::pair<int16_t, double>> res =
+  std::vector<std::pair<int, double>> res =
       PcmEncoder::localExtrema(std::vector<double>{}, false);
 
   CHECK(res.empty());
 }
 
 TEST_CASE("localExtrema with empty input and border", "[localExtrema][empty][withBorder]") {
-  std::vector<std::pair<int16_t, double>> res =
+  std::vector<std::pair<int, double>> res =
       PcmEncoder::localExtrema(std::vector<double>{}, true);
 
   CHECK(res.empty());
@@ -59,23 +59,23 @@ TEST_CASE("localExtrema with entry of 1 point",
           "[localExtrema][1_point][withBorder][withoutBorder]") {
   const std::vector<double> testingValues = {0, -1, 42, 4153, 346, -5423, 6, 1};
 
-  int16_t i = 0;
+  int i = 0;
   for (double testingElement : testingValues) {
     std::vector<double> v = {testingElement};
 
     DYNAMIC_SECTION("1 point entry without border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(v, false);
+      std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(v, false);
 
       CHECK(res.empty());
     }
 
     DYNAMIC_SECTION("1 point entry with border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(v, true);
+      std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(v, true);
 
       REQUIRE_FALSE(res.empty());
-      int16_t pi = 0;
-      std::pair<int16_t, double> p1(pi, testingElement);
-      std::pair<int16_t, double> p2(pi, testingElement);
+      int pi = 0;
+      std::pair<int, double> p1(pi, testingElement);
+      std::pair<int, double> p2(pi, testingElement);
       REQUIRE(res.size() == 2);
       REQUIRE((res[0] == p1));
       REQUIRE((res[1] == p2));
@@ -89,22 +89,22 @@ TEST_CASE("localExtrema with entry of 2 point",
   const std::vector<std::vector<double>> testingValues = {
       {1, 1}, {0, 1}, {-5432, 42}, {-1, -3}, {6542, 3461}};
 
-  int16_t i = 0;
+  int i = 0;
   for (const auto &v : testingValues) {
     DYNAMIC_SECTION("2 points entry without border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(v, false);
+      std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(v, false);
 
       CHECK(res.empty());
     }
 
     DYNAMIC_SECTION("2 points entry with border (TESTING CASE: " + std::to_string(i) + ")") {
-      std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(v, true);
+      std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(v, true);
 
       REQUIRE_FALSE(res.empty());
-      int16_t pi = 0;
-      std::pair<int16_t, double> p1(pi, v[pi]);
+      int pi = 0;
+      std::pair<int, double> p1(pi, v[pi]);
       pi = 1;
-      std::pair<int16_t, double> p2(pi, v[pi]);
+      std::pair<int, double> p2(pi, v[pi]);
       REQUIRE(res.size() == 2);
       REQUIRE((res[0] == p1));
       REQUIRE((res[1] == p2));
@@ -118,18 +118,18 @@ TEST_CASE("localExtrema without border every extremum are extracted",
   const std::vector<double> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
                                               3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
 
-  std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(testingValues, false);
+  std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(testingValues, false);
 
   REQUIRE_FALSE(res.empty());
 
   bool isMaximum = false;
   bool isMinimum = false;
   bool isFlat = false;
-  int16_t i = 1;
+  int i = 1;
   double previousValue = 0;
   double currentValue = testingValues[i - 1];
   double nextValue = testingValues[i];
-  for (; i < int16_t(testingValues.size() - 1); i++) {
+  for (; i < int(testingValues.size() - 1); i++) {
     previousValue = currentValue;
     currentValue = nextValue;
     nextValue = testingValues[i + 1];
@@ -138,9 +138,9 @@ TEST_CASE("localExtrema without border every extremum are extracted",
     isMinimum = previousValue >= currentValue && currentValue <= nextValue;
 
     if (!isFlat && (isMaximum || isMinimum)) {
-      std::pair<int16_t, double> p(i, testingValues[i]);
+      std::pair<int, double> p(i, testingValues[i]);
       bool contain = false;
-      for (std::pair<int16_t, double> element : res) {
+      for (std::pair<int, double> element : res) {
         if (element == p) {
           contain = true;
           break;
@@ -156,19 +156,19 @@ TEST_CASE("localExtrema without border extract only extremum",
   const std::vector<double> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
                                               3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
 
-  std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(testingValues, false);
+  std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(testingValues, false);
 
   REQUIRE_FALSE(res.empty());
 
   bool isMaximum = false;
   bool isMinimum = false;
   bool isFlat = false;
-  int16_t i = 1;
+  int i = 1;
   double previousValue = 0;
   double currentValue = testingValues[i - 1];
   double nextValue = testingValues[i];
-  auto testingValuesSize = int16_t(testingValues.size());
-  for (std::pair<int16_t, double> extremumElement : res) {
+  auto testingValuesSize = int(testingValues.size());
+  for (std::pair<int, double> extremumElement : res) {
     previousValue = testingValues[extremumElement.first - 1];
     currentValue = testingValues[extremumElement.first];
     nextValue = testingValues[extremumElement.first + 1];
@@ -189,15 +189,15 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
           "[localExtrema][N_points][withBorder]") {
   const std::vector<double> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
                                               3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
-  std::vector<std::pair<int16_t, double>> res = PcmEncoder::localExtrema(testingValues, true);
-  auto resSize = int16_t(res.size());
+  std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(testingValues, true);
+  auto resSize = int(res.size());
 
   REQUIRE(resSize >= 2);
 
   SECTION("first and last values are the borders") {
-    std::pair<int16_t, double> first = res[0];
-    std::pair<int16_t, double> last = res[resSize - 1];
-    auto testingValuesSize = int16_t(testingValues.size());
+    std::pair<int, double> first = res[0];
+    std::pair<int, double> last = res[resSize - 1];
+    auto testingValuesSize = int(testingValues.size());
 
     CHECK(first.first == 0);
     CHECK(first.second == Approx(testingValues[0]));
@@ -207,9 +207,9 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
   }
 
   SECTION("The rest is the same values as without border") {
-    std::vector<std::pair<int16_t, double>> resWithoutBorder =
+    std::vector<std::pair<int, double>> resWithoutBorder =
         PcmEncoder::localExtrema(testingValues, false);
-    std::vector<std::pair<int16_t, double>> subRes(res.begin() + 1, res.begin() + resSize - 1);
+    std::vector<std::pair<int, double>> subRes(res.begin() + 1, res.begin() + resSize - 1);
 
     REQUIRE(subRes.size() == resWithoutBorder.size());
 
@@ -227,7 +227,7 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("convertToCurveBand", "[convertToCurveBand]") {
-  std::vector<std::pair<int16_t, double>> testingPoints = {
+  std::vector<std::pair<int, double>> testingPoints = {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
     {0, .654}, {24, 1}, {40, 0}, {80, -.34}, {656, -.5648}, {2500, .15},
   };
@@ -251,7 +251,7 @@ TEST_CASE("convertToCurveBand", "[convertToCurveBand]") {
   REQUIRE(e.getKeyframesSize() == testingPoints.size());
   int i = 0;
   Keyframe k;
-  for (std::pair<int16_t, double> testingP : testingPoints) {
+  for (std::pair<int, double> testingP : testingPoints) {
     k = e.getKeyframeAt(i);
     CHECK(k.getRelativePosition() == expectedTimes[i]);
     CHECK_FALSE(k.getFrequencyModulation().has_value());
