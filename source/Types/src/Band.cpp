@@ -89,7 +89,6 @@ namespace haptics::types {
     });
 
     effects.insert(it, newEffect);
-    //effects.push_back(newEffect);
   }
 
   auto Band::replaceEffectAt(int index, haptics::types::Effect& newEffect) -> bool {

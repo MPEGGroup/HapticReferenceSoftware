@@ -98,7 +98,6 @@ namespace haptics::synthesizer {
     return length;
   }
 
-  // NOLINTNEXTLINE(misc-unused-parameters)
   [[nodiscard]] auto Helper::playFile(types::Haptics &haptic, const double timeLength, const int fs,
                                       std::string &filename) -> bool {
   

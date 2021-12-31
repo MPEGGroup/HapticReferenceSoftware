@@ -232,7 +232,6 @@ namespace haptics::types {
         break;
       }
     }
-    //-----
 
     return amp_modulation * freq_modulation;
   }
