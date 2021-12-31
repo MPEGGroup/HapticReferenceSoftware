@@ -3,15 +3,19 @@
 namespace haptics::tools {
 
   extern auto haptics::tools::linearInterpolation(std::pair<int, double> a, std::pair<int, double> b,
-                                                int x) -> double {
+                                                double x) -> double {
 
-    int start = a.first;
-    int end = b.first;
+    double start = a.first;
+    double end = b.first;
     double start_a = a.second;
     double end_a = b.second;
 
-    if (x < start || x > end) {
-      return EXIT_FAILURE;
+    if (x < start) {
+      return start_a;
+    }
+
+    if (x > end) {
+      return end_a;
     }
 
     if (start >= end) {
@@ -37,10 +41,6 @@ namespace haptics::tools {
 
     if (start_t == end_t) {
       return end_f;
-    }
-
-    if (position < start_t && position > end_t) {
-      return EXIT_FAILURE;
     }
 
     return position * (end_f - start_f) / (end_t - start_t) + start_f;

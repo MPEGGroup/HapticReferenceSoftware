@@ -93,8 +93,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     if (count == 0) {
       continue;
     }
+
+    effectToRepeat = {};
     for (bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
-      effectToRepeat = {};
       time = IvsEncoder::getTime(&repeatEvent);
       duration = IvsEncoder::getDuration(&repeatEvent);
       myBand = &myTrack.getBandAt(bandIndex);
@@ -105,15 +106,27 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
           effectToRepeat.push_back(myEffect);
         } else if (time + duration <= myEffect.getPosition()) {
           myEffect.setPosition(myEffect.getPosition() + count * duration);
+          myBand->replaceEffectAt(effectIndex, myEffect);
         }
       }
+    }
 
-      for (haptics::types::Effect &e: effectToRepeat) {
-        for (effectIndex = 1; effectIndex <= count; effectIndex++) {
-          myEffect = haptics::types::Effect(e);
-          myEffect.setPosition(myEffect.getPosition() + duration * effectIndex);
-          myBand->addEffect(myEffect);
+    for (haptics::types::Effect &e : effectToRepeat) {
+      for (effectIndex = 1; effectIndex <= count; effectIndex++) {
+        myEffect = haptics::types::Effect(e);
+        myEffect.setPosition(myEffect.getPosition() + duration * effectIndex);
+        myBand = myTrack.findBandAvailable(
+            myEffect.getPosition(),
+            myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
+                .getRelativePosition(),
+            types::BandType::Wave, types::EncodingModality::Vectorial);
+        if (myBand == nullptr) {
+          myTrack.addBand(*(new haptics::types::Band(
+              haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,
+              IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY)));
+          myBand = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
         }
+        myBand->addEffect(myEffect);
       }
     }
   }
@@ -144,7 +157,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int fadeTime = IvsEncoder::getFadeTime(basisEffect);
   if (fadeTime != -1) {
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
-    keyframeList[1]->setRelativePosition(duration - fadeTime);
+    keyframeList[1]->setRelativePosition(std::max(duration - fadeTime, 0));
     keyframeList.push_back(&*(new haptics::types::Keyframe(
         duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }
@@ -152,7 +165,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
-    keyframeList[0]->setRelativePosition(attackTime);
+    keyframeList[0]->setRelativePosition(std::min(attackTime,duration));
     out->addKeyframe(*(new haptics::types::Keyframe(
         0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }

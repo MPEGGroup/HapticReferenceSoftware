@@ -31,7 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Encoder/include/IOJson.h>
+#include <Types/include/IOJson.h>
 #include <iostream>
 
 using json = nlohmann::json;
@@ -420,7 +420,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
             jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
           }
           if (keyframe.getFrequencyModulation().has_value()) {
-            jsonKeyframe["frequencyModulation"] = keyframe.getFrequencyModulation().value();
+            jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
           }
           jsonKeyframes.push_back(jsonKeyframe);
         }

@@ -124,7 +124,9 @@ namespace haptics::encoder {
   for (types::Effect e : transients) {
     myBand.addEffect(e);
   }
-  myTrack.addBand(myBand);
+  if (myBand.getEffectsSize() > 0) {
+    myTrack.addBand(myBand);
+  }
 
   // CONTINUOUS
   types::Band *b = nullptr;
@@ -132,7 +134,7 @@ namespace haptics::encoder {
     b = myTrack.findBandAvailable(e.getPosition(), e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition(), types::BandType::Wave, types::EncodingModality::Vectorial);
     if (b == nullptr) {
       // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      myTrack.addBand(*(new haptics::types::Band(haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0, 0, 1000)));
+      myTrack.addBand(*(new haptics::types::Band(haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0, 65, 300)));
       b = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
     }
     b->addEffect(e);
@@ -314,10 +316,12 @@ namespace haptics::encoder {
 
     // IF FIRST KEYFRAME ON START OF EVENT, UPDATE EVENT
     if (first_kf_f->first == c.getPosition() && first_kf_f != frequencies->end() - 1) {
+      double freq_d = first_kf_f->second + base_freq;
+      freq_d = std::clamp(freq_d, BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX);
       int freq = static_cast<int>(haptics::tools::genericNormalization(
           BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
-          first_kf_f->second + base_freq));
-      c.getKeyframeAt(0).setFrequencyModulation(std::clamp(freq, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX));
+          freq_d));
+      c.getKeyframeAt(0).setFrequencyModulation(freq);
       first_kf_f++;
     } else if ((c.getPosition() < first_kf_f->first) && first_kf_f != frequencies->begin()) {
       double freq = haptics::tools::chirpInterpolation(
@@ -351,7 +355,8 @@ namespace haptics::encoder {
               base_freq));
           c.addFrequencyAt(freq, it->first - c.getPosition());
         }
-        double freq_d = std::clamp(it->second + base_freq, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
+        double freq_d = it->second + base_freq;
+        freq_d = std::clamp(freq_d, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
         int freq = static_cast<int>(haptics::tools::genericNormalization(
             BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
             freq_d));
