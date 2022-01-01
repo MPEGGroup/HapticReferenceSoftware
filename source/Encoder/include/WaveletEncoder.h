@@ -49,6 +49,7 @@ constexpr int FRACTIONBITS_0 = 7;
 constexpr double LOGFACTOR = 10;
 constexpr double MAXQUANTFACTOR = 0.999;
 constexpr double QUANT_ADD = 0.5;
+constexpr double S_2_MS_WAVELET = 1000;
 
 
 using haptics::tools::PsychohapticModel;

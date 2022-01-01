@@ -150,6 +150,8 @@ namespace haptics::types {
         return effect->EvaluateQuantized(position, this->getWindowLength());
       } else if (encodingModality == EncodingModality::Vectorial) {
         return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
+      } else if (encodingModality == EncodingModality::Wavelet) {
+        return effect->EvaluateWavelet(position, this->getWindowLength(),highFrequencyLimit);
       }
       break;
     case BandType::Transient: {

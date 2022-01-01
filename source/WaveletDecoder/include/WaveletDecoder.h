@@ -37,6 +37,7 @@
 #include <cmath>
 #include <vector>
 #include <optional>
+#include <algorithm>
 
 #include "FilterBank/include/Wavelet.h"
 #include "Types/include/Band.h"
@@ -48,16 +49,18 @@ using haptics::filterbank::Wavelet;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::Effect;
+using haptics::types::EncodingModality;
 
 namespace haptics::waveletdecoder {
 
+constexpr double MS_2_S_WAVELET = 0.001;
+
 class WaveletDecoder {
 public:
-  WaveletDecoder(Band band);
 
-  auto getSignal() -> std::vector<double>;
-  auto getSignalSize() -> size_t;
-  auto getSampleAt(int pos) -> double;
+  auto static decodeBand(Band &band) -> std::vector<double>;
+  void static transformBand(Band &band);
+  auto static decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl) -> std::vector<double>;
 
 
 private:

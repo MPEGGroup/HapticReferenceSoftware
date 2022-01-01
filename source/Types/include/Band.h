@@ -48,6 +48,7 @@ enum class BandType {
 enum class EncodingModality {
   Quantized = 0,
   Vectorial = Quantized + 1,
+  Wavelet = Vectorial + 1,
 };
 
 class Band {

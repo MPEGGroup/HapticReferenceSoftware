@@ -55,7 +55,7 @@ constexpr size_t book_size = 8;
 
 constexpr int FS = 8000;
 constexpr size_t BL = 128;
-constexpr size_t BITS = 20;
+constexpr size_t BITS = 90;
 constexpr double F_CUTOFF = 72;
 
 constexpr size_t bl = 128;
@@ -63,6 +63,8 @@ constexpr int levels = 1;
 constexpr int hSize = 7;
 constexpr int prec = 15;
 constexpr double prec_comparison = 0.00001;
+
+constexpr double S_2_MS_TEST = 1000;
 
 TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
@@ -176,13 +178,42 @@ TEST_CASE("Encoder/Decoder Integration") {
     Band b;
     enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
 
-    WaveletDecoder dec(b);
-
-    std::vector<double> sig_rec = dec.getSignal();
+    std::vector<double> sig_rec = WaveletDecoder::decodeBand(b);
     CHECK(sig_time.size() == sig_rec.size());
 
-    for (auto v : sig_rec) {
+    /*for (auto v : sig_rec) {
       std::cout << v << std::endl;
+    }*/
+  }
+}
+
+TEST_CASE("Band transformation") {
+
+  using haptics::encoder::WaveletEncoder;
+  using haptics::waveletdecoder::WaveletDecoder;
+
+  SECTION("Input/Output test") {
+
+    WaveletEncoder enc(BL, FS);
+    std::vector<double> sig_time(BL * 2, 0);
+    sig_time[0] = 1;
+    Band b;
+    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
+
+    WaveletDecoder::transformBand(b);
+
+    /*int size = 0;
+    for (int i = 0; i < b.getEffectsSize(); i++) {
+      for (int j = 0; j < b.getEffectAt(i).getKeyframesSize(); j++) {
+        std::cout << b.getEffectAt(i).getKeyframeAt(j).getAmplitudeModulation().value()
+                  << std::endl;
+        size++;
+      }
+    }
+    std::cout << "total size: " << size << std::endl;*/
+
+    for (double t = 0; t < 1.0/FS*(BL*2); t += 1.0/FS) {
+      std::cout << b.Evaluate(t * S_2_MS_TEST, 0, FS) << std::endl;
     }
   }
 }
