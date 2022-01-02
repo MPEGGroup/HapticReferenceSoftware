@@ -33,6 +33,7 @@
 
 #include <Encoder/include/PcmEncoder.h>
 #include <Tools/include/Tools.h>
+#include <Encoder/include/WaveletEncoder.h>
 
 using haptics::filterbank::Filterbank;
 using haptics::types::EncodingModality;
@@ -44,6 +45,7 @@ using haptics::types::Keyframe;
 using haptics::types::Effect;
 using haptics::types::Track;
 using haptics::types::Band;
+using haptics::encoder::WaveletEncoder;
 
 namespace haptics::encoder {
 
@@ -60,6 +62,10 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   std::vector<double> signal;
   std::vector<std::pair<int, double>> points;
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
+  // init of wavelet encoding
+  Band waveletBand;
+  WaveletEncoder waveletEnc(BL_WAVELET_2KB, static_cast<int>(wavParser.getSamplerate()));
+  std::vector<double> signal_wavelet;
   for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
     myTrack = out.getTrackAt(channelIndex);
     signal = wavParser.getSamplesChannel(channelIndex);
@@ -70,6 +76,15 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
                                        &myBand)) {
       myTrack.addBand(myBand);
     }
+    //wavelet processing
+    signal_wavelet = wavParser.getSamplesChannel(channelIndex);
+    signal_wavelet = filterbank.HP(signal, curveFrequencyLimit);
+    waveletBand = Band();
+    if (waveletEnc.encodeSignal(signal_wavelet, BITBUDGET_WAVELET_2KB, curveFrequencyLimit,
+                            waveletBand)) {
+      myTrack.addBand(waveletBand);
+    }
+
     out.replaceTrackAt(channelIndex, myTrack);
   }
 

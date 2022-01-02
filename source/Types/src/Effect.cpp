@@ -254,7 +254,7 @@ namespace haptics::types {
            myKeyframe->getAmplitudeModulation().value();
   }
 
-  auto Effect::EvaluateWavelet(double position, double windowLength, int highFrequencyLimit) -> double {//NOLINT
+  auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
     double relativePosition = position - this->getPosition();
     int index = std::floor(relativePosition/windowLength*(double)this->getKeyframesSize());
 
