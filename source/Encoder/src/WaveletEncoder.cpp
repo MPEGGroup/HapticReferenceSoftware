@@ -64,19 +64,24 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   band.setWindowLength((int)((double)bl/fs*S_2_MS_WAVELET));
 
   int pos_effect = 0;
-
+  long add_start = 0;
+  long add_end = bl;
   for (int b = 0; b < numBlocks; b++) {
     Effect effect;
-    auto start = sig_time.begin() + (long long)b * bl;
-    auto end = start + bl;
+    //auto start = sig_time.begin() + (long long)b * bl;
+    //std::cout << "encodeSignal copy init 2" << std::endl;
+    //auto end = start + bl;
 
+    //std::cout << "encodeSignal copy: " << end - sig_time.begin() << std::endl;
     std::vector<double> block_time(bl, 0);
-    if (end - sig_time.begin() > sig_time.size()) {
-      end = sig_time.end();
+    if (add_end > sig_time.size()) {
+      add_end = (long)sig_time.size()-1;
     }
-    std::copy(start, end, block_time.begin());
+    std::copy(sig_time.begin() + add_start, sig_time.begin()+add_end, block_time.begin());
+
     double scalar = 0;
     std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar);
+
     int pos = 0;
     for (auto v : block_quant) {
       Keyframe keyframe(pos, (float)v, 0);
@@ -88,7 +93,10 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     effect.setPosition(pos_effect);
     band.addEffect(effect);
     pos_effect += band.getWindowLength();
+    add_start += bl;
+    add_end += bl;
   }
+
   return true;
 }
 
@@ -151,7 +159,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
         }
 
     }
-
 
     //scale signal to int values
     int bitmax = findMax(bitalloc);

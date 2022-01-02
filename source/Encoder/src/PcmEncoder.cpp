@@ -56,7 +56,6 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   if (out.getTracksSize() != numChannels) {
     return EXIT_FAILURE;
   }
-
   Track myTrack;
   Band myBand;
   std::vector<double> signal;
@@ -84,10 +83,8 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
                             waveletBand)) {
       myTrack.addBand(waveletBand);
     }
-
     out.replaceTrackAt(channelIndex, myTrack);
   }
-
   return EXIT_SUCCESS;
 }
 

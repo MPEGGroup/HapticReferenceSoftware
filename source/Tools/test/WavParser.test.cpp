@@ -55,6 +55,24 @@ TEST_CASE("haptics::tools::WavParser") {
     CHECK(buffer2.size() == buffer.size());
   }
 
+  SECTION("Output to Input test MD") {
+
+    std::string filename = "test_MD.wav";
+    std::vector<double> buffer{0, 0.5, 0.75, 1}; //NOLINT
+    std::vector<double> buffer2{1, 0.75, 0.5, 0}; //NOLINT
+    std::vector<std::vector<double>> buffer_MD;
+    buffer_MD.push_back(buffer);
+    buffer_MD.push_back(buffer2);
+    WavParser::saveFile(filename, buffer_MD, fs);
+    CHECK(std::filesystem::is_regular_file(filename));
+    WavParser wavParser2;
+    wavParser2.loadFile(filename);
+    std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
+    //CHECK(buffer_rec.at(0) == buffer.at(0));
+    std::vector<double> buffer_rec2 = wavParser2.getSamplesChannel(1);
+    //CHECK(buffer_rec2.at(0) == buffer2.at(0));
+  }
+
   /*SECTION("Bugfix load MD file") {
 
     std::string filename = "IDCC-kin-ForceXSlow-8kHz-16-nopad.wav";

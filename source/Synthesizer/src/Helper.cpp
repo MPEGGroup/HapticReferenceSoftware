@@ -73,7 +73,6 @@ namespace haptics::synthesizer {
 [[nodiscard]] auto Helper::getEffectTimeLength(types::Effect &effect, types::BandType bandType,
                                                types::EncodingModality encodingModality,
                                                int windowLength) -> double {
-
   double length = effect.getPosition();
   if (effect.getKeyframesSize() == 0) {
     return length;
@@ -118,7 +117,6 @@ namespace haptics::synthesizer {
       }
     }
   }
-
   std::vector<std::vector<double>> amplitudes;
 
   int index = 0;
@@ -135,7 +133,6 @@ namespace haptics::synthesizer {
       amplitudes.push_back(trackAmp);
     }
   }
-
   return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
 }
 } // namespace haptics::synthesizer

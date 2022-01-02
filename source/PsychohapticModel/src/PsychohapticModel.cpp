@@ -294,6 +294,19 @@ auto PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak
         peaks p;
         return p;
     }
+    bool zeros = true;
+    for (auto v : spectrum) {
+      if (v > ZERO_COMP) {
+        zeros = false;
+        break;
+      }
+      //std::cout << v << std::endl;
+    }
+
+    if (zeros) {
+      peaks p;
+      return p;
+    }
 
     peaks peaks_all = findAllPeakLocations(spectrum);
 
@@ -308,9 +321,7 @@ auto PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak
     }
 
     peaks prominences = peakProminence(spectrum,peaks_min_h);
-
     peaks peaks_min_prominence = filterPeakCriterion(prominences, min_peak_prominence);
-
     size_t prominences_length = peaks_min_prominence.heights.size();
 
     peaks result;

@@ -51,7 +51,7 @@ constexpr double MAXQUANTFACTOR = 0.999;
 constexpr double QUANT_ADD = 0.5;
 constexpr double S_2_MS_WAVELET = 1000;
 constexpr int BL_WAVELET_2KB = 128;
-constexpr int BITBUDGET_WAVELET_2KB = 4;
+constexpr int BITBUDGET_WAVELET_2KB = 90;
 
 
 using haptics::tools::PsychohapticModel;
