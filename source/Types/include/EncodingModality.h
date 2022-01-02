@@ -29,21 +29,17 @@
 * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 * THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef ENCODINGMODALITY_H
+#define ENCODINGMODALITY_H
 
-#include <Types/include/Haptics.h>
-#include <vector>
+namespace haptics::types {
 
-namespace haptics::synthesizer {
-
-class Helper {
-public:
-  [[nodiscard]] auto static getTimeLength(types::Haptics &haptic) -> double;
-  [[nodiscard]] auto static playFile(types::Haptics &haptic, const double timeLength, const int fs,
-                                     std::string &filename) -> bool;
+enum class EncodingModality {
+  Quantized = 0,
+  Vectorial = Quantized + 1,
 };
-} // namespace haptics::synthesizer
-#endif //HELPER_H
+} // namespace haptics::types
+
+#endif //ENCODINGMODALITY_H

@@ -31,19 +31,16 @@
 * THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef BANDTYPE_H
+#define BANDTYPE_H
 
-#include <Types/include/Haptics.h>
-#include <vector>
+namespace haptics::types {
 
-namespace haptics::synthesizer {
-
-class Helper {
-public:
-  [[nodiscard]] auto static getTimeLength(types::Haptics &haptic) -> double;
-  [[nodiscard]] auto static playFile(types::Haptics &haptic, const double timeLength, const int fs,
-                                     std::string &filename) -> bool;
+enum class BandType {
+ Wave = 0,
+ Curve = Wave + 1,
+ Transient = Curve + 1,
 };
-} // namespace haptics::synthesizer
-#endif //HELPER_H
+} // namespace haptics::types
+
+#endif //BANDTYPE_H

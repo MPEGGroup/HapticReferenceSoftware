@@ -131,7 +131,10 @@ namespace haptics::encoder {
   // CONTINUOUS
   types::Band *b = nullptr;
   for (types::Effect e : continuous) {
-    b = myTrack.findBandAvailable(e.getPosition(), e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition(), types::BandType::Wave, types::EncodingModality::Vectorial);
+    b = myTrack.findBandAvailable(
+        e.getPosition(),
+        e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition().value(),
+        types::BandType::Wave, types::EncodingModality::Vectorial);
     if (b == nullptr) {
       // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
       myTrack.addBand(*(new haptics::types::Band(haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0, 65, 300)));
@@ -287,15 +290,15 @@ namespace haptics::encoder {
 
     for (auto it = first_kf_a; it < amplitudes->end(); it++) {
       //IF AFTER OR ON THE END OF THE EFFECT, UPDATE END
-      if (it->first >= (c.getPosition() + k_end.getRelativePosition())) {
+      if (it->first >= (c.getPosition() + k_end.getRelativePosition().value())) {
         float amp = static_cast<float>(haptics::tools::linearInterpolation(
-            *(it - 1), *it, c.getPosition() + k_end.getRelativePosition()));
+            *(it - 1), *it, c.getPosition() + k_end.getRelativePosition().value()));
         k_end.setAmplitudeModulation(amp * k_end.getAmplitudeModulation().value());
         break;
       }
       //IF IN THE MIDDLE OF THE EFFECT, ADD KEYFRAME
       if (c.getPosition() < it->first &&
-          it->first < (c.getPosition() + k_end.getRelativePosition())) {
+          it->first < (c.getPosition() + k_end.getRelativePosition().value())) {
         //IF NO KEYFRAME BEFORE, BEGIN MODULATION
         if (it == amplitudes->begin()) {
           c.addAmplitudeAt(base_amp, it->first - c.getPosition());
@@ -335,10 +338,10 @@ namespace haptics::encoder {
 
     for (auto it = first_kf_f; it < frequencies->end(); it++) {
       // IF AFTER OR ON THE END OF THE EFFECT, UPDATE END
-      if (it->first >= (c.getPosition() + k_end.getRelativePosition())) {
+      if (it->first >= (c.getPosition() + k_end.getRelativePosition().value())) {
         double freq = haptics::tools::chirpInterpolation(
-            (it - 1)->first, it->first, (it - 1)->second + base_freq,
-            it->second + base_freq, c.getPosition() + k_end.getRelativePosition());
+            (it - 1)->first, it->first, (it - 1)->second + base_freq, it->second + base_freq,
+            c.getPosition() + k_end.getRelativePosition().value());
         freq = std::clamp(freq + base_freq, BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX);
         k_end.setFrequencyModulation(static_cast<int>(haptics::tools::genericNormalization(
             BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN, ACTUAL_FREQUENCY_MAX,
@@ -347,7 +350,7 @@ namespace haptics::encoder {
       }
       // IF IN THE MIDDLE OF THE EFFECT, ADD KEYFRAME
       if (c.getPosition() < it->first &&
-          it->first < (c.getPosition() + k_end.getRelativePosition())) {
+          it->first < (c.getPosition() + k_end.getRelativePosition().value())) {
         // IF NO KEYFRAME BEFORE, BEGIN MODULATION
         if (it == frequencies->begin()) {
           int freq = static_cast<int>(haptics::tools::genericNormalization(
