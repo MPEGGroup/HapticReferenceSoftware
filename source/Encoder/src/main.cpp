@@ -119,8 +119,14 @@ auto main(int argc, char *argv[]) -> int {
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         encodingFunction = [](std::string &filename, Perception &out) {
-          const double curveFrequency = 72.5;
-          return PcmEncoder::encode(filename, curveFrequency, out);
+          haptics::encoder::EncodingConfig config;
+          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+          config.curveFrequencyLimit = 72.5;
+          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+          config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
+          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+          config.windowLength = 15;
+          return PcmEncoder::encode(filename, config, out);
         };
       }
 
@@ -140,8 +146,14 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
-    const double curveFrequency = 72.5;
-    codeExit = PcmEncoder::encode(filename, curveFrequency, myPerception);
+    haptics::encoder::EncodingConfig config;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    config.curveFrequencyLimit = 72.5;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    config.windowLength = 15;
+    codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
   }
   else {
