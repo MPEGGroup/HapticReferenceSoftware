@@ -83,7 +83,6 @@ void WaveletDecoder::transformBand(Band &band) {
     std::vector<double> block_dwt(bl, 0);
     Keyframe keyframe = effect.getKeyframeAt(bl);
     auto scalar = (double)keyframe.getAmplitudeModulation().value();
-    // std::cout << "scalar decoder: " << scalar << std::endl;
     for (int i = 0; i < bl; i++) {
       Keyframe keyframe = effect.getKeyframeAt(i);
       block_dwt[i] = (double)keyframe.getAmplitudeModulation().value();

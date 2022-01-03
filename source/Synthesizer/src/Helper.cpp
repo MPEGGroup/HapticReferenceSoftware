@@ -112,6 +112,7 @@ namespace haptics::synthesizer {
         if (band.getBandType() == types::BandType::Wave) {
           if (band.getEncodingModality() == types::EncodingModality::Wavelet) {
             WaveletDecoder::transformBand(band);
+            haptic.getPerceptionAt(i).getTrackAt(j).replaceBandAt(k, band);
           }
         }
       }

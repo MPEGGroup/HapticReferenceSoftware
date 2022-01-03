@@ -99,6 +99,14 @@ namespace haptics::types {
     bands.push_back(newBand);
   }
 
+  auto Track::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
+    if (index < 0 || index >= this->getBandsSize()) {
+      return false;
+    }
+    this->bands[index] = newBand;
+    return true;
+  }
+
 auto Track::findBandAvailable(const int position, const int duration,
                               const types::BandType bandType,
                               const types::EncodingModality encodingModality)

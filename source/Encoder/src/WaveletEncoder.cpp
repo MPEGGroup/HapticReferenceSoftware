@@ -55,24 +55,17 @@ WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
 
 
 auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band) -> bool {
-
   int numBlocks = (int)ceil((double)sig_time.size() / (double)bl);
   band.setBandType(BandType::Wave);
   band.setEncodingModality(EncodingModality::Wavelet);
   band.setLowerFrequencyLimit((int)f_cutoff);
   band.setUpperFrequencyLimit((int)fs);
   band.setWindowLength((int)((double)bl/fs*S_2_MS_WAVELET));
-
   int pos_effect = 0;
   long add_start = 0;
   long add_end = bl;
   for (int b = 0; b < numBlocks; b++) {
     Effect effect;
-    //auto start = sig_time.begin() + (long long)b * bl;
-    //std::cout << "encodeSignal copy init 2" << std::endl;
-    //auto end = start + bl;
-
-    //std::cout << "encodeSignal copy: " << end - sig_time.begin() << std::endl;
     std::vector<double> block_time(bl, 0);
     if (add_end > sig_time.size()) {
       add_end = (long)sig_time.size()-1;
@@ -96,12 +89,10 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     add_start += bl;
     add_end += bl;
   }
-
   return true;
 }
 
 auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar) -> std::vector<double> {
-
     std::vector<double> block_dwt(bl, 0);
     Wavelet wavelet;
     wavelet.DWT(block_time, dwtlevel, block_dwt);
@@ -119,6 +110,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     std::vector<unsigned char> bitwavmax;
     bitwavmax.reserve(WAVMAXLENGTH);
     maximumWaveletCoefficient(block_dwt,qwavmax,bitwavmax);
+    //std::cout << "maximum wavelet coefficient: " << findMax(block_dwt) << ", quant: " << qwavmax << std::endl;
 
     //Quantization
     int i = 0;
@@ -199,8 +191,8 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
         m.fractionbits = FRACTIONBITS_0; 
     }else{
         integerpart = 1;
-        m.integerbits = 3;
-        m.fractionbits = 4; 
+        m.integerbits = INTEGERBITS_1;
+        m.fractionbits = FRACTIONBITS_1; 
         mode = 1;
     }
 

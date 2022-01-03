@@ -77,7 +77,8 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
     }
     //wavelet processing
     signal_wavelet = wavParser.getSamplesChannel(channelIndex);
-    signal_wavelet = filterbank.HP(signal, curveFrequencyLimit);
+    Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
+    signal_wavelet = filterbank2.HP(signal_wavelet, curveFrequencyLimit);
     waveletBand = Band();
     if (waveletEnc.encodeSignal(signal_wavelet, BITBUDGET_WAVELET_2KB, curveFrequencyLimit,
                             waveletBand)) {

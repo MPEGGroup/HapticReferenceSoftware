@@ -32,6 +32,7 @@
  */
 
 #include <Types/include/Band.h>
+#include <iostream>
 
 namespace haptics::types {
 
@@ -151,7 +152,8 @@ namespace haptics::types {
       } else if (encodingModality == EncodingModality::Vectorial) {
         return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
       } else if (encodingModality == EncodingModality::Wavelet) {
-        return effect->EvaluateWavelet(position, this->getWindowLength());
+        auto sample = effect->EvaluateWavelet(position, this->getWindowLength());
+        return sample;
       }
       break;
     case BandType::Transient: {

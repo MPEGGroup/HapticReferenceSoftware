@@ -38,6 +38,8 @@
 
 #include "../include/WaveletEncoder.h"
 #include "WaveletDecoder/include/WaveletDecoder.h"
+#include "FilterBank/include/Filterbank.h"
+#include "Tools/include/WavParser.h"
 
 constexpr int val = 3;
 constexpr int bits = 3;
@@ -66,6 +68,8 @@ constexpr double prec_comparison = 0.00001;
 
 constexpr double S_2_MS_TEST = 1000;
 
+constexpr double FS_filter = 8000;
+
 TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
   using haptics::encoder::WaveletEncoder;
@@ -86,7 +90,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,1") {
   }
 }
 
-TEST_CASE("haptics::encoder::WaveletEncoder,2") {
+/*TEST_CASE("haptics::encoder::WaveletEncoder,2") {
 
   using haptics::encoder::quantMode;
   using haptics::encoder::WaveletEncoder;
@@ -117,14 +121,14 @@ TEST_CASE("haptics::encoder::WaveletEncoder,2") {
     CHECK(v_quantized[1] == quantized);
     CHECK(v_quantized[2] == 0);
   }
-}
+}*/
 
 TEST_CASE("haptics::encoder::WaveletEncoder,3") {
 
   using haptics::encoder::WaveletEncoder;
   using haptics::types::Band;
 
-  SECTION("Encoder tools") {
+  /*SECTION("Encoder tools") {
 
     std::vector<double> v_unquantized(3, unquantized);
     double qwavmax = 0;
@@ -134,9 +138,9 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
     CHECK(qwavmax == quantized);
     CHECK(std::equal(bitwavmax.begin(), bitwavmax.end(), bitwavmax_compare.begin()));
 
-    /*for(size_t i=0; i<WAVMAXLENGTH; i++){
+    for(size_t i=0; i<WAVMAXLENGTH; i++){
         std::cout << (int)bitwavmax[i] << std::endl;
-    }*/
+    }
   }
 
   SECTION("Encoder") {
@@ -146,7 +150,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
     WaveletEncoder waveletEncoder(bl_test, fs_test);
     double scalar = 0;
     std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar);
-  }
+  }*/
 
   SECTION("Encoder Integration") {
     std::vector<double> data_time(bl_test, 0);
@@ -250,3 +254,51 @@ TEST_CASE("Band transformation") {
     CHECK(equal);
   }
 }*/
+
+TEST_CASE("haptics::filterbank::Filterbank") {
+
+  using haptics::filterbank::Filterbank;
+  using haptics::tools::WavParser;
+
+  SECTION("LP") {
+
+    WavParser wavparser;
+    wavparser.loadFile("pantheon.wav");
+
+    //std::vector<double> in(BL, 0);
+    std::vector<double> in = wavparser.getSamplesChannel(0);
+    //in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.LP(in, 72.5);//NOLINT
+
+    std::cout << "LP:" << std::endl;
+    /*for (int i = 0; i < BL; i++) {
+        std::cout << out[i] << std::endl;
+    }*/
+
+    std::string out_name("pantheon_LP.wav");
+    WavParser::saveFile(out_name, out, FS);
+
+    CHECK(true);
+  }
+
+  SECTION("HP") {
+
+    WavParser wavparser;
+    wavparser.loadFile("pantheon.wav");
+
+    // std::vector<double> in(BL, 0);
+    std::vector<double> in = wavparser.getSamplesChannel(0);
+    //in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.HP(in, 72.5); //NOLINT
+
+    std::cout << "HP:" << std::endl;
+    /*for (int i = 0; i < BL; i++) {
+        std::cout << out[i] << std::endl;
+    }*/
+    std::string out_name("pantheon_HP.wav");
+    WavParser::saveFile(out_name, out, FS);
+    CHECK(true);
+  }
+}

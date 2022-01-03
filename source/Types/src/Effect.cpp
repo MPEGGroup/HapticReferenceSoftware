@@ -259,9 +259,9 @@ namespace haptics::types {
     int index = std::floor(relativePosition/windowLength*(double)this->getKeyframesSize());
 
     //std::cout << "windowLength: " << windowLength << std::endl;
-    //std::cout << "position: " << position << std::endl;
+    //std::cout << "EvaluateWavelet position: " << position << std::endl;
     //std::cout << "relativePosition: " << relativePosition << std::endl;
-    //std::cout << "index: " << index << std::endl;
+    //std::cout << "EvaluateWavelet index: " << index << std::endl;
 
     if (index >= this->getKeyframesSize()) {
       return 0;
