@@ -64,7 +64,7 @@ namespace haptics::synthesizer {
   }
 
   [[nodiscard]] auto Helper::playFile(types::Haptics &haptic, const double timeLength, const int fs,
-                                      std::string &filename) -> bool {
+                                      const int pad, std::string &filename) -> bool {
   
     std::vector<std::vector<double>> amplitudes;
 
@@ -72,9 +72,9 @@ namespace haptics::synthesizer {
 
     for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
       for (int j = 0; j < haptic.getPerceptionAt(i).getTracksSize(); j++) {
-        double t = 0;
+        double t = 0 - pad * MS_2_S;
         std::vector<double> trackAmp;
-        while (t < (timeLength * MS_2_S)) {
+        while (t < ((timeLength + pad) * MS_2_S)) {
           double amp = haptic.getPerceptionAt(i).getTrackAt(j).Evaluate(t * S_2_MS);
           trackAmp.push_back(amp);
           t += 1.0 / static_cast<double>(fs);

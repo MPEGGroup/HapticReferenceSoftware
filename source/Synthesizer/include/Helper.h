@@ -42,8 +42,8 @@ namespace haptics::synthesizer {
 class Helper {
 public:
   [[nodiscard]] auto static getTimeLength(types::Haptics &haptic) -> double;
-  [[nodiscard]] auto static playFile(types::Haptics &haptic, const double timeLength, const int fs,
-                                     std::string &filename) -> bool;
+  [[nodiscard]] auto static playFile(types::Haptics &haptic, double timeLength, int fs,
+                                     int pad, std::string &filename) -> bool;
 };
 } // namespace haptics::synthesizer
 #endif //HELPER_H
