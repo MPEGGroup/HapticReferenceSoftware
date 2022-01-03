@@ -33,6 +33,7 @@
 
 #include <Synthesizer/include/Helper.h>
 #include <Tools/include/InputParser.h>
+#include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
 #include <Types/include/IOJson.h>
 #include <filesystem>
@@ -100,6 +101,13 @@ auto main(int argc, char *argv[]) -> int {
 
   if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {
     return EXIT_FAILURE;
+  }
+
+  if (inputParser.cmdOptionExists("--generate_ohm")) {
+    std::filesystem::path p(output);
+    haptics::tools::OHMData ohm = hapticFile.extractMetadataToOHM(p.filename().u8string());
+    std::string ohmPath = output.substr(0, filename.find_last_of('.')) + ".ohm";
+    ohm.writeFile(ohmPath);
   }
 
   return EXIT_SUCCESS;
