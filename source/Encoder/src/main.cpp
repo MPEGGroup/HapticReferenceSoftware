@@ -51,7 +51,7 @@ using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
+// NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
@@ -107,31 +107,25 @@ auto main(int argc, char *argv[]) -> int {
       }
 
       ext = InputParser::getFileExt(filename);
-      std::function<int(std::string &, Perception &)> encodingFunction =
-          // NOLINTNEXTLINE(misc-unused-parameters)
-          [](std::string &filename, Perception &out) { return EXIT_FAILURE; };
+      myPerception = hapticFile.getPerceptionAt(i);
       if (ext == "json" || ext == "ahap") {
         std::cout << "The AHAP file to encode : " << filename << std::endl;
-        encodingFunction = AhapEncoder::encode;
+        codeExit = AhapEncoder::encode(filename, myPerception);
       } else if (ext == "xml" || ext == "ivs") {
         std::cout << "The IVS file to encode : " << filename << std::endl;
-        encodingFunction = IvsEncoder::encode;
+        codeExit = IvsEncoder::encode(filename, myPerception);
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
-        encodingFunction = [](std::string &filename, Perception &out) {
-          haptics::encoder::EncodingConfig config;
-          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-          config.curveFrequencyLimit = 72.5;
-          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-          config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
-          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-          config.windowLength = 15;
-          return PcmEncoder::encode(filename, config, out);
-        };
+        haptics::encoder::EncodingConfig config;
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.curveFrequencyLimit = 72.5;
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.windowLength = 15;
+        return PcmEncoder::encode(filename, config, myPerception);
       }
 
-      myPerception = hapticFile.getPerceptionAt(i);
-      codeExit = encodingFunction(filename, myPerception);
       if (codeExit == EXIT_SUCCESS) {
         hapticFile.replacePerceptionAt(i, myPerception);
       }
