@@ -114,23 +114,28 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     }
 }
 
-auto Haptics::extractMetadataToOHM(std::string filename) -> haptics::tools::OHMData & {
-  haptics::tools::OHMData res;
-  res.setVersion(static_cast<short>(std::stoi(version)));
-  res.setDescription(description);
+auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData & {
+  std::string header = std::string("OHM ");
+  haptics::tools::OHMData res(header, static_cast<short>(std::stoi(version)),
+                              static_cast<short>(perceptions.size()), description);
+  tools::OHMData::HapticElementMetadata element;
+  tools::OHMData::HapticChannelMetadata channel;
   for (types::Perception p : perceptions) {
-    tools::OHMData::HapticElementMetadata element;
+    element = tools::OHMData::HapticElementMetadata();
     element.elementDescription = p.getDescription();
     element.numHapticChannels = static_cast<short>(p.getTracksSize());
     element.elementFilename = filename;
+    element.channelsMetadata = {};
     for (int i = 0; i < element.numHapticChannels; i++) {
-      tools::OHMData::HapticChannelMetadata channel;
+      channel = tools::OHMData::HapticChannelMetadata();
       types::Track t = p.getTrackAt(i);
       channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMask();
       channel.channelDescription = t.getDescription();
       channel.gain = t.getGain();
+
       element.channelsMetadata.push_back(channel);
     }
+
     res.addHapticElementMetadata(element);
   }
   return res;

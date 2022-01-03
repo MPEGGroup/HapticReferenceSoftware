@@ -118,6 +118,12 @@ namespace haptics::tools {
         
     public:
         explicit OHMData() = default;
+        explicit OHMData(std::string &_header, short _version, short _numElements, std::string &_description)
+          : header(_header)
+          , version(_version)
+          , numElements(_numElements)
+          , description(_description)
+          , elementsMetadata({}) {};
         explicit OHMData(const std::string &filePath);
         auto loadFile(const std::string &filePath) -> bool;
         auto writeFile(const std::string &filePath) -> bool;
@@ -126,6 +132,8 @@ namespace haptics::tools {
         auto setVersion(short newVersion) -> void;
         [[nodiscard]] auto getNumElements() const -> short;
         auto setNumElements(short newNumElements) -> void;
+        [[nodiscard]] auto getHeader() const -> std::string;
+        auto setHeader(std::string &newHeader) -> void;
         [[nodiscard]] auto getDescription() const -> std::string;
         auto setDescription(std::string &newDescription) -> void;
         auto getHapticElementMetadataSize() -> size_t;

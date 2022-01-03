@@ -224,6 +224,14 @@ namespace haptics::tools {
         numElements = newNumElements;
     }
 
+    [[nodiscard]] auto OHMData::getHeader() const -> std::string {
+        return header;
+    }
+
+    auto OHMData::setHeader(std::string &newHeader) -> void {
+      header = newHeader;
+    }
+
     [[nodiscard]] auto OHMData::getDescription() const -> std::string {
         return description;
     }
