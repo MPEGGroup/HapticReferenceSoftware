@@ -107,7 +107,7 @@ auto main(int argc, char *argv[]) -> int {
     std::filesystem::path p(output);
     std::string str = p.filename().u8string();
     haptics::tools::OHMData ohm = hapticFile.extractMetadataToOHM(str);
-    std::string ohmPath = output.substr(0, filename.find_last_of('.')) + ".ohm";
+    std::string ohmPath = output.substr(0, filename.find_last_of('.')) + "ohm";
     ohm.writeFile(ohmPath);
   }
 
