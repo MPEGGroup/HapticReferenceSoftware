@@ -117,7 +117,8 @@ auto FourierTools::IFFT(std::valarray<std::complex<double>> &in) -> bool {
 }
 
 auto FourierTools::GetAmplitude(std::complex<double> c) -> double {
- return 2 * std::abs(c);
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+ return .2 * std::abs(c);
 }
 
 auto FourierTools::GetPhase(std::complex<double> c) -> double {
