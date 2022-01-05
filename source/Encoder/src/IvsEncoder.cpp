@@ -33,6 +33,7 @@
 
 #include <Encoder/include/IvsEncoder.h>
 #include <fstream>
+#include <limits>
 
 namespace haptics::encoder {
 
@@ -54,7 +55,8 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   }
   myTrack = out.getTrackAt(0);
 
-  pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = IvsEncoder::getBasisEffects(&doc);
+  pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
+      IvsEncoder::getBasisEffects(&doc);
   pugi::xml_node basisEffect = {};
   int bandIndex = -1;
   haptics::types::Band *myBand = nullptr;
@@ -145,14 +147,13 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int duration = IvsEncoder::getDuration(basisEffect, launchEvent);
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
   int periodLength = IvsEncoder::getPeriod(basisEffect, launchEvent);
-  int freq = static_cast<int>(1.0/(static_cast<float>(periodLength) / MAX_FREQUENCY));
+  int freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) / MAX_FREQUENCY));
 
   std::vector<haptics::types::Keyframe *> keyframeList = std::vector<haptics::types::Keyframe *>{
       new haptics::types::Keyframe(
           0, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq),
       new haptics::types::Keyframe(
-          duration, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)
-  };
+          duration, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)};
 
   int fadeTime = IvsEncoder::getFadeTime(basisEffect);
   if (fadeTime != -1) {
@@ -165,7 +166,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
-    keyframeList[0]->setRelativePosition(std::min(attackTime,duration));
+    keyframeList[0]->setRelativePosition(std::min(attackTime, duration));
     out->addKeyframe(*(new haptics::types::Keyframe(
         0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
   }
@@ -176,7 +177,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 
   return true;
 }
-
 
 [[nodiscard]] auto IvsEncoder::getLastModified(const pugi::xml_document *doc) -> std::string {
   std::string res = std::string(doc->child("ivs-file").attribute("last-modified").value());
@@ -260,7 +260,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 }
 
 [[nodiscard]] auto IvsEncoder::getMagnitude(const pugi::xml_node *basisEffect,
-                                           const pugi::xml_node *launchEvent) -> int {
+                                            const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute magnitudeAttribute = launchEvent->attribute("magnitude-override");
   const pugi::char_t *n = magnitudeAttribute.name();
   if (!std::string(magnitudeAttribute.name()).empty()) {
@@ -314,7 +314,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   return haptics::types::BaseSignal(-1);
 }
 
-[[nodiscard]] auto IvsEncoder::getAttackTime(const pugi::xml_node* basisEffect) -> int {
+[[nodiscard]] auto IvsEncoder::getAttackTime(const pugi::xml_node *basisEffect) -> int {
   pugi::xml_attribute attackTimeAttribute = basisEffect->attribute("attack-time");
   if (!std::string(attackTimeAttribute.name()).empty()) {
     return attackTimeAttribute.as_int();
@@ -352,7 +352,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::floatToInt(const int f) -> int {
 
   if (f < 0) {
-    int res = (f + MAX_INT) / MAX_FREQUENCY;
+    int res = (f + std::numeric_limits<int>::max()) / MAX_FREQUENCY;
     return res;
   }
 
