@@ -15,6 +15,7 @@ include(cmake/dj_fft.cmake)
 include(cmake/nlohmann_json.cmake)
 include(cmake/catch2.cmake)
 include(cmake/iir.cmake)
+include(cmake/pugixml.cmake)
 
 if (BUILD_CATCH2)
     include(CTest)
