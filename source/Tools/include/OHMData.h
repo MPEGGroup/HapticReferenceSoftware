@@ -39,100 +39,96 @@
 
 namespace haptics::tools {
 
-	class OHMData
-	{
-        static constexpr int oneByteShift = 8;
-        static constexpr int twoBytesShift = 16;
-        static constexpr int threeBytesShift = 24;
-        static constexpr int descriptionByteSize = 32;
-        static constexpr int fileNameByteSize = 64;
-        enum class Body : uint32_t {
-            UNSPECIFIED = 0x00000000,
-            HEAD_FRONT = 0x00000001,
-            HEAD_BACK = 0x00000002,
-            HEAD_RIGHT = 0x00000004,
-            HEAD_LEFT = 0x00000008,
-            RIGHT_UPPER_CHEST = 0x00000010,
-            LEFT_UPPER_CHEST = 0x00000020,
-            ABDOMEN = 0x00000040,
-            WAIST = 0x00000080,
-            UPPER_BACK = 0x00000100,
-            LOWER_BACK = 0x00000200,
-            RIGHT_UPPERARM = 0x00000400,
-            LEFT_UPPERARM = 0x00000800,
-            RIGHT_FOREARM = 0x00001000,
-            LEFT_FOREARM = 0x00002000,
-            RIGHT_WRIST = 0x00004000,
-            LEFT_WRIST = 0x00008000,
-            RIGHT_HAND_PALM = 0x00010000,
-            LEFT_HAND_PALM = 0x00020000,
-            RIGHT_HAND_DORSUM = 0x00040000,
-            LEFT_HAND_DORSUM = 0x00080000,
-            RIGHT_HAND_FINGERS = 0x00100000,
-            LEFT_HAND_FINGERS = 0x00200000,
-            RIGHT_THIGH = 0x00400000,
-            LEFT_THIGH = 0x00800000,
-            RIGHT_CALF = 0x01000000,
-            LEFT_CALF = 0x02000000,
-            RIGHT_FOOT_PALM = 0x04000000,
-            LEFT_FOOT_PALM = 0x08000000,
-            RIGHT_FOOT_DORSUM = 0x10000000,
-            LEFT_FOOT_DORSUM = 0x20000000,
-            RIGHT_FOOT_FINGERS = 0x40000000,
-            LEFT_FOOT_FINGERS = 0x80000000,
-            ALL = 0xFFFFFFFF,
-            HEAD = HEAD_FRONT | HEAD_BACK | HEAD_LEFT | HEAD_RIGHT,
-            UPPER_CHEST = RIGHT_UPPER_CHEST | LEFT_UPPER_CHEST,
-            RIGHT_HAND = RIGHT_HAND_PALM | RIGHT_HAND_DORSUM | RIGHT_HAND_FINGERS,
-            LEFT_HAND = LEFT_HAND_PALM | LEFT_HAND_DORSUM | LEFT_HAND_FINGERS,
-            RIGHT_ARM = RIGHT_UPPERARM | RIGHT_FOREARM | RIGHT_WRIST | RIGHT_HAND,
-            LEFT_ARM = LEFT_UPPERARM | LEFT_FOREARM | LEFT_WRIST | LEFT_HAND,
-            RIGHT_FOOT = RIGHT_FOOT_PALM | RIGHT_FOOT_DORSUM | RIGHT_FOOT_FINGERS,
-            LEFT_FOOT = LEFT_FOOT_PALM | LEFT_FOOT_DORSUM | LEFT_FOOT_FINGERS,
-            RIGHT_LEG = RIGHT_THIGH | RIGHT_CALF | RIGHT_FOOT,
-            LEFT_LEG = LEFT_THIGH | LEFT_CALF | LEFT_FOOT
-        };
-		struct HapticChannelMetadata
-		{
-			std::string channelDescription;
-			float gain = 1.0f;
-			Body bodyPartMask = Body::UNSPECIFIED;
-		};
+class OHMData {
+  static constexpr int oneByteShift = 8;
+  static constexpr int twoBytesShift = 16;
+  static constexpr int threeBytesShift = 24;
+  static constexpr int descriptionByteSize = 32;
+  static constexpr int fileNameByteSize = 64;
+  enum class Body : uint32_t {
+    UNSPECIFIED = 0x00000000,
+    HEAD_FRONT = 0x00000001,
+    HEAD_BACK = 0x00000002,
+    HEAD_RIGHT = 0x00000004,
+    HEAD_LEFT = 0x00000008,
+    RIGHT_UPPER_CHEST = 0x00000010,
+    LEFT_UPPER_CHEST = 0x00000020,
+    ABDOMEN = 0x00000040,
+    WAIST = 0x00000080,
+    UPPER_BACK = 0x00000100,
+    LOWER_BACK = 0x00000200,
+    RIGHT_UPPERARM = 0x00000400,
+    LEFT_UPPERARM = 0x00000800,
+    RIGHT_FOREARM = 0x00001000,
+    LEFT_FOREARM = 0x00002000,
+    RIGHT_WRIST = 0x00004000,
+    LEFT_WRIST = 0x00008000,
+    RIGHT_HAND_PALM = 0x00010000,
+    LEFT_HAND_PALM = 0x00020000,
+    RIGHT_HAND_DORSUM = 0x00040000,
+    LEFT_HAND_DORSUM = 0x00080000,
+    RIGHT_HAND_FINGERS = 0x00100000,
+    LEFT_HAND_FINGERS = 0x00200000,
+    RIGHT_THIGH = 0x00400000,
+    LEFT_THIGH = 0x00800000,
+    RIGHT_CALF = 0x01000000,
+    LEFT_CALF = 0x02000000,
+    RIGHT_FOOT_PALM = 0x04000000,
+    LEFT_FOOT_PALM = 0x08000000,
+    RIGHT_FOOT_DORSUM = 0x10000000,
+    LEFT_FOOT_DORSUM = 0x20000000,
+    RIGHT_FOOT_FINGERS = 0x40000000,
+    LEFT_FOOT_FINGERS = 0x80000000,
+    ALL = 0xFFFFFFFF,
+    HEAD = HEAD_FRONT | HEAD_BACK | HEAD_LEFT | HEAD_RIGHT,
+    UPPER_CHEST = RIGHT_UPPER_CHEST | LEFT_UPPER_CHEST,
+    RIGHT_HAND = RIGHT_HAND_PALM | RIGHT_HAND_DORSUM | RIGHT_HAND_FINGERS,
+    LEFT_HAND = LEFT_HAND_PALM | LEFT_HAND_DORSUM | LEFT_HAND_FINGERS,
+    RIGHT_ARM = RIGHT_UPPERARM | RIGHT_FOREARM | RIGHT_WRIST | RIGHT_HAND,
+    LEFT_ARM = LEFT_UPPERARM | LEFT_FOREARM | LEFT_WRIST | LEFT_HAND,
+    RIGHT_FOOT = RIGHT_FOOT_PALM | RIGHT_FOOT_DORSUM | RIGHT_FOOT_FINGERS,
+    LEFT_FOOT = LEFT_FOOT_PALM | LEFT_FOOT_DORSUM | LEFT_FOOT_FINGERS,
+    RIGHT_LEG = RIGHT_THIGH | RIGHT_CALF | RIGHT_FOOT,
+    LEFT_LEG = LEFT_THIGH | LEFT_CALF | LEFT_FOOT
+  };
+  struct HapticChannelMetadata {
+    std::string channelDescription;
+    float gain = 1.0F;
+    Body bodyPartMask = Body::UNSPECIFIED;
+  };
 
-    public:
-		  struct HapticElementMetadata
-		  {
-			  std::string elementFilename;
-			  std::string elementDescription;
-			  short numHapticChannels = 0;
-			  std::vector<HapticChannelMetadata> channelsMetadata;
-		  };
+public:
+  struct HapticElementMetadata {
+    std::string elementFilename;
+    std::string elementDescription;
+    short numHapticChannels = 0;
+    std::vector<HapticChannelMetadata> channelsMetadata;
+  };
 
-    private:
-        std::string header;
-        short version = 1;
-        short numElements = 0;
-        std::string description;
-        std::vector<HapticElementMetadata> elementsMetadata;
+private:
+  std::string header;
+  short version = 1;
+  short numElements = 0;
+  std::string description;
+  std::vector<HapticElementMetadata> elementsMetadata;
 
-        static auto fillString(const std::string &text, const unsigned int numCharacters)->std::string;
-        
-    public:
-        explicit OHMData() = default;
-        explicit OHMData(const std::string &filePath);
-        auto loadFile(const std::string &filePath) -> bool;
-        auto writeFile(const std::string &filePath) -> bool;
+  static auto fillString(const std::string &text, unsigned int numCharacters) -> std::string;
 
-        [[nodiscard]] auto getVersion() const -> short;
-        auto setVersion(short newVersion) -> void;
-        [[nodiscard]] auto getNumElements() const -> short;
-        auto setNumElements(short newNumElements) -> void;
-        [[nodiscard]] auto getDescription() const -> std::string;
-        auto setDescription(std::string &newDescription) -> void;
-        auto getHapticElementMetadataSize() -> size_t;
-        auto getHapticElementMetadataAt(int index) -> HapticElementMetadata &;
-        auto addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void;
+public:
+  explicit OHMData() = default;
+  explicit OHMData(const std::string &filePath);
+  auto loadFile(const std::string &filePath) -> bool;
+  auto writeFile(const std::string &filePath) -> bool;
 
-	};
-} //namespace haptics::tools
-#endif //OHMDATA_H
+  [[nodiscard]] auto getVersion() const -> short;
+  auto setVersion(short newVersion) -> void;
+  [[nodiscard]] auto getNumElements() const -> short;
+  auto setNumElements(short newNumElements) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  auto getHapticElementMetadataSize() -> size_t;
+  auto getHapticElementMetadataAt(int index) -> HapticElementMetadata &;
+  auto addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void;
+};
+} // namespace haptics::tools
+#endif // OHMDATA_H
