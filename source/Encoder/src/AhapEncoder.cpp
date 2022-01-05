@@ -52,7 +52,6 @@ const int ACTUAL_FREQUENCY_MAX = 300;
 
 namespace haptics::encoder {
 
-// NOLINTNEXTLINE(misc-unused-parameters)
 [[nodiscard]] auto AhapEncoder::encode(std::string& filename, haptics::types::Perception &out) -> int {
   if (out.getTracksSize() > 1) {
     return EXIT_FAILURE;
@@ -119,8 +118,8 @@ namespace haptics::encoder {
   myTrack = out.getTrackAt(0);
 
   // TRANSIENTS
-  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-  types::Band myBand = types::Band(types::BandType::Transient, types::EncodingModality::Vectorial, 0, 0, 1000);
+  types::Band myBand = types::Band(types::BandType::Transient, types::EncodingModality::Vectorial,
+                                   0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY);
   for (types::Effect e : transients) {
     myBand.addEffect(e);
   }
@@ -133,8 +132,9 @@ namespace haptics::encoder {
   for (types::Effect e : continuous) {
     b = myTrack.findBandAvailable(e.getPosition(), e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition(), types::BandType::Wave, types::EncodingModality::Vectorial);
     if (b == nullptr) {
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      myTrack.addBand(*(new haptics::types::Band(haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0, 65, 300)));
+      myTrack.addBand(*(new haptics::types::Band(haptics::types::BandType::Wave,
+                                                 haptics::types::EncodingModality::Vectorial, 0,
+                                                 MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY)));
       b = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
     }
     b->addEffect(e);

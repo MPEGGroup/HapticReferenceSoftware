@@ -58,6 +58,10 @@ public:
       -> int;
   [[nodiscard]] auto static extractKeyframes(nlohmann::json *parameterCurve,
                                              std::vector<std::pair<int, double>> *keyframes) -> int;
+
+private:
+  static const int MIN_AHAP_FREQUENCY = 65;
+  static const int MAX_AHAP_FREQUENCY = 300;
 };
 } // namespace haptics::encoder
 #endif // AHAPENCODER_H

@@ -175,7 +175,7 @@ namespace haptics::types {
 
     // IF FREQUENCY MODULATION (SHOULD BE BUT TO BE SURE)
 
-    double freq_modulation = 1;
+    double evaluatedBaseSignal = 1;
     // first KF after position
     auto k_f_after = std::find_if(keyframes.begin(), keyframes.end(),
                                   [relativePosition](haptics::types::Keyframe k) {
@@ -199,41 +199,15 @@ namespace haptics::types {
       double DeltaT = MS_2_S * (static_cast<double>(k_f_after->getRelativePosition()) -
                              static_cast<double>(k_f_before->getRelativePosition()));
 
-      freq_modulation =
+      double freq_modulation =
           std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit),
                      static_cast<double>(highFrequencyLimit)) +
           f0;
 
-      double phase = this->getPhase();
-      switch (this->getBaseSignal()) {
-      case BaseSignal::Sine:
-        freq_modulation = std::sin(M_PI * t * freq_modulation + phase);
-        break;
-      case BaseSignal::Square:
-        freq_modulation = std::copysign(1, std::sin(M_PI * t * freq_modulation + phase));
-        break;
-      case BaseSignal::Triangle:
-        t += phase / (2 * M_PI * freq_modulation);
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-        freq_modulation = 1 - 4 * std::abs(std::round(t * freq_modulation - .25) - (t * freq_modulation - .25));
-        break;
-      case BaseSignal::SawToothUp:
-        t += phase / (2 * M_PI * freq_modulation);
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-        freq_modulation = 2 * (t * freq_modulation - std::floor(t * freq_modulation + .5));
-        break;
-      case BaseSignal::SawToothDown:
-        t += phase / (2 * M_PI * freq_modulation);
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-        freq_modulation = 2 * (std::floor(t * freq_modulation + .5) - t * freq_modulation);
-        break;
-      default:
-        freq_modulation = 1;
-        break;
-      }
+      evaluatedBaseSignal = this->computeBaseSignal(t, freq_modulation);
     }
 
-    return amp_modulation * freq_modulation;
+    return amp_modulation * evaluatedBaseSignal;
   }
 
   auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
@@ -270,7 +244,6 @@ namespace haptics::types {
       }
 
       res +=
-          // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
           std::sin(4 * M_PI * (relativePosition - it->getRelativePosition()) / transientDuration) *
           it->getAmplitudeModulation().value();
       it++;
@@ -314,16 +287,46 @@ namespace haptics::types {
       h = x1 - x0;
       df = (f1 - f0) / h;
 
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      c2 = -(2.0 * t0 - 3.0 * df + t1) / h;
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      c3 = (t0 - 2.0 * df + t1) / h / h;
+      c2 = -(2 * t0 - 3 * df + t1) / h;
+      c3 = (t0 - 2 * df + t1) / h / h;
 
       auto result = static_cast<float>(f0 + (t - x0) * (t0 + (t - x0) * (c2 + (t - x0) * c3)));
       return std::max(std::min(1.0F, result), -1.0F);
     }
 
     return res;
+  }
+
+  [[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency) const -> double {
+    const double half = .5;
+    const double quarter = .25;
+
+    double phi = this->getPhase();
+    switch (this->getBaseSignal()) {
+    case BaseSignal::Sine:
+      return std::sin(M_PI * time * frequency + phi);
+      break;
+    case BaseSignal::Square:
+      return std::copysign(1, std::sin(M_PI * time * frequency + phi));
+      break;
+    case BaseSignal::Triangle:
+      time += phi / (2 * M_PI * frequency);
+      return 1 - 4 * std::abs(std::round(time * frequency - quarter) - (time * frequency - quarter));
+      break;
+    case BaseSignal::SawToothUp:
+      time += phi / (2 * M_PI * frequency);
+      return 2 * (time * frequency - std::floor(time * frequency + half));
+      break;
+    case BaseSignal::SawToothDown:
+      time += phi / (2 * M_PI * frequency);
+      return 2 * (std::floor(time * frequency + half) - time * frequency);
+      break;
+    default:
+      return 1;
+      break;
+    }
+
+    return 0;
   }
 
 } // namespace haptics::types
