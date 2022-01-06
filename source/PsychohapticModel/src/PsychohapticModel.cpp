@@ -87,7 +87,7 @@ auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
 
   static double correction = sqrt(2);
   std::transform(
-      spect_complex.begin(), spect_complex.end() - (long long)bl, spect_real.begin(),
+      spect_complex.begin(), spect_complex.end() - (int)bl, spect_real.begin(),
       [](std::complex<double> a) { return LOGFACTOR_SPECT * log10(fabs(correction * a.real())); });
 
   /*for(size_t i=0; i<bl; i++){
