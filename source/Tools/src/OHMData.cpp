@@ -205,6 +205,10 @@ auto OHMData::setVersion(short newVersion) -> void { version = newVersion; }
 [[nodiscard]] auto OHMData::getNumElements() const -> short { return numElements; }
 auto OHMData::setNumElements(short newNumElements) -> void { numElements = newNumElements; }
 
+[[nodiscard]] auto OHMData::getHeader() const -> std::string { return header; }
+
+auto OHMData::setHeader(std::string &newHeader) -> void { header = newHeader; }
+
 [[nodiscard]] auto OHMData::getDescription() const -> std::string { return description; }
 
 auto OHMData::setDescription(std::string &newDescription) -> void { description = newDescription; }

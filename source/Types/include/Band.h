@@ -34,21 +34,12 @@
 #ifndef BAND_H
 #define BAND_H
 
+#include <Types/include/EncodingModality.h>
+#include <Types/include/BandType.h>
 #include <Types/include/Effect.h>
 #include <vector>
 
 namespace haptics::types {
-
-enum class BandType {
-  Wave = 0,
-  Curve = Wave + 1,
-  Transient = Curve + 1,
-};
-
-enum class EncodingModality {
-  Quantized = 0,
-  Vectorial = Quantized + 1,
-};
 
 class Band {
 public:
@@ -78,6 +69,7 @@ public:
   auto replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool;
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
+  auto getBandTimeLength() -> double;
 
 private:
   static constexpr double TRANSIENT_DURATION_MS = 22;

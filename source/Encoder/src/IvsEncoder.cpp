@@ -74,7 +74,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     myBand = myTrack.findBandAvailable(
         myEffect.getPosition(),
         myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
-            .getRelativePosition(),
+            .getRelativePosition().value(),
         types::BandType::Wave, types::EncodingModality::Vectorial);
     if (myBand == nullptr) {
       myTrack.addBand(*(new haptics::types::Band(
@@ -120,7 +120,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
         myBand = myTrack.findBandAvailable(
             myEffect.getPosition(),
             myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
-                .getRelativePosition(),
+                .getRelativePosition().value(),
             types::BandType::Wave, types::EncodingModality::Vectorial);
         if (myBand == nullptr) {
           myTrack.addBand(*(new haptics::types::Band(
@@ -140,14 +140,25 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::convertToEffect(const pugi::xml_node *basisEffect,
                                                const pugi::xml_node *launchEvent,
                                                haptics::types::Effect *out) -> bool {
+  int periodLength = IvsEncoder::getPeriod(basisEffect, launchEvent);
+  int freq = 0;
+  std::string effectType = basisEffect->attribute("type").as_string();
+  if (effectType == "periodic") {
+    out->setBaseSignal(IvsEncoder::getWaveform(basisEffect));
+    freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) / MAX_FREQUENCY));
+  } else if (effectType == "magsweep") {
+    out->setBaseSignal(types::BaseSignal::Sine);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    freq = 170;
+  } else {
+    return false;
+  }
+
   out->setPosition(IvsEncoder::getTime(launchEvent));
   out->setPhase(0);
-  out->setBaseSignal(IvsEncoder::getWaveform(basisEffect));
 
   int duration = IvsEncoder::getDuration(basisEffect, launchEvent);
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
-  int periodLength = IvsEncoder::getPeriod(basisEffect, launchEvent);
-  int freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) / MAX_FREQUENCY));
 
   std::vector<haptics::types::Keyframe *> keyframeList = std::vector<haptics::types::Keyframe *>{
       new haptics::types::Keyframe(

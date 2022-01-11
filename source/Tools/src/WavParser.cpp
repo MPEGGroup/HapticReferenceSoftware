@@ -55,9 +55,6 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
   std::vector<float> b;
   b.resize(numSamples);
   drwav_read_pcm_frames_f32(&wav, samplesPerChannel, b.data());
-  
-
-
 
   for (size_t c = 0; c < numChannels; c++) {
     std::vector<double> b_double;
@@ -75,7 +72,6 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
 }
 
 auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool {
-
   drwav wav;
   drwav_data_format format;
   format.container = drwav_container_riff;
@@ -95,6 +91,14 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
 
 auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
                          int sampleRate) -> bool {
+  size_t s = buff.at(0).size();
+  bool sameSize = true;
+  for (int i = 1; i < buff.size(); i++) {
+    if (buff.at(i).size() != s) {
+      std::cout << "Output Tracks are of different size" << std::endl;
+      return false;
+    }
+  }
   drwav wav;
   drwav_data_format format;
   format.container = drwav_container_riff;
@@ -108,11 +112,8 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   b_int.resize(buff.size() * buff.at(0).size());
   long c = 0;
   for (auto &b : buff) {
-
-    for (std::pair<std::vector<uint16_t>::iterator, std::vector<double>::iterator> it(
-             b_int.begin() + (long)c, b.begin());
-         it.first < b_int.end(); it.first += (long)buff.size(), it.second++) {
-      *it.first = ((uint16_t)(round((*it.second) * SCALING)));
+    for (int i = 0; i < b.size(); i++) {
+      b_int.at((i * buff.size()) + c) = (uint16_t)(round((b.at(i) * SCALING)));
     }
     c++;
   }

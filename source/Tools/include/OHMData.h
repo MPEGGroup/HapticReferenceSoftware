@@ -45,6 +45,8 @@ class OHMData {
   static constexpr int threeBytesShift = 24;
   static constexpr int descriptionByteSize = 32;
   static constexpr int fileNameByteSize = 64;
+
+public:
   enum class Body : uint32_t {
     UNSPECIFIED = 0x00000000,
     HEAD_FRONT = 0x00000001,
@@ -96,8 +98,6 @@ class OHMData {
     float gain = 1.0F;
     Body bodyPartMask = Body::UNSPECIFIED;
   };
-
-public:
   struct HapticElementMetadata {
     std::string elementFilename;
     std::string elementDescription;
@@ -116,6 +116,12 @@ private:
 
 public:
   explicit OHMData() = default;
+  explicit OHMData(std::string &_header, short _version, short _numElements, std::string &_description)
+      : header(_header)
+      , version(_version)
+      , numElements(_numElements)
+      , description(_description)
+      , elementsMetadata({}) {};
   explicit OHMData(const std::string &filePath);
   auto loadFile(const std::string &filePath) -> bool;
   auto writeFile(const std::string &filePath) -> bool;
@@ -124,6 +130,8 @@ public:
   auto setVersion(short newVersion) -> void;
   [[nodiscard]] auto getNumElements() const -> short;
   auto setNumElements(short newNumElements) -> void;
+  [[nodiscard]] auto getHeader() const -> std::string;
+  auto setHeader(std::string &newHeader) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
   auto getHapticElementMetadataSize() -> size_t;

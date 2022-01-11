@@ -136,6 +136,12 @@ auto Track::findBandAvailable(const int position, const int duration,
       res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
     }
 
+    if (res < -1) {
+      return -1;
+    }
+    if (res > 1) {
+      return 1;
+    }
     return res;
   }
 

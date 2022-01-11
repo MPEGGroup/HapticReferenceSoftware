@@ -87,12 +87,12 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
                                        const int stop) -> bool {
   const int position = effect.getPosition();
-  int length = 0;
+  double length = 0;
   if (encodingModality == EncodingModality::Quantized) {
     length = static_cast<int>(effect.getKeyframesSize()) * windowLength;
   } else {
     length =
-        effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1).getRelativePosition();
+        effect.getEffectTimeLength(bandType, encodingModality, windowLength, TRANSIENT_DURATION_MS);
   }
 
   return (position <= start && position + length >= start) ||
@@ -102,13 +102,11 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
 }
 
 auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double {
-
-  // OUT OUF BOUND CHECK
+  //OUT OUF BOUND CHECK
   if (effects.empty() ||
       position > effects.back().getPosition() +
-                     effects.back()
-                         .getKeyframeAt(static_cast<int>(effects.back().getKeyframesSize()) - 1)
-                         .getRelativePosition() ||
+                     effects.back().getEffectTimeLength(bandType, encodingModality, windowLength,
+                                                        TRANSIENT_DURATION_MS) ||
       position < 0) {
     return 0;
   }
@@ -155,5 +153,15 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   }
 
   return -1;
+}
+
+auto Band::getBandTimeLength() -> double {
+  if (this->effects.empty()) {
+    return 0;
+  }
+  return this->effects.back().getPosition() +
+         this->effects.back().getEffectTimeLength(this->getBandType(),
+                                                  this->getEncodingModality(),
+                                                  this->getWindowLength(), TRANSIENT_DURATION_MS);
 }
 } // namespace haptics::types
