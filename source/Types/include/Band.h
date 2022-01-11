@@ -51,7 +51,7 @@ public:
       , windowLength(newWindowLength)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
-      , effects({}) {};
+      , effects({}){};
 
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
@@ -67,8 +67,7 @@ public:
   auto getEffectAt(int index) -> haptics::types::Effect &;
   auto addEffect(haptics::types::Effect &newEffect) -> void;
   auto replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool;
-  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop)
-      -> bool;
+  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto getBandTimeLength() -> double;
 
@@ -86,4 +85,4 @@ private:
 };
 } // namespace haptics::types
 
-#endif //BAND_H
+#endif // BAND_H

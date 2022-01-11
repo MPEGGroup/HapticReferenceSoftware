@@ -44,9 +44,9 @@ class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                     uint32_t newBodyPartMask)
+                 uint32_t newBodyPartMask)
       : id(newId)
-      , description(newDescription)
+      , description(std::move(newDescription))
       , gain(newGain)
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
@@ -82,7 +82,6 @@ private:
   uint32_t bodyPartMask = 0;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
-
 };
 } // namespace haptics::types
-#endif //TRACK_H
+#endif // TRACK_H
