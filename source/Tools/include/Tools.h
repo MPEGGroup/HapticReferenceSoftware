@@ -35,24 +35,22 @@
 #define TOOLS_H
 
 #include <iostream>
-#define M_PI 3.14159265359
 
 constexpr auto S_2_MS = 1000.0;
 constexpr auto MS_2_S = 0.001;
 
 namespace haptics::tools {
 
-  [[nodiscard]] extern auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b,
-                                              double x) -> double;
+[[nodiscard]] auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, double x)
+    -> double;
 
-  [[nodiscard]] extern auto chirpInterpolation(int start_time, int end_time,
-                                                     double start_frequency, double end_frequency,
-                                                     int position) -> double;
+[[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency,
+                                      double end_frequency, int position) -> double;
 
-  [[nodiscard]] extern auto genericNormalization(double start_in, double end_in, double start_out,
-                                                 double end_out, double x_in) -> double;
+[[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out,
+                                        double end_out, double x_in) -> double;
 
-  [[nodiscard]] extern auto is_eq(double a, double b) -> bool;
+[[nodiscard]] auto is_eq(double a, double b) -> bool;
 
-}
+} // namespace haptics::tools
 #endif

@@ -34,13 +34,13 @@
 #ifndef PCMENCODER_H
 #define PCMENCODER_H
 
-#include <Filterbank/include/FilterBank.h>
+#include <FilterBank/include/Filterbank.h>
 #include <Tools/include/WavParser.h>
-#include <Types/include/Perception.h>
-#include <Types/include/Keyframe.h>
-#include <Types/include/Effect.h>
-#include <Types/include/Track.h>
 #include <Types/include/Band.h>
+#include <Types/include/Effect.h>
+#include <Types/include/Keyframe.h>
+#include <Types/include/Perception.h>
+#include <Types/include/Track.h>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -49,10 +49,11 @@ namespace haptics::encoder {
 
 class PcmEncoder {
 public:
-  auto static encode(std::string &filename, double curveFrequencyLimit, types::Perception &out) -> int;
-  [[nodiscard]] auto static PcmEncoder::convertToCurveBand(
-      std::vector<std::pair<int, double>> &points, double samplerate,
-      double curveFrequencyLimit, haptics::types::Band *out) -> bool;
+  auto static encode(std::string &filename, double curveFrequencyLimit, types::Perception &out)
+      -> int;
+  [[nodiscard]] auto static convertToCurveBand(std::vector<std::pair<int, double>> &points,
+                                               double samplerate, double curveFrequencyLimit,
+                                               haptics::types::Band *out) -> bool;
   [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
       -> std::vector<std::pair<int, double>>;
 };

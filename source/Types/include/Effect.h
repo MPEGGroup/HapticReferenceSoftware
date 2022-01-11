@@ -82,6 +82,7 @@ private:
   float phase = 0;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
   BaseSignal baseSignal = BaseSignal::Sine;
+  [[nodiscard]] auto computeBaseSignal(double time, double frequency) const -> double;
 };
 } // namespace haptics::types
 
