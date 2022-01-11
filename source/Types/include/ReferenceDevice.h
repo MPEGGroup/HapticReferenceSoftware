@@ -34,16 +34,15 @@
 #ifndef REFERENCEDEVICE_H
 #define REFERENCEDEVICE_H
 
-#include <string>
 #include <optional>
+#include <string>
 
 namespace haptics::types {
 
 class ReferenceDevice {
 public:
   explicit ReferenceDevice() = default;
-  explicit ReferenceDevice(int newId, std::string newName)
-      : id(newId), name(newName) {};
+  explicit ReferenceDevice(int newId, std::string newName) : id(newId), name(std::move(newName)){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -72,7 +71,6 @@ public:
   [[nodiscard]] auto getSize() const -> std::optional<float>;
   auto setSize(float newSize) -> void;
 
-
 private:
   int id = -1;
   std::string name;
@@ -87,7 +85,6 @@ private:
   std::optional<float> maximumDisplacement;
   std::optional<float> weight;
   std::optional<float> size;
-
 };
 } // namespace haptics::types
-#endif //REFERENCEDEVICE_H
+#endif // REFERENCEDEVICE_H

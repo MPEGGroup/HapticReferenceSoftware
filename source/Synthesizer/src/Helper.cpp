@@ -55,12 +55,7 @@ namespace haptics::synthesizer {
       track = perception.getTrackAt(trackIndex);
       for (int bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
         band = track.getBandAt(bandIndex);
-        if (band.getEffectsSize() == 0) {
-          continue;
-        }
-        effect = band.getEffectAt(static_cast<int>(band.getEffectsSize()) - 1);
-        currentLength = Helper::getEffectTimeLength(
-            effect, band.getBandType(), band.getEncodingModality(), band.getWindowLength());
+        currentLength = band.getBandTimeLength();
         if (currentLength > maxLength) {
           maxLength = currentLength;
         }
@@ -70,42 +65,10 @@ namespace haptics::synthesizer {
   return maxLength;
 }
 
-[[nodiscard]] auto Helper::getEffectTimeLength(types::Effect &effect, types::BandType bandType,
-                                               types::EncodingModality encodingModality,
-                                               int windowLength) -> double {
-  double length = effect.getPosition();
-  if (effect.getKeyframesSize() == 0) {
-    return length;
-  }
-
-  types::Keyframe lastKeyframe =
-      effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1);
-  switch (bandType) {
-  case types::BandType::Transient:
-  case types::BandType::Curve:
-    return length + lastKeyframe.getRelativePosition();
-  case types::BandType::Wave:
-    switch (encodingModality) {
-    case types::EncodingModality::Quantized:
-      return length + static_cast<int>(effect.getKeyframesSize()) * windowLength;
-    case types::EncodingModality::Vectorial:
-      return length + lastKeyframe.getRelativePosition();
-    case types::EncodingModality::Wavelet:
-      //return length + windowLength;
-      return length; //temporary fix to achieve original file size
-    default:
-      break;
-    }
-  default:
-    break;
-  }
-  return length;
-}
-
 [[nodiscard]] auto Helper::playFile(types::Haptics &haptic, const double timeLength, const int fs,
                                     const int pad, std::string &filename) -> bool {
 
-  //Apply preprocessing on wavelet bands
+  // Apply preprocessing on wavelet bands
   for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
     for (int j = 0; j < haptic.getPerceptionAt(i).getTracksSize(); j++) {
       for (int k = 0; k < haptic.getPerceptionAt(i).getTrackAt(j).getBandsSize(); k++) {
@@ -135,6 +98,7 @@ namespace haptics::synthesizer {
       amplitudes.push_back(trackAmp);
     }
   }
+
   return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
 }
 } // namespace haptics::synthesizer

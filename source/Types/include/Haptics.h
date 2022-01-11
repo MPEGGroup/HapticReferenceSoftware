@@ -34,9 +34,9 @@
 #ifndef HAPTICS_H
 #define HAPTICS_H
 
-#include <Types/include/Perception.h>
-#include <Types/include/Avatar.h>
 #include <Tools/include/OHMData.h>
+#include <Types/include/Avatar.h>
+#include <Types/include/Perception.h>
 #include <fstream>
 #include <vector>
 
@@ -46,7 +46,11 @@ class Haptics {
 public:
   explicit Haptics() = default;
   explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
-      : version(newVersion), date(newDate), description(newDescription), perceptions({}), avatars({}){};
+      : version(std::move(newVersion))
+      , date(std::move(newDate))
+      , description(std::move(newDescription))
+      , perceptions({})
+      , avatars({}){};
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
@@ -62,14 +66,14 @@ public:
   auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
   auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
+  auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
 
 private:
-  std::string version = "";
-  std::string date = "";
-  std::string description = "";
+  std::string version;
+  std::string date;
+  std::string description;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
-
 };
 } // namespace haptics::types
-#endif //HAPTICS_H
+#endif // HAPTICS_H

@@ -34,27 +34,34 @@
 #ifndef AHAPENCODER_H
 #define AHAPENCODER_H
 
+#include <Types/include/Band.h>
+#include <Types/include/Effect.h>
+#include <Types/include/Keyframe.h>
 #include <Types/include/Perception.h>
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include <Types/include/Effect.h>
-#include <Types/include/Band.h>
-#include <Types/include/Keyframe.h>
 
 namespace haptics::encoder {
 
 class AhapEncoder {
 public:
-  [[nodiscard]] auto static AhapEncoder::encode(std::string& filename, types::Perception &out) -> int;
-  [[nodiscard]] auto static AhapEncoder::extractTransients(nlohmann::json * event,
-                                                          std::vector<haptics::types::Effect> * transients,
-                                                          std::vector<std::pair<int, double>> * amplitudes,
-                                                          std::vector<std::pair<int, double>> * frequencies) -> int;
-  [[nodiscard]] auto static AhapEncoder::extractContinuous(nlohmann::json * event,
-                                                          std::vector<haptics::types::Effect> * continuous,
-                                                          std::vector<std::pair<int, double>> * amplitudes,
-                                                          std::vector<std::pair<int, double>> * frequencies) -> int;
-  [[nodiscard]] auto static AhapEncoder::extractKeyframes(nlohmann::json * parameterCurve, std::vector<std::pair<int,double>> * keyframes) -> int;
+  [[nodiscard]] auto static encode(std::string &filename, types::Perception &out) -> int;
+  [[nodiscard]] auto static extractTransients(nlohmann::json *event,
+                                              std::vector<haptics::types::Effect> *transients,
+                                              std::vector<std::pair<int, double>> *amplitudes,
+                                              std::vector<std::pair<int, double>> *frequencies)
+      -> int;
+  [[nodiscard]] auto static extractContinuous(nlohmann::json *event,
+                                              std::vector<haptics::types::Effect> *continuous,
+                                              std::vector<std::pair<int, double>> *amplitudes,
+                                              std::vector<std::pair<int, double>> *frequencies)
+      -> int;
+  [[nodiscard]] auto static extractKeyframes(nlohmann::json *parameterCurve,
+                                             std::vector<std::pair<int, double>> *keyframes) -> int;
+
+private:
+  static const int MIN_AHAP_FREQUENCY = 65;
+  static const int MAX_AHAP_FREQUENCY = 300;
 };
 } // namespace haptics::encoder
-#endif //AHAPENCODER_H
+#endif // AHAPENCODER_H

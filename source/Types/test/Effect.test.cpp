@@ -92,7 +92,7 @@ TEST_CASE("addKeyframe with amplitude and frequency", "[addKeyframe]") {
   const int testingPosition = 24;
   const double testingAmplitude = .9543;
   const int testingFrequency = 0;
-  e.addKeyframe(testingPosition, testingAmplitude, NULL);
+  e.addKeyframe(testingPosition, testingAmplitude, testingFrequency);
 
   REQUIRE(e.getKeyframesSize() == n + 1);
   Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);

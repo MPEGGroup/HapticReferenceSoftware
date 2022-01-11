@@ -34,8 +34,8 @@
 #ifndef PERCEPTION_H
 #define PERCEPTION_H
 
-#include <Types/include/Track.h>
 #include <Types/include/ReferenceDevice.h>
+#include <Types/include/Track.h>
 #include <fstream>
 #include <vector>
 
@@ -56,9 +56,11 @@ enum class PerceptionModality {
 class Perception {
 public:
   explicit Perception() = default;
-  explicit Perception(int newId, int newAvatarId, std::string newDescription, PerceptionModality newPerceptionModality)
-      : id(newId), avatarId(newAvatarId)
-      , description(newDescription)
+  explicit Perception(int newId, int newAvatarId, std::string newDescription,
+                      PerceptionModality newPerceptionModality)
+      : id(newId)
+      , avatarId(newAvatarId)
+      , description(std::move(newDescription))
       , perceptionModality(newPerceptionModality)
       , tracks({}){};
 
@@ -81,11 +83,10 @@ public:
 private:
   int id = -1;
   int avatarId = -1;
-  std::string description = "";
-  PerceptionModality perceptionModality;
+  std::string description;
+  PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Track> tracks = {};
   std::vector<ReferenceDevice> referenceDevices;
-
 };
 } // namespace haptics::types
-#endif //PERCEPTION_H
+#endif // PERCEPTION_H

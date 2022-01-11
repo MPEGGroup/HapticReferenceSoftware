@@ -255,7 +255,7 @@ TEST_CASE("Band transformation") {
   }
 }*/
 
-TEST_CASE("haptics::filterbank::Filterbank") {
+/* TEST_CASE("haptics::filterbank::Filterbank") {
 
   using haptics::filterbank::Filterbank;
   using haptics::tools::WavParser;
@@ -272,9 +272,9 @@ TEST_CASE("haptics::filterbank::Filterbank") {
     std::vector<double> out = fb.LP(in, 72.5);//NOLINT
 
     std::cout << "LP:" << std::endl;
-    /*for (int i = 0; i < BL; i++) {
+    for (int i = 0; i < BL; i++) {
         std::cout << out[i] << std::endl;
-    }*/
+    }
 
     std::string out_name("pantheon_LP.wav");
     WavParser::saveFile(out_name, out, FS);
@@ -294,11 +294,11 @@ TEST_CASE("haptics::filterbank::Filterbank") {
     std::vector<double> out = fb.HP(in, 72.5); //NOLINT
 
     std::cout << "HP:" << std::endl;
-    /*for (int i = 0; i < BL; i++) {
+    for (int i = 0; i < BL; i++) {
         std::cout << out[i] << std::endl;
-    }*/
+    }
     std::string out_name("pantheon_HP.wav");
     WavParser::saveFile(out_name, out, FS);
     CHECK(true);
   }
-}
+}*/

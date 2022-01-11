@@ -34,6 +34,8 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
+#include <Types/include/EncodingModality.h>
+#include <Types/include/BandType.h>
 #include <Types/include/Keyframe.h>
 #include <vector>
 
@@ -68,9 +70,13 @@ public:
   auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe&;
   auto addKeyframe(Keyframe &newKeyframe) -> void;
-  auto addKeyframe(int position, std::optional<double> amplitudeModulation, std::optional<int> frequencyModulation) -> void;
+  auto addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
+                   std::optional<int> frequencyModulation) -> void;
   auto addAmplitudeAt(float amplitude, int position) -> bool;
   auto addFrequencyAt(int frequency, int position) -> bool;
+  auto Effect::getEffectTimeLength(types::BandType bandType,
+                                   types::EncodingModality encodingModality, int windowLength,
+                                   double transientDuration) -> double;
   //Use Absolute position not relative
   auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluateQuantized(double position, double windowLength) -> double;
@@ -83,6 +89,7 @@ private:
   float phase = 0;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
   BaseSignal baseSignal = BaseSignal::Sine;
+  [[nodiscard]] auto computeBaseSignal(double time, double frequency) const -> double;
 };
 } // namespace haptics::types
 

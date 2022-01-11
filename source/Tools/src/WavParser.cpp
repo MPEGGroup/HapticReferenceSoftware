@@ -55,9 +55,6 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
   std::vector<float> b;
   b.resize(numSamples);
   drwav_read_pcm_frames_f32(&wav, samplesPerChannel, b.data());
-  
-
-
 
   for (size_t c = 0; c < numChannels; c++) {
     std::vector<double> b_double;
@@ -115,7 +112,8 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   b_int.resize(buff.size() * buff.at(0).size());
   long c = 0;
   for (auto &b : buff) {
-    for (int i = 0; i<b.size(); i++) {
+
+    for (int i = 0; i < b.size(); i++) {
       b_int.at((i * buff.size()) + c) = (uint16_t)(round((b.at(i) * SCALING)));
     }
     c++;

@@ -300,14 +300,15 @@ auto IOJson::loadReferenceDevices(const nlohmann::json& jsonReferenceDevices, ty
 auto IOJson::loadKeyframes(const nlohmann::json& jsonKeyframes, types::Effect& effect) -> void {
   for (auto it = jsonKeyframes.begin(); it != jsonKeyframes.end(); ++it) {
     auto jsonKeyframe = it.value();
-    // TODO: add specific error messages
-    if (!jsonKeyframe.contains("relative_position") || !jsonKeyframe["relative_position"].is_number_integer()) {
-      continue;
-    }
-    auto relativePosition = jsonKeyframe["relative_position"].get<int>();
+    std::optional<int> relativePosition;
     std::optional<float> amplitudeModulation;
     std::optional<float> frequencyModulation;
-    if (jsonKeyframe.contains("amplitude_modulation") && jsonKeyframe["amplitude_modulation"].is_number()) {
+    if (jsonKeyframe.contains("relative_position") &&
+        jsonKeyframe["relative_position"].is_number_integer()) {
+      relativePosition = jsonKeyframe["relative_position"].get<int>();
+    }
+    if (jsonKeyframe.contains("amplitude_modulation") &&
+        jsonKeyframe["amplitude_modulation"].is_number()) {
       amplitudeModulation = jsonKeyframe["amplitude_modulation"].get<float>();
     }
     if (jsonKeyframe.contains("frequency_modulation") &&
@@ -415,7 +416,9 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
         for (int n = 0; n < numKeyframes; n++) {
           const auto &keyframe = effect.getKeyframeAt(n);
           auto jsonKeyframe = json::object();
-          jsonKeyframe["relative_position"] = keyframe.getRelativePosition();
+          if (keyframe.getRelativePosition().has_value()) {
+            jsonKeyframe["relative_position"] = keyframe.getRelativePosition().value();
+          }
           if (keyframe.getAmplitudeModulation().has_value()) {
             jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
           }

@@ -34,27 +34,53 @@
 #ifndef PCMENCODER_H
 #define PCMENCODER_H
 
-#include <Filterbank/include/FilterBank.h>
+#include <Filterbank/include/FourierTools.h>
+#include <FilterBank/include/Filterbank.h>
 #include <Tools/include/WavParser.h>
-#include <Types/include/Perception.h>
-#include <Types/include/Keyframe.h>
-#include <Types/include/Effect.h>
-#include <Types/include/Track.h>
 #include <Types/include/Band.h>
+#include <Types/include/Effect.h>
+#include <Types/include/Keyframe.h>
+#include <Types/include/Perception.h>
+#include <Types/include/Track.h>
 #include <iostream>
 #include <utility>
 #include <vector>
 
 namespace haptics::encoder {
+struct EncodingConfig {
+  double curveFrequencyLimit = 0;
+  std::vector<std::pair<double, double>> frequencyBandLimits;
+  int windowLength = 0;
+  int wavelet_windowLength = 0;
+  int wavelet_bitbudget = 0;
+
+  explicit EncodingConfig() = default;
+  explicit EncodingConfig(double _curveFrequencyLimit,
+                          std::vector<std::pair<double, double>> &_frequencyBandLimits,
+                          int _windowLength, int _wavelet_windowLength, int _wavelet_bitbudget)
+      : curveFrequencyLimit(_curveFrequencyLimit)
+      , frequencyBandLimits(_frequencyBandLimits)
+      , windowLength(_windowLength)
+      , wavelet_windowLength(_wavelet_windowLength)
+      , wavelet_bitbudget(_wavelet_bitbudget){};
+};
 
 class PcmEncoder {
 public:
-  auto static encode(std::string &filename, double curveFrequencyLimit, types::Perception &out) -> int;
-  [[nodiscard]] auto static PcmEncoder::convertToCurveBand(
-      std::vector<std::pair<int, double>> &points, double samplerate,
-      double curveFrequencyLimit, haptics::types::Band *out) -> bool;
+  auto static encode(std::string &filename, EncodingConfig &config, types::Perception &out)
+      -> int;
+  [[nodiscard]] auto static convertToCurveBand(std::vector<std::pair<int, double>> &points,
+                                               double samplerate, double curveFrequencyLimit,
+                                               haptics::types::Band *out) -> bool;
   [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
       -> std::vector<std::pair<int, double>>;
+
+private:
+  [[nodiscard]] auto static PcmEncoder::encodeIntoWaveBand(
+      std::vector<double> &signal, filterbank::Filterbank &filterbank, double samplerate,
+      std::pair<double, double> frequencyBandLimits, EncodingConfig &config, types::Band *out)
+      -> bool;
+
 };
 } // namespace haptics::encoder
 #endif // PCMENCODER_H

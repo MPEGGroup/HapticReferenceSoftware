@@ -35,11 +35,11 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Keyframe::getRelativePosition() const -> int {
+[[nodiscard]] auto Keyframe::getRelativePosition() const -> std::optional<int> {
   return relativePosition;
 }
 
-auto Keyframe::setRelativePosition(int newRelativePosition) -> void {
+auto Keyframe::setRelativePosition(std::optional<int> newRelativePosition) -> void {
   relativePosition = newRelativePosition;
 }
 
