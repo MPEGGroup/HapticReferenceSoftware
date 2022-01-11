@@ -78,10 +78,6 @@ auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
 
   std::vector<std::complex<double>> spect_complex = dj::fft1d(block_complex, dj::fft_dir::DIR_FWD);
 
-  /*for(size_t i=0; i<block_complex.size(); i++){
-      std::cout << spect_complex[i].real() << ", " << spect_complex[i].imag() << std::endl;
-  }*/
-
   std::vector<double> spect_real;
   spect_real.resize(bl);
 
@@ -90,9 +86,6 @@ auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
       spect_complex.begin(), spect_complex.end() - (long long)bl, spect_real.begin(),
       [](std::complex<double> a) { return LOGFACTOR_SPECT * log10(abs(correction * a.real())); });
 
-  /*for(size_t i=0; i<bl; i++){
-      std::cout << spect_real[i] << std::endl;
-  }*/
 
   std::vector<double> globalmask = globalMaskingThreshold(spect);
   modelResult result;
@@ -168,11 +161,8 @@ auto PsychohapticModel::findAllPeakLocations(std::vector<double> &x) -> peaks {
         ++num_peaks;
       } else if (i + 1 < x.size()) {
         if (x[i + 1] == x[i]) {
-          // else if (abs(x[i+1] - x[i]) < abs(x[i]/PLATEAU_COMP_FACTOR)) {
           i_plateau = i + 1;
           while (i_plateau < x.size()) {
-          //while (x[i_plateau] == x[i]) {
-            // while (abs(x[i_plateau] - x[i]) < abs(x[i]/PLATEAU_COMP_FACTOR)) {
             if (x[i_plateau] != x[i]) {
               break;
             }
@@ -214,7 +204,7 @@ auto PsychohapticModel::peakProminence(std::vector<double> &spectrum, peaks inpu
   prominences.heights.reserve(num_peaks);
   prominences.locations.reserve(num_peaks);
   for (size_t i = 0; i < num_peaks; i++) {
-    prominences.heights.push_back(0); // simple init instead?
+    prominences.heights.push_back(0);
   }
   std::vector<size_t> valley_left(num_peaks, 0);
   std::vector<size_t> valley_right(num_peaks, 0);
@@ -317,7 +307,6 @@ auto PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak
       zeros = false;
       break;
     }
-    // std::cout << v << std::endl;
   }
 
   if (zeros) {

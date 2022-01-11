@@ -110,7 +110,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     std::vector<unsigned char> bitwavmax;
     bitwavmax.reserve(WAVMAXLENGTH);
     maximumWaveletCoefficient(block_dwt,qwavmax,bitwavmax);
-    //std::cout << "maximum wavelet coefficient: " << findMax(block_dwt) << ", quant: " << qwavmax << std::endl;
 
     //Quantization
     int i = 0;
@@ -160,9 +159,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
 
     std::vector<double> test(bl, 0);
     wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);
-    /*for (auto v : block_dwt) {
-      std::cout << v << std::endl;
-    }*/
 
     if (qwavmax != 0) {
       for (int i = 0; i < bl; i++) {
@@ -171,7 +167,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
       }
     }
     scalar = qwavmax;
-    //std::cout << "scalar encoder: " << scalar << std::endl;
     return block_dwt_quant;
 }
 
@@ -218,7 +213,6 @@ void WaveletEncoder::uniformQuant(std::vector<double> &in, size_t start, double 
     double max_q = delta * ((1<<bits)-1);
     for(size_t i=start; i<start+length; i++){
         double sign = sgn(in[i]);
-        //std::cout << "quant: " << floor(abs(in[i]) / delta + QUANT_ADD) << ", " << in[i] << ", " << abs(in[i]) / delta << ", " << delta << ", " << max << std::endl;
         if (max == 0) {
           out[i] = 0;
         } else {

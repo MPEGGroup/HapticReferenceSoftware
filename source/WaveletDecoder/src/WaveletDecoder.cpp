@@ -42,6 +42,7 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
   int fs = band.getUpperFrequencyLimit();
   int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
                  (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
+  //int bl = band.getEffectAt(0).getKeyframesSize() - 1;
   int dwtlevel = (int)log2((double)bl / 4);
   std::vector<double> sig_rec(numBlocks * bl, 0);
 
@@ -76,6 +77,7 @@ void WaveletDecoder::transformBand(Band &band) {
   int fs = band.getUpperFrequencyLimit();
   int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
                  (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
+  //int bl = band.getEffectAt(0).getKeyframesSize() - 1;
   int dwtlevel = (int)log2((double)bl / 4);
 
   for (int b = 0; b < numBlocks; b++) {
@@ -87,10 +89,6 @@ void WaveletDecoder::transformBand(Band &band) {
       Keyframe keyframe = effect.getKeyframeAt(i);
       block_dwt[i] = (double)keyframe.getAmplitudeModulation().value();
     }
-
-    /*for (auto v : block_dwt) {
-      std::cout << v << std::endl;
-    }*/
 
     std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
 

@@ -53,10 +53,15 @@ auto PcmEncoder::encode(std::string &filename, const double curveFrequencyLimit,
   WavParser wavParser;
   wavParser.loadFile(filename);
   size_t numChannels = wavParser.getNumChannels();
-  if (out.getTracksSize() != numChannels) {
+  Track myTrack;
+  if (out.getTracksSize() == 0) {
+    for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
+      myTrack = Track(channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0));
+      out.addTrack(myTrack);
+    }
+  } else if (out.getTracksSize() != numChannels) {
     return EXIT_FAILURE;
   }
-  Track myTrack;
   Band myBand;
   std::vector<double> signal;
   std::vector<std::pair<int, double>> points;

@@ -86,12 +86,20 @@ auto main(int argc, char *argv[]) -> int {
       return EXIT_FAILURE;
     }
   }
+
   std::cout << "The sampling frequency used will be : " << fs << "\n";
+
+  std::string padStr = inputParser.getCmdOption("--pad");
+  int pad = 0;
+  if (!padStr.empty()) {
+    pad = std::max(std::stoi(padStr), 0);
+    std::cout << "The padding used will be : " << pad << "ms\n";
+  }
 
   Haptics hapticFile = IOJson::loadFile(filename);
   const double timeLength = Helper::getTimeLength(hapticFile);
 
-  if (!Helper::playFile(hapticFile, timeLength, fs, output)) {
+  if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {
     return EXIT_FAILURE;
   }
 

@@ -53,7 +53,6 @@ constexpr double mask_c = 30;
 constexpr double PEAK_HUGE_VAL = 2147483647;  // 2^32 - 1
 constexpr double MIN_PEAK_PROMINENCE = 12;
 constexpr double MIN_PEAK_HEIGHT_DIFF = 45;
-//constexpr double PLATEAU_COMP_FACTOR = 10000;
 
 constexpr double LOGFACTOR_SPECT = 20;
 constexpr double ZERO_COMP = 1e-35;
