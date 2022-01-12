@@ -68,7 +68,6 @@ TEST_CASE("haptics::filterbank::Wavelet") {
         break;
       }
     }
-    std::cout << "outputTest" << std::endl;
     /*for (size_t i = 0; i < bl; i++) {
       std::cout << in[i] << ", " << in_rec[i] << std::endl;
     }*/

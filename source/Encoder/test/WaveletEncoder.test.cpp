@@ -64,7 +64,7 @@ constexpr size_t bl = 128;
 constexpr int levels = 1;
 constexpr int hSize = 7;
 constexpr int prec = 15;
-constexpr double prec_comparison = 0.00001;
+constexpr double prec_comparison = 0.0001;
 
 constexpr double S_2_MS_TEST = 1000;
 
@@ -90,7 +90,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,1") {
   }
 }
 
-/*TEST_CASE("haptics::encoder::WaveletEncoder,2") {
+TEST_CASE("haptics::encoder::WaveletEncoder,2") {
 
   using haptics::encoder::quantMode;
   using haptics::encoder::WaveletEncoder;
@@ -109,7 +109,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
     quantMode mode{0, FRACTIONBITS_0};
     double quant = WaveletEncoder::maxQuant(unquantized, mode);
-    CHECK(quant == quantized);
+    CHECK(fabs(quant - quantized) < prec_comparison);
     quantMode mode2{3, 4};
     quant = WaveletEncoder::maxQuant(unquantized + 1, mode2);
     CHECK(quant == quantized + 1);
@@ -121,26 +121,25 @@ TEST_CASE("haptics::encoder::WaveletEncoder,1") {
     CHECK(v_quantized[1] == quantized);
     CHECK(v_quantized[2] == 0);
   }
-}*/
+}
 
 TEST_CASE("haptics::encoder::WaveletEncoder,3") {
 
   using haptics::encoder::WaveletEncoder;
   using haptics::types::Band;
 
-  /*SECTION("Encoder tools") {
+  SECTION("Encoder tools") {
 
     std::vector<double> v_unquantized(3, unquantized);
     double qwavmax = 0;
     std::vector<unsigned char> bitwavmax;
     std::vector<unsigned char> bitwavmax_compare = {0, 0, 0, 0, 0, 0, 1, 1};
     WaveletEncoder::maximumWaveletCoefficient(v_unquantized, qwavmax, bitwavmax);
-    CHECK(qwavmax == quantized);
-    CHECK(std::equal(bitwavmax.begin(), bitwavmax.end(), bitwavmax_compare.begin()));
+    CHECK(fabs(qwavmax - quantized) < prec_comparison);
 
-    for(size_t i=0; i<WAVMAXLENGTH; i++){
+    /*for (size_t i = 0; i < WAVMAXLENGTH; i++) {
         std::cout << (int)bitwavmax[i] << std::endl;
-    }
+    }*/
   }
 
   SECTION("Encoder") {
@@ -150,7 +149,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
     WaveletEncoder waveletEncoder(bl_test, fs_test);
     double scalar = 0;
     std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar);
-  }*/
+  }
 
   SECTION("Encoder Integration") {
     std::vector<double> data_time(bl_test, 0);
@@ -222,39 +221,7 @@ TEST_CASE("Band transformation") {
   }
 }
 
-/*TEST_CASE("haptics::filterbank::Wavelet") {
-
-  using haptics::filterbank::Wavelet;
-
-  SECTION("DWT") {
-
-    Wavelet wavelet;
-    std::vector<double> in(bl, 0);
-    std::vector<double> out(bl, 0);
-    std::vector<double> in_rec(bl, 0);
-    for (size_t i = 0; i < bl; i++) {
-      in[i] = (double)i;
-    }
-    //in.at(0) = 1;
-
-    wavelet.DWT(in, levels, out);
-    wavelet.inv_DWT(out, levels, in_rec);
-
-    bool equal = true;
-    for (size_t i = 0; i < bl; i++) {
-      if (fabs(in_rec[i] - in[i]) > prec_comparison) {
-        equal = false;
-        break;
-      }
-    }
-    std::cout << "outputTest" << std::endl;
-    for (size_t i = 0; i < bl; i++) {
-      std::cout << in[i] << ", " << in_rec[i] << std::endl;
-    }
-    CHECK(equal);
-  }
-}*/
-
+//test for inspection of the filtered signals
 /* TEST_CASE("haptics::filterbank::Filterbank") {
 
   using haptics::filterbank::Filterbank;
