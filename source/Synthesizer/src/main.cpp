@@ -39,7 +39,7 @@
 #include <filesystem>
 
 using haptics::synthesizer::Helper;
-using haptics::encoder::IOJson;
+using haptics::types::IOJson;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
 

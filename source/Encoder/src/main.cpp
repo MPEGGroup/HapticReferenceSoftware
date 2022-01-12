@@ -34,6 +34,7 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
+#include <Types/include/IOBinary.h>
 #include <Types/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
@@ -45,11 +46,12 @@
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
-using haptics::encoder::IOJson;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
+using haptics::types::IOBinary;
+using haptics::types::IOJson;
 
 // NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
 auto main(int argc, char *argv[]) -> int {
@@ -159,6 +161,17 @@ auto main(int argc, char *argv[]) -> int {
     return codeExit;
   }
 
-  IOJson::writeFile(hapticFile, output);
+  if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    haptics::types::Avatar a1(42, 1, haptics::types::AvatarType::Custom);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+    haptics::types::Avatar a2(24, 2, haptics::types::AvatarType::Pressure);
+    hapticFile.addAvatar(a1);
+    hapticFile.addAvatar(a2);
+    IOBinary::writeFile(hapticFile, output);
+  } else {
+    IOJson::writeFile(hapticFile, output);
+  }
+
   return codeExit;
 }

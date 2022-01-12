@@ -32,8 +32,12 @@
  */
 
 #include <Tools/include/InputParser.h>
+#include <Types/include/IOBinary.h>
+#include <Types/include/Haptics.h>
 
 using haptics::tools::InputParser;
+using haptics::types::IOBinary;
+using haptics::types::Haptics;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
@@ -61,5 +65,6 @@ auto main(int argc, char *argv[]) -> int {
     if (!output.empty()) {
         std::cout << "The generated file will be : " << output << "\n";
     }
-    return EXIT_SUCCESS;
+
+    return IOBinary::loadFile(filename) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

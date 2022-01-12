@@ -36,7 +36,7 @@
 
 using json = nlohmann::json;
 
-namespace haptics::encoder {
+namespace haptics::types {
 
 auto IOJson::loadFile(const std::string &filePath) -> haptics::types::Haptics {
   std::ifstream ifs(filePath);

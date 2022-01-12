@@ -31,51 +31,30 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AVATAR_H
-#define AVATAR_H
+#ifndef IOBinary_H
+#define IOBinary_H
 
+#include <Types/include/Haptics.h>
 #include <string>
-#include <map>
 
 namespace haptics::types {
-enum class AvatarType {
-  Vibration = 1,
-  Pressure = 2,
-  Temperature = 3,
-  Custom = 0,
-};
 
-static const std::map<std::string, AvatarType> stringToAvatarType = {
-    {"Vibration", AvatarType::Vibration},
-    {"Pressure", AvatarType::Pressure},
-    {"Temperature", AvatarType::Temperature},
-    {"Custom", AvatarType::Custom}};
-static const std::map<AvatarType, std::string> avatarTypeToString = {
-    {AvatarType::Vibration, "Vibration"},
-    {AvatarType::Pressure, "Pressure"},
-    {AvatarType::Temperature, "Temperature"},
-    {AvatarType::Custom, "Custom"}};
-
-class Avatar {
+class IOBinary {
 public:
-  explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType) {};
-
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getLod() const -> int;
-  auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> AvatarType;
-  auto setType(AvatarType newType) -> void;
-
+  static auto loadFile(const std::string &filePath) -> bool;
+  static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> bool;
 
 private:
-  int id = -1;
-  int lod = 0;
-  AvatarType type = AvatarType::Custom;
-  //TODO : Mesh
+  static auto readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
+  static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool;
+  static auto writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool;
 
+  static auto writeBandHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto writeBandBody(types::Haptics &haptic, std::ofstream &file) -> bool;
+
+  static auto readString(std::ifstream &file) -> std::string;
+  static auto writeString(const std::string &text, std::ofstream &file) -> void;
 };
 } // namespace haptics::types
-#endif //AVATAR_H
+#endif // IOBinary_H
