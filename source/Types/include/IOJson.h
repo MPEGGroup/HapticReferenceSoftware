@@ -105,6 +105,17 @@ namespace haptics::encoder {
       {types::AvatarType::Temperature, "Temperature"},
       {types::AvatarType::Custom, "Custom"}};
 
+  static const std::map<std::string, types::ActuatorType> stringToActuatorType = {
+      {"LRA", types::ActuatorType::LRA},
+      {"VCA", types::ActuatorType::VCA},
+      {"ERM", types::ActuatorType::ERM},
+      {"Piezo", types::ActuatorType::Piezo}};
+  static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
+      {types::ActuatorType::LRA, "LRA"},
+      {types::ActuatorType::VCA, "VCA"},
+      {types::ActuatorType::ERM, "ERM"},
+      {types::ActuatorType::Piezo, "Piezo"}};
+
   class IOJson {
 public:
   static auto loadFile(const std::string &filePath) -> types::Haptics;

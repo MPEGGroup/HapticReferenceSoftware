@@ -96,6 +96,10 @@ auto IOJson::loadPerceptions(const nlohmann::json& jsonPerceptions, types::Hapti
                                           perceptionPerceptionModality);
     auto jsonTracks = jsonPerception["tracks"];
     loadTracks(jsonTracks, perception);
+    if (jsonPerception.contains("reference_devices") && jsonPerception["reference_devices"].is_array()) {
+      auto jsonReferenceDevices = jsonPerception["reference_devices"];
+      loadReferenceDevices(jsonReferenceDevices, perception);
+    }
     haptic.addPerception(perception);
   }
 }
@@ -243,7 +247,7 @@ auto IOJson::loadReferenceDevices(const nlohmann::json& jsonReferenceDevices, ty
     if (!jsonReferenceDevice.contains("id") || !jsonReferenceDevice["id"].is_number_integer()) {
       continue;
     }
-    if (!jsonReferenceDevice.contains("name") || !jsonReferenceDevice["lod"].is_string()) {
+    if (!jsonReferenceDevice.contains("name") || !jsonReferenceDevice["name"].is_string()) {
       continue;
     }
     auto id = jsonReferenceDevice["id"].get<int>();
@@ -292,6 +296,13 @@ auto IOJson::loadReferenceDevices(const nlohmann::json& jsonReferenceDevices, ty
     }
     if (!jsonReferenceDevice.contains("size") || !jsonReferenceDevice["size"].is_number()) {
       referenceDevice.setSize(jsonReferenceDevice["size"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("custom") || !jsonReferenceDevice["custom"].is_number()) {
+      referenceDevice.setCustom(jsonReferenceDevice["custom"].get<float>());
+    }
+    if (!jsonReferenceDevice.contains("type") || !jsonReferenceDevice["type"].is_string()) {
+      auto type = jsonReferenceDevice["type"].get<std::string>();
+      referenceDevice.setType(stringToActuatorType.at(type));
     }
     perception.addReferenceDevice(referenceDevice);
   }
@@ -479,6 +490,12 @@ auto IOJson::extractReferenceDevices(types::Perception &perception,
     }
     if (referenceDevice.getSize().has_value()) {
       jsonReferenceDevice["size"] = referenceDevice.getSize().value();
+    }
+    if (referenceDevice.getCustom().has_value()) {
+      jsonReferenceDevice["custom"] = referenceDevice.getCustom().value();
+    }
+    if (referenceDevice.getType().has_value()) {
+      jsonReferenceDevice["type"] = referenceDevice.getType().value();
     }
 
     jsonReferenceDevices.push_back(jsonReferenceDevice);
