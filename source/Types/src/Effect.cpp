@@ -71,6 +71,15 @@ auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
   return keyframes.at(index);
 }
 
+auto Effect::replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool {
+  if (index < 0 || index >= keyframes.size()) {
+    return false;
+  }
+
+  this->keyframes[index] = newKeyframe;
+  return true;
+}
+
 auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
 }

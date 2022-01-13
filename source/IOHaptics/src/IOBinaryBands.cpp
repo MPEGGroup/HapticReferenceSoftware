@@ -154,23 +154,108 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
   }
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::readTransientBandBody(types::Band &band, std::ifstream &file) -> bool {
+  types::Effect myEffect;
+  types::Keyframe myKeyframe;
+  for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
+    float amplitude = IOBinaryPrimitives::readFloat(file);
+    auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    auto frequency = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+
+    myKeyframe = types::Keyframe(0, amplitude, static_cast<int>(frequency));
+    myEffect = types::Effect(static_cast<int>(position), 0, types::BaseSignal::Sine);
+    myEffect.addKeyframe(myKeyframe);
+    band.replaceEffectAt(effectIndex, myEffect);
+  }
+
   return true;
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool {
+  types::Effect myEffect;
+  types::Keyframe myKeyframe;
+  for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
+    myEffect = band.getEffectAt(effectIndex);
+    for (int kfIndex = 0; kfIndex < static_cast<int>(myEffect.getKeyframesSize()); kfIndex++) {
+      myKeyframe = myEffect.getKeyframeAt(kfIndex);
+
+      float amplitude = 0;
+      if (myKeyframe.getAmplitudeModulation().has_value()) {
+        amplitude = myKeyframe.getAmplitudeModulation().value();
+      }
+      IOBinaryPrimitives::writeFloat(amplitude, file);
+
+      auto position = static_cast<unsigned int>(myEffect.getPosition());
+      if (myKeyframe.getRelativePosition().has_value()) {
+        position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
+      }
+      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+
+      unsigned int frequency = 0;
+      if (myKeyframe.getFrequencyModulation().has_value()) {
+        frequency = static_cast<unsigned int>(myKeyframe.getFrequencyModulation().value());
+      }
+      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(frequency, file);
+    }
+  }
+
   return true;
 }
 
 // NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::readCurveBandBody(types::Band &band, std::ifstream &file) -> bool {
+  types::Effect myEffect;
+  types::Keyframe myKeyframe;
+  unsigned int effectPosition = 0;
+  for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
+    myEffect = band.getEffectAt(effectIndex);
+    myEffect.setPhase(0);
+    myEffect.setBaseSignal(types::BaseSignal::Sine);
+    effectPosition = 0;
+    for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize()); keyframeIndex++) {
+      float amplitude = IOBinaryPrimitives::readFloat(file);
+      auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+
+      if (keyframeIndex == 0) {
+        effectPosition = position;
+        position = 0;
+      } else {
+        position -= effectPosition;
+      }
+
+      myKeyframe = types::Keyframe(static_cast<int>(position), amplitude, std::nullopt);
+      myEffect.replaceKeyframeAt(keyframeIndex, myKeyframe);
+    }
+
+    band.replaceEffectAt(effectIndex, myEffect);
+  }
+
   return true;
 }
 
 // NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool {
+  types::Effect myEffect;
+  types::Keyframe myKeyframe;
+  for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
+    myEffect = band.getEffectAt(effectIndex);
+    for (int kfIndex = 0; kfIndex < static_cast<int>(myEffect.getKeyframesSize()); kfIndex++) {
+      myKeyframe = myEffect.getKeyframeAt(kfIndex);
+
+      float amplitude = 0;
+      if (myKeyframe.getAmplitudeModulation().has_value()) {
+        amplitude = myKeyframe.getAmplitudeModulation().value();
+      }
+      IOBinaryPrimitives::writeFloat(amplitude, file);
+
+      auto position = static_cast<unsigned int>(myEffect.getPosition());
+      if (myKeyframe.getRelativePosition().has_value()) {
+        position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
+      }
+      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+    }
+  }
+
   return true;
 }
 

@@ -39,7 +39,7 @@
 
 namespace haptics::io {
 
-auto IOBinary::loadFile(const std::string &filePath) -> bool {
+auto IOBinary::loadFile(const std::string &filePath, types::Haptics &out) -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
     std::cout << filePath << ": Cannot open file!" << std::endl;
@@ -57,10 +57,9 @@ auto IOBinary::loadFile(const std::string &filePath) -> bool {
     return false;
   }
 
-  types::Haptics haptic;
-  bool res = IOBinary::readFileHeader(haptic, file);
+  bool res = IOBinary::readFileHeader(out, file);
   if (res) {
-    IOBinary::readFileBody(haptic, file);
+    IOBinary::readFileBody(out, file);
   }
 
   file.close();
@@ -474,6 +473,10 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool
         myBand = myTrack.getBandAt(bandIndex);
         if (!IOBinaryBands::readBandHeader(myBand, file)) {
           continue;
+        }
+
+        if (!IOBinaryBands::readBandBody(myBand, file)) {
+          return false;
         }
         
         myTrack.replaceBandAt(bandIndex, myBand);

@@ -59,7 +59,7 @@ enum class DeviceInformationMask : uint16_t {
 
 class IOBinary {
 public:
-  static auto loadFile(const std::string &filePath) -> bool;
+  static auto loadFile(const std::string &filePath, types::Haptics &out) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> bool;
 
 private:

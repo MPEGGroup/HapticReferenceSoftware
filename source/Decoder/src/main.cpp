@@ -33,10 +33,12 @@
 
 #include <Tools/include/InputParser.h>
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOJson.h>
 #include <Types/include/Haptics.h>
 
 using haptics::tools::InputParser;
 using haptics::io::IOBinary;
+using haptics::io::IOJson;
 using haptics::types::Haptics;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -60,11 +62,18 @@ auto main(int argc, char *argv[]) -> int {
     std::cout << "The file to process is : " << filename << "\n";
     std::string output = inputParser.getCmdOption("-o");
     if (output.empty()) {
-        output = inputParser.getCmdOption("--output");
+      output = inputParser.getCmdOption("--output");
     }
-    if (!output.empty()) {
-        std::cout << "The generated file will be : " << output << "\n";
+    if (output.empty()) {
+      InputParser::help(args[0]);
+      return EXIT_FAILURE;
     }
 
-    return IOBinary::loadFile(filename) ? EXIT_SUCCESS : EXIT_FAILURE;
+    Haptics hapticFile;
+    if (!IOBinary::loadFile(filename, hapticFile)) {
+      return EXIT_FAILURE;
+    }
+
+    IOJson::writeFile(hapticFile, output);
+    return EXIT_SUCCESS;
 }
