@@ -92,7 +92,14 @@ namespace haptics::types {
   }
 
   auto Track::getBandAt(int index) -> haptics::types::Band& {
-    return bands.at(index);
+    return bands.at(index); }
+
+  auto Track::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
+    if (index < 0 || index >= bands.size()) {
+      return false;
+    }
+    bands[index] = newBand;
+    return true;
   }
 
   auto Track::addBand(haptics::types::Band& newBand) -> void {

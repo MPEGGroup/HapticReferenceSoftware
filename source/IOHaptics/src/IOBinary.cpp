@@ -57,13 +57,13 @@ auto IOBinary::loadFile(const std::string &filePath) -> bool {
   }
 
   types::Haptics haptic;
-  if (!IOBinary::readFileHeader(haptic, file)) {
-    file.close();
-    return false;
+  bool res = IOBinary::readFileHeader(haptic, file);
+  if (res) {
+    IOBinary::readFileBody(haptic, file);
   }
 
   file.close();
-  return true;
+  return res;
 }
 
 auto IOBinary::writeFile(types::Haptics &haptic, const std::string &filePath) -> bool {
@@ -74,6 +74,10 @@ auto IOBinary::writeFile(types::Haptics &haptic, const std::string &filePath) ->
   }
 
   bool res = IOBinary::writeFileHeader(haptic, file);
+  if (res) {
+    res = IOBinary::writeFileBody(haptic, file);
+  }
+
   file.close();
   return res;
 }
@@ -452,16 +456,125 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
   return true;
 }
 
+auto IOBinary::readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool {
+  types::Perception myPerception;
+  types::Track myTrack;
+  types::Band myBand;
 
+  for (int perceptionIndex = 0; perceptionIndex < static_cast<int>(haptic.getPerceptionsSize());
+       perceptionIndex++) {
+    myPerception = haptic.getPerceptionAt(perceptionIndex);
 
-// NOLINTNEXTLINE(misc-unused-parameters)
-auto IOBinary::writeBandHeader(types::Haptics &haptic, std::ofstream &file) -> bool {
-  return false;
+    for (int trackIndex = 0; trackIndex < static_cast<int>(myPerception.getTracksSize());
+         trackIndex++) {
+      myTrack = myPerception.getTrackAt(trackIndex);
+
+      for (int bandIndex = 0; bandIndex < static_cast<int>(myTrack.getBandsSize()); bandIndex++) {
+        myBand = myTrack.getBandAt(bandIndex);
+        if (!IOBinary::readBandHeader(myBand, file)) {
+          continue;
+        }
+        
+        myTrack.replaceBandAt(bandIndex, myBand);
+        // TODO : write Band body
+      }
+      myPerception.replaceTrackAt(trackIndex, myTrack);
+    }
+    haptic.replacePerceptionAt(perceptionIndex, myPerception);
+  }
+
+  return true;
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters)
-auto IOBinary::writeBandBody(types::Haptics &haptic, std::ofstream &file) -> bool {
-  return false;
+auto IOBinary::writeFileBody(types::Haptics& haptic, std::ofstream& file) -> bool {
+  types::Perception myPerception;
+  types::Track myTrack;
+  types::Band myBand;
+  for (unsigned short perceptionIndex = 0;
+       perceptionIndex < static_cast<unsigned short>(haptic.getPerceptionsSize());
+       perceptionIndex++) {
+    myPerception = haptic.getPerceptionAt(perceptionIndex);
+
+    for (unsigned short trackIndex = 0;
+         trackIndex < static_cast<unsigned short>(myPerception.getTracksSize()); trackIndex++) {
+      myTrack = myPerception.getTrackAt(trackIndex);
+    
+      for (unsigned short bandIndex = 0; bandIndex < static_cast<unsigned short>(myTrack.getBandsSize());
+           bandIndex++) {
+        myBand = myTrack.getBandAt(bandIndex);
+        if (!IOBinary::writeBandHeader(myBand, file)) {
+          continue;
+        }
+
+        // TODO : write Band body
+      }
+    }
+  }
+
+  return true;
+}
+
+auto IOBinary::readBandHeader(types::Band& band, std::ifstream& file) -> bool {
+  auto bandType = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  band.setBandType(static_cast<types::BandType>(bandType));
+
+  auto encodingmodality = IOBinaryPrimitives::IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  band.setEncodingModality(static_cast<types::EncodingModality>(encodingmodality));
+
+  if (band.getBandType() == types::BandType::Wave &&
+      (band.getEncodingModality() == types::EncodingModality::Quantized ||
+       band.getEncodingModality() == types::EncodingModality::Wavelet)) {
+    auto windowLength = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    band.setWindowLength(static_cast<int>(windowLength));
+  }
+
+  auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+  band.setLowerFrequencyLimit(static_cast<int>(lowerFrequencyLimit));
+
+  auto upperFrequencyLimit = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+  band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
+
+  if (band.getBandType() == types::BandType::Transient ||
+      band.getBandType() == types::BandType::Curve) {
+    auto keyframeCount = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+  }
+
+  return true;
+}
+
+auto IOBinary::writeBandHeader(types::Band &band, std::ofstream &file) -> bool {
+  types::BandType t = band.getBandType();
+  auto bandType = static_cast<unsigned short>(t);
+  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(bandType, file);
+
+  auto encodingmodality = static_cast<unsigned short>(band.getEncodingModality());
+  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(encodingmodality, file);
+
+  if (band.getBandType() == types::BandType::Wave &&
+      (band.getEncodingModality() == types::EncodingModality::Quantized ||
+       band.getEncodingModality() == types::EncodingModality::Wavelet)) {
+    auto windowLength = static_cast<unsigned int>(band.getWindowLength());
+    IOBinaryPrimitives::writeNBytes<unsigned int, 4>(windowLength, file);
+  }
+
+  auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
+  IOBinaryPrimitives::writeNBytes<unsigned int, 4>(lowerFrequencyLimit, file);
+
+  auto upperFrequencyLimit = static_cast<unsigned int>(band.getUpperFrequencyLimit());
+  IOBinaryPrimitives::writeNBytes<unsigned int, 4>(upperFrequencyLimit, file);
+
+  if (band.getBandType() == types::BandType::Transient ||
+      band.getBandType() == types::BandType::Curve) {
+    unsigned int keyframeCount = 0;
+    types::Effect myEffect;
+    for (int i = 0; i < static_cast<int>(band.getEffectsSize()); i++) {
+      myEffect = band.getEffectAt(i);
+      keyframeCount += static_cast<unsigned int>(myEffect.getKeyframesSize());
+    }
+    IOBinaryPrimitives::writeNBytes<unsigned int, 4>(keyframeCount, file);
+  }
+
+  return true;
 }
 
 auto IOBinary::generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice) -> uint16_t {

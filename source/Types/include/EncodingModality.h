@@ -39,9 +39,9 @@
 
 namespace haptics::types {
 enum class EncodingModality {
-
-  Quantized = 0,
-  Vectorial = Quantized + 1,
+  Quantized = 1,
+  Vectorial = 0,
+  Wavelet = 2
 };
 
 static const std::map<std::string, EncodingModality> stringToModality = {

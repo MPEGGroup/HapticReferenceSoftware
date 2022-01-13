@@ -68,6 +68,7 @@ public:
   auto addVertex(int &newVertice) -> void;
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
+  auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
   auto addBand(haptics::types::Band &newBand) -> void;
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;

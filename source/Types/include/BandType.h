@@ -40,9 +40,9 @@
 namespace haptics::types {
 
 enum class BandType {
- Wave = 0,
- Curve = Wave + 1,
- Transient = Curve + 1,
+ Wave = 2,
+ Curve = 1,
+ Transient = 0,
 };
 
 static const std::map<std::string, BandType> stringToBandType = {
