@@ -38,14 +38,17 @@ namespace haptics::filterbank {
 
 void Wavelet::DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
 
+  out.resize(in.size());
   std::vector<double> x(in.begin(), in.end());
   for (int i = 0; i < levels; i++) {
     auto len = in.size() >> i;
     std::vector<double> l(len, 0);
     std::vector<double> h(len, 0);
 
-    symconv1D(x, hp, h);
-    symconv1D(x, lp, l);
+    std::vector<double> x_temp(len, 0);
+    std::copy(x.begin(), x.begin() + (long long)len, x_temp.begin());
+    symconv1D(x_temp, hp, h);
+    symconv1D(x_temp, lp, l);
 
     auto out_ind = 0;
     auto out_add = len >> 1;
@@ -59,9 +62,7 @@ void Wavelet::DWT(std::vector<double> &in, int levels, std::vector<double> &out)
 }
 
 void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
-
   std::copy(in.begin(), in.end(), out.begin());
-
   for (int i = levels - 1; i >= 0; i--) {
     auto len = in.size() >> i;
     std::vector<double> l(len, 0);
@@ -70,11 +71,10 @@ void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &
       l[j] = out[j / 2];
       h[j + 1] = out[j / 2 + (len / 2)];
     }
-    for (int j = 0; j < len; j += 2) {
+    /*for (int j = 0; j < len; j += 2) {
       l[j + 1] = 0;
       h[j] = 0;
-    }
-
+    }*/
     symconv1D(h, hpr, out);
     symconv1DAdd(l, lpr, out);
   }
@@ -82,7 +82,7 @@ void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &
 
 template <size_t hSize>
 void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out) {
-
+  
   size_t inSize = in.size();
 
   // symmetric extension
@@ -99,7 +99,6 @@ void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h, s
   auto extension = 2 * lext;
   std::vector<double> conv(inSize + hSize - 1 + extension, 0);
   conv1D(temp, h, conv);
-  out.resize(inSize);
   std::copy(conv.begin() + extension, conv.end() - extension, out.begin());
 }
 
@@ -123,7 +122,6 @@ void Wavelet::symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h
   auto extension = 2 * lext;
   std::vector<double> conv(inSize + hSize - 1 + extension, 0);
   conv1D(temp, h, conv);
-  out.resize(inSize);
   for (int i = 0; i < inSize; i++) {
     out[i] += conv[i + hSize - 1];
   }

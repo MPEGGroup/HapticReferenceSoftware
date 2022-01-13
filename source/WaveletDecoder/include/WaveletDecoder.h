@@ -31,71 +31,45 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PSYCHOHAPTICMODEL_H
-#define PSYCHOHAPTICMODEL_H
+#ifndef WAVELETDECODER_H
+#define WAVELETDECODER_H
 
-#include <iostream>
+#include <cmath>
 #include <vector>
+#include <optional>
 #include <algorithm>
 
+#include "FilterBank/include/Wavelet.h"
+#include "Types/include/Band.h"
+#include "Types/include/Effect.h"
+#include "Types/include/Keyframe.h"
 
-constexpr double a = 62;
-constexpr double c = (double)1/(double)550;
-constexpr double b = 1-(250*c);
-constexpr double e = 77;
-constexpr double base = 10;
-constexpr double factor = 10;
 
-constexpr double mask_a = 5;
-constexpr double mask_b = 1400;
-constexpr double mask_c = 30;
+using haptics::filterbank::Wavelet;
+using haptics::types::Band;
+using haptics::types::BandType;
+using haptics::types::Effect;
+using haptics::types::EncodingModality;
 
-constexpr double PEAK_HUGE_VAL = 2147483647;  // 2^32 - 1
-constexpr double MIN_PEAK_PROMINENCE = 12;
-constexpr double MIN_PEAK_HEIGHT_DIFF = 45;
+namespace haptics::waveletdecoder {
 
-constexpr double LOGFACTOR_SPECT = 20;
-constexpr double ZERO_COMP = 1e-35;
+constexpr double MS_2_S_WAVELET = 0.001;
 
-namespace haptics::tools {
-
-struct peaks {
-  std::vector<size_t> locations;
-  std::vector<double> heights;
-};
-
-struct modelResult {
-  std::vector<double> SMR;
-  std::vector<double> bandenergy;
-};
-
-class PsychohapticModel {
+class WaveletDecoder {
 public:
-    PsychohapticModel(size_t bl_new, int fs_new);
 
-    auto getSMR(std::vector<double> &block) -> modelResult;
+  auto static decodeBand(Band &band) -> std::vector<double>;
+  void static transformBand(Band &band);
+  auto static decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl) -> std::vector<double>;
 
-    static auto findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height) -> peaks;
-    void peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc, std::vector<double> &mask);
 
 private:
-    auto globalMaskingThreshold(std::vector<double> &spect) -> std::vector<double>;
-    void perceptualThreshold();
+  int bl;
+  int fs;
+  int dwtlevel;
 
-    static auto findAllPeakLocations(std::vector<double> &x) -> peaks;
-    static auto peakProminence(std::vector<double> &spectrum, peaks input) -> peaks;
-    static auto filterPeakCriterion(peaks &input, double min_peak_val) -> peaks;
-
-    static auto max(double v1, double v2) -> double;
-    static auto findMaxVector(std::vector<double> &data) -> double;
-
-    size_t bl;
-    int fs;
-    std::vector<double> freqs;
-    std::vector<double> percthres;
-    std::vector<int> book;
-    std::vector<int> book_cumulative;
+  std::vector<double> sig_rec;
 
 };
-} // namespace haptics::tools
-#endif //PSYCHOHAPTICMODEL_H
+} // namespace haptics::waveletdecoder
+#endif // WAVELETDECODER_H

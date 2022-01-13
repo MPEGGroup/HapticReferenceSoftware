@@ -39,13 +39,28 @@
 
 #include "PsychohapticModel/include/PsychohapticModel.h"
 #include "FilterBank/include/Wavelet.h"
+#include "Types/include/Band.h"
+#include "Types/include/Effect.h"
+#include "Types/include/Keyframe.h"
 
-constexpr size_t WAVMAXLENGTH = 8;
+constexpr size_t WAVMAXLENGTH = 24;
 constexpr int MAXBITS = 15;
-constexpr int FRACTIONBITS_0 = 7;
+constexpr int FRACTIONBITS_0 = 23;
+constexpr int FRACTIONBITS_1 = 19;
+constexpr int INTEGERBITS_1 = 4;
 constexpr double LOGFACTOR = 10;
 constexpr double MAXQUANTFACTOR = 0.999;
 constexpr double QUANT_ADD = 0.5;
+constexpr double S_2_MS_WAVELET = 1000;
+
+
+using haptics::tools::PsychohapticModel;
+using haptics::tools::modelResult;
+using haptics::filterbank::Wavelet;
+using haptics::types::Band;
+using haptics::types::BandType;
+using haptics::types::EncodingModality;
+using haptics::types::Effect;
 
 namespace haptics::encoder {
 
@@ -58,7 +73,9 @@ class WaveletEncoder {
 public:
     WaveletEncoder(int bl_new, int fs_new);
 
-    auto encodeBlock(std::vector<double> &block_time, int bitbudget) -> std::vector<double>;
+    auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band) -> bool;
+    auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar)
+        -> std::vector<double>;
     static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
                                           std::vector<unsigned char> &bitwavmax);
     void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,

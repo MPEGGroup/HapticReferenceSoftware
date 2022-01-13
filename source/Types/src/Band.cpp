@@ -126,31 +126,35 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
 auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                             int highFrequencyLimit) -> double {
 
-  switch (this->bandType) {
-  case BandType::Curve:
-    return effect->EvaluateKeyframes(position);
-    break;
-  case BandType::Wave:
-    if (encodingModality == EncodingModality::Quantized) {
-      return effect->EvaluateQuantized(position, this->getWindowLength());
-    } else if (encodingModality == EncodingModality::Vectorial) {
-      return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
+    switch (this->bandType) {
+    case BandType::Curve:
+        return effect->EvaluateKeyframes(position);
+        break;
+    case BandType::Wave:
+        if (encodingModality == EncodingModality::Quantized) {
+            return effect->EvaluateQuantized(position, this->getWindowLength());
+        }
+        else if (encodingModality == EncodingModality::Vectorial) {
+            return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
+        }else if (encodingModality == EncodingModality::Wavelet) {
+          auto sample = effect->EvaluateWavelet(position, this->getWindowLength());
+          return sample;
+        }
+        break;
+    case BandType::Transient: {
+        double res = 0;
+        for (Effect e : effects) {
+            if (e.getPosition() <= position && position <= e.getPosition() + TRANSIENT_DURATION_MS) {
+                res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
+            }
+        }
+        return res;
+        break;
     }
-    break;
-  case BandType::Transient: {
-    double res = 0;
-    for (Effect e : effects) {
-      if (e.getPosition() <= position && position <= e.getPosition() + TRANSIENT_DURATION_MS) {
-        res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
-      }
+    default:
+        return 0;
+        break;
     }
-    return res;
-    break;
-  }
-  default:
-    return 0;
-    break;
-  }
 
   return -1;
 }
