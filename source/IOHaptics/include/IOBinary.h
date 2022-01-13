@@ -69,7 +69,6 @@ private:
   static auto readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
   static auto readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool;
   static auto readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool;
-  static auto readBandHeader(types::Band &band, std::ifstream &file) -> bool;
 
   static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writeFileBody(types::Haptics &haptic, std::ofstream &file) -> bool;
@@ -77,7 +76,6 @@ private:
   static auto writePerceptionsHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writeReferenceDevices(types::Perception &perception, std::ofstream &file) -> bool;
   static auto writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool;
-  static auto writeBandHeader(types::Band &band, std::ofstream &file) -> bool;
 
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice) -> uint16_t;
 };

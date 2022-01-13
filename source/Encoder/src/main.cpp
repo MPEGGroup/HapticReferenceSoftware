@@ -125,7 +125,7 @@ auto main(int argc, char *argv[]) -> int {
         config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
         config.windowLength = 15;
-        return PcmEncoder::encode(filename, config, myPerception);
+        codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
 
       if (codeExit == EXIT_SUCCESS) {
