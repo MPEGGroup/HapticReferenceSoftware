@@ -38,7 +38,7 @@
 #include <nlohmann/json.hpp>
 #include <Types/include/Haptics.h>
 
-namespace haptics::types {
+namespace haptics::io {
 
 class IOJson {
 public:
@@ -64,5 +64,5 @@ public:
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
-} // namespace encoder
+} // namespace haptics::io
 #endif //IOJSON_H

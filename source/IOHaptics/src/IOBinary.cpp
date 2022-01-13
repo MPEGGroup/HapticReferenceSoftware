@@ -31,12 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Types/include/IOBinary.h>
+#include <IOHaptics/include/IOBinary.h>
 #include <array>
 #include <fstream>
 #include <iostream>
 
-namespace haptics::types {
+namespace haptics::io {
 
 auto IOBinary::loadFile(const std::string &filePath) -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
@@ -56,7 +56,7 @@ auto IOBinary::loadFile(const std::string &filePath) -> bool {
     return false;
   }
 
-  Haptics haptic;
+  types::Haptics haptic;
   if (!IOBinary::readFileHeader(haptic, file)) {
     file.close();
     return false;
@@ -125,15 +125,15 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> b
 auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool {
   auto avatarCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
-  Avatar myAvatar;
+  types::Avatar myAvatar;
   for (unsigned short i = 0; i < avatarCount; i++) {
     auto avatarId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     auto avatarLod = IOBinaryPrimitives::readNBytes<int, 4>(file);
     auto avatarType = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
     std::string avatarURI;
-    myAvatar = Avatar(avatarId, avatarLod, static_cast<AvatarType>(avatarType));
-    if (myAvatar.getType() == AvatarType::Custom) {
+    myAvatar = types::Avatar(avatarId, avatarLod, static_cast<types::AvatarType>(avatarType));
+    if (myAvatar.getType() == types::AvatarType::Custom) {
       // TODO : do something with this value
       avatarURI = IOBinaryPrimitives::readString(file);
     }
@@ -148,7 +148,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
   auto avatarCount = static_cast<unsigned short>(haptic.getAvatarsSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarCount, file);
 
-  Avatar myAvatar;
+  types::Avatar myAvatar;
   const std::string avatarURI = "placeholder";
   for (unsigned short i = 0; i < avatarCount; i++) {
     myAvatar = haptic.getAvatarAt(i);
@@ -162,7 +162,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
     auto avatarType = static_cast<unsigned short>(myAvatar.getType());
     IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarType, file);
 
-    if (myAvatar.getType() == AvatarType::Custom) {
+    if (myAvatar.getType() == types::AvatarType::Custom) {
       IOBinaryPrimitives::writeString(avatarURI, file); 
     }
   }
@@ -172,15 +172,15 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
 auto IOBinary::readPerceptionsHeader(types::Haptics& haptic, std::ifstream& file) -> bool {
   auto perceptionCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
-  Perception myPerception;
+  types::Perception myPerception;
   for (unsigned short i = 0; i < perceptionCount; i++) {
     auto perceptionId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     auto perceptionModality = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
     std::string perceptionDescription = IOBinaryPrimitives::readString(file);
     auto avatarId = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
-    myPerception = Perception(perceptionId, avatarId, perceptionDescription,
-                              static_cast<PerceptionModality>(perceptionModality));
+    myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
+                              static_cast<types::PerceptionModality>(perceptionModality));
     if (!IOBinary::readReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -198,7 +198,7 @@ auto IOBinary::writePerceptionsHeader(types::Haptics& haptic, std::ofstream& fil
   auto perceptionCount = static_cast<unsigned short>(haptic.getPerceptionsSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(perceptionCount, file);
 
-  Perception myPerception;
+  types::Perception myPerception;
   for (unsigned short i = 0; i < perceptionCount; i++) {
     myPerception = haptic.getPerceptionAt(i);
 
@@ -233,7 +233,7 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
     std::string referenceDeviceName = IOBinaryPrimitives::readString(file);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
 
-    ReferenceDevice myReferenceDevice(referenceDeviceId, referenceDeviceName);
+    types::ReferenceDevice myReferenceDevice(referenceDeviceId, referenceDeviceName);
     myReferenceDevice.setBodyPartMask(bodyPartMask);
 
     auto deviceInformationMask = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -300,7 +300,7 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(referenceDeviceCount, file);
 
   // for each reference device
-  ReferenceDevice myReferenceDevice;
+  types::ReferenceDevice myReferenceDevice;
   for (unsigned short i = 0; i < referenceDeviceCount; i++) {
     myReferenceDevice = perception.getReferenceDeviceAt(i);
 
@@ -388,7 +388,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
-    Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
+    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
 
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
@@ -398,7 +398,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
 
     auto bandCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
     for (unsigned short j = 0; j < bandCount; j++) {
-      Band emptyBand;
+      types::Band emptyBand;
       t.addBand(emptyBand);
     }
 
@@ -413,7 +413,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(trackCount, file);
 
   // for each track
-  Track myTrack;
+  types::Track myTrack;
   for (unsigned short i = 0; i < trackCount; i++) {
     myTrack = perception.getTrackAt(i);
 
@@ -464,7 +464,7 @@ auto IOBinary::writeBandBody(types::Haptics &haptic, std::ofstream &file) -> boo
   return false;
 }
 
-auto IOBinary::generateReferenceDeviceInformationMask(ReferenceDevice &referenceDevice) -> uint16_t {
+auto IOBinary::generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice) -> uint16_t {
   auto mask = (uint16_t)DeviceInformationMask::NOTHING;
   
   if (referenceDevice.getMaximumFrequency().has_value()) {

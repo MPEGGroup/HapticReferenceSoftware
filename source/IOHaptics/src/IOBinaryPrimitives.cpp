@@ -31,12 +31,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Types/include/IOBinaryPrimitives.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <array>
 #include <fstream>
-#include <iostream>
 
-namespace haptics::types {
+namespace haptics::io {
 
 auto IOBinaryPrimitives::writeString(const std::string &text, std::ofstream &file) -> void {
   std::string str = text;

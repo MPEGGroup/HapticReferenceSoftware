@@ -35,10 +35,10 @@
 #define IOBINARY_H
 
 #include <Types/include/Haptics.h>
-#include <Types/include/IOBinaryPrimitives.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <string>
 
-namespace haptics::types {
+namespace haptics::io {
 
 enum class DeviceInformationMask : uint16_t {
   MAXIMUM_FREQUENCY     = 0b0000'0000'0000'0001,
@@ -77,7 +77,7 @@ private:
   static auto writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool;
   static auto writeBandBody(types::Haptics &haptic, std::ofstream &file) -> bool;
 
-  static auto generateReferenceDeviceInformationMask(ReferenceDevice &referenceDevice) -> uint16_t;
+  static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice) -> uint16_t;
 };
-} // namespace haptics::types
+} // namespace haptics::io
 #endif // IOBINARY_H

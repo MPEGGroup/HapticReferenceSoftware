@@ -32,11 +32,11 @@
  */
 
 #include <Tools/include/InputParser.h>
-#include <Types/include/IOBinary.h>
+#include <IOHaptics/include/IOBinary.h>
 #include <Types/include/Haptics.h>
 
 using haptics::tools::InputParser;
-using haptics::types::IOBinary;
+using haptics::io::IOBinary;
 using haptics::types::Haptics;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

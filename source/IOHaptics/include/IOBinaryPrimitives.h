@@ -36,7 +36,7 @@
 
 #include <string>
 
-namespace haptics::types {
+namespace haptics::io {
 
 class IOBinaryPrimitives {
 public:
@@ -49,5 +49,5 @@ public:
   template <class T, size_t bytesCount>
   static auto writeNBytes(const T &value, std::ofstream &file) -> void;
 };
-} // namespace haptics::types
+} // namespace haptics::io
 #endif // IOBINARYPRIMITIVES_H

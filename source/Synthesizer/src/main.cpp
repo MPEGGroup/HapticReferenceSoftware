@@ -35,11 +35,11 @@
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
-#include <Types/include/IOJson.h>
+#include <IOHaptics/include/IOJson.h>
 #include <filesystem>
 
 using haptics::synthesizer::Helper;
-using haptics::types::IOJson;
+using haptics::io::IOJson;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
 

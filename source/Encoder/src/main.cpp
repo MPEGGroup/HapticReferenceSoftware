@@ -34,8 +34,8 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
-#include <Types/include/IOBinary.h>
-#include <Types/include/IOJson.h>
+#include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
@@ -50,8 +50,8 @@ using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
-using haptics::types::IOBinary;
-using haptics::types::IOJson;
+using haptics::io::IOBinary;
+using haptics::io::IOJson;
 
 // NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
 auto main(int argc, char *argv[]) -> int {

@@ -31,12 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Types/include/IOJson.h>
+#include <IOHaptics/include/IOJson.h>
 #include <iostream>
 
 using json = nlohmann::json;
 
-namespace haptics::types {
+namespace haptics::io {
 
 auto IOJson::loadFile(const std::string &filePath) -> haptics::types::Haptics {
   std::ifstream ifs(filePath);
@@ -90,7 +90,7 @@ auto IOJson::loadPerceptions(const nlohmann::json& jsonPerceptions, types::Hapti
     auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
     auto perceptionDescription = jsonPerception["description"].get<std::string>();
     auto perceptionPerceptionModality =
-        stringToPerceptionModality.at(jsonPerception["perception_modality"].get<std::string>());
+        types::stringToPerceptionModality.at(jsonPerception["perception_modality"].get<std::string>());
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
@@ -169,8 +169,8 @@ auto IOJson::loadBands(const nlohmann::json& jsonBands, types::Track& track) -> 
       continue;
     }
 
-    types::BandType bandType = stringToBandType.at(jsonBand["band_type"].get<std::string>());
-    types::EncodingModality encodingModality = stringToModality.at(jsonBand["encoding_modality"]);
+    types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
+    types::EncodingModality encodingModality = types::stringToModality.at(jsonBand["encoding_modality"]);
     int windowLength = jsonBand["window_length"].get<int>();
     int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();
     int upperLimit = jsonBand["upper_frequency_limit"].get<int>();
@@ -203,7 +203,7 @@ auto IOJson::loadEffects(const nlohmann::json& jsonEffects, types::Band& band) -
 
     auto position = jsonEffect["position"].get<int>();
     auto phase = jsonEffect["phase"].get<float>();
-    auto baseSignal = stringToBaseSignal.at(jsonEffect["base_signal"]);
+    auto baseSignal = types::stringToBaseSignal.at(jsonEffect["base_signal"]);
 
     types::Effect effect(position, phase, baseSignal);
     auto jsonKeyframes = jsonEffect["keyframes"];
@@ -229,7 +229,7 @@ auto IOJson::loadAvatars(const nlohmann::json& jsonAvatars, types::Haptics& hapt
     }
     auto id = jsonAvatar["id"].get<int>();
     auto lod = jsonAvatar["lod"].get<int>();
-    auto type = stringToAvatarType.at(jsonAvatar["type"]);
+    auto type = types::stringToAvatarType.at(jsonAvatar["type"]);
 
     types::Avatar avatar(id, lod, type);
     haptic.addAvatar(avatar);
@@ -344,7 +344,7 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerc
     jsonPerception["id"] = perception.getId();
     jsonPerception["avatar_id"] = perception.getAvatarId();
     jsonPerception["description"] = perception.getDescription();
-    jsonPerception["perception_modality"] = perceptionModalityToString.at(perception.getPerceptionModality());
+    jsonPerception["perception_modality"] = types::perceptionModalityToString.at(perception.getPerceptionModality());
 
     auto jsonReferenceDevices = json::array();
     extractReferenceDevices(perception, jsonReferenceDevices);
@@ -366,7 +366,7 @@ auto IOJson::extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars)
     auto jsonAvatar = json::object();
     jsonAvatar["id"] = avatar.getId();
     jsonAvatar["lod"] = avatar.getLod();
-    jsonAvatar["type"] = avatarTypeToString.at(avatar.getType());
+    jsonAvatar["type"] = types::avatarTypeToString.at(avatar.getType());
     jsonAvatars.push_back(jsonAvatar);
   }
 }
@@ -396,8 +396,8 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     for (int l = 0; l < numBands; l++) {
       auto band = track.getBandAt(l);
       auto jsonBand = json::object();
-      jsonBand["band_type"] = bandTypeToString.at(band.getBandType());
-      jsonBand["encoding_modality"] = modalityToString.at(band.getEncodingModality());
+      jsonBand["band_type"] = types::bandTypeToString.at(band.getBandType());
+      jsonBand["encoding_modality"] = types::modalityToString.at(band.getEncodingModality());
       jsonBand["window_length"] = band.getWindowLength();
       jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
       jsonBand["upper_frequency_limit"] = band.getUpperFrequencyLimit();
@@ -409,7 +409,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
         auto jsonEffect = json::object();
         jsonEffect["position"] = effect.getPosition();
         jsonEffect["phase"] = effect.getPhase();
-        jsonEffect["base_signal"] = baseSignalToString.at(effect.getBaseSignal());
+        jsonEffect["base_signal"] = types::baseSignalToString.at(effect.getBaseSignal());
 
         auto jsonKeyframes = json::array();
         auto numKeyframes = effect.getKeyframesSize();
@@ -484,4 +484,4 @@ auto IOJson::extractReferenceDevices(types::Perception &perception,
     jsonReferenceDevices.push_back(jsonReferenceDevice);
   }
 }
-} // namespace haptics::encoder
+} // namespace haptics::io

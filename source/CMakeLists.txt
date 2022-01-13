@@ -8,6 +8,7 @@ add_subdirectory("Tools")
 add_subdirectory("Types")
 add_subdirectory("FilterBank")
 add_subdirectory("PsychohapticModel")
+add_subdirectory("IOHaptics")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")
