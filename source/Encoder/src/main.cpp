@@ -162,12 +162,6 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    haptics::types::Avatar a1(42, 1, haptics::types::AvatarType::Custom);
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    haptics::types::Avatar a2(24, 2, haptics::types::AvatarType::Pressure);
-    hapticFile.addAvatar(a1);
-    hapticFile.addAvatar(a2);
     IOBinary::writeFile(hapticFile, output);
   } else {
     IOJson::writeFile(hapticFile, output);

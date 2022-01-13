@@ -31,13 +31,31 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IOBinary_H
-#define IOBinary_H
+#ifndef IOBINARY_H
+#define IOBINARY_H
 
 #include <Types/include/Haptics.h>
+#include <Types/include/IOBinaryPrimitives.h>
 #include <string>
 
 namespace haptics::types {
+
+enum class DeviceInformationMask : uint16_t {
+  MAXIMUM_FREQUENCY     = 0b0000'0000'0000'0001,
+  MINIMUM_FREQUENCY     = 0b0000'0000'0000'0010,
+  RESONANCE_FREQUENCY   = 0b0000'0000'0000'0100,
+  MAXIMUM_AMPLITUDE     = 0b0000'0000'0000'1000,
+  IMPEDANCE             = 0b0000'0000'0001'0000,
+  MAXIMUM_VOLTAGE       = 0b0000'0000'0010'0000,
+  MAXIMUM_CURRENT       = 0b0000'0000'0100'0000,
+  MAXIMUM_DISPLACEMENT  = 0b0000'0000'1000'0000,
+  WEIGHT                = 0b0000'0001'0000'0000,
+  SIZE                  = 0b0000'0010'0000'0000,
+  TYPE                  = 0b0000'0100'0000'0000,
+
+  NOTHING               = 0b0000'0000'0000'0000,
+  ALL                   = 0b1111'1111'1111'1111,
+};
 
 class IOBinary {
 public:
@@ -46,15 +64,20 @@ public:
 
 private:
   static auto readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
-  static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool;
-  static auto writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool;
-
+  static auto readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
+  static auto readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool;
+  static auto readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool;
   static auto writeBandHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+
+  static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto writePerceptionsHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto writeReferenceDevices(types::Perception &perception, std::ofstream &file) -> bool;
+  static auto writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool;
   static auto writeBandBody(types::Haptics &haptic, std::ofstream &file) -> bool;
 
-  static auto readString(std::ifstream &file) -> std::string;
-  static auto writeString(const std::string &text, std::ofstream &file) -> void;
+  static auto generateReferenceDeviceInformationMask(ReferenceDevice &referenceDevice) -> uint16_t;
 };
 } // namespace haptics::types
-#endif // IOBinary_H
+#endif // IOBINARY_H

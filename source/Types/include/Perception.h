@@ -45,14 +45,14 @@ namespace haptics::types {
 
 enum class PerceptionModality {
   Other = 0,
-  Pressure = Other + 1,
-  Acceleration = Pressure + 1,
-  Velocity = Acceleration + 1,
-  Position = Velocity + 1,
-  Temperature = Position + 1,
-  Vibration = Temperature + 1,
-  Water = Vibration + 1,
-  Wind = Water + 1
+  Pressure = 1,
+  Acceleration = 2,
+  Velocity = 3,
+  Position = 4,
+  Temperature = 5,
+  Vibration = 6,
+  Water = 7,
+  Wind = 8
 };
 
 static const std::map<std::string, PerceptionModality> stringToPerceptionModality = {
