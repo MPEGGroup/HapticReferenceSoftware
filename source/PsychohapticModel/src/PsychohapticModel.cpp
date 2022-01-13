@@ -199,25 +199,25 @@ auto PsychohapticModel::findAllPeakLocations(std::vector<double> &x) -> peaks {
 auto PsychohapticModel::peakProminence(std::vector<double> &spectrum, peaks input) -> peaks {
 
   peaks prominences;
-  size_t num_peaks = input.locations.size();
+  int num_peaks = (int)input.locations.size();
   prominences.heights.reserve(num_peaks);
   prominences.locations.reserve(num_peaks);
-  for (size_t i = 0; i < num_peaks; i++) {
-    prominences.heights.push_back(0); // simple init instead?
+  for (int i = 0; i < num_peaks; i++) {
+    prominences.heights.push_back(0);
   }
-  std::vector<size_t> valley_left(num_peaks, 0);
-  std::vector<size_t> valley_right(num_peaks, 0);
+  std::vector<int> valley_left(num_peaks, 0);
+  std::vector<int> valley_right(num_peaks, 0);
   valley_right.reserve(num_peaks);
-  for (size_t i = 0; i < num_peaks; ++i) {
-    size_t j_min = 0;
+  for (int i = 0; i < num_peaks; ++i) {
+    int j_min = 0;
     for (int k = (int)i - 1; k >= 0; --k) {
       if (input.heights[k] > input.heights[i]) {
-        j_min = input.locations[k];
+        j_min = (int)input.locations[k];
         break;
       }
     }
-    size_t j_max = input.locations[i] - 1;
-    size_t j = j_max;
+    int j_max = (int)input.locations[i] - 1;
+    int j = j_max;
     double min_val_left = input.heights[i];
     while ((j >= j_min) && (j <= j_max)) {
       if (input.locations[i] == 0) {
@@ -231,18 +231,18 @@ auto PsychohapticModel::peakProminence(std::vector<double> &spectrum, peaks inpu
       --j;
     }
 
-    j_max = spectrum.size() - 1;
-    for (size_t k = i + 1; k < num_peaks; ++k) {
+    j_max = (int)spectrum.size() - 1;
+    for (int k = i + 1; k < num_peaks; ++k) {
       if (input.heights[k] > input.heights[i]) {
-        j_max = input.locations[k];
+        j_max = (int)input.locations[k];
         break;
       }
     }
-    j_min = input.locations[i] + 1;
+    j_min = (int)input.locations[i] + 1;
     j = j_min;
     double min_val_right = input.heights[i];
     while ((j >= j_min) && (j <= j_max)) {
-      if (input.locations[i] == (int32_t)(j_max)) {
+      if (input.locations[i] == (int)(j_max)) {
         valley_right[i] = -1;
         break;
       }
@@ -255,7 +255,7 @@ auto PsychohapticModel::peakProminence(std::vector<double> &spectrum, peaks inpu
   }
   double valley_left_height_cur = 0;
   double valley_right_height_cur = 0;
-  for (size_t i = 0; i < num_peaks; ++i) {
+  for (int i = 0; i < num_peaks; ++i) {
     if (valley_left[i] == -1) {
       valley_left_height_cur = -PEAK_HUGE_VAL;
     } else {
