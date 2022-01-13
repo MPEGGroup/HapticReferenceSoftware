@@ -38,6 +38,7 @@
 #include <list>
 #include <vector>
 #include <Spiht/include/Spiht_Enc.h>
+#include <Spiht/include/ArithDec.h>
 
 namespace haptics::spiht {
 
@@ -60,11 +61,12 @@ private:
   template <typename T> auto bi2de(std::vector<T> &data, int length) -> T;
   auto static sgn(int val) -> int;
 
-  std::vector<char> instream;
   std::list<int> LIP;
   std::list<int> LIS1;
   std::list<int> LIS2;
   std::list<int> LSP;
+
+  ArithDec arithDec;
 };
 } // namespace haptics::spiht
 #endif // SPIHT_DEC_H

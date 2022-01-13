@@ -38,8 +38,7 @@ namespace haptics::spiht {
 void Spiht_Dec::decode(std::vector<char> &bitstream, std::vector<int> &out, int origlength,
                        int level, double &wavmax, int &n_real) {
 
-  // arithDec->initDecoding(bitstream, pos, streamlength);
-  instream = bitstream;
+  arithDec.initDecoding(bitstream);
   out.resize(origlength, 0);
   n_real = getMaxAllocBits();
   wavmax = getWavmax();
@@ -188,17 +187,14 @@ void Spiht_Dec::refinementPass(std::vector<int> &out, int LSP_index, int compare
   }
 }
 
-auto Spiht_Dec::getBit(int context) -> int { // NOLINT
-  int out = (unsigned char)instream.at(0);
-  instream.erase(instream.begin());
-  return out;
+auto Spiht_Dec::getBit(int context) -> int {
+  return arithDec.decode(context);
 }
 
 void Spiht_Dec::getBits(std::vector<int> &out, int length, int context) { // NOLINT
   out.resize(length);
   for (int i = 0; i < length; i++) {
-    out[i] = (unsigned char)instream.at(0);
-    instream.erase(instream.begin());
+    out[i] = arithDec.decode(context);
   }
 }
 

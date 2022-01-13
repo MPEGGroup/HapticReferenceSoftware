@@ -35,6 +35,7 @@
 
 #include <Spiht/include/Spiht_Enc.h>
 #include <Spiht/include/Spiht_Dec.h>
+#include <Spiht/include/ArithEnc.h>
 #include <iostream>
 
 constexpr size_t bl = 512;
@@ -44,6 +45,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
 
   using haptics::spiht::Spiht_Enc;
   using haptics::spiht::Spiht_Dec;
+  using haptics::spiht::ArithEnc;
 
   SECTION("maxDescendant") {
     Spiht_Enc enc;
@@ -76,15 +78,21 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     Spiht_Enc enc;
     std::vector<int> signal(bl, 0);
     signal.at(bl / 2) = 1;
+    signal.at(0) = 4;
+    signal.at(3) = 3;
     std::vector<char> bitwavmax{1, 0, 0, 0, 0, 0, 0, 0};
-    std::vector<char> outstream;
+    std::vector<char> stream_spiht;
     std::vector<int> context;
-    enc.encode(signal, level, bitwavmax, 1, outstream, context);
+    enc.encode(signal, level, bitwavmax, 4, stream_spiht, context);
+    ArithEnc arithEnc;
+    std::vector<char> outstream_arithmetic;
+    arithEnc.encode(stream_spiht, context, outstream_arithmetic);
+    
     Spiht_Dec dec;
     std::vector<int> signal_rec(bl, 0);
     double wavmax = 0;
     int n_real = 0;
-    dec.decode(outstream, signal_rec, bl, level, wavmax, n_real);
+    dec.decode(outstream_arithmetic, signal_rec, bl, level, wavmax, n_real);
     bool equal = true;
     for (int i = 0; i < bl; i++) {
       if (signal.at(i) != signal_rec.at(i)) {

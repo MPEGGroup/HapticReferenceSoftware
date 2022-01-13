@@ -61,14 +61,14 @@ private:
                                                  RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
   std::vector<char> instream;
 
-  size_t in_index;
-  size_t max_index;
+  size_t in_index = 0;
+  size_t max_index = 0;
 
-  int range_diff;
-  int range_lower;
-  int range_upper;
+  int range_diff = 0;
+  int range_lower = 0;
+  int range_upper = 0;
 
-  int in_leading;
+  int in_leading = 0;
 };
 } // namespace haptics::spiht
 #endif // ARITDEC_H
