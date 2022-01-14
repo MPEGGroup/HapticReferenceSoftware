@@ -71,4 +71,26 @@ TEST_CASE("haptics::spiht::ArithEnc") {
     }
     CHECK(equal);
   }
+
+  SECTION("convert to bytes") {
+    ArithEnc enc;
+    std::vector<char> in = {0,1,1,1,0,1,0,1,1,1};
+    std::vector<char> converted;
+    std::vector<char> out;
+    ArithEnc::convert2bytes(in, converted);
+    ArithDec::convert2bits(converted, out);
+    bool equal = true;
+    for (int i = 0; i < in.size(); i++) {
+      if (out[i] != in[i]) {
+        equal = false;
+      }
+    }
+    CHECK(equal);
+    if (!equal) {
+      std::cout << "output in bits:" << std::endl;
+      for (auto v : out) {
+        std::cout << (int)v << std::endl;
+      }
+    }
+  }
 }

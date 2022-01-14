@@ -51,6 +51,7 @@ public:
   auto decode(int context) -> int;
 
   void resetCounter();
+  void static convert2bits(std::vector<char> &in, std::vector<char> &out);
 
 private:
   void rescaleCounter();

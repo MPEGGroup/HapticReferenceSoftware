@@ -165,4 +165,25 @@ void ArithEnc::rescaleCounter() {
   }
 }
 
+void ArithEnc::convert2bytes(std::vector<char> &in, std::vector<char> &out) {
+  out.resize(ceil((double)in.size()/BYTE_SIZE));
+  int index = 0;
+  for (auto &v: out) {
+    std::bitset<BYTE_SIZE> temp;
+    for (int j = 0; j < BYTE_SIZE; j++) {
+      if (index >= in.size()) {
+        break;
+      }
+      if (in.at(index) == 1) {
+        temp[j] = true;
+      }
+      index++;
+    }
+    std::cout << "result: " << temp.to_ulong() << std::endl;
+    std::cout << "result char: " << (int)(char)temp.to_ulong()
+    << std::endl;
+    v = (char)temp.to_ulong();
+  }
+}
+
 } // namespace haptics::spiht

@@ -37,6 +37,8 @@
 #include <array>
 #include <iostream>
 #include <vector>
+#include <bitset>
+
 
 namespace haptics::spiht {
 
@@ -48,6 +50,7 @@ constexpr size_t CONTEXT_SIZE = 7;
 constexpr int RESET_HALF = 8;
 constexpr int RESET_TOTAL = 16;
 constexpr int RESIZE_TOTAL = 32;
+constexpr int BYTE_SIZE = 8;
 
 class ArithEnc {
 public:
@@ -55,6 +58,7 @@ public:
                         std::vector<char> &outstream);
 
   void resetCounter();
+  void static convert2bytes(std::vector<char> &in, std::vector<char> &out);
 
 private:
   void static remainder(int bits_to_follow, std::vector<char> &outstream, int range_lower,
@@ -66,6 +70,11 @@ private:
                                            RESET_HALF, RESET_HALF, RESET_HALF};
   std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
                                                  RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
+
+  std::array<int, BYTE_SIZE> masks = {0b00000001, 0b00000010, 0b00000100,
+                                       0b00001000, 0b00010000, 0b00100000,
+                                       0b01000000, 0b10000000};
+
 };
 } // namespace haptics::spiht
 #endif // ARITHENC_H
