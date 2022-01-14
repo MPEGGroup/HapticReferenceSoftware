@@ -480,7 +480,6 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool
         }
         
         myTrack.replaceBandAt(bandIndex, myBand);
-        // TODO : write Band body
       }
       myPerception.replaceTrackAt(trackIndex, myTrack);
     }
