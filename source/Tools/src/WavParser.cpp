@@ -112,6 +112,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   b_int.resize(buff.size() * buff.at(0).size());
   long c = 0;
   for (auto &b : buff) {
+
     for (int i = 0; i < b.size(); i++) {
       b_int.at((i * buff.size()) + c) = (uint16_t)(round((b.at(i) * SCALING)));
     }

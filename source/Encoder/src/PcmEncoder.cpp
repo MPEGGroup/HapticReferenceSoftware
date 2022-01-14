@@ -33,8 +33,7 @@
 
 #include <Encoder/include/PcmEncoder.h>
 #include <Tools/include/Tools.h>
-#include <algorithm>
-#include <cmath>
+#include <Encoder/include/WaveletEncoder.h>
 
 using haptics::filterbank::FourierTools;
 using haptics::filterbank::Filterbank;
@@ -47,6 +46,7 @@ using haptics::types::Keyframe;
 using haptics::types::Effect;
 using haptics::types::Track;
 using haptics::types::Band;
+using haptics::encoder::WaveletEncoder;
 
 namespace haptics::encoder {
 
@@ -69,6 +69,10 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   std::vector<double> filteredSignal;
   std::vector<std::pair<int, double>> points;
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
+  // init of wavelet encoding
+  Band waveletBand;
+  WaveletEncoder waveletEnc(config.wavelet_windowLength, static_cast<int>(wavParser.getSamplerate()));
+  std::vector<double> signal_wavelet;
   for (int channelIndex = 0; channelIndex < numChannels; channelIndex++) {
     myTrack = out.getTrackAt(channelIndex);
     signal = wavParser.getSamplesChannel(channelIndex);
@@ -81,18 +85,27 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
                                        config.curveFrequencyLimit, &myBand)) {
       myTrack.addBand(myBand);
     }
+    out.replaceTrackAt(channelIndex, myTrack);
 
-    // WAVE BANDS
-    for (std::pair<double, double> frequencyLimits : config.frequencyBandLimits) {
-      myBand = Band();
-      if (PcmEncoder::encodeIntoWaveBand(signal, filterbank, wavParser.getSamplerate(),
-                                         frequencyLimits, config, &myBand)) {
-        myTrack.addBand(myBand);
-      }
+    //wavelet processing
+    signal_wavelet = wavParser.getSamplesChannel(channelIndex);
+    Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
+    signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+    waveletBand = Band();
+    if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget, config.curveFrequencyLimit,
+        waveletBand)) {
+        myTrack.addBand(waveletBand);
     }
+    // WAVE BANDS
+    /*for (std::pair<double, double> frequencyLimits : config.frequencyBandLimits) {
+        myBand = Band();
+        if (PcmEncoder::encodeIntoWaveBand(signal, filterbank, wavParser.getSamplerate(),
+            frequencyLimits, config, &myBand)) {
+            myTrack.addBand(myBand);
+        }
+    }*/
     out.replaceTrackAt(channelIndex, myTrack);
   }
-
   return EXIT_SUCCESS;
 }
 

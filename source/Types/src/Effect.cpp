@@ -248,8 +248,29 @@ auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
          myKeyframe->getAmplitudeModulation().value();
 }
 
+auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
+    double relativePosition = position - this->getPosition();
+    int index = std::floor(relativePosition / windowLength * (double)this->getKeyframesSize());
+
+    //std::cout << "windowLength: " << windowLength << std::endl;
+    //std::cout << "EvaluateWavelet position: " << position << std::endl;
+    //std::cout << "relativePosition: " << relativePosition << std::endl;
+    //std::cout << "EvaluateWavelet index: " << index << std::endl;
+
+    if (index >= this->getKeyframesSize()) {
+        return 0;
+    }
+
+    auto myKeyframe = keyframes.begin() + index;
+    if (!myKeyframe->getAmplitudeModulation().has_value()) {
+        return 0;
+    }
+
+    return myKeyframe->getAmplitudeModulation().value();
+}
+
 auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
-  const double relativePosition = position - this->getPosition();
+    const double relativePosition = position - this->getPosition();
 
   auto checkingFunction = [&](Keyframe kf) {
     return kf.getRelativePosition().has_value() &&
