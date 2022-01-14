@@ -179,9 +179,6 @@ void ArithEnc::convert2bytes(std::vector<char> &in, std::vector<char> &out) {
       }
       index++;
     }
-    std::cout << "result: " << temp.to_ulong() << std::endl;
-    std::cout << "result char: " << (int)(char)temp.to_ulong()
-    << std::endl;
     v = (char)temp.to_ulong();
   }
 }
