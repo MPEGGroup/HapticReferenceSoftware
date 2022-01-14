@@ -135,4 +135,21 @@ auto ReferenceDevice::setSize(float newSize) -> void {
     size = newSize;
 }
 
+
+[[nodiscard]] auto ReferenceDevice::getCustom() const -> std::optional<float> {
+    return custom;
+}
+
+auto ReferenceDevice::setCustom(float newCustom) -> void {
+    custom = newCustom;
+}
+
+[[nodiscard]] auto ReferenceDevice::getType() const -> std::optional<ActuatorType> {
+    return type;
+}
+
+auto ReferenceDevice::setType(ActuatorType newType) -> void {
+    type = newType;
+}
+
 } // namespace haptics::types

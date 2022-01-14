@@ -39,6 +39,14 @@
 
 namespace haptics::types {
 
+	
+enum class ActuatorType {
+  LRA = 0,
+  VCA = LRA + 1,
+  ERM = VCA + 1,
+  Piezo = ERM + 1
+};
+
 class ReferenceDevice {
 public:
   explicit ReferenceDevice() = default;
@@ -70,6 +78,10 @@ public:
   auto setWeight(float newWeight) -> void;
   [[nodiscard]] auto getSize() const -> std::optional<float>;
   auto setSize(float newSize) -> void;
+  [[nodiscard]] auto getCustom() const -> std::optional<float>;
+  auto setCustom(float newCustom) -> void;
+  [[nodiscard]] auto getType() const -> std::optional<ActuatorType>;
+  auto setType(ActuatorType newType) -> void;
 
 private:
   int id = -1;
@@ -85,6 +97,8 @@ private:
   std::optional<float> maximumDisplacement;
   std::optional<float> weight;
   std::optional<float> size;
+  std::optional<float> custom;
+  std::optional<ActuatorType> type;
 };
 } // namespace haptics::types
 #endif // REFERENCEDEVICE_H
