@@ -42,10 +42,12 @@
 namespace haptics::encoder {
   static const std::map<std::string, types::EncodingModality> stringToModality = {
     {"Quantized", types::EncodingModality::Quantized},
-    {"Vectorial", types::EncodingModality::Vectorial}};
+    {"Vectorial", types::EncodingModality::Vectorial},
+    {"Wavelet", types::EncodingModality::Wavelet}};
   static const std::map<types::EncodingModality, std::string> modalityToString = {
     {types::EncodingModality::Quantized, "Quantized"},
-    {types::EncodingModality::Vectorial, "Vectorial"}};
+    {types::EncodingModality::Vectorial, "Vectorial"},
+    {types::EncodingModality::Wavelet, "Wavelet"}};
 
   
   static const std::map<std::string, types::BandType> stringToBandType = {

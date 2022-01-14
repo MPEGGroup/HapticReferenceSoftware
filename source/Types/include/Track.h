@@ -69,6 +69,7 @@ public:
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto addBand(haptics::types::Band &newBand) -> void;
+  auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;

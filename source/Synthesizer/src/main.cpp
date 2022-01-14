@@ -87,6 +87,7 @@ auto main(int argc, char *argv[]) -> int {
       return EXIT_FAILURE;
     }
   }
+
   std::cout << "The sampling frequency used will be : " << fs << "\n";
 
   std::string padStr = inputParser.getCmdOption("--pad");

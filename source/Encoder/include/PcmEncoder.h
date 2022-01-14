@@ -51,14 +51,18 @@ struct EncodingConfig {
   double curveFrequencyLimit = 0;
   std::vector<std::pair<double, double>> frequencyBandLimits;
   int windowLength = 0;
+  int wavelet_windowLength = 0;
+  int wavelet_bitbudget = 0;
 
   explicit EncodingConfig() = default;
   explicit EncodingConfig(double _curveFrequencyLimit,
                           std::vector<std::pair<double, double>> &_frequencyBandLimits,
-                          int _windowLength)
+                          int _windowLength, int _wavelet_windowLength, int _wavelet_bitbudget)
       : curveFrequencyLimit(_curveFrequencyLimit)
       , frequencyBandLimits(_frequencyBandLimits)
-      , windowLength(_windowLength){};
+      , windowLength(_windowLength)
+      , wavelet_windowLength(_wavelet_windowLength)
+      , wavelet_bitbudget(_wavelet_bitbudget){};
 };
 
 class PcmEncoder {

@@ -39,6 +39,7 @@ namespace haptics::types {
 enum class EncodingModality {
   Quantized = 0,
   Vectorial = Quantized + 1,
+  Wavelet = Vectorial + 1,
 };
 } // namespace haptics::types
 

@@ -147,6 +147,10 @@ auto main(int argc, char *argv[]) -> int {
     config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     config.windowLength = 15;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    config.wavelet_windowLength = 128;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+    config.wavelet_bitbudget = 4;
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
   }
