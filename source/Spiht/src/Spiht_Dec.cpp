@@ -35,6 +35,28 @@
 
 namespace haptics::spiht {
 
+void Spiht_Dec::decodeEffect(std::vector<char> &in, Effect &effect, int origlength) {
+  std::vector<char> in_bits;
+  ArithDec::convert2bits(in, in_bits);
+  std::vector<int> out;
+  auto level = (int)(log2((double)origlength) - 2);
+  double wavmax = 0;
+  int bits = 0;
+  decode(in_bits, out, origlength, level, wavmax, bits);
+  double multiplier = 1 / pow(2, (double)bits) - 1;
+  int pos = 0;
+  for (auto v : out) {
+    double val = (double)v * multiplier;
+    Keyframe keyframe(pos, (float)val, 0);
+    effect.addKeyframe(keyframe);
+    pos++;
+  }
+  Keyframe keyframe(pos, (float)wavmax, 0);
+  effect.addKeyframe(keyframe);
+  Keyframe keyframeBits(pos, (float)bits, 0);
+  effect.addKeyframe(keyframeBits);
+}
+
 void Spiht_Dec::decode(std::vector<char> &bitstream, std::vector<int> &out, int origlength,
                        int level, double &wavmax, int &n_real) {
 
@@ -48,7 +70,7 @@ void Spiht_Dec::decode(std::vector<char> &bitstream, std::vector<int> &out, int 
   while (0 <= n) {
     int compare = 1 << n; // 2^n
     int LSP_index = (int)LSP.size();
-    
+
     sortingPass(out, origlength, compare);
 
     refinementPass(out, LSP_index, compare);
@@ -82,9 +104,9 @@ auto Spiht_Dec::getMaxAllocBits() -> int {
 
 auto Spiht_Dec::getWavmax() -> double {
   int mode = getBit(CONTEXT_0);
-  std::vector<int> wavmaxArray(WAVMAX_SIZE - 1, 0);
-  getBits(wavmaxArray, WAVMAX_SIZE - 1, 0);
-  int temp = bi2de(wavmaxArray, WAVMAX_SIZE - 1);
+  std::vector<int> wavmaxArray(WAVMAXLENGTH - 1, 0);
+  getBits(wavmaxArray, WAVMAXLENGTH - 1, 0);
+  int temp = bi2de(wavmaxArray, WAVMAXLENGTH - 1);
   double wavmax = 0;
   if (mode == 0) {
     wavmax = (double)temp * pow(2, -FRACTIONBITS_0);
@@ -187,9 +209,7 @@ void Spiht_Dec::refinementPass(std::vector<int> &out, int LSP_index, int compare
   }
 }
 
-auto Spiht_Dec::getBit(int context) -> int {
-  return arithDec.decode(context);
-}
+auto Spiht_Dec::getBit(int context) -> int { return arithDec.decode(context); }
 
 void Spiht_Dec::getBits(std::vector<int> &out, int length, int context) { // NOLINT
   out.resize(length);

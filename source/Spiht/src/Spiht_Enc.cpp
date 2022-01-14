@@ -35,6 +35,29 @@
 
 namespace haptics::spiht {
 
+void Spiht_Enc::encodeEffect(Effect &effect, std::vector<char> &outstream) {
+  auto bl = (int)effect.getKeyframesSize() - 2;
+  double scalar = effect.getKeyframeAt(bl + 1).getAmplitudeModulation().value();
+  auto bits = (int)effect.getKeyframeAt(bl + 2).getAmplitudeModulation().value();
+  double multiplier = pow(2, (double)bits) - 1;
+  std::vector<int> block(bl, 0);
+  int index = 0;
+  for (auto &v : block) {
+    v = (int)(effect.getKeyframeAt(index).getAmplitudeModulation().value() * multiplier);
+    index++;
+  }
+  std::vector<char> bitwavmax;
+  maximumWaveletCoefficient(scalar, bitwavmax);
+  auto level = (int)(log2((double)bl) - 2);
+  std::vector<int> context;
+  std::vector<char> stream_spiht;
+  encode(block, level, bitwavmax, bits, stream_spiht, context);
+  ArithEnc arithEnc;
+  std::vector<char> stream_arithmetic;
+  arithEnc.encode(stream_spiht, context, stream_arithmetic);
+  ArithEnc::convert2bytes(stream_arithmetic, outstream);
+}
+
 void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<char> &bitwavmax,
                        int maxallocbits, std::vector<char> &outstream, std::vector<int> &context) {
 
@@ -246,6 +269,28 @@ void Spiht_Enc::initMaxDescendants(std::vector<int> &signal) {
     p2 = p1 + 1;
     target = width >> 1;
   }
+}
+
+void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<char> &bitwavmax) {
+
+  int integerpart = 0;
+  char mode = 0;
+  quantMode m = {0, 0};
+  if (qwavmax < 1) {
+    m.integerbits = 0;
+    m.fractionbits = FRACTIONBITS_0;
+  } else {
+    integerpart = 1;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
+    mode = 1;
+  }
+
+  bitwavmax.clear();
+  bitwavmax.reserve(WAVMAXLENGTH);
+  bitwavmax.push_back(mode);
+  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
+        m.integerbits + m.fractionbits);
 }
 
 void Spiht_Enc::de2bi(int val, std::vector<char> &outstream, int length) {

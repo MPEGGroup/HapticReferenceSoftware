@@ -38,7 +38,12 @@
 #include <list>
 #include <vector>
 
+#include <Types/include/Effect.h>
+#include <Spiht/include/ArithEnc.h>
+
 namespace haptics::spiht {
+
+using haptics::types::Effect;
 
 constexpr size_t MAXALLOCBITS_SIZE = 4;
 constexpr int CONTEXT_0 = 0;
@@ -50,8 +55,20 @@ constexpr int CONTEXT_5 = 5;
 constexpr int CONTEXT_6 = 6;
 constexpr size_t BUFFER_SIZE = 100000;
 
+constexpr size_t WAVMAXLENGTH = 24;
+constexpr int MAXBITS = 15;
+constexpr int FRACTIONBITS_0 = 23;
+constexpr int FRACTIONBITS_1 = 19;
+constexpr int INTEGERBITS_1 = 4;
+
+struct quantMode {
+  int integerbits;
+  int fractionbits;
+};
+
 class Spiht_Enc {
 public:
+  void encodeEffect(Effect &effect, std::vector<char> &outstream);
   void encode(std::vector<int> &instream, int level, std::vector<char> &bitwavmax, int maxallocbits,
               std::vector<char> &outstream, std::vector<int> &context);
 
@@ -64,6 +81,7 @@ private:
 
   void static addToOutput(char bit, int c, std::vector<char> &outstream, std::vector<int> &context);
 
+  static void maximumWaveletCoefficient(double qwavmax, std::vector<char> &bitwavmax);
   void static de2bi(int val, std::vector<char> &outstream, int length);
   auto static bitget(int in, int bit) -> int;
 

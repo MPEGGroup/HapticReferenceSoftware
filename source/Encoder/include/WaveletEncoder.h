@@ -74,10 +74,11 @@ public:
     WaveletEncoder(int bl_new, int fs_new);
 
     auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band) -> bool;
-    auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar)
+    auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits)
         -> std::vector<double>;
     static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
-                                          std::vector<unsigned char> &bitwavmax);
+                                          std::vector<char> &bitwavmax);
+    static void maximumWaveletCoefficient(double qwavmax, std::vector<char> &bitwavmax);
     void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
                      std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
 
@@ -89,7 +90,7 @@ public:
     static auto findMinInd(std::vector<double> &data) -> size_t;
 
     static auto sgn(double val) -> double;
-    static void de2bi(int val, std::vector<unsigned char> &outstream, int length);
+    static void de2bi(int val, std::vector<char> &outstream, int length);
 
 private:
 
