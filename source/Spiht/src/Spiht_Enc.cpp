@@ -37,13 +37,13 @@ namespace haptics::spiht {
 
 void Spiht_Enc::encodeEffect(Effect &effect, std::vector<char> &outstream) {
   auto bl = (int)effect.getKeyframesSize() - 2;
-  double scalar = effect.getKeyframeAt(bl + 1).getAmplitudeModulation().value();
-  auto bits = (int)effect.getKeyframeAt(bl + 2).getAmplitudeModulation().value();
-  double multiplier = pow(2, (double)bits) - 1;
+  double scalar = effect.getKeyframeAt(bl).getAmplitudeModulation().value();
+  auto bits = (int)effect.getKeyframeAt(bl + 1).getAmplitudeModulation().value();
+  double multiplier = pow(2, (double)bits);
   std::vector<int> block(bl, 0);
   int index = 0;
   for (auto &v : block) {
-    v = (int)(effect.getKeyframeAt(index).getAmplitudeModulation().value() * multiplier);
+    v = (int)((double)effect.getKeyframeAt(index).getAmplitudeModulation().value() * multiplier);
     index++;
   }
   std::vector<char> bitwavmax;

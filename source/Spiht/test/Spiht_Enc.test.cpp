@@ -41,6 +41,8 @@
 constexpr size_t bl = 512;
 constexpr size_t level = 7;
 constexpr int BITS_EFFECT = 15;
+constexpr float precision = 0.00000000001;
+constexpr int MOD_VAL = 256;
 
 TEST_CASE("haptics::spiht::Spiht_Enc") {
 
@@ -123,7 +125,8 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     Spiht_Enc enc;
     Effect effect_in;
     for (int i = 0; i < bl; i++) {
-      Keyframe keyframe(i, (float)i, 0);
+      // Keyframe keyframe(i, (float)i / (float)bl, 0);
+      Keyframe keyframe(i, (float)(i % MOD_VAL) / MOD_VAL, 0);
       effect_in.addKeyframe(keyframe);
     }
     Keyframe keyframe(bl, (float)1, 0);
@@ -135,6 +138,25 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
 
     Spiht_Dec dec;
     Effect effect_out;
+    bool equal = true;
     dec.decodeEffect(stream_enc, effect_out, bl);
+    for (int i = 0; i < bl; i++) {
+      if (!(fabs(effect_in.getKeyframeAt(i).getAmplitudeModulation().value() -
+                 effect_out.getKeyframeAt(i).getAmplitudeModulation().value()) < precision)) {
+        equal = false;
+      }
+    }
+    CHECK(equal);
+    if (!equal) {
+      for (int i = 0; i < bl; i++) {
+        std::cout << effect_in.getKeyframeAt(i).getAmplitudeModulation().value() << ","
+                  << effect_out.getKeyframeAt(i).getAmplitudeModulation().value() << std::endl;
+      }
+      std::cout << "scalar: " << effect_in.getKeyframeAt(bl).getAmplitudeModulation().value() << ","
+                << effect_out.getKeyframeAt(bl).getAmplitudeModulation().value() << std::endl;
+      std::cout << "bits: " << effect_in.getKeyframeAt(bl + 1).getAmplitudeModulation().value()
+                << "," << effect_out.getKeyframeAt(bl + 1).getAmplitudeModulation().value()
+                << std::endl;
+    }
   }
 }
