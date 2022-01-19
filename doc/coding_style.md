@@ -14,7 +14,7 @@ Copyright disclaimers shall not be altered, except to include the current year. 
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2021, ISO/IEC
+ * Copyright (c) 2010-2022, ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,12 +63,12 @@ Avoid using `#define` to define constants. Use `const` global variables or `cons
 All header files will include a mechanism to prevent multiple inclusion by using a `#define`. The name of the `#define` is created using the header file name in capital letters and a trailing underscore. All special characters in the file name are replaced by underscores. For a header file named *myheader.h* the structure would be the following:
 
 ```cpp
-#ifndef _MYHEADER_H_
-#define _MYHEADER_H_
+#ifndef MYHEADER_H
+#define MYHEADER_H
 
 <content of header file>
 
-#endif
+#endif // MYHEADER_H
 ```
 
 ### Private and protected
@@ -186,7 +186,7 @@ Use comments to explain the intent (or implementation detail) of code sections t
 Contributed code must **NOT** produce compiler warnings when compiled with the following compilers, after default CMake project generation: 
 * Visual Studio 2019,
 * gcc-10.x
-* clang-11.x
+* clang-12.x
 
 By default, CMake is configured to run [**clang-tidy**](https://clang.llvm.org/extra/clang-tidy/) and will raise errors, if any, at compilation time. The list of tests is configured in *.clang-tidy* file. Please refer to the [official website](https://clang.llvm.org/extra/clang-tidy/checks/list.html) for more details. The tests can be locally disabled in cmake but they will be checked before a branch merge by the software coordinator.
 
