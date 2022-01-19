@@ -29,7 +29,7 @@ This piece of software requires Windows 10 with Visual Studio 2019, or Linux wit
 
 ## Usage
 
-A successul build  will produce the two *Encoder* and *Decoder* executables, in the build/source/[Encoder|Decoder] folder. Runtime instructions are provided in [doc/usage.md](doc/usage.md)
+A successul build  will produce the two *Encoder* and *Synthesizer* executables, in the build/source/[Encoder|Synthesizer] folder. Runtime instructions are provided in [doc/usage.md](doc/usage.md)
 
 ## Contributing
 

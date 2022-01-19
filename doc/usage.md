@@ -22,10 +22,10 @@ Example
  ./Encoder -f IDCC-vib-Paper-8kHz-16-pad.wav -o IDCC-vib-Paper-8kHz-16-pad.gmpg
 ```
 
-### Decoding
+### Synthesizing
 
 ```shell
-usages: ./Decoder [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]
+usages: ./Synthesizer [-h] [{-v, -q}] -f <FILE> [-o <OUTPUT_FILE>]
 
 This piece of software converts binary encoded RM0 files submitted to the MPEG CfP call for Haptic standardization into their human-readable format
 
@@ -43,5 +43,5 @@ Example
 
 Example
 ```shell
- ./Decoder -f IDCC-vib-Paper-8kHz-16-pad.gmpg -o IDCC-vib-Paper-8kHz-16-pad.wav
+ ./Synthesizer -f IDCC-vib-Paper-8kHz-16-pad.gmpg -o IDCC-vib-Paper-8kHz-16-pad.wav
 ```
