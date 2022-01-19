@@ -38,11 +38,10 @@
 #include <Types/include/IOJson.h>
 #include <filesystem>
 
-using haptics::synthesizer::Helper;
 using haptics::encoder::IOJson;
+using haptics::synthesizer::Helper;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
-
 
 const int DEFAULT_FS = 8000;
 

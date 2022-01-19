@@ -34,91 +34,87 @@
 #ifndef IOJSON_H
 #define IOJSON_H
 
-#include <string>
-#include <nlohmann/json.hpp>
 #include <Types/include/Haptics.h>
 #include <map>
+#include <nlohmann/json.hpp>
+#include <string>
 
 namespace haptics::encoder {
-  static const std::map<std::string, types::EncodingModality> stringToModality = {
+static const std::map<std::string, types::EncodingModality> stringToModality = {
     {"Quantized", types::EncodingModality::Quantized},
     {"Vectorial", types::EncodingModality::Vectorial},
     {"Wavelet", types::EncodingModality::Wavelet}};
-  static const std::map<types::EncodingModality, std::string> modalityToString = {
+static const std::map<types::EncodingModality, std::string> modalityToString = {
     {types::EncodingModality::Quantized, "Quantized"},
     {types::EncodingModality::Vectorial, "Vectorial"},
     {types::EncodingModality::Wavelet, "Wavelet"}};
 
-  
-  static const std::map<std::string, types::BandType> stringToBandType = {
-      {"Wave", types::BandType::Wave},
-      {"Curve", types::BandType::Curve},
-      {"Transient", types::BandType::Transient}};
-  static const std::map<types::BandType, std::string> bandTypeToString = {
-      {types::BandType::Wave, "Wave"},
-      {types::BandType::Curve, "Curve"},
-      {types::BandType::Transient, "Transient"}};
+static const std::map<std::string, types::BandType> stringToBandType = {
+    {"Wave", types::BandType::Wave},
+    {"Curve", types::BandType::Curve},
+    {"Transient", types::BandType::Transient}};
+static const std::map<types::BandType, std::string> bandTypeToString = {
+    {types::BandType::Wave, "Wave"},
+    {types::BandType::Curve, "Curve"},
+    {types::BandType::Transient, "Transient"}};
 
-  
-  static const std::map<std::string, types::BaseSignal> stringToBaseSignal = {
-      {"Sine", types::BaseSignal::Sine},
-      {"Square", types::BaseSignal::Square},
-      {"Triangle", types::BaseSignal::Triangle},
-      {"SawToothUp", types::BaseSignal::SawToothUp},
-      {"SawToothDown", types::BaseSignal::SawToothDown}};
-  static const std::map<types::BaseSignal, std::string> baseSignalToString = {
-      {types::BaseSignal::Sine, "Sine"},
-      {types::BaseSignal::Square, "Square"},
-      {types::BaseSignal::Triangle, "Triangle"},
-      {types::BaseSignal::SawToothUp, "SawToothUp"},
-      {types::BaseSignal::SawToothDown, "SawToothDown"}};
+static const std::map<std::string, types::BaseSignal> stringToBaseSignal = {
+    {"Sine", types::BaseSignal::Sine},
+    {"Square", types::BaseSignal::Square},
+    {"Triangle", types::BaseSignal::Triangle},
+    {"SawToothUp", types::BaseSignal::SawToothUp},
+    {"SawToothDown", types::BaseSignal::SawToothDown}};
+static const std::map<types::BaseSignal, std::string> baseSignalToString = {
+    {types::BaseSignal::Sine, "Sine"},
+    {types::BaseSignal::Square, "Square"},
+    {types::BaseSignal::Triangle, "Triangle"},
+    {types::BaseSignal::SawToothUp, "SawToothUp"},
+    {types::BaseSignal::SawToothDown, "SawToothDown"}};
 
+static const std::map<std::string, types::PerceptionModality> stringToPerceptionModality = {
+    {"Other", types::PerceptionModality::Other},
+    {"Pressure", types::PerceptionModality::Pressure},
+    {"Acceleration", types::PerceptionModality::Acceleration},
+    {"Velocity", types::PerceptionModality::Velocity},
+    {"Position", types::PerceptionModality::Position},
+    {"Temperature", types::PerceptionModality::Temperature},
+    {"Vibration", types::PerceptionModality::Vibration},
+    {"Water", types::PerceptionModality::Water},
+    {"Wind", types::PerceptionModality::Wind}};
+static const std::map<types::PerceptionModality, std::string> perceptionModalityToString = {
+    {types::PerceptionModality::Other, "Other"},
+    {types::PerceptionModality::Pressure, "Pressure"},
+    {types::PerceptionModality::Acceleration, "Acceleration"},
+    {types::PerceptionModality::Velocity, "Velocity"},
+    {types::PerceptionModality::Position, "Position"},
+    {types::PerceptionModality::Temperature, "Temperature"},
+    {types::PerceptionModality::Vibration, "Vibration"},
+    {types::PerceptionModality::Water, "Water"},
+    {types::PerceptionModality::Wind, "Wind"}};
 
-  static const std::map<std::string, types::PerceptionModality> stringToPerceptionModality = {
-      {"Other", types::PerceptionModality::Other},
-      {"Pressure", types::PerceptionModality::Pressure},
-      {"Acceleration", types::PerceptionModality::Acceleration},
-      {"Velocity", types::PerceptionModality::Velocity},
-      {"Position", types::PerceptionModality::Position},
-      {"Temperature", types::PerceptionModality::Temperature},
-      {"Vibration", types::PerceptionModality::Vibration},
-      {"Water", types::PerceptionModality::Water},
-      {"Wind", types::PerceptionModality::Wind}};
-  static const std::map<types::PerceptionModality, std::string> perceptionModalityToString = {
-      {types::PerceptionModality::Other, "Other"},
-      {types::PerceptionModality::Pressure, "Pressure"},
-      {types::PerceptionModality::Acceleration, "Acceleration"},
-      {types::PerceptionModality::Velocity, "Velocity"},
-      {types::PerceptionModality::Position, "Position"},
-      {types::PerceptionModality::Temperature, "Temperature"},
-      {types::PerceptionModality::Vibration, "Vibration"},
-      {types::PerceptionModality::Water, "Water"},
-      {types::PerceptionModality::Wind, "Wind"}};
+static const std::map<std::string, types::AvatarType> stringToAvatarType = {
+    {"Vibration", types::AvatarType::Vibration},
+    {"Pressure", types::AvatarType::Pressure},
+    {"Temperature", types::AvatarType::Temperature},
+    {"Custom", types::AvatarType::Custom}};
+static const std::map<types::AvatarType, std::string> avatarTypeToString = {
+    {types::AvatarType::Vibration, "Vibration"},
+    {types::AvatarType::Pressure, "Pressure"},
+    {types::AvatarType::Temperature, "Temperature"},
+    {types::AvatarType::Custom, "Custom"}};
 
-  
-  static const std::map<std::string, types::AvatarType> stringToAvatarType = {
-      {"Vibration", types::AvatarType::Vibration},
-      {"Pressure", types::AvatarType::Pressure},
-      {"Temperature", types::AvatarType::Temperature},
-      {"Custom", types::AvatarType::Custom}};
-  static const std::map<types::AvatarType, std::string> avatarTypeToString = {
-      {types::AvatarType::Vibration, "Vibration"},
-      {types::AvatarType::Pressure, "Pressure"},
-      {types::AvatarType::Temperature, "Temperature"},
-      {types::AvatarType::Custom, "Custom"}};
+static const std::map<std::string, types::ActuatorType> stringToActuatorType = {
+    {"LRA", types::ActuatorType::LRA},
+    {"VCA", types::ActuatorType::VCA},
+    {"ERM", types::ActuatorType::ERM},
+    {"Piezo", types::ActuatorType::Piezo}};
+static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
+    {types::ActuatorType::LRA, "LRA"},
+    {types::ActuatorType::VCA, "VCA"},
+    {types::ActuatorType::ERM, "ERM"},
+    {types::ActuatorType::Piezo, "Piezo"}};
 
-  static const std::map<std::string, types::ActuatorType> stringToActuatorType = {
-      {"LRA", types::ActuatorType::LRA},
-      {"VCA", types::ActuatorType::VCA},
-      {"ERM", types::ActuatorType::ERM},
-      {"Piezo", types::ActuatorType::Piezo}};
-  static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
-      {types::ActuatorType::LRA, "LRA"},
-      {types::ActuatorType::VCA, "VCA"},
-      {types::ActuatorType::ERM, "ERM"},
-      {types::ActuatorType::Piezo, "Piezo"}};
-
-  class IOJson {
+class IOJson {
 public:
   static auto loadFile(const std::string &filePath) -> types::Haptics;
   static auto loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
@@ -131,16 +127,13 @@ public:
   static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> void;
   static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> void;
 
-  static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions)
-      -> void;
-  static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars)
-      -> void;
-  static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks)
-      -> void;
-  static auto
-  extractReferenceDevices(types::Perception &perception, nlohmann::json &jsonReferenceDevices) -> void;
+  static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
+  static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;
+  static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void;
+  static auto extractReferenceDevices(types::Perception &perception,
+                                      nlohmann::json &jsonReferenceDevices) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
-} // namespace encoder
-#endif //IOJSON_H
+} // namespace haptics::encoder
+#endif // IOJSON_H

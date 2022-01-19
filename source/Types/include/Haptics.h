@@ -66,7 +66,7 @@ public:
   auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
   auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
-  auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
+  auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
 
 private:
   std::string version;

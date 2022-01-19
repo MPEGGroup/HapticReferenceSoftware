@@ -39,13 +39,7 @@
 
 namespace haptics::types {
 
-	
-enum class ActuatorType {
-  LRA = 0,
-  VCA = LRA + 1,
-  ERM = VCA + 1,
-  Piezo = ERM + 1
-};
+enum class ActuatorType { LRA = 0, VCA = LRA + 1, ERM = VCA + 1, Piezo = ERM + 1 };
 
 class ReferenceDevice {
 public:

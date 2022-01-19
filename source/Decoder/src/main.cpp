@@ -37,29 +37,29 @@ using haptics::tools::InputParser;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
-    const auto args = std::vector<const char *>(argv, argv + argc);
-    InputParser inputParser(args);
-    if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-        InputParser::help(args[0]);
-        return EXIT_SUCCESS;
-    }
-
-    std::string filename = inputParser.getCmdOption("-f");
-    if (filename.empty()) {
-        filename = inputParser.getCmdOption("--file");
-    }
-    if (filename.empty()) {
-        InputParser::help(args[0]);
-        return EXIT_FAILURE;
-    }
-
-    std::cout << "The file to process is : " << filename << "\n";
-    std::string output = inputParser.getCmdOption("-o");
-    if (output.empty()) {
-        output = inputParser.getCmdOption("--output");
-    }
-    if (!output.empty()) {
-        std::cout << "The generated file will be : " << output << "\n";
-    }
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
+  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
+    InputParser::help(args[0]);
     return EXIT_SUCCESS;
+  }
+
+  std::string filename = inputParser.getCmdOption("-f");
+  if (filename.empty()) {
+    filename = inputParser.getCmdOption("--file");
+  }
+  if (filename.empty()) {
+    InputParser::help(args[0]);
+    return EXIT_FAILURE;
+  }
+
+  std::cout << "The file to process is : " << filename << "\n";
+  std::string output = inputParser.getCmdOption("-o");
+  if (output.empty()) {
+    output = inputParser.getCmdOption("--output");
+  }
+  if (!output.empty()) {
+    std::cout << "The generated file will be : " << output << "\n";
+  }
+  return EXIT_SUCCESS;
 }

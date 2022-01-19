@@ -177,6 +177,12 @@ void doSomething()
 ### Automated formatting
 All code will be formatted using the **clang-format** tool and the configuration file to be found at the root of the repository (*.clang-format*).
 
+Please configuration your IDE to use this configuration file to produce files compliant with these coding convention.
+
+The python script *scripts/check/clang_format.py* can be used to format all the source code at once. 
+
+All source code not follwing this convention will not be merged. The conformity of the code is automatically within a gitlab CI pipeline when a merge is requested.
+
 ## Code comments
 Do not use comments or other means to mark code as yours. The revision control system allows tracking back who submitted which code.
 
@@ -186,7 +192,7 @@ Use comments to explain the intent (or implementation detail) of code sections t
 Contributed code must **NOT** produce compiler warnings when compiled with the following compilers, after default CMake project generation: 
 * Visual Studio 2019,
 * gcc-10.x
-* clang-11.x
+* clang-12.x
 
 By default, CMake is configured to run [**clang-tidy**](https://clang.llvm.org/extra/clang-tidy/) and will raise errors, if any, at compilation time. The list of tests is configured in *.clang-tidy* file. Please refer to the [official website](https://clang.llvm.org/extra/clang-tidy/checks/list.html) for more details. The tests can be locally disabled in cmake but they will be checked before a branch merge by the software coordinator.
 
@@ -212,7 +218,7 @@ Functions should be kept to a reasonable size. If a function exceeds 100 lines o
 
 ### MS Visual Studio
 
-Since VS 2019 version 16.4, clang-tidy errors can be checked within the tool. Please refer to the [documentation](https://devblogs.microsoft.com/cppblog/code-analysis-with-clang-tidy-in-visual-studio/) to configure your editor.
+Since VS 2019 version 16.4, clang-tidy errors can be checked within the IDE. Please refer to the [documentation](https://devblogs.microsoft.com/cppblog/code-analysis-with-clang-tidy-in-visual-studio/) to configure your editor.
 
 If the cmake project has been directly opened in VS, just add `enableClangTidyCodeAnalysis : true` to *CMakeSettings.json*. Information in *.clang-tidy* will be used to configure the linter (no need to specify the option *clangTidyChecks*).
 

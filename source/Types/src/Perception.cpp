@@ -35,28 +35,18 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Perception::getId() const -> int {
-    return id;
-}
+[[nodiscard]] auto Perception::getId() const -> int { return id; }
 
-auto Perception::setId(int newId) -> void {
-    id = newId;
-}
+auto Perception::setId(int newId) -> void { id = newId; }
 
-[[nodiscard]] auto Perception::getAvatarId() const -> int {
-    return avatarId;
-}
+[[nodiscard]] auto Perception::getAvatarId() const -> int { return avatarId; }
 
-auto Perception::setAvatarId(int newAvatarId) -> void {
-    avatarId = newAvatarId;
-}
+auto Perception::setAvatarId(int newAvatarId) -> void { avatarId = newAvatarId; }
 
-[[nodiscard]] auto Perception::getDescription() const -> std::string {
-    return description;
-}
+[[nodiscard]] auto Perception::getDescription() const -> std::string { return description; }
 
 auto Perception::setDescription(std::string &newDescription) -> void {
-    description = newDescription;
+  description = newDescription;
 }
 
 [[nodiscard]] auto Perception::getPerceptionModality() const -> PerceptionModality {
@@ -67,34 +57,26 @@ auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality)
   perceptionModality = newPerceptionModality;
 }
 
-auto Perception::getTracksSize() -> size_t {
-    return tracks.size();
-}
+auto Perception::getTracksSize() -> size_t { return tracks.size(); }
 
-auto Perception::getTrackAt(int index) -> haptics::types::Track& {
-    return tracks.at(index);
-}
+auto Perception::getTrackAt(int index) -> haptics::types::Track & { return tracks.at(index); }
 
-auto Perception::replaceTrackAt(int index, haptics::types::Track& newTrack) -> bool {
-  if (index < 0 || index >= tracks.size()) {
+auto Perception::replaceTrackAt(int index, haptics::types::Track &newTrack) -> bool {
+  if (index < 0 || index >= (int)tracks.size()) {
     return false;
   }
   tracks[index] = newTrack;
   return true;
 }
 
-auto Perception::addTrack(haptics::types::Track& newTrack) -> void {
-    tracks.push_back(newTrack);
-}
+auto Perception::addTrack(haptics::types::Track &newTrack) -> void { tracks.push_back(newTrack); }
 
-auto Perception::getReferenceDevicesSize() -> size_t {
-    return referenceDevices.size();
-}
+auto Perception::getReferenceDevicesSize() -> size_t { return referenceDevices.size(); }
 
-auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice& {
+auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice & {
   return referenceDevices.at(index);
 }
-auto Perception::addReferenceDevice(haptics::types::ReferenceDevice& newReferenceDevice) -> void {
+auto Perception::addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void {
   referenceDevices.push_back(newReferenceDevice);
 }
 

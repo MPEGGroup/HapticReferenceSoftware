@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Types/include/Band.h>
+#include <catch2/catch.hpp>
 
 using haptics::types::Band;
 using haptics::types::BandType;
