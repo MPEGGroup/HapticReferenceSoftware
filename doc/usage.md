@@ -40,8 +40,6 @@ optional arguments:
 ```
 
 Example
-
-Example
 ```shell
  ./Synthesizer -f IDCC-vib-Paper-8kHz-16-pad.gmpg -o IDCC-vib-Paper-8kHz-16-pad.wav
 ```
