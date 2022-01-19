@@ -14,7 +14,7 @@ Copyright disclaimers shall not be altered, except to include the current year. 
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2021, ISO/IEC
+ * Copyright (c) 2010-2022, ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,12 +63,12 @@ Avoid using `#define` to define constants. Use `const` global variables or `cons
 All header files will include a mechanism to prevent multiple inclusion by using a `#define`. The name of the `#define` is created using the header file name in capital letters and a trailing underscore. All special characters in the file name are replaced by underscores. For a header file named *myheader.h* the structure would be the following:
 
 ```cpp
-#ifndef _MYHEADER_H_
-#define _MYHEADER_H_
+#ifndef MYHEADER_H
+#define MYHEADER_H
 
 <content of header file>
 
-#endif
+#endif // MYHEADER_H
 ```
 
 ### Private and protected
