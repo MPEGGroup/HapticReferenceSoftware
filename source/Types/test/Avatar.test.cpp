@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Types/include/Avatar.h>
+#include <catch2/catch.hpp>
 
 TEST_CASE("haptics::tools::OHMData") {
 

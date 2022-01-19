@@ -45,7 +45,7 @@ class Avatar {
 public:
   explicit Avatar() = default;
   explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType) {};
+      : id(newId), lod(newLod), type(newType){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -54,13 +54,11 @@ public:
   [[nodiscard]] auto getType() const -> AvatarType;
   auto setType(AvatarType newType) -> void;
 
-
 private:
   int id = -1;
   int lod = 0;
   AvatarType type = AvatarType::Custom;
-  //TODO : Mesh
-
+  // TODO : Mesh
 };
 } // namespace haptics::types
-#endif //AVATAR_H
+#endif // AVATAR_H

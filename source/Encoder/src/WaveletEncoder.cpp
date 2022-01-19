@@ -62,7 +62,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   band.setWindowLength((int)((double)bl / fs * S_2_MS_WAVELET));
   int pos_effect = 0;
   long add_start = 0;
-  long add_end = bl;
+  unsigned int add_end = bl;
   for (int b = 0; b < numBlocks; b++) {
     Effect effect;
     std::vector<double> block_time(bl, 0);
@@ -113,7 +113,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
 
   // Quantization
   int i = 0;
-  for (int block = 0; block < book.size(); block++) {
+  for (uint32_t block = 0; block < book.size(); block++) {
     bitalloc[block] = 0;
     noiseenergy[block] = 0;
     for (; i < book_cumulative[block + 1]; i++) {
@@ -124,7 +124,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   while (bitalloc_sum < bitbudget) {
 
     updateNoise(pm_result.bandenergy, noiseenergy, SNR, MNR, pm_result.SMR);
-    for (int i = 0; i < book.size(); i++) {
+    for (uint32_t i = 0; i < book.size(); i++) {
       if (bitalloc[i] >= MAXBITS) {
         MNR[i] = INFINITY;
       }
@@ -174,12 +174,11 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
   double wavmax = findMax(sig);
 
   int integerpart = 0;
-  int integerbits = 0;
-  int fractionbits = 0;
+  // int fractionbits = 0;
   char mode = 0;
   quantMode m = {0, 0};
   if (wavmax < 1) {
-    fractionbits = FRACTIONBITS_0;
+    // fractionbits = FRACTIONBITS_0;
     m.integerbits = 0;
     m.fractionbits = FRACTIONBITS_0;
   } else {
@@ -201,7 +200,7 @@ void WaveletEncoder::updateNoise(std::vector<double> &bandenergy, std::vector<do
                                  std::vector<double> &SNR, std::vector<double> &MNR,
                                  std::vector<double> &SMR) {
 
-  for (int i = 0; i < book.size(); i++) {
+  for (uint32_t i = 0; i < book.size(); i++) {
     SNR[i] = LOGFACTOR * log10(bandenergy[i] / noiseenergy[i]);
     MNR[i] = SNR[i] - SMR[i];
   }
@@ -216,8 +215,8 @@ void WaveletEncoder::uniformQuant(std::vector<double> &in, size_t start, double 
     if (max == 0) {
       out[i] = 0;
     } else {
-      double q = sign * delta * floor(abs(in[i]) / delta + QUANT_ADD);
-      if (abs(q) > max_q) {
+      double q = sign * delta * floor(fabs(in[i]) / delta + QUANT_ADD);
+      if (fabs(q) > max_q) {
         out[i] = sign * max_q;
       } else {
         out[i] = q;
@@ -253,7 +252,7 @@ template <class T> auto WaveletEncoder::findMax(std::vector<T> &data) -> T {
 auto WaveletEncoder::findMinInd(std::vector<double> &data) -> size_t {
   double min = data[0];
   size_t index = 0;
-  for (int i = 1; i < data.size(); i++) {
+  for (uint32_t i = 1; i < data.size(); i++) {
     if (data[i] < min) {
       min = data[i];
       index = i;

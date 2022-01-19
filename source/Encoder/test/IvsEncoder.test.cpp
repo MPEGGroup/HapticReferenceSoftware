@@ -47,7 +47,7 @@ TEST_CASE("IvsEncoder::getLastModified without node", "[getLastModified][without
 
 TEST_CASE("IvsEncoder::getLastModified without attribute", "[getLastModified][withoutAttribute]") {
   pugi::xml_document doc;
-  pugi::xml_node node = doc.append_child("ivs-file");
+  doc.append_child("ivs-file");
   std::string res = IvsEncoder::getLastModified(&doc);
 
   REQUIRE(res.empty());
@@ -300,7 +300,7 @@ TEST_CASE("IvsEncoder::getLaunchedEffect without basis", "[getLaunchedEffect][wi
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
   launchEvent.append_attribute("effect") = "Hello World";
-  pugi::xml_node basisEffect = node.append_child("basis-effect");
+  node.append_child("basis-effect");
   pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
       node.children("basis-effect");
 
@@ -535,7 +535,7 @@ TEST_CASE("IvsEncoder::getAttackTime without configured attribute",
 TEST_CASE("IvsEncoder::getAttackTime with configured attribute", "[getAttackTime][withAttribute]") {
   const std::vector<int> testingValues = {42, 0, 350};
 
-  for (int i = 0; i < testingValues.size(); i++) {
+  for (uint32_t i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getAttackTime with configured attribute (TESTING CASE: " +
                     std::to_string(i) + ")") {
       int testingCase = testingValues[i];
@@ -568,7 +568,7 @@ TEST_CASE("IvsEncoder::getAttackLevel with configured attribute",
           "[getAttackLevel][withAttribute]") {
   const std::vector<int> testingValues = {42, 0, 350};
 
-  for (int i = 0; i < testingValues.size(); i++) {
+  for (uint32_t i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getAttackLevel with configured attribute (TESTING CASE: " +
                     std::to_string(i) + ")") {
       int testingCase = testingValues[i];
@@ -600,7 +600,7 @@ TEST_CASE("IvsEncoder::getFadeTime without configured attribute",
 TEST_CASE("IvsEncoder::getFadeTime with configured attribute", "[getFadeTime][withAttribute]") {
   const std::vector<int> testingValues = {42, 0, 350};
 
-  for (int i = 0; i < testingValues.size(); i++) {
+  for (uint32_t i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getFadeTime with configured attribute (TESTING CASE: " +
                     std::to_string(i) + ")") {
       int testingCase = testingValues[i];
@@ -632,7 +632,7 @@ TEST_CASE("IvsEncoder::getFadeLevel without configured attribute",
 TEST_CASE("IvsEncoder::getFadeLevel with configured attribute", "[getFadeLevel][withAttribute]") {
   const std::vector<int> testingValues = {42, 0, 350};
 
-  for (int i = 0; i < testingValues.size(); i++) {
+  for (uint32_t i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getFadeLevel with configured attribute (TESTING CASE: " +
                     std::to_string(i) + ")") {
       int testingCase = testingValues[i];
@@ -665,7 +665,7 @@ TEST_CASE("IvsEncoder::getWaveform with configured attribute", "[getWaveform][wi
       "something wrong", "sine", "square", "triangle", "sawtooth-up", "sawtooth-down"};
 
   std::string testingCase = "placeholder";
-  for (int i = 0; i < testingValues.size(); i++) {
+  for (uint32_t i = 0; i < testingValues.size(); i++) {
     DYNAMIC_SECTION("IvsEncoder::getWaveform with configured attribute (TESTING CASE: " +
                     std::to_string(i) + ")") {
       testingCase = testingValues[i];

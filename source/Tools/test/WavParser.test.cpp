@@ -58,8 +58,8 @@ TEST_CASE("haptics::tools::WavParser") {
   SECTION("Output to Input test MD") {
 
     std::string filename = "test_MD.wav";
-    std::vector<double> buffer{0, 0.5, 0.75, 1}; //NOLINT
-    std::vector<double> buffer2{1, 0.75, 0.5, 0}; //NOLINT
+    std::vector<double> buffer{0, 0.5, 0.75, 1};  // NOLINT
+    std::vector<double> buffer2{1, 0.75, 0.5, 0}; // NOLINT
     std::vector<std::vector<double>> buffer_MD;
     buffer_MD.push_back(buffer);
     buffer_MD.push_back(buffer2);
@@ -70,5 +70,4 @@ TEST_CASE("haptics::tools::WavParser") {
     std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
     std::vector<double> buffer_rec2 = wavParser2.getSamplesChannel(1);
   }
-
 }

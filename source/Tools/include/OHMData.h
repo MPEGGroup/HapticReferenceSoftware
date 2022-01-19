@@ -116,12 +116,13 @@ private:
 
 public:
   explicit OHMData() = default;
-  explicit OHMData(std::string &_header, short _version, short _numElements, std::string &_description)
+  explicit OHMData(std::string &_header, short _version, short _numElements,
+                   std::string &_description)
       : header(_header)
       , version(_version)
       , numElements(_numElements)
       , description(_description)
-      , elementsMetadata({}) {};
+      , elementsMetadata({}){};
   explicit OHMData(const std::string &filePath);
   auto loadFile(const std::string &filePath) -> bool;
   auto writeFile(const std::string &filePath) -> bool;
