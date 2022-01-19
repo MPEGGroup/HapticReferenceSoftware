@@ -1,5 +1,7 @@
 # Usage
 
+Assuming that the executables has been [installed](building.md), Encoder and Synthesizer are located in the *bin* folder. They can be used as follows:
+
 ## Encoding
 
 ```shell
