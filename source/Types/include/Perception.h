@@ -37,9 +37,9 @@
 #include <Types/include/ReferenceDevice.h>
 #include <Types/include/Track.h>
 #include <fstream>
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
 
 namespace haptics::types {
 
@@ -56,25 +56,25 @@ enum class PerceptionModality {
 };
 
 static const std::map<std::string, PerceptionModality> stringToPerceptionModality = {
-   {"Other", PerceptionModality::Other},
-   {"Pressure", PerceptionModality::Pressure},
-   {"Acceleration", PerceptionModality::Acceleration},
-   {"Velocity", PerceptionModality::Velocity},
-   {"Position", PerceptionModality::Position},
-   {"Temperature", PerceptionModality::Temperature},
-   {"Vibration", PerceptionModality::Vibration},
-   {"Water", PerceptionModality::Water},
-   {"Wind", PerceptionModality::Wind}};
+    {"Other", PerceptionModality::Other},
+    {"Pressure", PerceptionModality::Pressure},
+    {"Acceleration", PerceptionModality::Acceleration},
+    {"Velocity", PerceptionModality::Velocity},
+    {"Position", PerceptionModality::Position},
+    {"Temperature", PerceptionModality::Temperature},
+    {"Vibration", PerceptionModality::Vibration},
+    {"Water", PerceptionModality::Water},
+    {"Wind", PerceptionModality::Wind}};
 static const std::map<PerceptionModality, std::string> perceptionModalityToString = {
-   {PerceptionModality::Other, "Other"},
-   {PerceptionModality::Pressure, "Pressure"},
-   {PerceptionModality::Acceleration, "Acceleration"},
-   {PerceptionModality::Velocity, "Velocity"},
-   {PerceptionModality::Position, "Position"},
-   {PerceptionModality::Temperature, "Temperature"},
-   {PerceptionModality::Vibration, "Vibration"},
-   {PerceptionModality::Water, "Water"},
-   {PerceptionModality::Wind, "Wind"}};
+    {PerceptionModality::Other, "Other"},
+    {PerceptionModality::Pressure, "Pressure"},
+    {PerceptionModality::Acceleration, "Acceleration"},
+    {PerceptionModality::Velocity, "Velocity"},
+    {PerceptionModality::Position, "Position"},
+    {PerceptionModality::Temperature, "Temperature"},
+    {PerceptionModality::Vibration, "Vibration"},
+    {PerceptionModality::Water, "Water"},
+    {PerceptionModality::Wind, "Wind"}};
 
 class Perception {
 public:

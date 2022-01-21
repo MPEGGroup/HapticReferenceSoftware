@@ -34,8 +34,8 @@
 #ifndef IOBINARY_H
 #define IOBINARY_H
 
-#include <Types/include/Haptics.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
+#include <Types/include/Haptics.h>
 #include <string>
 
 namespace haptics::io {
@@ -77,7 +77,8 @@ private:
   static auto writeReferenceDevices(types::Perception &perception, std::ofstream &file) -> bool;
   static auto writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool;
 
-  static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice) -> uint16_t;
+  static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice)
+    -> uint16_t;
 };
 } // namespace haptics::io
 #endif // IOBINARY_H

@@ -88,8 +88,8 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
     auto perceptionId = jsonPerception["id"].get<int>();
     auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
     auto perceptionDescription = jsonPerception["description"].get<std::string>();
-    auto perceptionPerceptionModality =
-        types::stringToPerceptionModality.at(jsonPerception["perception_modality"].get<std::string>());
+    auto perceptionPerceptionModality = types::stringToPerceptionModality.at(
+        jsonPerception["perception_modality"].get<std::string>());
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
@@ -173,7 +173,8 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
       continue;
     }
 
-    types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
+    types::BandType bandType =
+        types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
     types::EncodingModality encodingModality = types::stringToModality.at(jsonBand["encoding_modality"]);
     int windowLength = jsonBand["window_length"].get<int>();
     int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();

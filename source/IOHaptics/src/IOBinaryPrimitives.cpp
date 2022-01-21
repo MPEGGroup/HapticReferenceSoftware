@@ -80,8 +80,8 @@ auto IOBinaryPrimitives::readNBytes(std::ifstream &file) -> T {
   return value;
 }
 
-template auto IOBinaryPrimitives::writeNBytes<unsigned char, 1>(const unsigned char &value,
-                                                                std::ofstream &file) -> void;
+template auto IOBinaryPrimitives::writeNBytes<unsigned char, 1>(const unsigned char &value, std::ofstream &file)
+    -> void;
 template auto IOBinaryPrimitives::writeNBytes<uint8_t, 1>(const uint8_t &value,
                                                           std::ofstream &file) -> void;
 template auto IOBinaryPrimitives::writeNBytes<unsigned short, 2>(const unsigned short &value,
@@ -104,4 +104,4 @@ template auto IOBinaryPrimitives::readNBytes<short, 2>(std::ifstream &file) -> s
 template auto IOBinaryPrimitives::readNBytes<uint16_t, 2>(std::ifstream &file) -> uint16_t;
 template auto IOBinaryPrimitives::readNBytes<int, 4>(std::ifstream &file) -> int;
 template auto IOBinaryPrimitives::readNBytes<uint32_t, 4>(std::ifstream &file) -> uint32_t;
-} // namespace haptics::types
+} // namespace haptics::io

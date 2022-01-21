@@ -34,8 +34,8 @@
 #ifndef AVATAR_H
 #define AVATAR_H
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace haptics::types {
 enum class AvatarType {
@@ -46,15 +46,15 @@ enum class AvatarType {
 };
 
 static const std::map<std::string, AvatarType> stringToAvatarType = {
-   {"Vibration", AvatarType::Vibration},
-   {"Pressure", AvatarType::Pressure},
-   {"Temperature", AvatarType::Temperature},
-   {"Custom", AvatarType::Custom}};
+    {"Vibration", AvatarType::Vibration},
+    {"Pressure", AvatarType::Pressure},
+    {"Temperature", AvatarType::Temperature},
+    {"Custom", AvatarType::Custom}};
 static const std::map<AvatarType, std::string> avatarTypeToString = {
-   {AvatarType::Vibration, "Vibration"},
-   {AvatarType::Pressure, "Pressure"},
-   {AvatarType::Temperature, "Temperature"},
-   {AvatarType::Custom, "Custom"}};
+    {AvatarType::Vibration, "Vibration"},
+    {AvatarType::Pressure, "Pressure"},
+    {AvatarType::Temperature, "Temperature"},
+    {AvatarType::Custom, "Custom"}};
 
 class Avatar {
 public:

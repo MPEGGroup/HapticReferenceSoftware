@@ -1,35 +1,35 @@
 /* The copyright in this software is being made available under the BSD
-* License, included below. This software may be subject to other third party
-* and contributor rights, including patent rights, and no such rights are
-* granted under this license.
-*
-* Copyright (c) 2010-2021, ISO/IEC
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-*  * Redistributions of source code must retain the above copyright notice,
-*    this list of conditions and the following disclaimer.
-*  * Redistributions in binary form must reproduce the above copyright notice,
-*    this list of conditions and the following disclaimer in the documentation
-*    and/or other materials provided with the distribution.
-*  * Neither the name of the ISO/IEC nor the names of its contributors may
-*    be used to endorse or promote products derived from this software without
-*    specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
-* BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-* THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * License, included below. This software may be subject to other third party
+ * and contributor rights, including patent rights, and no such rights are
+ * granted under this license.
+ *
+ * Copyright (c) 2010-2021, ISO/IEC
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *  * Neither the name of the ISO/IEC nor the names of its contributors may
+ *    be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include <IOHaptics/include/IOBinaryBands.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
@@ -37,11 +37,12 @@
 
 namespace haptics::io {
 
-auto IOBinaryBands::readBandHeader(types::Band& band, std::ifstream& file) -> bool {
+auto IOBinaryBands::readBandHeader(types::Band &band, std::ifstream &file) -> bool {
   auto bandType = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
   band.setBandType(static_cast<types::BandType>(bandType));
 
-  auto encodingmodality = IOBinaryPrimitives::IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  auto encodingmodality =
+      IOBinaryPrimitives::IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
   band.setEncodingModality(static_cast<types::EncodingModality>(encodingmodality));
 
   if (band.getBandType() == types::BandType::Wave &&
@@ -223,7 +224,8 @@ auto IOBinaryBands::readCurveBandBody(types::Band &band, std::ifstream &file) ->
     myEffect.setPhase(0);
     myEffect.setBaseSignal(types::BaseSignal::Sine);
     effectPosition = 0;
-    for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize()); keyframeIndex++) {
+    for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize());
+      keyframeIndex++) {
       float amplitude = IOBinaryPrimitives::readFloat(file);
       auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
 
@@ -279,7 +281,7 @@ auto IOBinaryBands::readVectorialBandBody(types::Band &band, std::ifstream &file
 
       myKeyframe = types::Keyframe(std::nullopt, std::nullopt, std::nullopt);
       if ((amplitudeFrequencyMask & 0b0000'0001) != 0) {
-        float amplitude = IOBinaryPrimitives::readFloat(file); 
+        float amplitude = IOBinaryPrimitives::readFloat(file);
         myKeyframe.setAmplitudeModulation(amplitude);
       }
       auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
@@ -451,12 +453,12 @@ auto IOBinaryBands::writeQuantizedBandBody(types::Band &band, std::ofstream &fil
   return true;
 }
 
-//NOLINTNEXTLINE(misc-unused-parameters)
+// NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool {
   return true;
 }
 
-//NOLINTNEXTLINE(misc-unused-parameters)
+// NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool {
   return true;
 }

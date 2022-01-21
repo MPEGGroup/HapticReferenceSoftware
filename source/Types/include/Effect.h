@@ -37,34 +37,28 @@
 #include <Types/include/BandType.h>
 #include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
 
 using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum class BaseSignal {
-  Sine = 0,
-  Square = 1,
-  Triangle = 2,
-  SawToothUp = 3,
-  SawToothDown = 4
-};
+enum class BaseSignal { Sine = 0, Square = 1, Triangle = 2, SawToothUp = 3, SawToothDown = 4 };
 
 static const std::map<std::string, BaseSignal> stringToBaseSignal = {
-   {"Sine", BaseSignal::Sine},
-   {"Square", BaseSignal::Square},
-   {"Triangle", BaseSignal::Triangle},
-   {"SawToothUp", BaseSignal::SawToothUp},
-   {"SawToothDown", BaseSignal::SawToothDown}};
+    {"Sine", BaseSignal::Sine},
+    {"Square", BaseSignal::Square},
+    {"Triangle", BaseSignal::Triangle},
+    {"SawToothUp", BaseSignal::SawToothUp},
+    {"SawToothDown", BaseSignal::SawToothDown}};
 static const std::map<BaseSignal, std::string> baseSignalToString = {
-   {BaseSignal::Sine, "Sine"},
-   {BaseSignal::Square, "Square"},
-   {BaseSignal::Triangle, "Triangle"},
-   {BaseSignal::SawToothUp, "SawToothUp"},
-   {BaseSignal::SawToothDown, "SawToothDown"}};
+    {BaseSignal::Sine, "Sine"},
+    {BaseSignal::Square, "Square"},
+    {BaseSignal::Triangle, "Triangle"},
+    {BaseSignal::SawToothUp, "SawToothUp"},
+    {BaseSignal::SawToothDown, "SawToothDown"}};
 
 class Effect {
 public:

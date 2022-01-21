@@ -31,14 +31,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Tools/include/InputParser.h>
 #include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOJson.h>
+#include <Tools/include/InputParser.h>
 #include <Types/include/Haptics.h>
 
-using haptics::tools::InputParser;
 using haptics::io::IOBinary;
 using haptics::io::IOJson;
+using haptics::tools::InputParser;
 using haptics::types::Haptics;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

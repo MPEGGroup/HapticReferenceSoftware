@@ -46,12 +46,12 @@
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
+using haptics::io::IOBinary;
+using haptics::io::IOJson;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
-using haptics::io::IOBinary;
-using haptics::io::IOJson;
 
 // NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
 auto main(int argc, char *argv[]) -> int {

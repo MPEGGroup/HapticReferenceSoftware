@@ -34,24 +34,24 @@
 #ifndef REFERENCEDEVICE_H
 #define REFERENCEDEVICE_H
 
+#include <map>
 #include <optional>
 #include <string>
-#include <map>
 
 namespace haptics::types {
 
 enum class ActuatorType { Unknown = 0, LRA = 1, VCA = 2, ERM = 3, Piezo = 4 };
 
 static const std::map<std::string, ActuatorType> stringToActuatorType = {
-   {"LRA", ActuatorType::LRA},
-   {"VCA", ActuatorType::VCA},
-   {"ERM", ActuatorType::ERM},
-   {"Piezo", ActuatorType::Piezo}};
+    {"LRA", ActuatorType::LRA},
+    {"VCA", ActuatorType::VCA},
+    {"ERM", ActuatorType::ERM},
+    {"Piezo", ActuatorType::Piezo}};
 static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
-   {ActuatorType::LRA, "LRA"},
-   {ActuatorType::VCA, "VCA"},
-   {ActuatorType::ERM, "ERM"},
-   {ActuatorType::Piezo, "Piezo"}};
+    {ActuatorType::LRA, "LRA"},
+    {ActuatorType::VCA, "VCA"},
+    {ActuatorType::ERM, "ERM"},
+    {ActuatorType::Piezo, "Piezo"}};
 
 class ReferenceDevice {
 public:

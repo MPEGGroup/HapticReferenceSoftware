@@ -34,25 +34,21 @@
 #ifndef ENCODINGMODALITY_H
 #define ENCODINGMODALITY_H
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace haptics::types {
 
-enum class EncodingModality {
-  Quantized = 1,
-  Vectorial = 0,
-  Wavelet = 2
-};
+enum class EncodingModality { Quantized = 1, Vectorial = 0, Wavelet = 2 };
 
 static const std::map<std::string, EncodingModality> stringToModality = {
-   {"Quantized", EncodingModality::Quantized},
-   {"Vectorial", EncodingModality::Vectorial},
-   {"Wavelet", types::EncodingModality::Wavelet}};
+    {"Quantized", EncodingModality::Quantized},
+    {"Vectorial", EncodingModality::Vectorial},
+    {"Wavelet", types::EncodingModality::Wavelet}};
 static const std::map<EncodingModality, std::string> modalityToString = {
-   {EncodingModality::Quantized, "Quantized"},
-   {EncodingModality::Vectorial, "Vectorial"},
-   {EncodingModality::Wavelet, "Wavelet"}};
+    {EncodingModality::Quantized, "Quantized"},
+    {EncodingModality::Vectorial, "Vectorial"},
+    {EncodingModality::Wavelet, "Wavelet"}};
 } // namespace haptics::types
 
 #endif // ENCODINGMODALITY_H
