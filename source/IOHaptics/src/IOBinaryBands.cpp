@@ -136,7 +136,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file) -> bool
     case types::EncodingModality::Quantized:
       return IOBinaryBands::readQuantizedBandBody(band, file);
     case types::EncodingModality::Wavelet:
-      return IOBinaryBands::readWaveletBandBody(band, file);
+      return IOBinaryBands::readWaveletBandBody();
     default:
       return true;
     }
@@ -158,7 +158,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
     case types::EncodingModality::Quantized:
       return IOBinaryBands::writeQuantizedBandBody(band, file);
     case types::EncodingModality::Wavelet:
-      return IOBinaryBands::writeWaveletBandBody(band, file);
+      return IOBinaryBands::writeWaveletBandBody();
     default:
       return true;
     }
@@ -453,14 +453,12 @@ auto IOBinaryBands::writeQuantizedBandBody(types::Band &band, std::ofstream &fil
   return true;
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters, clang-diagnostic-unused-parameter)
-auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool {
+auto IOBinaryBands::readWaveletBandBody() -> bool {
   // TODO : this is a placeholder for the Wavelet binary compression
   return true;
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters, clang-diagnostic-unused-parameter)
-auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool {
+auto IOBinaryBands::writeWaveletBandBody() -> bool {
   // TODO : this is a placeholder for the Wavelet binary compression
   return true;
 }
