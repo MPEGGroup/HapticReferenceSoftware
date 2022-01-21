@@ -56,7 +56,7 @@ auto Effect::getKeyframesSize() -> size_t { return keyframes.size(); }
 auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe & { return keyframes.at(index); }
 
 auto Effect::replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool {
-  if (index < 0 || index >= keyframes.size()) {
+  if (index < 0 || index >= static_cast<int>(keyframes.size())) {
     return false;
   }
 
