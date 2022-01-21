@@ -1,0 +1,8 @@
+clang-format:
+  stage: check
+  image: cbachhuber/clang:12
+  tags: [ linux ]
+  script:
+    - python3 scripts/check/clang_format.py
+    - git diff
+    - if [[ $(git diff) ]]; then echo "Formatting is wrong. Please see above."; return 1; fi

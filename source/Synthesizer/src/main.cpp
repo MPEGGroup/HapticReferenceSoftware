@@ -38,11 +38,10 @@
 #include <IOHaptics/include/IOJson.h>
 #include <filesystem>
 
-using haptics::synthesizer::Helper;
 using haptics::io::IOJson;
+using haptics::synthesizer::Helper;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
-
 
 const int DEFAULT_FS = 8000;
 
@@ -87,6 +86,7 @@ auto main(int argc, char *argv[]) -> int {
       return EXIT_FAILURE;
     }
   }
+
   std::cout << "The sampling frequency used will be : " << fs << "\n";
 
   std::string padStr = inputParser.getCmdOption("--pad");

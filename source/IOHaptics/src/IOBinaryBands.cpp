@@ -458,6 +458,6 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
 
 //NOLINTNEXTLINE(misc-unused-parameters)
 auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool {
-  return false;
+  return true;
 }
 } // namespace haptics::io

@@ -31,13 +31,13 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
-#include <Types/include/Keyframe.h>
 #include <Types/include/Effect.h>
+#include <Types/include/Keyframe.h>
+#include <catch2/catch.hpp>
 
 using haptics::types::BaseSignal;
-using haptics::types::Keyframe;
 using haptics::types::Effect;
+using haptics::types::Keyframe;
 
 TEST_CASE("addKeyframe with only position", "[addKeyframe]") {
   Effect e(0, 1, BaseSignal::SawToothUp);

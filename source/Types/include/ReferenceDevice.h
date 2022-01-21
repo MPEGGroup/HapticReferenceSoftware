@@ -36,8 +36,22 @@
 
 #include <optional>
 #include <string>
+#include <map>
 
 namespace haptics::types {
+
+enum class ActuatorType { Unknown = 0, LRA = 1, VCA = 2, ERM = 3, Piezo = 4 };
+
+static const std::map<std::string, ActuatorType> stringToActuatorType = {
+   {"LRA", ActuatorType::LRA},
+   {"VCA", ActuatorType::VCA},
+   {"ERM", ActuatorType::ERM},
+   {"Piezo", ActuatorType::Piezo}};
+static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
+   {ActuatorType::LRA, "LRA"},
+   {ActuatorType::VCA, "VCA"},
+   {ActuatorType::ERM, "ERM"},
+   {ActuatorType::Piezo, "Piezo"}};
 
 class ReferenceDevice {
 public:
@@ -70,6 +84,10 @@ public:
   auto setWeight(float newWeight) -> void;
   [[nodiscard]] auto getSize() const -> std::optional<float>;
   auto setSize(float newSize) -> void;
+  [[nodiscard]] auto getCustom() const -> std::optional<float>;
+  auto setCustom(float newCustom) -> void;
+  [[nodiscard]] auto getType() const -> std::optional<ActuatorType>;
+  auto setType(ActuatorType newType) -> void;
 
 private:
   int id = -1;
@@ -85,6 +103,8 @@ private:
   std::optional<float> maximumDisplacement;
   std::optional<float> weight;
   std::optional<float> size;
+  std::optional<float> custom;
+  std::optional<ActuatorType> type;
 };
 } // namespace haptics::types
 #endif // REFERENCEDEVICE_H

@@ -35,28 +35,16 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Avatar::getId() const -> int {
-  return id;
-}
+[[nodiscard]] auto Avatar::getId() const -> int { return id; }
 
-auto Avatar::setId(int newId) -> void {
-  id = newId;
-}
+auto Avatar::setId(int newId) -> void { id = newId; }
 
-[[nodiscard]] auto Avatar::getLod() const -> int {
-	return lod;
-}
+[[nodiscard]] auto Avatar::getLod() const -> int { return lod; }
 
-auto Avatar::setLod(int newLod) -> void {
-	lod = newLod;
-}
+auto Avatar::setLod(int newLod) -> void { lod = newLod; }
 
-[[nodiscard]] auto Avatar::getType() const -> AvatarType {
-	return type;
-}
+[[nodiscard]] auto Avatar::getType() const -> AvatarType { return type; }
 
-auto Avatar::setType(AvatarType newType) -> void {
-	type = newType;
-}
+auto Avatar::setType(AvatarType newType) -> void { type = newType; }
 
 } // namespace haptics::types

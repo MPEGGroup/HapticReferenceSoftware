@@ -58,7 +58,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
       IvsEncoder::getBasisEffects(&doc);
   pugi::xml_node basisEffect = {};
-  int bandIndex = -1;
   haptics::types::Band *myBand = nullptr;
   haptics::types::Effect myEffect;
   for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&doc)) {
@@ -74,7 +73,8 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     myBand = myTrack.findBandAvailable(
         myEffect.getPosition(),
         myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
-            .getRelativePosition().value(),
+            .getRelativePosition()
+            .value(),
         types::BandType::Wave, types::EncodingModality::Vectorial);
     if (myBand == nullptr) {
       myTrack.addBand(*(new haptics::types::Band(
@@ -86,9 +86,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   }
 
   int time = -1;
-  int count = -1;
+  int count = 0;
   int duration = -1;
-  int effectIndex = -1;
+  int effectIndex = 0;
   std::vector<haptics::types::Effect> effectToRepeat = {};
   for (pugi::xml_node repeatEvent : IvsEncoder::getRepeatEvents(&doc)) {
     count = IvsEncoder::getCount(&repeatEvent);
@@ -97,12 +97,12 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     }
 
     effectToRepeat = {};
-    for (bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
+    for (uint32_t bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
       time = IvsEncoder::getTime(&repeatEvent);
       duration = IvsEncoder::getDuration(&repeatEvent);
-      myBand = &myTrack.getBandAt(bandIndex);
+      myBand = &myTrack.getBandAt((int)bandIndex);
 
-      for (effectIndex = 0; effectIndex < myBand->getEffectsSize(); effectIndex++) {
+      for (effectIndex = 0; effectIndex < (int)myBand->getEffectsSize(); effectIndex++) {
         myEffect = myBand->getEffectAt(effectIndex);
         if (time <= myEffect.getPosition() && myEffect.getPosition() < time + duration) {
           effectToRepeat.push_back(myEffect);
@@ -116,11 +116,12 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     for (haptics::types::Effect &e : effectToRepeat) {
       for (effectIndex = 1; effectIndex <= count; effectIndex++) {
         myEffect = haptics::types::Effect(e);
-        myEffect.setPosition(myEffect.getPosition() + duration * effectIndex);
+        myEffect.setPosition(myEffect.getPosition() + duration * (int)effectIndex);
         myBand = myTrack.findBandAvailable(
             myEffect.getPosition(),
             myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
-                .getRelativePosition().value(),
+                .getRelativePosition()
+                .value(),
             types::BandType::Wave, types::EncodingModality::Vectorial);
         if (myBand == nullptr) {
           myTrack.addBand(*(new haptics::types::Band(
@@ -148,8 +149,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) / MAX_FREQUENCY));
   } else if (effectType == "magsweep") {
     out->setBaseSignal(types::BaseSignal::Sine);
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    freq = 170;
+    freq = IvsEncoder::MAGSWEEP_FREQUENCY;
   } else {
     return false;
   }
@@ -262,7 +262,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::getDuration(const pugi::xml_node *basisEffect,
                                            const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute durationAttribute = launchEvent->attribute("duration-override");
-  const pugi::char_t *n = durationAttribute.name();
   if (!std::string(durationAttribute.name()).empty()) {
     return durationAttribute.as_int();
   }
@@ -273,7 +272,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::getMagnitude(const pugi::xml_node *basisEffect,
                                             const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute magnitudeAttribute = launchEvent->attribute("magnitude-override");
-  const pugi::char_t *n = magnitudeAttribute.name();
   if (!std::string(magnitudeAttribute.name()).empty()) {
     return magnitudeAttribute.as_int();
   }
@@ -289,7 +287,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::getPeriod(const pugi::xml_node *basisEffect,
                                          const pugi::xml_node *launchEvent) -> int {
   pugi::xml_attribute periodAttribute = launchEvent->attribute("period-override");
-  const pugi::char_t *n = periodAttribute.name();
 
   if (!std::string(periodAttribute.name()).empty()) {
     return floatToInt(periodAttribute.as_int());

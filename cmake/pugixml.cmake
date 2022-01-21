@@ -1,18 +1,23 @@
-include(FetchContent)
-foreach (lang IN ITEMS C CXX)
-    set("CMAKE_${lang}_CLANG_TIDY_save" "${CMAKE_${lang}_CLANG_TIDY}")
-    set("CMAKE_${lang}_CLANG_TIDY" "")
-endforeach ()
-FetchContent_Declare(pugixml
-        GIT_REPOSITORY "https://github.com/zeux/pugixml"
-        GIT_TAG "origin/master"
-        GIT_SHALLOW ON
-        )
-set(PUGIXML_NO_XPATH ON CACHE INTERNAL "")
-FetchContent_MakeAvailable(pugixml)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_BINARY_DIR}/_deps/pugixml-src/")
+include(FetchContent)
+if(NO_INTERNET)
+    set(LOCAL_PUGIXML_DIR ${CMAKE_SOURCE_DIR}/../pugixml CACHE PATH "Path to the local PUGIXML directory" )
+    message(STATUS "Looking for a local copy of the PUGIXML test framework in ${LOCAL_PUGIXML_DIR}")
+    fetchcontent_declare(DR_LIBS URL ${LOCAL_PUGIXML_DIR})
+else()
+        FetchContent_Declare(pugixml
+            GIT_REPOSITORY "https://github.com/zeux/pugixml"
+            GIT_TAG "9e382f98076e57581fcc61323728443374889646"
+            GIT_SHALLOW ON
+            GIT_PROGRESS TRUE
+        )
+endif()
+set(PUGIXML_NO_XPATH ON CACHE INTERNAL "")
+FetchContent_MakeAvailable(PUGIXML)
+
+# Make PUGIXML cmake scripts available
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH} "${CMAKE_BINARY_DIR}/_deps/pugixml-src/contrib/")
+
 include_directories(${CMAKE_BINARY_DIR}/_deps/pugixml-src/src/)
-foreach (lang IN ITEMS C CXX)
-    set("CMAKE_${lang}_CLANG_TIDY" "${CMAKE_${lang}_CLANG_TIDY_save}")
-endforeach ()

@@ -92,8 +92,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
 auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
                          int sampleRate) -> bool {
   size_t s = buff.at(0).size();
-  bool sameSize = true;
-  for (int i = 1; i < buff.size(); i++) {
+  for (uint32_t i = 1; i < buff.size(); i++) {
     if (buff.at(i).size() != s) {
       std::cout << "Output Tracks are of different size" << std::endl;
       return false;
@@ -112,7 +111,8 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   b_int.resize(buff.size() * buff.at(0).size());
   long c = 0;
   for (auto &b : buff) {
-    for (int i = 0; i < b.size(); i++) {
+
+    for (uint32_t i = 0; i < b.size(); i++) {
       b_int.at((i * buff.size()) + c) = (uint16_t)(round((b.at(i) * SCALING)));
     }
     c++;

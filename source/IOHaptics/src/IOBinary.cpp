@@ -288,9 +288,14 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
       myReferenceDevice.setSize(value);
     }
 
-    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
-      // TODO : Reference device type is not yet implemented
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::CUSTOM) != 0) {
       value = IOBinaryPrimitives::readFloat(file);
+      myReferenceDevice.setCustom(value);
+    }
+
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
+      auto type = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+      myReferenceDevice.setType(static_cast<types::ActuatorType>(type));
     }
 
     perception.addReferenceDevice(myReferenceDevice);
@@ -369,10 +374,14 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
       IOBinaryPrimitives::writeFloat(value, file);
     }
 
-    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
-      // TODO : Reference device type is not yet implemented
-      value = 0;
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::CUSTOM) != 0) {
+      value = myReferenceDevice.getCustom().value();
       IOBinaryPrimitives::writeFloat(value, file);
+    }
+
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
+      uint8_t type = static_cast<uint8_t>(myReferenceDevice.getType().value());
+      IOBinaryPrimitives::writeNBytes<uint8_t, 1>(type, file);
     }
   }
 
@@ -551,6 +560,12 @@ auto IOBinary::generateReferenceDeviceInformationMask(types::ReferenceDevice &re
   }
   if (referenceDevice.getSize().has_value()) {
     mask |= (uint16_t)DeviceInformationMask::SIZE;
+  }
+  if (referenceDevice.getCustom().has_value()) {
+    mask |= (uint16_t)DeviceInformationMask::CUSTOM;
+  }
+  if (referenceDevice.getType().has_value()) {
+    mask |= (uint16_t)DeviceInformationMask::TYPE;
   }
   
   return mask;

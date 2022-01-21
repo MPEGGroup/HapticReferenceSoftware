@@ -34,14 +34,13 @@
 #ifndef PSYCHOHAPTICMODEL_H
 #define PSYCHOHAPTICMODEL_H
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
-#include <algorithm>
-
 
 constexpr double a = 62;
-constexpr double c = (double)1/(double)550;
-constexpr double b = 1-(250*c);
+constexpr double c = (double)1 / (double)550;
+constexpr double b = 1 - (250 * c);
 constexpr double e = 77;
 constexpr double base = 10;
 constexpr double factor = 10;
@@ -50,12 +49,12 @@ constexpr double mask_a = 5;
 constexpr double mask_b = 1400;
 constexpr double mask_c = 30;
 
-constexpr double PEAK_HUGE_VAL = 2147483647;  // 2^32 - 1
+constexpr double PEAK_HUGE_VAL = 2147483647; // 2^32 - 1
 constexpr double MIN_PEAK_PROMINENCE = 12;
 constexpr double MIN_PEAK_HEIGHT_DIFF = 45;
-//constexpr double PLATEAU_COMP_FACTOR = 10000;
 
 constexpr double LOGFACTOR_SPECT = 20;
+constexpr double ZERO_COMP = 1e-35;
 
 namespace haptics::tools {
 
@@ -71,31 +70,32 @@ struct modelResult {
 
 class PsychohapticModel {
 public:
-    PsychohapticModel(size_t bl_new, int fs_new);
+  PsychohapticModel(size_t bl_new, int fs_new);
 
-    auto getSMR(std::vector<double> &block) -> modelResult;
+  auto getSMR(std::vector<double> &block) -> modelResult;
 
-    static auto findPeaks(std::vector<double> &spectrum, double min_peak_prominence, double min_peak_height) -> peaks;
-    void peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc, std::vector<double> &mask);
+  static auto findPeaks(std::vector<double> &spectrum, double min_peak_prominence,
+                        double min_peak_height) -> peaks;
+  void peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc,
+                std::vector<double> &mask);
 
 private:
-    auto globalMaskingThreshold(std::vector<double> &spect) -> std::vector<double>;
-    void perceptualThreshold();
+  auto globalMaskingThreshold(std::vector<double> &spect) -> std::vector<double>;
+  void perceptualThreshold();
 
-    static auto findAllPeakLocations(std::vector<double> &x) -> peaks;
-    static auto peakProminence(std::vector<double> &spectrum, peaks input) -> peaks;
-    static auto filterPeakCriterion(peaks &input, double min_peak_val) -> peaks;
+  static auto findAllPeakLocations(std::vector<double> &x) -> peaks;
+  static auto peakProminence(std::vector<double> &spectrum, peaks input) -> peaks;
+  static auto filterPeakCriterion(peaks &input, double min_peak_val) -> peaks;
 
-    static auto max(double v1, double v2) -> double;
-    static auto findMaxVector(std::vector<double> &data) -> double;
+  static auto max(double v1, double v2) -> double;
+  static auto findMaxVector(std::vector<double> &data) -> double;
 
-    size_t bl;
-    int fs;
-    std::vector<double> freqs;
-    std::vector<double> percthres;
-    std::vector<int> book;
-    std::vector<int> book_cumulative;
-
+  size_t bl;
+  int fs;
+  std::vector<double> freqs;
+  std::vector<double> percthres;
+  std::vector<int> book;
+  std::vector<int> book_cumulative;
 };
 } // namespace haptics::tools
-#endif //PSYCHOHAPTICMODEL_H
+#endif // PSYCHOHAPTICMODEL_H
