@@ -106,7 +106,6 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> b
   const std::string date = haptic.getDate();
   const std::string description = haptic.getDescription();
   const std::string shape = "Custom";
-  unsigned short perceptionCount = 0;
 
   IOBinaryPrimitives::writeString(version, file);
   IOBinaryPrimitives::writeString(date, file);
@@ -390,6 +389,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
   for (unsigned short i = 0; i < trackCount; i++) {
     auto trackId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     std::string trackDescription = IOBinaryPrimitives::readString(file);
+    // NOLINTNEXTLINE(clang-diagnostic-unused-variable)
     auto deviceId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     auto trackGain = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto trackMixingWeight = IOBinaryPrimitives::readNBytes<float, 4>(file);

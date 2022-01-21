@@ -453,13 +453,15 @@ auto IOBinaryBands::writeQuantizedBandBody(types::Band &band, std::ofstream &fil
   return true;
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters)
+// NOLINTNEXTLINE(misc-unused-parameters, clang-diagnostic-unused-parameter)
 auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool {
+  // TODO : this is a placeholder for the Wavelet binary compression
   return true;
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters)
+// NOLINTNEXTLINE(misc-unused-parameters, clang-diagnostic-unused-parameter)
 auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool {
+  // TODO : this is a placeholder for the Wavelet binary compression
   return true;
 }
 } // namespace haptics::io
