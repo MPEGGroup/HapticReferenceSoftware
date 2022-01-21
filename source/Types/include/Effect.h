@@ -38,8 +38,8 @@
 #include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 using haptics::types::Keyframe;
 

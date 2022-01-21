@@ -38,8 +38,8 @@
 #include <Types/include/Track.h>
 #include <fstream>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace haptics::types {
 

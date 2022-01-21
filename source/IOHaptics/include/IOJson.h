@@ -44,7 +44,7 @@ class IOJson {
 public:
   static auto loadFile(const std::string &filePath) -> types::Haptics;
   static auto loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
-    -> void;
+      -> void;
   static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> void;
   static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> void;
   static auto loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,

@@ -78,7 +78,7 @@ private:
   static auto writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool;
 
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice)
-    -> uint16_t;
+      -> uint16_t;
 };
 } // namespace haptics::io
 #endif // IOBINARY_H

@@ -46,13 +46,9 @@ enum class BandType {
 };
 
 static const std::map<std::string, BandType> stringToBandType = {
-    {"Wave", BandType::Wave},
-    {"Curve", BandType::Curve},
-    {"Transient", BandType::Transient}};
+    {"Wave", BandType::Wave}, {"Curve", BandType::Curve}, {"Transient", BandType::Transient}};
 static const std::map<BandType, std::string> bandTypeToString = {
-    {BandType::Wave, "Wave"},
-    {BandType::Curve, "Curve"},
-    {BandType::Transient, "Transient"}};
+    {BandType::Wave, "Wave"}, {BandType::Curve, "Curve"}, {BandType::Transient, "Transient"}};
 } // namespace haptics::types
 
 #endif // BANDTYPE_H

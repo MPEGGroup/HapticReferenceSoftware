@@ -173,9 +173,9 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
       continue;
     }
 
-    types::BandType bandType =
-        types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
-    types::EncodingModality encodingModality = types::stringToModality.at(jsonBand["encoding_modality"]);
+    types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
+    types::EncodingModality encodingModality =
+        types::stringToModality.at(jsonBand["encoding_modality"]);
     int windowLength = jsonBand["window_length"].get<int>();
     int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();
     int upperLimit = jsonBand["upper_frequency_limit"].get<int>();

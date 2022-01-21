@@ -225,7 +225,7 @@ auto IOBinaryBands::readCurveBandBody(types::Band &band, std::ifstream &file) ->
     myEffect.setBaseSignal(types::BaseSignal::Sine);
     effectPosition = 0;
     for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize());
-      keyframeIndex++) {
+         keyframeIndex++) {
       float amplitude = IOBinaryPrimitives::readFloat(file);
       auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
 

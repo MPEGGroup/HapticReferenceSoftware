@@ -80,10 +80,10 @@ auto IOBinaryPrimitives::readNBytes(std::ifstream &file) -> T {
   return value;
 }
 
-template auto IOBinaryPrimitives::writeNBytes<unsigned char, 1>(const unsigned char &value, std::ofstream &file)
+template auto IOBinaryPrimitives::writeNBytes<unsigned char, 1>(const unsigned char &value,
+                                                                std::ofstream &file) -> void;
+template auto IOBinaryPrimitives::writeNBytes<uint8_t, 1>(const uint8_t &value, std::ofstream &file)
     -> void;
-template auto IOBinaryPrimitives::writeNBytes<uint8_t, 1>(const uint8_t &value,
-                                                          std::ofstream &file) -> void;
 template auto IOBinaryPrimitives::writeNBytes<unsigned short, 2>(const unsigned short &value,
                                                                  std::ofstream &file) -> void;
 template auto IOBinaryPrimitives::writeNBytes<short, 2>(const short &value, std::ofstream &file)
