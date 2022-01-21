@@ -35,6 +35,7 @@
 #define IOBINARYPRIMITIVES_H
 
 #include <array>
+#include <cstring>
 #include <fstream>
 #include <string>
 
@@ -49,7 +50,6 @@ public:
 
     std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
-    std::reverse(bytes.begin(), bytes.end());
     memcpy(&value, &bytes, sizeof(value));
 
     return value;
@@ -61,7 +61,6 @@ public:
   static auto writeNBytes(const T &value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
     memcpy(&bytes, &value, sizeof(value));
-    std::reverse(bytes.begin(), bytes.end());
     file.write(bytes.data(), bytesCount);
   }
 };
