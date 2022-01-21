@@ -32,8 +32,6 @@
  */
 
 #include <IOHaptics/include/IOBinaryPrimitives.h>
-#include <array>
-#include <fstream>
 
 namespace haptics::io {
 
@@ -59,49 +57,4 @@ auto IOBinaryPrimitives::writeFloat(const float &f, std::ofstream &file) -> void
 auto IOBinaryPrimitives::readFloat(std::ifstream &file) -> float {
   return readNBytes<float, 4>(file);
 }
-
-template <class T, size_t bytesCount>
-auto IOBinaryPrimitives::writeNBytes(const T &value, std::ofstream &file) -> void {
-  std::array<char, bytesCount> bytes{};
-  memcpy(&bytes, &value, sizeof(value));
-  std::reverse(bytes.begin(), bytes.end());
-  file.write(bytes.data(), bytesCount);
-}
-
-template <class T, size_t bytesCount>
-auto IOBinaryPrimitives::readNBytes(std::ifstream &file) -> T {
-  T value = 0;
-
-  std::array<char, bytesCount> bytes{};
-  file.read(bytes.data(), bytesCount);
-  std::reverse(bytes.begin(), bytes.end());
-  memcpy(&value, &bytes, sizeof(value));
-
-  return value;
-}
-
-template auto IOBinaryPrimitives::writeNBytes<unsigned char, 1>(const unsigned char &value,
-                                                                std::ofstream &file) -> void;
-template auto IOBinaryPrimitives::writeNBytes<uint8_t, 1>(const uint8_t &value, std::ofstream &file)
-    -> void;
-template auto IOBinaryPrimitives::writeNBytes<unsigned short, 2>(const unsigned short &value,
-                                                                 std::ofstream &file) -> void;
-template auto IOBinaryPrimitives::writeNBytes<short, 2>(const short &value, std::ofstream &file)
-    -> void;
-template auto IOBinaryPrimitives::writeNBytes<uint16_t, 2>(const uint16_t &value,
-                                                           std::ofstream &file) -> void;
-template auto IOBinaryPrimitives::writeNBytes<int, 4>(const int &value, std::ofstream &file)
-    -> void;
-template auto IOBinaryPrimitives::writeNBytes<uint32_t, 4>(const uint32_t &value,
-                                                           std::ofstream &file) -> void;
-
-template auto IOBinaryPrimitives::readNBytes<unsigned char, 1>(std::ifstream &file)
-    -> unsigned char;
-template auto IOBinaryPrimitives::readNBytes<uint8_t, 1>(std::ifstream &file) -> uint8_t;
-template auto IOBinaryPrimitives::readNBytes<unsigned short, 2>(std::ifstream &file)
-    -> unsigned short;
-template auto IOBinaryPrimitives::readNBytes<short, 2>(std::ifstream &file) -> short;
-template auto IOBinaryPrimitives::readNBytes<uint16_t, 2>(std::ifstream &file) -> uint16_t;
-template auto IOBinaryPrimitives::readNBytes<int, 4>(std::ifstream &file) -> int;
-template auto IOBinaryPrimitives::readNBytes<uint32_t, 4>(std::ifstream &file) -> uint32_t;
 } // namespace haptics::io

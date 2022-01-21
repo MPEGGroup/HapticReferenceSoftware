@@ -34,6 +34,8 @@
 #ifndef IOBINARYPRIMITIVES_H
 #define IOBINARYPRIMITIVES_H
 
+#include <array>
+#include <fstream>
 #include <string>
 
 namespace haptics::io {
@@ -42,12 +44,26 @@ class IOBinaryPrimitives {
 public:
   static auto readString(std::ifstream &file) -> std::string;
   static auto readFloat(std::ifstream &file) -> float;
-  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T;
+  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
+    T value = 0;
+
+    std::array<char, bytesCount> bytes{};
+    file.read(bytes.data(), bytesCount);
+    std::reverse(bytes.begin(), bytes.end());
+    memcpy(&value, &bytes, sizeof(value));
+
+    return value;
+  }
 
   static auto writeString(const std::string &text, std::ofstream &file) -> void;
   static auto writeFloat(const float &f, std::ofstream &file) -> void;
   template <class T, size_t bytesCount>
-  static auto writeNBytes(const T &value, std::ofstream &file) -> void;
+  static auto writeNBytes(const T &value, std::ofstream &file) -> void {
+    std::array<char, bytesCount> bytes{};
+    memcpy(&bytes, &value, sizeof(value));
+    std::reverse(bytes.begin(), bytes.end());
+    file.write(bytes.data(), bytesCount);
+  }
 };
 } // namespace haptics::io
 #endif // IOBINARYPRIMITIVES_H

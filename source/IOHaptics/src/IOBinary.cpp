@@ -389,8 +389,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
   for (unsigned short i = 0; i < trackCount; i++) {
     auto trackId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     std::string trackDescription = IOBinaryPrimitives::readString(file);
-    // NOLINTNEXTLINE(clang-diagnostic-unused-variable)
-    auto deviceId = IOBinaryPrimitives::readNBytes<short, 2>(file);
+    IOBinaryPrimitives::readNBytes<short, 2>(file);
     auto trackGain = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto trackMixingWeight = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
