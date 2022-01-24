@@ -202,8 +202,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
       freq_modulation =
           std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit),
-                     static_cast<double>(highFrequencyLimit)) +
-          f0;
+                     static_cast<double>(highFrequencyLimit));
     }
 
     evaluatedBaseSignal = this->computeBaseSignal(t, freq_modulation);
@@ -334,9 +333,10 @@ auto Effect::EvaluateKeyframes(double position) -> double {
   double phi = this->getPhase();
   switch (this->getBaseSignal()) {
   case BaseSignal::Sine:
-    return std::sin(M_PI * time * frequency + phi);
+    return std::sin(2 * M_PI * time * frequency + phi);
   case BaseSignal::Square:
-    return std::copysign(1, std::sin(M_PI * time * frequency + phi));
+    time += phi / (2 * M_PI * frequency);
+    return 1 - 2 * std::round(time * frequency - std::floor(time * frequency));
   case BaseSignal::Triangle:
     time += phi / (2 * M_PI * frequency);
     return 1 - 4 * std::abs(std::round(time * frequency - quarter) - (time * frequency - quarter));
