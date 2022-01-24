@@ -96,7 +96,7 @@ TEST_CASE("IvsEncoder::getLastModified", "[getLastModified][correctParam]") {
   }
 }
 
-TEST_CASE("IvsEncoder::getBasisEffects without node", "[getLastModified][withoutNode]") {
+TEST_CASE("IvsEncoder::getBasisEffects without node", "[getBasisEffects][withoutNode]") {
   pugi::xml_document doc;
   pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getBasisEffects(&doc);
 
@@ -281,7 +281,7 @@ TEST_CASE("IvsEncoder::getRepeatEvents", "[getRepeatEvents][correctParam]") {
   }
 }
 
-TEST_CASE("IvsEncoder::getLaunchedEffect without launch", "[getLaunchedEffect][withoutNode]") {
+TEST_CASE("IvsEncoder::getLaunchedEffect without launch", "[getLaunchedEffect][withoutLaunch]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
@@ -295,7 +295,7 @@ TEST_CASE("IvsEncoder::getLaunchedEffect without launch", "[getLaunchedEffect][w
   REQUIRE_FALSE(IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, res));
 }
 
-TEST_CASE("IvsEncoder::getLaunchedEffect without basis", "[getLaunchedEffect][withoutNode]") {
+TEST_CASE("IvsEncoder::getLaunchedEffect without basis", "[getLaunchedEffect][withoutBasis]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node launchEvent = node.append_child("launch-effect");
@@ -357,7 +357,7 @@ TEST_CASE("IvsEncoder::getTime without value", "[getTime][withoutValue]") {
   REQUIRE(res == -1);
 }
 
-TEST_CASE("IvsEncoder::getTime without override", "[getTime][withValue]") {
+TEST_CASE("IvsEncoder::getTime with value", "[getTime][withValue]") {
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node repeatEvent = node.append_child("basis-effect");
@@ -378,7 +378,7 @@ TEST_CASE("IvsEncoder::getCount without value", "[getCount][withoutValue]") {
   REQUIRE(res == 0);
 }
 
-TEST_CASE("IvsEncoder::getCount without override", "[getCount][withValue]") {
+TEST_CASE("IvsEncoder::getCount with value", "[getCount][withValue]") {
   const int count = 3254;
   pugi::xml_document doc;
   pugi::xml_node node = doc.append_child("root");
