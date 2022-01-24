@@ -37,3 +37,13 @@ make
 ## Testing
 
 Run [unit tests](testing.md) to make sure that everything is ok. Otherwise contact the software coordinator.
+
+## Install
+
+During the Cmake configuration the *CMAKE_INSTALL_PREFIX* can be configured to select a folder in which the executable will be installed.
+
+Then run
+```shell
+make install
+```
+for Linux or run the *INSTALL* target in Visual Studio.

@@ -4,6 +4,7 @@ add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/
 target_link_libraries(Encoder PUBLIC tools types psychohapticModel filterbank iohaptics)
 target_link_libraries(Encoder PRIVATE pugixml::static iir::iir_static)
 
+install(TARGETS Encoder DESTINATION bin)
 
 if(BUILD_CATCH2)
     add_executable(test_Encoder test/PcmEncoder.test.cpp src/PcmEncoder.cpp test/AhapEncoder.test.cpp src/AhapEncoder.cpp test/IvsEncoder.test.cpp src/IvsEncoder.cpp src/WaveletEncoder.cpp)
