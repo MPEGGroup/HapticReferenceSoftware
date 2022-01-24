@@ -32,6 +32,7 @@
  */
 
 #include <Encoder/include/IvsEncoder.h>
+#include <Tools/include/Tools.h>
 #include <fstream>
 #include <limits>
 
@@ -146,7 +147,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   std::string effectType = basisEffect->attribute("type").as_string();
   if (effectType == "periodic") {
     out->setBaseSignal(IvsEncoder::getWaveform(basisEffect));
-    freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) / MAX_FREQUENCY));
+    freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) * MS_2_S));
   } else if (effectType == "magsweep") {
     out->setBaseSignal(types::BaseSignal::Sine);
     freq = IvsEncoder::MAGSWEEP_FREQUENCY;
@@ -160,30 +161,47 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   int duration = IvsEncoder::getDuration(basisEffect, launchEvent);
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
 
-  std::vector<haptics::types::Keyframe *> keyframeList = std::vector<haptics::types::Keyframe *>{
-      new haptics::types::Keyframe(
-          0, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq),
-      new haptics::types::Keyframe(
-          duration, static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)};
-
-  int fadeTime = IvsEncoder::getFadeTime(basisEffect);
-  if (fadeTime != -1) {
-    int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
-    keyframeList[1]->setRelativePosition(std::max(duration - fadeTime, 0));
-    keyframeList.push_back(&*(new haptics::types::Keyframe(
-        duration, static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
-  }
+  float amplitude = static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
+  types::Keyframe k(0, amplitude, freq);
+  out->addKeyframe(k);
+  k = types::Keyframe(duration, amplitude, freq);
+  out->addKeyframe(k);
 
   int attackTime = IvsEncoder::getAttackTime(basisEffect);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
-    keyframeList[0]->setRelativePosition(std::min(attackTime, duration));
-    out->addKeyframe(*(new haptics::types::Keyframe(
-        0, static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE, freq)));
+    float attackAmplitude = static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
+    out->addAmplitudeAt(attackAmplitude, 0);
+    if (attackTime > duration) {
+      std::pair<int, double> attackStart(0, attackAmplitude);
+      std::pair<int, double> attackEnd(attackTime, amplitude);
+      out->addAmplitudeAt(
+          static_cast<float>(tools::linearInterpolation(attackStart, attackEnd, duration)),
+          duration);
+      return true;
+    }
+    out->addAmplitudeAt(amplitude, attackTime);
   }
 
-  for (haptics::types::Keyframe *kf : keyframeList) {
-    out->addKeyframe(*kf);
+  int fadeDuration = IvsEncoder::getFadeTime(basisEffect);
+  if (fadeDuration != -1) {
+    int fadeTime = IvsEncoder::getDuration(basisEffect) - fadeDuration;
+    if (fadeTime >= duration) {
+      return true;
+    }
+
+    int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
+    float fadeAmplitude = static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
+    out->addAmplitudeAt(amplitude, fadeTime);
+
+    if (fadeTime + fadeDuration > duration) {
+      std::pair<int, double> fadeStart(fadeTime, amplitude);
+      std::pair<int, double> fadeEnd(fadeTime + fadeDuration, fadeAmplitude);
+      out->addAmplitudeAt(
+          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, duration)), duration);
+    } else {
+      out->addAmplitudeAt(fadeAmplitude, duration);
+    }
   }
 
   return true;
@@ -360,7 +378,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::floatToInt(const int f) -> int {
 
   if (f < 0) {
-    int res = (f + std::numeric_limits<int>::max()) / MAX_FREQUENCY;
+    int res = ((f + std::numeric_limits<int>::max()) + 1) / MS_2_MICROSECONDS;
     return res;
   }
 

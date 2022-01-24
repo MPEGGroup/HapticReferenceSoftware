@@ -69,29 +69,22 @@ auto Effect::addKeyframe(haptics::types::Keyframe &newKeyframe) -> void {
 }
 
 auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
-
-  bool ret = false;
-
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
       });
 
-  if (kit == keyframes.begin()) {
-    return ret;
-  }
-
   if (kit == keyframes.end()) {
-    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
+    Keyframe kf = Keyframe(position, amplitude, std::nullopt);
     keyframes.push_back(kf);
     return true;
   }
 
-  if ((kit)->getRelativePosition() == position && !(kit)->getAmplitudeModulation().has_value()) {
+  if ((kit)->getRelativePosition() == position) {
     (kit)->setAmplitudeModulation(amplitude);
   } else {
-    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
-    keyframes.insert(kit + 1, kf);
+    Keyframe kf = Keyframe(position, amplitude, std::nullopt);
+    keyframes.insert(kit, kf);
   }
 
   return true;
@@ -103,21 +96,17 @@ auto Effect::addFrequencyAt(int frequency, int position) -> bool {
         return k.getRelativePosition() >= position;
       });
 
-  if (kit == keyframes.begin()) {
-    return false;
-  }
-
   if (kit == keyframes.end()) {
-    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
+    Keyframe kf = Keyframe(position, std::nullopt, frequency);
     keyframes.push_back(kf);
     return true;
   }
 
-  if (kit->getRelativePosition() == position && !kit->getFrequencyModulation().has_value()) {
+  if (kit->getRelativePosition() == position) {
     kit->setFrequencyModulation(frequency);
   } else {
-    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
-    keyframes.insert(kit + 1, kf);
+    Keyframe kf = Keyframe(position, std::nullopt, frequency);
+    keyframes.insert(kit, kf);
   }
 
   return true;
