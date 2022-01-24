@@ -180,7 +180,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
           duration);
       return true;
     }
-     out->addAmplitudeAt(amplitude, attackTime);
+    out->addAmplitudeAt(amplitude, attackTime);
   }
 
   int fadeDuration = IvsEncoder::getFadeTime(basisEffect);
@@ -198,8 +198,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       std::pair<int, double> fadeStart(fadeTime, amplitude);
       std::pair<int, double> fadeEnd(fadeTime + fadeDuration, fadeAmplitude);
       out->addAmplitudeAt(
-          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, duration)),
-          duration);
+          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, duration)), duration);
     } else {
       out->addAmplitudeAt(fadeAmplitude, duration);
     }
