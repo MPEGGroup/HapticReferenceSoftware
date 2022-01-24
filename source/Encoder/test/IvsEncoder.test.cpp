@@ -831,7 +831,7 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   if (k.getFrequencyModulation().has_value()) {
-    CHECK(k.getFrequencyModulation().value() == expectedFrequency);  
+    CHECK(k.getFrequencyModulation().value() == expectedFrequency);
   }
 
   k = res.getKeyframeAt(2);
@@ -894,7 +894,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
   CHECK(k.getRelativePosition() == effectAttackTime);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   if (k.getFrequencyModulation().has_value()) {
-    CHECK(k.getFrequencyModulation().value() == expectedFrequency); 
+    CHECK(k.getFrequencyModulation().value() == expectedFrequency);
   }
 
   k = res.getKeyframeAt(2);
