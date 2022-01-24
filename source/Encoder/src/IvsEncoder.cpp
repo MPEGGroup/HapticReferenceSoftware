@@ -32,6 +32,7 @@
  */
 
 #include <Encoder/include/IvsEncoder.h>
+#include <Tools/include/Tools.h>
 #include <fstream>
 #include <limits>
 
@@ -146,7 +147,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   std::string effectType = basisEffect->attribute("type").as_string();
   if (effectType == "periodic") {
     out->setBaseSignal(IvsEncoder::getWaveform(basisEffect));
-    freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) / MAX_FREQUENCY));
+    freq = static_cast<int>(1.0 / (static_cast<float>(periodLength) * MS_2_S));
   } else if (effectType == "magsweep") {
     out->setBaseSignal(types::BaseSignal::Sine);
     freq = IvsEncoder::MAGSWEEP_FREQUENCY;
@@ -360,7 +361,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 [[nodiscard]] auto IvsEncoder::floatToInt(const int f) -> int {
 
   if (f < 0) {
-    int res = (f + std::numeric_limits<int>::max()) / MAX_FREQUENCY;
+    int res = ((f + std::numeric_limits<int>::max()) + 1) / MS_2_MICROSECONDS;
     return res;
   }
 
