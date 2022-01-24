@@ -90,8 +90,10 @@ namespace haptics::synthesizer {
     for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getTracksSize(); j++) {
       double t = 0 - pad * MS_2_S;
       std::vector<double> trackAmp;
+      types::Track myTrack;
       while (t < ((timeLength + pad) * MS_2_S)) {
-        double amp = haptic.getPerceptionAt((int)i).getTrackAt((int)j).Evaluate(t * S_2_MS);
+        myTrack = haptic.getPerceptionAt((int)i).getTrackAt((int)j);
+        double amp = myTrack.Evaluate(t * S_2_MS) * myTrack.getGain();
         trackAmp.push_back(amp);
         t += 1.0 / static_cast<double>(fs);
       }
