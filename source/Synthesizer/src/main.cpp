@@ -31,14 +31,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOJson.h>
 #include <Synthesizer/include/Helper.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
-#include <Types/include/IOJson.h>
 #include <filesystem>
 
-using haptics::encoder::IOJson;
+using haptics::io::IOJson;
 using haptics::synthesizer::Helper;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;

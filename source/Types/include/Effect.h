@@ -37,19 +37,28 @@
 #include <Types/include/BandType.h>
 #include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
+#include <map>
+#include <string>
 #include <vector>
 
 using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum class BaseSignal {
-  Sine = 0,
-  Square = Sine + 1,
-  Triangle = Square + 1,
-  SawToothUp = Triangle + 1,
-  SawToothDown = SawToothUp + 1
-};
+enum class BaseSignal { Sine = 0, Square = 1, Triangle = 2, SawToothUp = 3, SawToothDown = 4 };
+
+static const std::map<std::string, BaseSignal> stringToBaseSignal = {
+    {"Sine", BaseSignal::Sine},
+    {"Square", BaseSignal::Square},
+    {"Triangle", BaseSignal::Triangle},
+    {"SawToothUp", BaseSignal::SawToothUp},
+    {"SawToothDown", BaseSignal::SawToothDown}};
+static const std::map<BaseSignal, std::string> baseSignalToString = {
+    {BaseSignal::Sine, "Sine"},
+    {BaseSignal::Square, "Square"},
+    {BaseSignal::Triangle, "Triangle"},
+    {BaseSignal::SawToothUp, "SawToothUp"},
+    {BaseSignal::SawToothDown, "SawToothDown"}};
 
 class Effect {
 public:
@@ -66,6 +75,7 @@ public:
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe &;
+  auto replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool;
   auto addKeyframe(Keyframe &newKeyframe) -> void;
   auto addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
                    std::optional<int> frequencyModulation) -> void;

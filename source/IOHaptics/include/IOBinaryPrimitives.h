@@ -31,49 +31,38 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AVATAR_H
-#define AVATAR_H
+#ifndef IOBINARYPRIMITIVES_H
+#define IOBINARYPRIMITIVES_H
 
-#include <map>
+#include <array>
+#include <cstring>
+#include <fstream>
 #include <string>
 
-namespace haptics::types {
-enum class AvatarType {
-  Vibration = 1,
-  Pressure = 2,
-  Temperature = 3,
-  Custom = 0,
-};
+namespace haptics::io {
 
-static const std::map<std::string, AvatarType> stringToAvatarType = {
-    {"Vibration", AvatarType::Vibration},
-    {"Pressure", AvatarType::Pressure},
-    {"Temperature", AvatarType::Temperature},
-    {"Custom", AvatarType::Custom}};
-static const std::map<AvatarType, std::string> avatarTypeToString = {
-    {AvatarType::Vibration, "Vibration"},
-    {AvatarType::Pressure, "Pressure"},
-    {AvatarType::Temperature, "Temperature"},
-    {AvatarType::Custom, "Custom"}};
-
-class Avatar {
+class IOBinaryPrimitives {
 public:
-  explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType){};
+  static auto readString(std::ifstream &file) -> std::string;
+  static auto readFloat(std::ifstream &file) -> float;
+  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
+    T value = 0;
 
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getLod() const -> int;
-  auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> AvatarType;
-  auto setType(AvatarType newType) -> void;
+    std::array<char, bytesCount> bytes{};
+    file.read(bytes.data(), bytesCount);
+    memcpy(&value, &bytes, sizeof(value));
 
-private:
-  int id = -1;
-  int lod = 0;
-  AvatarType type = AvatarType::Custom;
-  // TODO : Mesh
+    return value;
+  }
+
+  static auto writeString(const std::string &text, std::ofstream &file) -> void;
+  static auto writeFloat(const float &f, std::ofstream &file) -> void;
+  template <class T, size_t bytesCount>
+  static auto writeNBytes(const T &value, std::ofstream &file) -> void {
+    std::array<char, bytesCount> bytes{};
+    memcpy(&bytes, &value, sizeof(value));
+    file.write(bytes.data(), bytesCount);
+  }
 };
-} // namespace haptics::types
-#endif // AVATAR_H
+} // namespace haptics::io
+#endif // IOBINARYPRIMITIVES_H

@@ -31,49 +31,30 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AVATAR_H
-#define AVATAR_H
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 
-#include <map>
-#include <string>
+namespace haptics::io {
 
-namespace haptics::types {
-enum class AvatarType {
-  Vibration = 1,
-  Pressure = 2,
-  Temperature = 3,
-  Custom = 0,
-};
+auto IOBinaryPrimitives::writeString(const std::string &text, std::ofstream &file) -> void {
+  std::string str = text;
+  str.append(1, '\x00');
+  file.write(str.c_str(), static_cast<int>(str.size()));
+}
 
-static const std::map<std::string, AvatarType> stringToAvatarType = {
-    {"Vibration", AvatarType::Vibration},
-    {"Pressure", AvatarType::Pressure},
-    {"Temperature", AvatarType::Temperature},
-    {"Custom", AvatarType::Custom}};
-static const std::map<AvatarType, std::string> avatarTypeToString = {
-    {AvatarType::Vibration, "Vibration"},
-    {AvatarType::Pressure, "Pressure"},
-    {AvatarType::Temperature, "Temperature"},
-    {AvatarType::Custom, "Custom"}};
+auto IOBinaryPrimitives::readString(std::ifstream &file) -> std::string {
+  char c = 0;
+  std::string str;
+  while (file.get(c), c != '\0') {
+    str += c;
+  }
+  return str;
+}
 
-class Avatar {
-public:
-  explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType){};
+auto IOBinaryPrimitives::writeFloat(const float &f, std::ofstream &file) -> void {
+  writeNBytes<float, 4>(f, file);
+}
 
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getLod() const -> int;
-  auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> AvatarType;
-  auto setType(AvatarType newType) -> void;
-
-private:
-  int id = -1;
-  int lod = 0;
-  AvatarType type = AvatarType::Custom;
-  // TODO : Mesh
-};
-} // namespace haptics::types
-#endif // AVATAR_H
+auto IOBinaryPrimitives::readFloat(std::ifstream &file) -> float {
+  return readNBytes<float, 4>(file);
+}
+} // namespace haptics::io

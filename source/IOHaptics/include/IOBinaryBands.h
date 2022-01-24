@@ -31,49 +31,33 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AVATAR_H
-#define AVATAR_H
+#ifndef IOBINARYBANDS_H
+#define IOBINARYBANDS_H
 
-#include <map>
-#include <string>
+#include <Types/include/Band.h>
 
-namespace haptics::types {
-enum class AvatarType {
-  Vibration = 1,
-  Pressure = 2,
-  Temperature = 3,
-  Custom = 0,
-};
+namespace haptics::io {
 
-static const std::map<std::string, AvatarType> stringToAvatarType = {
-    {"Vibration", AvatarType::Vibration},
-    {"Pressure", AvatarType::Pressure},
-    {"Temperature", AvatarType::Temperature},
-    {"Custom", AvatarType::Custom}};
-static const std::map<AvatarType, std::string> avatarTypeToString = {
-    {AvatarType::Vibration, "Vibration"},
-    {AvatarType::Pressure, "Pressure"},
-    {AvatarType::Temperature, "Temperature"},
-    {AvatarType::Custom, "Custom"}};
-
-class Avatar {
+class IOBinaryBands {
 public:
-  explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType){};
+  static auto readBandHeader(types::Band &band, std::ifstream &file) -> bool;
+  static auto readBandBody(types::Band &band, std::ifstream &file) -> bool;
 
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getLod() const -> int;
-  auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> AvatarType;
-  auto setType(AvatarType newType) -> void;
+  static auto writeBandHeader(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeBandBody(types::Band &band, std::ofstream &file) -> bool;
 
 private:
-  int id = -1;
-  int lod = 0;
-  AvatarType type = AvatarType::Custom;
-  // TODO : Mesh
+  static auto readTransientBandBody(types::Band &band, std::ifstream &file) -> bool;
+  static auto readCurveBandBody(types::Band &band, std::ifstream &file) -> bool;
+  static auto readVectorialBandBody(types::Band &band, std::ifstream &file) -> bool;
+  static auto readQuantizedBandBody(types::Band &band, std::ifstream &file) -> bool;
+  static auto readWaveletBandBody() -> bool;
+
+  static auto writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeVectorialBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeQuantizedBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeWaveletBandBody() -> bool;
 };
-} // namespace haptics::types
-#endif // AVATAR_H
+} // namespace haptics::io
+#endif // IOBINARYBANDS_H

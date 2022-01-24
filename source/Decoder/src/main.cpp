@@ -31,9 +31,15 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOJson.h>
 #include <Tools/include/InputParser.h>
+#include <Types/include/Haptics.h>
 
+using haptics::io::IOBinary;
+using haptics::io::IOJson;
 using haptics::tools::InputParser;
+using haptics::types::Haptics;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
@@ -58,8 +64,16 @@ auto main(int argc, char *argv[]) -> int {
   if (output.empty()) {
     output = inputParser.getCmdOption("--output");
   }
-  if (!output.empty()) {
-    std::cout << "The generated file will be : " << output << "\n";
+  if (output.empty()) {
+    InputParser::help(args[0]);
+    return EXIT_FAILURE;
   }
+
+  Haptics hapticFile;
+  if (!IOBinary::loadFile(filename, hapticFile)) {
+    return EXIT_FAILURE;
+  }
+
+  IOJson::writeFile(hapticFile, output);
   return EXIT_SUCCESS;
 }

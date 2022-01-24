@@ -34,18 +34,20 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
+#include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
-#include <Types/include/IOJson.h>
 #include <Types/include/Perception.h>
 #include <filesystem>
 #include <functional>
 
 using haptics::encoder::AhapEncoder;
-using haptics::encoder::IOJson;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
+using haptics::io::IOBinary;
+using haptics::io::IOJson;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
@@ -125,7 +127,11 @@ auto main(int argc, char *argv[]) -> int {
         config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
         config.windowLength = 15;
-        return PcmEncoder::encode(filename, config, myPerception);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.wavelet_windowLength = 128;
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.wavelet_bitbudget = 4;
+        codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
 
       if (codeExit == EXIT_SUCCESS) {
@@ -164,6 +170,11 @@ auto main(int argc, char *argv[]) -> int {
     return codeExit;
   }
 
-  IOJson::writeFile(hapticFile, output);
+  if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+    IOBinary::writeFile(hapticFile, output);
+  } else {
+    IOJson::writeFile(hapticFile, output);
+  }
+
   return codeExit;
 }

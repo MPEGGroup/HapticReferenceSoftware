@@ -31,49 +31,35 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef AVATAR_H
-#define AVATAR_H
+#ifndef IOJSON_H
+#define IOJSON_H
 
+#include <Types/include/Haptics.h>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <string>
 
-namespace haptics::types {
-enum class AvatarType {
-  Vibration = 1,
-  Pressure = 2,
-  Temperature = 3,
-  Custom = 0,
-};
-
-static const std::map<std::string, AvatarType> stringToAvatarType = {
-    {"Vibration", AvatarType::Vibration},
-    {"Pressure", AvatarType::Pressure},
-    {"Temperature", AvatarType::Temperature},
-    {"Custom", AvatarType::Custom}};
-static const std::map<AvatarType, std::string> avatarTypeToString = {
-    {AvatarType::Vibration, "Vibration"},
-    {AvatarType::Pressure, "Pressure"},
-    {AvatarType::Temperature, "Temperature"},
-    {AvatarType::Custom, "Custom"}};
-
-class Avatar {
+namespace haptics::io {
+class IOJson {
 public:
-  explicit Avatar() = default;
-  explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType){};
+  static auto loadFile(const std::string &filePath) -> types::Haptics;
+  static auto loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
+      -> void;
+  static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> void;
+  static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> void;
+  static auto loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
+                                   types::Perception &perception) -> void;
+  static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> void;
+  static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> void;
+  static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> void;
 
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getLod() const -> int;
-  auto setLod(int newLod) -> void;
-  [[nodiscard]] auto getType() const -> AvatarType;
-  auto setType(AvatarType newType) -> void;
+  static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
+  static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;
+  static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void;
+  static auto extractReferenceDevices(types::Perception &perception,
+                                      nlohmann::json &jsonReferenceDevices) -> void;
 
-private:
-  int id = -1;
-  int lod = 0;
-  AvatarType type = AvatarType::Custom;
-  // TODO : Mesh
+  static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
-} // namespace haptics::types
-#endif // AVATAR_H
+} // namespace haptics::io
+#endif // IOJSON_H
