@@ -189,22 +189,22 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
                                             k.getRelativePosition().value() <= relativePosition &&
                                             k.getFrequencyModulation().has_value();
                                    });
-    double t = MS_2_S * relativePosition;
     double freq_modulation = 0;
     if (k_a_before == keyframes.rend()) {
       freq_modulation = (keyframes.rend() - 1)->getFrequencyModulation().value();
     } else {
       // Modulation
       double f0 = std::max(k_f_before->getFrequencyModulation().value(), 0);
+      int t0 = k_f_before->getRelativePosition().value();
       double f1 = std::max(k_f_after->getFrequencyModulation().value(), 0);
-      double DeltaT = MS_2_S * (static_cast<double>(k_f_after->getRelativePosition().value()) -
-                                static_cast<double>(k_f_before->getRelativePosition().value()));
+      int t1 = k_f_after->getRelativePosition().value();
 
-      freq_modulation =
-          std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit),
-                     static_cast<double>(highFrequencyLimit));
+      freq_modulation = std::clamp(
+          f0 + (relativePosition - t0) * (f1 - f0) / static_cast<double>(t1 - t0) / 2,
+          static_cast<double>(lowFrequencyLimit), static_cast<double>(highFrequencyLimit));
     }
 
+    double t = MS_2_S * relativePosition;
     evaluatedBaseSignal = this->computeBaseSignal(t, freq_modulation);
   }
 
