@@ -195,8 +195,8 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     } else {
       double f0 = firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value();
       int t0 = firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
-                  ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
-                  : 0;
+                   ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
+                   : 0;
       auto f1 = static_cast<double>(firstFrequencyAfterPosition);
       int t1 = firstRelativePositionAfterPosition;
 
