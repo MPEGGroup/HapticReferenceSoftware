@@ -61,6 +61,5 @@ TEST_CASE("haptics::tools::OHMData") {
 
     // TODO : some tests
     CHECK(true);
-    
   }
 }

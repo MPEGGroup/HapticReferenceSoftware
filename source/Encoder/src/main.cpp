@@ -34,18 +34,20 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
-#include <Types/include/IOJson.h>
+#include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
 #include <Types/include/Perception.h>
-#include <functional>
 #include <filesystem>
+#include <functional>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
-using haptics::encoder::IOJson;
+using haptics::io::IOBinary;
+using haptics::io::IOJson;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
@@ -86,7 +88,8 @@ auto main(int argc, char *argv[]) -> int {
     std::cout << "The OHM file to process : " << filename << std::endl;
     OHMData ohmData;
     if (!ohmData.loadFile(filename)) {
-      std::cerr << "ERROR : impossible to read the OHM file : " << std::endl << filename << std::endl;
+      std::cerr << "ERROR : impossible to read the OHM file : " << std::endl
+                << filename << std::endl;
       return EXIT_FAILURE;
     }
     hapticFile.loadMetadataFromOHM(ohmData);
@@ -97,8 +100,9 @@ auto main(int argc, char *argv[]) -> int {
     }
     std::filesystem::path folderPath = std::filesystem::path(filename);
     folderPath = folderPath.parent_path();
-    for (int i = 0; i < ohmData.getHapticElementMetadataSize() && codeExit == EXIT_SUCCESS; i++) {
-      OHMData::HapticElementMetadata metadata = ohmData.getHapticElementMetadataAt(i);
+    for (uint32_t i = 0; i < ohmData.getHapticElementMetadataSize() && codeExit == EXIT_SUCCESS;
+         i++) {
+      OHMData::HapticElementMetadata metadata = ohmData.getHapticElementMetadataAt((int)i);
 
       filename = (folderPath / metadata.elementFilename).string();
       if (!std::filesystem::is_regular_file(filename)) {
@@ -107,7 +111,7 @@ auto main(int argc, char *argv[]) -> int {
       }
 
       ext = InputParser::getFileExt(filename);
-      myPerception = hapticFile.getPerceptionAt(i);
+      myPerception = hapticFile.getPerceptionAt((int)i);
       if (ext == "json" || ext == "ahap") {
         std::cout << "The AHAP file to encode : " << filename << std::endl;
         codeExit = AhapEncoder::encode(filename, myPerception);
@@ -123,11 +127,15 @@ auto main(int argc, char *argv[]) -> int {
         config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
         config.windowLength = 15;
-        return PcmEncoder::encode(filename, config, myPerception);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.wavelet_windowLength = 128;
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+        config.wavelet_bitbudget = 4;
+        codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
 
       if (codeExit == EXIT_SUCCESS) {
-        hapticFile.replacePerceptionAt(i, myPerception);
+        hapticFile.replacePerceptionAt((int)i, myPerception);
       }
     }
   } else if (ext == "json" || ext == "ahap") {
@@ -153,8 +161,7 @@ auto main(int argc, char *argv[]) -> int {
     config.wavelet_bitbudget = 4;
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
-  }
-  else {
+  } else {
     codeExit = EXIT_FAILURE;
   }
 
@@ -163,6 +170,11 @@ auto main(int argc, char *argv[]) -> int {
     return codeExit;
   }
 
-  IOJson::writeFile(hapticFile, output);
+  if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+    IOBinary::writeFile(hapticFile, output);
+  } else {
+    IOJson::writeFile(hapticFile, output);
+  }
+
   return codeExit;
 }

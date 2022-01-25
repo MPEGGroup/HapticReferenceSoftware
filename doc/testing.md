@@ -13,3 +13,5 @@ make test
 for Linux and directly from the menu *Test/Run CTests for RM0* in MS Visual Studio.
 
 Tests can also be run independently, executables are built during the compilation. They provide more detailed information.
+
+These tests will be automatically performed when a merge is requested. The reference machine is a Linux AWS instance handled by InterDigital. A merge will not be accepted until all tests are passing. Please contact the software coordinator if you encounter any issue.

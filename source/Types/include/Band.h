@@ -34,9 +34,9 @@
 #ifndef BAND_H
 #define BAND_H
 
-#include <Types/include/EncodingModality.h>
 #include <Types/include/BandType.h>
 #include <Types/include/Effect.h>
+#include <Types/include/EncodingModality.h>
 #include <vector>
 
 namespace haptics::types {
