@@ -34,13 +34,36 @@
 #include <catch2/catch.hpp>
 #include <Types/include/Avatar.h>
 
-TEST_CASE("haptics::tools::OHMData") {
+TEST_CASE("haptics::tools::Avatar") {
 
   using haptics::types::Avatar;
 
-  SECTION("Loading OHM File") {
-
-    // TODO : some tests
-    CHECK(true);
+  Avatar avatar(1, 2, haptics::types::AvatarType::Vibration);
+  SECTION("Checking getId") { 
+      auto checkId = avatar.getId();
+      CHECK(checkId == 1);
+  }
+  SECTION("Checking getLod") {
+    auto checkLod = avatar.getLod();
+    CHECK( checkLod == 2);
+  }
+  SECTION("Checking getType") {
+    auto checkType = avatar.getType();
+    CHECK( checkType == haptics::types::AvatarType::Vibration); 
+  }
+  SECTION("Checking setId") {
+    avatar.setId(2);
+    auto checkId = avatar.getId();
+    CHECK(checkId == 2);
+  }
+  SECTION("Checking setLod") {
+    avatar.setLod(3);
+    auto checkLod = avatar.getLod();
+    CHECK(checkLod == 3);
+  }
+  SECTION("Checking setType") {
+    avatar.setType(haptics::types::AvatarType::Pressure);
+    auto checkType = avatar.getType();
+    CHECK(checkType == haptics::types::AvatarType::Pressure);
   }
 }

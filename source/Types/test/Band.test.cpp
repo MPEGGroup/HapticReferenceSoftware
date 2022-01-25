@@ -38,7 +38,7 @@ using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::EncodingModality;
 
-TEST_CASE("haptics::types::Band", "[placeholder]") {
+TEST_CASE("haptics::types::Band") {
   const Band b(BandType::Wave, EncodingModality::Quantized, 10, 70, 1000);
 
   CHECK(true);

@@ -34,12 +34,30 @@
 #include <catch2/catch.hpp>
 
 #include <Tools/include/OHMData.h>
+#include <filesystem>
+
+using haptics::tools::OHMData;
 
 TEST_CASE("haptics::tools::OHMData") {
 
-  using haptics::tools::OHMData;
+  SECTION("Output to Input test") {
 
-  SECTION("Loading OHM File") {
+
+  }
+  std::string filename = "../../../../data/test.ohm";
+  OHMData ohmData(filename);
+
+  SECTION("Testing loading") {
+
+  }
+
+
+  std::string filename2 = "test2.ohm";
+  ohmData.writeFile(filename2);
+
+  CHECK(std::filesystem::is_regular_file(filename));
+
+  SECTION("Testing ") {
 
     // TODO : some tests
     CHECK(true);
