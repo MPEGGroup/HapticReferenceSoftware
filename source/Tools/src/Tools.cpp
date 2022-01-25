@@ -27,23 +27,19 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 }
 
 [[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency,
-                                      double end_frequency, int position) -> double {
-
-  int start_t = start_time;
-  int end_t = end_time;
-  double start_f = start_frequency;
-  double end_f = end_frequency;
-
-  if (end_t > start_t) {
-    std::swap(start_t, end_t);
-    std::swap(start_f, end_f);
+                                      double end_frequency, double position) -> double {
+  if (end_time < start_time) {
+    std::swap(start_time, end_time);
+    std::swap(start_frequency, end_frequency);
   }
 
-  if (start_t == end_t) {
-    return end_f;
+  if (start_time == end_time) {
+    return end_frequency;
   }
 
-  return position * (end_f - start_f) / (end_t - start_t) + start_f;
+  return (((end_frequency - start_frequency) / (end_time - start_time)) / 2) *
+             (position - start_time) +
+         start_frequency;
 }
 
 [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out,

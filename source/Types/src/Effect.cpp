@@ -134,81 +134,90 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   double relativePosition = position - this->position;
 
-  // IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
-
-  double amp_modulation = 0;
-  // First KF AFTER
-  auto k_a_after = std::find_if(
+  // AMPLITUDE MODULATION
+  double amp_modulation = 1;
+  // First amplitude keyframe after the relative position
+  auto firstAmplitudeKeyframeAfterPositionIt = std::find_if(
       keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
-        return k.getRelativePosition().has_value() && k.getAmplitudeModulation() &&
-               k.getAmplitudeModulation().has_value() &&
-               k.getRelativePosition().value() > relativePosition;
+        return k.getAmplitudeModulation().has_value() && k.getRelativePosition().has_value() &&
+               k.getRelativePosition().value() >= relativePosition;
       });
-  if (k_a_after < keyframes.end()) {
-    // first KF before position
-    auto k_a_before = std::find_if(keyframes.rbegin(), keyframes.rend(),
-                                   [relativePosition](haptics::types::Keyframe k) {
-                                     return k.getRelativePosition().has_value() &&
-                                            k.getRelativePosition().value() <= relativePosition &&
-                                            k.getAmplitudeModulation().has_value();
-                                   });
-    if (k_a_before == keyframes.rend()) {
-      amp_modulation = (keyframes.rend() - 1)->getAmplitudeModulation().value();
+  if (firstAmplitudeKeyframeAfterPositionIt < keyframes.end()) {
+    float firstAmplitudeAfterPosition =
+        firstAmplitudeKeyframeAfterPositionIt->getAmplitudeModulation().value();
+    int firstRelativePositionAfterPosition =
+        firstAmplitudeKeyframeAfterPositionIt->getRelativePosition().value();
+    // First amplitude keyframe before the keyframe previously found
+    auto firstAmplitudeKeyframeBeforePositionIt =
+        std::find_if(std::make_reverse_iterator(firstAmplitudeKeyframeAfterPositionIt),
+                     keyframes.rend(), [](haptics::types::Keyframe k) {
+                       return k.getAmplitudeModulation().has_value();
+                     });
+    if (firstAmplitudeKeyframeBeforePositionIt == keyframes.rend()) {
+      amp_modulation = firstAmplitudeAfterPosition;
     } else {
-      amp_modulation = haptics::tools::linearInterpolation(
-          {k_a_before->getRelativePosition().value(), k_a_before->getAmplitudeModulation().value()},
-          {k_a_after->getRelativePosition().value(), k_a_after->getAmplitudeModulation().value()},
-          relativePosition);
+      float a0 = firstAmplitudeKeyframeBeforePositionIt->getAmplitudeModulation().value();
+      int t0 = firstAmplitudeKeyframeBeforePositionIt->getRelativePosition().has_value()
+                   ? firstAmplitudeKeyframeBeforePositionIt->getRelativePosition().value()
+                   : 0;
+      float a1 = firstAmplitudeAfterPosition;
+      int t1 = firstRelativePositionAfterPosition;
+      amp_modulation = haptics::tools::linearInterpolation({t0, a0}, {t1, a1}, relativePosition);
     }
   } else {
-    amp_modulation = (keyframes.end() - 1)->getAmplitudeModulation().value();
+    auto amplitudeKeyframeIt = std::find_if(
+        keyframes.rbegin(), keyframes.rend(), [](haptics::types::Keyframe k) {
+          return k.getAmplitudeModulation().has_value();
+        });
+    if (amplitudeKeyframeIt < keyframes.rend()) {
+      amp_modulation = amplitudeKeyframeIt->getAmplitudeModulation().value();
+    }
   }
 
-  // IF FREQUENCY MODULATION (SHOULD BE BUT TO BE SURE)
-
-  double evaluatedBaseSignal = 1;
-  // first KF after position
-  auto k_f_after = std::find_if(
+  // FREQUENCY MODULATION
+  double freq_modulation = 0;
+  // First frequency keyframe after the relative position
+  auto firstFrequencyKeyframeAfterPositionIt = std::find_if(
       keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
-        return k.getRelativePosition().has_value() && k.getFrequencyModulation().has_value() &&
-               k.getRelativePosition() > relativePosition;
+        return k.getFrequencyModulation().has_value() && k.getRelativePosition().has_value() &&
+               k.getRelativePosition().value() >= relativePosition;
       });
-  if (k_f_after < keyframes.end()) {
-    // first KF before position
-    auto k_f_before = keyframes.begin();
-    for (auto it = k_f_after; it >= keyframes.begin(); it--) {
-      if (it->getRelativePosition() <= relativePosition &&
-          it->getFrequencyModulation().has_value()) {
-        k_f_before = it;
-        break;
-      }
-    }
-    auto k_a_before = std::find_if(keyframes.rbegin(), keyframes.rend(),
-                                   [relativePosition](haptics::types::Keyframe k) {
-                                     return k.getRelativePosition().has_value() &&
-                                            k.getRelativePosition().value() <= relativePosition &&
-                                            k.getFrequencyModulation().has_value();
-                                   });
-    double freq_modulation = 0;
-    if (k_a_before == keyframes.rend()) {
-      freq_modulation = (keyframes.rend() - 1)->getFrequencyModulation().value();
+  if (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
+    int firstFrequencyAfterPosition =
+        firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value();
+    int firstRelativePositionAfterPosition =
+        firstFrequencyKeyframeAfterPositionIt->getRelativePosition().value();
+    // First frequency keyframe before the keyframe previously found
+    auto firstFrequencyKeyframeBeforePositionIt =
+        std::find_if(std::make_reverse_iterator(firstFrequencyKeyframeAfterPositionIt),
+                     keyframes.rend(), [](haptics::types::Keyframe k) {
+                       return k.getFrequencyModulation().has_value();
+                     });
+
+    if (firstFrequencyKeyframeBeforePositionIt == keyframes.rend()) {
+      freq_modulation = static_cast<double>(firstFrequencyAfterPosition);
     } else {
-      // Modulation
-      double f0 = std::max(k_f_before->getFrequencyModulation().value(), 0);
-      int t0 = k_f_before->getRelativePosition().value();
-      double f1 = std::max(k_f_after->getFrequencyModulation().value(), 0);
-      int t1 = k_f_after->getRelativePosition().value();
+      double f0 = firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value();
+      int t0 = firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
+          ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value() : 0;
+      auto f1 = static_cast<double>(firstFrequencyAfterPosition);
+      int t1 = firstRelativePositionAfterPosition;
 
-      freq_modulation = std::clamp(
-          f0 + (relativePosition - t0) * (f1 - f0) / static_cast<double>(t1 - t0) / 2,
-          static_cast<double>(lowFrequencyLimit), static_cast<double>(highFrequencyLimit));
+      freq_modulation = tools::chirpInterpolation(t0, t1, f0, f1, relativePosition);
+      freq_modulation = std::clamp(freq_modulation, static_cast<double>(lowFrequencyLimit),
+                                   static_cast<double>(highFrequencyLimit));
     }
-
-    double t = MS_2_S * relativePosition;
-    evaluatedBaseSignal = this->computeBaseSignal(t, freq_modulation);
+  } else {
+    auto frequencyKeyframeIt = std::find_if(keyframes.rbegin(), keyframes.rend(),
+                                            [](haptics::types::Keyframe k) {
+                                              return k.getFrequencyModulation().has_value();
+                                            });
+    if (frequencyKeyframeIt < keyframes.rend()) {
+      freq_modulation = frequencyKeyframeIt->getFrequencyModulation().value();
+    }
   }
 
-  return amp_modulation * evaluatedBaseSignal;
+  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation);
 }
 
 auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
