@@ -41,7 +41,7 @@ constexpr int fs = 8000;
 
 auto checkCorrect(std::vector<double> buffer, std::vector<double> buffer_rec) -> bool {
   bool correct = true;
-  for (int i = 0; i < buffer.size(); i++) {
+  for (size_t i = 0; i < buffer.size(); i++) {
     if (fabs(buffer[i]) >= 1) {
       if (buffer[i] >= 1) {
         // NOLINTNEXTLINE
