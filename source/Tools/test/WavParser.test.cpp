@@ -102,7 +102,6 @@ TEST_CASE("haptics::tools::WavParser") {
 
 TEST_CASE("haptics::tools::WavParser overflow") {
 
-  using haptics::tools::SCALING;
   using haptics::tools::WavParser;
 
   SECTION("Overflow test") {
