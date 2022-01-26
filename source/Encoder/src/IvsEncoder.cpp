@@ -79,8 +79,10 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
         types::BandType::Wave, types::EncodingModality::Vectorial);
     if (myBand == nullptr) {
       myTrack.addBand(*(new haptics::types::Band(
-          haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,
-          IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY)));
+          haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
+          haptics::types::EncodingModality::Vectorial, 0, IvsEncoder::MIN_FREQUENCY,
+          IvsEncoder::MAX_FREQUENCY)));
+
       myBand = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
     }
     myBand->addEffect(myEffect);
@@ -126,8 +128,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
             types::BandType::Wave, types::EncodingModality::Vectorial);
         if (myBand == nullptr) {
           myTrack.addBand(*(new haptics::types::Band(
-              haptics::types::BandType::Wave, haptics::types::EncodingModality::Vectorial, 0,
-              IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY)));
+              haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
+              haptics::types::EncodingModality::Vectorial, 0, IvsEncoder::MIN_FREQUENCY,
+              IvsEncoder::MAX_FREQUENCY)));
           myBand = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
         }
         myBand->addEffect(myEffect);
