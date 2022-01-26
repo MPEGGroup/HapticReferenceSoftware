@@ -34,18 +34,33 @@
 #ifndef AVATAR_H
 #define AVATAR_H
 
+#include <map>
+#include <string>
+
 namespace haptics::types {
 enum class AvatarType {
-  Vibration = 0,
-  Pressure = Vibration + 1,
-  Temperature = Pressure + 1,
-  Custom = Temperature + 1,
+  Vibration = 1,
+  Pressure = 2,
+  Temperature = 3,
+  Custom = 0,
 };
+
+static const std::map<std::string, AvatarType> stringToAvatarType = {
+    {"Vibration", AvatarType::Vibration},
+    {"Pressure", AvatarType::Pressure},
+    {"Temperature", AvatarType::Temperature},
+    {"Custom", AvatarType::Custom}};
+static const std::map<AvatarType, std::string> avatarTypeToString = {
+    {AvatarType::Vibration, "Vibration"},
+    {AvatarType::Pressure, "Pressure"},
+    {AvatarType::Temperature, "Temperature"},
+    {AvatarType::Custom, "Custom"}};
+
 class Avatar {
 public:
   explicit Avatar() = default;
   explicit Avatar(int newId, int newLod, AvatarType newType)
-      : id(newId), lod(newLod), type(newType) {};
+      : id(newId), lod(newLod), type(newType){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -54,13 +69,11 @@ public:
   [[nodiscard]] auto getType() const -> AvatarType;
   auto setType(AvatarType newType) -> void;
 
-
 private:
   int id = -1;
   int lod = 0;
   AvatarType type = AvatarType::Custom;
-  //TODO : Mesh
-
+  // TODO : Mesh
 };
 } // namespace haptics::types
-#endif //AVATAR_H
+#endif // AVATAR_H

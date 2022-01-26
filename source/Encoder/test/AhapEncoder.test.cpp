@@ -31,15 +31,15 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Encoder/include/AhapEncoder.h>
+#include <catch2/catch.hpp>
 
 using haptics::encoder::AhapEncoder;
 
 TEST_CASE("return true", "[placeholder]") {
-  //std::string str("this/is/my/file/path.ext");
-  //int exit_code = AhapEncoder::encode(str);
+  // std::string str("this/is/my/file/path.ext");
+  // int exit_code = AhapEncoder::encode(str);
 
-  //CHECK(exit_code == EXIT_FAILURE);
+  // CHECK(exit_code == EXIT_FAILURE);
   CHECK(true);
 }

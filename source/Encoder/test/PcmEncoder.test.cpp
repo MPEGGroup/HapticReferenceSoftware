@@ -31,26 +31,24 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Encoder/include/PcmEncoder.h>
+#include <catch2/catch.hpp>
 
 using haptics::encoder::PcmEncoder;
-using haptics::types::EncodingModality;
-using haptics::types::Keyframe;
+using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::Effect;
-using haptics::types::Band;
+using haptics::types::EncodingModality;
+using haptics::types::Keyframe;
 
 TEST_CASE("localExtrema with empty input and no border", "[localExtrema][empty][withoutBorder]") {
-  std::vector<std::pair<int, double>> res =
-      PcmEncoder::localExtrema(std::vector<double>{}, false);
+  std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(std::vector<double>{}, false);
 
   CHECK(res.empty());
 }
 
 TEST_CASE("localExtrema with empty input and border", "[localExtrema][empty][withBorder]") {
-  std::vector<std::pair<int, double>> res =
-      PcmEncoder::localExtrema(std::vector<double>{}, true);
+  std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(std::vector<double>{}, true);
 
   CHECK(res.empty());
 }
@@ -116,7 +114,7 @@ TEST_CASE("localExtrema with entry of 2 point",
 TEST_CASE("localExtrema without border every extremum are extracted",
           "[localExtrema][N_points][withoutBorder]") {
   const std::vector<double> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
-                                              3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
+                                             3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
 
   std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(testingValues, false);
 
@@ -154,7 +152,7 @@ TEST_CASE("localExtrema without border every extremum are extracted",
 TEST_CASE("localExtrema without border extract only extremum",
           "[localExtrema][N_points][withoutBorder]") {
   const std::vector<double> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
-                                              3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
+                                             3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
 
   std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(testingValues, false);
 
@@ -167,7 +165,6 @@ TEST_CASE("localExtrema without border extract only extremum",
   double previousValue = 0;
   double currentValue = testingValues[i - 1];
   double nextValue = testingValues[i];
-  auto testingValuesSize = int(testingValues.size());
   for (std::pair<int, double> extremumElement : res) {
     previousValue = testingValues[extremumElement.first - 1];
     currentValue = testingValues[extremumElement.first];
@@ -188,7 +185,7 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
           "are the borders",
           "[localExtrema][N_points][withBorder]") {
   const std::vector<double> testingValues = {0, 0, 1, 2, 3, 4, 4, 4, 3, 2, 2,
-                                              3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
+                                             3, 4, 6, 8, 7, 8, 6, 3, 1, 0};
   std::vector<std::pair<int, double>> res = PcmEncoder::localExtrema(testingValues, true);
   auto resSize = int(res.size());
 
@@ -224,18 +221,15 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
   }
 }
 
-
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("convertToCurveBand", "[convertToCurveBand]") {
   std::vector<std::pair<int, double>> testingPoints = {
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-    {0, .654}, {24, 1}, {40, 0}, {80, -.34}, {656, -.5648}, {2500, .15},
+      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
+      {0, .654}, {24, 1}, {40, 0}, {80, -.34}, {656, -.5648}, {2500, .15},
   };
   const double testingSamplerate = 8000;
   const double testingCurveFrequencyLimit = 72;
-  const std::vector<double> expectedTimes = {
-    0, 3, 5, 10, 82, 312
-  };
+  const std::vector<double> expectedTimes = {0, 3, 5, 10, 82, 312};
   REQUIRE(testingPoints.size() == expectedTimes.size());
 
   Band res;

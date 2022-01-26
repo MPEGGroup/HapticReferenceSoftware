@@ -100,8 +100,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
 auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
                          int sampleRate) -> bool {
   size_t s = buff.at(0).size();
-  bool sameSize = true;
-  for (int i = 1; i < buff.size(); i++) {
+  for (uint32_t i = 1; i < buff.size(); i++) {
     if (buff.at(i).size() != s) {
       std::cout << "Output Tracks are of different size" << std::endl;
       return false;
@@ -120,8 +119,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   b_int.resize(buff.size() * buff.at(0).size());
   long c = 0;
   for (auto &b : buff) {
-
-    for (int i = 0; i < b.size(); i++) {
+    for (uint32_t i = 0; i < b.size(); i++) {
       auto v = (round(b.at(i) * SCALING));
       if (v > SCALING - 1) {
         b_int.at((i * buff.size()) + c) = (uint16_t)SCALING - 1;
@@ -133,7 +131,6 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
     }
     c++;
   }
-
   drwav_write_pcm_frames(&wav, b_int.size() / buff.size(), b_int.data());
   drwav_uninit(&wav);
   return true;

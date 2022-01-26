@@ -34,31 +34,37 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include <Types/include/EncodingModality.h>
 #include <Types/include/BandType.h>
+#include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
+#include <map>
+#include <string>
 #include <vector>
 
 using haptics::types::Keyframe;
 
 namespace haptics::types {
 
-enum class BaseSignal {
-  Sine = 0,
-  Square = Sine + 1,
-  Triangle = Square + 1,
-  SawToothUp = Triangle + 1,
-  SawToothDown = SawToothUp + 1
-};
+enum class BaseSignal { Sine = 0, Square = 1, Triangle = 2, SawToothUp = 3, SawToothDown = 4 };
+
+static const std::map<std::string, BaseSignal> stringToBaseSignal = {
+    {"Sine", BaseSignal::Sine},
+    {"Square", BaseSignal::Square},
+    {"Triangle", BaseSignal::Triangle},
+    {"SawToothUp", BaseSignal::SawToothUp},
+    {"SawToothDown", BaseSignal::SawToothDown}};
+static const std::map<BaseSignal, std::string> baseSignalToString = {
+    {BaseSignal::Sine, "Sine"},
+    {BaseSignal::Square, "Square"},
+    {BaseSignal::Triangle, "Triangle"},
+    {BaseSignal::SawToothUp, "SawToothUp"},
+    {BaseSignal::SawToothDown, "SawToothDown"}};
 
 class Effect {
 public:
   explicit Effect() = default;
   explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal)
-      : position(newPosition)
-      , phase(newPhase)
-      , keyframes({})
-      , baseSignal(newBaseSignal) {};
+      : position(newPosition), phase(newPhase), keyframes({}), baseSignal(newBaseSignal){};
 
   [[nodiscard]] auto getPosition() const -> int;
   auto setPosition(int newPosition) -> void;
@@ -68,16 +74,16 @@ public:
   [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   auto getKeyframesSize() -> size_t;
-  auto getKeyframeAt(int index) -> Keyframe&;
+  auto getKeyframeAt(int index) -> Keyframe &;
+  auto replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool;
   auto addKeyframe(Keyframe &newKeyframe) -> void;
   auto addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
                    std::optional<int> frequencyModulation) -> void;
   auto addAmplitudeAt(float amplitude, int position) -> bool;
   auto addFrequencyAt(int frequency, int position) -> bool;
-  auto Effect::getEffectTimeLength(types::BandType bandType,
-                                   types::EncodingModality encodingModality, int windowLength,
-                                   double transientDuration) -> double;
-  //Use Absolute position not relative
+  auto getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
+                           int windowLength, double transientDuration) -> double;
+  // Use Absolute position not relative
   auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluateQuantized(double position, double windowLength) -> double;
   auto EvaluateWavelet(double position, double windowLength) -> double;
@@ -93,4 +99,4 @@ private:
 };
 } // namespace haptics::types
 
-#endif //EFFECT_H
+#endif // EFFECT_H

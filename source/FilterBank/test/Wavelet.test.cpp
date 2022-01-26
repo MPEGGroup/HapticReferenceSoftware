@@ -40,8 +40,6 @@
 
 constexpr size_t bl = 128;
 constexpr int levels = 1;
-constexpr int hSize = 7;
-constexpr int prec = 15;
 constexpr double prec_comparison = 0.00001;
 
 TEST_CASE("haptics::filterbank::Wavelet") {

@@ -36,40 +36,23 @@
 
 namespace haptics::types {
 
+[[nodiscard]] auto Haptics::getVersion() const -> std::string { return version; }
 
-[[nodiscard]] auto Haptics::getVersion() const -> std::string {
-    return version;
-}
+auto Haptics::setVersion(std::string &newVersion) -> void { version = newVersion; }
 
-auto Haptics::setVersion(std::string& newVersion) -> void {
-    version = newVersion;
-}
+[[nodiscard]] auto Haptics::getDate() const -> std::string { return date; }
+auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
 
-[[nodiscard]] auto Haptics::getDate() const -> std::string {
-    return date;
-}
-auto Haptics::setDate(std::string& newDate) -> void {
-    date = newDate;
-}
+[[nodiscard]] auto Haptics::getDescription() const -> std::string { return description; }
 
-[[nodiscard]] auto Haptics::getDescription() const -> std::string {
-  return description;
-}
+auto Haptics::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
-auto Haptics::setDescription(std::string &newDescription) -> void {
-  description = newDescription;
-}
+auto Haptics::getPerceptionsSize() -> size_t { return perceptions.size(); }
 
-auto Haptics::getPerceptionsSize() -> size_t {
-  return perceptions.size();
-}
-
-auto Haptics::getPerceptionAt(int index) -> Perception& {
-  return perceptions.at(index);
-}
+auto Haptics::getPerceptionAt(int index) -> Perception & { return perceptions.at(index); }
 
 auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool {
-  if (index < 0 || index >= perceptions.size()) {
+  if (index < 0 || index >= (int)perceptions.size()) {
     return false;
   }
 
@@ -77,41 +60,35 @@ auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool 
   return true;
 }
 
-auto Haptics::addPerception(Perception& newPerception) -> void {
+auto Haptics::addPerception(Perception &newPerception) -> void {
   perceptions.push_back(newPerception);
 }
 
-auto Haptics::getAvatarsSize() -> size_t { 
-    return avatars.size(); 
-}
+auto Haptics::getAvatarsSize() -> size_t { return avatars.size(); }
 
-auto Haptics::getAvatarAt(int index) -> Avatar & {
-    return avatars.at(index);
-}
+auto Haptics::getAvatarAt(int index) -> Avatar & { return avatars.at(index); }
 
-auto Haptics::addAvatar(Avatar &newAvatar) -> void {
-    avatars.push_back(newAvatar);
-}
+auto Haptics::addAvatar(Avatar &newAvatar) -> void { avatars.push_back(newAvatar); }
 
 auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
-    version = std::to_string(data.getVersion());
-    time_t now = time(nullptr);
-    date = ctime(&now);
-    description = data.getDescription();
-    short numElements = data.getNumElements();
-    for (int i = 0 ; i < numElements ; i++ ) {
-      auto element = data.getHapticElementMetadataAt(i);
-      std::string elemDescription = element.elementDescription;
-      Perception perception(i, 0, elemDescription, PerceptionModality::Other);
-      short numChannels = element.numHapticChannels;
-      for (int j = 0; j < numChannels; j++) {
-        auto channel = element.channelsMetadata[j];
-        Track track(j, channel.channelDescription, channel.gain, 1,
-                    static_cast<uint32_t>(channel.bodyPartMask));
-        perception.addTrack(track);
-      }
-      perceptions.push_back(perception);
+  version = std::to_string(data.getVersion());
+  time_t now = time(nullptr);
+  date = ctime(&now);
+  description = data.getDescription();
+  short numElements = data.getNumElements();
+  for (int i = 0; i < numElements; i++) {
+    auto element = data.getHapticElementMetadataAt(i);
+    std::string elemDescription = element.elementDescription;
+    Perception perception(i, 0, elemDescription, PerceptionModality::Other);
+    short numChannels = element.numHapticChannels;
+    for (int j = 0; j < numChannels; j++) {
+      auto channel = element.channelsMetadata[j];
+      Track track(j, channel.channelDescription, channel.gain, 1,
+                  static_cast<uint32_t>(channel.bodyPartMask));
+      perception.addTrack(track);
     }
+    perceptions.push_back(perception);
+  }
 }
 
 auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData {

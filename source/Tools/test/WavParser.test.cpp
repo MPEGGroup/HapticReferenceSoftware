@@ -100,13 +100,13 @@ TEST_CASE("haptics::tools::WavParser") {
   }
 }
 
-TEST_CASE("haptics::tools::WavParser,2") {
+TEST_CASE("haptics::tools::WavParser overflow") {
 
   using haptics::tools::SCALING;
   using haptics::tools::WavParser;
 
   SECTION("Overflow test") {
-
+    
     std::string filename = "test_overflow.wav";
     std::vector<double> buffer{0, 0.5, 0.75, 1, 1.25};      // NOLINT
     std::vector<double> buffer2{-1, -0.75, -0.5, 0, -1.25}; // NOLINT
@@ -129,9 +129,9 @@ TEST_CASE("haptics::tools::WavParser,2") {
   }
 
   SECTION("Overflow test 1D") {
-
+    
     std::string filename = "test_overflow_1D.wav";
-    std::vector<double> buffer{0, 0.5, -1, 1, 1.25};      // NOLINT
+    std::vector<double> buffer{0, 0.5, -1, 1, 1.25}; // NOLINT
     WavParser::saveFile(filename, buffer, fs);
     CHECK(std::filesystem::is_regular_file(filename));
     WavParser wavParser2;

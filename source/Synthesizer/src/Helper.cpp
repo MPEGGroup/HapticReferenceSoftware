@@ -49,12 +49,13 @@ namespace haptics::synthesizer {
   types::Effect effect;
   double maxLength = 0;
   double currentLength = 0;
-  for (int perceptionIndex = 0; perceptionIndex < haptic.getPerceptionsSize(); perceptionIndex++) {
-    perception = haptic.getPerceptionAt(perceptionIndex);
-    for (int trackIndex = 0; trackIndex < perception.getTracksSize(); trackIndex++) {
-      track = perception.getTrackAt(trackIndex);
-      for (int bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
-        band = track.getBandAt(bandIndex);
+  for (uint32_t perceptionIndex = 0; perceptionIndex < haptic.getPerceptionsSize();
+       perceptionIndex++) {
+    perception = haptic.getPerceptionAt((int)perceptionIndex);
+    for (uint32_t trackIndex = 0; trackIndex < perception.getTracksSize(); trackIndex++) {
+      track = perception.getTrackAt((int)trackIndex);
+      for (uint32_t bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
+        band = track.getBandAt((int)bandIndex);
         currentLength = band.getBandTimeLength();
         if (currentLength > maxLength) {
           maxLength = currentLength;
@@ -69,14 +70,15 @@ namespace haptics::synthesizer {
                                     const int pad, std::string &filename) -> bool {
 
   // Apply preprocessing on wavelet bands
-  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    for (int j = 0; j < haptic.getPerceptionAt(i).getTracksSize(); j++) {
-      for (int k = 0; k < haptic.getPerceptionAt(i).getTrackAt(j).getBandsSize(); k++) {
-        types::Band band = haptic.getPerceptionAt(i).getTrackAt(j).getBandAt(k);
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getTracksSize(); j++) {
+      for (uint32_t k = 0; k < haptic.getPerceptionAt((int)i).getTrackAt((int)j).getBandsSize();
+           k++) {
+        types::Band band = haptic.getPerceptionAt((int)i).getTrackAt((int)j).getBandAt((int)k);
         if (band.getBandType() == types::BandType::Wave) {
           if (band.getEncodingModality() == types::EncodingModality::Wavelet) {
             WaveletDecoder::transformBand(band);
-            haptic.getPerceptionAt(i).getTrackAt(j).replaceBandAt(k, band);
+            haptic.getPerceptionAt((int)i).getTrackAt((int)j).replaceBandAt((int)k, band);
           }
         }
       }
@@ -84,14 +86,14 @@ namespace haptics::synthesizer {
   }
   std::vector<std::vector<double>> amplitudes;
 
-  int index = 0;
-
-  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    for (int j = 0; j < haptic.getPerceptionAt(i).getTracksSize(); j++) {
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getTracksSize(); j++) {
       double t = 0 - pad * MS_2_S;
       std::vector<double> trackAmp;
+      types::Track myTrack;
       while (t < ((timeLength + pad) * MS_2_S)) {
-        double amp = haptic.getPerceptionAt(i).getTrackAt(j).Evaluate(t * S_2_MS);
+        myTrack = haptic.getPerceptionAt((int)i).getTrackAt((int)j);
+        double amp = myTrack.Evaluate(t * S_2_MS) * myTrack.getGain();
         trackAmp.push_back(amp);
         t += 1.0 / static_cast<double>(fs);
       }
