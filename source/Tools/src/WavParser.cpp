@@ -82,8 +82,16 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
   drwav_init_file_write(&wav, filename.c_str(), &format, nullptr);
   std::vector<uint16_t> b_int;
   b_int.resize(buff.size());
-  std::transform(buff.begin(), buff.end(), b_int.begin(),
-                 [](double v) -> uint16_t { return (uint16_t)(round((v)*SCALING)); });
+  std::transform(buff.begin(), buff.end(), b_int.begin(), [](double v) -> uint16_t {
+    auto v_scaled = (round(v * SCALING));
+    if (v_scaled > SCALING - 1) {
+      return (uint16_t)SCALING - 1;
+    }
+    if (v_scaled < -SCALING) {
+      return (uint16_t)-SCALING;
+    }
+    return (uint16_t)v_scaled;
+  });
   drwav_write_pcm_frames(&wav, b_int.size(), b_int.data());
   drwav_uninit(&wav);
   return true;
@@ -114,7 +122,14 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   for (auto &b : buff) {
 
     for (int i = 0; i < b.size(); i++) {
-      b_int.at((i * buff.size()) + c) = (uint16_t)(round((b.at(i) * SCALING)));
+      auto v = (round(b.at(i) * SCALING));
+      if (v > SCALING - 1) {
+        b_int.at((i * buff.size()) + c) = (uint16_t)SCALING - 1;
+      } else if (v < -SCALING) {
+        b_int.at((i * buff.size()) + c) = (uint16_t)-SCALING;
+      } else {
+        b_int.at((i * buff.size()) + c) = (uint16_t)v;
+      }
     }
     c++;
   }
@@ -135,5 +150,7 @@ auto WavParser::getSamplesChannel(size_t channel) const -> std::vector<double> {
 }
 
 auto WavParser::getAllSamples() const -> std::vector<std::vector<double>> { return buffer; }
+
+auto WavParser::sgn(double val) -> double { return (double)(0 < val) - (double)(val < 0); }
 
 } // namespace haptics::tools

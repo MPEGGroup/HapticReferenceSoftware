@@ -41,7 +41,7 @@
 namespace haptics::tools {
 
 constexpr uint32_t BITS_PER_SAMPLE = 16;
-constexpr double SCALING = 32767;
+constexpr double SCALING = 32768; // 2^15
 
 class WavParser {
 public:
@@ -56,6 +56,8 @@ public:
   [[nodiscard]] auto getAllSamples() const -> std::vector<std::vector<double>>;
 
 private:
+  static auto sgn(double val) -> double;
+
   int sampleRate = 0;
   size_t numChannels = 0;
   size_t numSamples = 0;
