@@ -40,10 +40,6 @@ namespace haptics::types {
 
 auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
-[[nodiscard]] auto Band::getCurveType() const -> CurveType { return curveType; }
-
-auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
-
 [[nodiscard]] auto Band::getEncodingModality() const -> EncodingModality {
   return encodingModality;
 }

@@ -35,7 +35,6 @@
 #define BAND_H
 
 #include <Types/include/BandType.h>
-#include <Types/include/CurveType.h>
 #include <Types/include/Effect.h>
 #include <Types/include/EncodingModality.h>
 #include <vector>
@@ -45,11 +44,9 @@ namespace haptics::types {
 class Band {
 public:
   explicit Band() = default;
-  explicit Band(BandType newBandType, CurveType newCurveType,
-                EncodingModality newEncodingModality, int newWindowLength,
+  explicit Band(BandType newBandType, EncodingModality newEncodingModality, int newWindowLength,
                 int newLowerFrequencyLimit, int newUpperFrequencyLimit)
       : bandType(newBandType)
-      , curveType(newCurveType)
       , encodingModality(newEncodingModality)
       , windowLength(newWindowLength)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
@@ -58,8 +55,6 @@ public:
 
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
-  [[nodiscard]] auto getCurveType() const -> CurveType;
-  auto setCurveType(CurveType newCurveType) -> void;
   [[nodiscard]] auto getEncodingModality() const -> EncodingModality;
   auto setEncodingModality(EncodingModality newEncodingModality) -> void;
   [[nodiscard]] auto getWindowLength() const -> int;
@@ -83,7 +78,6 @@ private:
 
   BandType bandType = BandType::Wave;
   EncodingModality encodingModality = EncodingModality::Quantized;
-  CurveType curveType = CurveType::Cubic;
   int windowLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
