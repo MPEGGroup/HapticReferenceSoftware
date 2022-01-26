@@ -31,16 +31,24 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Types/include/Band.h>
-#include <catch2/catch.hpp>
+#ifndef CURVETYPE_H
+#define CURVETYPE_H
 
-using haptics::types::Band;
-using haptics::types::BandType;
-using haptics::types::CurveType;
-using haptics::types::EncodingModality;
+#include <map>
+#include <string>
 
-TEST_CASE("haptics::types::Band", "[placeholder]") {
-  const Band b(BandType::Wave, CurveType::Cubic, EncodingModality::Quantized, 10, 70, 1000);
+namespace haptics::types {
 
-  CHECK(true);
-}
+enum class CurveType {
+  Unknown = 0,
+  Cubic = 1,
+  Linear = 2,
+};
+
+static const std::map<std::string, CurveType> stringToCurveType = {
+    {"Unknown", CurveType::Unknown}, {"Cubic", CurveType::Cubic}, {"Linear", CurveType::Linear}};
+static const std::map<CurveType, std::string> curveTypeToString = {
+    {CurveType::Unknown, "Unknown"}, {CurveType::Cubic, "Cubic"}, {CurveType::Linear, "Linear"}};
+} // namespace haptics::types
+
+#endif // CURVETYPE_H

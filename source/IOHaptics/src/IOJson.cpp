@@ -155,6 +155,9 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
     if (!jsonBand.contains("band_type") || !jsonBand["band_type"].is_string()) {
       continue;
     }
+    if (!jsonBand.contains("curve_type") || !jsonBand["curve_type"].is_string()) {
+      continue;
+    }
     if (!jsonBand.contains("encoding_modality") || !jsonBand["encoding_modality"].is_string()) {
       continue;
     }
@@ -174,13 +177,14 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
     }
 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
+    types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].get<std::string>());
     types::EncodingModality encodingModality =
         types::stringToModality.at(jsonBand["encoding_modality"]);
     int windowLength = jsonBand["window_length"].get<int>();
     int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();
     int upperLimit = jsonBand["upper_frequency_limit"].get<int>();
 
-    types::Band band(bandType, encodingModality, windowLength, lowerLimit, upperLimit);
+    types::Band band(bandType, curveType, encodingModality, windowLength, lowerLimit, upperLimit);
     auto jsonEffects = jsonBand["effects"];
     loadEffects(jsonEffects, band);
 
@@ -407,6 +411,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       auto band = track.getBandAt((int)l);
       auto jsonBand = json::object();
       jsonBand["band_type"] = types::bandTypeToString.at(band.getBandType());
+      jsonBand["curve_type"] = types::curveTypeToString.at(band.getCurveType());
       jsonBand["encoding_modality"] = types::modalityToString.at(band.getEncodingModality());
       jsonBand["window_length"] = band.getWindowLength();
       jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
