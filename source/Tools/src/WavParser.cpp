@@ -88,7 +88,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
       return (uint16_t)SCALING - 1;
     }
     if (v_scaled < -SCALING) {
-      return (uint16_t)-SCALING;
+      return (uint16_t)-SCALING + 1;
     }
     return (uint16_t)v_scaled;
   });
