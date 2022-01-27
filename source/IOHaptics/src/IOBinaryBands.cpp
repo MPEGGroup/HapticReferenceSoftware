@@ -49,8 +49,8 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::ifstream &file) -> bo
     auto curveType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::Wave &&
-            (band.getEncodingModality() == types::EncodingModality::Quantized ||
-             band.getEncodingModality() == types::EncodingModality::Wavelet)) {
+             (band.getEncodingModality() == types::EncodingModality::Quantized ||
+              band.getEncodingModality() == types::EncodingModality::Wavelet)) {
     auto windowLength = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
     band.setWindowLength(static_cast<int>(windowLength));
   }
@@ -99,8 +99,8 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ofstream &file) -> b
     auto windowLength = static_cast<uint8_t>(band.getCurveType());
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(windowLength, file);
   } else if (band.getBandType() == types::BandType::Wave &&
-            (band.getEncodingModality() == types::EncodingModality::Quantized ||
-             band.getEncodingModality() == types::EncodingModality::Wavelet)) {
+             (band.getEncodingModality() == types::EncodingModality::Quantized ||
+              band.getEncodingModality() == types::EncodingModality::Wavelet)) {
     auto windowLength = static_cast<unsigned int>(band.getWindowLength());
     IOBinaryPrimitives::writeNBytes<unsigned int, 4>(windowLength, file);
   }
