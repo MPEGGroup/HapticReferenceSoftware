@@ -84,7 +84,7 @@ auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
   static double correction = sqrt(2);
   std::transform(
       spect_complex.begin(), spect_complex.end() - (long long)bl, spect_real.begin(),
-      [](std::complex<double> a) { return LOGFACTOR_SPECT * log10(abs(correction * a.real())); });
+      [](std::complex<double> a) { return LOGFACTOR_SPECT * log10(fabs(correction * a.real())); });
 
   std::vector<double> globalmask = globalMaskingThreshold(spect);
   modelResult result;
@@ -92,7 +92,7 @@ auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
   result.bandenergy.resize(book.size());
   std::vector<double> maskenergy(bl, 0);
   int i = 0;
-  for (int b = 0; b < book.size(); b++) {
+  for (uint32_t b = 0; b < book.size(); b++) {
     result.bandenergy[b] = 0;
     maskenergy[b] = 0;
     for (; i < book_cumulative[b + 1]; i++) {
@@ -112,11 +112,11 @@ auto PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect) -> st
   std::vector<double> mask;
   peakMask(p.heights, p.locations, mask);
   if (mask.empty()) {
-    for (int i = 0; i < bl; i++) {
+    for (uint32_t i = 0; i < bl; i++) {
       globalmask[i] = percthres[i]; // percthres is in linear domain
     }
   } else {
-    for (int i = 0; i < bl; i++) {
+    for (uint32_t i = 0; i < bl; i++) {
       globalmask[i] = pow(base, mask.at(i) / factor) + percthres[i]; // percthres is in linear
                                                                      // domain
     }
@@ -127,7 +127,7 @@ auto PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect) -> st
 void PsychohapticModel::perceptualThreshold() {
 
   double temp = a / (pow(log10(b), 2));
-  int i = 0;
+  uint32_t i = 0;
   while (i < bl) {
     percthres[i] = pow(base, (fabs(temp * pow(log10(c * freqs[i] + b), 2)) - e) / factor);
     // limit values at high frequencies
@@ -242,7 +242,7 @@ auto PsychohapticModel::peakProminence(std::vector<double> &spectrum, peaks inpu
     j = j_min;
     double min_val_right = input.heights[i];
     while ((j >= j_min) && (j <= j_max)) {
-      if (input.locations[i] == (int)(j_max)) {
+      if (input.locations[i] == (uint32_t)(j_max)) {
         valley_right[i] = -1;
         break;
       }
@@ -326,7 +326,9 @@ auto PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak
   }
 
   peaks prominences = peakProminence(spectrum, peaks_min_h);
+
   peaks peaks_min_prominence = filterPeakCriterion(prominences, min_peak_prominence);
+
   size_t prominences_length = peaks_min_prominence.heights.size();
 
   peaks result;

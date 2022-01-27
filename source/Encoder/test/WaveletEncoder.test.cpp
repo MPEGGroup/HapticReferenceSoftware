@@ -37,9 +37,9 @@
 #include <vector>
 
 #include "../include/WaveletEncoder.h"
-#include "WaveletDecoder/include/WaveletDecoder.h"
 #include "FilterBank/include/Filterbank.h"
 #include "Tools/include/WavParser.h"
+#include "WaveletDecoder/include/WaveletDecoder.h"
 
 constexpr int val = 3;
 constexpr int bits = 3;
@@ -216,13 +216,13 @@ TEST_CASE("Band transformation") {
     }
     std::cout << "total size: " << size << std::endl;*/
 
-    for (double t = 0; t < 1.0/FS*(BL*2); t += 1.0/FS) {
+    for (double t = 0; t < 1.0 / FS * (BL * 2); t += 1.0 / FS) {
       std::cout << b.Evaluate(t * S_2_MS_TEST, 0, FS) << std::endl;
     }
   }
 }
 
-//test for inspection of the filtered signals
+// test for inspection of the filtered signals
 /* TEST_CASE("haptics::filterbank::Filterbank") {
 
   using haptics::filterbank::Filterbank;

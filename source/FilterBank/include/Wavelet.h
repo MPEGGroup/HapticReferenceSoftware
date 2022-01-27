@@ -34,10 +34,10 @@
 #ifndef WAVELET_H
 #define WAVELET_H
 
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <vector>
-#include <array>
 
 namespace haptics::filterbank {
 
@@ -60,19 +60,20 @@ public:
   void inv_DWT(std::vector<double> &in, int levels, std::vector<double> &out);
 
   template <size_t hSize>
-  static void symconv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out);
+  static void symconv1D(std::vector<double> &in, std::array<double, hSize> &h,
+                        std::vector<double> &out);
   template <size_t hSize>
   static void symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h,
                            std::vector<double> &out);
   template <size_t hSize>
-  static void conv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out);
+  static void conv1D(std::vector<double> &in, std::array<double, hSize> &h,
+                     std::vector<double> &out);
 
 private:
-  std::array<double,LP_SIZE> lp = {LP_4,  LP_3, LP_2, LP_1, LP_0, LP_1, LP_2, LP_3, LP_4};
-  std::array<double,HP_SIZE> hp = {HP_3, HP_2, HP_1, HP_0, HP_1, HP_2, HP_3};
-  std::array<double,HP_SIZE> lpr = {HP_3, -HP_2, HP_1, -HP_0, HP_1, -HP_2, HP_3};
-  std::array<double,LP_SIZE> hpr = {-LP_4,  LP_3, -LP_2, LP_1, -LP_0, LP_1, -LP_2, LP_3, -LP_4};
-
+  std::array<double, LP_SIZE> lp = {LP_4, LP_3, LP_2, LP_1, LP_0, LP_1, LP_2, LP_3, LP_4};
+  std::array<double, HP_SIZE> hp = {HP_3, HP_2, HP_1, HP_0, HP_1, HP_2, HP_3};
+  std::array<double, HP_SIZE> lpr = {HP_3, -HP_2, HP_1, -HP_0, HP_1, -HP_2, HP_3};
+  std::array<double, LP_SIZE> hpr = {-LP_4, LP_3, -LP_2, LP_1, -LP_0, LP_1, -LP_2, LP_3, -LP_4};
 };
 } // namespace haptics::filterbank
 #endif // WAVELET_H

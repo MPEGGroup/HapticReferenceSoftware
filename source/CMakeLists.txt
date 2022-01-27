@@ -10,6 +10,7 @@ add_subdirectory("FilterBank")
 add_subdirectory("PsychohapticModel")
 add_subdirectory("Spiht")
 add_subdirectory("WaveletDecoder")
+add_subdirectory("IOHaptics")
 
 if(BUILD_DECODER)
     add_subdirectory("Decoder")

@@ -31,13 +31,13 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Types/include/Perception.h>
+#include <catch2/catch.hpp>
 
 TEST_CASE("haptics::types::Perception") {
-using haptics::types::Perception;
-using haptics::types::PerceptionModality;
-const Perception h(0, 0, "Some perception test content", PerceptionModality::Temperature);
-// TODO : some tests
-CHECK(true);
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  const Perception h(0, 0, "Some perception test content", PerceptionModality::Temperature);
+  // TODO : some tests
+  CHECK(true);
 }

@@ -34,16 +34,15 @@
 #ifndef WAVELETDECODER_H
 #define WAVELETDECODER_H
 
-#include <cmath>
-#include <vector>
-#include <optional>
 #include <algorithm>
+#include <cmath>
+#include <optional>
+#include <vector>
 
 #include "FilterBank/include/Wavelet.h"
 #include "Types/include/Band.h"
 #include "Types/include/Effect.h"
 #include "Types/include/Keyframe.h"
-
 
 using haptics::filterbank::Wavelet;
 using haptics::types::Band;
@@ -57,19 +56,13 @@ constexpr double MS_2_S_WAVELET = 0.001;
 
 class WaveletDecoder {
 public:
-
   auto static decodeBand(Band &band) -> std::vector<double>;
   void static transformBand(Band &band);
-  auto static decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl) -> std::vector<double>;
-
+  auto static decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl)
+      -> std::vector<double>;
 
 private:
-  int bl;
-  int fs;
-  int dwtlevel;
-
   std::vector<double> sig_rec;
-
 };
 } // namespace haptics::waveletdecoder
 #endif // WAVELETDECODER_H

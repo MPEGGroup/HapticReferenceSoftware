@@ -31,10 +31,10 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
-#include <Types/include/Track.h>
 #include <Types/include/Band.h>
 #include <Types/include/Effect.h>
+#include <Types/include/Track.h>
+#include <catch2/catch.hpp>
 
 const int id = -1;
 const std::string desctription = "placeholder";
@@ -43,7 +43,6 @@ const float mixingWeight = .5;
 const int bodypartMask = 42;
 const int lowF = 0;
 const int highF = 1000;
-
 
 TEST_CASE("Track::findWaveBandAvailable without band", "[findWaveBandAvailable][empty]") {
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
@@ -138,7 +137,7 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
 
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   haptics::types::Band b1(haptics::types::BandType::Wave,
-                         haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
   haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle);
   haptics::types::Keyframe kf1(0, 1.0, 0);
   haptics::types::Keyframe kf2(effect1Size, 1.0, effect1F);
@@ -171,8 +170,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   REQUIRE(res != nullptr);
   CHECK(res == &t.getBandAt(1));
   haptics::types::Effect e;
-  for (int i = 0; i < res->getEffectsSize(); i++) {
-    e = res->getEffectAt(i);
+  for (uint32_t i = 0; i < res->getEffectsSize(); i++) {
+    e = res->getEffectAt((int)i);
     REQUIRE_FALSE(res->isOverlapping(e, testingPosition, testingPosition + testingDuration));
   }
 }
