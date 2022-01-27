@@ -38,19 +38,19 @@
 #include <list>
 #include <vector>
 
-#include <Spiht/include/Spiht_Enc.h>
 #include <Spiht/include/ArithDec.h>
+#include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Effect.h>
 
 namespace haptics::spiht {
 
-//constexpr size_t WAVMAX_SIZE = 8;
+// constexpr size_t WAVMAX_SIZE = 8;
 
 class Spiht_Dec {
 public:
-  void decodeEffect(std::vector<char> &in, Effect &effect, int origlength);
-  void decode(std::vector<char> &bitstream, std::vector<int> &out, int origlength, int level,
-              double &wavmax, int &n_real);
+  void decodeEffect(std::vector<unsigned char> &in, Effect &effect, int origlength);
+  void decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
+              int level, double &wavmax, int &n_real);
 
 private:
   void initLists(int origlength, int level);

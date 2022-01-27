@@ -34,6 +34,8 @@
 #ifndef IOBINARYBANDS_H
 #define IOBINARYBANDS_H
 
+#include <Spiht/include/Spiht_Dec.h>
+#include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Band.h>
 
 namespace haptics::io {
@@ -51,13 +53,13 @@ private:
   static auto readCurveBandBody(types::Band &band, std::ifstream &file) -> bool;
   static auto readVectorialBandBody(types::Band &band, std::ifstream &file) -> bool;
   static auto readQuantizedBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readWaveletBandBody() -> bool;
+  static auto readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool;
 
   static auto writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool;
   static auto writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool;
   static auto writeVectorialBandBody(types::Band &band, std::ofstream &file) -> bool;
   static auto writeQuantizedBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeWaveletBandBody() -> bool;
+  static auto writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool;
 };
 } // namespace haptics::io
 #endif // IOBINARYBANDS_H

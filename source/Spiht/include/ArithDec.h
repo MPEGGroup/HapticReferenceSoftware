@@ -47,11 +47,11 @@ constexpr int DIGITS = 10;
 
 class ArithDec {
 public:
-  void initDecoding(std::vector<char> &instream);
+  void initDecoding(std::vector<unsigned char> &instream);
   auto decode(int context) -> int;
 
   void resetCounter();
-  void static convert2bits(std::vector<char> &in, std::vector<char> &out);
+  void static convert2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out);
 
 private:
   void rescaleCounter();
@@ -60,7 +60,7 @@ private:
                                            RESET_HALF, RESET_HALF, RESET_HALF};
   std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
                                                  RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
-  std::vector<char> instream;
+  std::vector<unsigned char> instream;
 
   size_t in_index = 0;
   size_t max_index = 0;

@@ -71,9 +71,9 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     Spiht_Enc enc;
     std::vector<int> signal(bl, 0);
     signal.at(bl / 2) = 1;
-    std::vector<char> bitwavmax(haptics::spiht::WAVMAXLENGTH, 0);
+    std::vector<unsigned char> bitwavmax(haptics::spiht::WAVMAXLENGTH, 0);
     bitwavmax.at(0) = 1;
-    std::vector<char> outstream;
+    std::vector<unsigned char> outstream;
     std::vector<int> context;
     enc.encode(signal, level, bitwavmax, 1, outstream, context);
   }
@@ -84,13 +84,13 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     signal.at(bl / 2) = 1;
     signal.at(0) = 4;
     signal.at(3) = 3;
-    std::vector<char> bitwavmax(haptics::spiht::WAVMAXLENGTH, 0);
+    std::vector<unsigned char> bitwavmax(haptics::spiht::WAVMAXLENGTH, 0);
     bitwavmax.at(0) = 1;
-    std::vector<char> stream_spiht;
+    std::vector<unsigned char> stream_spiht;
     std::vector<int> context;
     enc.encode(signal, level, bitwavmax, 4, stream_spiht, context);
     ArithEnc arithEnc;
-    std::vector<char> outstream_arithmetic;
+    std::vector<unsigned char> outstream_arithmetic;
     arithEnc.encode(stream_spiht, context, outstream_arithmetic);
 
     Spiht_Dec dec;
@@ -133,7 +133,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     effect_in.addKeyframe(keyframe);
     Keyframe keyframeBits(bl + 1, (float)BITS_EFFECT, 0);
     effect_in.addKeyframe(keyframeBits);
-    std::vector<char> stream_enc;
+    std::vector<unsigned char> stream_enc;
     enc.encodeEffect(effect_in, stream_enc);
 
     Spiht_Dec dec;

@@ -35,7 +35,7 @@
 
 namespace haptics::spiht {
 
-void ArithDec::initDecoding(std::vector<char> &instream) {
+void ArithDec::initDecoding(std::vector<unsigned char> &instream) {
   this->instream = instream;
   in_index = 0;
   max_index = instream.size() - 1;
@@ -145,7 +145,7 @@ void ArithDec::rescaleCounter() {
   }
 }
 
-void ArithDec::convert2bits(std::vector<char> &in, std::vector<char> &out) {
+void ArithDec::convert2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) {
   out.resize(in.size() * BYTE_SIZE);
   int index = 0;
   for (auto &v : in) {
@@ -158,6 +158,5 @@ void ArithDec::convert2bits(std::vector<char> &in, std::vector<char> &out) {
     }
   }
 }
-
 
 } // namespace haptics::spiht

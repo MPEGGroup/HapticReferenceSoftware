@@ -35,10 +35,9 @@
 #define ARITHENC_H
 
 #include <array>
+#include <bitset>
 #include <iostream>
 #include <vector>
-#include <bitset>
-
 
 namespace haptics::spiht {
 
@@ -54,14 +53,14 @@ constexpr int BYTE_SIZE = 8;
 
 class ArithEnc {
 public:
-  void ArithEnc::encode(std::vector<char> &instream, std::vector<int> &context,
-                        std::vector<char> &outstream);
+  void ArithEnc::encode(std::vector<unsigned char> &instream, std::vector<int> &context,
+                        std::vector<unsigned char> &outstream);
 
   void resetCounter();
-  void static convert2bytes(std::vector<char> &in, std::vector<char> &out);
+  void static convert2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out);
 
 private:
-  void static remainder(int bits_to_follow, std::vector<char> &outstream, int range_lower,
+  void static remainder(int bits_to_follow, std::vector<unsigned char> &outstream, int range_lower,
                         int range_upper);
 
   void rescaleCounter();
@@ -71,10 +70,8 @@ private:
   std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
                                                  RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
 
-  std::array<int, BYTE_SIZE> masks = {0b00000001, 0b00000010, 0b00000100,
-                                       0b00001000, 0b00010000, 0b00100000,
-                                       0b01000000, 0b10000000};
-
+  std::array<int, BYTE_SIZE> masks = {0b00000001, 0b00000010, 0b00000100, 0b00001000,
+                                      0b00010000, 0b00100000, 0b01000000, 0b10000000};
 };
 } // namespace haptics::spiht
 #endif // ARITHENC_H

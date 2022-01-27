@@ -35,8 +35,8 @@
 
 namespace haptics::spiht {
 
-void Spiht_Dec::decodeEffect(std::vector<char> &in, Effect &effect, int origlength) {
-  std::vector<char> in_bits;
+void Spiht_Dec::decodeEffect(std::vector<unsigned char> &in, Effect &effect, int origlength) {
+  std::vector<unsigned char> in_bits;
   ArithDec::convert2bits(in, in_bits);
   std::vector<int> out;
   auto level = (int)(log2((double)origlength) - 2);
@@ -57,7 +57,7 @@ void Spiht_Dec::decodeEffect(std::vector<char> &in, Effect &effect, int origleng
   effect.addKeyframe(keyframeBits);
 }
 
-void Spiht_Dec::decode(std::vector<char> &bitstream, std::vector<int> &out, int origlength,
+void Spiht_Dec::decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
                        int level, double &wavmax, int &n_real) {
 
   arithDec.initDecoding(bitstream);

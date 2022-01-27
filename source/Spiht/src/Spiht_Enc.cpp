@@ -35,7 +35,7 @@
 
 namespace haptics::spiht {
 
-void Spiht_Enc::encodeEffect(Effect &effect, std::vector<char> &outstream) {
+void Spiht_Enc::encodeEffect(Effect &effect, std::vector<unsigned char> &outstream) {
   auto bl = (int)effect.getKeyframesSize() - 2;
   double scalar = effect.getKeyframeAt(bl).getAmplitudeModulation().value();
   auto bits = (int)effect.getKeyframeAt(bl + 1).getAmplitudeModulation().value();
@@ -46,20 +46,21 @@ void Spiht_Enc::encodeEffect(Effect &effect, std::vector<char> &outstream) {
     v = (int)((double)effect.getKeyframeAt(index).getAmplitudeModulation().value() * multiplier);
     index++;
   }
-  std::vector<char> bitwavmax;
+  std::vector<unsigned char> bitwavmax;
   maximumWaveletCoefficient(scalar, bitwavmax);
   auto level = (int)(log2((double)bl) - 2);
   std::vector<int> context;
-  std::vector<char> stream_spiht;
+  std::vector<unsigned char> stream_spiht;
   encode(block, level, bitwavmax, bits, stream_spiht, context);
   ArithEnc arithEnc;
-  std::vector<char> stream_arithmetic;
+  std::vector<unsigned char> stream_arithmetic;
   arithEnc.encode(stream_spiht, context, stream_arithmetic);
   ArithEnc::convert2bytes(stream_arithmetic, outstream);
 }
 
-void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<char> &bitwavmax,
-                       int maxallocbits, std::vector<char> &outstream, std::vector<int> &context) {
+void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
+                       int maxallocbits, std::vector<unsigned char> &outstream,
+                       std::vector<int> &context) {
 
   outstream.reserve(outstream.size() + BUFFER_SIZE);
   context.reserve(context.size() + BUFFER_SIZE);
@@ -176,20 +177,20 @@ void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<char> 
 }
 
 void Spiht_Enc::refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,
-                               std::vector<char> &outstream, std::vector<int> &context) {
+                               std::vector<unsigned char> &outstream, std::vector<int> &context) {
   auto it = LSP.begin();
   int temp = 0;
   while (temp < LSP_index) {
 
     int s = bitget((int)floor(fabs(data[*it])), n + 1);
-    outstream.push_back((char)s);
+    outstream.push_back((unsigned char)s);
     context.push_back(CONTEXT_6);
     temp++;
     it++;
   }
 }
 
-void Spiht_Enc::addToOutput(char bit, int c, std::vector<char> &outstream,
+void Spiht_Enc::addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream,
                             std::vector<int> &context) {
   outstream.push_back(bit);
   context.push_back(c);
@@ -271,7 +272,7 @@ void Spiht_Enc::initMaxDescendants(std::vector<int> &signal) {
   }
 }
 
-void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<char> &bitwavmax) {
+void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax) {
 
   int integerpart = 0;
   char mode = 0;
@@ -293,7 +294,7 @@ void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<char> &bit
         m.integerbits + m.fractionbits);
 }
 
-void Spiht_Enc::de2bi(int val, std::vector<char> &outstream, int length) {
+void Spiht_Enc::de2bi(int val, std::vector<unsigned char> &outstream, int length) {
   int n = length;
   while (n > 0) {
     outstream.push_back((char)(val % 2));

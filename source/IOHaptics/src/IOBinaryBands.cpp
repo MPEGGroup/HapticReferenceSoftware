@@ -136,7 +136,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file) -> bool
     case types::EncodingModality::Quantized:
       return IOBinaryBands::readQuantizedBandBody(band, file);
     case types::EncodingModality::Wavelet:
-      return IOBinaryBands::readWaveletBandBody();
+      return IOBinaryBands::readWaveletBandBody(band, file);
     default:
       return true;
     }
@@ -158,7 +158,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
     case types::EncodingModality::Quantized:
       return IOBinaryBands::writeQuantizedBandBody(band, file);
     case types::EncodingModality::Wavelet:
-      return IOBinaryBands::writeWaveletBandBody();
+      return IOBinaryBands::writeWaveletBandBody(band, file);
     default:
       return true;
     }
@@ -453,13 +453,38 @@ auto IOBinaryBands::writeQuantizedBandBody(types::Band &band, std::ofstream &fil
   return true;
 }
 
-auto IOBinaryBands::readWaveletBandBody() -> bool {
-  // TODO : this is a placeholder for the Wavelet binary compression
+auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool {
+  spiht::Spiht_Dec dec;
+  auto effects_size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+  auto blocklength = IOBinaryPrimitives::readNBytes<uint16_t, 1>(file);
+  band.setWindowLength(blocklength);
+  for (uint16_t i = 0; i < effects_size; i++) {
+    std::vector<unsigned char> instream;
+    instream.resize(IOBinaryPrimitives::readNBytes<uint16_t, 2>(file));
+    for (auto &b : instream) {
+      b = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
+    }
+    types::Effect effect;
+    dec.decodeEffect(instream, effect, (int)blocklength);
+    band.addEffect(effect);
+  }
   return true;
 }
 
-auto IOBinaryBands::writeWaveletBandBody() -> bool {
-  // TODO : this is a placeholder for the Wavelet binary compression
+auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool {
+  spiht::Spiht_Enc enc;
+  auto effects_size = (uint16_t)band.getEffectsSize();
+  IOBinaryPrimitives::writeNBytes<uint16_t, 2>(effects_size, file);
+  int blocklength = band.getWindowLength();
+  IOBinaryPrimitives::writeNBytes<int, 1>(blocklength, file);
+  for (uint16_t i = 0; i < (uint16_t)band.getEffectsSize(); i++) {
+    std::vector<unsigned char> outstream;
+    enc.encodeEffect(band.getEffectAt(i), outstream);
+    IOBinaryPrimitives::writeNBytes<uint16_t, 2>((uint16_t)outstream.size(), file);
+    for (auto &b : outstream) {
+      IOBinaryPrimitives::writeNBytes<unsigned char, 1>(b, file);
+    }
+  }
   return true;
 }
 } // namespace haptics::io

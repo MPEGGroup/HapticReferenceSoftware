@@ -35,8 +35,8 @@
 
 namespace haptics::spiht {
 
-void ArithEnc::encode(std::vector<char> &instream, std::vector<int> &context,
-                      std::vector<char> &outstream) {
+void ArithEnc::encode(std::vector<unsigned char> &instream, std::vector<int> &context,
+                      std::vector<unsigned char> &outstream) {
 
   // init loop variables
   int range_lower = 0;
@@ -46,7 +46,7 @@ void ArithEnc::encode(std::vector<char> &instream, std::vector<int> &context,
   int new_symbol = 0;
   int c = 0;
   int range_add = 0;
-  outstream.reserve(instream.size() * 2); //reserve memory with a little buffer
+  outstream.reserve(instream.size() * 2); // reserve memory with a little buffer
 
   for (int i = 0; i < instream.size(); i++) {
 
@@ -127,7 +127,7 @@ void ArithEnc::encode(std::vector<char> &instream, std::vector<int> &context,
   outstream.resize(index_end + 1);
 }
 
-void ArithEnc::remainder(int bits_to_follow, std::vector<char> &outstream, int range_lower,
+void ArithEnc::remainder(int bits_to_follow, std::vector<unsigned char> &outstream, int range_lower,
                          int range_upper) {
   if (bits_to_follow > 0) {
     // if bits_to_follow is not reset to 0, setting the LSB of the output to 1
@@ -165,10 +165,10 @@ void ArithEnc::rescaleCounter() {
   }
 }
 
-void ArithEnc::convert2bytes(std::vector<char> &in, std::vector<char> &out) {
-  out.resize(ceil((double)in.size()/BYTE_SIZE));
+void ArithEnc::convert2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) {
+  out.resize(ceil((double)in.size() / BYTE_SIZE));
   int index = 0;
-  for (auto &v: out) {
+  for (auto &v : out) {
     std::bitset<BYTE_SIZE> temp;
     for (int j = 0; j < BYTE_SIZE; j++) {
       if (index >= in.size()) {
@@ -179,7 +179,7 @@ void ArithEnc::convert2bytes(std::vector<char> &in, std::vector<char> &out) {
       }
       index++;
     }
-    v = (char)temp.to_ulong();
+    v = (unsigned char)temp.to_ulong();
   }
 }
 
