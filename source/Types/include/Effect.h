@@ -35,6 +35,7 @@
 #define EFFECT_H
 
 #include <Types/include/BandType.h>
+#include <Types/include/CurveType.h>
 #include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
 #include <map>
@@ -88,7 +89,7 @@ public:
   auto EvaluateQuantized(double position, double windowLength) -> double;
   auto EvaluateWavelet(double position, double windowLength) -> double;
   auto EvaluateTransient(double position, double transientDuration) -> double;
-  auto EvaluateKeyframes(double position) -> double;
+  auto EvaluateKeyframes(double position, types::CurveType curveType) -> double;
 
 private:
   int position = 0;

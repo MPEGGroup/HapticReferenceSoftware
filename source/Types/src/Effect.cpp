@@ -276,7 +276,7 @@ auto Effect::EvaluateTransient(double position, double transientDuration) -> dou
   return res;
 }
 
-auto Effect::EvaluateKeyframes(double position) -> double {
+auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> double {
   double res = 0;
   auto k_after =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
@@ -301,27 +301,22 @@ auto Effect::EvaluateKeyframes(double position) -> double {
       return k_after->getAmplitudeModulation().value();
     }
 
-    double x0 = MS_2_S * k_before->getRelativePosition().value();
+    double t0 = MS_2_S * k_before->getRelativePosition().value();
     double f0 = k_before->getAmplitudeModulation().value();
-    double t0 = 0;
-    double x1 = MS_2_S * k_after->getRelativePosition().value();
+    double t1 = MS_2_S * k_after->getRelativePosition().value();
     double f1 = k_after->getAmplitudeModulation().value();
-    double t1 = 0;
 
     double t = MS_2_S * position;
-
-    double c2 = 0;
-    double c3 = 0;
-    double df = 0;
-    double h = 0;
-    h = x1 - x0;
-    df = (f1 - f0) / h;
-
-    c2 = -(2 * t0 - 3 * df + t1) / h;
-    c3 = (t0 - 2 * df + t1) / h / h;
-
-    auto result = static_cast<float>(f0 + (t - x0) * (t0 + (t - x0) * (c2 + (t - x0) * c3)));
-    return std::max(std::min(1.0F, result), -1.0F);
+    switch (curveType) {
+    case types::CurveType::Cubic: {
+      double h = t1 - t0;
+      return f0 + (f1 - f0) * (3 * h + 2 * (t0 - t)) * std::pow(t - t0, 2) / std::pow(h, 3);
+    }
+    case types::CurveType::Linear:
+      return (f0 * (t1 - t) + f1 * (t - t0)) / (t1 - t0);
+    default:
+      return 0;
+    }
   }
 
   return res;

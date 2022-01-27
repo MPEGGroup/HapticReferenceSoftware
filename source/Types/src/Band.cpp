@@ -132,7 +132,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position);
+    return effect->EvaluateKeyframes(position, this->getCurveType());
   case BandType::Wave:
     if (encodingModality == EncodingModality::Quantized) {
       return effect->EvaluateQuantized(position, this->getWindowLength());
