@@ -34,6 +34,7 @@
 #include <Encoder/include/PcmEncoder.h>
 #include <Encoder/include/WaveletEncoder.h>
 #include <Tools/include/Tools.h>
+#include <Types/include/CurveType.h>
 
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
@@ -42,6 +43,7 @@ using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::BaseSignal;
+using haptics::types::CurveType;
 using haptics::types::Effect;
 using haptics::types::EncodingModality;
 using haptics::types::Keyframe;
@@ -120,6 +122,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   }
 
   out->setBandType(BandType::Curve);
+  out->setCurveType(CurveType::Cubic);
   out->setEncodingModality(EncodingModality::Quantized);
   out->setWindowLength(0);
   out->setLowerFrequencyLimit(0);
