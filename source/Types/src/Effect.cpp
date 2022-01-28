@@ -203,6 +203,8 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
       freq_modulation = tools::chirpInterpolation(t0, t1, f0, f1, relativePosition);
       freq_modulation = std::clamp(freq_modulation, static_cast<double>(lowFrequencyLimit),
                                    static_cast<double>(highFrequencyLimit));
+      // To replace the evaluated relative position in the range [0; t1-t0], this will prevent unexpected behaviours on the chirp evaluation
+      relativePosition -= t0;
     }
   } else {
     auto frequencyKeyframeIt =
