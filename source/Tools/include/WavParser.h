@@ -41,7 +41,8 @@
 namespace haptics::tools {
 
 constexpr uint32_t BITS_PER_SAMPLE = 16;
-constexpr double SCALING = 32768; // 2^15
+constexpr double SCALING = 32768;   // 2^15
+constexpr uint16_t NEG_MAX = 32768; // 2^15
 
 class WavParser {
 public:

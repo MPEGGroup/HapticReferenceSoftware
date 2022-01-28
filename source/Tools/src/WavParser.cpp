@@ -88,7 +88,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
       return (uint16_t)SCALING - 1;
     }
     if (v_scaled < -SCALING) {
-      return (uint16_t)-SCALING + 1;
+      return NEG_MAX;
     }
     return (uint16_t)v_scaled;
   });
@@ -124,7 +124,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
       if (v > SCALING - 1) {
         b_int.at((i * buff.size()) + c) = (uint16_t)SCALING - 1;
       } else if (v < -SCALING) {
-        b_int.at((i * buff.size()) + c) = (uint16_t)-SCALING;
+        b_int.at((i * buff.size()) + c) = NEG_MAX;
       } else {
         b_int.at((i * buff.size()) + c) = (uint16_t)v;
       }
