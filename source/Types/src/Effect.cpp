@@ -190,7 +190,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
         int deltaT =
             pos - (firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
                        ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
-                                : 0);
+                       : 0);
         phi += M_PI * deltaT * MS_2_S *
                (firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value() +
                 firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
@@ -205,7 +205,8 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   if (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
     if (firstFrequencyKeyframeBeforePositionIt == keyframes.rend()) {
-      freq_modulation = static_cast<double>(firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
+      freq_modulation = static_cast<double>(
+          firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
     } else {
       double f0 = static_cast<double>(
           firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value());
@@ -353,7 +354,8 @@ auto Effect::EvaluateKeyframes(double position) -> double {
   return res;
 }
 
-[[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency, double phase) const -> double {
+[[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency, double phase) const
+    -> double {
   const double half = .5;
   const double quarter = .25;
 
