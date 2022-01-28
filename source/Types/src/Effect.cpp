@@ -143,23 +143,19 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
                k.getRelativePosition().value() >= relativePosition;
       });
   if (firstAmplitudeKeyframeAfterPositionIt < keyframes.end()) {
-    float firstAmplitudeAfterPosition =
-        firstAmplitudeKeyframeAfterPositionIt->getAmplitudeModulation().value();
-    int firstRelativePositionAfterPosition =
-        firstAmplitudeKeyframeAfterPositionIt->getRelativePosition().value();
     // First amplitude keyframe before the keyframe previously found
     auto firstAmplitudeKeyframeBeforePositionIt = std::find_if(
         std::make_reverse_iterator(firstAmplitudeKeyframeAfterPositionIt), keyframes.rend(),
         [](haptics::types::Keyframe k) { return k.getAmplitudeModulation().has_value(); });
     if (firstAmplitudeKeyframeBeforePositionIt == keyframes.rend()) {
-      amp_modulation = firstAmplitudeAfterPosition;
+      amp_modulation = firstAmplitudeKeyframeAfterPositionIt->getAmplitudeModulation().value();
     } else {
       float a0 = firstAmplitudeKeyframeBeforePositionIt->getAmplitudeModulation().value();
       int t0 = firstAmplitudeKeyframeBeforePositionIt->getRelativePosition().has_value()
                    ? firstAmplitudeKeyframeBeforePositionIt->getRelativePosition().value()
                    : 0;
-      float a1 = firstAmplitudeAfterPosition;
-      int t1 = firstRelativePositionAfterPosition;
+      float a1 = firstAmplitudeKeyframeAfterPositionIt->getAmplitudeModulation().value();
+      int t1 = firstAmplitudeKeyframeAfterPositionIt->getRelativePosition().value();
       amp_modulation = haptics::tools::linearInterpolation({t0, a0}, {t1, a1}, relativePosition);
     }
   } else {
@@ -174,31 +170,53 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   // FREQUENCY MODULATION
   double freq_modulation = 0;
+  double phi = this->getPhase();
   // First frequency keyframe after the relative position
-  auto firstFrequencyKeyframeAfterPositionIt = std::find_if(
-      keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
-        return k.getFrequencyModulation().has_value() && k.getRelativePosition().has_value() &&
-               k.getRelativePosition().value() >= relativePosition;
-      });
-  if (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
-    int firstFrequencyAfterPosition =
-        firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value();
-    int firstRelativePositionAfterPosition =
-        firstFrequencyKeyframeAfterPositionIt->getRelativePosition().value();
-    // First frequency keyframe before the keyframe previously found
-    auto firstFrequencyKeyframeBeforePositionIt = std::find_if(
-        std::make_reverse_iterator(firstFrequencyKeyframeAfterPositionIt), keyframes.rend(),
-        [](haptics::types::Keyframe k) { return k.getFrequencyModulation().has_value(); });
+  // Find phase corresponding to this keyframe
+  auto firstFrequencyKeyframeAfterPositionIt = keyframes.begin();
+  auto firstFrequencyKeyframeBeforePositionIt = keyframes.rend();
+  while (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
+    if (firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().has_value()) {
+      int pos = firstFrequencyKeyframeAfterPositionIt->getRelativePosition().has_value()
+                    ? firstFrequencyKeyframeAfterPositionIt->getRelativePosition().value()
+                    : 0;
+      firstFrequencyKeyframeBeforePositionIt = std::find_if(
+          std::make_reverse_iterator(firstFrequencyKeyframeAfterPositionIt), keyframes.rend(),
+          [](haptics::types::Keyframe k) { return k.getFrequencyModulation().has_value(); });
+      if (pos >= relativePosition) {
+        break;
+      }
+      if (firstFrequencyKeyframeBeforePositionIt < keyframes.rend()) {
+        int deltaT =
+            pos - (firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
+                       ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
+                                : 0);
+        phi += M_PI * deltaT * MS_2_S *
+               (firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value() +
+                firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
+      } else if (pos > 0) { // first keyframe with frequency value
+        phi += 2 * M_PI * pos * MS_2_S *
+               firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value();
+      }
+    }
 
+    firstFrequencyKeyframeAfterPositionIt++;
+  }
+
+  if (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
     if (firstFrequencyKeyframeBeforePositionIt == keyframes.rend()) {
-      freq_modulation = static_cast<double>(firstFrequencyAfterPosition);
+      freq_modulation = static_cast<double>(firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
     } else {
-      double f0 = firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value();
+      double f0 = static_cast<double>(
+          firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value());
       int t0 = firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
                    ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
                    : 0;
-      auto f1 = static_cast<double>(firstFrequencyAfterPosition);
-      int t1 = firstRelativePositionAfterPosition;
+      auto f1 = static_cast<double>(
+          firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
+      int t1 = firstFrequencyKeyframeAfterPositionIt->getRelativePosition().has_value()
+                   ? firstFrequencyKeyframeAfterPositionIt->getRelativePosition().value()
+                   : 0;
 
       freq_modulation = tools::chirpInterpolation(t0, t1, f0, f1, relativePosition);
       freq_modulation = std::clamp(freq_modulation, static_cast<double>(lowFrequencyLimit),
@@ -217,7 +235,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     }
   }
 
-  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation);
+  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
 }
 
 auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
@@ -335,25 +353,23 @@ auto Effect::EvaluateKeyframes(double position) -> double {
   return res;
 }
 
-[[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency) const -> double {
+[[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency, double phase) const -> double {
   const double half = .5;
   const double quarter = .25;
 
-  double phi = this->getPhase();
+  if (frequency != 0) {
+    time += phase / (2 * M_PI * frequency);
+  }
   switch (this->getBaseSignal()) {
   case BaseSignal::Sine:
-    return std::sin(2 * M_PI * time * frequency + phi);
+    return std::sin(2 * M_PI * time * frequency);
   case BaseSignal::Square:
-    time += phi / (2 * M_PI * frequency);
     return 1 - 2 * std::round(time * frequency - std::floor(time * frequency));
   case BaseSignal::Triangle:
-    time += phi / (2 * M_PI * frequency);
     return 1 - 4 * std::abs(std::round(time * frequency - quarter) - (time * frequency - quarter));
   case BaseSignal::SawToothUp:
-    time += phi / (2 * M_PI * frequency);
     return 2 * (time * frequency - std::floor(time * frequency + half));
   case BaseSignal::SawToothDown:
-    time += phi / (2 * M_PI * frequency);
     return 2 * (std::floor(time * frequency + half) - time * frequency);
   default:
     return 1;
