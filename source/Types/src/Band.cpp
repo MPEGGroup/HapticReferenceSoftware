@@ -40,6 +40,10 @@ namespace haptics::types {
 
 auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
+[[nodiscard]] auto Band::getCurveType() const -> CurveType { return curveType; }
+
+auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
+
 [[nodiscard]] auto Band::getEncodingModality() const -> EncodingModality {
   return encodingModality;
 }
@@ -128,7 +132,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position);
+    return effect->EvaluateKeyframes(position, this->getCurveType());
   case BandType::Wave:
     if (encodingModality == EncodingModality::Quantized) {
       return effect->EvaluateQuantized(position, this->getWindowLength());
