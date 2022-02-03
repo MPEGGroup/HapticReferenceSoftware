@@ -1,0 +1,24 @@
+PSNR:
+  stage: test
+  image: gcc-cmake-python:RM0
+  tags: [linux]
+  before_script:
+    - export CXX=/usr/bin/g++-10
+    - export CC=/usr/bin/gcc-10
+  script:
+    - mkdir -p build && cd build
+    - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=~/install ..
+    - make -j
+    - make install
+    - cd ..
+    - mkdir reports
+    - python3 ./scripts/tools/download_data.py --data_dir ~/data --ftp_info /opt/mpeg_ftp.json
+    - python3 ./scripts/tools/check_data.py --data_dir ~/data --md5 ./test/list_files.md5
+    - pytest-3 ./scripts/test/integration_tests.py --autopad --install_dir ~/install/ --data_dir ~/data/Test/Test1-1 --junitxml=reports/report.xml -o junit_family="xunit1" -n auto --csv reports/report.csv --csv-columns host,system,python_version,function,status,success,duration,properties_as_columns
+  artifacts:
+    when: always
+    reports:
+      junit: reports/report.xml
+    paths:
+      - ./reports
+    expire_in: 1 week
