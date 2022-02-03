@@ -34,7 +34,9 @@
 
 import os
 from pathlib import Path
-import sys
+import pytest
+import json
+
 
 def pytest_addoption(parser):
     parser.addoption('--autopad', help='turns on automatic padding, \
@@ -43,15 +45,22 @@ def pytest_addoption(parser):
                      action="store_true")
     parser.addoption("--install_dir", help="RM0 installation directory", required=True)
     parser.addoption("--data_dir", help="Data directory (from mpegcontent repo)", required=True)
+    parser.addoption("--psnr_ref", help="PSNR references file. All PSNR computed if not provided.")
 
 def pytest_generate_tests(metafunc):
     install_dir = metafunc.config.getoption("install_dir")
     data_dir = metafunc.config.getoption("data_dir")
+    psnr_ref = metafunc.config.getoption("psnr_ref")
 
     if not os.path.exists(install_dir):
-        sys.exit("Installation directory " + install_dir+" does not exist.")
+        pytest.exit("Installation directory " + install_dir+" does not exist.")
     if not os.path.exists(data_dir):
-        sys.exit("Data directory " + data_dir+" does not exist.")
+        pytest.exit("Data directory " + data_dir+" does not exist.")
+    if psnr_ref is not None:
+        if not os.path.exists(psnr_ref):
+            pytest.exit("PSNR reference file does not exist.")
+        else:
+            data_json = json.load(open(psnr_ref, 'r'))
 
     if "autopad" in metafunc.fixturenames:
         if metafunc.config.getoption("autopad"):
@@ -64,8 +73,18 @@ def pytest_generate_tests(metafunc):
 
     list_wav_files = []
     for path in Path(data_dir).rglob('*.wav'):
-        # cast to str because Path object is not serializable
-        list_wav_files.append(str(path))
+        #filter out Rendered files
+        if '/Rendered/' in str(path):
+            continue
+
+        if psnr_ref is not None:
+            for list_files in data_json:
+                if path.name in data_json[list_files]:
+                    # cast to str because Path object is not serializable
+                    list_wav_files.append([str(path), data_json[list_files][path.name]])
+                    break
+        else:
+            list_wav_files.append([str(path), None])
 
     if "encoder" in metafunc.fixturenames:
         metafunc.parametrize("encoder", [encoder_path])
@@ -73,5 +92,5 @@ def pytest_generate_tests(metafunc):
     if "synthesizer" in metafunc.fixturenames:
         metafunc.parametrize("synthesizer", [synthesizer_path])
 
-    if "wav_file" in metafunc.fixturenames:
-        metafunc.parametrize("wav_file", list_wav_files)
+    if "wav_file_psnr" in metafunc.fixturenames:
+        metafunc.parametrize("wav_file_psnr", list_wav_files)

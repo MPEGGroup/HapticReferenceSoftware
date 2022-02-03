@@ -39,28 +39,32 @@ import os
 from psnr import psnr_two_files
 import time
 
-def test_psnrs(encoder, synthesizer, wav_file, autopad, record_property):
-    record_property("file", wav_file)
+
+def test_psnrs(encoder, synthesizer, wav_file_psnr, autopad, record_property):
+    record_property("file", wav_file_psnr[0])
     tmpdirname = tempfile.TemporaryDirectory()
-    tmp_wav_file = os.path.basename(wav_file)
+    tmp_wav_file = os.path.basename(wav_file_psnr[0])
     gmpg_file = tmp_wav_file.split('.')[0] + ".gmpg"
     temp_file_path_gmpg = os.path.join(tmpdirname.name, gmpg_file)
     temp_file_path_wav = os.path.join(tmpdirname.name, tmp_wav_file)
     print(encoder, autopad)
     print("--Encoding")
     t_start = time.time()
-    subprocess.run([encoder, "-f", wav_file , '-o', temp_file_path_gmpg])
+    subprocess.run([encoder, "-f", wav_file_psnr[0], '-o', temp_file_path_gmpg])
     duration = time.time() - t_start
     record_property("encoder_duration_s", duration)
     print("Enconder time: "+str(duration))
     print("--Synthesizing")
     t_start = time.time()
-    subprocess.run([synthesizer, "-f", temp_file_path_gmpg , '-o', temp_file_path_wav])
+    subprocess.run([synthesizer, "-f", temp_file_path_gmpg, '-o', temp_file_path_wav])
     duration = time.time() - t_start
     record_property("synthesizer_duration_s", duration)
-    print("Synthesizer time: "+str(duration))   
+    print("Synthesizer time: "+str(duration))
     print("--PSNR")
-    psnr = psnr_two_files(wav_file, temp_file_path_wav, autopad)
+    psnr = psnr_two_files(wav_file_psnr[0], temp_file_path_wav, autopad)
+    psnr = round(psnr, 2)
     print("psnr:" + str(psnr))
     record_property("psnr", psnr)
-    # assert psnr >= 50
+    if wav_file_psnr[1] is not None:
+        record_property("psnr_ref", wav_file_psnr[1])
+        assert psnr >= wav_file_psnr[1]
