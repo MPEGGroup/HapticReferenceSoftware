@@ -52,8 +52,8 @@ struct EncodingConfig {
   int wavelet_bitbudget = 0;
 
   explicit EncodingConfig() = default;
-  explicit EncodingConfig(double _curveFrequencyLimit,
-                          int _wavelet_windowLength, int _wavelet_bitbudget)
+  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_windowLength,
+                          int _wavelet_bitbudget)
       : curveFrequencyLimit(_curveFrequencyLimit)
       , wavelet_windowLength(_wavelet_windowLength)
       , wavelet_bitbudget(_wavelet_bitbudget){};

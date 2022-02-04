@@ -91,8 +91,7 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
                                        const int stop) -> bool {
   const int position = effect.getPosition();
-  double length =
-      effect.getEffectTimeLength(bandType, encodingModality, TRANSIENT_DURATION_MS);
+  double length = effect.getEffectTimeLength(bandType, encodingModality, TRANSIENT_DURATION_MS);
 
   return (position <= start && position + length >= start) ||
          (position <= stop && position + length >= stop) ||
