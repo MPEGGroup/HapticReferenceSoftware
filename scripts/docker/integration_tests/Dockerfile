@@ -36,5 +36,5 @@ COPY mpeg_ftp.json /opt/
 
 RUN apt-get update
 RUN apt-get install -y python3-pytest python3-pytest-xdist python3-pip python3-numpy python3-soundfile
-RUN pip install pytest-csv
+RUN pip install pytest-csv pytest-monitor
 RUN apt-get clean

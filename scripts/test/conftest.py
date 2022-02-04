@@ -62,18 +62,12 @@ def pytest_generate_tests(metafunc):
         else:
             data_json = json.load(open(psnr_ref, 'r'))
 
-    if "autopad" in metafunc.fixturenames:
-        if metafunc.config.getoption("autopad"):
-            metafunc.parametrize("autopad", [True])
-        else:
-            metafunc.parametrize("autopad", [False])
-
     encoder_path = os.path.join(install_dir, 'bin', 'Encoder')
     synthesizer_path = os.path.join(install_dir, 'bin', 'Synthesizer')
 
     list_wav_files = []
     for path in Path(data_dir).rglob('*.wav'):
-        #filter out Rendered files
+        # filter out Rendered files
         if '/Rendered/' in str(path):
             continue
 
@@ -86,11 +80,17 @@ def pytest_generate_tests(metafunc):
         else:
             list_wav_files.append([str(path), None])
 
+    if "wav_file_psnr" in metafunc.fixturenames:
+        metafunc.parametrize("wav_file_psnr", list_wav_files)
+
     if "encoder" in metafunc.fixturenames:
         metafunc.parametrize("encoder", [encoder_path])
 
     if "synthesizer" in metafunc.fixturenames:
         metafunc.parametrize("synthesizer", [synthesizer_path])
 
-    if "wav_file_psnr" in metafunc.fixturenames:
-        metafunc.parametrize("wav_file_psnr", list_wav_files)
+    if "autopad" in metafunc.fixturenames:
+        if metafunc.config.getoption("autopad"):
+            metafunc.parametrize("autopad", [True])
+        else:
+            metafunc.parametrize("autopad", [False])

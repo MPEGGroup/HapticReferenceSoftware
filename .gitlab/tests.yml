@@ -22,6 +22,7 @@ PSNR:
       -n auto --csv reports/report.csv 
       --psnr_ref ./test/psnr_2k.json
       --csv-columns host,system,python_version,function,status,success,duration,properties_as_columns
+      --db reports/metrics.db
   artifacts:
     when: always
     reports:

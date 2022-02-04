@@ -52,44 +52,44 @@ def psnr(x, y):
     return val
 
 
-def psnr_two_files(original, compressed, autopad=False):
+def psnr_two_files(original, decompressed, autopad=False):
     # read data
     data_original, sample_rate_original = read(original)
-    data_compressed, sample_rate_compressed = read(compressed)
+    data_decompressed, sample_rate_decompressed = read(decompressed)
     
     # check samplerate
-    if(sample_rate_original != sample_rate_compressed):
+    if(sample_rate_original != sample_rate_decompressed):
         sys.exit("[!] The sample rates of the input files are not the same.")
 
     # check number of channels
     num_chan_original = 1
-    num_chan_compressed = 1
+    num_chan_decompressed = 1
 
     if len(data_original.shape) > 1:
         num_chan_original = data_original.shape[1]
 
-    if len(data_compressed.shape) > 1:
-        num_chan_compressed = data_compressed.shape[1]
+    if len(data_decompressed.shape) > 1:
+        num_chan_decompressed = data_decompressed.shape[1]
 
-    if(num_chan_compressed != num_chan_original):
+    if(num_chan_decompressed != num_chan_original):
         sys.exit("[!] The number of channels is not the same.")
 
     # check file length + channels
-    if(data_original.shape != data_compressed.shape):
+    if(data_original.shape != data_decompressed.shape):
         # zero-pad signals to the right (start is assumed to be aligned!)
-        if autopad and (data_original.shape[0] != data_compressed.shape[0]):
-            padLen = data_compressed.shape[0] - data_original.shape[0]
+        if autopad and (data_original.shape[0] != data_decompressed.shape[0]):
+            padLen = data_decompressed.shape[0] - data_original.shape[0]
             if num_chan_original == 1:
                 zPad = np.zeros( abs(padLen) )
             else:
                 s = (abs(padLen), num_chan_original)
                 zPad = np.zeros(s)
             
-            # if the sample length difference is negative, the compressed file is shorter
+            # if the sample length difference is negative, the decompressed file is shorter
             if padLen < 0:
-                # zero-pads the compressed file
-                data_compressed = np.concatenate((data_compressed, zPad))
-                print("[.] Adding automatic zero-padding of", abs(padLen), "samples to the compressed file.")
+                # zero-pads the decompressed file
+                data_decompressed = np.concatenate((data_decompressed, zPad))
+                print("[.] Adding automatic zero-padding of", abs(padLen), "samples to the decompressed file.")
             
             # if the sample length difference is positive, the original file is shorter
             elif padLen > 0:
@@ -105,13 +105,13 @@ def psnr_two_files(original, compressed, autopad=False):
         
     # calculate psnr (dB)
     # cast to python float to enable serialization
-    return float(psnr(data_original, data_compressed))
+    return float(psnr(data_original, data_decompressed))
 
 if __name__ == "__main__":  
     # parse arguments
     parser = argparse.ArgumentParser(description='Computing PSNR')
     parser.add_argument("original", help="path to the original file")
-    parser.add_argument("compressed", help="path to the compressed file")
+    parser.add_argument("decompressed", help="path to the decompressed file")
     parser.add_argument('--autopad', help='turns on automatic padding, \
                                            else PSNR won\'t be computed with \
                                            unequal signal lengths',
@@ -119,8 +119,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if(not path.exists(args.original)):
         sys.exit(args.original + " file could not be found")
-    if(not path.exists(args.compressed)):
-        sys.exit(args.compressed + " file could not be found")
+    if(not path.exists(args.decompressed)):
+        sys.exit(args.decompressed + " file could not be found")
 
-    psnr_val = psnr_two_files(args.original, args.compressed, args.autopad)
+    psnr_val = psnr_two_files(args.original, args.decompressed, args.autopad)
     print("The PSNR is:", psnr_val, "dB")

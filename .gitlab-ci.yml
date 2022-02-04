@@ -19,13 +19,14 @@ include:
         - .clang-format
         - .clang-tidy
         - .gitlab-ci.yml
-        - ".gitlab/ci/*.yml"
+        - ".gitlab/*.yml"
         - "**/CMakeLists.txt"
         - "**/*.cmake"
         - "**/*.cmake.in"
         - "**/*.cpp"
         - "**/*.h"
         - "**/*.hpp"
+        - "scripts/test/*.py"
 
 clang-format:
   <<: *trigger_launch

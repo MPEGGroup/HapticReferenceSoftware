@@ -43,6 +43,6 @@ The script produces a *report.xml* file directly ingested by the gitlab CI syste
 
 If a single file have to be processed, the following script may be called :
 ```shell
-python --autopad ./scripts/test/psnr.py <original_file.wav> <compressed_file.wav>
+python --autopad ./scripts/test/psnr.py <original_file.wav> <decompressed_file.wav>
 ```
 The autopad option is optional and allows comparaison of two files with a different samples number.

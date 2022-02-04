@@ -37,29 +37,44 @@ import subprocess
 import tempfile
 import os
 from psnr import psnr_two_files
+from bitrate import compute_bitrate
 import time
 
 
-def test_psnrs(encoder, synthesizer, wav_file_psnr, autopad, record_property):
-    record_property("file", wav_file_psnr[0])
-    tmpdirname = tempfile.TemporaryDirectory()
-    tmp_wav_file = os.path.basename(wav_file_psnr[0])
-    gmpg_file = tmp_wav_file.split('.')[0] + ".gmpg"
-    temp_file_path_gmpg = os.path.join(tmpdirname.name, gmpg_file)
-    temp_file_path_wav = os.path.join(tmpdirname.name, tmp_wav_file)
-    print(encoder, autopad)
+def encoding(encoder, wav_file, temp_file_path_gmpg, record_property):
     print("--Encoding")
     t_start = time.time()
-    subprocess.run([encoder, "-f", wav_file_psnr[0], '-o', temp_file_path_gmpg])
+    subprocess.run([encoder, "-f", wav_file, '-o', temp_file_path_gmpg])
     duration = time.time() - t_start
     record_property("encoder_duration_s", duration)
     print("Enconder time: "+str(duration))
+
+
+def synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property):
     print("--Synthesizing")
     t_start = time.time()
     subprocess.run([synthesizer, "-f", temp_file_path_gmpg, '-o', temp_file_path_wav])
     duration = time.time() - t_start
     record_property("synthesizer_duration_s", duration)
     print("Synthesizer time: "+str(duration))
+
+
+def test_psnrs(wav_file_psnr, encoder, synthesizer, autopad, record_property):
+    record_property("file", wav_file_psnr[0])
+    tmpdirname = tempfile.TemporaryDirectory()
+    tmp_wav_file = os.path.basename(wav_file_psnr[0])
+    gmpg_file = tmp_wav_file.split('.')[0] + ".gmpg"
+    temp_file_path_gmpg = os.path.join(tmpdirname.name, gmpg_file)
+    temp_file_path_wav = os.path.join(tmpdirname.name, tmp_wav_file)
+
+    encoding(encoder, wav_file_psnr[0], temp_file_path_gmpg, record_property)
+
+    # ToDo : compute on binary file
+    bit_rate = compute_bitrate(wav_file_psnr[0], temp_file_path_gmpg)
+    record_property("bitrate_kbps", bit_rate)
+
+    synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property)
+
     print("--PSNR")
     psnr = psnr_two_files(wav_file_psnr[0], temp_file_path_wav, autopad)
     psnr = round(psnr, 2)
