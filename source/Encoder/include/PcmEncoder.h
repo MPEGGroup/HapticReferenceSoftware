@@ -57,6 +57,14 @@ struct EncodingConfig {
       : curveFrequencyLimit(_curveFrequencyLimit)
       , wavelet_windowLength(_wavelet_windowLength)
       , wavelet_bitbudget(_wavelet_bitbudget){};
+
+  auto static generateConfig() -> EncodingConfig {
+    const double curveFrequencyLimit = 72.5;
+    const int wavelet_windowLength = 128;
+    const int wavelet_bitbudget = 4;
+
+    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
+  }
 };
 
 class PcmEncoder {
