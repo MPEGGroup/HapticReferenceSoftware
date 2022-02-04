@@ -124,7 +124,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   if (position < this->position ||
       position > this->position +
-                     this->getEffectTimeLength(BandType::Wave, EncodingModality::Vectorial, 0, 0)) {
+                     this->getEffectTimeLength(BandType::Wave, EncodingModality::Vectorial, 0)) {
     return res;
   }
 
@@ -239,32 +239,9 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
   return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
 }
 
-auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
-  double relativePosition = position - this->getPosition();
-  int index = std::floor(relativePosition / windowLength);
-  if (index >= (int)this->getKeyframesSize()) {
-    return 0;
-  }
-
-  auto myKeyframe = keyframes.begin() + index;
-  if (!myKeyframe->getAmplitudeModulation().has_value() ||
-      !myKeyframe->getFrequencyModulation().has_value()) {
-    return 0;
-  }
-
-  double t = MS_2_S * relativePosition;
-  return std::sin(t * myKeyframe->getFrequencyModulation().value() * 2 * M_PI + this->getPhase()) *
-         myKeyframe->getAmplitudeModulation().value();
-}
-
 auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
   double relativePosition = position - this->getPosition();
   int index = std::floor(relativePosition / windowLength * (double)this->getKeyframesSize());
-
-  // std::cout << "windowLength: " << windowLength << std::endl;
-  // std::cout << "EvaluateWavelet position: " << position << std::endl;
-  // std::cout << "relativePosition: " << relativePosition << std::endl;
-  // std::cout << "EvaluateWavelet index: " << index << std::endl;
 
   if (index >= (int)this->getKeyframesSize()) {
     return 0;
@@ -374,7 +351,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
 }
 
 auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
-                                 int windowLength, double transientDuration) -> double {
+                                 double transientDuration) -> double {
   if (this->getKeyframesSize() == 0) {
     return 0;
   }
@@ -393,8 +370,6 @@ auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModali
                : 0;
   case types::BandType::Wave:
     switch (encodingModality) {
-    case types::EncodingModality::Quantized:
-      return static_cast<int>(this->getKeyframesSize()) * windowLength;
     case types::EncodingModality::Vectorial:
       return lastKeyframe->getRelativePosition().has_value()
                  ? lastKeyframe->getRelativePosition().value()

@@ -82,7 +82,7 @@ private:
 
   BandType bandType = BandType::Wave;
   CurveType curveType = CurveType::Cubic;
-  EncodingModality encodingModality = EncodingModality::Quantized;
+  EncodingModality encodingModality = EncodingModality::Vectorial;
   int windowLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
