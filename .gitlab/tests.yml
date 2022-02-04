@@ -1,4 +1,4 @@
-PSNR:
+METRICS:
   stage: test
   image: gcc-cmake-python:RM0
   tags: [linux]
@@ -23,6 +23,7 @@ PSNR:
       --psnr_ref ./test/psnr_2k.json
       --csv-columns host,system,python_version,function,name,status,success,duration,properties_as_columns
       --db reports/metrics.db
+   after_script:
     - python3 ./scripts/tools/csv_to_metrics.py ./reports/report.csv ./reports/metrics.txt
   artifacts:
     when: always
