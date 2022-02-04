@@ -124,10 +124,6 @@ auto main(int argc, char *argv[]) -> int {
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
         config.curveFrequencyLimit = 72.5;
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.windowLength = 15;
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
         config.wavelet_windowLength = 128;
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
         config.wavelet_bitbudget = 4;
@@ -151,10 +147,6 @@ auto main(int argc, char *argv[]) -> int {
     haptics::encoder::EncodingConfig config;
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     config.curveFrequencyLimit = 72.5;
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.windowLength = 15;
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
     config.wavelet_windowLength = 128;
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
