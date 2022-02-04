@@ -21,12 +21,14 @@ PSNR:
       --junitxml=reports/report.xml -o junit_family="xunit1" 
       -n auto --csv reports/report.csv 
       --psnr_ref ./test/psnr_2k.json
-      --csv-columns host,system,python_version,function,status,success,duration,properties_as_columns
+      --csv-columns host,system,python_version,function,name,status,success,duration,properties_as_columns
       --db reports/metrics.db
+    - python3 ./scripts/tools/csv_to_metrics.py ./reports/report.csv ./reports/metrics.txt
   artifacts:
     when: always
     reports:
       junit: reports/report.xml
+      metrics: reports/metrics.txt
     paths:
       - ./reports
     expire_in: 1 week
