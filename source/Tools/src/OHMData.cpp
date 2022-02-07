@@ -45,7 +45,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   version = 1;
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
-    std::cout << filePath << ": Cannot open file!" << std::endl;
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
     file.close();
     return false;
   }
@@ -54,7 +54,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   unsigned int length = static_cast<unsigned int>(file.tellg());
   file.seekg(0, std::ios::beg);
 
-  std::cout << "Open: " << length << std::endl;
+  std::cerr << "Open: " << length << std::endl;
   if (length == 0) { // avoid undefined behavior
     file.close();
     return false;
@@ -65,7 +65,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   file.read(headerBytes.data(), 4);
   header = std::string(headerBytes.data(), 4);
   if (header != "OHM ") {
-    std::cout << "Incorrect header: " << header << std::endl;
+    std::cerr << "Incorrect header: " << header << std::endl;
     file.close();
     return false;
   }
@@ -141,7 +141,7 @@ auto OHMData::fillString(const std::string &text, const unsigned int numCharacte
 auto OHMData::writeFile(const std::string &filePath) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
-    std::cout << filePath << ": Cannot open file!" << std::endl;
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
     return false;
   }
   // Writing the header
