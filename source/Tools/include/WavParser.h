@@ -47,8 +47,8 @@ constexpr uint16_t NEG_MAX = 32768; // 2^15
 class WavParser {
 public:
   auto loadFile(const std::string &filename) -> bool;
-  static auto saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool;
-  static auto saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
+  static auto saveFile(const std::string &filename, const std::vector<double> &buff, int sampleRate) -> bool;
+  static auto saveFile(const std::string &filename, const std::vector<std::vector<double>> &buff,
                        int sampleRate) -> bool;
   [[nodiscard]] auto getSamplerate() const -> uint32_t;
   [[nodiscard]] auto getNumChannels() const -> size_t;
