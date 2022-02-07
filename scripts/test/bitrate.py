@@ -38,6 +38,7 @@ import sys
 from os import path
 
 
+# bitrate kbps
 def compute_bitrate(wav_file, compressed_file):
     data_original, sample_rate_original = read(wav_file)
     duration_s = len(data_original) / sample_rate_original

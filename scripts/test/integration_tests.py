@@ -38,6 +38,7 @@ import tempfile
 import os
 from psnr import psnr_two_files
 from bitrate import compute_bitrate
+from pathlib import Path
 import time
 
 
@@ -69,14 +70,22 @@ def test_psnrs(wav_file_psnr, encoder, synthesizer, autopad, record_property):
 
     encoding(encoder, wav_file_psnr[0], temp_file_path_gmpg, record_property)
 
-    # ToDo : compute on binary file
-    bit_rate = compute_bitrate(wav_file_psnr[0], temp_file_path_gmpg)
-    record_property("bitrate_kbps", bit_rate)
-
     synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property)
 
+    # get original rendered wav if IVS ou AHAP
+    wav_file = Path(wav_file_psnr[0])
+    if wav_file.suffix != ".wav":
+        names = wav_file.stem.split('-')
+        new_name = names[0]+"-"+names[1]+"-"+names[2]+"-8kHz-16-nopad.wav"
+        wav_file = Path(wav_file.parent.parent, "WAV_noPad", new_name)
+    wav_file = str(wav_file)
+
+    # ToDo : compute on binary file
+    bit_rate = compute_bitrate(wav_file, temp_file_path_gmpg)
+    record_property("bitrate_kbps", bit_rate)
+
     print("--PSNR")
-    psnr = psnr_two_files(wav_file_psnr[0], temp_file_path_wav, autopad)
+    psnr = psnr_two_files(wav_file, temp_file_path_wav, autopad)
     psnr = round(psnr, 2)
     print("psnr:" + str(psnr))
     record_property("psnr", psnr)

@@ -13,7 +13,6 @@ Clang 12 Debug:
       ..
     - make -j
     - make test
-  after_script:
     - cd ..
     - mkdir coverage_html
     - >

@@ -1,29 +1,29 @@
 {
     "long_effets":
     {
-        "ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.wav" : 31.033,
-        "IDCC-vib-Rain-8kHz-16-nopad.wav" : 26.74,
-        "IDCC-vib-Towel-8kHz-16-nopad.wav" : 30.718,
-        "APPL-vib-heartbeats-8kHz-16-nopad.wav" : 23.587,
-        "IMMR-vib-Content1-8kHz-16-nopad.wav" : 17.093,
-        "APPL-vib-inflate-8kHz-16-nopad.wav" : 20.73,
-        "IMMR-vib-PersTexture1-8kHz-16-nopad.wav" : 32.601,
-        "APPL-vib-oscillate-8kHz-16-nopad.wav" : 19.795,
-        "APPL-vib-rumble-8kHz-16-nopad.wav" : 37.006,
-        "IMMR-vib-Ringtone1-8kHz-16-nopad.wav" : 20.614,
-        "IMMR-vib-Weapon1-8kHz-16-nopad.wav" : 26.402
+        "ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.ohm" : 31.033,
+        "IDCC-vib-Rain-8kHz-16-nopad.ohm" : 26.74,
+        "IDCC-vib-Towel-8kHz-16-nopad.ohm" : 30.718,
+        "APPL-vib-heartbeats-nopad.ohm" : 23.587,
+        "IMMR-vib-Content1.ohm" : 17.093,
+        "APPL-vib-inflate-nopad.ohm" : 20.73,
+        "IMMR-vib-PersTexture1.ohm" : 32.601,
+        "APPL-vib-oscillate-nopad.ohm" : 19.795,
+        "APPL-vib-rumble-nopad.ohm" : 37.006,
+        "IMMR-vib-Ringtone1-.ohm" : 20.614,
+        "IMMR-vib-Weapon1.ohm" : 26.402
     },
     "kinesthetic":
     {
-        "IDCC-kin-BigBuckBunny-8kHz-16-nopad.wav": 42.56,
-        "IDCC-kin-ForceYSlow-8kHz-16-nopad.wav" : 30.09,
-        "IDCC-kin-BikeRiding-8kHz-16-nopad.wav" : 36.87,
-        "IDCC-kin-ForceZFast-8kHz-16-nopad.wav" : 30.15,
-        "IDCC-kin-ForceXFast-8kHz-16-nopad.wav" : 30.15,
-        "IDCC-kin-ForceZSlow-8kHz-16-nopad.wav" : 30.09,
-        "IDCC-kin-ForceXSlow-8kHz-16-nopad.wav" : 30.09,
-        "IDCC-kin-HorseRiding-8kHz-16-nopad.wav" : 23.75,
-        "IDCC-kin-ForceYFast-8kHz-16-nopad.wav" : 30.15,
-        "IDCC-kin-Rollercoaster-8kHz-16-nopad.wav" : 32.82
+        "IDCC-kin-BigBuckBunny-8kHz-16-nopad.ohm": 42.56,
+        "IDCC-kin-ForceYSlow-8kHz-16-nopad.ohm" : 30.09,
+        "IDCC-kin-BikeRiding-8kHz-16-nopad.ohm" : 36.87,
+        "IDCC-kin-ForceZFast-8kHz-16-nopad.ohm" : 30.15,
+        "IDCC-kin-ForceXFast-8kHz-16-nopad.ohm" : 30.15,
+        "IDCC-kin-ForceZSlow-8kHz-16-nopad.ohm" : 30.09,
+        "IDCC-kin-ForceXSlow-8kHz-16-nopad.ohm" : 30.09,
+        "IDCC-kin-HorseRiding-8kHz-16-nopad.ohm" : 23.75,
+        "IDCC-kin-ForceYFast-8kHz-16-nopad.ohm" : 30.15,
+        "IDCC-kin-Rollercoaster-8kHz-16-nopad.ohm" : 32.82
     }
 }

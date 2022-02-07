@@ -66,9 +66,9 @@ def pytest_generate_tests(metafunc):
     synthesizer_path = os.path.join(install_dir, 'bin', 'Synthesizer')
 
     list_wav_files = []
-    for path in Path(data_dir).rglob('*.wav'):
-        # filter out Rendered files
-        if '/Rendered/' in str(path):
+    for path in Path(data_dir).rglob('*.ohm'):
+        # filter out Rendered wav files - IVS and AHAP added first
+        if path.name in list_wav_files or 'Restored' in str(path):
             continue
 
         if psnr_ref is not None:
