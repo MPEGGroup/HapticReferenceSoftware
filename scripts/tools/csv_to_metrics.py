@@ -47,11 +47,26 @@ if __name__ == "__main__":
     if(not path.exists(args.csv_file)):
         sys.exit(args.csv_file + " file could not be found")
 
-    f = open(args.metrics_file, "w")
+    labels = []
+    psnrs = []
+    bitrate = []
     with open(args.csv_file, 'r', newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',')
         next(spamreader)  # skip header
         for row in spamreader:
-            name = path.basename(row[9])
-            f.write(name+" "+row[10]+"\n")
+            labels.append(path.basename(row[10]))
+            psnrs.append(row[11])
+            bitrate.append(row[8])
+
+    f = open(args.metrics_file, "w")
+    f.write("# TYPE psnr gauge\n")
+    f.write('# HELP PSNR values\n')
+    f.write('# UNIT psnr db\n')
+    for i, l in enumerate(labels):
+        f.write('psnr{name='+str(l)+'} '+str(psnrs[i])+"\n")
+    f.write("# TYPE bitrate gauge\n")
+    f.write('# HELP Bitrate values\n')
+    f.write('# UNIT bitrate kbps\n')
+    for i, l in enumerate(labels):
+        f.write('bitrate{name='+str(l)+'} '+str(bitrate[i])+"\n")
     f.close()

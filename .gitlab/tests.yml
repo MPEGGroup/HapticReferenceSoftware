@@ -1,4 +1,4 @@
-METRICS:
+Metrics:
   stage: test
   image: gcc-cmake-python:RM0
   tags: [linux]

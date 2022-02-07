@@ -37,5 +37,5 @@ Clang 12 Debug:
 GCC 10 Release:
   <<: *trigger_launch
 
-METRICS:
+Metrics:
   <<: *trigger_launch
