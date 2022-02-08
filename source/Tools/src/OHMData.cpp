@@ -54,8 +54,8 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   unsigned int length = static_cast<unsigned int>(file.tellg());
   file.seekg(0, std::ios::beg);
 
-  std::cerr << "Open: " << length << std::endl;
   if (length == 0) { // avoid undefined behavior
+    std::cerr << "Opening empty file" << std::endl;
     file.close();
     return false;
   }
