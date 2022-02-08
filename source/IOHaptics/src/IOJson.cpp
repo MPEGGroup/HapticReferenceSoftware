@@ -169,8 +169,8 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
       continue;
     }
     if (!jsonBand.contains("encoding_modality") || !jsonBand["encoding_modality"].is_string()) {
-      continue;
       std::cerr << "Missing or invalid encoding modality" << std::endl;
+      continue;
     }
     if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_number_integer()) {
       std::cerr << "Missing or invalid window length" << std::endl;
