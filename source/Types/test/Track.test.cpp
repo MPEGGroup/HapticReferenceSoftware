@@ -44,6 +44,58 @@ const int bodypartMask = 42;
 const int lowF = 0;
 const int highF = 1000;
 
+TEST_CASE("Track::generateBand without parameters", "[generateBand][withoutParameters]") {
+  const int bandcount = 19;
+
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
+  for (int i = 0; i < bandcount; i++) {
+    haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
+                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+    t.addBand(b);
+  }
+
+  REQUIRE(t.getBandsSize() == static_cast<size_t>(bandcount));
+
+  haptics::types::Band *res = t.generateBand();
+
+  CHECK(t.getBandsSize() == static_cast<size_t>(bandcount) + 1);
+  CHECK_FALSE(res == nullptr);
+}
+
+TEST_CASE("Track::generateBand with parameters", "[generateBand][withParameters]") {
+  const int bandcount = 19;
+  const haptics::types::BandType testingBandType = haptics::types::BandType::Curve;
+  const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Linear;
+  const haptics::types::EncodingModality testingEncodingModality =
+      haptics::types::EncodingModality::Wavelet;
+  const int testingWindowLength = 32;
+  const int testingMinF = 65;
+  const int testingMaxF = 300;
+
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
+  for (int i = 0; i < bandcount; i++) {
+    haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
+                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+    t.addBand(b);
+  }
+
+  REQUIRE(t.getBandsSize() == static_cast<size_t>(bandcount));
+
+  haptics::types::Band *res =
+      t.generateBand(testingBandType, testingCurveType, testingEncodingModality,
+                     testingWindowLength, testingMinF, testingMaxF);
+
+  CHECK(t.getBandsSize() == static_cast<size_t>(bandcount) + 1);
+  CHECK_FALSE(res == nullptr);
+  CHECK(res->getBandType() == testingBandType);
+  CHECK(res->getCurveType() == testingCurveType);
+  CHECK(res->getEncodingModality() == testingEncodingModality);
+  CHECK(res->getWindowLength() == testingWindowLength);
+  CHECK(res->getLowerFrequencyLimit() == testingMinF);
+  CHECK(res->getUpperFrequencyLimit() == testingMaxF);
+  CHECK(res->getEffectsSize() == 0);
+}
+
 TEST_CASE("Track::findWaveBandAvailable without band", "[findWaveBandAvailable][empty]") {
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
 

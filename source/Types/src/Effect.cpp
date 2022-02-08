@@ -114,7 +114,8 @@ auto Effect::addFrequencyAt(int frequency, int position) -> bool {
 
 auto Effect::addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
                          std::optional<int> frequencyModulation) -> void {
-  this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
+  Keyframe newKf(position, amplitudeModulation, frequencyModulation);
+  this->addKeyframe(newKf);
 }
 
 // NOLINTNEXTLINE(readability-function-size)

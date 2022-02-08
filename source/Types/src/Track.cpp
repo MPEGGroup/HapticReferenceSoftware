@@ -75,6 +75,21 @@ auto Track::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   return true;
 }
 
+auto Track::generateBand() -> haptics::types::Band * {
+  Band newBand;
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Track::generateBand(BandType bandType, CurveType curveType, EncodingModality encodingModality,
+                         int windowLength, int lowerFrequencyLimit, int upperFrequencyLimit)
+    -> haptics::types::Band * {
+  Band newBand(bandType, curveType, encodingModality, windowLength, lowerFrequencyLimit,
+               upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
 auto Track::findBandAvailable(const int position, const int duration,
                               const types::BandType bandType,
                               const types::EncodingModality encodingModality)
