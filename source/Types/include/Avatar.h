@@ -35,8 +35,8 @@
 #define AVATAR_H
 
 #include <map>
-#include <string>
 #include <optional>
+#include <string>
 
 namespace haptics::types {
 enum class AvatarType {

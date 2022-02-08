@@ -71,7 +71,8 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
   return true;
 }
 
-auto WavParser::saveFile(const std::string &filename, const std::vector<double> &buff, int sampleRate) -> bool {
+auto WavParser::saveFile(const std::string &filename, const std::vector<double> &buff,
+                         int sampleRate) -> bool {
   drwav wav;
   drwav_data_format format;
   format.container = drwav_container_riff;
