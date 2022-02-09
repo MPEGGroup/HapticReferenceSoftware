@@ -456,8 +456,8 @@ auto IOBinaryBands::writeQuantizedBandBody(types::Band &band, std::ofstream &fil
 auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool {
   spiht::Spiht_Dec dec;
   auto effects_size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
-  auto blocklength = IOBinaryPrimitives::readNBytes<uint16_t, 1>(file);
-  band.setWindowLength(blocklength);
+  auto blocklength = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+  band.setWindowLength((int)blocklength);
   for (uint16_t i = 0; i < effects_size; i++) {
     std::vector<unsigned char> instream;
     instream.resize(IOBinaryPrimitives::readNBytes<uint16_t, 2>(file));
@@ -475,8 +475,8 @@ auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file)
   spiht::Spiht_Enc enc;
   auto effects_size = (uint16_t)band.getEffectsSize();
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>(effects_size, file);
-  int blocklength = band.getWindowLength();
-  IOBinaryPrimitives::writeNBytes<int, 1>(blocklength, file);
+  auto blocklength = (uint8_t)band.getWindowLength();
+  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(blocklength, file);
   for (uint16_t i = 0; i < (uint16_t)band.getEffectsSize(); i++) {
     std::vector<unsigned char> outstream;
     enc.encodeEffect(band.getEffectAt(i), outstream);
