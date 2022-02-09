@@ -8,7 +8,7 @@ if(NO_INTERNET)
 else()
         FetchContent_Declare(pugixml
             GIT_REPOSITORY "https://github.com/zeux/pugixml"
-            GIT_TAG "428606b3c105921bd59237a572edbd00a04ee406"
+            GIT_TAG "v1.12"
             GIT_SHALLOW ON
             GIT_PROGRESS TRUE
         )
