@@ -44,7 +44,7 @@ TEST_CASE("haptics::tools::OHMData") {
   std::string filepath = std::filesystem::current_path().string() + "/../../../../../../data/test.ohm";
   OHMData ohmData(filepath);
 
-  SECTION("Test loading") { 
+  SECTION("Test loading", "[loadFile]") { 
       bool validHeader = ohmData.getHeader() == "OHM ";
       bool validDescription = ohmData.getDescription() == "pantheon grand starfall";
       bool validVersion = ohmData.getVersion() == 1;
@@ -64,7 +64,7 @@ TEST_CASE("haptics::tools::OHMData") {
   
   std::string filepath2 = std::filesystem::current_path().string() + "/../../../../../../data/tests/test2.ohm";
 
-  SECTION("Test writing") {
+  SECTION("Test writing", "[writeFile]") {
     ohmData.writeFile(filepath2);
     CHECK(std::filesystem::is_regular_file(filepath2));
     OHMData ohmData2(filepath2);
