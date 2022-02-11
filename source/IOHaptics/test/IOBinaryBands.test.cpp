@@ -1,35 +1,35 @@
 /* The copyright in this software is being made available under the BSD
-* License, included below. This software may be subject to other third party
-* and contributor rights, including patent rights, and no such rights are
-* granted under this license.
-*
-* Copyright (c) 2010-2021, ISO/IEC
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-*  * Redistributions of source code must retain the above copyright notice,
-*    this list of conditions and the following disclaimer.
-*  * Redistributions in binary form must reproduce the above copyright notice,
-*    this list of conditions and the following disclaimer in the documentation
-*    and/or other materials provided with the distribution.
-*  * Neither the name of the ISO/IEC nor the names of its contributors may
-*    be used to endorse or promote products derived from this software without
-*    specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
-* BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-* THE POSSIBILITY OF SUCH DAMAGE.
-*/
+  * License, included below. This software may be subject to other third party
+  * and contributor rights, including patent rights, and no such rights are
+  * granted under this license.
+  *
+  * Copyright (c) 2010-2021, ISO/IEC
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions are met:
+  *
+  *  * Redistributions of source code must retain the above copyright notice,
+  *    this list of conditions and the following disclaimer.
+  *  * Redistributions in binary form must reproduce the above copyright notice,
+  *    this list of conditions and the following disclaimer in the documentation
+  *    and/or other materials provided with the distribution.
+  *  * Neither the name of the ISO/IEC nor the names of its contributors may
+  *    be used to endorse or promote products derived from this software without
+  *    specific prior written permission.
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+  * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+  * THE POSSIBILITY OF SUCH DAMAGE.
+  */
 
 #include <IOHaptics/include/IOBinaryBands.h>
 #include <catch2/catch.hpp>
@@ -59,7 +59,6 @@ auto addEffect(
   myBand.addEffect(myEffect);
 }
 
-
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandHeader on curve") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::Curve;
@@ -75,7 +74,7 @@ TEST_CASE("write/read BandHeader on curve") {
   haptics::types::Effect testingEffect(0, 0, haptics::types::BaseSignal::Sine);
   const int expectedKeyframeCount = 42;
   for (int i = 0; i < expectedKeyframeCount; i++) {
-    const float amplitude = static_cast<float>(i) / expectedKeyframeCount; 
+    const float amplitude = static_cast<float>(i) / expectedKeyframeCount;
     testingEffect.addAmplitudeAt(amplitude, i);
   }
   testingBand.addEffect(testingEffect);
@@ -397,7 +396,8 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 
   const int testingEffect1_position = 42;
   const float testingEffect1_phase = 0;
-  const haptics::types::BaseSignal testingEffect1_baseSignal = haptics::types::BaseSignal::SawToothUp;
+  const haptics::types::BaseSignal testingEffect1_baseSignal =
+      haptics::types::BaseSignal::SawToothUp;
   const std::vector<std::tuple<int, std::optional<float>, std::optional<int>>>
       testingEffect1_keyframes = {{0, .1F, 90}, {36, .1F, 90}};
   addEffect(testingBand, testingEffect1_position, testingEffect1_phase, testingEffect1_baseSignal,
@@ -405,8 +405,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 
   const int testingEffect2_position = 654;
   const float testingEffect2_phase = 2.65;
-  const haptics::types::BaseSignal testingEffect2_baseSignal =
-      haptics::types::BaseSignal::Triangle;
+  const haptics::types::BaseSignal testingEffect2_baseSignal = haptics::types::BaseSignal::Triangle;
   const std::vector<std::tuple<int, std::optional<float>, std::optional<int>>>
       testingEffect2_keyframes = {
           {0, .1F, 90}, {72, .954F, 90}, {1000, std::nullopt, 300}, {1036, 0.0F, std::nullopt}};
