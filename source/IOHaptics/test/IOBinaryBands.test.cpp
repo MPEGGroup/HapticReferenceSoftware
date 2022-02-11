@@ -447,7 +447,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     CHECK(resEffect1.getPhase() == testingEffect1_phase);
     CHECK(resEffect1.getBaseSignal() == testingEffect1_baseSignal);
     REQUIRE(resEffect1.getKeyframesSize() == testingEffect1_keyframes.size());
-    for (int i = 0; i < resEffect1.getKeyframesSize(); i++) {
+    for (int i = 0; i < static_cast<int>(resEffect1.getKeyframesSize()); i++) {
       haptics::types::Keyframe resKeyframe = resEffect1.getKeyframeAt(i);
       std::tuple<int, std::optional<float>, std::optional<int>> expectedKeyframeValue =
           testingEffect1_keyframes.at(i);
@@ -471,7 +471,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     CHECK(resEffect2.getPhase() == testingEffect2_phase);
     CHECK(resEffect2.getBaseSignal() == testingEffect2_baseSignal);
     REQUIRE(resEffect2.getKeyframesSize() == testingEffect2_keyframes.size());
-    for (int i = 0; i < resEffect2.getKeyframesSize(); i++) {
+    for (int i = 0; i < static_cast<int>(resEffect2.getKeyframesSize()); i++) {
       haptics::types::Keyframe resKeyframe = resEffect2.getKeyframeAt(i);
       std::tuple<int, std::optional<float>, std::optional<int>> expectedKeyframeValue =
           testingEffect2_keyframes.at(i);
