@@ -35,6 +35,7 @@
 #define AVATAR_H
 
 #include <map>
+#include <optional>
 #include <string>
 
 namespace haptics::types {
@@ -68,12 +69,14 @@ public:
   auto setLod(int newLod) -> void;
   [[nodiscard]] auto getType() const -> AvatarType;
   auto setType(AvatarType newType) -> void;
+  [[nodiscard]] auto getMesh() const -> std::optional<std::string>;
+  auto setMesh(const std::string &newMesh) -> void;
 
 private:
   int id = -1;
   int lod = 0;
   AvatarType type = AvatarType::Custom;
-  // TODO : Mesh
+  std::optional<std::string> mesh;
 };
 } // namespace haptics::types
 #endif // AVATAR_H

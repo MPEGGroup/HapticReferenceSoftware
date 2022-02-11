@@ -40,6 +40,10 @@ namespace haptics::types {
 
 auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
+[[nodiscard]] auto Band::getCurveType() const -> CurveType { return curveType; }
+
+auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
+
 [[nodiscard]] auto Band::getEncodingModality() const -> EncodingModality {
   return encodingModality;
 }
@@ -87,13 +91,7 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
                                        const int stop) -> bool {
   const int position = effect.getPosition();
-  double length = 0;
-  if (encodingModality == EncodingModality::Quantized) {
-    length = static_cast<int>(effect.getKeyframesSize()) * windowLength;
-  } else {
-    length =
-        effect.getEffectTimeLength(bandType, encodingModality, windowLength, TRANSIENT_DURATION_MS);
-  }
+  double length = effect.getEffectTimeLength(bandType, encodingModality, TRANSIENT_DURATION_MS);
 
   return (position <= start && position + length >= start) ||
          (position <= stop && position + length >= stop) ||
@@ -105,7 +103,7 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
   // OUT OUF BOUND CHECK
   if (effects.empty() ||
       position > effects.back().getPosition() +
-                     effects.back().getEffectTimeLength(bandType, encodingModality, windowLength,
+                     effects.back().getEffectTimeLength(bandType, encodingModality,
                                                         TRANSIENT_DURATION_MS) ||
       position < 0) {
     return 0;
@@ -128,11 +126,9 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position);
+    return effect->EvaluateKeyframes(position, this->getCurveType());
   case BandType::Wave:
-    if (encodingModality == EncodingModality::Quantized) {
-      return effect->EvaluateQuantized(position, this->getWindowLength());
-    } else if (encodingModality == EncodingModality::Vectorial) {
+    if (encodingModality == EncodingModality::Vectorial) {
       return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
     } else if (encodingModality == EncodingModality::Wavelet) {
       auto sample = effect->EvaluateWavelet(position, this->getWindowLength());
@@ -161,6 +157,6 @@ auto Band::getBandTimeLength() -> double {
   }
   return this->effects.back().getPosition() +
          this->effects.back().getEffectTimeLength(this->getBandType(), this->getEncodingModality(),
-                                                  this->getWindowLength(), TRANSIENT_DURATION_MS);
+                                                  TRANSIENT_DURATION_MS);
 }
 } // namespace haptics::types

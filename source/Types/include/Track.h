@@ -70,6 +70,10 @@ public:
   auto getBandAt(int index) -> haptics::types::Band &;
   auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
   auto addBand(haptics::types::Band &newBand) -> void;
+  auto generateBand() -> haptics::types::Band *;
+  auto generateBand(BandType bandType, CurveType curveType, EncodingModality encodingModality,
+                    int windowLength, int lowerFrequencyLimit, int upperFrequencyLimit)
+      -> haptics::types::Band *;
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;

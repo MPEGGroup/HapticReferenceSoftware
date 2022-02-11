@@ -120,17 +120,8 @@ auto main(int argc, char *argv[]) -> int {
         codeExit = IvsEncoder::encode(filename, myPerception);
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
-        haptics::encoder::EncodingConfig config;
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.curveFrequencyLimit = 72.5;
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.windowLength = 15;
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.wavelet_windowLength = 128;
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-        config.wavelet_bitbudget = 4;
+        haptics::encoder::EncodingConfig config =
+            haptics::encoder::EncodingConfig::generateConfig();
         codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
 
@@ -148,17 +139,7 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
-    haptics::encoder::EncodingConfig config;
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.curveFrequencyLimit = 72.5;
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.frequencyBandLimits = std::vector<std::pair<double, double>>{{72.5, 1000}};
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.windowLength = 15;
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.wavelet_windowLength = 128;
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-    config.wavelet_bitbudget = 4;
+    haptics::encoder::EncodingConfig config = haptics::encoder::EncodingConfig::generateConfig();
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
   } else {

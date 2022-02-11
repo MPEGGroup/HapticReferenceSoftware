@@ -31,39 +31,24 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FOURIERTOOLS_H
-#define FOURIERTOOLS_H
+#ifndef CURVETYPE_H
+#define CURVETYPE_H
 
-#include <complex>
-#include <valarray>
-#include <vector>
+#include <map>
+#include <string>
 
-namespace haptics::filterbank {
+namespace haptics::types {
 
-class FourierTools {
-public:
-  auto static FFT(std::vector<double> &in, std::valarray<std::complex<double>> &out) -> bool;
-  auto static FFT(std::valarray<std::complex<double>> &in) -> bool;
-
-  auto static GetAmplitude(std::complex<double> c) -> double;
-  auto static GetPhase(std::complex<double> c) -> double;
-  auto static GetFrequency(int index, int fftSize, double samplerate) -> double;
-
-private:
-  static const uint32_t SHIFTBITS_1 = 1;
-  static const uint32_t SHIFTBITS_2 = 2;
-  static const uint32_t SHIFTBITS_4 = 4;
-  static const uint32_t SHIFTBITS_8 = 8;
-  static const uint32_t SHIFTBITS_16 = 16;
-  static const uint32_t SHIFTBITS_32 = 32;
-  static const unsigned int BINARYMASK_1 = 0xaaaaaaaa;
-  static const unsigned int BINARYMASK_INVERSE_1 = 0x55555555;
-  static const unsigned int BINARYMASK_2 = 0xcccccccc;
-  static const unsigned int BINARYMASK_INVERSE_2 = 0x33333333;
-  static const unsigned int BINARYMASK_4 = 0xf0f0f0f0;
-  static const unsigned int BINARYMASK_INVERSE_4 = 0x0f0f0f0f;
-  static const unsigned int BINARYMASK_8 = 0xff00ff00;
-  static const unsigned int BINARYMASK_INVERSE_8 = 0x00ff00ff;
+enum class CurveType {
+  Unknown = 0,
+  Cubic = 1,
+  Linear = 2,
 };
-} // namespace haptics::filterbank
-#endif // FOURIERTOOLS_H
+
+static const std::map<std::string, CurveType> stringToCurveType = {
+    {"Unknown", CurveType::Unknown}, {"Cubic", CurveType::Cubic}, {"Linear", CurveType::Linear}};
+static const std::map<CurveType, std::string> curveTypeToString = {
+    {CurveType::Unknown, "Unknown"}, {CurveType::Cubic, "Cubic"}, {CurveType::Linear, "Linear"}};
+} // namespace haptics::types
+
+#endif // CURVETYPE_H
