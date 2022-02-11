@@ -55,7 +55,8 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on strings") {
       IOBinaryPrimitives::writeString(testingString, file);
       file.close();
 
-      CHECK(std::filesystem::file_size(filename) == static_cast<uintmax_t>(testingString.size()) + 1);
+      CHECK(std::filesystem::file_size(filename) ==
+            static_cast<uintmax_t>(testingString.size()) + 1);
     }
 
     DYNAMIC_SECTION("Read string (TESTING CASE: " + testingString + ")") {
