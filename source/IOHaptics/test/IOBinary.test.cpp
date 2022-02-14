@@ -343,7 +343,66 @@ TEST_CASE("write/read file header for track testing") {
                                                 testingDescription_perception0,
                                                 testingPerceptionModality_perception0);
 
+  const int testingId_perception1 = 423;
+  const int testingAvatarId_perception1 = 3;
+  const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
+  const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
+  haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
+                                                testingDescription_perception1,
+                                                testingPerceptionModality_perception1);
+
+  const int testingId_track0 = 0;
+  const std::string testingDescription_track0 = "testingDescription_track0";
+  const float testingGain_track0 = .34;
+  const float testingMixingWeight_track0 = 1;
+  const uint32_t testingBodyPartMask_track0 = 32;
+  const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
+  const size_t testingBandsCount_track0 = 45;
+  haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
+                                      testingGain_track0, testingMixingWeight_track0,
+                                      testingBodyPartMask_track0);
+  for (auto vertex : testingVertices_track0) {
+    testingTrack0.addVertex(vertex);
+  }
+  for (size_t i = 0; i < testingBandsCount_track0; i++) {
+    testingTrack0.generateBand();
+  }
+
+  const int testingId_track1 = 432;
+  const std::string testingDescription_track1 = "again another string";
+  const float testingGain_track1 = 0;
+  const float testingMixingWeight_track1 = .333;
+  const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
+  const size_t testingBandsCount_track1 = 0;
+  haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
+                                      testingGain_track1, testingMixingWeight_track1,
+                                      testingBodyPartMask_track1);
+  for (size_t i = 0; i < testingBandsCount_track1; i++) {
+    testingTrack1.generateBand();
+  }
+
+  const int testingId_track2 = 4;
+  const std::string testingDescription_track2 = "I'm inside a test";
+  const float testingGain_track2 = 2.7652;
+  const float testingMixingWeight_track2 = .6666;
+  const uint32_t testingBodyPartMask_track2 = 0;
+  const std::vector<int> testingVertices_track2 = {0, 6};
+  const size_t testingBandsCount_track2 = 1;
+  haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
+                                      testingGain_track2, testingMixingWeight_track2,
+                                      testingBodyPartMask_track2);
+  for (auto vertex : testingVertices_track2) {
+    testingTrack2.addVertex(vertex);
+  }
+  for (size_t i = 0; i < testingBandsCount_track2; i++) {
+    testingTrack2.generateBand();
+  }
+
+  testingPerception0.addTrack(testingTrack0);
+  testingPerception0.addTrack(testingTrack1);
+  testingPerception1.addTrack(testingTrack2);
   testingHaptic.addPerception(testingPerception0);
+  testingHaptic.addPerception(testingPerception1);
 
   SECTION("write tracks header") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -354,7 +413,10 @@ TEST_CASE("write/read file header for track testing") {
 
     REQUIRE(succeed);
     const uintmax_t expectedFileSize =
-        testingShape.size() + testingDescription_perception0.size() + 21;
+        testingShape.size() + testingDescription_perception0.size() +
+        testingDescription_perception1.size() + testingDescription_track0.size() +
+        testingDescription_track1.size() + testingDescription_track2.size() +
+        testingVertices_track0.size() + testingVertices_track2.size() + 121;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -369,7 +431,45 @@ TEST_CASE("write/read file header for track testing") {
 
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
-    REQUIRE(res.getPerceptionsSize() == 1);
-    CHECK(res.getPerceptionAt(0).getTracksSize() == 0);
+    REQUIRE(res.getPerceptionsSize() == 2);    
+    REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
+    CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
+    CHECK(res.getPerceptionAt(0).getAvatarId() == testingAvatarId_perception0);
+    CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);
+    CHECK(res.getPerceptionAt(0).getPerceptionModality() == testingPerceptionModality_perception0);
+
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getGain() == testingGain_track0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() == testingMixingWeight_track0);
+    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() == testingVertices_track0.size());
+    for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
+      REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVertexAt(i) == testingVertices_track0.at(i));
+    }
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandsSize() == testingBandsCount_track0);
+
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getGain() == testingGain_track1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() == testingMixingWeight_track1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
+
+    REQUIRE(res.getPerceptionAt(1).getTracksSize() == 1);
+    CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
+    CHECK(res.getPerceptionAt(1).getAvatarId() == testingAvatarId_perception1);
+    CHECK(res.getPerceptionAt(1).getDescription() == testingDescription_perception1);
+    CHECK(res.getPerceptionAt(1).getPerceptionModality() == testingPerceptionModality_perception1);
+
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getGain() == testingGain_track2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() == testingMixingWeight_track2);
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
+            testingVertices_track2.size());
+    for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
+      REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVertexAt(i) == testingVertices_track2.at(i));
+    }
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
   }
 }
