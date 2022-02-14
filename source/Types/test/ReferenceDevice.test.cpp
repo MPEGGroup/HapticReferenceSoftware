@@ -36,7 +36,28 @@
 
 TEST_CASE("haptics::types::ReferenceDevice") {
   using haptics::types::ReferenceDevice;
-  const ReferenceDevice h;
-  // TODO : some tests
-  CHECK(true);
+  ReferenceDevice device(0, "Test device");
+
+  SECTION("Checking getId", "[getId]") {
+    auto checkId = device.getId();
+    CHECK(checkId == 0);
+  }
+
+  SECTION("Checking getName", "[getName]") {
+    auto checkName = device.getName();
+    CHECK(checkName == "Test device");
+  }
+
+  SECTION("Checking setId", "[setId]") {
+    device.setId(2);
+    auto checkId = device.getId();
+    CHECK(checkId == 2);
+  }
+
+  SECTION("Checking setName", "[setName]") {
+    std::string newName = "Test device 2";
+    device.setName(newName);
+    auto checkName = device.getName();
+    CHECK(checkName == newName);
+  }
 }
