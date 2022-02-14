@@ -353,7 +353,8 @@ TEST_CASE("write/read file header for track testing") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize = testingShape.size() + testingDescription_perception0.size() + 21;
+    const uintmax_t expectedFileSize =
+        testingShape.size() + testingDescription_perception0.size() + 21;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
