@@ -114,7 +114,8 @@ TEST_CASE("write/read file header for avatar testing") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize = testingShape.size() + 4 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
+    const uintmax_t expectedFileSize =
+        testingShape.size() + 4 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
