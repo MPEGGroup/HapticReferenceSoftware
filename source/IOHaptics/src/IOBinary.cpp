@@ -132,8 +132,8 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool 
     std::string avatarURI;
     myAvatar = types::Avatar(avatarId, avatarLod, static_cast<types::AvatarType>(avatarType));
     if (myAvatar.getType() == types::AvatarType::Custom) {
-      // TODO : do something with this value
       avatarURI = IOBinaryPrimitives::readString(file);
+      myAvatar.setMesh(avatarURI);
     }
 
     haptic.addAvatar(myAvatar);
@@ -147,7 +147,6 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarCount, file);
 
   types::Avatar myAvatar;
-  const std::string avatarURI = "placeholder";
   for (unsigned short i = 0; i < avatarCount; i++) {
     myAvatar = haptic.getAvatarAt(i);
 
@@ -161,6 +160,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
     IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarType, file);
 
     if (myAvatar.getType() == types::AvatarType::Custom) {
+      std::string avatarURI = myAvatar.getMesh().has_value() ? myAvatar.getMesh().value() : "";
       IOBinaryPrimitives::writeString(avatarURI, file);
     }
   }

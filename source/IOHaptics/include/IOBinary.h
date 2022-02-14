@@ -61,17 +61,17 @@ class IOBinary {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &out) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> bool;
-
-private:
   static auto readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
   static auto readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool;
+  static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto writeFileBody(types::Haptics &haptic, std::ofstream &file) -> bool;
+
+private:
   static auto readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool;
   static auto readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
   static auto readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool;
   static auto readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool;
 
-  static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
-  static auto writeFileBody(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writePerceptionsHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writeReferenceDevices(types::Perception &perception, std::ofstream &file) -> bool;
