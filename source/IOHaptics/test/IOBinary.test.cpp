@@ -43,12 +43,12 @@ const std::string filename = "testing_IOBinary.bin";
 
 auto addReferenceDevice(
     haptics::types::Perception &myPerception,
-    const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
-                           std::optional<float>, std::optional<float>, std::optional<float>,
-                           std::optional<float>, std::optional<float>, std::optional<float>,
-                           std::optional<float>, std::optional<float>, std::optional<float>,
-                           std::optional<float>, std::optional<haptics::types::ActuatorType>>>
-        &referenceDeviceValues) -> void {
+    const std::vector<std::tuple<
+        int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
+    -> void {
   for (auto values : referenceDeviceValues) {
     const size_t idIndex = 0;
     const size_t nameIndex = 1;
@@ -244,9 +244,9 @@ TEST_CASE("write/read file header for reference device testing") {
            haptics::types::ActuatorType::LRA},
           {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
-          {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+          {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-           std::nullopt, std::nullopt, std::nullopt}};
+           std::nullopt, std::nullopt}};
   addReferenceDevice(testingPerception, testingReferenceDeviceValue_perception0);
   testingHaptic.addPerception(testingPerception);
 
@@ -339,8 +339,8 @@ TEST_CASE("write/read file header for track testing") {
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
   haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
-                                               testingDescription_perception0,
-                                               testingPerceptionModality_perception0);
+                                                testingDescription_perception0,
+                                                testingPerceptionModality_perception0);
 
   testingHaptic.addPerception(testingPerception0);
 
