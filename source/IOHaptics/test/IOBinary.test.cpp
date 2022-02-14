@@ -321,6 +321,7 @@ TEST_CASE("write/read file header for reference device testing") {
       CHECK(myDevice.getMaximumDisplacement() == std::get<maximumDisplacementIndex>(testingValues));
       CHECK(myDevice.getWeight() == std::get<weightIndex>(testingValues));
       CHECK(myDevice.getSize() == std::get<sizeIndex>(testingValues));
+      CHECK(myDevice.getCustom() == std::get<customIndex>(testingValues));
       CHECK(myDevice.getType() == std::get<typeIndex>(testingValues));
     }
   }
@@ -352,7 +353,7 @@ TEST_CASE("write/read file header for track testing") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize = testingShape.size() + testingDescription_perception0.size();
+    const uintmax_t expectedFileSize = testingShape.size() + testingDescription_perception0.size() + 21;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
