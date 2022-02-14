@@ -55,6 +55,13 @@ auto Track::setMixingWeight(float newMixingWeight) -> void { mixingWeight = newM
 
 auto Track::setBodyPartMask(uint32_t newBodyPartMask) -> void { bodyPartMask = newBodyPartMask; }
 
+[[nodiscard]] auto Track::getReferenceDeviceId() const -> std::optional<int> {
+  return referenceDeviceId;
+}
+auto Track::setReferenceDeviceId(int newReferenceDeviceId) -> void {
+  referenceDeviceId = newReferenceDeviceId;
+}
+
 auto Track::getVerticesSize() -> size_t { return vertices.size(); }
 
 auto Track::getVertexAt(int index) -> int & { return vertices.at(index); }

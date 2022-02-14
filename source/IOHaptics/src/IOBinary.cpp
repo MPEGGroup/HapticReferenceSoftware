@@ -132,8 +132,8 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool 
     std::string avatarURI;
     myAvatar = types::Avatar(avatarId, avatarLod, static_cast<types::AvatarType>(avatarType));
     if (myAvatar.getType() == types::AvatarType::Custom) {
-      // TODO : do something with this value
       avatarURI = IOBinaryPrimitives::readString(file);
+      myAvatar.setMesh(avatarURI);
     }
 
     haptic.addAvatar(myAvatar);
@@ -147,7 +147,6 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarCount, file);
 
   types::Avatar myAvatar;
-  const std::string avatarURI = "placeholder";
   for (unsigned short i = 0; i < avatarCount; i++) {
     myAvatar = haptic.getAvatarAt(i);
 
@@ -161,6 +160,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
     IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarType, file);
 
     if (myAvatar.getType() == types::AvatarType::Custom) {
+      const std::string avatarURI = myAvatar.getMesh().value_or("");
       IOBinaryPrimitives::writeString(avatarURI, file);
     }
   }
@@ -389,14 +389,16 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
   for (unsigned short i = 0; i < trackCount; i++) {
     auto trackId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     std::string trackDescription = IOBinaryPrimitives::readString(file);
-    IOBinaryPrimitives::readNBytes<short, 2>(file);
+    auto deviceId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     auto trackGain = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto trackMixingWeight = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
     types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
-
+    if (deviceId >= 0) {
+      t.setReferenceDeviceId(deviceId);
+    }
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
       vertex = IOBinaryPrimitives::readNBytes<int, 4>(file);
@@ -430,8 +432,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     std::string trackDescription = myTrack.getDescription();
     IOBinaryPrimitives::writeString(trackDescription, file);
 
-    // TODO : device id not linked yet to tracks
-    short deviceId = 0;
+    short deviceId = static_cast<short>(myTrack.getReferenceDeviceId().value_or(-1));
     IOBinaryPrimitives::writeNBytes<short, 2>(deviceId, file);
 
     float trackGain = myTrack.getGain();
