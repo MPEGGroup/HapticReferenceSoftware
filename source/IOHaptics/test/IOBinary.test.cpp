@@ -129,6 +129,7 @@ TEST_CASE("write/read file header for avatar testing") {
     file.close();
 
     REQUIRE(succeed);
+    CHECK(std::filesystem::file_size(filename) == startedFileSize);
     REQUIRE(res.getAvatarsSize() == 2);
 
     CHECK(res.getAvatarAt(0).getId() == testingId_avatar1);
