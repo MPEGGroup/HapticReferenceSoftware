@@ -267,6 +267,11 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
       myReferenceDevice.setMaximumVoltage(value);
     }
 
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
+      value = IOBinaryPrimitives::readFloat(file);
+      myReferenceDevice.setMaximumCurrent(value);
+    }
+
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_DISPLACEMENT) != 0) {
       value = IOBinaryPrimitives::readFloat(file);
       myReferenceDevice.setMaximumDisplacement(value);
@@ -350,6 +355,11 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_VOLTAGE) != 0) {
       value = myReferenceDevice.getMaximumVoltage().value();
+      IOBinaryPrimitives::writeFloat(value, file);
+    }
+
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
+      value = myReferenceDevice.getMaximumCurrent().value();
       IOBinaryPrimitives::writeFloat(value, file);
     }
 
