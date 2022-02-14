@@ -105,7 +105,7 @@ TEST_CASE("haptics::types::Perception testing referenceDevice") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
   Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
-  haptics::types::ReferenceDevice device(0, "Test track");
+  haptics::types::ReferenceDevice device(0, "Test Device");
   SECTION("Checking addReferenceDevice", "[addReferenceDevice]") {
     perception.addReferenceDevice(device);
     CHECK(perception.getReferenceDevicesSize() == 1);
