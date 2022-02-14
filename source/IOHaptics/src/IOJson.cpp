@@ -143,6 +143,10 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
 
+    if (jsonTrack.contains("reference_device_id") && jsonTrack["reference_device_id"].is_number()) {
+      auto device_id = jsonTrack["reference_device_id"].get<int>();
+      track.setReferenceDeviceId(device_id);
+    }
     if (jsonTrack.contains("vertices") && jsonTrack["vertices"].is_array()) {
       auto jsonVertices = jsonTrack["vertices"];
       for (auto itv = jsonVertices.begin(); itv != jsonVertices.end(); ++itv) {
@@ -425,6 +429,9 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     jsonTrack["gain"] = track.getGain();
     jsonTrack["mixing_weight"] = track.getMixingWeight();
     jsonTrack["body_part_mask"] = track.getBodyPartMask();
+    if (track.getReferenceDeviceId().has_value()) {
+      jsonTrack["reference_device_id"] = track.getReferenceDeviceId().value();
+    }
 
     auto jsonVertices = json::array();
     auto numVertices = track.getVerticesSize();
