@@ -431,7 +431,7 @@ TEST_CASE("write/read file header for track testing") {
 
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
-    REQUIRE(res.getPerceptionsSize() == 2);    
+    REQUIRE(res.getPerceptionsSize() == 2);
     REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
     CHECK(res.getPerceptionAt(0).getAvatarId() == testingAvatarId_perception0);
@@ -442,7 +442,8 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getGain() == testingGain_track0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() == testingMixingWeight_track0);
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() == testingVertices_track0.size());
+    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
+            testingVertices_track0.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
       REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVertexAt(i) == testingVertices_track0.at(i));
     }
