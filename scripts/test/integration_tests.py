@@ -91,4 +91,5 @@ def test_psnrs(wav_file_psnr, encoder, synthesizer, autopad, record_property):
     record_property("psnr", psnr)
     if wav_file_psnr[1] is not None:
         record_property("psnr_ref", wav_file_psnr[1])
-        assert psnr >= wav_file_psnr[1]
+        # test with a 0.1 threshold
+        assert psnr - wav_file_psnr[1] > -0.1
