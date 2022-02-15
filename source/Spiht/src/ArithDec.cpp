@@ -142,6 +142,9 @@ void ArithDec::rescaleCounter() {
       counter.at(i) = 1;
     }
     counter_total.at(i) = RESIZE_TOTAL;
+    if (counter.at(i) == counter_total.at(i)) {
+      counter.at(i) = counter_total.at(i) - 1;
+    }
   }
 }
 

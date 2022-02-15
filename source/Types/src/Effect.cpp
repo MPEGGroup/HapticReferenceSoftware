@@ -234,6 +234,7 @@ auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
   double relativePosition = position - this->getPosition();
   int index = std::floor(relativePosition / windowLength * (double)this->getKeyframesSize());
 
+  // std::cout << "Effect EvaluateWavelet" << std::endl;
   // std::cout << "windowLength: " << windowLength << std::endl;
   // std::cout << "EvaluateWavelet position: " << position << std::endl;
   // std::cout << "relativePosition: " << relativePosition << std::endl;
@@ -242,7 +243,7 @@ auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
   if (index >= (int)this->getKeyframesSize()) {
     return 0;
   }
-
+  // std::cout << "Effect EvaluateWavelet in range" << std::endl;
   auto myKeyframe = keyframes.begin() + index;
   if (!myKeyframe->getAmplitudeModulation().has_value()) {
     return 0;

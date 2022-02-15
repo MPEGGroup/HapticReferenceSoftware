@@ -84,7 +84,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     Keyframe keyframe(bl, (float)scalar, 0); // add scalar of block to block data for now
     effect.addKeyframe(keyframe);
     Keyframe keyframeBits(bl + 1, (float)maxbits, 0); // add scalar of block to block data for now
-    effect.addKeyframe(keyframe);
+    effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
     pos_effect += band.getWindowLength();
@@ -185,8 +185,8 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
     m.fractionbits = FRACTIONBITS_0;
   } else {
     integerpart = 1;
-    m.integerbits = 3;
-    m.fractionbits = 4;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
     mode = 1;
   }
 

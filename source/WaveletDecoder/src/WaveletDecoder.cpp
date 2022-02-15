@@ -54,10 +54,6 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
       block_dwt[i] = (double)keyframe.getAmplitudeModulation().value();
     }
 
-    /*for (auto v : block_dwt) {
-      std::cout << v << std::endl;
-    }*/
-
     std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
     std::copy(block_time.begin(), block_time.end(), sig_rec.begin() + effect.getPosition());
   }
@@ -70,9 +66,9 @@ void WaveletDecoder::transformBand(Band &band) {
     return;
   }
   size_t numBlocks = band.getEffectsSize();
-  int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
-                 (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
-  // int bl = band.getEffectAt(0).getKeyframesSize() - 1;
+  // int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
+  //                (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
+  auto bl = (int)band.getEffectAt(0).getKeyframesSize() - 2;
   int dwtlevel = (int)log2((double)bl / 4);
 
   for (uint32_t b = 0; b < numBlocks; b++) {
@@ -86,7 +82,6 @@ void WaveletDecoder::transformBand(Band &band) {
     }
 
     std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
-
     Effect newEffect;
     newEffect.setPosition(effect.getPosition());
     for (int i = 0; i < bl; i++) {

@@ -38,8 +38,8 @@
 #include <list>
 #include <vector>
 
-#include <Types/include/Effect.h>
 #include <Spiht/include/ArithEnc.h>
+#include <Types/include/Effect.h>
 
 namespace haptics::spiht {
 
@@ -69,8 +69,8 @@ struct quantMode {
 class Spiht_Enc {
 public:
   void encodeEffect(Effect &effect, std::vector<unsigned char> &outstream);
-  void encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax, int maxallocbits,
-              std::vector<unsigned char> &outstream, std::vector<int> &context);
+  void encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
+              int maxallocbits, std::vector<unsigned char> &outstream, std::vector<int> &context);
 
   auto maxDescendant(int j, int type) -> int;
   void initMaxDescendants(std::vector<int> &signal);
@@ -79,7 +79,8 @@ private:
   void static refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,
                              std::vector<unsigned char> &outstream, std::vector<int> &context);
 
-  void static addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream, std::vector<int> &context);
+  void static addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream,
+                          std::vector<int> &context);
 
   static void maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
   void static de2bi(int val, std::vector<unsigned char> &outstream, int length);
@@ -87,6 +88,8 @@ private:
 
   std::vector<int> maxDescendants;
   std::vector<int> maxDescendants1;
+
+  ArithEnc arithEnc;
 };
 } // namespace haptics::spiht
 #endif // SPIHT_ENC_H

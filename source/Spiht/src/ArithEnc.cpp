@@ -125,6 +125,7 @@ void ArithEnc::encode(std::vector<unsigned char> &instream, std::vector<int> &co
     index_end--;
   }
   outstream.resize(index_end + 1);
+  rescaleCounter();
 }
 
 void ArithEnc::remainder(int bits_to_follow, std::vector<unsigned char> &outstream, int range_lower,
@@ -162,6 +163,9 @@ void ArithEnc::rescaleCounter() {
       counter.at(i) = 1;
     }
     counter_total.at(i) = RESIZE_TOTAL;
+    if (counter.at(i) == counter_total.at(i)) {
+      counter.at(i) = counter_total.at(i) - 1;
+    }
   }
 }
 

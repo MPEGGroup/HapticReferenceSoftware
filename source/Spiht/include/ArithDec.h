@@ -53,9 +53,9 @@ public:
   void resetCounter();
   void static convert2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out);
 
-private:
   void rescaleCounter();
 
+private:
   std::array<int, CONTEXT_SIZE> counter = {RESET_HALF, RESET_HALF, RESET_HALF, RESET_HALF,
                                            RESET_HALF, RESET_HALF, RESET_HALF};
   std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,

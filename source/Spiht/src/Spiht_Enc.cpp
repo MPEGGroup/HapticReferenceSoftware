@@ -52,7 +52,6 @@ void Spiht_Enc::encodeEffect(Effect &effect, std::vector<unsigned char> &outstre
   std::vector<int> context;
   std::vector<unsigned char> stream_spiht;
   encode(block, level, bitwavmax, bits, stream_spiht, context);
-  ArithEnc arithEnc;
   std::vector<unsigned char> stream_arithmetic;
   arithEnc.encode(stream_spiht, context, stream_arithmetic);
   ArithEnc::convert2bytes(stream_arithmetic, outstream);

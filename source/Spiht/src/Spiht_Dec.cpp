@@ -78,7 +78,7 @@ void Spiht_Dec::decode(std::vector<unsigned char> &bitstream, std::vector<int> &
     n--;
   }
 
-  // arithDec->rescaleCounter();
+  arithDec.rescaleCounter();
 }
 
 void Spiht_Dec::initLists(int origlength, int level) {
@@ -105,13 +105,13 @@ auto Spiht_Dec::getMaxAllocBits() -> int {
 auto Spiht_Dec::getWavmax() -> double {
   int mode = getBit(CONTEXT_0);
   std::vector<int> wavmaxArray(WAVMAXLENGTH - 1, 0);
-  getBits(wavmaxArray, WAVMAXLENGTH - 1, 0);
+  getBits(wavmaxArray, WAVMAXLENGTH - 1, CONTEXT_0);
   int temp = bi2de(wavmaxArray, WAVMAXLENGTH - 1);
   double wavmax = 0;
   if (mode == 0) {
     wavmax = (double)temp * pow(2, -FRACTIONBITS_0);
   } else {
-    wavmax = (double)temp * pow(2, -4) + 1;
+    wavmax = (double)temp * pow(2, -FRACTIONBITS_1) + 1;
   }
   return wavmax;
 }
