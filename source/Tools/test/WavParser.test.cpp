@@ -81,6 +81,8 @@ TEST_CASE("haptics::tools::WavParser") {
     wavParser2.loadFile(filename);
     std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
+    std::remove("test.wav");
+    CHECK(!std::filesystem::is_regular_file("test.wav"));
   }
 
   SECTION("Output to Input test MD") {
@@ -97,6 +99,8 @@ TEST_CASE("haptics::tools::WavParser") {
     wavParser2.loadFile(filename);
     std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
     std::vector<double> buffer_rec2 = wavParser2.getSamplesChannel(1);
+    std::remove("test_MD.wav");
+    CHECK(!std::filesystem::is_regular_file("test_MD.wav"));
   }
 }
 
@@ -125,6 +129,8 @@ TEST_CASE("haptics::tools::WavParser overflow") {
     std::cout << "channel 2" << std::endl;
     correct = checkCorrect(buffer2, buffer_rec2);
     CHECK(correct);
+    std::remove("test_overflow.wav");
+    CHECK(!std::filesystem::is_regular_file("test_overflow.wav"));
   }
 
   SECTION("Overflow test 1D") {
@@ -139,5 +145,7 @@ TEST_CASE("haptics::tools::WavParser overflow") {
     bool correct = true;
     correct = checkCorrect(buffer, buffer_rec);
     CHECK(correct);
+    std::remove("test_overflow_1D.wav");
+    CHECK(!std::filesystem::is_regular_file("test_overflow_1D.wav"));
   }
 }
