@@ -36,7 +36,6 @@ import argparse
 import os
 import pathlib
 import hashlib
-import sys
 
 
 if __name__ == "__main__":
@@ -45,10 +44,11 @@ if __name__ == "__main__":
     parser.add_argument("--md5", help="md5 file", required=True)
     args = parser.parse_args()
     if not os.path.exists(args.data_dir):
-        sys.exit("Data folder doest not exist.")
+        exit("Data folder doest not exist.")
     if not os.path.exists(args.md5):
-        sys.exit("md5 file doest not exist.")
+        exit("md5 file doest not exist.")
 
+    valid = True
     print("Checking files ....")
     with open(pathlib.Path(args.md5)) as f_md5:
         for line in f_md5:
@@ -56,6 +56,9 @@ if __name__ == "__main__":
             f_original = pathlib.Path(args.data_dir, md5_data[1])            
             f_hash = hashlib.md5(open(f_original, 'rb').read()).hexdigest()
             if f_hash != md5_data[0]:
-                sys.exit("File " + md5_data[1] + " has been modified on the server.")
-    print("Files are valid.")
-    
+                valid = False
+                print("File " + md5_data[1] + " has been modified on the server.")
+    if valid:
+        print("Files are valid.")
+    else:
+        exit("Files are not valid.")
