@@ -228,26 +228,25 @@ TEST_CASE("write/read file header for reference device testing") {
   const int testingId_perception0 = 0;
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
-  const auto testingPerceptionModality_perception0 =
-      haptics::types::PerceptionModality::Vibration;
+  const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
   haptics::types::Perception testingPerception(testingId_perception0, testingAvatarId_perception0,
-                                                testingDescription_perception0,
-                                                testingPerceptionModality_perception0);
+                                               testingDescription_perception0,
+                                               testingPerceptionModality_perception0);
 
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
-                                std::optional<float>, std::optional<float>, std::optional<float>,
-                                std::optional<float>, std::optional<float>, std::optional<float>,
-                                std::optional<float>, std::optional<float>, std::optional<float>,
-                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
+                               std::optional<float>, std::optional<float>, std::optional<float>,
+                               std::optional<float>, std::optional<float>, std::optional<float>,
+                               std::optional<float>, std::optional<float>, std::optional<float>,
+                               std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
           {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt,
-            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
-            haptics::types::ActuatorType::LRA},
+           std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
+           haptics::types::ActuatorType::LRA},
           {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
-            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
+           450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
           {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, std::nullopt}};
+           std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+           std::nullopt, std::nullopt}};
   addReferenceDevice(testingPerception, testingReferenceDeviceValue_perception0);
   testingHaptic.addPerception(testingPerception);
 
@@ -339,11 +338,10 @@ TEST_CASE("write/read file header for track testing") {
   const int testingId_perception0 = 0;
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
-  const auto testingPerceptionModality_perception0 =
-      haptics::types::PerceptionModality::Vibration;
-  haptics::types::Perception testingPerception0(
-      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
-      testingPerceptionModality_perception0);
+  const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
+  haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
+                                                testingDescription_perception0,
+                                                testingPerceptionModality_perception0);
 
   const int testingId_perception1 = 423;
   const int testingAvatarId_perception1 = 3;
@@ -484,7 +482,7 @@ TEST_CASE("write/read file for body testing") {
   const std::string testingDescription = "I'm a testing value";
   const std::string testingShape = "Custom";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
-    
+
   const int testingId_avatar1 = 42;
   const int testingLod_avatar1 = 3;
   const auto testingType_avatar1 = haptics::types::AvatarType::Custom;
@@ -502,34 +500,33 @@ TEST_CASE("write/read file for body testing") {
   const int testingId_perception0 = 0;
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
-  const auto testingPerceptionModality_perception0 =
-      haptics::types::PerceptionModality::Vibration;
-  haptics::types::Perception testingPerception0(
-      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
-      testingPerceptionModality_perception0);
+  const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
+  haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
+                                                testingDescription_perception0,
+                                                testingPerceptionModality_perception0);
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
-                                std::optional<float>, std::optional<float>, std::optional<float>,
-                                std::optional<float>, std::optional<float>, std::optional<float>,
-                                std::optional<float>, std::optional<float>, std::optional<float>,
-                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
+                               std::optional<float>, std::optional<float>, std::optional<float>,
+                               std::optional<float>, std::optional<float>, std::optional<float>,
+                               std::optional<float>, std::optional<float>, std::optional<float>,
+                               std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
-          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt,
-            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
-            haptics::types::ActuatorType::LRA},
+          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
+           std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
+           haptics::types::ActuatorType::LRA},
           {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
-            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
+           450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
           {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, std::nullopt}};
+           std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+           std::nullopt, std::nullopt}};
   addReferenceDevice(testingPerception0, testingReferenceDeviceValue_perception0);
 
   const int testingId_perception1 = 423;
   const int testingAvatarId_perception1 = 3;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
-  haptics::types::Perception testingPerception1(
-      testingId_perception1, testingAvatarId_perception1, testingDescription_perception1,
-      testingPerceptionModality_perception1);
+  haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
+                                                testingDescription_perception1,
+                                                testingPerceptionModality_perception1);
 
   const int testingId_track0 = 0;
   const std::string testingDescription_track0 = "testingDescription_track0";
@@ -600,7 +597,7 @@ TEST_CASE("write/read file for body testing") {
                                     testingUpperFrequencyLimit_band2);
 
   // TODO : fix this starting position for curves
-  //const int testingPosition_effect0 = 63;
+  // const int testingPosition_effect0 = 63;
   const int testingPosition_effect0 = 0;
   const float testingPhase_effect0 = 0;
   const auto testingBaseSignal_effect0 = haptics::types::BaseSignal::Sine;
@@ -639,8 +636,8 @@ TEST_CASE("write/read file for body testing") {
   testingHaptic.addPerception(testingPerception1);
   testingHaptic.addAvatar(avatar1);
   testingHaptic.addAvatar(avatar2);
-  
-    SECTION("write file") {
+
+  SECTION("write file") {
     bool succeed = IOBinary::writeFile(testingHaptic, filename);
 
     REQUIRE(succeed);
@@ -678,7 +675,7 @@ TEST_CASE("write/read file for body testing") {
 
     REQUIRE(res.getPerceptionsSize() == 2);
 
-    //CHECK perception 0
+    // CHECK perception 0
     CHECK(res.getPerceptionAt(0).getAvatarId() == testingAvatarId_perception0);
     CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
@@ -808,7 +805,8 @@ TEST_CASE("write/read file for body testing") {
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getWindowLength() == testingWindowLength_band2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getWindowLength() ==
+          testingWindowLength_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() == 0);
   }
