@@ -47,4 +47,8 @@ auto Avatar::setLod(int newLod) -> void { lod = newLod; }
 
 auto Avatar::setType(AvatarType newType) -> void { type = newType; }
 
+[[nodiscard]] auto Avatar::getMesh() const -> std::optional<std::string> { return mesh; }
+
+auto Avatar::setMesh(const std::string &newMesh) -> void { mesh = newMesh; }
+
 } // namespace haptics::types

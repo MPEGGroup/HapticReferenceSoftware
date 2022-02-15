@@ -45,7 +45,7 @@ auto IOJson::loadFile(const std::string &filePath) -> haptics::types::Haptics {
         jsonTree.contains("description") && jsonTree.contains("perceptions") &&
         jsonTree["perceptions"].is_array() && jsonTree.contains("avatars") &&
         jsonTree["avatars"].is_array())) {
-    // TODO invalid input file
+    std::cerr << "Invalid GMPG input file: missing required field" << std::endl;
   }
   auto version = jsonTree["version"].get<std::string>();
   auto date = jsonTree["date"].get<std::string>();
@@ -57,7 +57,7 @@ auto IOJson::loadFile(const std::string &filePath) -> haptics::types::Haptics {
   auto jsonPerceptions = jsonTree["perceptions"];
   loadPerceptions(jsonPerceptions, haptic);
   if (haptic.getPerceptionsSize() == 0) {
-    // TODO invalid input file
+    std::cerr << "Invalid GMPG input file: no perception found" << std::endl;
   }
   return haptic;
 }
@@ -67,21 +67,25 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
 
   for (auto it = jsonPerceptions.begin(); it != jsonPerceptions.end(); ++it) {
     auto jsonPerception = it.value();
-    // TODO: add specific error messages
     if (!jsonPerception.contains("id") || !jsonPerception["id"].is_number_integer()) {
+      std::cerr << "Missing or invalid perception id" << std::endl;
       continue;
     }
     if (!jsonPerception.contains("avatar_id") || !jsonPerception["avatar_id"].is_number_integer()) {
+      std::cerr << "Missing or invalid perception avatar id" << std::endl;
       continue;
     }
     if (!jsonPerception.contains("description") || !jsonPerception["description"].is_string()) {
+      std::cerr << "Missing or invalid perception description" << std::endl;
       continue;
     }
     if (!jsonPerception.contains("perception_modality") ||
         !jsonPerception["perception_modality"].is_string()) {
+      std::cerr << "Missing or invalid perception modality" << std::endl;
       continue;
     }
     if (!jsonPerception.contains("tracks") || !jsonPerception["tracks"].is_array()) {
+      std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
 
@@ -106,23 +110,28 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
 auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> void {
   for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
     auto jsonTrack = it.value();
-    // TODO: add specific error messages
     if (!jsonTrack.contains("id") || !jsonTrack["id"].is_number_integer()) {
+      std::cerr << "Missing or invalid track id" << std::endl;
       continue;
     }
     if (!jsonTrack.contains("description") || !jsonTrack["description"].is_string()) {
+      std::cerr << "Missing or invalid track description" << std::endl;
       continue;
     }
     if (!jsonTrack.contains("gain") || !jsonTrack["gain"].is_number()) {
+      std::cerr << "Missing or invalid track gain" << std::endl;
       continue;
     }
     if (!jsonTrack.contains("mixing_weight") || !jsonTrack["mixing_weight"].is_number()) {
+      std::cerr << "Missing or invalid track mixing weight" << std::endl;
       continue;
     }
     if (!jsonTrack.contains("body_part_mask") || !jsonTrack["body_part_mask"].is_number_integer()) {
+      std::cerr << "Missing or invalid track body part mask" << std::endl;
       continue;
     }
     if (!jsonTrack.contains("bands") || !jsonTrack["bands"].is_array()) {
+      std::cerr << "Missing or invalid bands" << std::endl;
       continue;
     }
 
@@ -151,28 +160,34 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
 auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> void {
   for (auto it = jsonBands.begin(); it != jsonBands.end(); ++it) {
     auto jsonBand = it.value();
-    // TODO: add specific error messages
     if (!jsonBand.contains("band_type") || !jsonBand["band_type"].is_string()) {
+      std::cerr << "Missing or invalid band type" << std::endl;
       continue;
     }
     if (!jsonBand.contains("curve_type") || !jsonBand["curve_type"].is_string()) {
+      std::cerr << "Missing or invalid curve type" << std::endl;
       continue;
     }
     if (!jsonBand.contains("encoding_modality") || !jsonBand["encoding_modality"].is_string()) {
+      std::cerr << "Missing or invalid encoding modality" << std::endl;
       continue;
     }
     if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_number_integer()) {
+      std::cerr << "Missing or invalid window length" << std::endl;
       continue;
     }
     if (!jsonBand.contains("lower_frequency_limit") ||
         !jsonBand["lower_frequency_limit"].is_number_integer()) {
+      std::cerr << "Missing or invalid lower frequency limit" << std::endl;
       continue;
     }
     if (!jsonBand.contains("upper_frequency_limit") ||
         !jsonBand["upper_frequency_limit"].is_number_integer()) {
+      std::cerr << "Missing or invalid upper frequency limit" << std::endl;
       continue;
     }
     if (!jsonBand.contains("effects") || !jsonBand["effects"].is_array()) {
+      std::cerr << "Missing or invalid list of effects" << std::endl;
       continue;
     }
 
@@ -196,17 +211,20 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
 auto IOJson::loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> void {
   for (auto it = jsonEffects.begin(); it != jsonEffects.end(); ++it) {
     auto jsonEffect = it.value();
-    // TODO: add specific error messages
     if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+      std::cerr << "Missing or invalid effect position" << std::endl;
       continue;
     }
     if (!jsonEffect.contains("phase") || !jsonEffect["phase"].is_number()) {
+      std::cerr << "Missing or invalid effect phase" << std::endl;
       continue;
     }
     if (!jsonEffect.contains("base_signal") || !jsonEffect["base_signal"].is_string()) {
+      std::cerr << "Missing or invalid effect base_signal" << std::endl;
       continue;
     }
     if (!jsonEffect.contains("keyframes") || !jsonEffect["keyframes"].is_array()) {
+      std::cerr << "Missing or invalid list of keyframes" << std::endl;
       continue;
     }
 
@@ -227,12 +245,15 @@ auto IOJson::loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &hapt
     auto jsonAvatar = it.value();
 
     if (!jsonAvatar.contains("id") || !jsonAvatar["id"].is_number_integer()) {
+      std::cerr << "Missing or invalid avatar id" << std::endl;
       continue;
     }
     if (!jsonAvatar.contains("lod") || !jsonAvatar["lod"].is_number_integer()) {
+      std::cerr << "Missing or invalid avatar lod" << std::endl;
       continue;
     }
     if (!jsonAvatar.contains("type") || !jsonAvatar["type"].is_string()) {
+      std::cerr << "Missing or invalid avatar type" << std::endl;
       continue;
     }
     auto id = jsonAvatar["id"].get<int>();
@@ -240,6 +261,10 @@ auto IOJson::loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &hapt
     auto type = types::stringToAvatarType.at(jsonAvatar["type"]);
 
     types::Avatar avatar(id, lod, type);
+
+    if (jsonAvatar.contains("mesh") && jsonAvatar["mesh"].is_string()) {
+      avatar.setMesh(jsonAvatar["type"]);
+    }
     haptic.addAvatar(avatar);
   }
 }
@@ -249,9 +274,11 @@ auto IOJson::loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
     auto jsonReferenceDevice = it.value();
 
     if (!jsonReferenceDevice.contains("id") || !jsonReferenceDevice["id"].is_number_integer()) {
+      std::cerr << "Missing or invalid reference device id" << std::endl;
       continue;
     }
     if (!jsonReferenceDevice.contains("name") || !jsonReferenceDevice["name"].is_string()) {
+      std::cerr << "Missing or invalid reference device name" << std::endl;
       continue;
     }
     auto id = jsonReferenceDevice["id"].get<int>();
@@ -382,6 +409,9 @@ auto IOJson::extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars)
     jsonAvatar["id"] = avatar.getId();
     jsonAvatar["lod"] = avatar.getLod();
     jsonAvatar["type"] = types::avatarTypeToString.at(avatar.getType());
+    if (avatar.getMesh().has_value()) {
+      jsonAvatar["mesh"] = avatar.getMesh().value();
+    }
     jsonAvatars.push_back(jsonAvatar);
   }
 }
@@ -407,7 +437,6 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
 
     auto jsonBands = json::array();
     auto numBands = track.getBandsSize();
-    std::cout << "Actual Num Bands : " << numBands << std::endl;
     for (uint32_t l = 0; l < numBands; l++) {
       auto band = track.getBandAt((int)l);
       auto jsonBand = json::object();
@@ -450,7 +479,6 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       jsonBands.push_back(jsonBand);
     }
     jsonTrack["bands"] = jsonBands;
-    // TODO bands
     jsonTracks.push_back(jsonTrack);
   }
 }

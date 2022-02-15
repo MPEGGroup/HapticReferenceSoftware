@@ -138,11 +138,9 @@ namespace haptics::encoder {
         e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition().value(),
         types::BandType::Wave, types::EncodingModality::Vectorial);
     if (b == nullptr) {
-      myTrack.addBand(*(new haptics::types::Band(
-          haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-          haptics::types::EncodingModality::Vectorial, 0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY)));
-
-      b = &myTrack.getBandAt(static_cast<int>(myTrack.getBandsSize()) - 1);
+      b = myTrack.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
+                               haptics::types::EncodingModality::Vectorial, 0, MIN_AHAP_FREQUENCY,
+                               MAX_AHAP_FREQUENCY);
     }
     b->addEffect(e);
   }

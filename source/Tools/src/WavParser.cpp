@@ -71,7 +71,8 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
   return true;
 }
 
-auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int sampleRate) -> bool {
+auto WavParser::saveFile(const std::string &filename, const std::vector<double> &buff,
+                         int sampleRate) -> bool {
   drwav wav;
   drwav_data_format format;
   format.container = drwav_container_riff;
@@ -97,7 +98,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<double> &buff, int s
   return true;
 }
 
-auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>> &buff,
+auto WavParser::saveFile(const std::string &filename, const std::vector<std::vector<double>> &buff,
                          int sampleRate) -> bool {
   size_t s = buff.at(0).size();
   for (uint32_t i = 1; i < buff.size(); i++) {
@@ -118,7 +119,7 @@ auto WavParser::saveFile(std::string &filename, std::vector<std::vector<double>>
   std::vector<uint16_t> b_int;
   b_int.resize(buff.size() * buff.at(0).size());
   long c = 0;
-  for (auto &b : buff) {
+  for (const auto &b : buff) {
     for (uint32_t i = 0; i < b.size(); i++) {
       auto v = (round(b.at(i) * SCALING));
       if (v > SCALING - 1) {
