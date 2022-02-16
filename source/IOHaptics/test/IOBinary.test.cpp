@@ -60,7 +60,7 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     const int expectedFileSize =
         static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size()) +
         3 + 2 * 2;
-    CHECK(static_cast<uintmax_t>(std::filesystem::file_size(filename)) == expectedFileSize);
+    CHECK(static_cast<int>(std::filesystem::file_size(filename)) == expectedFileSize);
   }
 
   SECTION("read haptic header") {
