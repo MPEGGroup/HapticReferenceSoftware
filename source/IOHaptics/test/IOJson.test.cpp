@@ -54,12 +54,15 @@ TEST_CASE("write/read gmpg haptic file without avatar and perceptions") {
   }
 
   SECTION("read haptic file") {
-    haptics::types::Haptics res = IOJson::loadFile(filename);
+    haptics::types::Haptics res;
+    bool succeed = IOJson::loadFile(filename, res);
+    REQUIRE(succeed);
     CHECK(res.getVersion() == testingVersion);
     CHECK(res.getDate() == testingDate);
     CHECK(res.getDescription() == testingDescription);
     CHECK(res.getAvatarsSize() == 0);
     CHECK(res.getPerceptionsSize() == 0);
+
     std::filesystem::remove(filename);
     CHECK(!std::filesystem::is_regular_file(filename));
   }
@@ -94,7 +97,9 @@ TEST_CASE("write/read gmpg haptic file for avatar testing") {
   }
 
   SECTION("read haptic file") {
-    haptics::types::Haptics res = IOJson::loadFile(filename);
+    haptics::types::Haptics res;
+    bool succeed = IOJson::loadFile(filename, res);
+    REQUIRE(succeed);
     REQUIRE(res.getAvatarsSize() == 2);
 
     CHECK(res.getAvatarAt(0).getId() == testingId_avatar1);
@@ -107,6 +112,9 @@ TEST_CASE("write/read gmpg haptic file for avatar testing") {
     CHECK(res.getAvatarAt(1).getLod() == testingLod_avatar2);
     CHECK(res.getAvatarAt(1).getType() == testingType_avatar2);
     CHECK_FALSE(res.getAvatarAt(1).getMesh().has_value());
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -148,7 +156,9 @@ TEST_CASE("write/read gmpg haptic file for reference device testing") {
   }
 
   SECTION("read haptic file") {
-    haptics::types::Haptics res = IOJson::loadFile(filename);
+    haptics::types::Haptics res;
+    bool succeed = IOJson::loadFile(filename, res);
+    REQUIRE(succeed);
     REQUIRE(res.getPerceptionsSize() == 1);
     CHECK(res.getPerceptionAt(0).getTracksSize() == 0);
     REQUIRE(res.getPerceptionAt(0).getReferenceDevicesSize() ==
@@ -180,9 +190,7 @@ TEST_CASE("write/read gmpg haptic file for reference device testing") {
 
       CHECK(myDevice.getId() == std::get<idIndex>(testingValues));
       CHECK(myDevice.getName() == std::get<nameIndex>(testingValues));
-      CHECK(myDevice.getBodyPartMask() == (std::get<bodyPartIndex>(testingValues).has_value()
-                                               ? std::get<bodyPartIndex>(testingValues).value()
-                                               : 0));
+      CHECK(myDevice.getBodyPartMask() == (std::get<bodyPartIndex>(testingValues)));
       CHECK(myDevice.getMaximumFrequency() == std::get<maximumFrequencyIndex>(testingValues));
       CHECK(myDevice.getMinimumFrequency() == std::get<minimumFrequencyIndex>(testingValues));
       CHECK(myDevice.getResonanceFrequency() == std::get<resonanceFrequencyIndex>(testingValues));
@@ -196,6 +204,9 @@ TEST_CASE("write/read gmpg haptic file for reference device testing") {
       CHECK(myDevice.getCustom() == std::get<customIndex>(testingValues));
       CHECK(myDevice.getType() == std::get<typeIndex>(testingValues));
     }
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -281,7 +292,9 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   }
 
   SECTION("read haptic file") {
-    haptics::types::Haptics res = IOJson::loadFile(filename);
+    haptics::types::Haptics res;
+    bool succeed = IOJson::loadFile(filename, res);
+    REQUIRE(succeed);
     REQUIRE(res.getPerceptionsSize() == 2);
     REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
@@ -323,6 +336,9 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
       REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVertexAt(i) == testingVertices_track2.at(i));
     }
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -493,7 +509,9 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   }
 
   SECTION("read haptic file") {
-    haptics::types::Haptics res = IOJson::loadFile(filename);
+    haptics::types::Haptics res;
+    bool succeed = IOJson::loadFile(filename, res);
+    REQUIRE(succeed);
     CHECK(res.getVersion() == testingVersion);
     CHECK(res.getDate() == testingDate);
     CHECK(res.getDescription() == testingDescription);
@@ -644,5 +662,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
           testingWindowLength_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() == 0);
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }

@@ -59,7 +59,7 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     REQUIRE(succeed);
     const int expectedFileSize =
         static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size()) +
-        4 + 2 * 2;
+        3 + 2 * 2;
     CHECK(static_cast<uintmax_t>(std::filesystem::file_size(filename)) == expectedFileSize);
   }
 
@@ -79,6 +79,9 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     CHECK(res.getDescription() == testingDescription);
     CHECK(res.getAvatarsSize() == 0);
     CHECK(res.getPerceptionsSize() == 0);
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -113,7 +116,7 @@ TEST_CASE("write/read file header for avatar testing") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize = 4 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
+    const uintmax_t expectedFileSize = 3 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -140,6 +143,9 @@ TEST_CASE("write/read file header for avatar testing") {
     CHECK(res.getAvatarAt(1).getLod() == testingLod_avatar2);
     CHECK(res.getAvatarAt(1).getType() == testingType_avatar2);
     CHECK_FALSE(res.getAvatarAt(1).getMesh().has_value());
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -187,7 +193,7 @@ TEST_CASE("write/read file header for reference device testing") {
         testingDescription_perception0.size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 110;
+        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 109;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -249,6 +255,9 @@ TEST_CASE("write/read file header for reference device testing") {
       CHECK(myDevice.getCustom() == std::get<customIndex>(testingValues));
       CHECK(myDevice.getType() == std::get<typeIndex>(testingValues));
     }
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -340,7 +349,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 121;
+        testingVertices_track2.size() + 120;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -396,6 +405,9 @@ TEST_CASE("write/read file header for track testing") {
       REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVertexAt(i) == testingVertices_track2.at(i));
     }
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
 
@@ -570,7 +582,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 374;
+        testingVertices_track2.size() + 373;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -732,5 +744,8 @@ TEST_CASE("write/read file for body testing") {
           testingWindowLength_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() == 0);
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }
