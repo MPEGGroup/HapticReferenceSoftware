@@ -39,12 +39,13 @@ GCC 10 Release:
     - mkdir -p build && cd build
     - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror" -DCMAKE_BUILD_TYPE=Release ..
     - make -j
-    - ctest --output-junit report.xml
+    - mkdir reports
+    - ctest --output-junit reports/report.xml
   artifacts:
     when: always
     reports:
-      junit: build/report.xml
+      junit: build/reports/report.xml
     paths:
-      - build/
+      - build/reports/
     expire_in: 1 week
 

@@ -67,9 +67,7 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
     auto c = diff % (long)numChannels;
     buffer.at(c).push_back(*it);
   }
-
   drwav_uninit(&wav);
-
   return true;
 }
 
