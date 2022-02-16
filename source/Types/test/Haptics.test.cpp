@@ -70,7 +70,7 @@ TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
 
   SECTION("Test loading from OHM") {
     std::string filepath =
-        std::filesystem::current_path().string() + "/../../../../../../data/test.ohm";
+        std::filesystem::current_path().string() + "/../../../../../test/test.ohm";
     haptics::tools::OHMData ohmData(filepath);
 
     Haptics h;

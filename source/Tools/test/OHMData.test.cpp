@@ -41,7 +41,7 @@ using haptics::tools::OHMData;
 
 TEST_CASE("haptics::tools::OHMData") {
 
-  std::string filepath = std::filesystem::current_path().string() + "/../../../../../../data/test.ohm";
+  std::string filepath = std::filesystem::current_path().string() + "/../../../../../test/test.ohm";
   OHMData ohmData(filepath);
 
   SECTION("Test loading", "[loadFile]") { 
@@ -62,12 +62,13 @@ TEST_CASE("haptics::tools::OHMData") {
   }
 
   
-  std::string filepath2 = std::filesystem::current_path().string() + "/../../../../../../data/tests/test2.ohm";
+  std::string filepath2 = std::filesystem::current_path().string() + "/../../../../../test/test2.ohm";
 
   SECTION("Test writing", "[writeFile]") {
     ohmData.writeFile(filepath2);
     CHECK(std::filesystem::is_regular_file(filepath2));
     OHMData ohmData2(filepath2);
+    std::filesystem::remove(filepath2);
     bool validHeader = ohmData2.getHeader() == "OHM ";
     bool validDescription = ohmData2.getDescription() == ohmData.getDescription();
     bool validVersion = ohmData2.getVersion() == ohmData.getVersion();
