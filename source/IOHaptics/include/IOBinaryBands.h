@@ -40,6 +40,8 @@
 
 namespace haptics::io {
 
+constexpr int WAVELET_BL_FACTOR = 32;
+
 class IOBinaryBands {
 public:
   static auto readBandHeader(types::Band &band, std::ifstream &file) -> bool;
