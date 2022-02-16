@@ -94,7 +94,6 @@ auto IOBinary::readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bo
     return false;
   }
 
-
   // Get perceptions
   return IOBinary::readPerceptionsHeader(haptic, file);
 }
