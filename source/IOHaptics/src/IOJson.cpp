@@ -38,8 +38,7 @@ using json = nlohmann::json;
 
 namespace haptics::io {
 
-auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic)
-    -> bool {
+auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bool {
   std::ifstream ifs(filePath);
   json jsonTree = json::parse(ifs);
   if (!(jsonTree.contains("version") && jsonTree.contains("date") &&
@@ -315,8 +314,7 @@ auto IOJson::loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
         jsonReferenceDevice["maximum_amplitude"].is_number()) {
       referenceDevice.setMaximumAmplitude(jsonReferenceDevice["maximum_amplitude"].get<float>());
     }
-    if (jsonReferenceDevice.contains("impedance") &&
-        jsonReferenceDevice["impedance"].is_number()) {
+    if (jsonReferenceDevice.contains("impedance") && jsonReferenceDevice["impedance"].is_number()) {
       referenceDevice.setImpedance(jsonReferenceDevice["impedance"].get<float>());
     }
     if (jsonReferenceDevice.contains("maximum_voltage") &&
@@ -543,7 +541,8 @@ auto IOJson::extractReferenceDevices(types::Perception &perception,
       jsonReferenceDevice["custom"] = referenceDevice.getCustom().value();
     }
     if (referenceDevice.getType().has_value()) {
-      jsonReferenceDevice["type"] = types::actuatorTypeToString.at(referenceDevice.getType().value());
+      jsonReferenceDevice["type"] =
+          types::actuatorTypeToString.at(referenceDevice.getType().value());
     }
 
     jsonReferenceDevices.push_back(jsonReferenceDevice);
