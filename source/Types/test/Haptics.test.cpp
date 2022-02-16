@@ -71,26 +71,46 @@ TEST_CASE("haptics::types::Haptics") {
 TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
 
   SECTION("Test loading from OHM") {
-    std::string filepath =
-        std::filesystem::current_path().string() + "/../../../../../test/test.ohm";
-    haptics::tools::OHMData ohmData(filepath);
+    haptics::tools::OHMData ohmData;
+    const std::string header = "OHM ";
+    const std::string description = "Test description";
+    const int version = 1;
+    const std::string elementDescription = "Element description";
+    const std::string channelDescription = "Channel description";
+    const haptics::tools::OHMData::Body bodyPartMask = haptics::tools::OHMData::Body::UNSPECIFIED;
+    const float channelGain = 1.0;
+
+    // Setting the data
+    ohmData.setHeader(header);
+    ohmData.setDescription(description);
+    ohmData.setVersion(version);
+    haptics::tools::OHMData::HapticElementMetadata elementMetadata;
+    elementMetadata.elementDescription = elementDescription;
+    elementMetadata.numHapticChannels = 1;
+    haptics::tools::OHMData::HapticChannelMetadata channelMetadata;
+    channelMetadata.channelDescription = channelDescription;
+    channelMetadata.gain = channelGain;
+    channelMetadata.bodyPartMask = bodyPartMask;
+    elementMetadata.channelsMetadata.push_back(channelMetadata);
+    elementMetadata.numHapticChannels = static_cast<short>(elementMetadata.channelsMetadata.size());
+    ohmData.addHapticElementMetadata(elementMetadata);
 
     Haptics h;
     h.loadMetadataFromOHM(ohmData);
-    bool validDescription = h.getDescription() == "pantheon grand starfall";
-    bool validVersion = h.getVersion() == "1";
+    bool validDescription = h.getDescription() == description;
+    bool validVersion = h.getVersion() == std::to_string(version);
     bool validSize = h.getPerceptionsSize() == 1;
     bool validElmDescription =
-        validSize && (h.getPerceptionAt(0).getDescription() == "Vibration effect");
+        validSize && (h.getPerceptionAt(0).getDescription() == elementDescription);
     bool validNbTracks = validSize && (h.getPerceptionAt(0).getTracksSize() == 1);
     bool validChannelDescription =
         validSize && validNbTracks &&
-        (h.getPerceptionAt(0).getTrackAt(0).getDescription() == "Full body");
+        (h.getPerceptionAt(0).getTrackAt(0).getDescription() == channelDescription);
     bool validGain =
-        validSize && validNbTracks && (h.getPerceptionAt(0).getTrackAt(0).getGain() == 1);
+        validSize && validNbTracks && (h.getPerceptionAt(0).getTrackAt(0).getGain() == channelGain);
     bool validBodyPart = validSize && validNbTracks &&
                          (h.getPerceptionAt(0).getTrackAt(0).getBodyPartMask() ==
-                          static_cast<uint32_t>(haptics::tools::OHMData::Body::ALL));
+                          static_cast<uint32_t>(bodyPartMask));
     bool validFile = validDescription && validVersion && validSize && validElmDescription &&
                      validNbTracks && validChannelDescription && validGain && validBodyPart;
     CHECK(validFile);
