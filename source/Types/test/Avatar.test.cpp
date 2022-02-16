@@ -39,17 +39,17 @@ TEST_CASE("haptics::tools::Avatar") {
   using haptics::types::Avatar;
 
   Avatar avatar(1, 2, haptics::types::AvatarType::Vibration);
-  SECTION("Checking getId", "[getId]") { 
-      auto checkId = avatar.getId();
-      CHECK(checkId == 1);
+  SECTION("Checking getId", "[getId]") {
+    auto checkId = avatar.getId();
+    CHECK(checkId == 1);
   }
   SECTION("Checking getLod", "[getLod]") {
     auto checkLod = avatar.getLod();
-    CHECK( checkLod == 2);
+    CHECK(checkLod == 2);
   }
   SECTION("Checking getType", "[getType]") {
     auto checkType = avatar.getType();
-    CHECK( checkType == haptics::types::AvatarType::Vibration); 
+    CHECK(checkType == haptics::types::AvatarType::Vibration);
   }
   SECTION("Checking setId", "[setId]") {
     avatar.setId(2);

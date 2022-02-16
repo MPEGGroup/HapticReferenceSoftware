@@ -110,8 +110,8 @@ TEST_CASE("haptics::types::Perception testing referenceDevice") {
     perception.addReferenceDevice(device);
     CHECK(perception.getReferenceDevicesSize() == 1);
     haptics::types::ReferenceDevice addedDevice = perception.getReferenceDeviceAt(0);
-    bool sameDevice = (device.getId() == addedDevice.getId()) &&
-                     (device.getName() == addedDevice.getName());
+    bool sameDevice =
+        (device.getId() == addedDevice.getId()) && (device.getName() == addedDevice.getName());
     CHECK(sameDevice);
   }
 }
