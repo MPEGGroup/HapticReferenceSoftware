@@ -42,7 +42,7 @@ namespace haptics::io {
 auto IOBinary::loadFile(const std::string &filePath, types::Haptics &out) -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
-    std::cout << filePath << ": Cannot open file!" << std::endl;
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
     file.close();
     return false;
   }
@@ -51,7 +51,6 @@ auto IOBinary::loadFile(const std::string &filePath, types::Haptics &out) -> boo
   unsigned int length = static_cast<unsigned int>(file.tellg());
   file.seekg(0, std::ios::beg);
 
-  std::cout << "Open: " << length << std::endl;
   if (length == 0) { // avoid undefined behavior
     file.close();
     return false;
@@ -69,7 +68,7 @@ auto IOBinary::loadFile(const std::string &filePath, types::Haptics &out) -> boo
 auto IOBinary::writeFile(types::Haptics &haptic, const std::string &filePath) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
-    std::cout << filePath << ": Cannot open file!" << std::endl;
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
     return false;
   }
 
@@ -95,7 +94,6 @@ auto IOBinary::readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bo
     return false;
   }
 
-  std::string shape = IOBinaryPrimitives::readString(file);
 
   // Get perceptions
   return IOBinary::readPerceptionsHeader(haptic, file);
@@ -105,7 +103,6 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> b
   const std::string version = haptic.getVersion();
   const std::string date = haptic.getDate();
   const std::string description = haptic.getDescription();
-  const std::string shape = "Custom";
 
   IOBinaryPrimitives::writeString(version, file);
   IOBinaryPrimitives::writeString(date, file);
@@ -114,8 +111,6 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> b
   if (!IOBinary::writeAvatars(haptic, file)) {
     return false;
   }
-
-  IOBinaryPrimitives::writeString(shape, file);
 
   return IOBinary::writePerceptionsHeader(haptic, file);
 }
