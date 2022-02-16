@@ -179,7 +179,6 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
     if (!IOBinary::readTracksHeader(myPerception, file)) {
       return false;
     }
-
     haptic.addPerception(myPerception);
   }
 
