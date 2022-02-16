@@ -132,8 +132,8 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool 
     std::string avatarURI;
     myAvatar = types::Avatar(avatarId, avatarLod, static_cast<types::AvatarType>(avatarType));
     if (myAvatar.getType() == types::AvatarType::Custom) {
-      // TODO : do something with this value
       avatarURI = IOBinaryPrimitives::readString(file);
+      myAvatar.setMesh(avatarURI);
     }
 
     haptic.addAvatar(myAvatar);
@@ -147,7 +147,6 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarCount, file);
 
   types::Avatar myAvatar;
-  const std::string avatarURI = "placeholder";
   for (unsigned short i = 0; i < avatarCount; i++) {
     myAvatar = haptic.getAvatarAt(i);
 
@@ -161,6 +160,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
     IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarType, file);
 
     if (myAvatar.getType() == types::AvatarType::Custom) {
+      std::string avatarURI = myAvatar.getMesh().has_value() ? myAvatar.getMesh().value() : "";
       IOBinaryPrimitives::writeString(avatarURI, file);
     }
   }
@@ -267,6 +267,11 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
       myReferenceDevice.setMaximumVoltage(value);
     }
 
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
+      value = IOBinaryPrimitives::readFloat(file);
+      myReferenceDevice.setMaximumCurrent(value);
+    }
+
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_DISPLACEMENT) != 0) {
       value = IOBinaryPrimitives::readFloat(file);
       myReferenceDevice.setMaximumDisplacement(value);
@@ -350,6 +355,11 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_VOLTAGE) != 0) {
       value = myReferenceDevice.getMaximumVoltage().value();
+      IOBinaryPrimitives::writeFloat(value, file);
+    }
+
+    if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
+      value = myReferenceDevice.getMaximumCurrent().value();
       IOBinaryPrimitives::writeFloat(value, file);
     }
 

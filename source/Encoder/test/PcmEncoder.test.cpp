@@ -220,37 +220,3 @@ TEST_CASE("localExtrema with border extract values like without border plus firs
     }
   }
 }
-
-// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("convertToCurveBand", "[convertToCurveBand]") {
-  std::vector<std::pair<int, double>> testingPoints = {
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers, readability-magic-numbers)
-      {0, .654}, {24, 1}, {40, 0}, {80, -.34}, {656, -.5648}, {2500, .15},
-  };
-  const double testingSamplerate = 8000;
-  const double testingCurveFrequencyLimit = 72;
-  const std::vector<double> expectedTimes = {0, 3, 5, 10, 82, 312};
-  REQUIRE(testingPoints.size() == expectedTimes.size());
-
-  Band res;
-  REQUIRE(PcmEncoder::convertToCurveBand(testingPoints, testingSamplerate,
-                                         testingCurveFrequencyLimit, &res));
-  CHECK(res.getBandType() == BandType::Curve);
-  CHECK(res.getEncodingModality() == EncodingModality::Quantized);
-  CHECK(res.getWindowLength() == 0);
-  CHECK(res.getLowerFrequencyLimit() == 0);
-  CHECK(res.getUpperFrequencyLimit() == testingCurveFrequencyLimit);
-  REQUIRE(res.getEffectsSize() == 1);
-  Effect e = res.getEffectAt(0);
-  REQUIRE(e.getKeyframesSize() == testingPoints.size());
-  int i = 0;
-  Keyframe k;
-  for (std::pair<int, double> testingP : testingPoints) {
-    k = e.getKeyframeAt(i);
-    CHECK(k.getRelativePosition() == expectedTimes[i]);
-    CHECK_FALSE(k.getFrequencyModulation().has_value());
-    CHECK(k.getAmplitudeModulation().has_value());
-    CHECK(k.getAmplitudeModulation().value() == Approx(testingP.second));
-    i++;
-  }
-}

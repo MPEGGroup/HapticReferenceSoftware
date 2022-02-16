@@ -47,7 +47,7 @@ namespace haptics::tools {
     -> double;
 
 [[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency,
-                                      double end_frequency, int position) -> double;
+                                      double end_frequency, double position) -> double;
 
 [[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out,
                                         double end_out, double x_in) -> double;

@@ -34,14 +34,15 @@
 #include <Encoder/include/PcmEncoder.h>
 #include <Encoder/include/WaveletEncoder.h>
 #include <Tools/include/Tools.h>
+#include <Types/include/CurveType.h>
 
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
-using haptics::filterbank::FourierTools;
 using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::BaseSignal;
+using haptics::types::CurveType;
 using haptics::types::Effect;
 using haptics::types::EncodingModality;
 using haptics::types::Keyframe;
@@ -97,14 +98,6 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
                                 config.curveFrequencyLimit, waveletBand)) {
       myTrack.addBand(waveletBand);
     }
-    // WAVE BANDS
-    /*for (std::pair<double, double> frequencyLimits : config.frequencyBandLimits) {
-        myBand = Band();
-        if (PcmEncoder::encodeIntoWaveBand(signal, filterbank, wavParser.getSamplerate(),
-            frequencyLimits, config, &myBand)) {
-            myTrack.addBand(myBand);
-        }
-    }*/
     out.replaceTrackAt((int)channelIndex, myTrack);
   }
 
@@ -120,7 +113,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   }
 
   out->setBandType(BandType::Curve);
-  out->setEncodingModality(EncodingModality::Quantized);
+  out->setCurveType(CurveType::Cubic);
+  out->setEncodingModality(EncodingModality::Wavelet);
   out->setWindowLength(0);
   out->setLowerFrequencyLimit(0);
   out->setUpperFrequencyLimit((int)curveFrequencyLimit);
@@ -198,84 +192,4 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
 
   return extremaIndexes;
 }
-[[nodiscard]] auto
-PcmEncoder::encodeIntoWaveBand(std::vector<double> &signal, Filterbank &filterbank,
-                               const double samplerate,
-                               const std::pair<double, double> frequencyBandLimits,
-                               EncodingConfig &config, Band *out) -> bool {
-  if (out == nullptr) {
-    return false;
-  }
-
-  int windowSampleCount = (int)std::round(config.windowLength * MS_2_S * samplerate);
-  if (windowSampleCount == 0) {
-    return false;
-  }
-
-  int upperFrequency = (int)std::round(frequencyBandLimits.second);
-  int LowerFrequency = (int)std::round(frequencyBandLimits.first);
-  std::vector<double> filteredSignal = filterbank.HP(signal, LowerFrequency);
-  filteredSignal = filterbank.LP(filteredSignal, upperFrequency);
-  if (filteredSignal.empty()) {
-    return false;
-  }
-
-  out->setBandType(BandType::Wave);
-  out->setEncodingModality(EncodingModality::Quantized);
-  out->setLowerFrequencyLimit(LowerFrequency);
-  out->setUpperFrequencyLimit(upperFrequency);
-  out->setWindowLength(config.windowLength);
-
-  Effect myEffect;
-  bool generateNewEffect = true;
-  std::vector<double> windowedSignal;
-  for (uint32_t startingWindowIndex = 0; startingWindowIndex < filteredSignal.size();
-       startingWindowIndex += windowSampleCount) {
-    if (startingWindowIndex + windowSampleCount < filteredSignal.size()) {
-      windowedSignal =
-          std::vector<double>(filteredSignal.begin() + startingWindowIndex,
-                              filteredSignal.begin() + startingWindowIndex + windowSampleCount);
-    } else {
-      windowedSignal =
-          std::vector<double>(filteredSignal.begin() + startingWindowIndex, filteredSignal.end());
-    }
-    std::valarray<std::complex<double>> fftValue;
-    if (!FourierTools::FFT(windowedSignal, fftValue)) {
-      continue;
-    }
-
-    auto *maxIt =
-        std::max_element(std::begin(fftValue), std::end(fftValue),
-                         [](std::complex<double> e1, std::complex<double> e2) {
-                           return FourierTools::GetAmplitude(e1) < FourierTools::GetAmplitude(e2);
-                         });
-    int maxIndex = static_cast<int>(maxIt - std::begin(fftValue));
-    if (tools::is_eq(FourierTools::GetAmplitude(*maxIt), 0)) {
-      generateNewEffect = true;
-      out->addEffect(myEffect);
-    } else {
-      if (generateNewEffect) {
-        myEffect = Effect((int)(std::round(S_2_MS * startingWindowIndex / samplerate)),
-                          (float)FourierTools::GetPhase(*maxIt), BaseSignal::Sine);
-        generateNewEffect = false;
-      }
-      int f = (int)std::round(
-          FourierTools::GetFrequency(maxIndex, static_cast<int>(fftValue.size()), samplerate));
-      if (LowerFrequency < f && f <= upperFrequency) {
-        myEffect.addKeyframe(std::nullopt, (float)FourierTools::GetAmplitude(*maxIt), f);
-      } else {
-        generateNewEffect = true;
-        if (myEffect.getKeyframesSize() != 0) {
-          out->addEffect(myEffect);
-        }
-      }
-    }
-  }
-  if (!generateNewEffect) {
-    out->addEffect(myEffect);
-  }
-
-  return out->getEffectsSize() != 0;
-}
-
 } // namespace haptics::encoder

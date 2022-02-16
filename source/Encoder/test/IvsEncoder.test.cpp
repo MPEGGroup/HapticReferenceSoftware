@@ -103,7 +103,7 @@ TEST_CASE("IvsEncoder::getBasisEffects without node", "[getBasisEffects][without
   REQUIRE(res.empty());
 }
 
-TEST_CASE("IvsEncoder::getBasisEffects with wrong node", "[getLastModified][wrongNode]") {
+TEST_CASE("IvsEncoder::getBasisEffects with wrong node", "[getBasisEffects][wrongNode]") {
   pugi::xml_document doc;
   pugi::xml_node node =
       doc.append_child("ivs-file").append_child("wrong effects").append_child("basis-effect");
@@ -115,7 +115,7 @@ TEST_CASE("IvsEncoder::getBasisEffects with wrong node", "[getLastModified][wron
   REQUIRE(res.empty());
 }
 
-TEST_CASE("IvsEncoder::getBasisEffects", "[getLastModified][correctParam]") {
+TEST_CASE("IvsEncoder::getBasisEffects", "[getBasisEffects][correctParam]") {
   const std::vector<std::vector<std::string>> testingValues = {
       {"ShortTransitionRampUp100_1", "500", "sine"},
       {"Bump100_1", "50", "sine"},
