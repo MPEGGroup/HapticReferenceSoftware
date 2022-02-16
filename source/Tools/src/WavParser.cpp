@@ -68,6 +68,8 @@ auto WavParser::loadFile(const std::string &filename) -> bool {
     buffer.at(c).push_back(*it);
   }
 
+  drwav_uninit(&wav);
+
   return true;
 }
 
@@ -103,7 +105,7 @@ auto WavParser::saveFile(const std::string &filename, const std::vector<std::vec
   size_t s = buff.at(0).size();
   for (uint32_t i = 1; i < buff.size(); i++) {
     if (buff.at(i).size() != s) {
-      std::cout << "Output Tracks are of different size" << std::endl;
+      std::cerr << "Output Tracks are of different size" << std::endl;
       return false;
     }
   }
