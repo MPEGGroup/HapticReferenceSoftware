@@ -169,6 +169,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   }
   scalar = qwavmax;
   maxbits = bitmax;
+
   return block_dwt_quant;
 }
 
