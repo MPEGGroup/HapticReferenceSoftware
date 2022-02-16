@@ -130,11 +130,10 @@ public:
   [[nodiscard]] auto getVersion() const -> short;
   auto setVersion(short newVersion) -> void;
   [[nodiscard]] auto getNumElements() const -> short;
-  auto setNumElements(short newNumElements) -> void;
   [[nodiscard]] auto getHeader() const -> std::string;
-  auto setHeader(std::string &newHeader) -> void;
+  auto setHeader(const std::string &newHeader) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
-  auto setDescription(std::string &newDescription) -> void;
+  auto setDescription(const std::string &newDescription) -> void;
   auto getHapticElementMetadataSize() -> size_t;
   auto getHapticElementMetadataAt(int index) -> HapticElementMetadata &;
   auto addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void;

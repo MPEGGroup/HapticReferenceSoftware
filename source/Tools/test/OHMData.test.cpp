@@ -39,71 +39,57 @@
 
 using haptics::tools::OHMData;
 
-TEST_CASE("haptics::tools::OHMData") {
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
+TEST_CASE("haptics::tools::OHMData", "[loadFile][writeFile]") {
+  OHMData ohmData;
+  const std::string header = "OHM ";
+  const std::string description = "Test description";
+  const int version = 1;
+  const std::string elementDescription = "Element description";
+  const std::string elementFilename = "SomeHapticFile.wav";
+  const std::string channelDescription = "Channel description";
+  const OHMData::Body bodyPartMask = OHMData::Body::UNSPECIFIED;
+  const float channelGain = 1.0;
 
-  std::string filepath = std::filesystem::current_path().string() + "/../../../../../test/test.ohm";
-  OHMData ohmData(filepath);
+  // Setting the data
+  ohmData.setHeader(header);
+  ohmData.setDescription(description);
+  ohmData.setVersion(version);
+  OHMData::HapticElementMetadata elementMetadata;
+  elementMetadata.elementFilename = elementFilename;
+  elementMetadata.elementDescription = elementDescription;
+  elementMetadata.numHapticChannels = 1;
+  OHMData::HapticChannelMetadata channelMetadata;
+  channelMetadata.channelDescription = channelDescription;
+  channelMetadata.gain = channelGain;
+  channelMetadata.bodyPartMask = bodyPartMask;
+  elementMetadata.channelsMetadata.push_back(channelMetadata);
+  elementMetadata.numHapticChannels = static_cast<short>(elementMetadata.channelsMetadata.size());
+  ohmData.addHapticElementMetadata(elementMetadata);
 
-  SECTION("Test loading", "[loadFile]") {
-    bool validHeader = ohmData.getHeader() == "OHM ";
-    bool validDescription = ohmData.getDescription() == "pantheon grand starfall";
-    bool validVersion = ohmData.getVersion() == 1;
-    bool validSize = ohmData.getHapticElementMetadataSize() == 1;
-    bool validFileName = validSize && (ohmData.getHapticElementMetadataAt(0).elementFilename ==
-                                       "ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.wav");
-    bool validElmDescription =
-        validSize &&
-        (ohmData.getHapticElementMetadataAt(0).elementDescription == "Vibration effect");
-    bool validNbTracks =
-        validSize && (ohmData.getHapticElementMetadataAt(0).numHapticChannels == 1);
-    bool validChannelDescription =
-        validSize && validNbTracks &&
-        (ohmData.getHapticElementMetadataAt(0).channelsMetadata[0].channelDescription ==
-         "Full body");
-    bool validGain = validSize && validNbTracks &&
-                     (ohmData.getHapticElementMetadataAt(0).channelsMetadata[0].gain == 1);
-    bool validBodyPart = validSize && validNbTracks &&
-                         (ohmData.getHapticElementMetadataAt(0).channelsMetadata[0].bodyPartMask ==
-                          OHMData::Body::ALL);
-    bool validFile = validHeader && validDescription && validVersion && validSize &&
-                     validFileName && validElmDescription && validNbTracks &&
-                     validChannelDescription && validGain && validBodyPart;
-    CHECK(validFile);
+  std::string filename = "test.ohm";
+  SECTION("Test writing/loading", "[writeFile]") {
+    ohmData.writeFile(filename);
+    CHECK(std::filesystem::is_regular_file(filename));
   }
 
-  std::string filepath2 =
-      std::filesystem::current_path().string() + "/../../../../../test/test2.ohm";
-
-  SECTION("Test writing", "[writeFile]") {
-    ohmData.writeFile(filepath2);
-    CHECK(std::filesystem::is_regular_file(filepath2));
-    OHMData ohmData2(filepath2);
-    std::filesystem::remove(filepath2);
-    bool validHeader = ohmData2.getHeader() == "OHM ";
-    bool validDescription = ohmData2.getDescription() == ohmData.getDescription();
-    bool validVersion = ohmData2.getVersion() == ohmData.getVersion();
-    bool validSize =
-        ohmData2.getHapticElementMetadataSize() == ohmData.getHapticElementMetadataSize();
-    bool validFileName = validSize && (ohmData2.getHapticElementMetadataAt(0).elementFilename ==
-                                       ohmData.getHapticElementMetadataAt(0).elementFilename);
-    bool validElmDescription =
-        validSize && (ohmData2.getHapticElementMetadataAt(0).elementDescription ==
-                      ohmData.getHapticElementMetadataAt(0).elementDescription);
-    bool validNbTracks = validSize && (ohmData2.getHapticElementMetadataAt(0).numHapticChannels ==
-                                       ohmData.getHapticElementMetadataAt(0).numHapticChannels);
-    bool validChannelDescription =
-        validSize && validNbTracks &&
-        (ohmData2.getHapticElementMetadataAt(0).channelsMetadata[0].channelDescription ==
-         ohmData.getHapticElementMetadataAt(0).channelsMetadata[0].channelDescription);
-    bool validGain = validSize && validNbTracks &&
-                     (ohmData2.getHapticElementMetadataAt(0).channelsMetadata[0].gain ==
-                      ohmData.getHapticElementMetadataAt(0).channelsMetadata[0].gain);
-    bool validBodyPart = validSize && validNbTracks &&
-                         (ohmData2.getHapticElementMetadataAt(0).channelsMetadata[0].bodyPartMask ==
-                          ohmData.getHapticElementMetadataAt(0).channelsMetadata[0].bodyPartMask);
-    bool validFile = validHeader && validDescription && validVersion && validSize &&
-                     validFileName && validElmDescription && validNbTracks &&
-                     validChannelDescription && validGain && validBodyPart;
-    CHECK(validFile);
+  SECTION("Test loading", "[loadFile]") {
+    OHMData ohmLoadedData(filename);
+    CHECK(ohmLoadedData.getHeader() == header);
+    CHECK(ohmLoadedData.getDescription() == description);
+    CHECK(ohmLoadedData.getVersion() == version);
+    bool validSize = ohmLoadedData.getHapticElementMetadataSize() == 1;
+    REQUIRE(validSize);
+    auto hapticElement = ohmLoadedData.getHapticElementMetadataAt(0);
+    CHECK(hapticElement.elementFilename == elementFilename);
+    CHECK(hapticElement.elementDescription == elementDescription);
+    bool validNbTracks = ohmLoadedData.getHapticElementMetadataAt(0).numHapticChannels == 1;
+    REQUIRE(validNbTracks);
+    auto hapticChannel = hapticElement.channelsMetadata[0];
+    CHECK(hapticChannel.channelDescription == channelDescription);
+    CHECK(hapticChannel.gain == channelGain);
+    CHECK(hapticChannel.bodyPartMask == bodyPartMask);
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }

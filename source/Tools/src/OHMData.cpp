@@ -203,15 +203,16 @@ auto OHMData::writeFile(const std::string &filePath) -> bool {
 auto OHMData::setVersion(short newVersion) -> void { version = newVersion; }
 
 [[nodiscard]] auto OHMData::getNumElements() const -> short { return numElements; }
-auto OHMData::setNumElements(short newNumElements) -> void { numElements = newNumElements; }
 
 [[nodiscard]] auto OHMData::getHeader() const -> std::string { return header; }
 
-auto OHMData::setHeader(std::string &newHeader) -> void { header = newHeader; }
+auto OHMData::setHeader(const std::string &newHeader) -> void { header = newHeader; }
 
 [[nodiscard]] auto OHMData::getDescription() const -> std::string { return description; }
 
-auto OHMData::setDescription(std::string &newDescription) -> void { description = newDescription; }
+auto OHMData::setDescription(const std::string &newDescription) -> void {
+  description = newDescription;
+}
 
 auto OHMData::getHapticElementMetadataSize() -> size_t { return elementsMetadata.size(); }
 
@@ -221,5 +222,6 @@ auto OHMData::getHapticElementMetadataAt(int index) -> HapticElementMetadata & {
 
 auto OHMData::addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void {
   elementsMetadata.push_back(newElementMetadata);
+  numElements = static_cast<short>(elementsMetadata.size());
 }
 } // namespace haptics::tools
