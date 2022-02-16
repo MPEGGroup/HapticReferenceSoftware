@@ -50,13 +50,11 @@ private:
   static auto readTransientBandBody(types::Band &band, std::ifstream &file) -> bool;
   static auto readCurveBandBody(types::Band &band, std::ifstream &file) -> bool;
   static auto readVectorialBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readQuantizedBandBody(types::Band &band, std::ifstream &file) -> bool;
   static auto readWaveletBandBody() -> bool;
 
   static auto writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool;
   static auto writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool;
   static auto writeVectorialBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeQuantizedBandBody(types::Band &band, std::ofstream &file) -> bool;
   static auto writeWaveletBandBody() -> bool;
 };
 } // namespace haptics::io

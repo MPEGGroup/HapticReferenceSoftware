@@ -81,7 +81,7 @@ private:
                         int highFrequencyLimit) -> double;
 
   BandType bandType = BandType::Wave;
-  CurveType curveType = CurveType::Cubic;
+  CurveType curveType = CurveType::Unknown;
   EncodingModality encodingModality = EncodingModality::Vectorial;
   int windowLength = 0;
   int lowerFrequencyLimit = 0;
