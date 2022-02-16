@@ -102,6 +102,13 @@ public:
   auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
   auto replaceTrackAt(int index, Track &newTrack) -> bool;
   auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
+  auto addReferenceDevice(
+      const std::vector<std::tuple<
+          int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
+          std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+          std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+          std::optional<float>, std::optional<haptics::types::ActuatorType>>>
+          &referenceDeviceValues) -> void;
 
 private:
   int id = -1;

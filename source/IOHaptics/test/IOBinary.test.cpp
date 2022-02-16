@@ -41,85 +41,12 @@ using haptics::io::IOBinary;
 
 const std::string filename = "testing_IOBinary.bin";
 
-auto addReferenceDevice(
-    haptics::types::Perception &myPerception,
-    const std::vector<std::tuple<
-        int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
-        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
-        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
-        std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
-    -> void {
-  for (auto values : referenceDeviceValues) {
-    const size_t idIndex = 0;
-    const size_t nameIndex = 1;
-    const size_t bodyPartIndex = 2;
-    const size_t maximumFrequencyIndex = 3;
-    const size_t minimumFrequencyIndex = 4;
-    const size_t resonanceFrequencyIndex = 5;
-    const size_t maximumAmplitudeIndex = 6;
-    const size_t impedanceIndex = 7;
-    const size_t maximumVoltageIndex = 8;
-    const size_t maximumCurrentIndex = 9;
-    const size_t maximumDisplacementIndex = 10;
-    const size_t weightIndex = 11;
-    const size_t sizeIndex = 12;
-    const size_t customIndex = 13;
-    const size_t typeIndex = 14;
-
-    haptics::types::ReferenceDevice myDevice(std::get<idIndex>(values),
-                                             std::get<nameIndex>(values));
-
-    if (std::get<bodyPartIndex>(values).has_value()) {
-      myDevice.setBodyPartMask(std::get<bodyPartIndex>(values).value());
-    }
-    if (std::get<maximumFrequencyIndex>(values).has_value()) {
-      myDevice.setMaximumFrequency(std::get<maximumFrequencyIndex>(values).value());
-    }
-    if (std::get<minimumFrequencyIndex>(values).has_value()) {
-      myDevice.setMinimumFrequency(std::get<minimumFrequencyIndex>(values).value());
-    }
-    if (std::get<resonanceFrequencyIndex>(values).has_value()) {
-      myDevice.setResonanceFrequency(std::get<resonanceFrequencyIndex>(values).value());
-    }
-    if (std::get<maximumAmplitudeIndex>(values).has_value()) {
-      myDevice.setMaximumAmplitude(std::get<maximumAmplitudeIndex>(values).value());
-    }
-    if (std::get<impedanceIndex>(values).has_value()) {
-      myDevice.setImpedance(std::get<impedanceIndex>(values).value());
-    }
-    if (std::get<maximumVoltageIndex>(values).has_value()) {
-      myDevice.setMaximumVoltage(std::get<maximumVoltageIndex>(values).value());
-    }
-    if (std::get<maximumCurrentIndex>(values).has_value()) {
-      myDevice.setMaximumCurrent(std::get<maximumCurrentIndex>(values).value());
-    }
-    if (std::get<maximumDisplacementIndex>(values).has_value()) {
-      myDevice.setMaximumDisplacement(std::get<maximumDisplacementIndex>(values).value());
-    }
-    if (std::get<weightIndex>(values).has_value()) {
-      myDevice.setWeight(std::get<weightIndex>(values).value());
-    }
-    if (std::get<sizeIndex>(values).has_value()) {
-      myDevice.setSize(std::get<sizeIndex>(values).value());
-    }
-    if (std::get<customIndex>(values).has_value()) {
-      myDevice.setCustom(std::get<customIndex>(values).value());
-    }
-    if (std::get<typeIndex>(values).has_value()) {
-      myDevice.setType(std::get<typeIndex>(values).value());
-    }
-
-    myPerception.addReferenceDevice(myDevice);
-  }
-}
-
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read file header without avatar and perceptions") {
   const std::string testingVersion = "42";
   const std::string testingDate = "Monday, February 14, 2022";
   const std::string testingDescription =
       "I'm an awsome Haptic description placeholder and I wasn't writted by a developer";
-  const std::string testingShape = "Custom";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   SECTION("write haptic header") {
@@ -130,9 +57,10 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize = testingVersion.size() + testingDate.size() +
-                                       testingDescription.size() + testingShape.size() + 4 + 2 * 2;
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+    const int expectedFileSize =
+        static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size()) +
+        4 + 2 * 2;
+    CHECK(static_cast<uintmax_t>(std::filesystem::file_size(filename)) == expectedFileSize);
   }
 
   SECTION("read haptic header") {
@@ -159,7 +87,6 @@ TEST_CASE("write/read file header for avatar testing") {
   const std::string testingVersion;
   const std::string testingDate;
   const std::string testingDescription;
-  const std::string testingShape = "Custom";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_avatar1 = 42;
@@ -186,8 +113,7 @@ TEST_CASE("write/read file header for avatar testing") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize =
-        testingShape.size() + 4 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
+    const uintmax_t expectedFileSize = 4 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -222,7 +148,6 @@ TEST_CASE("write/read file header for reference device testing") {
   const std::string testingVersion;
   const std::string testingDate;
   const std::string testingDescription;
-  const std::string testingShape = "Custom";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_perception0 = 0;
@@ -247,7 +172,7 @@ TEST_CASE("write/read file header for reference device testing") {
           {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
-  addReferenceDevice(testingPerception, testingReferenceDeviceValue_perception0);
+  testingPerception.addReferenceDevice(testingReferenceDeviceValue_perception0);
   testingHaptic.addPerception(testingPerception);
 
   SECTION("write reference devices") {
@@ -259,7 +184,7 @@ TEST_CASE("write/read file header for reference device testing") {
 
     REQUIRE(succeed);
     const uintmax_t expectedFileSize =
-        testingShape.size() + testingDescription_perception0.size() +
+        testingDescription_perception0.size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 110;
@@ -332,7 +257,6 @@ TEST_CASE("write/read file header for track testing") {
   const std::string testingVersion;
   const std::string testingDate;
   const std::string testingDescription;
-  const std::string testingShape = "Custom";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_perception0 = 0;
@@ -413,10 +337,10 @@ TEST_CASE("write/read file header for track testing") {
 
     REQUIRE(succeed);
     const uintmax_t expectedFileSize =
-        testingShape.size() + testingDescription_perception0.size() +
-        testingDescription_perception1.size() + testingDescription_track0.size() +
-        testingDescription_track1.size() + testingDescription_track2.size() +
-        testingVertices_track0.size() + testingVertices_track2.size() + 121;
+        testingDescription_perception0.size() + testingDescription_perception1.size() +
+        testingDescription_track0.size() + testingDescription_track1.size() +
+        testingDescription_track2.size() + testingVertices_track0.size() +
+        testingVertices_track2.size() + 121;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -480,7 +404,6 @@ TEST_CASE("write/read file for body testing") {
   const std::string testingVersion = "RM1";
   const std::string testingDate = "Today";
   const std::string testingDescription = "I'm a testing value";
-  const std::string testingShape = "Custom";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_avatar1 = 42;
@@ -518,7 +441,7 @@ TEST_CASE("write/read file for body testing") {
           {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
-  addReferenceDevice(testingPerception0, testingReferenceDeviceValue_perception0);
+  testingPerception0.addReferenceDevice(testingReferenceDeviceValue_perception0);
 
   const int testingId_perception1 = 423;
   const int testingAvatarId_perception1 = 3;
@@ -643,7 +566,7 @@ TEST_CASE("write/read file for body testing") {
     REQUIRE(succeed);
     const uintmax_t expectedFileSize =
         testingVersion.size() + testingDate.size() + testingDescription.size() +
-        testingShape.size() + testingMesh_avatar1.size() + testingMesh_avatar2.size() +
+        testingMesh_avatar1.size() + testingMesh_avatar2.size() +
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
