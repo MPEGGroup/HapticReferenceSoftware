@@ -97,22 +97,15 @@ TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
 
     Haptics h;
     h.loadMetadataFromOHM(ohmData);
-    bool validDescription = h.getDescription() == description;
-    bool validVersion = h.getVersion() == std::to_string(version);
-    bool validSize = h.getPerceptionsSize() == 1;
-    bool validElmDescription =
-        validSize && (h.getPerceptionAt(0).getDescription() == elementDescription);
-    bool validNbTracks = validSize && (h.getPerceptionAt(0).getTracksSize() == 1);
-    bool validChannelDescription =
-        validSize && validNbTracks &&
-        (h.getPerceptionAt(0).getTrackAt(0).getDescription() == channelDescription);
-    bool validGain =
-        validSize && validNbTracks && (h.getPerceptionAt(0).getTrackAt(0).getGain() == channelGain);
-    bool validBodyPart = validSize && validNbTracks &&
-                         (h.getPerceptionAt(0).getTrackAt(0).getBodyPartMask() ==
-                          static_cast<uint32_t>(bodyPartMask));
-    bool validFile = validDescription && validVersion && validSize && validElmDescription &&
-                     validNbTracks && validChannelDescription && validGain && validBodyPart;
-    CHECK(validFile);
+    CHECK(h.getDescription() == description);
+    CHECK(h.getVersion() == std::to_string(version));
+    REQUIRE(h.getPerceptionsSize() == 1);
+    auto perception = h.getPerceptionAt(0);
+    CHECK(perception.getDescription() == elementDescription);
+    REQUIRE(perception.getTracksSize() == 1);
+    auto track = perception.getTrackAt(0);
+    CHECK(track.getDescription() == channelDescription);
+    CHECK(track.getGain() == channelGain);
+    CHECK(track.getBodyPartMask() == static_cast<uint32_t>(bodyPartMask));
   }
 }
