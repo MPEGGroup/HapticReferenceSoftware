@@ -38,8 +38,7 @@ namespace haptics::waveletdecoder {
 auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
   size_t numBlocks = band.getEffectsSize();
   int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
-                 (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
-  // int bl = band.getEffectAt(0).getKeyframesSize() - 1;
+                 (double)band.getUpperFrequencyLimit());
   int dwtlevel = (int)log2((double)bl / 4);
   std::vector<double> sig_rec(numBlocks * bl, 0);
 
@@ -48,15 +47,10 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
     std::vector<double> block_dwt(bl, 0);
     Keyframe keyframe = effect.getKeyframeAt(bl);
     auto scalar = (double)keyframe.getAmplitudeModulation().value();
-    // std::cout << "scalar decoder: " << scalar << std::endl;
     for (int i = 0; i < bl; i++) {
       Keyframe keyframe = effect.getKeyframeAt(i);
       block_dwt[i] = (double)keyframe.getAmplitudeModulation().value();
     }
-
-    /*for (auto v : block_dwt) {
-      std::cout << v << std::endl;
-    }*/
 
     std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
     std::copy(block_time.begin(), block_time.end(), sig_rec.begin() + effect.getPosition());
@@ -71,8 +65,7 @@ void WaveletDecoder::transformBand(Band &band) {
   }
   size_t numBlocks = band.getEffectsSize();
   int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
-                 (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
-  // int bl = band.getEffectAt(0).getKeyframesSize() - 1;
+                 (double)band.getUpperFrequencyLimit());
   int dwtlevel = (int)log2((double)bl / 4);
 
   for (uint32_t b = 0; b < numBlocks; b++) {

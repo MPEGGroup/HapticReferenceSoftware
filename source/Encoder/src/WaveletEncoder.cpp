@@ -153,7 +153,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   int bitmax = findMax(bitalloc);
   int intmax = 1 << bitmax;
   double multiplicator = (double)intmax / (double)qwavmax;
-  // double multiplicator = (double)1 / qwavmax;
 
   std::vector<double> test(bl, 0);
   wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);
@@ -174,11 +173,9 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
   double wavmax = findMax(sig);
 
   int integerpart = 0;
-  // int fractionbits = 0;
   char mode = 0;
   quantMode m = {0, 0};
   if (wavmax < 1) {
-    // fractionbits = FRACTIONBITS_0;
     m.integerbits = 0;
     m.fractionbits = FRACTIONBITS_0;
   } else {

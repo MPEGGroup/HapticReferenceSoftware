@@ -73,10 +73,6 @@ void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &
       l[j] = out[j / 2];
       h[j + 1] = out[j / 2 + (len / 2)];
     }
-    /*for (int j = 0; j < len; j += 2) {
-      l[j + 1] = 0;
-      h[j] = 0;
-    }*/
     symconv1D(h, hpr, out);
     symconv1DAdd(l, lpr, out);
   }
