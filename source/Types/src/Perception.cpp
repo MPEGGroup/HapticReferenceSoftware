@@ -151,7 +151,7 @@ auto Perception::addReferenceDevice(
   }
 }
 
-auto Perception::convertToModality(const std::string& modalityString) -> PerceptionModality {
+auto Perception::convertToModality(const std::string &modalityString) -> PerceptionModality {
   if (stringToPerceptionModality.count(modalityString) != 0) {
     return stringToPerceptionModality.at(modalityString);
   }
