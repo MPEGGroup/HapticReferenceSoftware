@@ -79,7 +79,8 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
   for (int i = 0; i < numElements; i++) {
     auto element = data.getHapticElementMetadataAt(i);
     std::string elemDescription = element.elementDescription;
-    Perception perception(i, 0, elemDescription, PerceptionModality::Other);
+    PerceptionModality perceptionModality = Perception::convertToModality(elemDescription);
+    Perception perception(i, 0, elemDescription, perceptionModality);
     short numChannels = element.numHapticChannels;
     for (int j = 0; j < numChannels; j++) {
       auto channel = element.channelsMetadata[j];
