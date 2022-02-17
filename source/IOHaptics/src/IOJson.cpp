@@ -39,6 +39,7 @@ using json = nlohmann::json;
 namespace haptics::io {
 
 auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bool {
+  bool loadingSuccess = true;
   std::ifstream ifs(filePath);
   json jsonTree = json::parse(ifs);
   if (!(jsonTree.contains("version") && jsonTree.contains("date") &&
@@ -55,15 +56,15 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   haptic.setDate(date);
   haptic.setDescription(description);
   auto jsonAvatars = jsonTree["avatars"];
-  loadAvatars(jsonAvatars, haptic);
+  loadingSuccess = loadingSuccess && loadAvatars(jsonAvatars, haptic);
   auto jsonPerceptions = jsonTree["perceptions"];
-  loadPerceptions(jsonPerceptions, haptic);
-  return true;
+  loadingSuccess = loadingSuccess && loadPerceptions(jsonPerceptions, haptic);
+  return loadingSuccess;
 }
 
 auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
     -> bool {
-
+  bool loadingSuccess = true;
   for (auto it = jsonPerceptions.begin(); it != jsonPerceptions.end(); ++it) {
     auto jsonPerception = it.value();
     if (!jsonPerception.contains("id") || !jsonPerception["id"].is_number_integer()) {
@@ -97,17 +98,18 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
     auto jsonTracks = jsonPerception["tracks"];
-    loadTracks(jsonTracks, perception);
+    loadingSuccess = loadingSuccess && loadTracks(jsonTracks, perception);
     if (jsonPerception.contains("reference_devices") &&
         jsonPerception["reference_devices"].is_array()) {
       auto jsonReferenceDevices = jsonPerception["reference_devices"];
-      loadReferenceDevices(jsonReferenceDevices, perception);
+      loadingSuccess = loadingSuccess && loadReferenceDevices(jsonReferenceDevices, perception);
     }
     haptic.addPerception(perception);
   }
-  return true;
+  return loadingSuccess;
 }
 auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool {
+  bool loadingSuccess = true;
   for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
     auto jsonTrack = it.value();
     if (!jsonTrack.contains("id") || !jsonTrack["id"].is_number_integer()) {
@@ -157,12 +159,13 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
       }
     }
     auto jsonBands = jsonTrack["bands"];
-    loadBands(jsonBands, track);
+    loadingSuccess = loadingSuccess && loadBands(jsonBands, track);
     perception.addTrack(track);
   }
-  return true;
+  return loadingSuccess;
 }
 auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool {
+  bool loadingSuccess = true;
   for (auto it = jsonBands.begin(); it != jsonBands.end(); ++it) {
     auto jsonBand = it.value();
     if (!jsonBand.contains("band_type") || !jsonBand["band_type"].is_string()) {
@@ -207,14 +210,15 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
 
     types::Band band(bandType, curveType, encodingModality, windowLength, lowerLimit, upperLimit);
     auto jsonEffects = jsonBand["effects"];
-    loadEffects(jsonEffects, band);
+    loadingSuccess = loadingSuccess && loadEffects(jsonEffects, band);
 
     track.addBand(band);
   }
-  return true;
+  return loadingSuccess;
 }
 
 auto IOJson::loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> bool {
+  bool loadingSuccess = true;
   for (auto it = jsonEffects.begin(); it != jsonEffects.end(); ++it) {
     auto jsonEffect = it.value();
     if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
@@ -240,11 +244,11 @@ auto IOJson::loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -
 
     types::Effect effect(position, phase, baseSignal);
     auto jsonKeyframes = jsonEffect["keyframes"];
-    loadKeyframes(jsonKeyframes, effect);
+    loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
 
     band.addEffect(effect);
   }
-  return true;
+  return loadingSuccess;
 }
 
 auto IOJson::loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> bool {
