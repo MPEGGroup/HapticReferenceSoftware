@@ -68,6 +68,7 @@ TEST_CASE("haptics::types::Haptics") {
   }
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
 
   SECTION("Test loading from OHM") {

@@ -77,6 +77,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   memcpy(&version, &versionBytes, sizeof(version));
 
   // Get the number of elements
+  short numElements = 0;
   std::array<char, 2> numElementsBytes{};
   file.read(numElementsBytes.data(), 2);
   std::reverse(numElementsBytes.begin(), numElementsBytes.end());
@@ -154,6 +155,7 @@ auto OHMData::writeFile(const std::string &filePath) -> bool {
   file.write(versionBytes.data(), 2);
 
   // Writing the number of elements
+  auto numElements = static_cast<short>(getHapticElementMetadataSize());
   std::array<char, 2> numElementsBytes{};
   memcpy(&numElementsBytes, &numElements, sizeof(numElements));
   std::reverse(numElementsBytes.begin(), numElementsBytes.end());
@@ -202,8 +204,6 @@ auto OHMData::writeFile(const std::string &filePath) -> bool {
 
 auto OHMData::setVersion(short newVersion) -> void { version = newVersion; }
 
-[[nodiscard]] auto OHMData::getNumElements() const -> short { return numElements; }
-
 [[nodiscard]] auto OHMData::getHeader() const -> std::string { return header; }
 
 auto OHMData::setHeader(const std::string &newHeader) -> void { header = newHeader; }
@@ -222,6 +222,5 @@ auto OHMData::getHapticElementMetadataAt(int index) -> HapticElementMetadata & {
 
 auto OHMData::addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void {
   elementsMetadata.push_back(newElementMetadata);
-  numElements = static_cast<short>(elementsMetadata.size());
 }
 } // namespace haptics::tools
