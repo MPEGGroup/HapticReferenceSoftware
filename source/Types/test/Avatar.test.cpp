@@ -34,6 +34,7 @@
 #include <Types/include/Avatar.h>
 #include <catch2/catch.hpp>
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("haptics::tools::Avatar") {
 
   using haptics::types::Avatar;
@@ -51,6 +52,10 @@ TEST_CASE("haptics::tools::Avatar") {
     auto checkType = avatar.getType();
     CHECK(checkType == haptics::types::AvatarType::Vibration);
   }
+  SECTION("Checking getMesh", "[getMesh]") {
+    auto checkMesh = avatar.getMesh();
+    CHECK(!checkMesh.has_value());
+  }
   SECTION("Checking setId", "[setId]") {
     avatar.setId(2);
     auto checkId = avatar.getId();
@@ -65,5 +70,11 @@ TEST_CASE("haptics::tools::Avatar") {
     avatar.setType(haptics::types::AvatarType::Pressure);
     auto checkType = avatar.getType();
     CHECK(checkType == haptics::types::AvatarType::Pressure);
+  }
+  SECTION("Checking setMesh", "[setMesh]") {
+    std::string mesh = "SomeMesh.obj";
+    avatar.setMesh(mesh);
+    auto checkMesh = avatar.getMesh();
+    CHECK(checkMesh == mesh);
   }
 }
