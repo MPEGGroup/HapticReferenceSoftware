@@ -87,22 +87,22 @@ auto Perception::addReferenceDevice(
         std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
         std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
     -> void {
+  const size_t idIndex = 0;
+  const size_t nameIndex = 1;
+  const size_t bodyPartIndex = 2;
+  const size_t maximumFrequencyIndex = 3;
+  const size_t minimumFrequencyIndex = 4;
+  const size_t resonanceFrequencyIndex = 5;
+  const size_t maximumAmplitudeIndex = 6;
+  const size_t impedanceIndex = 7;
+  const size_t maximumVoltageIndex = 8;
+  const size_t maximumCurrentIndex = 9;
+  const size_t maximumDisplacementIndex = 10;
+  const size_t weightIndex = 11;
+  const size_t sizeIndex = 12;
+  const size_t customIndex = 13;
+  const size_t typeIndex = 14;
   for (auto values : referenceDeviceValues) {
-    const size_t idIndex = 0;
-    const size_t nameIndex = 1;
-    const size_t bodyPartIndex = 2;
-    const size_t maximumFrequencyIndex = 3;
-    const size_t minimumFrequencyIndex = 4;
-    const size_t resonanceFrequencyIndex = 5;
-    const size_t maximumAmplitudeIndex = 6;
-    const size_t impedanceIndex = 7;
-    const size_t maximumVoltageIndex = 8;
-    const size_t maximumCurrentIndex = 9;
-    const size_t maximumDisplacementIndex = 10;
-    const size_t weightIndex = 11;
-    const size_t sizeIndex = 12;
-    const size_t customIndex = 13;
-    const size_t typeIndex = 14;
 
     haptics::types::ReferenceDevice myDevice(std::get<idIndex>(values),
                                              std::get<nameIndex>(values));
