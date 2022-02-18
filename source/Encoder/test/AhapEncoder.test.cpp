@@ -37,9 +37,6 @@
 using haptics::encoder::AhapEncoder;
 
 TEST_CASE("return true", "[placeholder]") {
-  // std::string str("this/is/my/file/path.ext");
-  // int exit_code = AhapEncoder::encode(str);
-
-  // CHECK(exit_code == EXIT_FAILURE);
+  // TODO: Some tests
   CHECK(true);
 }
