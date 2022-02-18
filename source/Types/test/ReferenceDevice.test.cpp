@@ -127,55 +127,55 @@ TEST_CASE("haptics::types::ReferenceDevice setters") {
   SECTION("Checking setImpedance", "[setImpedance]") {
     const float impedance = 10;
     device.setImpedance(impedance);
-    REQUIRE(!device.getImpedance().has_value());
+    REQUIRE(device.getImpedance().has_value());
     CHECK(device.getImpedance().value() == impedance);
   }
 
   SECTION("Checking setMaximumVoltage", "[setMaximumVoltage]") {
     const float maximumVoltage = 3;
     device.setMaximumVoltage(maximumVoltage);
-    REQUIRE(!device.getMaximumVoltage().has_value());
+    REQUIRE(device.getMaximumVoltage().has_value());
     CHECK(device.getMaximumVoltage().value() == maximumVoltage);
   }
 
   SECTION("Checking setMaximumCurrent", "[setMaximumCurrent]") {
     const float maximumCurrent = 1;
     device.setMaximumCurrent(maximumCurrent);
-    REQUIRE(!device.getMaximumCurrent().has_value());
+    REQUIRE(device.getMaximumCurrent().has_value());
     CHECK(device.getMaximumCurrent().value() == maximumCurrent);
   }
 
   SECTION("Checking setMaximumDisplacement", "[setMaximumDisplacement]") {
     const float maximumDisplacement = 10;
     device.setMaximumDisplacement(maximumDisplacement);
-    REQUIRE(!device.getMaximumDisplacement().has_value());
+    REQUIRE(device.getMaximumDisplacement().has_value());
     CHECK(device.getMaximumDisplacement().value() == maximumDisplacement);
   }
 
   SECTION("Checking setWeight", "[setWeight]") {
     const float weight = 10;
     device.setWeight(weight);
-    REQUIRE(!device.getWeight().has_value());
+    REQUIRE(device.getWeight().has_value());
     CHECK(device.getWeight().value() == weight);
   }
 
   SECTION("Checking setSize", "[setSize]") {
     const float size = 2;
     device.setSize(size);
-    REQUIRE(!device.getSize().has_value());
+    REQUIRE(device.getSize().has_value());
     CHECK(device.getSize().value() == size);
   }
 
   SECTION("Checking setCustom", "[setCustom]") {
     const float custom = 10;
     device.setCustom(custom);
-    REQUIRE(!device.getCustom().has_value());
+    REQUIRE(device.getCustom().has_value());
     CHECK(device.getCustom().value() == custom);
   }
 
   SECTION("Checking setType", "[setType]") {
     device.setType(haptics::types::ActuatorType::ERM);
-    REQUIRE(!device.getType().has_value());
+    REQUIRE(device.getType().has_value());
     CHECK(device.getType().value() == haptics::types::ActuatorType::ERM);
   }
 }
