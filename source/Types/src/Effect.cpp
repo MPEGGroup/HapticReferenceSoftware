@@ -292,11 +292,10 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
 
   if (k_after < keyframes.end()) {
     // first KF before position
-    auto k_before = std::find_if(std::make_reverse_iterator(k_after), keyframes.rend(),
-                                 [](haptics::types::Keyframe k) {
-                                   return k.getRelativePosition().has_value() &&
-                                          k.getAmplitudeModulation().has_value();
-                                 });
+    auto k_before = std::find_if(
+        std::make_reverse_iterator(k_after), keyframes.rend(), [](haptics::types::Keyframe k) {
+          return k.getRelativePosition().has_value() && k.getAmplitudeModulation().has_value();
+        });
     if (k_before == keyframes.rend()) {
       return k_after->getAmplitudeModulation().value();
     }
