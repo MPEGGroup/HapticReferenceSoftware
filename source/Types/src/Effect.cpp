@@ -68,7 +68,7 @@ auto Effect::addKeyframe(haptics::types::Keyframe &newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
 }
 
-auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
+auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position) -> bool {
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
@@ -90,7 +90,7 @@ auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
   return true;
 }
 
-auto Effect::addFrequencyAt(int frequency, int position) -> bool {
+auto Effect::addFrequencyAt(std::optional<int> frequency, int position) -> bool {
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
@@ -282,27 +282,22 @@ auto Effect::EvaluateTransient(double position, double transientDuration) -> dou
 }
 
 auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> double {
+  const double relativePosition = position - this->getPosition();
   double res = 0;
-  auto k_after =
-      std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
+  auto k_after = std::find_if(
+      keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
         return k.getRelativePosition().has_value() && k.getAmplitudeModulation().has_value() &&
-               k.getRelativePosition() > position;
+               k.getRelativePosition() > relativePosition;
       });
 
   if (k_after < keyframes.end()) {
     // first KF before position
-    auto k_before = keyframes.begin();
-    bool found = true;
-    for (auto it = k_after - 1; it > keyframes.begin(); it--) {
-      if (it->getRelativePosition().has_value() && it->getAmplitudeModulation().has_value()) {
-        k_before = it;
-        break;
-      }
-      if (it == keyframes.begin()) {
-        found = false;
-      }
-    }
-    if (!found) {
+    auto k_before = std::find_if(std::make_reverse_iterator(k_after), keyframes.rend(),
+                                 [relativePosition](haptics::types::Keyframe k) {
+                                   return k.getRelativePosition().has_value() &&
+                                          k.getAmplitudeModulation().has_value();
+                                 });
+    if (k_before == keyframes.rend()) {
       return k_after->getAmplitudeModulation().value();
     }
 
@@ -311,7 +306,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
     double t1 = MS_2_S * k_after->getRelativePosition().value();
     double f1 = k_after->getAmplitudeModulation().value();
 
-    double t = MS_2_S * position;
+    double t = MS_2_S * relativePosition;
     switch (curveType) {
     case types::CurveType::Cubic: {
       double h = t1 - t0;
