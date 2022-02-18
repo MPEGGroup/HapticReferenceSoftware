@@ -95,7 +95,7 @@ TEST_CASE("haptics::types::Perception testing tracks") {
     CHECK(track.getId() == addedTrack.getId());
     CHECK(track.getDescription() == addedTrack.getDescription());
     CHECK(track.getGain() == Approx(addedTrack.getGain()));
-    CHECK(track.getMixingWeight() ==  Approx(addedTrack.getMixingWeight()));
+    CHECK(track.getMixingWeight() == Approx(addedTrack.getMixingWeight()));
     CHECK(track.getBodyPartMask() == addedTrack.getBodyPartMask());
   }
 }
