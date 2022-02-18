@@ -75,7 +75,7 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
   time_t now = time(nullptr);
   date = ctime(&now);
   description = data.getDescription();
-  auto numElements = data.getHapticElementMetadataSize();
+  auto numElements = static_cast<int>(data.getHapticElementMetadataSize());
   for (int i = 0; i < numElements; i++) {
     auto element = data.getHapticElementMetadataAt(i);
     std::string elemDescription = element.elementDescription;
