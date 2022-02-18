@@ -331,10 +331,12 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
   types::Keyframe myKeyframe;
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
     myEffect = band.getEffectAt(effectIndex);
-    myKeyframe = myEffect.getKeyframeAt(0);
-    if (myKeyframe.getRelativePosition().value_or(0) != 0) {
-      myEffect.addAmplitudeAt(myKeyframe.getAmplitudeModulation(), 0);
-      myEffect.addFrequencyAt(myKeyframe.getFrequencyModulation(), 0);
+    if (myEffect.getKeyframesSize() > 0) {
+      myKeyframe = myEffect.getKeyframeAt(0);
+      if (myKeyframe.getRelativePosition().value_or(0) != 0) {
+        myEffect.addAmplitudeAt(myKeyframe.getAmplitudeModulation(), 0);
+        myEffect.addFrequencyAt(myKeyframe.getFrequencyModulation(), 0);
+      }
     }
     auto keyframeCount = static_cast<unsigned short>(myEffect.getKeyframesSize());
     IOBinaryPrimitives::writeNBytes<unsigned short, 2>(keyframeCount, file);
