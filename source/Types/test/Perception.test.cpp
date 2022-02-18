@@ -92,12 +92,11 @@ TEST_CASE("haptics::types::Perception testing tracks") {
     perception.addTrack(track);
     CHECK(perception.getTracksSize() == 1);
     haptics::types::Track addedTrack = perception.getTrackAt(0);
-    bool sameTrack = (track.getId() == addedTrack.getId()) &&
-                     (track.getDescription() == addedTrack.getDescription()) &&
-                     (track.getGain() == addedTrack.getGain()) &&
-                     (track.getMixingWeight() == addedTrack.getMixingWeight()) &&
-                     (track.getBodyPartMask() == addedTrack.getBodyPartMask());
-    CHECK(sameTrack);
+    CHECK(track.getId() == addedTrack.getId());
+    CHECK(track.getDescription() == addedTrack.getDescription());
+    CHECK(track.getGain() == Approx(addedTrack.getGain()));
+    CHECK(track.getMixingWeight() ==  Approx(addedTrack.getMixingWeight()));
+    CHECK(track.getBodyPartMask() == addedTrack.getBodyPartMask());
   }
 }
 

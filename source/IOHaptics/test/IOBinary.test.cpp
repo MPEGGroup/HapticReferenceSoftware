@@ -373,8 +373,9 @@ TEST_CASE("write/read file header for track testing") {
 
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getGain() == testingGain_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() == testingMixingWeight_track0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getGain() == Approx(testingGain_track0));
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() ==
+          Approx(testingMixingWeight_track0));
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
             testingVertices_track0.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
@@ -384,8 +385,9 @@ TEST_CASE("write/read file header for track testing") {
 
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getGain() == testingGain_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() == testingMixingWeight_track1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getGain() == Approx(testingGain_track1));
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() ==
+          Approx(testingMixingWeight_track1));
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
 
@@ -397,8 +399,9 @@ TEST_CASE("write/read file header for track testing") {
 
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getGain() == testingGain_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() == testingMixingWeight_track2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getGain() == Approx(testingGain_track2));
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() ==
+          Approx(testingMixingWeight_track2));
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
