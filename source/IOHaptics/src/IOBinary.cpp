@@ -398,7 +398,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
-    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
+    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask, std::nullopt);
     if (deviceId >= 0) {
       t.setReferenceDeviceId(deviceId);
     }

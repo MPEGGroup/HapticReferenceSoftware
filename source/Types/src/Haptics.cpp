@@ -84,7 +84,7 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     for (int j = 0; j < numChannels; j++) {
       auto channel = element.channelsMetadata[j];
       Track track(j, channel.channelDescription, channel.gain, 1,
-                  static_cast<uint32_t>(channel.bodyPartMask));
+                  static_cast<uint32_t>(channel.bodyPartMask), std::nullopt);
       perception.addTrack(track);
     }
     perceptions.push_back(perception);

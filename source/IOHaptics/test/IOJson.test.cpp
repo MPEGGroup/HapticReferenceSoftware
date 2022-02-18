@@ -240,9 +240,10 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
+  const haptics::types::Direction testingDirection_track0(127, 4, -128);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0);
+                                      testingBodyPartMask_track0, testingDirection_track0);
   for (auto vertex : testingVertices_track0) {
     testingTrack0.addVertex(vertex);
   }
@@ -256,9 +257,10 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const float testingMixingWeight_track1 = .333;
   const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
   const size_t testingBandsCount_track1 = 0;
+  const haptics::types::Direction testingDirection_track1(127, 4, -0);
   haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
                                       testingGain_track1, testingMixingWeight_track1,
-                                      testingBodyPartMask_track1);
+                                      testingBodyPartMask_track1, testingDirection_track1);
   for (size_t i = 0; i < testingBandsCount_track1; i++) {
     testingTrack1.generateBand();
   }
@@ -272,7 +274,7 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const size_t testingBandsCount_track2 = 1;
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
-                                      testingBodyPartMask_track2);
+                                      testingBodyPartMask_track2, std::nullopt);
   for (auto vertex : testingVertices_track2) {
     testingTrack2.addVertex(vertex);
   }
@@ -405,7 +407,7 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0);
+                                      testingBodyPartMask_track0, std::nullopt);
   for (auto vertex : testingVertices_track0) {
     testingTrack0.addVertex(vertex);
   }
@@ -417,7 +419,7 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
   haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
                                       testingGain_track1, testingMixingWeight_track1,
-                                      testingBodyPartMask_track1);
+                                      testingBodyPartMask_track1, std::nullopt);
 
   const int testingId_track2 = 4;
   const std::string testingDescription_track2 = "I'm inside a test";
@@ -425,9 +427,10 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const float testingMixingWeight_track2 = .6666;
   const uint32_t testingBodyPartMask_track2 = 0;
   const std::vector<int> testingVertices_track2 = {0, 6};
+  const haptics::types::Direction testingDirection_track2(0, -1, 1);
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
-                                      testingBodyPartMask_track2);
+                                      testingBodyPartMask_track2, testingDirection_track2);
   for (auto vertex : testingVertices_track2) {
     testingTrack2.addVertex(vertex);
   }

@@ -143,7 +143,7 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
     auto trackMixingWeight = jsonTrack["mixing_weight"].get<float>();
     auto trackBodyPart = jsonTrack["body_part_mask"].get<uint32_t>();
 
-    types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
+    types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart, std::nullopt);
 
     if (jsonTrack.contains("reference_device_id") && jsonTrack["reference_device_id"].is_number()) {
       auto device_id = jsonTrack["reference_device_id"].get<int>();

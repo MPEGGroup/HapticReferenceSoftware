@@ -40,16 +40,33 @@
 
 namespace haptics::types {
 
+struct Direction {
+  int8_t X = 0;
+  int8_t Y = 0;
+  int8_t Z = 0;
+
+  explicit Direction() = default;
+  explicit Direction(int8_t x, int8_t y, int8_t z)
+      : X(x)
+      , Y(y)
+      , Z(z){};
+
+  auto operator==(const Direction &other) const -> int{
+    return X == other.X && Y == other.Y && Z == other.Z;
+  };
+};
+
 class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                 uint32_t newBodyPartMask)
+                 uint32_t newBodyPartMask, std::optional<Direction> newDirection)
       : id(newId)
       , description(std::move(newDescription))
       , gain(newGain)
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
+      , direction(newDirection)
       , vertices({})
       , bands({}){};
 
@@ -79,6 +96,8 @@ public:
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
+  [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
+  auto setDirection(std::optional<Direction> newDirection) -> void;
 
 private:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
@@ -90,6 +109,7 @@ private:
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;
+  std::optional<Direction> direction;
 };
 } // namespace haptics::types
 #endif // TRACK_H

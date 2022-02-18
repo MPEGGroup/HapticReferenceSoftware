@@ -141,4 +141,10 @@ auto Track::Evaluate(double position) -> double {
   return res;
 }
 
+[[nodiscard]] auto Track::getDirection() const -> std::optional<Direction> { return direction; }
+
+auto Track::setDirection(std::optional<Direction> newDirection) -> void {
+  direction = newDirection;
+}
+
 } // namespace haptics::types
