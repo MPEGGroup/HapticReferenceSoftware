@@ -80,4 +80,75 @@ auto Perception::addReferenceDevice(haptics::types::ReferenceDevice &newReferenc
   referenceDevices.push_back(newReferenceDevice);
 }
 
+auto Perception::addReferenceDevice(
+    const std::vector<std::tuple<
+        int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
+    -> void {
+  const size_t idIndex = 0;
+  const size_t nameIndex = 1;
+  const size_t bodyPartIndex = 2;
+  const size_t maximumFrequencyIndex = 3;
+  const size_t minimumFrequencyIndex = 4;
+  const size_t resonanceFrequencyIndex = 5;
+  const size_t maximumAmplitudeIndex = 6;
+  const size_t impedanceIndex = 7;
+  const size_t maximumVoltageIndex = 8;
+  const size_t maximumCurrentIndex = 9;
+  const size_t maximumDisplacementIndex = 10;
+  const size_t weightIndex = 11;
+  const size_t sizeIndex = 12;
+  const size_t customIndex = 13;
+  const size_t typeIndex = 14;
+  for (auto values : referenceDeviceValues) {
+
+    haptics::types::ReferenceDevice myDevice(std::get<idIndex>(values),
+                                             std::get<nameIndex>(values));
+
+    if (std::get<bodyPartIndex>(values).has_value()) {
+      myDevice.setBodyPartMask(std::get<bodyPartIndex>(values).value());
+    }
+    if (std::get<maximumFrequencyIndex>(values).has_value()) {
+      myDevice.setMaximumFrequency(std::get<maximumFrequencyIndex>(values).value());
+    }
+    if (std::get<minimumFrequencyIndex>(values).has_value()) {
+      myDevice.setMinimumFrequency(std::get<minimumFrequencyIndex>(values).value());
+    }
+    if (std::get<resonanceFrequencyIndex>(values).has_value()) {
+      myDevice.setResonanceFrequency(std::get<resonanceFrequencyIndex>(values).value());
+    }
+    if (std::get<maximumAmplitudeIndex>(values).has_value()) {
+      myDevice.setMaximumAmplitude(std::get<maximumAmplitudeIndex>(values).value());
+    }
+    if (std::get<impedanceIndex>(values).has_value()) {
+      myDevice.setImpedance(std::get<impedanceIndex>(values).value());
+    }
+    if (std::get<maximumVoltageIndex>(values).has_value()) {
+      myDevice.setMaximumVoltage(std::get<maximumVoltageIndex>(values).value());
+    }
+    if (std::get<maximumCurrentIndex>(values).has_value()) {
+      myDevice.setMaximumCurrent(std::get<maximumCurrentIndex>(values).value());
+    }
+    if (std::get<maximumDisplacementIndex>(values).has_value()) {
+      myDevice.setMaximumDisplacement(std::get<maximumDisplacementIndex>(values).value());
+    }
+    if (std::get<weightIndex>(values).has_value()) {
+      myDevice.setWeight(std::get<weightIndex>(values).value());
+    }
+    if (std::get<sizeIndex>(values).has_value()) {
+      myDevice.setSize(std::get<sizeIndex>(values).value());
+    }
+    if (std::get<customIndex>(values).has_value()) {
+      myDevice.setCustom(std::get<customIndex>(values).value());
+    }
+    if (std::get<typeIndex>(values).has_value()) {
+      myDevice.setType(std::get<typeIndex>(values).value());
+    }
+
+    addReferenceDevice(myDevice);
+  }
+}
+
 } // namespace haptics::types

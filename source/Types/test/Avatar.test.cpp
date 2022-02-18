@@ -34,13 +34,47 @@
 #include <Types/include/Avatar.h>
 #include <catch2/catch.hpp>
 
-TEST_CASE("haptics::tools::OHMData") {
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
+TEST_CASE("haptics::tools::Avatar") {
 
   using haptics::types::Avatar;
 
-  SECTION("Loading OHM File") {
-
-    // TODO : some tests
-    CHECK(true);
+  Avatar avatar(1, 2, haptics::types::AvatarType::Vibration);
+  SECTION("Checking getId", "[getId]") {
+    auto checkId = avatar.getId();
+    CHECK(checkId == 1);
+  }
+  SECTION("Checking getLod", "[getLod]") {
+    auto checkLod = avatar.getLod();
+    CHECK(checkLod == 2);
+  }
+  SECTION("Checking getType", "[getType]") {
+    auto checkType = avatar.getType();
+    CHECK(checkType == haptics::types::AvatarType::Vibration);
+  }
+  SECTION("Checking getMesh", "[getMesh]") {
+    auto checkMesh = avatar.getMesh();
+    CHECK(!checkMesh.has_value());
+  }
+  SECTION("Checking setId", "[setId]") {
+    avatar.setId(2);
+    auto checkId = avatar.getId();
+    CHECK(checkId == 2);
+  }
+  SECTION("Checking setLod", "[setLod]") {
+    avatar.setLod(3);
+    auto checkLod = avatar.getLod();
+    CHECK(checkLod == 3);
+  }
+  SECTION("Checking setType", "[setType]") {
+    avatar.setType(haptics::types::AvatarType::Pressure);
+    auto checkType = avatar.getType();
+    CHECK(checkType == haptics::types::AvatarType::Pressure);
+  }
+  SECTION("Checking setMesh", "[setMesh]") {
+    std::string mesh = "SomeMesh.obj";
+    avatar.setMesh(mesh);
+    auto checkMesh = avatar.getMesh();
+    CHECK(checkMesh == mesh);
   }
 }
