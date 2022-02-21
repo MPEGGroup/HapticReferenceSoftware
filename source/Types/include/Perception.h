@@ -52,7 +52,8 @@ enum class PerceptionModality {
   Temperature = 5,
   Vibration = 6,
   Water = 7,
-  Wind = 8
+  Wind = 8,
+  Kinesthetic = 9
 };
 
 static const std::map<std::string, PerceptionModality> stringToPerceptionModality = {
@@ -64,7 +65,8 @@ static const std::map<std::string, PerceptionModality> stringToPerceptionModalit
     {"Temperature", PerceptionModality::Temperature},
     {"Vibration", PerceptionModality::Vibration},
     {"Water", PerceptionModality::Water},
-    {"Wind", PerceptionModality::Wind}};
+    {"Wind", PerceptionModality::Wind},
+    {"Kinesthetic", PerceptionModality::Kinesthetic}};
 static const std::map<PerceptionModality, std::string> perceptionModalityToString = {
     {PerceptionModality::Other, "Other"},
     {PerceptionModality::Pressure, "Pressure"},
@@ -74,7 +76,8 @@ static const std::map<PerceptionModality, std::string> perceptionModalityToStrin
     {PerceptionModality::Temperature, "Temperature"},
     {PerceptionModality::Vibration, "Vibration"},
     {PerceptionModality::Water, "Water"},
-    {PerceptionModality::Wind, "Wind"}};
+    {PerceptionModality::Wind, "Wind"},
+    {PerceptionModality::Kinesthetic, "Kinesthetic"}};
 
 class Perception {
 public:
@@ -109,6 +112,7 @@ public:
           std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
           std::optional<float>, std::optional<haptics::types::ActuatorType>>>
           &referenceDeviceValues) -> void;
+  static auto convertToModality(const std::string &modalityString) -> PerceptionModality;
 
 private:
   int id = -1;

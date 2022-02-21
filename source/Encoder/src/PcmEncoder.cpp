@@ -85,6 +85,9 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     myBand = Band();
     if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
                                        config.curveFrequencyLimit, &myBand)) {
+      if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
+        myBand.setCurveType(CurveType::Linear);
+      }
       myTrack.addBand(myBand);
     }
     out.replaceTrackAt((int)channelIndex, myTrack);
