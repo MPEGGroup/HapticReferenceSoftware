@@ -75,11 +75,12 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
   time_t now = time(nullptr);
   date = ctime(&now);
   description = data.getDescription();
-  short numElements = data.getNumElements();
+  auto numElements = static_cast<int>(data.getHapticElementMetadataSize());
   for (int i = 0; i < numElements; i++) {
     auto element = data.getHapticElementMetadataAt(i);
     std::string elemDescription = element.elementDescription;
-    Perception perception(i, 0, elemDescription, PerceptionModality::Other);
+    PerceptionModality perceptionModality = Perception::convertToModality(elemDescription);
+    Perception perception(i, 0, elemDescription, perceptionModality);
     short numChannels = element.numHapticChannels;
     for (int j = 0; j < numChannels; j++) {
       auto channel = element.channelsMetadata[j];
@@ -95,7 +96,7 @@ auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHM
   std::string header = std::string("OHM ");
   auto v = static_cast<short>(version.empty() ? 0 : std::stoi(version));
   std::string desc = description;
-  haptics::tools::OHMData res(header, v, static_cast<short>(perceptions.size()), desc);
+  haptics::tools::OHMData res(header, v, desc);
   tools::OHMData::HapticElementMetadata element;
   tools::OHMData::HapticChannelMetadata channel;
   for (types::Perception p : perceptions) {

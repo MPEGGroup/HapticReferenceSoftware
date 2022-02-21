@@ -31,49 +31,32 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOJson.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
 #include <fstream>
 #include <vector>
 
-using haptics::io::IOBinary;
+using haptics::io::IOJson;
 
-const std::string filename = "testing_IOBinary.bin";
+const std::string filename = "testing_IOJson.gmpg";
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read file header without avatar and perceptions") {
-  const std::string testingVersion = "42";
+TEST_CASE("write/read gmpg haptic file without avatar and perceptions") {
+  const std::string testingVersion = "1";
   const std::string testingDate = "Monday, February 14, 2022";
-  const std::string testingDescription =
-      "I'm an awsome Haptic description placeholder and I wasn't writted by a developer";
+  const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
-  SECTION("write haptic header") {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
-    REQUIRE(file);
-
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
-    file.close();
-
-    REQUIRE(succeed);
-    const int expectedFileSize =
-        static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size()) +
-        3 + 2 * 2;
-    CHECK(static_cast<int>(std::filesystem::file_size(filename)) == expectedFileSize);
+  SECTION("write haptic file") {
+    IOJson::writeFile(testingHaptic, filename);
+    CHECK(std::filesystem::is_regular_file(filename));
   }
 
-  SECTION("read haptic header") {
-    const uintmax_t startedFileSize = std::filesystem::file_size(filename);
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    REQUIRE(file);
-
+  SECTION("read haptic file") {
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
-    file.close();
-
+    bool succeed = IOJson::loadFile(filename, res);
     REQUIRE(succeed);
-    CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getVersion() == testingVersion);
     CHECK(res.getDate() == testingDate);
     CHECK(res.getDescription() == testingDescription);
@@ -86,10 +69,10 @@ TEST_CASE("write/read file header without avatar and perceptions") {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read file header for avatar testing") {
-  const std::string testingVersion;
-  const std::string testingDate;
-  const std::string testingDescription;
+TEST_CASE("write/read gmpg haptic file for avatar testing") {
+  const std::string testingVersion = "1";
+  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_avatar1 = 42;
@@ -108,29 +91,15 @@ TEST_CASE("write/read file header for avatar testing") {
   avatar2.setMesh(testingMesh_avatar2);
   testingHaptic.addAvatar(avatar2);
 
-  SECTION("write avatars") {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
-    REQUIRE(file);
-
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
-    file.close();
-
-    REQUIRE(succeed);
-    const uintmax_t expectedFileSize = 3 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+  SECTION("write haptic file") {
+    IOJson::writeFile(testingHaptic, filename);
+    CHECK(std::filesystem::is_regular_file(filename));
   }
 
-  SECTION("read avatars") {
-    const uintmax_t startedFileSize = std::filesystem::file_size(filename);
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    REQUIRE(file);
-
+  SECTION("read haptic file") {
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
-    file.close();
-
+    bool succeed = IOJson::loadFile(filename, res);
     REQUIRE(succeed);
-    CHECK(std::filesystem::file_size(filename) == startedFileSize);
     REQUIRE(res.getAvatarsSize() == 2);
 
     CHECK(res.getAvatarAt(0).getId() == testingId_avatar1);
@@ -150,10 +119,10 @@ TEST_CASE("write/read file header for avatar testing") {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read file header for reference device testing") {
-  const std::string testingVersion;
-  const std::string testingDate;
-  const std::string testingDescription;
+TEST_CASE("write/read gmpg haptic file for reference device testing") {
+  const std::string testingVersion = "1";
+  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_perception0 = 0;
@@ -181,33 +150,15 @@ TEST_CASE("write/read file header for reference device testing") {
   testingPerception.addReferenceDevice(testingReferenceDeviceValue_perception0);
   testingHaptic.addPerception(testingPerception);
 
-  SECTION("write reference devices") {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
-    REQUIRE(file);
-
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
-    file.close();
-
-    REQUIRE(succeed);
-    const uintmax_t expectedFileSize =
-        testingDescription_perception0.size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 109;
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+  SECTION("write haptic file") {
+    IOJson::writeFile(testingHaptic, filename);
+    CHECK(std::filesystem::is_regular_file(filename));
   }
 
-  SECTION("read reference devices") {
-    const uintmax_t startedFileSize = std::filesystem::file_size(filename);
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    REQUIRE(file);
-
+  SECTION("read haptic file") {
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
-    file.close();
-
+    bool succeed = IOJson::loadFile(filename, res);
     REQUIRE(succeed);
-    CHECK(std::filesystem::file_size(filename) == startedFileSize);
     REQUIRE(res.getPerceptionsSize() == 1);
     CHECK(res.getPerceptionAt(0).getTracksSize() == 0);
     REQUIRE(res.getPerceptionAt(0).getReferenceDevicesSize() ==
@@ -239,9 +190,7 @@ TEST_CASE("write/read file header for reference device testing") {
 
       CHECK(myDevice.getId() == std::get<idIndex>(testingValues));
       CHECK(myDevice.getName() == std::get<nameIndex>(testingValues));
-      CHECK(myDevice.getBodyPartMask() == (std::get<bodyPartIndex>(testingValues).has_value()
-                                               ? std::get<bodyPartIndex>(testingValues).value()
-                                               : 0));
+      CHECK(myDevice.getBodyPartMask() == std::get<bodyPartIndex>(testingValues));
       CHECK(myDevice.getMaximumFrequency() == std::get<maximumFrequencyIndex>(testingValues));
       CHECK(myDevice.getMinimumFrequency() == std::get<minimumFrequencyIndex>(testingValues));
       CHECK(myDevice.getResonanceFrequency() == std::get<resonanceFrequencyIndex>(testingValues));
@@ -262,10 +211,10 @@ TEST_CASE("write/read file header for reference device testing") {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read file header for track testing") {
-  const std::string testingVersion;
-  const std::string testingDate;
-  const std::string testingDescription;
+TEST_CASE("write/read gmpg haptic file for track testing") {
+  const std::string testingVersion = "1";
+  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_perception0 = 0;
@@ -337,33 +286,15 @@ TEST_CASE("write/read file header for track testing") {
   testingHaptic.addPerception(testingPerception0);
   testingHaptic.addPerception(testingPerception1);
 
-  SECTION("write tracks header") {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
-    REQUIRE(file);
-
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
-    file.close();
-
-    REQUIRE(succeed);
-    const uintmax_t expectedFileSize =
-        testingDescription_perception0.size() + testingDescription_perception1.size() +
-        testingDescription_track0.size() + testingDescription_track1.size() +
-        testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 120;
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+  SECTION("write haptic file") {
+    IOJson::writeFile(testingHaptic, filename);
+    CHECK(std::filesystem::is_regular_file(filename));
   }
 
-  SECTION("read track header") {
-    const uintmax_t startedFileSize = std::filesystem::file_size(filename);
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    REQUIRE(file);
-
+  SECTION("read haptic file") {
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
-    file.close();
-
+    bool succeed = IOJson::loadFile(filename, res);
     REQUIRE(succeed);
-    CHECK(std::filesystem::file_size(filename) == startedFileSize);
     REQUIRE(res.getPerceptionsSize() == 2);
     REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
@@ -415,10 +346,10 @@ TEST_CASE("write/read file header for track testing") {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read file for body testing") {
-  const std::string testingVersion = "RM1";
-  const std::string testingDate = "Today";
-  const std::string testingDescription = "I'm a testing value";
+TEST_CASE("write/read gmpg haptic file for signal testing") {
+  const std::string testingVersion = "1";
+  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
   const int testingId_avatar1 = 42;
@@ -575,28 +506,15 @@ TEST_CASE("write/read file for body testing") {
   testingHaptic.addAvatar(avatar1);
   testingHaptic.addAvatar(avatar2);
 
-  SECTION("write file") {
-    bool succeed = IOBinary::writeFile(testingHaptic, filename);
-
-    REQUIRE(succeed);
-    const uintmax_t expectedFileSize =
-        testingVersion.size() + testingDate.size() + testingDescription.size() +
-        testingMesh_avatar1.size() + testingMesh_avatar2.size() +
-        testingDescription_perception0.size() + testingDescription_perception1.size() +
-        testingDescription_track0.size() + testingDescription_track1.size() +
-        testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 373;
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+  SECTION("write haptic file") {
+    IOJson::writeFile(testingHaptic, filename);
+    CHECK(std::filesystem::is_regular_file(filename));
   }
 
-  SECTION("read file") {
-    const uintmax_t startedFileSize = std::filesystem::file_size(filename);
-
+  SECTION("read haptic file") {
     haptics::types::Haptics res;
-    bool succeed = IOBinary::loadFile(filename, res);
-
+    bool succeed = IOJson::loadFile(filename, res);
     REQUIRE(succeed);
-    CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getVersion() == testingVersion);
     CHECK(res.getDate() == testingDate);
     CHECK(res.getDescription() == testingDescription);

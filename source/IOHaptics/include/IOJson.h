@@ -42,16 +42,16 @@
 namespace haptics::io {
 class IOJson {
 public:
-  static auto loadFile(const std::string &filePath) -> types::Haptics;
+  static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
-      -> void;
-  static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> void;
-  static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> void;
+      -> bool;
+  static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> bool;
+  static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool;
   static auto loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
-                                   types::Perception &perception) -> void;
-  static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> void;
-  static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> void;
-  static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> void;
+                                   types::Perception &perception) -> bool;
+  static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool;
+  static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> bool;
+  static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> bool;
 
   static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
   static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;

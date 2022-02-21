@@ -96,7 +96,8 @@ auto main(int argc, char *argv[]) -> int {
     std::cout << "The padding used will be : " << pad << "ms\n";
   }
 
-  Haptics hapticFile = IOJson::loadFile(filename);
+  Haptics hapticFile;
+  IOJson::loadFile(filename, hapticFile);
   const double timeLength = Helper::getTimeLength(hapticFile);
 
   if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {

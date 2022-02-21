@@ -123,10 +123,8 @@ TEST_CASE("haptics::tools::WavParser overflow") {
     std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
     std::vector<double> buffer_rec2 = wavParser2.getSamplesChannel(1);
     bool correct = true;
-    std::cout << "channel 1" << std::endl;
     correct = checkCorrect(buffer, buffer_rec);
     CHECK(correct);
-    std::cout << "channel 2" << std::endl;
     correct = checkCorrect(buffer2, buffer_rec2);
     CHECK(correct);
     std::remove("test_overflow.wav");

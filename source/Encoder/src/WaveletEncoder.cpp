@@ -156,7 +156,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   int bitmax = findMax(bitalloc);
   int intmax = 1 << bitmax;
   double multiplicator = (double)intmax / (double)qwavmax;
-  // double multiplicator = (double)1 / qwavmax;
 
   std::vector<double> test(bl, 0);
   wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);

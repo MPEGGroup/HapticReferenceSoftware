@@ -76,7 +76,7 @@ namespace haptics::encoder {
       if (e.at("ParameterCurve").at("ParameterID") == "HapticIntensityControl") {
         ret = extractKeyframes(&(e.at("ParameterCurve")), &amplitudes);
         if (ret != 0) {
-          std::cout << "ERROR IN AMPLITUDE EXTRACTION" << std::endl;
+          std::cerr << "ERROR IN AMPLITUDE EXTRACTION" << std::endl;
           return EXIT_FAILURE;
         }
       }
@@ -84,7 +84,7 @@ namespace haptics::encoder {
       if (e.at("ParameterCurve").at("ParameterID") == "HapticSharpnessControl") {
         ret = extractKeyframes(&(e.at("ParameterCurve")), &frequencies);
         if (ret != 0) {
-          std::cout << "ERROR IN FREQUENCY EXTRACTION" << std::endl;
+          std::cerr << "ERROR IN FREQUENCY EXTRACTION" << std::endl;
           return EXIT_FAILURE;
         }
       }
@@ -97,7 +97,7 @@ namespace haptics::encoder {
       if (e.at("Event").at("EventType") == "HapticTransient") {
         ret = extractTransients(&(e.at("Event")), &transients, &amplitudes, &frequencies);
         if (ret != 0) {
-          std::cout << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
+          std::cerr << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
           return EXIT_FAILURE;
         }
       }
@@ -105,7 +105,7 @@ namespace haptics::encoder {
       if (e.at("Event").at("EventType") == "HapticContinuous") {
         ret = extractContinuous(&(e.at("Event")), &continuous, &amplitudes, &frequencies);
         if (ret != 0) {
-          std::cout << "ERROR IN CONTINUOUS EXTRACTION" << std::endl;
+          std::cerr << "ERROR IN CONTINUOUS EXTRACTION" << std::endl;
           return EXIT_FAILURE;
         }
       }

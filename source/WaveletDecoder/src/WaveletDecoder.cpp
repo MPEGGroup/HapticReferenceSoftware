@@ -38,8 +38,7 @@ namespace haptics::waveletdecoder {
 auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
   size_t numBlocks = band.getEffectsSize();
   int bl = (int)((double)band.getWindowLength() * MS_2_S_WAVELET *
-                 (double)band.getUpperFrequencyLimit()); // or check size of keyframe vector
-  // int bl = band.getEffectAt(0).getKeyframesSize() - 1;
+                 (double)band.getUpperFrequencyLimit());
   int dwtlevel = (int)log2((double)bl / 4);
   std::vector<double> sig_rec(numBlocks * bl, 0);
 

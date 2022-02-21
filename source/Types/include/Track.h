@@ -63,6 +63,8 @@ public:
   auto setMixingWeight(float newMixingWeight) -> void;
   [[nodiscard]] auto getBodyPartMask() const -> uint32_t;
   auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
+  [[nodiscard]] auto getReferenceDeviceId() const -> std::optional<int>;
+  auto setReferenceDeviceId(int newReferenceDeviceId) -> void;
   auto getVerticesSize() -> size_t;
   auto getVertexAt(int index) -> int &;
   auto addVertex(int &newVertice) -> void;
@@ -87,6 +89,7 @@ private:
   uint32_t bodyPartMask = 0;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
+  std::optional<int> referenceDeviceId;
 };
 } // namespace haptics::types
 #endif // TRACK_H

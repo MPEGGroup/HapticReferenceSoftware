@@ -281,7 +281,8 @@ TEST_CASE("write/read BandBody on curve") {
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == expectedKeyframeCount * (4 + 4)); //NOLINT
+    CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
+          expectedKeyframeCount * (4 + 4));
   }
 
   SECTION("read band body") {
@@ -346,7 +347,8 @@ TEST_CASE("write/read BandBody on transient") {
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == expectedTransientCount * (4 + 4 + 4)); //NOLINT
+    CHECK(std::filesystem::file_size(filename) ==
+          static_cast<uintmax_t>(expectedTransientCount * (4 + 4 + 4)));
   }
 
   SECTION("read band body") {

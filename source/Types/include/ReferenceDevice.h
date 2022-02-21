@@ -43,11 +43,13 @@ namespace haptics::types {
 enum class ActuatorType { Unknown = 0, LRA = 1, VCA = 2, ERM = 3, Piezo = 4 };
 
 static const std::map<std::string, ActuatorType> stringToActuatorType = {
+    {"Unknown", ActuatorType::Unknown},
     {"LRA", ActuatorType::LRA},
     {"VCA", ActuatorType::VCA},
     {"ERM", ActuatorType::ERM},
     {"Piezo", ActuatorType::Piezo}};
 static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
+    {ActuatorType::Unknown, "Unknown"},
     {ActuatorType::LRA, "LRA"},
     {ActuatorType::VCA, "VCA"},
     {ActuatorType::ERM, "ERM"},

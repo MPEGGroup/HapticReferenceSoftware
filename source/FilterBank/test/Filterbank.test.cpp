@@ -51,10 +51,6 @@ TEST_CASE("haptics::filterbank::Filterbank") {
     Filterbank fb(FS);
     std::vector<double> out = fb.LP(in, FS / 4);
 
-    /*for(int i=0; i<BL; i++){
-        std::cout << out[i] << std::endl;
-    }*/
-
     CHECK(true);
   }
 
@@ -64,10 +60,6 @@ TEST_CASE("haptics::filterbank::Filterbank") {
     in[(BL + 1) / 2 - 1] = 1;
     Filterbank fb(FS);
     std::vector<double> out = fb.HP(in, FS / 4);
-
-    /*for(int i=0; i<BL; i++){
-        std::cout << out[i] << std::endl;
-    }*/
 
     CHECK(true);
   }
@@ -80,10 +72,6 @@ TEST_CASE("haptics::filterbank::Filterbank") {
     std::vector<double> out1 = fb.HP(in, FS / 4);
 
     std::vector<double> out2 = fb.LP(in, FS / 4);
-
-    /*for(int i=0; i<BL; i++){
-        std::cout << out1[i] +out2[i] << std::endl;
-    }*/
 
     CHECK(true);
   }

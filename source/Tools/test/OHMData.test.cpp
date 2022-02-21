@@ -34,14 +34,62 @@
 #include <catch2/catch.hpp>
 
 #include <Tools/include/OHMData.h>
+#include <filesystem>
+#include <iostream>
 
-TEST_CASE("haptics::tools::OHMData") {
+using haptics::tools::OHMData;
 
-  using haptics::tools::OHMData;
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
+TEST_CASE("haptics::tools::OHMData", "[loadFile][writeFile]") {
+  OHMData ohmData;
+  const std::string header = "OHM ";
+  const std::string description = "Test description";
+  const int version = 1;
+  const std::string elementDescription = "Element description";
+  const std::string elementFilename = "SomeHapticFile.wav";
+  const std::string channelDescription = "Channel description";
+  const OHMData::Body bodyPartMask = OHMData::Body::UNSPECIFIED;
+  const float channelGain = 1.0;
 
-  SECTION("Loading OHM File") {
+  // Setting the data
+  ohmData.setHeader(header);
+  ohmData.setDescription(description);
+  ohmData.setVersion(version);
+  OHMData::HapticElementMetadata elementMetadata;
+  elementMetadata.elementFilename = elementFilename;
+  elementMetadata.elementDescription = elementDescription;
+  elementMetadata.numHapticChannels = 1;
+  OHMData::HapticChannelMetadata channelMetadata;
+  channelMetadata.channelDescription = channelDescription;
+  channelMetadata.gain = channelGain;
+  channelMetadata.bodyPartMask = bodyPartMask;
+  elementMetadata.channelsMetadata.push_back(channelMetadata);
+  elementMetadata.numHapticChannels = static_cast<short>(elementMetadata.channelsMetadata.size());
+  ohmData.addHapticElementMetadata(elementMetadata);
 
-    // TODO : some tests
-    CHECK(true);
+  std::string filename = "test.ohm";
+  SECTION("Test writing/loading", "[writeFile]") {
+    ohmData.writeFile(filename);
+    CHECK(std::filesystem::is_regular_file(filename));
+  }
+
+  SECTION("Test loading", "[loadFile]") {
+    OHMData ohmLoadedData(filename);
+    CHECK(ohmLoadedData.getHeader() == header);
+    CHECK(ohmLoadedData.getDescription() == description);
+    CHECK(ohmLoadedData.getVersion() == version);
+    bool validSize = ohmLoadedData.getHapticElementMetadataSize() == 1;
+    REQUIRE(validSize);
+    auto hapticElement = ohmLoadedData.getHapticElementMetadataAt(0);
+    CHECK(hapticElement.elementFilename == elementFilename);
+    CHECK(hapticElement.elementDescription == elementDescription);
+    bool validNbTracks = ohmLoadedData.getHapticElementMetadataAt(0).numHapticChannels == 1;
+    REQUIRE(validNbTracks);
+    auto hapticChannel = hapticElement.channelsMetadata[0];
+    CHECK(hapticChannel.channelDescription == channelDescription);
+    CHECK(hapticChannel.gain == channelGain);
+    CHECK(hapticChannel.bodyPartMask == bodyPartMask);
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
   }
 }

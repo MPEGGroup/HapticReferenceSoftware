@@ -129,21 +129,15 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
   using haptics::types::Band;
 
   SECTION("Encoder tools") {
-
     std::vector<double> v_unquantized(3, unquantized);
     double qwavmax = 0;
     std::vector<char> bitwavmax;
     std::vector<char> bitwavmax_compare = {0, 0, 0, 0, 0, 0, 1, 1};
     WaveletEncoder::maximumWaveletCoefficient(v_unquantized, qwavmax, bitwavmax);
     CHECK(fabs(qwavmax - quantized) < prec_comparison);
-
-    /*for (size_t i = 0; i < WAVMAXLENGTH; i++) {
-        std::cout << (int)bitwavmax[i] << std::endl;
-    }*/
   }
 
   SECTION("Encoder") {
-
     std::vector<double> data_time(bl_test, 0);
     data_time[0] = 1;
     WaveletEncoder waveletEncoder(bl_test, fs_test);
@@ -160,12 +154,6 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
     bool success = false;
     success = waveletEncoder.encodeSignal(data_time, 1, 0, band);
     CHECK(success);
-
-    /*std::cout << "number of effects: " << band.getEffectsSize() << std::endl;
-    Effect effect = band.getEffectAt(0);
-    std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;
-    effect = band.getEffectAt(1);
-    std::cout << "number of keyframes: " << effect.getKeyframesSize() << std::endl;*/
   }
 }
 
@@ -184,10 +172,6 @@ TEST_CASE("Encoder/Decoder Integration") {
 
     std::vector<double> sig_rec = WaveletDecoder::decodeBand(b);
     CHECK(sig_time.size() == sig_rec.size());
-
-    /*for (auto v : sig_rec) {
-      std::cout << v << std::endl;
-    }*/
   }
 }
 
@@ -206,67 +190,8 @@ TEST_CASE("Band transformation") {
 
     WaveletDecoder::transformBand(b);
 
-    /*int size = 0;
-    for (int i = 0; i < b.getEffectsSize(); i++) {
-      for (int j = 0; j < b.getEffectAt(i).getKeyframesSize(); j++) {
-        std::cout << b.getEffectAt(i).getKeyframeAt(j).getAmplitudeModulation().value()
-                  << std::endl;
-        size++;
-      }
-    }
-    std::cout << "total size: " << size << std::endl;*/
-
     for (double t = 0; t < 1.0 / FS * (BL * 2); t += 1.0 / FS) {
       std::cout << b.Evaluate(t * S_2_MS_TEST, 0, FS) << std::endl;
     }
   }
 }
-
-// test for inspection of the filtered signals
-/* TEST_CASE("haptics::filterbank::Filterbank") {
-
-  using haptics::filterbank::Filterbank;
-  using haptics::tools::WavParser;
-
-  SECTION("LP") {
-
-    WavParser wavparser;
-    wavparser.loadFile("pantheon.wav");
-
-    //std::vector<double> in(BL, 0);
-    std::vector<double> in = wavparser.getSamplesChannel(0);
-    //in[(BL + 1) / 2 - 1] = 1;
-    Filterbank fb(FS);
-    std::vector<double> out = fb.LP(in, 72.5);//NOLINT
-
-    std::cout << "LP:" << std::endl;
-    for (int i = 0; i < BL; i++) {
-        std::cout << out[i] << std::endl;
-    }
-
-    std::string out_name("pantheon_LP.wav");
-    WavParser::saveFile(out_name, out, FS);
-
-    CHECK(true);
-  }
-
-  SECTION("HP") {
-
-    WavParser wavparser;
-    wavparser.loadFile("pantheon.wav");
-
-    // std::vector<double> in(BL, 0);
-    std::vector<double> in = wavparser.getSamplesChannel(0);
-    //in[(BL + 1) / 2 - 1] = 1;
-    Filterbank fb(FS);
-    std::vector<double> out = fb.HP(in, 72.5); //NOLINT
-
-    std::cout << "HP:" << std::endl;
-    for (int i = 0; i < BL; i++) {
-        std::cout << out[i] << std::endl;
-    }
-    std::string out_name("pantheon_HP.wav");
-    WavParser::saveFile(out_name, out, FS);
-    CHECK(true);
-  }
-}*/
