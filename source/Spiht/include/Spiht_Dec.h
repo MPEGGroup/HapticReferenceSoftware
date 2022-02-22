@@ -34,9 +34,9 @@
 #ifndef SPIHT_DEC_H
 #define SPIHT_DEC_H
 
+#include <cmath>
 #include <iostream>
 #include <list>
-#include <cmath>
 #include <vector>
 
 #include <Spiht/include/ArithDec.h>
