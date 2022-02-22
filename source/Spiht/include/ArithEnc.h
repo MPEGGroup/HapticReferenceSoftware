@@ -69,9 +69,6 @@ private:
                                            RESET_HALF, RESET_HALF, RESET_HALF};
   std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
                                                  RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
-
-  std::array<int, BYTE_SIZE> masks = {0b00000001, 0b00000010, 0b00000100, 0b00001000,
-                                      0b00010000, 0b00100000, 0b01000000, 0b10000000};
 };
 } // namespace haptics::spiht
 #endif // ARITHENC_H

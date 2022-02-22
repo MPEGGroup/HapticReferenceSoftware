@@ -37,6 +37,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <math.h>
 
 #include <Spiht/include/ArithDec.h>
 #include <Spiht/include/Spiht_Enc.h>

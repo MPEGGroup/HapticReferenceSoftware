@@ -37,6 +37,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <math.h>
 
 #include <Spiht/include/ArithEnc.h>
 #include <Types/include/Effect.h>
