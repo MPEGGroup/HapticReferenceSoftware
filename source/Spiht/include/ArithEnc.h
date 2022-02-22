@@ -36,6 +36,7 @@
 
 #include <array>
 #include <bitset>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -53,8 +54,8 @@ constexpr int BYTE_SIZE = 8;
 
 class ArithEnc {
 public:
-  void ArithEnc::encode(std::vector<unsigned char> &instream, std::vector<int> &context,
-                        std::vector<unsigned char> &outstream);
+  void encode(std::vector<unsigned char> &instream, std::vector<int> &context,
+              std::vector<unsigned char> &outstream);
 
   void resetCounter();
   void static convert2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out);

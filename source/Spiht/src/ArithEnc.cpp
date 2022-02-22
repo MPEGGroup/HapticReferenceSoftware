@@ -171,7 +171,7 @@ void ArithEnc::rescaleCounter() {
 
 void ArithEnc::convert2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) {
   out.resize(ceil((double)in.size() / BYTE_SIZE));
-  int index = 0;
+  size_t index = 0;
   for (auto &v : out) {
     std::bitset<BYTE_SIZE> temp;
     for (int j = 0; j < BYTE_SIZE; j++) {

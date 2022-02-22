@@ -116,9 +116,9 @@ void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<unsign
         int max_d = maxDescendant(*it1, *it2);
         if (max_d >= compare) {
           addToOutput(1, CONTEXT_3, outstream, context);
-          int y = *it1;
+          size_t y = *it1;
           // Children
-          int index = 2 * y;
+          int index = 2 * (int)y;
           if (fabs(instream[index]) >= compare) {
             LSP.push_back(index);
             addToOutput(1, CONTEXT_4, outstream, context);
@@ -127,7 +127,7 @@ void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<unsign
             addToOutput(0, CONTEXT_4, outstream, context);
             LIP.push_back(index);
           }
-          index = 2 * y + 1;
+          index = 2 * (int)y + 1;
           if (fabs(instream[index]) >= compare) {
             LSP.push_back(index);
             addToOutput(1, CONTEXT_4, outstream, context);
@@ -197,13 +197,13 @@ void Spiht_Enc::addToOutput(unsigned char bit, int c, std::vector<unsigned char>
 
 auto Spiht_Enc::maxDescendant(int j, int type) -> int {
   if (type == 1) {
-    if (j >= maxDescendants1.size()) {
+    if (j >= (int)maxDescendants1.size()) {
       std::cout << "maxDescendants1 out of bounds" << std::endl;
       return 0;
     }
     return maxDescendants1[j];
   }
-  if (j >= maxDescendants.size()) {
+  if (j >= (int)maxDescendants.size()) {
     std::cout << "maxDescendants out of bounds" << std::endl;
     return 0;
   }
@@ -222,7 +222,7 @@ void Spiht_Enc::initMaxDescendants(std::vector<int> &signal) {
   size_t p2 = p1 + 1;
   size_t target = start >> 1;
 
-  for (int i = 0; i < (start >> 1); i++) {
+  for (size_t i = 0; i < (start >> 1); i++) {
     int v1 = abs(signal[p1]);
     int v2 = abs(signal[p2]);
     if (v1 > v2) {
@@ -242,7 +242,7 @@ void Spiht_Enc::initMaxDescendants(std::vector<int> &signal) {
   target = width >> 1;
 
   while (target > 1) {
-    for (int i = 0; i < (width >> 1); i++) {
+    for (size_t i = 0; i < (width >> 1); i++) {
       int v1 = maxDescendants[p1];
       int v2 = maxDescendants[p2];
       if (v1 > v2) {

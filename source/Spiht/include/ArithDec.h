@@ -35,6 +35,7 @@
 #define ARITHDEC_H
 
 #include <array>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
