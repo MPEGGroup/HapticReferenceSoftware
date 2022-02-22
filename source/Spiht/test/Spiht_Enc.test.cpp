@@ -99,7 +99,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     int n_real = 0;
     dec.decode(outstream_arithmetic, signal_rec, bl, level, wavmax, n_real);
     bool equal = true;
-    for (int i = 0; i < bl; i++) {
+    for (size_t i = 0; i < bl; i++) {
       if (signal.at(i) != signal_rec.at(i)) {
         equal = false;
       }
@@ -124,8 +124,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
   SECTION("Effect Encoding") {
     Spiht_Enc enc;
     Effect effect_in;
-    for (int i = 0; i < bl; i++) {
-      // Keyframe keyframe(i, (float)i / (float)bl, 0);
+    for (size_t i = 0; i < bl; i++) {
       Keyframe keyframe(i, (float)(i % MOD_VAL) / MOD_VAL, 0);
       effect_in.addKeyframe(keyframe);
     }
@@ -140,7 +139,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     Effect effect_out;
     bool equal = true;
     dec.decodeEffect(stream_enc, effect_out, bl);
-    for (int i = 0; i < bl; i++) {
+    for (int i = 0; i < (int)bl; i++) {
       if (!(fabs(effect_in.getKeyframeAt(i).getAmplitudeModulation().value() -
                  effect_out.getKeyframeAt(i).getAmplitudeModulation().value()) < precision)) {
         equal = false;
@@ -148,7 +147,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     }
     CHECK(equal);
     if (!equal) {
-      for (int i = 0; i < bl; i++) {
+      for (int i = 0; i < (int)bl; i++) {
         std::cout << effect_in.getKeyframeAt(i).getAmplitudeModulation().value() << ","
                   << effect_out.getKeyframeAt(i).getAmplitudeModulation().value() << std::endl;
       }

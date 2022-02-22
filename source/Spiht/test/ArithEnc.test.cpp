@@ -64,7 +64,7 @@ TEST_CASE("haptics::spiht::ArithEnc") {
     ArithDec dec;
     dec.initDecoding(out);
     bool equal = true;
-    for (int i = 0; i < streamsize; i++) {
+    for (size_t i = 0; i < streamsize; i++) {
       if (dec.decode(context[i]) != in[i]) {
         equal = false;
       }
@@ -73,14 +73,13 @@ TEST_CASE("haptics::spiht::ArithEnc") {
   }
 
   SECTION("convert to bytes") {
-    ArithEnc enc;
     std::vector<unsigned char> in = {0, 1, 1, 1, 0, 1, 0, 1, 1, 1};
     std::vector<unsigned char> converted;
     std::vector<unsigned char> out;
     ArithEnc::convert2bytes(in, converted);
     ArithDec::convert2bits(converted, out);
     bool equal = true;
-    for (int i = 0; i < in.size(); i++) {
+    for (size_t i = 0; i < in.size(); i++) {
       if (out[i] != in[i]) {
         equal = false;
       }
