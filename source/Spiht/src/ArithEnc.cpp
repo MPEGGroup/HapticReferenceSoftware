@@ -120,7 +120,7 @@ void ArithEnc::encode(std::vector<unsigned char> &instream, std::vector<int> &co
   remainder(bits_to_follow, outstream, range_lower, range_upper);
 
   // cut off unnecessary zeros at end
-  size_t index_end = outstream.size() - 1;
+  int index_end = (int)outstream.size() - 1;
   while (outstream.at(index_end) == 0 && index_end >= 0) {
     index_end--;
   }
