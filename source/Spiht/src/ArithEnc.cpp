@@ -48,7 +48,7 @@ void ArithEnc::encode(std::vector<unsigned char> &instream, std::vector<int> &co
   int range_add = 0;
   outstream.reserve(instream.size() * 2); // reserve memory with a little buffer
 
-  for (int i = 0; i < instream.size(); i++) {
+  for (size_t i = 0; i < instream.size(); i++) {
 
     // calculate range
     range_diff = range_upper - range_lower;
@@ -150,14 +150,14 @@ void ArithEnc::remainder(int bits_to_follow, std::vector<unsigned char> &outstre
 }
 
 void ArithEnc::resetCounter() {
-  for (int i = 0; i < CONTEXT_SIZE; i++) {
+  for (size_t i = 0; i < CONTEXT_SIZE; i++) {
     counter.at(i) = RESET_TOTAL / 2;
     counter_total.at(i) = RESET_TOTAL;
   }
 }
 
 void ArithEnc::rescaleCounter() {
-  for (int i = 0; i < CONTEXT_SIZE; i++) {
+  for (size_t i = 0; i < CONTEXT_SIZE; i++) {
     counter.at(i) = (int)((double)counter.at(i) / (double)(counter_total.at(i) * RESIZE_TOTAL));
     if (counter.at(i) == 0) {
       counter.at(i) = 1;

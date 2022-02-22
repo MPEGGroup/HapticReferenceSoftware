@@ -43,7 +43,7 @@ void ArithDec::initDecoding(std::vector<unsigned char> &instream) {
   // get first 10 digits
   in_leading = 0;
   int shift = SHIFT_START;
-  for (int i = 0; i < DIGITS; i++) {
+  for (size_t i = 0; i < DIGITS; i++) {
     if (i < instream.size()) {
       in_leading += (int)instream.at(in_index) << shift;
       in_index++;
@@ -129,14 +129,14 @@ auto ArithDec::decode(int context) -> int {
 }
 
 void ArithDec::resetCounter() {
-  for (int i = 0; i < CONTEXT_SIZE; i++) {
+  for (size_t i = 0; i < CONTEXT_SIZE; i++) {
     counter.at(i) = RESET_TOTAL / 2;
     counter_total.at(i) = RESET_TOTAL;
   }
 }
 
 void ArithDec::rescaleCounter() {
-  for (int i = 0; i < CONTEXT_SIZE; i++) {
+  for (size_t i = 0; i < CONTEXT_SIZE; i++) {
     counter.at(i) = (int)((double)counter.at(i) / (double)(counter_total.at(i) * RESIZE_TOTAL));
     if (counter.at(i) == 0) {
       counter.at(i) = 1;

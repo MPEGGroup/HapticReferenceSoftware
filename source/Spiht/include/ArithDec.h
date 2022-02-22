@@ -43,7 +43,7 @@
 namespace haptics::spiht {
 
 constexpr int SHIFT_START = 9;
-constexpr int DIGITS = 10;
+constexpr size_t DIGITS = 10;
 
 class ArithDec {
 public:
