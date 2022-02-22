@@ -34,9 +34,9 @@
 #ifndef SPIHT_ENC_H
 #define SPIHT_ENC_H
 
+#include <cmath>
 #include <iostream>
 #include <list>
-#include <cmath>
 #include <vector>
 
 #include <Spiht/include/ArithEnc.h>
