@@ -31,35 +31,65 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IOBINARYBANDS_H
-#define IOBINARYBANDS_H
+#include <catch2/catch.hpp>
 
-#include <Spiht/include/Spiht_Dec.h>
-#include <Spiht/include/Spiht_Enc.h>
-#include <Types/include/Band.h>
+#include <Spiht/include/ArithDec.h>
+#include <Spiht/include/ArithEnc.h>
+#include <iostream>
 
-namespace haptics::io {
+constexpr size_t streamsize = 10;
 
-constexpr int WAVELET_BL_FACTOR = 32;
+TEST_CASE("haptics::spiht::ArithEnc") {
 
-class IOBinaryBands {
-public:
-  static auto readBandHeader(types::Band &band, std::ifstream &file) -> bool;
-  static auto readBandBody(types::Band &band, std::ifstream &file) -> bool;
+  using haptics::spiht::ArithDec;
+  using haptics::spiht::ArithEnc;
 
-  static auto writeBandHeader(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeBandBody(types::Band &band, std::ofstream &file) -> bool;
+  SECTION("Encoding") {
+    ArithEnc enc;
+    std::vector<unsigned char> in(streamsize, 0);
+    std::vector<int> context(streamsize, 0);
+    std::vector<unsigned char> out;
+    in[1] = 1;
+    enc.encode(in, context, out);
+  }
 
-private:
-  static auto readTransientBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readCurveBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readVectorialBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool;
+  SECTION("Encoding & Decoding") {
+    ArithEnc enc;
+    std::vector<unsigned char> in(streamsize, 0);
+    std::vector<int> context(streamsize, 0);
+    std::vector<unsigned char> out;
+    in[1] = 1;
+    enc.encode(in, context, out);
 
-  static auto writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeVectorialBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool;
-};
-} // namespace haptics::io
-#endif // IOBINARYBANDS_H
+    ArithDec dec;
+    dec.initDecoding(out);
+    bool equal = true;
+    for (size_t i = 0; i < streamsize; i++) {
+      if (dec.decode(context[i]) != in[i]) {
+        equal = false;
+      }
+    }
+    CHECK(equal);
+  }
+
+  SECTION("convert to bytes") {
+    std::vector<unsigned char> in = {0, 1, 1, 1, 0, 1, 0, 1, 1, 1};
+    std::vector<unsigned char> converted;
+    std::vector<unsigned char> out;
+    ArithEnc::convert2bytes(in, converted);
+    ArithDec::convert2bits(converted, out);
+    bool equal = true;
+    for (size_t i = 0; i < in.size(); i++) {
+      if (out[i] != in[i]) {
+        equal = false;
+      }
+    }
+    CHECK(equal);
+    if (!equal) {
+      std::cout << "output in bits:" << std::endl;
+      for (auto v : out) {
+        std::cout << (int)v << std::endl;
+      }
+    }
+  }
+}
