@@ -198,13 +198,13 @@ void Spiht_Enc::addToOutput(unsigned char bit, int c, std::vector<unsigned char>
 auto Spiht_Enc::maxDescendant(int j, int type) -> int {
   if (type == 1) {
     if (j >= (int)maxDescendants1.size()) {
-      std::cout << "maxDescendants1 out of bounds" << std::endl;
+      std::cerr << "maxDescendants1 out of bounds" << std::endl;
       return 0;
     }
     return maxDescendants1[j];
   }
   if (j >= (int)maxDescendants.size()) {
-    std::cout << "maxDescendants out of bounds" << std::endl;
+    std::cerr << "maxDescendants out of bounds" << std::endl;
     return 0;
   }
   return maxDescendants[j];

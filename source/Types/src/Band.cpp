@@ -34,8 +34,6 @@
 #include <Types/include/Band.h>
 #include <algorithm>
 
-#include <iostream>
-
 namespace haptics::types {
 
 [[nodiscard]] auto Band::getBandType() const -> BandType { return bandType; }

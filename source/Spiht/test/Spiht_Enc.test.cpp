@@ -55,12 +55,6 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     std::vector<int> signal(bl, 0);
     signal.at(bl / 2) = 1;
     enc.initMaxDescendants(signal);
-    /*
-    std::cout << "maxDescendant:" << std::endl;
-    for (int i = 0; i < bl / 4; i++) {
-      std::cout << enc.maxDescendant(i, 0) << std::endl;
-    }
-    */
     CHECK(enc.maxDescendant(2, 0) == 1);
     CHECK(enc.maxDescendant(3, 0) == 0);
     CHECK(enc.maxDescendant(bl / 4, 0) == 1);
