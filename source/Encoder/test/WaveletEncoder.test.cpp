@@ -76,7 +76,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
   SECTION("Encoder tools") {
 
-    std::vector<unsigned char> outstream(1, '0');
+    std::vector<char> outstream(1, '0');
     WaveletEncoder::de2bi(val, outstream, bits);
     CHECK(outstream.size() == bits + 1);
     CHECK(outstream[1] == 1);
@@ -131,8 +131,8 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
   SECTION("Encoder tools") {
     std::vector<double> v_unquantized(3, unquantized);
     double qwavmax = 0;
-    std::vector<unsigned char> bitwavmax;
-    std::vector<unsigned char> bitwavmax_compare = {0, 0, 0, 0, 0, 0, 1, 1};
+    std::vector<char> bitwavmax;
+    std::vector<char> bitwavmax_compare = {0, 0, 0, 0, 0, 0, 1, 1};
     WaveletEncoder::maximumWaveletCoefficient(v_unquantized, qwavmax, bitwavmax);
     CHECK(fabs(qwavmax - quantized) < prec_comparison);
   }
@@ -142,7 +142,8 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
     data_time[0] = 1;
     WaveletEncoder waveletEncoder(bl_test, fs_test);
     double scalar = 0;
-    std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar);
+    int maxbits = 0;
+    std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar, maxbits);
   }
 
   SECTION("Encoder Integration") {

@@ -247,7 +247,6 @@ auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
   if (index >= (int)this->getKeyframesSize()) {
     return 0;
   }
-
   auto myKeyframe = keyframes.begin() + index;
   if (!myKeyframe->getAmplitudeModulation().has_value()) {
     return 0;

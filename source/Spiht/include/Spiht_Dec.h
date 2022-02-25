@@ -31,35 +31,45 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IOBINARYBANDS_H
-#define IOBINARYBANDS_H
+#ifndef SPIHT_DEC_H
+#define SPIHT_DEC_H
 
-#include <Spiht/include/Spiht_Dec.h>
+#include <cmath>
+#include <iostream>
+#include <list>
+#include <vector>
+
+#include <Spiht/include/ArithDec.h>
 #include <Spiht/include/Spiht_Enc.h>
-#include <Types/include/Band.h>
+#include <Types/include/Effect.h>
 
-namespace haptics::io {
+namespace haptics::spiht {
 
-constexpr int WAVELET_BL_FACTOR = 32;
+// constexpr size_t WAVMAX_SIZE = 8;
 
-class IOBinaryBands {
+class Spiht_Dec {
 public:
-  static auto readBandHeader(types::Band &band, std::ifstream &file) -> bool;
-  static auto readBandBody(types::Band &band, std::ifstream &file) -> bool;
-
-  static auto writeBandHeader(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeBandBody(types::Band &band, std::ofstream &file) -> bool;
+  void decodeEffect(std::vector<unsigned char> &in, Effect &effect, int origlength);
+  void decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
+              int level, double &wavmax, int &n_real);
 
 private:
-  static auto readTransientBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readCurveBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readVectorialBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool;
+  void initLists(int origlength, int level);
+  auto getMaxAllocBits() -> int;
+  auto getWavmax() -> double;
+  void sortingPass(std::vector<int> &out, int origlength, int compare);
+  void refinementPass(std::vector<int> &out, int LSP_index, int compare);
+  auto getBit(int context) -> int;
+  void getBits(std::vector<int> &out, int length, int context);
+  template <typename T> auto bi2de(std::vector<T> &data, int length) -> T;
+  auto static sgn(int val) -> int;
 
-  static auto writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeVectorialBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool;
+  std::list<int> LIP;
+  std::list<int> LIS1;
+  std::list<int> LIS2;
+  std::list<int> LSP;
+
+  ArithDec arithDec;
 };
-} // namespace haptics::io
-#endif // IOBINARYBANDS_H
+} // namespace haptics::spiht
+#endif // SPIHT_DEC_H
