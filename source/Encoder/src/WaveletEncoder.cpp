@@ -83,7 +83,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     }
     Keyframe keyframe(bl, (float)scalar, 0); // add scalar of block to block data for now
     effect.addKeyframe(keyframe);
-    Keyframe keyframeBits(bl + 1, (float)maxbits, 0); // add scalar of block to block data for now
+    Keyframe keyframeBits(bl + 1, (float)maxbits, 0); // add maxbits to block data for now
     effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
@@ -156,9 +156,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   int bitmax = findMax(bitalloc);
   int intmax = 1 << bitmax;
   double multiplicator = (double)intmax / (double)qwavmax;
-
-  std::vector<double> test(bl, 0);
-  wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);
 
   if (qwavmax != 0) {
     for (int i = 0; i < bl; i++) {

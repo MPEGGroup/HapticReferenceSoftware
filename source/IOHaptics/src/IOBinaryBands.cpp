@@ -392,7 +392,8 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
   int position = 0;
   for (uint16_t i = 0; i < effects_size; i++) {
     std::vector<unsigned char> instream;
-    instream.resize(IOBinaryPrimitives::readNBytes<uint16_t, 2>(file));
+    auto size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    instream.resize(size);
     for (auto &b : instream) {
       b = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
     }
@@ -415,7 +416,7 @@ auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file)
   types::Effect effect = band.getEffectAt(0);
   auto blocklength = (uint16_t)effect.getKeyframesSize() - 2;
   IOBinaryPrimitives::writeNBytes<uint8_t, 1>(blocklength / WAVELET_BL_FACTOR, file);
-  for (uint16_t i = 0; i < (uint8_t)band.getEffectsSize(); i++) {
+  for (uint16_t i = 0; i < (uint16_t)band.getEffectsSize(); i++) {
     std::vector<unsigned char> outstream;
     enc.encodeEffect(band.getEffectAt(i), outstream);
     IOBinaryPrimitives::writeNBytes<uint16_t, 2>((uint16_t)outstream.size(), file);
