@@ -43,6 +43,7 @@ constexpr size_t level = 7;
 constexpr int BITS_EFFECT = 15;
 constexpr float precision = 0.00000000001;
 constexpr int MOD_VAL = 256;
+constexpr float scalar = 1.5;
 
 TEST_CASE("haptics::spiht::Spiht_Enc") {
 
@@ -122,7 +123,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
       Keyframe keyframe(i, (float)(i % MOD_VAL) / MOD_VAL, 0);
       effect_in.addKeyframe(keyframe);
     }
-    Keyframe keyframe(bl, (float)16.5, 0); // NOLINT
+    Keyframe keyframe(bl, scalar, 0); // NOLINT
     effect_in.addKeyframe(keyframe);
     Keyframe keyframeBits(bl + 1, (float)BITS_EFFECT, 0);
     effect_in.addKeyframe(keyframeBits);
