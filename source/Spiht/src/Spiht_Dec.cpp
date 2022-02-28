@@ -211,7 +211,7 @@ void Spiht_Dec::refinementPass(std::vector<int> &out, int LSP_index, int compare
 
 auto Spiht_Dec::getBit(int context) -> int { return arithDec.decode(context); }
 
-void Spiht_Dec::getBits(std::vector<int> &out, int length, int context) { // NOLINT
+void Spiht_Dec::getBits(std::vector<int> &out, int length, int context) {
   out.resize(length);
   for (int i = 0; i < length; i++) {
     out[i] = arithDec.decode(context);
