@@ -388,7 +388,7 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
   spiht::Spiht_Dec dec;
   auto effects_size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   auto blocklength = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file) * WAVELET_BL_FACTOR;
-  band.setWindowLength((int)blocklength * 1000 / band.getUpperFrequencyLimit()); // NOLINT
+  band.setWindowLength((int)blocklength * S2MS / band.getUpperFrequencyLimit());
   int position = 0;
   for (uint16_t i = 0; i < effects_size; i++) {
     std::vector<unsigned char> instream;
@@ -400,7 +400,7 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
     types::Effect effect;
     dec.decodeEffect(instream, effect, (int)blocklength);
     effect.setPosition(position);
-    position += (int)blocklength * 1000 / band.getUpperFrequencyLimit(); // NOLINT
+    position += (int)blocklength * S2MS / band.getUpperFrequencyLimit();
     band.addEffect(effect);
   }
   return true;

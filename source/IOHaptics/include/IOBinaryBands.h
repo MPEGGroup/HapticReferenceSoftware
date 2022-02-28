@@ -41,6 +41,7 @@
 namespace haptics::io {
 
 constexpr int WAVELET_BL_FACTOR = 32;
+constexpr int S2MS = 1000;
 
 class IOBinaryBands {
 public:
