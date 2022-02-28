@@ -119,7 +119,7 @@ void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<unsign
           size_t y = *it1;
           // Children
           int index = 2 * (int)y;
-          if (fabs(instream[index]) >= compare) {
+          if (abs(instream[index]) >= compare) {
             LSP.push_back(index);
             addToOutput(1, CONTEXT_4, outstream, context);
             addToOutput((char)(instream[index] >= 0), CONTEXT_1, outstream, context);
@@ -128,7 +128,7 @@ void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<unsign
             LIP.push_back(index);
           }
           index = 2 * (int)y + 1;
-          if (fabs(instream[index]) >= compare) {
+          if (abs(instream[index]) >= compare) {
             LSP.push_back(index);
             addToOutput(1, CONTEXT_4, outstream, context);
             addToOutput((char)(instream[index] >= 0), CONTEXT_1, outstream, context);
@@ -181,7 +181,7 @@ void Spiht_Enc::refinementPass(std::vector<int> &data, std::list<int> &LSP, int 
   int temp = 0;
   while (temp < LSP_index) {
 
-    int s = bitget((int)floor(fabs(data[*it])), n + 1);
+    int s = bitget((int)floor(abs(data[*it])), n + 1);
     outstream.push_back((unsigned char)s);
     context.push_back(CONTEXT_6);
     temp++;

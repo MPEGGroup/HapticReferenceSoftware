@@ -38,7 +38,7 @@ namespace haptics::spiht {
 void ArithDec::initDecoding(std::vector<unsigned char> &instream) {
   this->instream = instream;
   in_index = 0;
-  max_index = instream.size() - 1;
+  max_index = instream.size();
 
   // get first 10 digits
   in_leading = 0;
@@ -88,7 +88,7 @@ auto ArithDec::decode(int context) -> int {
     if (range_upper <= HALF) {
       range_lower = range_lower << 1;
       range_upper = range_upper << 1;
-      if (in_index <= max_index) {
+      if (in_index < max_index) {
         in_leading = (in_leading << 1) + instream.at(in_index);
         in_index++;
       } else {
@@ -97,7 +97,7 @@ auto ArithDec::decode(int context) -> int {
     } else if (range_lower >= HALF) {
       range_lower = (range_lower - HALF) << 1;
       range_upper = (range_upper - HALF) << 1;
-      if (in_index <= max_index) {
+      if (in_index < max_index) {
         in_leading = ((in_leading - HALF) << 1) + instream.at(in_index);
         in_index++;
       } else {
@@ -106,7 +106,7 @@ auto ArithDec::decode(int context) -> int {
     } else if (range_lower >= FIRST_QTR && range_upper <= THIRD_QTR) {
       range_lower = (range_lower - FIRST_QTR) << 1;
       range_upper = (range_upper - FIRST_QTR) << 1;
-      if (in_index <= max_index) {
+      if (in_index < max_index) {
         in_leading = ((in_leading - FIRST_QTR) << 1) + instream.at(in_index);
         in_index++;
       } else {

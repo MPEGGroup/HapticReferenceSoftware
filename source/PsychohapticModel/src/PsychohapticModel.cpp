@@ -167,7 +167,7 @@ auto PsychohapticModel::findAllPeakLocations(std::vector<double> &x) -> peaks {
             }
             ++i_plateau;
           }
-          if (i_plateau >= (x.size() - 1)) { // NOLINT
+          if (i_plateau >= (x.size() - 1)) {
             p.heights.push_back(x[i]);
             size_t i_peak = (i + i_plateau) / 2;
             if (i_peak >= x.size()) {
@@ -176,7 +176,7 @@ auto PsychohapticModel::findAllPeakLocations(std::vector<double> &x) -> peaks {
             p.locations.push_back(i_peak);
             ++num_peaks;
             i = i_plateau;
-          } else if (x[i_plateau + 1] < x[i]) { // NOLINT
+          } else if (x[i_plateau + 1] < x[i]) {
             p.heights.push_back(x[i]);
             size_t i_peak = (i + i_plateau) / 2;
             if (i_peak >= x.size()) {
