@@ -42,13 +42,22 @@ from pathlib import Path
 import time
 
 
-def encoding(encoder, wav_file, temp_file_path_gmpg, record_property):
+def encoding(encoder, wav_file, temp_file_path_mpg, record_property):
     print("--Encoding")
     t_start = time.time()
-    subprocess.run([encoder, "-f", wav_file, '-o', temp_file_path_gmpg])
+    subprocess.run([encoder, "-f", wav_file, '-b', '-o', temp_file_path_mpg])
     duration = time.time() - t_start
     record_property("encoder_duration_s", duration)
     print("Enconder time: "+str(duration))
+
+
+def decoding(decoder, temp_file_path_mpg, temp_file_path_gmpg, record_property):
+    print("--Decoding")
+    t_start = time.time()
+    subprocess.run([decoder, "-f", temp_file_path_mpg, '-o', temp_file_path_gmpg])
+    duration = time.time() - t_start
+    record_property("decoder_duration_s", duration)
+    print("Decoder time: "+str(duration))
 
 
 def synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property):
@@ -60,15 +69,19 @@ def synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_pr
     print("Synthesizer time: "+str(duration))
 
 
-def test_psnrs(wav_file_psnr, encoder, synthesizer, autopad, record_property):
+def test_psnrs(wav_file_psnr, encoder, synthesizer, decoder, autopad, record_property):
     record_property("file", wav_file_psnr[0])
     tmpdirname = tempfile.TemporaryDirectory()
     tmp_wav_file = os.path.basename(wav_file_psnr[0])
     gmpg_file = tmp_wav_file.split('.')[0] + ".gmpg"
+    mpg_file = tmp_wav_file.split('.')[0] + ".mpg"
     temp_file_path_gmpg = os.path.join(tmpdirname.name, gmpg_file)
     temp_file_path_wav = os.path.join(tmpdirname.name, tmp_wav_file)
+    temp_file_path_mpg = os.path.join(tmpdirname.name, mpg_file)
 
-    encoding(encoder, wav_file_psnr[0], temp_file_path_gmpg, record_property)
+    encoding(encoder, wav_file_psnr[0], temp_file_path_mpg, record_property)
+
+    decoding(decoder, temp_file_path_mpg, temp_file_path_gmpg, record_property)
 
     synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property)
 
@@ -80,8 +93,7 @@ def test_psnrs(wav_file_psnr, encoder, synthesizer, autopad, record_property):
         wav_file = Path(wav_file.parent.parent, "WAV_noPad", new_name)
     wav_file = str(wav_file)
 
-    # ToDo : compute on binary file
-    bit_rate = compute_bitrate(wav_file, temp_file_path_gmpg)
+    bit_rate = compute_bitrate(wav_file, temp_file_path_mpg)
     record_property("bitrate_kbps", bit_rate)
 
     print("--PSNR")

@@ -72,7 +72,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     std::copy(sig_time.begin() + add_start, sig_time.begin() + add_end, block_time.begin());
 
     double scalar = 0;
-    std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar);
+    int maxbits = 0;
+    std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar, maxbits);
 
     int pos = 0;
     for (auto v : block_quant) {
@@ -82,6 +83,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     }
     Keyframe keyframe(bl, (float)scalar, 0); // add scalar of block to block data for now
     effect.addKeyframe(keyframe);
+    Keyframe keyframeBits(bl + 1, (float)maxbits, 0); // add maxbits to block data for now
+    effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
     pos_effect += band.getWindowLength();
@@ -91,8 +94,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   return true;
 }
 
-auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar)
-    -> std::vector<double> {
+auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar,
+                                 int &maxbits) -> std::vector<double> {
   std::vector<double> block_dwt(bl, 0);
   Wavelet wavelet;
   wavelet.DWT(block_time, dwtlevel, block_dwt);
@@ -154,9 +157,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   int intmax = 1 << bitmax;
   double multiplicator = (double)intmax / (double)qwavmax;
 
-  std::vector<double> test(bl, 0);
-  wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);
-
   if (qwavmax != 0) {
     for (int i = 0; i < bl; i++) {
       block_intquant[i] = (int)round((block_dwt_quant[i] * multiplicator));
@@ -164,6 +164,8 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     }
   }
   scalar = qwavmax;
+  maxbits = bitmax;
+
   return block_dwt_quant;
 }
 
@@ -180,12 +182,35 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
     m.fractionbits = FRACTIONBITS_0;
   } else {
     integerpart = 1;
-    m.integerbits = 3;
-    m.fractionbits = 4;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
     mode = 1;
   }
 
   qwavmax = maxQuant(wavmax - (double)integerpart, m) + integerpart;
+  bitwavmax.clear();
+  bitwavmax.reserve(WAVMAXLENGTH);
+  bitwavmax.push_back(mode);
+  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
+        m.integerbits + m.fractionbits);
+}
+
+void WaveletEncoder::maximumWaveletCoefficient(double qwavmax,
+                                               std::vector<unsigned char> &bitwavmax) {
+
+  int integerpart = 0;
+  char mode = 0;
+  quantMode m = {0, 0};
+  if (qwavmax < 1) {
+    m.integerbits = 0;
+    m.fractionbits = FRACTIONBITS_0;
+  } else {
+    integerpart = 1;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
+    mode = 1;
+  }
+
   bitwavmax.clear();
   bitwavmax.reserve(WAVMAXLENGTH);
   bitwavmax.push_back(mode);
@@ -266,7 +291,7 @@ auto WaveletEncoder::sgn(double val) -> double {
 void WaveletEncoder::de2bi(int val, std::vector<unsigned char> &outstream, int length) {
   int n = length;
   while (n > 0) {
-    outstream.push_back((unsigned char)val % 2);
+    outstream.push_back((unsigned char)(val % 2));
     val = val >> 1;
     n--;
   }

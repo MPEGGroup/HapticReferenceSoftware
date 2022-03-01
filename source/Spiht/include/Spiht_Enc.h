@@ -31,73 +31,66 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WAVELETENCODER_H
-#define WAVELETENCODER_H
+#ifndef SPIHT_ENC_H
+#define SPIHT_ENC_H
 
 #include <cmath>
+#include <iostream>
+#include <list>
 #include <vector>
 
-#include "FilterBank/include/Wavelet.h"
-#include "PsychohapticModel/include/PsychohapticModel.h"
-#include "Types/include/Band.h"
-#include "Types/include/Effect.h"
-#include "Types/include/Keyframe.h"
+#include <Spiht/include/ArithEnc.h>
+#include <Types/include/Effect.h>
+
+namespace haptics::spiht {
+
+using haptics::types::Effect;
+
+constexpr size_t MAXALLOCBITS_SIZE = 4;
+constexpr int CONTEXT_0 = 0;
+constexpr int CONTEXT_1 = 1;
+constexpr int CONTEXT_2 = 2;
+constexpr int CONTEXT_3 = 3;
+constexpr int CONTEXT_4 = 4;
+constexpr int CONTEXT_5 = 5;
+constexpr int CONTEXT_6 = 6;
+constexpr size_t BUFFER_SIZE = 100000;
 
 constexpr size_t WAVMAXLENGTH = 24;
 constexpr int MAXBITS = 15;
 constexpr int FRACTIONBITS_0 = 23;
 constexpr int FRACTIONBITS_1 = 19;
 constexpr int INTEGERBITS_1 = 4;
-constexpr double LOGFACTOR = 10;
-constexpr double MAXQUANTFACTOR = 0.999;
-constexpr double QUANT_ADD = 0.5;
-constexpr double S_2_MS_WAVELET = 1000;
-
-using haptics::filterbank::Wavelet;
-using haptics::tools::modelResult;
-using haptics::tools::PsychohapticModel;
-using haptics::types::Band;
-using haptics::types::BandType;
-using haptics::types::Effect;
-using haptics::types::EncodingModality;
-
-namespace haptics::encoder {
 
 struct quantMode {
   int integerbits;
   int fractionbits;
 };
 
-class WaveletEncoder {
+class Spiht_Enc {
 public:
-  WaveletEncoder(int bl_new, int fs_new);
+  void encodeEffect(Effect &effect, std::vector<unsigned char> &outstream);
+  void encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
+              int maxallocbits, std::vector<unsigned char> &outstream, std::vector<int> &context);
 
-  auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band)
-      -> bool;
-  auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits)
-      -> std::vector<double>;
-  static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
-                                        std::vector<unsigned char> &bitwavmax);
-  void static maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
-  void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
-                   std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
-
-  static void uniformQuant(std::vector<double> &in, size_t start, double max, int bits,
-                           size_t length, std::vector<double> &out);
-  static auto maxQuant(double in, quantMode m) -> double;
-  template <class T> static auto findMax(std::vector<T> &data) -> T;
-  static auto findMinInd(std::vector<double> &data) -> size_t;
-
-  static auto sgn(double val) -> double;
-  static void de2bi(int val, std::vector<unsigned char> &outstream, int length);
+  auto maxDescendant(int j, int type) -> int;
+  void initMaxDescendants(std::vector<int> &signal);
 
 private:
-  tools::PsychohapticModel pm;
-  int bl;
-  int fs;
-  int dwtlevel;
-  std::vector<int> book;
-  std::vector<int> book_cumulative;
+  void static refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,
+                             std::vector<unsigned char> &outstream, std::vector<int> &context);
+
+  void static addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream,
+                          std::vector<int> &context);
+
+  static void maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
+  void static de2bi(int val, std::vector<unsigned char> &outstream, int length);
+  auto static bitget(int in, int bit) -> int;
+
+  std::vector<int> maxDescendants;
+  std::vector<int> maxDescendants1;
+
+  ArithEnc arithEnc;
 };
-} // namespace haptics::encoder
-#endif // WAVELETENCODER_H
+} // namespace haptics::spiht
+#endif // SPIHT_ENC_H

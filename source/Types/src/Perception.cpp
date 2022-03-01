@@ -151,4 +151,48 @@ auto Perception::addReferenceDevice(
   }
 }
 
+auto Perception::convertToModality(const std::string &modalityString) -> PerceptionModality {
+  if (stringToPerceptionModality.count(modalityString) != 0) {
+    return stringToPerceptionModality.at(modalityString);
+  }
+  if (modalityString == "Pressure effect") {
+    return PerceptionModality::Pressure;
+  }
+  if (modalityString == "Acceleration effect") {
+    return PerceptionModality::Acceleration;
+  }
+  if (modalityString == "Velocity effect") {
+    return PerceptionModality::Velocity;
+  }
+  if (modalityString == "Position effect") {
+    return PerceptionModality::Position;
+  }
+  if (modalityString == "Temperature effect") {
+    return PerceptionModality::Temperature;
+  }
+  if (modalityString == "Vibration effect") {
+    return PerceptionModality::Vibration;
+  }
+  if (modalityString == "Water effect") {
+    return PerceptionModality::Water;
+  }
+  if (modalityString == "Wind effect") {
+    return PerceptionModality::Wind;
+  }
+  if (modalityString == "Velocity effect") {
+    return PerceptionModality::Velocity;
+  }
+  if (modalityString == "Kinesthetic effect") {
+    return PerceptionModality::Kinesthetic;
+  }
+  if (modalityString == "Texture effect") {
+    return PerceptionModality::Kinesthetic;
+  }
+  if (modalityString == "Stiffness effect") {
+    return PerceptionModality::Kinesthetic;
+  }
+
+  return PerceptionModality::Other;
+}
+
 } // namespace haptics::types

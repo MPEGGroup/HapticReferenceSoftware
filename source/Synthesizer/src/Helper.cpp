@@ -100,7 +100,6 @@ namespace haptics::synthesizer {
       amplitudes.push_back(trackAmp);
     }
   }
-
   return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
 }
 } // namespace haptics::synthesizer
