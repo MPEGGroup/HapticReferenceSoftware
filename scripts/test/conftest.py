@@ -64,6 +64,7 @@ def pytest_generate_tests(metafunc):
 
     encoder_path = os.path.join(install_dir, 'bin', 'Encoder')
     synthesizer_path = os.path.join(install_dir, 'bin', 'Synthesizer')
+    decoder_path = os.path.join(install_dir, 'bin', 'Decoder')
 
     list_wav_files = []
     for path in Path(data_dir).rglob('*.ohm'):
@@ -88,6 +89,9 @@ def pytest_generate_tests(metafunc):
 
     if "synthesizer" in metafunc.fixturenames:
         metafunc.parametrize("synthesizer", [synthesizer_path])
+
+    if "decoder" in metafunc.fixturenames:
+        metafunc.parametrize("decoder", [decoder_path])
 
     if "autopad" in metafunc.fixturenames:
         if metafunc.config.getoption("autopad"):
