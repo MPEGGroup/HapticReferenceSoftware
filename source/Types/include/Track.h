@@ -60,13 +60,15 @@ class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                 uint32_t newBodyPartMask, std::optional<Direction> newDirection)
+                 uint32_t newBodyPartMask, std::optional<Direction> newDirection,
+                 std::optional<int8_t> newUnitLength)
       : id(newId)
       , description(std::move(newDescription))
       , gain(newGain)
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
       , direction(newDirection)
+      , unitLength(newUnitLength)
       , vertices({})
       , bands({}){};
 
@@ -98,6 +100,8 @@ public:
   auto Evaluate(double position) -> double;
   [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
   auto setDirection(std::optional<Direction> newDirection) -> void;
+  [[nodiscard]] auto getUnitLength() const -> std::optional<int8_t>;
+  auto setUnitLength(std::optional<int8_t> newUnitLength) -> void;
 
 private:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
@@ -110,6 +114,7 @@ private:
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;
   std::optional<Direction> direction;
+  std::optional<int8_t> unitLength;
 };
 } // namespace haptics::types
 #endif // TRACK_H

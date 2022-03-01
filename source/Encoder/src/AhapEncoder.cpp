@@ -112,7 +112,7 @@ namespace haptics::encoder {
     }
   }
 
-  haptics::types::Track myTrack(0, "placeholder description", 1, 1, 0, std::nullopt);
+  haptics::types::Track myTrack(0, "placeholder description", 1, 1, 0, std::nullopt, std::nullopt);
   if (out.getTracksSize() == 0) {
     out.addTrack(myTrack);
   }

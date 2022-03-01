@@ -147,4 +147,9 @@ auto Track::setDirection(std::optional<Direction> newDirection) -> void {
   direction = newDirection;
 }
 
+[[nodiscard]] auto Track::getUnitLength() const -> std::optional<int8_t> { return unitLength; }
+
+auto Track::setUnitLength(std::optional<int8_t> newUnitLength) -> void {
+  unitLength = newUnitLength;
+}
 } // namespace haptics::types

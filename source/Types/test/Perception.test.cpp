@@ -83,11 +83,12 @@ TEST_CASE("haptics::types::Perception checking setters") {
   }
 }
 
+//NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("haptics::types::Perception testing tracks") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
   Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
-  haptics::types::Track track(0, "Test track", 1, 1, 0, std::nullopt);
+  haptics::types::Track track(0, "Test track", 1, 1, 0, std::nullopt, -2);
   SECTION("Checking addTrack", "[addTrack]") {
     perception.addTrack(track);
     CHECK(perception.getTracksSize() == 1);
@@ -98,6 +99,7 @@ TEST_CASE("haptics::types::Perception testing tracks") {
     CHECK(track.getMixingWeight() == Approx(addedTrack.getMixingWeight()));
     CHECK(track.getBodyPartMask() == addedTrack.getBodyPartMask());
     CHECK(track.getDirection() == addedTrack.getDirection());
+    CHECK(track.getUnitLength() == addedTrack.getUnitLength());
   }
 }
 
