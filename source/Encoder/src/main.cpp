@@ -53,12 +53,32 @@ using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
 
+auto help() -> void {
+  std::cout
+      << "usages: Encoder [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-kin]" << std::endl
+      << std::endl
+      << "This piece of software encodes an input file into a MPEG Haptics RM1 file" << std::endl
+      << "positional arguments:" << std::endl
+      << "\t-f, --file <FILE>\t\tfile to convert" << std::endl
+      << "\t-o, --output <OUTPUT_FILE>\toutput file" << std::endl
+      << std::endl
+      << "optional arguments:" << std::endl
+      << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
+      << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
+         "the encoder will output a file in a human-readable format"
+      << std::endl
+      << "\t-kin, --kinesthetic\t\tIf provided, the file will be encoded as a kinesthetic effect. "
+         "Otherwise it will be considered as a vibrotactile effect (this option is currently "
+         "available only for wav files encoding)"
+      << std::endl;
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_SUCCESS;
   }
 
@@ -67,7 +87,7 @@ auto main(int argc, char *argv[]) -> int {
     filename = inputParser.getCmdOption("--file");
   }
   if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_FAILURE;
   }
 
@@ -147,7 +167,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   if (codeExit == EXIT_FAILURE) {
-    InputParser::help(args[0]);
+    help();
     return codeExit;
   }
 

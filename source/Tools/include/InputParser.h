@@ -45,7 +45,6 @@ public:
   InputParser(const std::vector<const char *> &args);
   [[nodiscard]] auto getCmdOption(const std::string &option) const -> const std::string &;
   [[nodiscard]] auto cmdOptionExists(const std::string &option) const -> bool;
-  void static help(const std::string &prg_name);
   auto static getFileExt(std::string &filename) -> std::string;
 
 private:

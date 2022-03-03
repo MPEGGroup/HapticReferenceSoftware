@@ -45,12 +45,38 @@ using haptics::types::Haptics;
 
 const int DEFAULT_FS = 8000;
 
+void help() {
+  std::cout
+      << "usages: Synthesizer [-h] -f <FILE> -o <OUTPUT_FILE> [-fs <FREQUENCY_SAMPLING>] "
+         "[--pad <PADDING>] [--generate_ohm]"
+      << std::endl
+      << std::endl
+      << "This piece of software ingest an MPEG Haptics binary encoded RM1 files (into its "
+         "human-readable format) and evaluate it to output a PCM file corresponding to the "
+         "synthezised input"
+      << std::endl
+      << "positional arguments:" << std::endl
+      << "\t-f, --file <FILE>\t\t\t\tfile to ingest" << std::endl
+      << "\t-o, --output <OUTPUT_FILE>\t\t\ttoutput file" << std::endl
+      << std::endl
+      << "optional arguments:" << std::endl
+      << "\t-h, --help\t\t\t\t\tshow this help message and exit" << std::endl
+      << "\t-fs, --sampling_frequency <FREQUENCY_SAMPLING>\tthe frequency sampling used to "
+         "synthezised the output (default value is "
+      << DEFAULT_FS << "Hz)" << std::endl
+      << "\t--pad <PADDING>\t\t\t\t\tadd a padding on the resulting file. The padding provided "
+         "should be in milliseconds"
+      << std::endl
+      << "\t--generate_ohm\t\t\t\t\tgenerate an output ohm files corresponding to the file metadata"
+      << std::endl;
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_SUCCESS;
   }
 
@@ -59,7 +85,7 @@ auto main(int argc, char *argv[]) -> int {
     filename = inputParser.getCmdOption("--file");
   }
   if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_FAILURE;
   }
 
@@ -82,7 +108,7 @@ auto main(int argc, char *argv[]) -> int {
   } else {
     fs = std::stoi(fsStr);
     if (fs <= 0) {
-      InputParser::help(args[0]);
+      help();
       return EXIT_FAILURE;
     }
   }
