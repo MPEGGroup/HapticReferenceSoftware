@@ -60,7 +60,7 @@ struct EncodingConfig {
 
   auto static generateConfig() -> EncodingConfig {
     const double curveFrequencyLimit = 72.5;
-    const int wavelet_windowLength = 128;
+    const int wavelet_windowLength = 512;
     const int wavelet_bitbudget = 4;
 
     return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
