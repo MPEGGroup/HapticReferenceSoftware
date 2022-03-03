@@ -241,6 +241,7 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
   const haptics::types::Direction testingDirection_track0(127, 4, -128);
+  const haptics::types::Direction expectedDirection_track0(89, 2, -90);
   const int8_t testingUnitLength_track0 = -3;
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
@@ -260,6 +261,7 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
   const size_t testingBandsCount_track1 = 0;
   const haptics::types::Direction testingDirection_track1(127, 4, -0);
+  const haptics::types::Direction expectedDirection_track1(126, 3, 0);
   const int8_t testingUnitLength_track1 = 43;
   haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
                                       testingGain_track1, testingMixingWeight_track1,
@@ -314,7 +316,7 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() ==
           Approx(testingMixingWeight_track0));
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == expectedDirection_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getUnitLength().has_value());
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getUnitLength().value() == testingUnitLength_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
@@ -330,7 +332,7 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() ==
           Approx(testingMixingWeight_track1));
     REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getDirection().value() == testingDirection_track1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getDirection().value() == expectedDirection_track1);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getUnitLength().has_value());
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getUnitLength().value() == testingUnitLength_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
@@ -444,6 +446,7 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const uint32_t testingBodyPartMask_track2 = 0;
   const std::vector<int> testingVertices_track2 = {0, 6};
   const haptics::types::Direction testingDirection_track2(0, -1, 1);
+  const haptics::types::Direction expectedDirection_track2(0, -90, 89);
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
                                       testingBodyPartMask_track2, testingDirection_track2,
@@ -614,9 +617,9 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getGain() == Approx(testingGain_track1));
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getUnitLength().has_value());
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getUnitLength().value() == testingUnitLength_track1);
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
+    REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getUnitLength().has_value());
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getUnitLength().value() == testingUnitLength_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() ==
           Approx(testingMixingWeight_track1));
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
@@ -669,9 +672,9 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() ==
           Approx(testingMixingWeight_track2));
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track2);
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getUnitLength().has_value());
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getDirection().value() == expectedDirection_track2);
+    CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getUnitLength().has_value());
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {

@@ -33,6 +33,8 @@
 
 #include <IOHaptics/include/IOJson.h>
 #include <iostream>
+#include <limits>
+#include <Tools/include/Tools.h>
 
 using json = nlohmann::json;
 
@@ -108,6 +110,7 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
   }
   return loadingSuccess;
 }
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
@@ -142,9 +145,46 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
     auto trackGain = jsonTrack["gain"].get<float>();
     auto trackMixingWeight = jsonTrack["mixing_weight"].get<float>();
     auto trackBodyPart = jsonTrack["body_part_mask"].get<uint32_t>();
+    std::optional<types::Direction> direction;
+    const int axisCount = 3;
+    if (jsonTrack.contains("direction") && jsonTrack["direction"].is_array() &&
+        jsonTrack["direction"].size() == axisCount) {
+      bool axisAreCorrect = true;
+      for (auto directionit = jsonTrack["direction"].begin();
+           directionit != jsonTrack["direction"].end(); ++directionit) {
+        axisAreCorrect &= directionit.value().is_number();
+      }
+      if (axisAreCorrect) {
+        auto _x = jsonTrack["direction"][0].get<double>();
+        auto _y = jsonTrack["direction"][1].get<double>();
+        auto _z = jsonTrack["direction"][2].get<double>();
+        double directionMagnitude = std::sqrt(_x * _x + _y * _y + _z * _z);
+
+        auto x = static_cast<int8_t>(tools::genericNormalization(
+            -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
+            std::numeric_limits<int8_t>::max(), _x));
+        auto y = static_cast<int8_t>(tools::genericNormalization(
+            -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
+            std::numeric_limits<int8_t>::max(), _y));
+        auto z = static_cast<int8_t>(tools::genericNormalization(
+            -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
+            std::numeric_limits<int8_t>::max(), _z));
+        direction = types::Direction(x, y, z);
+      } else {
+        direction = std::nullopt;
+      }
+    } else {
+      direction = std::nullopt;
+    }
+    std::optional<int8_t> unitLength;
+    if (jsonTrack.contains("unit_length") && jsonTrack["unit_length"].is_number_integer()) {
+      unitLength = jsonTrack["unit_length"].get<int8_t>();
+    } else {
+      unitLength = std::nullopt; 
+    }
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart,
-                       std::nullopt, std::nullopt);
+                       direction, unitLength);
 
     if (jsonTrack.contains("reference_device_id") && jsonTrack["reference_device_id"].is_number()) {
       auto device_id = jsonTrack["reference_device_id"].get<int>();
@@ -441,6 +481,13 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     jsonTrack["body_part_mask"] = track.getBodyPartMask();
     if (track.getReferenceDeviceId().has_value()) {
       jsonTrack["reference_device_id"] = track.getReferenceDeviceId().value();
+    }
+    if (track.getDirection().has_value()) {
+      types::Direction direction = track.getDirection().value();
+      jsonTrack["direction"] = json::array({direction.X, direction.Y, direction.Z});
+    }
+    if (track.getUnitLength().has_value()) {
+      jsonTrack["unit_length"] = track.getUnitLength().value();
     }
 
     auto jsonVertices = json::array();
