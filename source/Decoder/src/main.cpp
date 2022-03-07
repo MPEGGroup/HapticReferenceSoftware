@@ -41,12 +41,26 @@ using haptics::io::IOJson;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
 
+void help() {
+  std::cout << "usages: Decoder [-h] -f <FILE> -o <OUTPUT_FILE>" << std::endl
+            << std::endl
+            << "This piece of software converts MPEG Haptics binary encoded RM1 files into their "
+               "human-readable format"
+            << std::endl
+            << "positional arguments:" << std::endl
+            << "\t-f, --file <FILE>\t\tfile to convert" << std::endl
+            << "\t-o, --output <OUTPUT_FILE>\toutput file" << std::endl
+            << std::endl
+            << "optional arguments:" << std::endl
+            << "\t-h, --help\t\t\tshow this help message and exit" << std::endl;
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_SUCCESS;
   }
 
@@ -55,7 +69,7 @@ auto main(int argc, char *argv[]) -> int {
     filename = inputParser.getCmdOption("--file");
   }
   if (filename.empty()) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_FAILURE;
   }
 
@@ -65,7 +79,7 @@ auto main(int argc, char *argv[]) -> int {
     output = inputParser.getCmdOption("--output");
   }
   if (output.empty()) {
-    InputParser::help(args[0]);
+    help();
     return EXIT_FAILURE;
   }
 
