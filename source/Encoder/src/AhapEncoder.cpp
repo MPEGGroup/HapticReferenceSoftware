@@ -152,8 +152,19 @@ namespace haptics::encoder {
 [[nodiscard]] auto AhapEncoder::extractKeyframes(nlohmann::json *parameterCurve,
                                                  std::vector<std::pair<int, double>> *keyframes)
     -> int {
+  if (!parameterCurve->contains("Time") || !parameterCurve->at("Time").is_number() ||
+      !parameterCurve->contains("ParameterCurveControlPoints") ||
+      !parameterCurve->at("ParameterCurveControlPoints").is_array()) {
+    return EXIT_FAILURE;
+  }
 
   for (nlohmann::json kahap : parameterCurve->at("ParameterCurveControlPoints")) {
+    if (!parameterCurve->contains("Time") || !parameterCurve->at("Time").is_number() ||
+        !parameterCurve->contains("ParameterValue") ||
+        !parameterCurve->at("ParameterValue").is_number()) {
+      continue;
+    }
+
     std::pair<int, double> k;
     // TIME + curve offset
     k.first = static_cast<int>(

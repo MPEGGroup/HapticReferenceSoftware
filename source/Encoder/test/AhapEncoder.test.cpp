@@ -33,10 +33,114 @@
 
 #include <Encoder/include/AhapEncoder.h>
 #include <catch2/catch.hpp>
+#include <nlohmann/json.hpp>
 
 using haptics::encoder::AhapEncoder;
 
-TEST_CASE("return true", "[placeholder]") {
-  // TODO: Some tests
-  CHECK(true);
+TEST_CASE("extractKeyframes with ParameterCurveControlPoints not set", "[extractKeyframes]") {
+  const std::string testingParameterID = "HapticIntensityControl";
+  const float testingTime = 42.358;
+
+  nlohmann::json testingParameterCurve = nlohmann::json::object();
+  testingParameterCurve["ParameterID"] = testingParameterID;
+  testingParameterCurve["Time"] = testingTime;
+
+  std::vector<std::pair<int, double>> resKeyframes;
+  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+
+  REQUIRE(res == EXIT_FAILURE);
+}
+
+TEST_CASE("extractKeyframes with empty ParameterCurveControlPoints", "[extractKeyframes]") {
+  const std::string testingParameterID = "HapticIntensityControl";
+  const float testingTime = 42.358;
+
+  nlohmann::json testingParameterCurve = nlohmann::json::object();
+  testingParameterCurve["ParameterID"] = testingParameterID;
+  testingParameterCurve["Time"] = testingTime;
+  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::array();
+
+  std::vector<std::pair<int, double>> resKeyframes;
+  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+
+  REQUIRE(res == EXIT_SUCCESS);
+  CHECK(resKeyframes.empty());
+}
+
+TEST_CASE("extractKeyframes with ParameterCurveControlPoints", "[extractKeyframes]") {
+  const std::string testingParameterID = "HapticIntensityControl";
+  const float testingTime = 42.358;
+  const std::vector<std::pair<float, float>> testingControlPoints = {{35, .05}, {-5.2, 114.05}};
+
+  nlohmann::json testingParameterCurve = nlohmann::json::object();
+  testingParameterCurve["ParameterID"] = testingParameterID;
+  testingParameterCurve["Time"] = testingTime;
+  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::array();
+  for (auto controlPoint : testingControlPoints) {
+    testingParameterCurve["ParameterCurveControlPoints"].push_back(
+        {{"Time", controlPoint.first}, {"ParameterValue", controlPoint.second}});
+  }
+
+  std::vector<std::pair<int, double>> resKeyframes;
+  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+
+  REQUIRE(res == EXIT_SUCCESS);
+  CHECK(resKeyframes.size() == testingControlPoints.size());
+  for (size_t i = 0; i < resKeyframes.size(); i++) {
+    CHECK(static_cast<float>(resKeyframes.at(i).first) ==
+          Approx((testingTime + testingControlPoints.at(i).first) * 1000));
+    CHECK(resKeyframes.at(i).second == Approx(testingControlPoints.at(i).second));
+  }
+}
+
+TEST_CASE("extractKeyframes with incorrect ParameterCurveControlPoints", "[extractKeyframes]") {
+  const std::string testingParameterID = "HapticIntensityControl";
+  const float testingTime = 42.358;
+  const std::vector<std::pair<float, float>> testingControlPoints = {{35, .05}, {-5.2, 114.05}};
+
+  nlohmann::json testingParameterCurve = nlohmann::json::object();
+  testingParameterCurve["ParameterID"] = testingParameterID;
+  testingParameterCurve["Time"] = testingTime;
+  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::object();
+  testingParameterCurve["ParameterCurveControlPoints"]["Time"] = 0;
+  testingParameterCurve["ParameterCurveControlPoints"]["ParameterValue"] = 0;
+
+  std::vector<std::pair<int, double>> resKeyframes;
+  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+
+  REQUIRE(res == EXIT_FAILURE);
+}
+
+TEST_CASE("extractKeyframes with incorrect ControlPoints", "[extractKeyframes]") {
+  const std::string testingParameterID = "HapticIntensityControl";
+  const float testingTime = 42.358;
+  const std::vector<std::pair<float, float>> testingControlPoints = {{}};
+  const std::vector<float> testingIncorrectTime = {4536};
+  const nlohmann::json testingIncorrectParameterValue = nlohmann::json::object();
+
+  nlohmann::json testingParameterCurve = nlohmann::json::object();
+  testingParameterCurve["ParameterID"] = testingParameterID;
+  testingParameterCurve["Time"] = testingTime;
+  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::array();
+  testingParameterCurve["ParameterCurveControlPoints"].push_back(
+      {{"Time", testingControlPoints.at(0).first}});
+  for (auto controlPoint : testingControlPoints) {
+    testingParameterCurve["ParameterCurveControlPoints"].push_back(
+        {{"Time", controlPoint.first}, {"ParameterValue", controlPoint.second}});
+  }
+  testingParameterCurve["ParameterCurveControlPoints"].push_back(
+      {{"Time", testingIncorrectTime}, {"ParameterValue", testingIncorrectParameterValue}});
+  testingParameterCurve["ParameterCurveControlPoints"].push_back(
+      {{"ParameterValue", testingControlPoints.at(0).second}});
+
+  std::vector<std::pair<int, double>> resKeyframes;
+  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+
+  REQUIRE(res == EXIT_SUCCESS);
+  CHECK(resKeyframes.size() == testingControlPoints.size());
+  for (size_t i = 0; i < resKeyframes.size(); i++) {
+    CHECK(static_cast<float>(resKeyframes.at(i).first) ==
+          Approx((testingTime + testingControlPoints.at(i).first) * 1000));
+    CHECK(resKeyframes.at(i).second == Approx(testingControlPoints.at(i).second));
+  }
 }
