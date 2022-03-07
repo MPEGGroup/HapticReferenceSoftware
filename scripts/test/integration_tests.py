@@ -69,15 +69,17 @@ def synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_pr
     print("Synthesizer time: "+str(duration))
 
 
-def test_psnrs(wav_file_psnr, encoder, synthesizer, decoder, autopad, record_property):
+def test_psnrs(wav_file_psnr, encoder, synthesizer, decoder, autopad, tmpdirname, record_property):
     record_property("file", wav_file_psnr[0])
-    tmpdirname = tempfile.TemporaryDirectory()
+    if tmpdirname is None:
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpdirname = tmpdir.name
     tmp_wav_file = os.path.basename(wav_file_psnr[0])
     gmpg_file = tmp_wav_file.split('.')[0] + ".gmpg"
     mpg_file = tmp_wav_file.split('.')[0] + ".mpg"
-    temp_file_path_gmpg = os.path.join(tmpdirname.name, gmpg_file)
-    temp_file_path_wav = os.path.join(tmpdirname.name, tmp_wav_file)
-    temp_file_path_mpg = os.path.join(tmpdirname.name, mpg_file)
+    temp_file_path_gmpg = os.path.join(tmpdirname, gmpg_file)
+    temp_file_path_wav = os.path.join(tmpdirname, tmp_wav_file)
+    temp_file_path_mpg = os.path.join(tmpdirname, mpg_file)
 
     encoding(encoder, wav_file_psnr[0], temp_file_path_mpg, record_property)
 
