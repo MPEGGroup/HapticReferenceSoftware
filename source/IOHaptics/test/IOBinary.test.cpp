@@ -358,7 +358,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 120;
+        testingVertices_track2.size() + 135;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -609,7 +609,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 373;
+        testingVertices_track2.size() + 381;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -757,8 +757,8 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() ==
           Approx(testingMixingWeight_track2));
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getUnitLength().has_value());
+    CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
+    CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getUnitLength().has_value());
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
