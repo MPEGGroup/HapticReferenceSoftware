@@ -295,7 +295,7 @@ TEST_CASE("extractContinuous without modulation function", "[extractContinuous]"
   CHECK(resEffect.getBaseSignal() == haptics::types::BaseSignal::Sine);
   CHECK(resEffect.getPhase() == Approx(0));
   CHECK(static_cast<float>(resEffect.getPosition()) == Approx(testingTime * 1000));
-  
+
   REQUIRE(resEffect.getKeyframesSize() == 2);
   haptics::types::Keyframe resKeyframe = resEffect.getKeyframeAt(0);
   REQUIRE(resKeyframe.getRelativePosition().has_value());
@@ -304,18 +304,20 @@ TEST_CASE("extractContinuous without modulation function", "[extractContinuous]"
   CHECK(resKeyframe.getRelativePosition().value() == 0);
   CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
-  
+
   resKeyframe = resEffect.getKeyframeAt(1);
   REQUIRE(resKeyframe.getRelativePosition().has_value());
   REQUIRE(resKeyframe.getAmplitudeModulation().has_value());
   REQUIRE(resKeyframe.getFrequencyModulation().has_value());
-  CHECK(static_cast<float>(resKeyframe.getRelativePosition().value()) == Approx(testingDuration * 1000));
+  CHECK(static_cast<float>(resKeyframe.getRelativePosition().value()) ==
+        Approx(testingDuration * 1000));
   CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("extractContinuous without modulation function and default values", "[extractContinuous]") {
+TEST_CASE("extractContinuous without modulation function and default values",
+          "[extractContinuous]") {
   const std::string testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingDuration = 0.25;
@@ -350,7 +352,7 @@ TEST_CASE("extractContinuous without modulation function and default values", "[
   CHECK(resKeyframe.getRelativePosition().value() == 0);
   CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
-  
+
   resKeyframe = resEffect.getKeyframeAt(1);
   REQUIRE(resKeyframe.getRelativePosition().has_value());
   REQUIRE(resKeyframe.getAmplitudeModulation().has_value());
@@ -569,7 +571,7 @@ TEST_CASE("extractTransients without modulation function", "[extractTransients]"
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
- TEST_CASE("extractTransients without modulation function and default values",
+TEST_CASE("extractTransients without modulation function and default values",
           "[extractTransients]") {
   const std::string testingEventType = "HapticTransient";
   const float testingTime = 0.015;
@@ -602,41 +604,41 @@ TEST_CASE("extractTransients without modulation function", "[extractTransients]"
   CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
 }
 
- // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
- TEST_CASE("extractTransients with modulation function", "[extractTransients]") {
-   const std::string testingEventType = "HapticTransient";
-   const float testingTime = 0.015;
-   const float testingIntensity = 1;
-   const float testingSharpness = 0.5;
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
+TEST_CASE("extractTransients with modulation function", "[extractTransients]") {
+  const std::string testingEventType = "HapticTransient";
+  const float testingTime = 0.015;
+  const float testingIntensity = 1;
+  const float testingSharpness = 0.5;
 
-   nlohmann::json testingTransient = nlohmann::json::object();
-   testingTransient["EventType"] = testingEventType;
-   testingTransient["Time"] = testingTime;
-   testingTransient["EventParameters"] =
-       (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                 {"ParameterValue", testingIntensity}},
-                                {{"ParameterID", "HapticSharpness"},
-                                 {"ParameterValue", testingSharpness}}});
+  nlohmann::json testingTransient = nlohmann::json::object();
+  testingTransient["EventType"] = testingEventType;
+  testingTransient["Time"] = testingTime;
+  testingTransient["EventParameters"] =
+      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
+                                {"ParameterValue", testingIntensity}},
+                               {{"ParameterID", "HapticSharpness"},
+                                {"ParameterValue", testingSharpness}}});
 
   const std::vector<std::pair<int, double>> testingAmplitudeModulation = {{10, 0}, {100, 0.5}};
-   const std::vector<std::pair<int, double>> testingFrequencyModulation = {};
-   std::vector<haptics::types::Effect> res;
-   int resExitCode = AhapEncoder::extractTransients(
-       &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  const std::vector<std::pair<int, double>> testingFrequencyModulation = {};
+  std::vector<haptics::types::Effect> res;
+  int resExitCode = AhapEncoder::extractTransients(
+      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
-   REQUIRE(resExitCode == EXIT_SUCCESS);
-   REQUIRE(res.size() == 1);
-   haptics::types::Effect resEffect = res.at(0);
-   CHECK(static_cast<float>(resEffect.getPosition()) == Approx(testingTime * 1000));
+  REQUIRE(resExitCode == EXIT_SUCCESS);
+  REQUIRE(res.size() == 1);
+  haptics::types::Effect resEffect = res.at(0);
+  CHECK(static_cast<float>(resEffect.getPosition()) == Approx(testingTime * 1000));
 
-   REQUIRE(resEffect.getKeyframesSize() == 1);
-   haptics::types::Keyframe resKeyframe = resEffect.getKeyframeAt(0);
-   REQUIRE(resKeyframe.getRelativePosition().has_value());
-   REQUIRE(resKeyframe.getAmplitudeModulation().has_value());
-   REQUIRE(resKeyframe.getFrequencyModulation().has_value());
-   CHECK(resKeyframe.getRelativePosition().value() == 0);
-   const float expectedAmplitude = 0.022;
-   const int expectedFrequency = 90;
-   CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude));
-   CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
- }
+  REQUIRE(resEffect.getKeyframesSize() == 1);
+  haptics::types::Keyframe resKeyframe = resEffect.getKeyframeAt(0);
+  REQUIRE(resKeyframe.getRelativePosition().has_value());
+  REQUIRE(resKeyframe.getAmplitudeModulation().has_value());
+  REQUIRE(resKeyframe.getFrequencyModulation().has_value());
+  CHECK(resKeyframe.getRelativePosition().value() == 0);
+  const float expectedAmplitude = 0.022;
+  const int expectedFrequency = 90;
+  CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude));
+  CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
+}

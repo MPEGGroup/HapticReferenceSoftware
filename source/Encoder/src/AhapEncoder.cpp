@@ -177,11 +177,11 @@ namespace haptics::encoder {
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto AhapEncoder::extractTransients(nlohmann::json *event,
-                                                  std::vector<haptics::types::Effect> *transients,
-                                                  const std::vector<std::pair<int, double>> *amplitudes,
-                                                  const std::vector<std::pair<int, double>> *frequencies)
-    -> int {
+[[nodiscard]] auto
+AhapEncoder::extractTransients(nlohmann::json *event,
+                               std::vector<haptics::types::Effect> *transients,
+                               const std::vector<std::pair<int, double>> *amplitudes,
+                               const std::vector<std::pair<int, double>> *frequencies) -> int {
   if (!event->contains("Time") || !event->at("Time").is_number() || !event->contains("EventType") ||
       !event->at("EventType").is_string() ||
       event->at("EventType").get<std::string>() != "HapticTransient" ||
@@ -190,8 +190,8 @@ namespace haptics::encoder {
   }
 
   haptics::types::Effect t =
-      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
-                             haptics::types::BaseSignal::Sine);
+      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)),
+                             0, haptics::types::BaseSignal::Sine);
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
@@ -256,12 +256,12 @@ namespace haptics::encoder {
   return EXIT_SUCCESS;
 }
 
+[[nodiscard]] auto
 // NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
-[[nodiscard]] auto AhapEncoder::extractContinuous(nlohmann::json *event,
-                                                  std::vector<haptics::types::Effect> *continuous,
-                                                  const std::vector<std::pair<int, double>> *amplitudes,
-                                                  const std::vector<std::pair<int, double>> *frequencies)
-    -> int {
+AhapEncoder::extractContinuous(nlohmann::json *event,
+                               std::vector<haptics::types::Effect> *continuous,
+                               const std::vector<std::pair<int, double>> *amplitudes,
+                               const std::vector<std::pair<int, double>> *frequencies) -> int {
   if (!event->contains("Time") || !event->at("Time").is_number() || !event->contains("EventType") ||
       !event->at("EventType").is_string() ||
       event->at("EventType").get<std::string>() != "HapticContinuous" ||
