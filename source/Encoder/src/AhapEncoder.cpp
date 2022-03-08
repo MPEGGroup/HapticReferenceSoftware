@@ -159,9 +159,8 @@ namespace haptics::encoder {
   }
 
   for (nlohmann::json kahap : parameterCurve->at("ParameterCurveControlPoints")) {
-    if (!parameterCurve->contains("Time") || !parameterCurve->at("Time").is_number() ||
-        !parameterCurve->contains("ParameterValue") ||
-        !parameterCurve->at("ParameterValue").is_number()) {
+    if (!kahap.contains("Time") || !kahap.at("Time").is_number() ||
+        !kahap.contains("ParameterValue") || !kahap.at("ParameterValue").is_number()) {
       continue;
     }
 
@@ -180,12 +179,18 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto AhapEncoder::extractTransients(nlohmann::json *event,
                                                   std::vector<haptics::types::Effect> *transients,
-                                                  std::vector<std::pair<int, double>> *amplitudes,
-                                                  std::vector<std::pair<int, double>> *frequencies)
+                                                  const std::vector<std::pair<int, double>> *amplitudes,
+                                                  const std::vector<std::pair<int, double>> *frequencies)
     -> int {
+  if (!event->contains("Time") || !event->at("Time").is_number() || !event->contains("EventType") ||
+      !event->at("EventType").is_string() ||
+      event->at("EventType").get<std::string>() != "HapticTransient" ||
+      !event->contains("EventParameters") || !event->at("EventParameters").is_array()) {
+    return EXIT_FAILURE;
+  }
 
   haptics::types::Effect t =
-      haptics::types::Effect(static_cast<int>((event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
                              haptics::types::BaseSignal::Sine);
 
   haptics::types::Keyframe k;
@@ -254,13 +259,20 @@ namespace haptics::encoder {
 // NOLINTNEXTLINE(readability-function-size, readability-function-cognitive-complexity)
 [[nodiscard]] auto AhapEncoder::extractContinuous(nlohmann::json *event,
                                                   std::vector<haptics::types::Effect> *continuous,
-                                                  std::vector<std::pair<int, double>> *amplitudes,
-                                                  std::vector<std::pair<int, double>> *frequencies)
+                                                  const std::vector<std::pair<int, double>> *amplitudes,
+                                                  const std::vector<std::pair<int, double>> *frequencies)
     -> int {
+  if (!event->contains("Time") || !event->at("Time").is_number() || !event->contains("EventType") ||
+      !event->at("EventType").is_string() ||
+      event->at("EventType").get<std::string>() != "HapticContinuous" ||
+      !event->contains("EventDuration") || !event->at("EventDuration").is_number() ||
+      !event->contains("EventParameters") || !event->at("EventParameters").is_array()) {
+    return EXIT_FAILURE;
+  }
 
   haptics::types::Effect c =
-      haptics::types::Effect(static_cast<int>(event->at("Time").get<double>() * SEC_TO_MSEC), 0,
-                             haptics::types::BaseSignal::Sine);
+      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)),
+                             0, haptics::types::BaseSignal::Sine);
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;
@@ -271,7 +283,7 @@ namespace haptics::encoder {
   double base_freq = BASE_FREQUENCY_MAX;
 
   k_end.setRelativePosition(
-      static_cast<int>(event->at("EventDuration").get<double>() * SEC_TO_MSEC));
+      static_cast<int>(round(event->at("EventDuration").get<double>() * SEC_TO_MSEC)));
 
   // SET VALUES AS DEFINED
   for (nlohmann::json param : event->at("EventParameters")) {

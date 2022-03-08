@@ -48,13 +48,13 @@ public:
   [[nodiscard]] auto static encode(std::string &filename, types::Perception &out) -> int;
   [[nodiscard]] auto static extractTransients(nlohmann::json *event,
                                               std::vector<haptics::types::Effect> *transients,
-                                              std::vector<std::pair<int, double>> *amplitudes,
-                                              std::vector<std::pair<int, double>> *frequencies)
+                                              const std::vector<std::pair<int, double>> *amplitudes,
+                                              const std::vector<std::pair<int, double>> *frequencies)
       -> int;
   [[nodiscard]] auto static extractContinuous(nlohmann::json *event,
                                               std::vector<haptics::types::Effect> *continuous,
-                                              std::vector<std::pair<int, double>> *amplitudes,
-                                              std::vector<std::pair<int, double>> *frequencies)
+                                              const std::vector<std::pair<int, double>> *amplitudes,
+                                              const std::vector<std::pair<int, double>> *frequencies)
       -> int;
   [[nodiscard]] auto static extractKeyframes(nlohmann::json *parameterCurve,
                                              std::vector<std::pair<int, double>> *keyframes) -> int;
