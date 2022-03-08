@@ -121,10 +121,9 @@ auto Effect::addKeyframe(std::optional<int> position, std::optional<double> ampl
 auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
     -> double {
   double res = 0;
-  
-  double max_position = this->position + 
-                        this->getEffectTimeLength(BandType::Wave,
-                                                  EncodingModality::Vectorial, 0);
+
+  double max_position =
+      this->position + this->getEffectTimeLength(BandType::Wave, EncodingModality::Vectorial, 0);
 
   if (position < this->position || position > max_position || keyframes.empty()) {
     return res;
