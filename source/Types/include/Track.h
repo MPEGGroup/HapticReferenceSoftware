@@ -81,7 +81,6 @@ public:
   auto Evaluate(double position) -> double;
 
 private:
-  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   int id = -1;
   std::string description;
   float gain = 1;
