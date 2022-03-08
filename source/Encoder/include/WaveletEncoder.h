@@ -43,10 +43,10 @@
 #include "Types/include/Effect.h"
 #include "Types/include/Keyframe.h"
 
-constexpr size_t WAVMAXLENGTH = 24;
+constexpr size_t WAVMAXLENGTH = 8;
 constexpr int MAXBITS = 15;
-constexpr int FRACTIONBITS_0 = 23;
-constexpr int FRACTIONBITS_1 = 19;
+constexpr int FRACTIONBITS_0 = 7;
+constexpr int FRACTIONBITS_1 = 3;
 constexpr int INTEGERBITS_1 = 4;
 constexpr double LOGFACTOR = 10;
 constexpr double MAXQUANTFACTOR = 0.999;

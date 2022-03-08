@@ -45,8 +45,6 @@
 
 namespace haptics::spiht {
 
-// constexpr size_t WAVMAX_SIZE = 8;
-
 class Spiht_Dec {
 public:
   void decodeEffect(std::vector<unsigned char> &in, Effect &effect, int origlength);

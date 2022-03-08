@@ -58,10 +58,34 @@ struct EncodingConfig {
       , wavelet_windowLength(_wavelet_windowLength)
       , wavelet_bitbudget(_wavelet_bitbudget){};
 
-  auto static generateConfig() -> EncodingConfig {
-    const double curveFrequencyLimit = 72.5;
-    const int wavelet_windowLength = 512;
-    const int wavelet_bitbudget = 4;
+  auto static generateConfig(int bitrate = 2) -> EncodingConfig {
+
+    double curveFrequencyLimit = 0;
+    int wavelet_windowLength = 0;
+    int wavelet_bitbudget = 0;
+    switch (bitrate) {
+    case 2:
+      curveFrequencyLimit = 72.5;
+      wavelet_windowLength = 512;
+      wavelet_bitbudget = 4;
+      break;
+    case 16:
+      curveFrequencyLimit = 72.5;
+      wavelet_windowLength = 512;
+      wavelet_bitbudget = 110;
+      break;
+    case 64:
+      curveFrequencyLimit = 72.5;
+      wavelet_windowLength = 512;
+      wavelet_bitbudget = 120;
+      break;
+    default:
+      std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
+      curveFrequencyLimit = 72.5;
+      wavelet_windowLength = 512;
+      wavelet_bitbudget = 4;
+      break;
+    }
 
     return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }

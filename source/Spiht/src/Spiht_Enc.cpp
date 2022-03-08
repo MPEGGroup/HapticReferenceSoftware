@@ -275,7 +275,7 @@ void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<unsigned c
 
   int integerpart = 0;
   char mode = 0;
-  quantMode m = {0, 0};
+  encoder::quantMode m = {0, 0};
   if (qwavmax < 1) {
     m.integerbits = 0;
     m.fractionbits = FRACTIONBITS_0;
