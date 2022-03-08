@@ -534,9 +534,7 @@ TEST_CASE("write/read file for body testing") {
                                     testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
-  // TODO : fix this starting position for curves
-  // const int testingPosition_effect0 = 63;
-  const int testingPosition_effect0 = 0;
+  const int testingPosition_effect0 = 63;
   const float testingPhase_effect0 = 0;
   const auto testingBaseSignal_effect0 = haptics::types::BaseSignal::Sine;
   const std::vector<std::tuple<int, float>> testingKeyframes_effect0 = {
