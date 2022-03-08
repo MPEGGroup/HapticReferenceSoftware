@@ -135,13 +135,13 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     bool equal = true;
     dec.decodeEffect(stream_enc, effect_out, bl);
     for (int i = 0; i < (int)bl; i++) {
-      if (!(fabs(effect_in.getKeyframeAt(i).getAmplitudeModulation().value() -
+      if (!(std::fabs(effect_in.getKeyframeAt(i).getAmplitudeModulation().value() -
                  effect_out.getKeyframeAt(i).getAmplitudeModulation().value()) < precision)) {
         equal = false;
       }
     }
     CHECK(equal);
-    CHECK(fabs(effect_in.getKeyframeAt(bl).getAmplitudeModulation().value() -
+    CHECK(std::fabs(effect_in.getKeyframeAt(bl).getAmplitudeModulation().value() -
                effect_out.getKeyframeAt(bl).getAmplitudeModulation().value()) < precision);
     if (!equal) {
       for (int i = 0; i < (int)bl; i++) {
