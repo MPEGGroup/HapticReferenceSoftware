@@ -52,8 +52,8 @@ public:
       , bodyPartMask(newBodyPartMask)
       , vertices({})
       , bands({})
-      , sampleCount(std::nullopt)
-      , frequencySampling(std::nullopt){};
+      , frequencySampling(std::nullopt)
+      , sampleCount(std::nullopt){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -96,8 +96,8 @@ private:
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;
-  std::optional<uint32_t> frequencySampling;
-  std::optional<uint32_t> sampleCount;
+  std::optional<uint32_t> frequencySampling = std::nullopt;
+  std::optional<uint32_t> sampleCount = std::nullopt;
 };
 } // namespace haptics::types
 #endif // TRACK_H
