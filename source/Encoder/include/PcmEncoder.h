@@ -72,12 +72,12 @@ struct EncodingConfig {
     case 16:
       curveFrequencyLimit = 72.5;
       wavelet_windowLength = 512;
-      wavelet_bitbudget = 110;
+      wavelet_bitbudget = 13;
       break;
     case 64:
       curveFrequencyLimit = 72.5;
       wavelet_windowLength = 512;
-      wavelet_bitbudget = 120;
+      wavelet_bitbudget = 88;
       break;
     default:
       std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
