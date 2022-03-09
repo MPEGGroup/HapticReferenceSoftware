@@ -46,6 +46,11 @@
 #include <vector>
 
 namespace haptics::encoder {
+
+static constexpr int BITBUDGET_2KBS = 4;
+static constexpr int BITBUDGET_16KBS = 13;
+static constexpr int BITBUDGET_64KBS = 88;
+
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
   int wavelet_windowLength = 0;
@@ -60,30 +65,22 @@ struct EncodingConfig {
 
   auto static generateConfig(int bitrate = 2) -> EncodingConfig {
 
-    double curveFrequencyLimit = 0;
-    int wavelet_windowLength = 0;
+    const double curveFrequencyLimit = 72.5;
+    const int wavelet_windowLength = 512;
     int wavelet_bitbudget = 0;
     switch (bitrate) {
     case 2:
-      curveFrequencyLimit = 72.5;
-      wavelet_windowLength = 512;
-      wavelet_bitbudget = 4;
+      wavelet_bitbudget = BITBUDGET_2KBS;
       break;
     case 16:
-      curveFrequencyLimit = 72.5;
-      wavelet_windowLength = 512;
-      wavelet_bitbudget = 13;
+      wavelet_bitbudget = BITBUDGET_16KBS;
       break;
     case 64:
-      curveFrequencyLimit = 72.5;
-      wavelet_windowLength = 512;
-      wavelet_bitbudget = 88;
+      wavelet_bitbudget = BITBUDGET_64KBS;
       break;
     default:
       std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
-      curveFrequencyLimit = 72.5;
-      wavelet_windowLength = 512;
-      wavelet_bitbudget = 4;
+      wavelet_bitbudget = BITBUDGET_2KBS;
       break;
     }
 
