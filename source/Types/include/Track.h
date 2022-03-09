@@ -51,7 +51,9 @@ public:
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
       , vertices({})
-      , bands({}){};
+      , bands({})
+      , sampleCount(std::nullopt)
+      , frequencySampling(std::nullopt){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -79,6 +81,10 @@ public:
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
+  [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
+  auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
+  [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
+  auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
 
 private:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
@@ -90,6 +96,8 @@ private:
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;
+  std::optional<uint32_t> frequencySampling;
+  std::optional<uint32_t> sampleCount;
 };
 } // namespace haptics::types
 #endif // TRACK_H

@@ -90,6 +90,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       }
       myTrack.addBand(myBand);
     }
+    myTrack.setFrequencySampling(wavParser.getSamplerate());
+    myTrack.setSampleCount(static_cast<uint32_t>(wavParser.getNumSamples()));
     out.replaceTrackAt((int)channelIndex, myTrack);
 
     // wavelet processing
@@ -101,6 +103,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
                                 config.curveFrequencyLimit, waveletBand)) {
       myTrack.addBand(waveletBand);
     }
+    myTrack.setFrequencySampling(wavParser.getSamplerate());
+    myTrack.setSampleCount(static_cast<uint32_t>(wavParser.getNumSamples()));
     out.replaceTrackAt((int)channelIndex, myTrack);
   }
 
