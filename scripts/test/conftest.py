@@ -76,23 +76,23 @@ def pytest_generate_tests(metafunc):
     synthesizer_path = os.path.join(install_dir, 'bin', 'Synthesizer')
     decoder_path = os.path.join(install_dir, 'bin', 'Decoder')
 
-    list_wav_files = []
+    list_ohm_files = []
     for path in Path(data_dir).rglob('*.ohm'):
         # filter out Rendered wav files - IVS and AHAP added first
-        if path.name in list_wav_files or 'Restored' in str(path):
+        if path.name in list_ohm_files or 'Restored' in str(path):
             continue
 
         if psnr_ref is not None:
             for list_files in data_json:
                 if path.name in data_json[list_files]:
                     # cast to str because Path object is not serializable
-                    list_wav_files.append([str(path), data_json[list_files][path.name]])
+                    list_ohm_files.append([str(path), data_json[list_files][path.name]])
                     break
         else:
-            list_wav_files.append([str(path), None])
+            list_ohm_files.append([str(path), None])
 
-    if "wav_file_psnr" in metafunc.fixturenames:
-        metafunc.parametrize("wav_file_psnr", list_wav_files)
+    if "ohm_file" in metafunc.fixturenames:
+        metafunc.parametrize("ohm_file", list_ohm_files)
 
     if "encoder" in metafunc.fixturenames:
         metafunc.parametrize("encoder", [encoder_path])
