@@ -349,7 +349,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 120;
+        testingVertices_track2.size() + 132;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -585,7 +585,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 373;
+        testingVertices_track2.size() + 385;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
