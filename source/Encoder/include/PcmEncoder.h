@@ -50,6 +50,9 @@ namespace haptics::encoder {
 static constexpr int BITBUDGET_2KBS = 4;
 static constexpr int BITBUDGET_16KBS = 13;
 static constexpr int BITBUDGET_64KBS = 88;
+static constexpr int BITR_2 = 2;
+static constexpr int BITR_16 = 16;
+static constexpr int BITR_64 = 64;
 
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
@@ -69,13 +72,13 @@ struct EncodingConfig {
     const int wavelet_windowLength = 512;
     int wavelet_bitbudget = 0;
     switch (bitrate) {
-    case 2:
+    case BITR_2:
       wavelet_bitbudget = BITBUDGET_2KBS;
       break;
-    case 16:
+    case BITR_16:
       wavelet_bitbudget = BITBUDGET_16KBS;
       break;
-    case 64:
+    case BITR_64:
       wavelet_bitbudget = BITBUDGET_64KBS;
       break;
     default:
