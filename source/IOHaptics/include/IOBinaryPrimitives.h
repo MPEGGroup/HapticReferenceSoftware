@@ -50,7 +50,10 @@ public:
 
     std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
-    memcpy(&value, &bytes, sizeof(value));
+
+    for (size_t i = 0; i < bytesCount; i++) {
+      value |= static_cast<T>(bytes[i]) << 8 * i;
+    }
 
     return value;
   }
@@ -60,7 +63,9 @@ public:
   template <class T, size_t bytesCount>
   static auto writeNBytes(const T &value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
-    memcpy(&bytes, &value, sizeof(value));
+    for (size_t i = 0; i < bytesCount; i++) {
+      bytes[i] = (value & (0x000000ff >> i * 8)) >> i * 8;
+    }
     file.write(bytes.data(), bytesCount);
   }
 };
