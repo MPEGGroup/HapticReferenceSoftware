@@ -58,9 +58,11 @@ public:
     file.read(bytes.data(), bytesCount);
     T value = 0;
     const int byteSize = 8;
-    for (size_t i = 0; i < bytes.size(); i++) {
-      auto byteVal = static_cast<uint8_t>(bytes[i]);
+    int i = 0;
+    for (auto &byte : bytes) {
+      auto byteVal = static_cast<uint8_t>(byte);
       value |= static_cast<T>(byteVal) << byteSize * i;
+      i++;
     }
     return value;
   }
@@ -78,8 +80,10 @@ public:
     std::array<char, bytesCount> bytes{};
     const int mask = 0x000000ff;
     const int byteSize = 8;
-    for (size_t i = 0; i < bytes.size(); i++) {
-      bytes[i] = (value & (mask << i * byteSize)) >> i * byteSize;
+    int i = 0;
+    for (auto &byte : bytes) {
+      byte = (value & (mask << i * byteSize)) >> i * byteSize;
+      i++;
     }
     file.write(bytes.data(), bytesCount);
   }
