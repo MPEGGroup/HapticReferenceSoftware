@@ -58,11 +58,9 @@ public:
     file.read(bytes.data(), bytesCount);
     T value = 0;
     const int byteSize = 8;
-    int i = 0;
-    for (auto &byte : bytes) {
-      auto byteVal = static_cast<uint8_t>(byte);
+    for (size_t i = 0; i < bytes.size(); i++) {
+      auto byteVal = static_cast<uint8_t>(bytes[i]);
       value |= static_cast<T>(byteVal) << byteSize * i;
-      i++;
     }
     return value;
   }
@@ -79,11 +77,9 @@ public:
   static auto writeNBytesInteger(const T &value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
     const int mask = 0x000000ff;
-    int i = 0;
     const int byteSize = 8;
-    for (auto &byte : bytes) {
-      byte = (value & (mask << i * byteSize)) >> i * byteSize;
-      i++;
+    for (size_t i = 0; i < bytes.size(); i++) {
+      bytes[i] = (value & (mask << i * byteSize)) >> i * byteSize;
     }
     file.write(bytes.data(), bytesCount);
   }
