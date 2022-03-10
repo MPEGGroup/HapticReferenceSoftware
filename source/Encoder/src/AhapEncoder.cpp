@@ -316,10 +316,9 @@ AhapEncoder::extractContinuous(nlohmann::json *event,
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto
-AhapEncoder::modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>> *amplitudes,
-                                           types::Effect &continuous, const Keyframe &firstKeyframe,
-                                           Keyframe &lastKeyframe) -> void {
+auto AhapEncoder::modulateContinuousOnAmplitude(
+    const std::vector<std::pair<int, double>> *amplitudes, types::Effect &continuous,
+    const Keyframe &firstKeyframe, Keyframe &lastKeyframe) -> void {
   if (amplitudes->empty()) {
     return;
   }
@@ -369,10 +368,9 @@ AhapEncoder::modulateContinuousOnAmplitude(const std::vector<std::pair<int, doub
   }
 }
 
-[[nodiscard]] auto
-AhapEncoder::modulateContinuousOnFrequency(const std::vector<std::pair<int, double>> *frequencies,
-                                           types::Effect &continuous, Keyframe &lastKeyframe,
-                                           double base_freq) -> void {
+auto AhapEncoder::modulateContinuousOnFrequency(
+    const std::vector<std::pair<int, double>> *frequencies, types::Effect &continuous,
+    Keyframe &lastKeyframe, double base_freq) -> void {
   if (frequencies->empty()) {
     return;
   }
