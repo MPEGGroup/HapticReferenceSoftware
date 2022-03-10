@@ -51,8 +51,10 @@ public:
     std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
 
-    for (size_t i = 0; i < bytesCount; i++) {
-      value |= static_cast<T>(bytes[i]) << sizeof(char) * i;
+    int i = 0;
+    for (auto &byte : bytes) {
+      value |= static_cast<T>(byte) << sizeof(char) * i;
+      i++;
     }
 
     return value;
@@ -64,8 +66,10 @@ public:
   static auto writeNBytes(const T &value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
     const int mask = 0x000000ff;
-    for (size_t i = 0; i < bytesCount; i++) {
-      bytes[i] = (value & (mask >> i * sizeof(char))) >> i * sizeof(char);
+    int i = 0;
+    for (auto &byte : bytes) {
+      byte = (value & (mask >> i * sizeof(char))) >> i * sizeof(char);
+      i++;
     }
     file.write(bytes.data(), bytesCount);
   }
