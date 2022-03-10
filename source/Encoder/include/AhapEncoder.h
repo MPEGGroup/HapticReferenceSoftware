@@ -66,7 +66,6 @@ private:
       Keyframe &lastKeyframe, double base_freq) -> void;
   static const int MIN_AHAP_FREQUENCY = 65;
   static const int MAX_AHAP_FREQUENCY = 300;
-
 };
 } // namespace haptics::encoder
 #endif // AHAPENCODER_H
