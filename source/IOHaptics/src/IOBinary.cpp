@@ -396,9 +396,20 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto trackGain = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto trackMixingWeight = IOBinaryPrimitives::readNBytes<float, 4>(file);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    auto frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    std::optional<uint32_t> sampleCount = std::nullopt;
+    if (frequencySampling != 0) {
+      sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    }
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
     types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
+    if (frequencySampling != 0) {
+      t.setFrequencySampling(frequencySampling);
+    }
+    if (sampleCount.has_value()) {
+      t.setSampleCount(sampleCount);
+    }
     if (deviceId >= 0) {
       t.setReferenceDeviceId(deviceId);
     }
@@ -446,6 +457,14 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
 
     uint32_t bodyPartMask = myTrack.getBodyPartMask();
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
+
+    uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
+    IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
+
+    if (frequencySampling != 0) {
+      uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
+      IOBinaryPrimitives::writeNBytes<uint32_t, 4>(sampleCount, file);
+    }
 
     auto verticesCount = static_cast<int>(myTrack.getVerticesSize());
     IOBinaryPrimitives::writeNBytes<int, 4>(verticesCount, file);
