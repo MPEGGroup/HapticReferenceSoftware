@@ -46,12 +46,12 @@ public:
   static auto readString(std::ifstream &file) -> std::string;
   static auto readFloat(std::ifstream &file) -> float;
 
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
     std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
     T value = 0;
     for (size_t i = 0; i < bytes.size(); i++) {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       auto byteVal = static_cast<uint8_t>(bytes[i]);
       value |= static_cast<T>(byteVal) << byteSize * i;
     }
@@ -60,11 +60,11 @@ public:
 
   static auto writeString(const std::string &text, std::ofstream &file) -> void;
   static auto writeFloat(float f, std::ofstream &file) -> void;
-  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   template <class T, size_t bytesCount>
   static auto writeNBytes(T value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
     for (size_t i = 0; i < bytes.size(); i++) {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       bytes[i] = static_cast<uint8_t>(value >> i * byteSize);
     }
     file.write(bytes.data(), bytesCount);
