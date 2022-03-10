@@ -46,7 +46,15 @@ public:
   static auto readString(std::ifstream &file) -> std::string;
   static auto readFloat(std::ifstream &file) -> float;
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
-    std::array<char, bytesCount> bytes;
+    T value = 0;
+    std::array<char, bytesCount> bytes{};
+    file.read(bytes.data(), bytesCount);
+    memcpy(&value, &bytes, sizeof(value));
+    return value;
+  }
+
+  template <class T, size_t bytesCount> static auto readNBytesInteger(std::ifstream &file) -> T {
+    std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
     T value = 0;
     const int byteSize = 8;
@@ -63,6 +71,12 @@ public:
   static auto writeFloat(const float &f, std::ofstream &file) -> void;
   template <class T, size_t bytesCount>
   static auto writeNBytes(const T &value, std::ofstream &file) -> void {
+    std::array<char, bytesCount> bytes{};
+    memcpy(&bytes, &value, sizeof(value));
+    file.write(bytes.data(), bytesCount);
+  }
+  template <class T, size_t bytesCount>
+  static auto writeNBytesInteger(const T &value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
     const int mask = 0x000000ff;
     int i = 0;

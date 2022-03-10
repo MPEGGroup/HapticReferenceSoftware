@@ -38,36 +38,36 @@
 namespace haptics::io {
 
 auto IOBinaryBands::readBandHeader(types::Band &band, std::ifstream &file) -> bool {
-  auto bandType = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  auto bandType = IOBinaryPrimitives::readNBytesInteger<unsigned short, 2>(file);
   band.setBandType(static_cast<types::BandType>(bandType));
 
   auto encodingmodality =
-      IOBinaryPrimitives::IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+      IOBinaryPrimitives::IOBinaryPrimitives::readNBytesInteger<unsigned short, 2>(file);
   band.setEncodingModality(static_cast<types::EncodingModality>(encodingmodality));
 
   if (band.getBandType() == types::BandType::Curve) {
-    auto curveType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    auto curveType = IOBinaryPrimitives::readNBytesInteger<uint8_t, 1>(file);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::Wave &&
              band.getEncodingModality() == types::EncodingModality::Wavelet) {
-    auto windowLength = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    auto windowLength = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
     band.setWindowLength(static_cast<int>(windowLength));
   }
 
-  auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+  auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
   band.setLowerFrequencyLimit(static_cast<int>(lowerFrequencyLimit));
 
-  auto upperFrequencyLimit = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+  auto upperFrequencyLimit = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
 
   if (band.getBandType() == types::BandType::Transient) {
-    auto keyframeCount = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    auto keyframeCount = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
     for (unsigned int i = 0; i < keyframeCount; i++) {
       types::Effect e;
       band.addEffect(e);
     }
   } else if (band.getBandType() == types::BandType::Curve) {
-    auto keyframeCount = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    auto keyframeCount = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
     types::Effect e;
     for (unsigned int i = 0; i < keyframeCount; i++) {
       types::Keyframe kf;
@@ -76,7 +76,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::ifstream &file) -> bo
     band.addEffect(e);
   } else if (band.getBandType() == types::BandType::Wave &&
              band.getEncodingModality() == types::EncodingModality::Vectorial) {
-    auto keyframeCount = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    auto keyframeCount = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
     for (unsigned int i = 0; i < keyframeCount; i++) {
       types::Effect e;
       band.addEffect(e);
@@ -89,25 +89,25 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::ifstream &file) -> bo
 auto IOBinaryBands::writeBandHeader(types::Band &band, std::ofstream &file) -> bool {
   types::BandType t = band.getBandType();
   auto bandType = static_cast<unsigned short>(t);
-  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(bandType, file);
+  IOBinaryPrimitives::writeNBytesInteger<unsigned short, 2>(bandType, file);
 
   auto encodingmodality = static_cast<unsigned short>(band.getEncodingModality());
-  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(encodingmodality, file);
+  IOBinaryPrimitives::writeNBytesInteger<unsigned short, 2>(encodingmodality, file);
 
   if (band.getBandType() == types::BandType::Curve) {
     auto windowLength = static_cast<uint8_t>(band.getCurveType());
-    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(windowLength, file);
+    IOBinaryPrimitives::writeNBytesInteger<uint8_t, 1>(windowLength, file);
   } else if (band.getBandType() == types::BandType::Wave &&
              band.getEncodingModality() == types::EncodingModality::Wavelet) {
     auto windowLength = static_cast<unsigned int>(band.getWindowLength());
-    IOBinaryPrimitives::writeNBytes<unsigned int, 4>(windowLength, file);
+    IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(windowLength, file);
   }
 
   auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
-  IOBinaryPrimitives::writeNBytes<unsigned int, 4>(lowerFrequencyLimit, file);
+  IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(lowerFrequencyLimit, file);
 
   auto upperFrequencyLimit = static_cast<unsigned int>(band.getUpperFrequencyLimit());
-  IOBinaryPrimitives::writeNBytes<unsigned int, 4>(upperFrequencyLimit, file);
+  IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(upperFrequencyLimit, file);
 
   if (band.getBandType() == types::BandType::Transient) {
     unsigned int keyframeCount = 0;
@@ -116,7 +116,7 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ofstream &file) -> b
       myEffect = band.getEffectAt(i);
       keyframeCount += static_cast<unsigned int>(myEffect.getKeyframesSize());
     }
-    IOBinaryPrimitives::writeNBytes<unsigned int, 4>(keyframeCount, file);
+    IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(keyframeCount, file);
   } else if (band.getBandType() == types::BandType::Curve) {
     unsigned int keyframeCount = 0;
     types::Effect myEffect;
@@ -128,11 +128,11 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ofstream &file) -> b
         keyframeCount += 1;
       }
     }
-    IOBinaryPrimitives::writeNBytes<unsigned int, 4>(keyframeCount, file);
+    IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(keyframeCount, file);
   } else if (band.getBandType() == types::BandType::Wave &&
              band.getEncodingModality() == types::EncodingModality::Vectorial) {
     auto keyframeCount = static_cast<unsigned int>(band.getEffectsSize());
-    IOBinaryPrimitives::writeNBytes<unsigned int, 4>(keyframeCount, file);
+    IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(keyframeCount, file);
   }
 
   return true;
@@ -183,8 +183,8 @@ auto IOBinaryBands::readTransientBandBody(types::Band &band, std::ifstream &file
   types::Keyframe myKeyframe;
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
     float amplitude = IOBinaryPrimitives::readFloat(file);
-    auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
-    auto frequency = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    auto position = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
+    auto frequency = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
 
     myKeyframe = types::Keyframe(0, amplitude, static_cast<int>(frequency));
     myEffect = types::Effect(static_cast<int>(position), 0, types::BaseSignal::Sine);
@@ -213,13 +213,13 @@ auto IOBinaryBands::writeTransientBandBody(types::Band &band, std::ofstream &fil
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+      IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(position, file);
 
       unsigned int frequency = 0;
       if (myKeyframe.getFrequencyModulation().has_value()) {
         frequency = static_cast<unsigned int>(myKeyframe.getFrequencyModulation().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(frequency, file);
+      IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(frequency, file);
     }
   }
 
@@ -238,7 +238,7 @@ auto IOBinaryBands::readCurveBandBody(types::Band &band, std::ifstream &file) ->
     for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize());
          keyframeIndex++) {
       float amplitude = IOBinaryPrimitives::readFloat(file);
-      auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+      auto position = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
 
       if (keyframeIndex == 0) {
         effectPosition = position;
@@ -274,13 +274,13 @@ auto IOBinaryBands::writeCurveBandBody(types::Band &band, std::ofstream &file) -
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
       if (kfIndex == 0 && myKeyframe.getRelativePosition().value_or(0) != 0) {
-        IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+        IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(position, file);
         IOBinaryPrimitives::writeFloat(amplitude, file);
       }
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+      IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(position, file);
     }
   }
 
@@ -291,24 +291,24 @@ auto IOBinaryBands::readVectorialBandBody(types::Band &band, std::ifstream &file
   types::Effect myEffect;
   types::Keyframe myKeyframe;
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
-    auto keyframeCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+    auto keyframeCount = IOBinaryPrimitives::readNBytesInteger<unsigned short, 2>(file);
     for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(keyframeCount); keyframeIndex++) {
-      auto amplitudeFrequencyMask = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
+      auto amplitudeFrequencyMask = IOBinaryPrimitives::readNBytesInteger<unsigned char, 1>(file);
 
       myKeyframe = types::Keyframe(std::nullopt, std::nullopt, std::nullopt);
       if ((amplitudeFrequencyMask & 0b0000'0001) != 0) {
         float amplitude = IOBinaryPrimitives::readFloat(file);
         myKeyframe.setAmplitudeModulation(amplitude);
       }
-      auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+      auto position = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
       if ((amplitudeFrequencyMask & 0b0000'0010) != 0) {
-        auto frequency = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+        auto frequency = IOBinaryPrimitives::readNBytesInteger<unsigned int, 4>(file);
         myKeyframe.setFrequencyModulation(static_cast<int>(frequency));
       }
 
       if (keyframeIndex == 0) {
         float phase = IOBinaryPrimitives::readFloat(file);
-        auto baseSignal = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+        auto baseSignal = IOBinaryPrimitives::readNBytesInteger<unsigned short, 2>(file);
 
         myEffect = types::Effect(static_cast<int>(position), phase,
                                  static_cast<types::BaseSignal>(baseSignal));
@@ -339,7 +339,7 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
       }
     }
     auto keyframeCount = static_cast<unsigned short>(myEffect.getKeyframesSize());
-    IOBinaryPrimitives::writeNBytes<unsigned short, 2>(keyframeCount, file);
+    IOBinaryPrimitives::writeNBytesInteger<unsigned short, 2>(keyframeCount, file);
 
     for (unsigned short kfIndex = 0; kfIndex < keyframeCount; kfIndex++) {
       myKeyframe = myEffect.getKeyframeAt(kfIndex);
@@ -351,7 +351,7 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
       if (myKeyframe.getFrequencyModulation().has_value()) {
         valueMask |= 0b0000'0010;
       }
-      IOBinaryPrimitives::writeNBytes<unsigned char, 1>(valueMask, file);
+      IOBinaryPrimitives::writeNBytesInteger<unsigned char, 1>(valueMask, file);
 
       float amplitude = 0;
       if (myKeyframe.getAmplitudeModulation().has_value()) {
@@ -363,12 +363,12 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+      IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(position, file);
 
       unsigned int frequency = 0;
       if (myKeyframe.getFrequencyModulation().has_value()) {
         frequency = static_cast<unsigned int>(myKeyframe.getFrequencyModulation().value());
-        IOBinaryPrimitives::writeNBytes<unsigned int, 4>(frequency, file);
+        IOBinaryPrimitives::writeNBytesInteger<unsigned int, 4>(frequency, file);
       }
 
       if (kfIndex == 0) {
@@ -376,7 +376,7 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
         IOBinaryPrimitives::writeFloat(phase, file);
 
         auto baseSignal = static_cast<unsigned short>(myEffect.getBaseSignal());
-        IOBinaryPrimitives::writeNBytes<unsigned short, 2>(baseSignal, file);
+        IOBinaryPrimitives::writeNBytesInteger<unsigned short, 2>(baseSignal, file);
       }
     }
   }
@@ -386,13 +386,13 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
 
 auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool {
   spiht::Spiht_Dec dec;
-  auto effects_size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
-  auto blocklength = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file) * WAVELET_BL_FACTOR;
+  auto effects_size = IOBinaryPrimitives::readNBytesInteger<uint16_t, 2>(file);
+  auto blocklength = IOBinaryPrimitives::readNBytesInteger<uint8_t, 1>(file) * WAVELET_BL_FACTOR;
   band.setWindowLength((int)blocklength * S2MS / band.getUpperFrequencyLimit());
   int position = 0;
   for (uint16_t i = 0; i < effects_size; i++) {
     std::vector<unsigned char> instream;
-    auto size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    auto size = IOBinaryPrimitives::readNBytesInteger<uint16_t, 2>(file);
     instream.resize(size);
     for (auto &b : instream) {
       b = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
@@ -412,14 +412,14 @@ auto IOBinaryBands::writeWaveletBandBody(types::Band &band, std::ofstream &file)
   if (!(effects_size > 0)) {
     return true;
   }
-  IOBinaryPrimitives::writeNBytes<uint16_t, 2>(effects_size, file);
+  IOBinaryPrimitives::writeNBytesInteger<uint16_t, 2>(effects_size, file);
   types::Effect effect = band.getEffectAt(0);
   auto blocklength = (uint16_t)effect.getKeyframesSize() - 2;
-  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(blocklength / WAVELET_BL_FACTOR, file);
+  IOBinaryPrimitives::writeNBytesInteger<uint8_t, 1>(blocklength / WAVELET_BL_FACTOR, file);
   for (uint16_t i = 0; i < (uint16_t)band.getEffectsSize(); i++) {
     std::vector<unsigned char> outstream;
     enc.encodeEffect(band.getEffectAt(i), outstream);
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>((uint16_t)outstream.size(), file);
+    IOBinaryPrimitives::writeNBytesInteger<uint16_t, 2>((uint16_t)outstream.size(), file);
     for (auto &b : outstream) {
       IOBinaryPrimitives::writeNBytes<unsigned char, 1>(b, file);
     }
