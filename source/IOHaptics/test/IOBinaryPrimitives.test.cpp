@@ -109,7 +109,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryPrimitives::writeNBytesInteger<uint8_t, 1>(testingValue, file);
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(testingValue, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 1);
@@ -120,7 +120,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytesInteger<int8_t, 1>(file);
+    auto res = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -132,7 +132,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytesInteger<uint8_t, 1>(file);
+    auto res = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -148,7 +148,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryPrimitives::writeNBytesInteger<int, 4>(testingValue, file);
+    IOBinaryPrimitives::writeNBytes<int, 4>(testingValue, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 4);
@@ -159,7 +159,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytesInteger<int32_t, 4>(file);
+    auto res = IOBinaryPrimitives::readNBytes<int32_t, 4>(file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -171,7 +171,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytesInteger<uint32_t, 4>(file);
+    auto res = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -183,8 +183,8 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res_part1 = IOBinaryPrimitives::readNBytesInteger<int16_t, 2>(file);
-    auto res_part2 = IOBinaryPrimitives::readNBytesInteger<int16_t, 2>(file);
+    auto res_part1 = IOBinaryPrimitives::readNBytes<int16_t, 2>(file);
+    auto res_part2 = IOBinaryPrimitives::readNBytes<int16_t, 2>(file);
     file.close();
 
     const auto expectedFirstHalf = (int16_t)(testingValue & 0x0000FFFF);
