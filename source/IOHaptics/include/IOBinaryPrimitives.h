@@ -46,6 +46,7 @@ public:
   static auto readString(std::ifstream &file) -> std::string;
   static auto readFloat(std::ifstream &file) -> float;
 
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
     std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
@@ -59,6 +60,7 @@ public:
 
   static auto writeString(const std::string &text, std::ofstream &file) -> void;
   static auto writeFloat(float f, std::ofstream &file) -> void;
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
   template <class T, size_t bytesCount>
   static auto writeNBytes(T value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
