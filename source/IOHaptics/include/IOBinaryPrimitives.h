@@ -47,36 +47,42 @@ public:
   static auto readFloat(std::ifstream &file) -> float;
 
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
-    std::array<uint8_t, bytesCount> bytes{};
-    file.read(reinterpret_cast<char *>(bytes.data()), bytesCount);
+    std::array<char, bytesCount> bytes{};
+    file.read(bytes.data(), bytesCount);
     T value = 0;
     int i = 0;
     for (auto &byte : bytes) {
-      value |= static_cast<T>(byte) << byteSize * i;
+      auto byteVal = static_cast<uint8_t>(byte);
+      value |= static_cast<T>(byteVal) << byteSize * i;
       i++;
     }
     return value;
   }
   template <> static auto readNBytes<float, 4>(std::ifstream &file) -> float {
-    uint32_t tmp = readNBytes<uint32_t, 4>(file);
-    return *reinterpret_cast<float *>(&tmp);
+    float value = 0;
+    std::array<char, 4> bytes{};
+    file.read(bytes.data(), 4);
+    memcpy(&value, &bytes, sizeof(value));
+    return value;
   }
 
   static auto writeString(const std::string &text, std::ofstream &file) -> void;
   static auto writeFloat(float f, std::ofstream &file) -> void;
   template <class T, size_t bytesCount>
   static auto writeNBytes(T value, std::ofstream &file) -> void {
-    std::array<uint8_t, bytesCount> bytes{};
+    std::array<char, bytesCount> bytes{};
     int i = 0;
     for (auto &byte : bytes) {
-      byte = static_cast<char>(value >> i * byteSize);
+      byte = static_cast<uint8_t>(value >> i * byteSize);
       i++;
     }
-    file.write(reinterpret_cast<char *>(bytes.data()), bytesCount);
+    file.write(bytes.data(), bytesCount);
   }
 
   template <> static auto writeNBytes<float, 4>(float value, std::ofstream &file) -> void {
-    writeNBytes<uint32_t, 4>(*reinterpret_cast<uint32_t *>(&value), file);
+    std::array<char, 4> bytes{};
+    memcpy(&bytes, &value, sizeof(value));
+    file.write(bytes.data(), 4);
   }
 };
 } // namespace haptics::io
