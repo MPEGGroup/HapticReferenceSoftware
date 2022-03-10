@@ -141,4 +141,18 @@ auto Track::Evaluate(double position) -> double {
   return res;
 }
 
+[[nodiscard]] auto Track::getFrequencySampling() const -> std::optional<uint32_t> {
+  return frequencySampling;
+}
+
+auto Track::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
+  frequencySampling = newFrequencySampling;
+}
+
+[[nodiscard]] auto Track::getSampleCount() const -> std::optional<uint32_t> { return sampleCount; }
+
+auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
+  sampleCount = newSampleCount;
+}
+
 } // namespace haptics::types
