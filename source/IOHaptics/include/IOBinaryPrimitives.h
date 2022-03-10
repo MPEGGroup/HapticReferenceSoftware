@@ -46,17 +46,16 @@ public:
   static auto readString(std::ifstream &file) -> std::string;
   static auto readFloat(std::ifstream &file) -> float;
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
-    T value = 0;
-
-    std::array<char, bytesCount> bytes{};
+    std::array<char, bytesCount> bytes;
     file.read(bytes.data(), bytesCount);
-
+    T value = 0;
+    const int byteSize = 8;
     int i = 0;
     for (auto &byte : bytes) {
-      value |= static_cast<T>(byte) << sizeof(char) * i;
+      auto byteVal = static_cast<uint8_t>(byte);
+      value |= static_cast<T>(byteVal) << byteSize * i;
       i++;
     }
-
     return value;
   }
 
@@ -67,8 +66,9 @@ public:
     std::array<char, bytesCount> bytes{};
     const int mask = 0x000000ff;
     int i = 0;
+    const int byteSize = 8;
     for (auto &byte : bytes) {
-      byte = (value & (mask >> i * sizeof(char))) >> i * sizeof(char);
+      byte = (value & (mask << i * byteSize)) >> i * byteSize;
       i++;
     }
     file.write(bytes.data(), bytesCount);
