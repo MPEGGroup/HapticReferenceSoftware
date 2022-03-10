@@ -40,52 +40,43 @@
 #include <string>
 
 namespace haptics::io {
-
+static const int byteSize = 8;
 class IOBinaryPrimitives {
 public:
   static auto readString(std::ifstream &file) -> std::string;
   static auto readFloat(std::ifstream &file) -> float;
-  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
-    T value = 0;
-    std::array<char, bytesCount> bytes{};
-    file.read(bytes.data(), bytesCount);
-    memcpy(&value, &bytes, sizeof(value));
-    return value;
-  }
 
-  template <class T, size_t bytesCount> static auto readNBytesInteger(std::ifstream &file) -> T {
-    std::array<char, bytesCount> bytes{};
-    file.read(bytes.data(), bytesCount);
+  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
+    std::array<uint8_t, bytesCount> bytes{};
+    file.read(reinterpret_cast<char *>(bytes.data()), bytesCount);
     T value = 0;
-    const int byteSize = 8;
     int i = 0;
     for (auto &byte : bytes) {
-      auto byteVal = static_cast<uint8_t>(byte);
-      value |= static_cast<T>(byteVal) << byteSize * i;
+      value |= static_cast<T>(byte) << byteSize * i;
       i++;
     }
     return value;
+  }
+  template <> static auto readNBytes<float, 4>(std::ifstream &file) -> float {
+    uint32_t tmp = readNBytes<uint32_t, 4>(file);
+    return *reinterpret_cast<float *>(&tmp);
   }
 
   static auto writeString(const std::string &text, std::ofstream &file) -> void;
-  static auto writeFloat(const float &f, std::ofstream &file) -> void;
+  static auto writeFloat(float f, std::ofstream &file) -> void;
   template <class T, size_t bytesCount>
-  static auto writeNBytes(const T &value, std::ofstream &file) -> void {
-    std::array<char, bytesCount> bytes{};
-    memcpy(&bytes, &value, sizeof(value));
-    file.write(bytes.data(), bytesCount);
-  }
-  template <class T, size_t bytesCount>
-  static auto writeNBytesInteger(const T &value, std::ofstream &file) -> void {
-    std::array<char, bytesCount> bytes{};
-    const int mask = 0x000000ff;
-    const int byteSize = 8;
+  static auto writeNBytes(T value, std::ofstream &file) -> void {
+    std::array<uint8_t, bytesCount> bytes{};
     int i = 0;
     for (auto &byte : bytes) {
-      byte = (value & (mask << i * byteSize)) >> i * byteSize;
+      byte = static_cast<char>(value >> i * byteSize);
       i++;
     }
-    file.write(bytes.data(), bytesCount);
+    file.write(reinterpret_cast<char *>(bytes.data()), bytesCount);
+  }
+
+  template <> static auto writeNBytes<float, 4>(float value, std::ofstream &file) -> void {
+    writeNBytes<uint32_t, 4>(*reinterpret_cast<uint32_t *>(&value), file);
   }
 };
 } // namespace haptics::io
