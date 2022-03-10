@@ -441,7 +441,7 @@ TEST_CASE("extractContinuous with modulation function", "[extractContinuous]") {
   CHECK(static_cast<double>(resKeyframe.getRelativePosition().value()) ==
         Approx(testingDuration * 1000));
   const float expectedAmplitude_4 = 0.6138;
-  const int expectedFrequency_4 = 223;
+  const int expectedFrequency_4 = 224;
   CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude_4));
   CHECK(resKeyframe.getFrequencyModulation().value() == Approx(expectedFrequency_4));
 }
