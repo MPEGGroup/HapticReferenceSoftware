@@ -142,7 +142,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
-  const int testingValue = -42;
+  const int testingValue = 1000;
 
   SECTION("Write 4 byte") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -183,8 +183,8 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res_part1 = IOBinaryPrimitives::readNBytes<int8_t, 2>(file);
-    auto res_part2 = IOBinaryPrimitives::readNBytes<int8_t, 2>(file);
+    auto res_part1 = IOBinaryPrimitives::readNBytes<int16_t, 2>(file);
+    auto res_part2 = IOBinaryPrimitives::readNBytes<int16_t, 2>(file);
     file.close();
 
     const auto expectedFirstHalf = (int16_t)(testingValue & 0x0000FFFF);
