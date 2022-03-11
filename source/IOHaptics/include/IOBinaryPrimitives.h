@@ -47,11 +47,10 @@ public:
   static auto readFloat(std::ifstream &file) -> float;
 
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
-    std::array<char, bytesCount> bytes{};
+    std::vector<char> bytes(bytesCount);
     file.read(bytes.data(), bytesCount);
     T value = 0;
     for (size_t i = 0; i < bytes.size(); i++) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       auto byteVal = static_cast<uint8_t>(bytes[i]);
       value |= static_cast<T>(byteVal) << byteSize * i;
     }
@@ -62,9 +61,8 @@ public:
   static auto writeFloat(float f, std::ofstream &file) -> void;
   template <class T, size_t bytesCount>
   static auto writeNBytes(T value, std::ofstream &file) -> void {
-    std::array<char, bytesCount> bytes{};
+    std::vector<char> bytes(bytesCount);
     for (size_t i = 0; i < bytes.size(); i++) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       bytes[i] = static_cast<uint8_t>(value >> i * byteSize);
     }
     file.write(bytes.data(), bytesCount);
