@@ -51,6 +51,7 @@ public:
     file.read(bytes.data(), bytesCount);
     T value = 0;
     for (size_t i = 0; i < bytes.size(); i++) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       auto byteVal = static_cast<uint8_t>(bytes[i]);
       value |= static_cast<T>(byteVal) << byteSize * i;
     }
