@@ -213,6 +213,17 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
 
+    if (jsonTrack.contains("frequency_sampling") &&
+        jsonTrack["frequency_sampling"].is_number_integer()) {
+      auto frequencySampling = jsonTrack["frequency_sampling"].get<uint32_t>();
+      track.setFrequencySampling(frequencySampling);
+    }
+
+    if (jsonTrack.contains("sample_count") && jsonTrack["sample_count"].is_number_integer()) {
+      auto frequencySampling = jsonTrack["sample_count"].get<uint32_t>();
+      track.setSampleCount(frequencySampling);
+    }
+
     if (jsonTrack.contains("reference_device_id") && jsonTrack["reference_device_id"].is_number()) {
       auto device_id = jsonTrack["reference_device_id"].get<int>();
       track.setReferenceDeviceId(device_id);
@@ -570,6 +581,12 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     jsonTrack["body_part_mask"] = track.getBodyPartMask();
     if (track.getReferenceDeviceId().has_value()) {
       jsonTrack["reference_device_id"] = track.getReferenceDeviceId().value();
+    }
+    if (track.getFrequencySampling().has_value()) {
+      jsonTrack["frequency_sampling"] = track.getFrequencySampling().value();
+    }
+    if (track.getSampleCount().has_value()) {
+      jsonTrack["sample_count"] = track.getSampleCount().value();
     }
 
     auto jsonVertices = json::array();

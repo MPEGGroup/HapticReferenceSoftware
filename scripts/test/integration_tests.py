@@ -63,37 +63,41 @@ def decoding(decoder, temp_file_path_mpg, temp_file_path_gmpg, record_property):
 def synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property):
     print("--Synthesizing")
     t_start = time.time()
-    subprocess.run([synthesizer, "-f", temp_file_path_gmpg, '-o', temp_file_path_wav])
+    subprocess.run([synthesizer, "-f", temp_file_path_gmpg, '-o', temp_file_path_wav, '--generate_ohm'])
     duration = time.time() - t_start
     record_property("synthesizer_duration_s", duration)
     print("Synthesizer time: "+str(duration))
 
 
-def test_psnrs(wav_file_psnr, encoder, synthesizer, decoder, autopad, record_property):
-    record_property("file", wav_file_psnr[0])
-    tmpdirname = tempfile.TemporaryDirectory()
-    tmp_wav_file = os.path.basename(wav_file_psnr[0])
-    gmpg_file = tmp_wav_file.split('.')[0] + ".gmpg"
-    mpg_file = tmp_wav_file.split('.')[0] + ".mpg"
-    temp_file_path_gmpg = os.path.join(tmpdirname.name, gmpg_file)
-    temp_file_path_wav = os.path.join(tmpdirname.name, tmp_wav_file)
-    temp_file_path_mpg = os.path.join(tmpdirname.name, mpg_file)
+def test_psnrs(ohm_file, encoder, synthesizer, decoder, autopad, tmpdirname, record_property):
+    record_property("file", ohm_file[0])
+    if tmpdirname is None:
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpdirname = tmpdir.name
+    tmp_ohm_file = os.path.basename(ohm_file[0])
+    tmp_wav_file = tmp_ohm_file.split('.')[0] + ".wav"
+    gmpg_file = tmp_ohm_file.split('.')[0] + ".gmpg"
+    mpg_file = tmp_ohm_file.split('.')[0] + ".mpg"
+    temp_file_path_gmpg = os.path.join(tmpdirname, gmpg_file)
+    temp_file_path_wav = os.path.join(tmpdirname, tmp_wav_file)
+    temp_file_path_mpg = os.path.join(tmpdirname, mpg_file)
 
-    encoding(encoder, wav_file_psnr[0], temp_file_path_mpg, record_property)
+    encoding(encoder, ohm_file[0], temp_file_path_mpg, record_property)
 
     decoding(decoder, temp_file_path_mpg, temp_file_path_gmpg, record_property)
 
     synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property)
 
     # get original rendered wav if IVS ou AHAP
-    wav_file = Path(wav_file_psnr[0])
-    if wav_file.suffix != ".wav":
-        names = wav_file.stem.split('-')
-        new_name = names[0]+"-"+names[1]+"-"+names[2]+"-8kHz-16-nopad.wav"
-        wav_file = Path(wav_file.parent.parent, "WAV_noPad", new_name)
+    wav_file = Path(ohm_file[0])
+    names = wav_file.stem.split('-')
+    new_name = names[0]+"-"+names[1]+"-"+names[2]+"-8kHz-16-nopad.wav"
+    wav_file = Path(wav_file.parent.parent, "WAV_noPad", new_name)
     wav_file = str(wav_file)
 
+    print("--bitrate")
     bit_rate = compute_bitrate(wav_file, temp_file_path_mpg)
+    print("bitrate: "+ str(bit_rate))
     record_property("bitrate_kbps", bit_rate)
 
     print("--PSNR")
@@ -101,7 +105,7 @@ def test_psnrs(wav_file_psnr, encoder, synthesizer, decoder, autopad, record_pro
     psnr = round(psnr, 2)
     print("psnr:" + str(psnr))
     record_property("psnr", psnr)
-    if wav_file_psnr[1] is not None:
-        record_property("psnr_ref", wav_file_psnr[1])
+    if ohm_file[1] is not None:
+        record_property("psnr_ref", ohm_file[1])
         # test with a 0.1 threshold
-        assert psnr - wav_file_psnr[1] > -0.1
+        assert psnr - ohm_file[1] > -0.1

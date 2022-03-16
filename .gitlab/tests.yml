@@ -12,6 +12,7 @@ Metrics:
     - make install
     - cd ..
     - mkdir reports
+    - mkdir files
     - python3 ./scripts/tools/download_data.py --data_dir ~/data --ftp_info /opt/mpeg_ftp.json
     - python3 ./scripts/tools/check_data.py --data_dir ~/data --md5 ./test/list_files.md5
     - >
@@ -23,6 +24,7 @@ Metrics:
       --psnr_ref ./test/psnr_2k.json
       --csv-columns host,system,python_version,function,name,status,success,duration,properties_as_columns
       --db reports/metrics.db
+      --save_encoder_dir files
   after_script:
     - python3 ./scripts/tools/csv_to_metrics.py ./reports/report.csv ./reports/metrics.txt
   artifacts:
@@ -32,4 +34,5 @@ Metrics:
       metrics: reports/metrics.txt
     paths:
       - ./reports
+      - ./files
     expire_in: 1 week

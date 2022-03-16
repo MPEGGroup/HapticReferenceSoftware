@@ -54,11 +54,19 @@ namespace haptics::synthesizer {
     perception = haptic.getPerceptionAt((int)perceptionIndex);
     for (uint32_t trackIndex = 0; trackIndex < perception.getTracksSize(); trackIndex++) {
       track = perception.getTrackAt((int)trackIndex);
-      for (uint32_t bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
-        band = track.getBandAt((int)bandIndex);
-        currentLength = band.getBandTimeLength();
+      if (track.getFrequencySampling().has_value() && track.getSampleCount().has_value()) {
+        currentLength = S_2_MS * (static_cast<double>(track.getSampleCount().value()) /
+                                  track.getFrequencySampling().value());
         if (currentLength > maxLength) {
           maxLength = currentLength;
+        }
+      } else {
+        for (uint32_t bandIndex = 0; bandIndex < track.getBandsSize(); bandIndex++) {
+          band = track.getBandAt((int)bandIndex);
+          currentLength = band.getBandTimeLength();
+          if (currentLength > maxLength) {
+            maxLength = currentLength;
+          }
         }
       }
     }
@@ -88,14 +96,14 @@ namespace haptics::synthesizer {
 
   for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
     for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getTracksSize(); j++) {
-      double t = 0 - pad * MS_2_S;
       std::vector<double> trackAmp;
       types::Track myTrack;
-      while (t < ((timeLength + pad) * MS_2_S)) {
+      auto sampleCount = static_cast<uint32_t>(std::round(fs * MS_2_S * (timeLength + 2 * pad)));
+      for (uint32_t ti = 0; ti < sampleCount; ti++) {
         myTrack = haptic.getPerceptionAt((int)i).getTrackAt((int)j);
-        double amp = myTrack.Evaluate(t * S_2_MS) * myTrack.getGain();
+        double t = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
+        double amp = myTrack.Evaluate(t) * myTrack.getGain();
         trackAmp.push_back(amp);
-        t += 1.0 / static_cast<double>(fs);
       }
       amplitudes.push_back(trackAmp);
     }

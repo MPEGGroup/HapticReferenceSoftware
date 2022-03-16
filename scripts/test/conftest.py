@@ -46,11 +46,14 @@ def pytest_addoption(parser):
     parser.addoption("--install_dir", help="RM0 installation directory", required=True)
     parser.addoption("--data_dir", help="Data directory (from mpegcontent repo)", required=True)
     parser.addoption("--psnr_ref", help="PSNR references file. All PSNR computed if not provided.")
+    parser.addoption("--save_encoder_dir", help="Save encoded and decoded files to this directory.")
+
 
 def pytest_generate_tests(metafunc):
     install_dir = metafunc.config.getoption("install_dir")
     data_dir = metafunc.config.getoption("data_dir")
     psnr_ref = metafunc.config.getoption("psnr_ref")
+    save_encoder_dir = metafunc.config.getoption("save_encoder_dir")
 
     if not os.path.exists(install_dir):
         pytest.exit("Installation directory " + install_dir+" does not exist.")
@@ -61,28 +64,35 @@ def pytest_generate_tests(metafunc):
             pytest.exit("PSNR reference file does not exist.")
         else:
             data_json = json.load(open(psnr_ref, 'r'))
+    if save_encoder_dir is not None:
+        if not os.path.exists(save_encoder_dir):
+            pytest.exit("Save directory does not exist.")
+        else:
+            tmpdirname = str(Path(save_encoder_dir))
+    else:
+        tmpdirname = None # will be created by the test itself
 
     encoder_path = os.path.join(install_dir, 'bin', 'Encoder')
     synthesizer_path = os.path.join(install_dir, 'bin', 'Synthesizer')
     decoder_path = os.path.join(install_dir, 'bin', 'Decoder')
 
-    list_wav_files = []
+    list_ohm_files = []
     for path in Path(data_dir).rglob('*.ohm'):
         # filter out Rendered wav files - IVS and AHAP added first
-        if path.name in list_wav_files or 'Restored' in str(path):
+        if path.name in list_ohm_files or 'Restored' in str(path):
             continue
 
         if psnr_ref is not None:
             for list_files in data_json:
                 if path.name in data_json[list_files]:
                     # cast to str because Path object is not serializable
-                    list_wav_files.append([str(path), data_json[list_files][path.name]])
+                    list_ohm_files.append([str(path), data_json[list_files][path.name]])
                     break
         else:
-            list_wav_files.append([str(path), None])
+            list_ohm_files.append([str(path), None])
 
-    if "wav_file_psnr" in metafunc.fixturenames:
-        metafunc.parametrize("wav_file_psnr", list_wav_files)
+    if "ohm_file" in metafunc.fixturenames:
+        metafunc.parametrize("ohm_file", list_ohm_files)
 
     if "encoder" in metafunc.fixturenames:
         metafunc.parametrize("encoder", [encoder_path])
@@ -98,3 +108,6 @@ def pytest_generate_tests(metafunc):
             metafunc.parametrize("autopad", [True])
         else:
             metafunc.parametrize("autopad", [False])
+
+    if "tmpdirname" in metafunc.fixturenames:
+        metafunc.parametrize("tmpdirname", [tmpdirname])
