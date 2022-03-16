@@ -349,7 +349,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 120;
+        testingVertices_track2.size() + 132;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -534,9 +534,7 @@ TEST_CASE("write/read file for body testing") {
                                     testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
-  // TODO : fix this starting position for curves
-  // const int testingPosition_effect0 = 63;
-  const int testingPosition_effect0 = 0;
+  const int testingPosition_effect0 = 63;
   const float testingPhase_effect0 = 0;
   const auto testingBaseSignal_effect0 = haptics::types::BaseSignal::Sine;
   const std::vector<std::tuple<int, float>> testingKeyframes_effect0 = {
@@ -585,7 +583,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 373;
+        testingVertices_track2.size() + 385;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
