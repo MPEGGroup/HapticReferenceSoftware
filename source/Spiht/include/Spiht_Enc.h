@@ -39,6 +39,7 @@
 #include <list>
 #include <vector>
 
+#include <Encoder/include/WaveletEncoder.h>
 #include <Spiht/include/ArithEnc.h>
 #include <Types/include/Effect.h>
 
@@ -55,17 +56,6 @@ constexpr int CONTEXT_4 = 4;
 constexpr int CONTEXT_5 = 5;
 constexpr int CONTEXT_6 = 6;
 constexpr size_t BUFFER_SIZE = 100000;
-
-constexpr size_t WAVMAXLENGTH = 24;
-constexpr int MAXBITS = 15;
-constexpr int FRACTIONBITS_0 = 23;
-constexpr int FRACTIONBITS_1 = 19;
-constexpr int INTEGERBITS_1 = 4;
-
-struct quantMode {
-  int integerbits;
-  int fractionbits;
-};
 
 class Spiht_Enc {
 public:
