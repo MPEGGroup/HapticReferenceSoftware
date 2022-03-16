@@ -199,7 +199,7 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   return PerceptionModality::Other;
 }
 
-auto Perception::getEffectById(const int id) -> std::optional<Effect> {
+auto Perception::getEffectById(int id) -> std::optional<Effect> {
   for (auto effect : effectLibrary) {
     if (effect.getId() == id) {
       return effect;

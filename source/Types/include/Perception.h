@@ -120,7 +120,7 @@ public:
   auto searchForEquivalentEffects(Effect &effect, int startingTrack)
       -> std::vector<std::tuple<int, int, int>>;
   auto linearizeLibrary() -> void;
-  auto getEffectById(const int id) -> std::optional<Effect>;
+  auto getEffectById(int id) -> std::optional<Effect>;
 
 private:
   int id = -1;
