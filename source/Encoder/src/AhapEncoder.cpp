@@ -189,9 +189,9 @@ AhapEncoder::extractTransients(nlohmann::json *event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect t =
-      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)),
-                             0, haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect t = haptics::types::Effect(
+      static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
@@ -269,9 +269,9 @@ AhapEncoder::extractContinuous(nlohmann::json *event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect c =
-      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)),
-                             0, haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect c = haptics::types::Effect(
+      static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;
