@@ -113,6 +113,14 @@ public:
           std::optional<float>, std::optional<haptics::types::ActuatorType>>>
           &referenceDeviceValues) -> void;
   static auto convertToModality(const std::string &modalityString) -> PerceptionModality;
+  auto getEffectLibrarySize() -> size_t;
+  auto getBasisEffectAt(int index) -> haptics::types::Effect &;
+  auto addBasisEffect(haptics::types::Effect &newEffect) -> void;
+  auto refactorEffects() -> void;
+  auto searchForEquivalentEffects(Effect &effect, int startingTrack)
+      -> std::vector<std::tuple<int, int, int>>;
+  auto linearizeLibrary() -> void;
+  auto getEffectById(const int id) -> std::optional<Effect>;
 
 private:
   int id = -1;
@@ -121,6 +129,7 @@ private:
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Track> tracks = {};
   std::vector<ReferenceDevice> referenceDevices;
+  std::vector<Effect> effectLibrary = std::vector<Effect>{};
 };
 } // namespace haptics::types
 #endif // PERCEPTION_H

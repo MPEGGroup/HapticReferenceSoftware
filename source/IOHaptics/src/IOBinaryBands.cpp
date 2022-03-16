@@ -95,8 +95,8 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ofstream &file) -> b
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(encodingmodality, file);
 
   if (band.getBandType() == types::BandType::Curve) {
-    auto windowLength = static_cast<uint8_t>(band.getCurveType());
-    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(windowLength, file);
+    auto curveType = static_cast<uint8_t>(band.getCurveType());
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(curveType, file);
   } else if (band.getBandType() == types::BandType::Wave &&
              band.getEncodingModality() == types::EncodingModality::Wavelet) {
     auto windowLength = static_cast<unsigned int>(band.getWindowLength());
@@ -187,7 +187,8 @@ auto IOBinaryBands::readTransientBandBody(types::Band &band, std::ifstream &file
     auto frequency = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
 
     myKeyframe = types::Keyframe(0, amplitude, static_cast<int>(frequency));
-    myEffect = types::Effect(static_cast<int>(position), 0, types::BaseSignal::Sine);
+    myEffect = types::Effect(static_cast<int>(position), 0, types::BaseSignal::Sine,
+                             types::EffectType::Basis);
     myEffect.addKeyframe(myKeyframe);
     band.replaceEffectAt(effectIndex, myEffect);
   }
@@ -310,8 +311,9 @@ auto IOBinaryBands::readVectorialBandBody(types::Band &band, std::ifstream &file
         float phase = IOBinaryPrimitives::readFloat(file);
         auto baseSignal = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
-        myEffect = types::Effect(static_cast<int>(position), phase,
-                                 static_cast<types::BaseSignal>(baseSignal));
+        myEffect =
+            types::Effect(static_cast<int>(position), phase,
+                          static_cast<types::BaseSignal>(baseSignal), types::EffectType::Basis);
         myKeyframe.setRelativePosition(0);
       } else {
         int effectPosition = myEffect.getPosition();

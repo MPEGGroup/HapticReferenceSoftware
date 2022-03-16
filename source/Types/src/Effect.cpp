@@ -39,6 +39,9 @@
 
 namespace haptics::types {
 
+[[nodiscard]] auto Effect::getId() const -> int { return id; }
+auto Effect::setId(int newId) -> void { id = newId; }
+
 [[nodiscard]] auto Effect::getPosition() const -> int { return position; }
 
 auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
@@ -50,6 +53,10 @@ auto Effect::setPhase(float newPhase) -> void { phase = newPhase; }
 [[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal { return baseSignal; }
 
 auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void { baseSignal = newBaseSignal; }
+
+[[nodiscard]] auto Effect::getEffectType() const -> EffectType { return effectType; }
+
+auto Effect::setEffectType(EffectType newEffectType) -> void { effectType = newEffectType; }
 
 auto Effect::getKeyframesSize() -> size_t { return keyframes.size(); }
 
@@ -116,6 +123,25 @@ auto Effect::addKeyframe(std::optional<int> position, std::optional<double> ampl
                          std::optional<int> frequencyModulation) -> void {
   Keyframe newKf(position, amplitudeModulation, frequencyModulation);
   this->addKeyframe(newKf);
+}
+
+auto Effect::isEquivalent(Effect &effect) -> bool {
+  if (effectType != EffectType::Basis || effect.effectType != EffectType::Basis ||
+      phase != effect.getPhase() || baseSignal != effect.getBaseSignal()) {
+    return false;
+  }
+
+  auto size = keyframes.size();
+  if (size != effect.getKeyframesSize()) {
+    return false;
+  }
+
+  for (uint32_t i = 0; i < size; i++) {
+    if (getKeyframeAt((int)i) != effect.getKeyframeAt((int)i)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // NOLINTNEXTLINE(readability-function-size)

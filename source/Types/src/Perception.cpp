@@ -151,6 +151,16 @@ auto Perception::addReferenceDevice(
   }
 }
 
+auto Perception::getEffectLibrarySize() -> size_t { return effectLibrary.size(); }
+
+auto Perception::getBasisEffectAt(int index) -> haptics::types::Effect & {
+  return effectLibrary.at(index);
+}
+
+auto Perception::addBasisEffect(haptics::types::Effect &newEffect) -> void {
+  effectLibrary.push_back(newEffect);
+}
+
 auto Perception::convertToModality(const std::string &modalityString) -> PerceptionModality {
   if (stringToPerceptionModality.count(modalityString) != 0) {
     return stringToPerceptionModality.at(modalityString);
@@ -187,6 +197,93 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   }
 
   return PerceptionModality::Other;
+}
+
+auto Perception::getEffectById(const int id) -> std::optional<Effect> {
+  for (auto effect : effectLibrary) {
+    if (effect.getId() == id) {
+      return effect;
+    }
+  }
+  return {};
+}
+
+auto Perception::linearizeLibrary() -> void {
+  for (int i = 0; i < static_cast<int>(getTracksSize()); i++) {
+    auto track = getTrackAt(i);
+    auto numBands = static_cast<int>(track.getBandsSize());
+    for (int j = 0; j < numBands; j++) {
+      auto band = track.getBandAt(j);
+      auto numEffects = static_cast<int>(band.getEffectsSize());
+      for (int k = 0; k < numEffects; k++) {
+        auto effect = band.getEffectAt(k);
+        if (effect.getEffectType() == EffectType::Reference) {
+          auto refEffect = getEffectById(effect.getId());
+          if (refEffect.has_value()) {
+            Effect basisEffect(refEffect.value());
+            basisEffect.setPosition(effect.getPosition());
+            basisEffect.setId(-1);
+            getTrackAt(i).getBandAt(j).replaceEffectAt(k, basisEffect);
+          }
+        }
+      }
+    }
+  }
+  effectLibrary.clear();
+}
+
+auto Perception::refactorEffects() -> void {
+  for (int i = 0; i < static_cast<int>(getTracksSize()); i++) {
+    auto track = getTrackAt(i);
+    auto numBands = static_cast<int>(track.getBandsSize());
+    for (int j = 0; j < numBands; j++) {
+      auto band = track.getBandAt(j);
+      if (band.getEncodingModality() == EncodingModality::Wavelet) {
+        continue;
+      }
+      auto numEffects = static_cast<int>(band.getEffectsSize());
+      for (int k = 0; k < numEffects; k++) {
+        auto refEffect = band.getEffectAt(k);
+        auto sameEffects = searchForEquivalentEffects(refEffect, i);
+        if (sameEffects.size() > 1) {
+          Effect basisEffect(refEffect);
+          auto newId = static_cast<int>(getEffectLibrarySize());
+          basisEffect.setId(newId);
+          basisEffect.setPosition(0);
+          for (const auto &t : sameEffects) {
+            auto [l, m, n] = t;
+            if (i != l || j != m || k != n) {
+              Effect libEffect;
+              libEffect.setId(newId);
+              libEffect.setPosition(getTrackAt(l).getBandAt(m).getEffectAt(n).getPosition());
+              libEffect.setEffectType(EffectType::Reference);
+              getTrackAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
+            }
+          }
+          addBasisEffect(basisEffect);
+        }
+      }
+    }
+  }
+}
+
+auto Perception::searchForEquivalentEffects(Effect &effect, int startingTrack)
+    -> std::vector<std::tuple<int, int, int>> {
+  std::vector<std::tuple<int, int, int>> sameEffects;
+  for (int l = startingTrack; l < static_cast<int>(getTracksSize()); l++) {
+    auto track2 = getTrackAt(l);
+    auto numBands2 = static_cast<int>(track2.getBandsSize());
+    for (int m = 0; m < numBands2; m++) {
+      auto band2 = track2.getBandAt(m);
+      auto numEffects2 = static_cast<int>(band2.getEffectsSize());
+      for (int n = 0; n < numEffects2; n++) {
+        if (effect.isEquivalent(band2.getEffectAt(n))) {
+          sameEffects.emplace_back(l, m, n);
+        }
+      }
+    }
+  }
+  return sameEffects;
 }
 
 } // namespace haptics::types

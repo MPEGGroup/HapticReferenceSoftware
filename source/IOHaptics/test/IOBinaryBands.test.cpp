@@ -43,10 +43,10 @@ const std::string filename = "testing_IOBinaryBands.bin";
 
 auto addEffect(
     haptics::types::Band &myBand, const int position, const float phase,
-    const haptics::types::BaseSignal baseSignal,
+    const haptics::types::BaseSignal baseSignal, const haptics::types::EffectType effectType,
     const std::vector<std::tuple<int, std::optional<float>, std::optional<int>>> &keyframes)
     -> void {
-  haptics::types::Effect myEffect(position, phase, baseSignal);
+  haptics::types::Effect myEffect(position, phase, baseSignal, effectType);
   for (auto keyframeValue : keyframes) {
     if (std::get<1>(keyframeValue).has_value()) {
       myEffect.addAmplitudeAt(std::get<1>(keyframeValue).value(), std::get<0>(keyframeValue));
@@ -71,7 +71,8 @@ TEST_CASE("write/read BandHeader on curve") {
   haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
                                    testingWindowLength, testingLowerFrequencyLimit,
                                    testingUpperFrequencyLimit);
-  haptics::types::Effect testingEffect(0, 0, haptics::types::BaseSignal::Sine);
+  haptics::types::Effect testingEffect(0, 0, haptics::types::BaseSignal::Sine,
+                                       haptics::types::EffectType::Basis);
   const int expectedKeyframeCount = 42;
   for (int i = 0; i < expectedKeyframeCount; i++) {
     const float amplitude = static_cast<float>(i) / expectedKeyframeCount;
@@ -332,7 +333,8 @@ TEST_CASE("write/read BandBody on transient") {
                                    testingUpperFrequencyLimit);
   const int expectedTransientCount = 12;
   for (int i = 0; i < expectedTransientCount; i++) {
-    haptics::types::Effect testingEffect(i, 0, haptics::types::BaseSignal::Sine);
+    haptics::types::Effect testingEffect(i, 0, haptics::types::BaseSignal::Sine,
+                                         haptics::types::EffectType::Basis);
     const auto amplitude = static_cast<float>(i) / expectedTransientCount;
     const int frequency = 90;
     haptics::types::Keyframe testingKeyframe(0, amplitude, frequency);
@@ -360,7 +362,8 @@ TEST_CASE("write/read BandBody on transient") {
                              testingWindowLength, testingLowerFrequencyLimit,
                              testingUpperFrequencyLimit);
     for (int i = 0; i < expectedTransientCount; i++) {
-      haptics::types::Effect resEffect(0, 0, haptics::types::BaseSignal::Square);
+      haptics::types::Effect resEffect(0, 0, haptics::types::BaseSignal::Square,
+                                       haptics::types::EffectType::Basis);
       res.addEffect(resEffect);
     }
     bool succeed = IOBinaryBands::readBandBody(res, file);
@@ -403,7 +406,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
   const std::vector<std::tuple<int, std::optional<float>, std::optional<int>>>
       testingEffect1_keyframes = {{0, .1F, 90}, {36, .1F, 90}};
   addEffect(testingBand, testingEffect1_position, testingEffect1_phase, testingEffect1_baseSignal,
-            testingEffect1_keyframes);
+            haptics::types::EffectType::Basis, testingEffect1_keyframes);
 
   const int testingEffect2_position = 654;
   const float testingEffect2_phase = 2.65;
@@ -412,7 +415,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
       testingEffect2_keyframes = {
           {0, .1F, 90}, {72, .954F, 90}, {1000, std::nullopt, 300}, {1036, 0.0F, std::nullopt}};
   addEffect(testingBand, testingEffect2_position, testingEffect2_phase, testingEffect2_baseSignal,
-            testingEffect2_keyframes);
+            haptics::types::EffectType::Basis, testingEffect2_keyframes);
 
   SECTION("write band body") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);

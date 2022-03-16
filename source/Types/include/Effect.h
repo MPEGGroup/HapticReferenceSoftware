@@ -48,6 +48,8 @@ namespace haptics::types {
 
 enum class BaseSignal { Sine = 0, Square = 1, Triangle = 2, SawToothUp = 3, SawToothDown = 4 };
 
+enum class EffectType { Basis = 0, Reference = 1, Timeline = 2 };
+
 static const std::map<std::string, BaseSignal> stringToBaseSignal = {
     {"Sine", BaseSignal::Sine},
     {"Square", BaseSignal::Square},
@@ -61,12 +63,29 @@ static const std::map<BaseSignal, std::string> baseSignalToString = {
     {BaseSignal::SawToothUp, "SawToothUp"},
     {BaseSignal::SawToothDown, "SawToothDown"}};
 
+static const std::map<std::string, EffectType> stringToEffectType = {
+    {"Basis", EffectType::Basis},
+    {"Reference", EffectType::Reference},
+    {"Timeline", EffectType::Timeline}};
+
+static const std::map<EffectType, std::string> effectTypeToString = {
+    {EffectType::Basis, "Basis"},
+    {EffectType::Reference, "Reference"},
+    {EffectType::Timeline, "Timeline"}};
+
 class Effect {
 public:
   explicit Effect() = default;
-  explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal)
-      : position(newPosition), phase(newPhase), keyframes({}), baseSignal(newBaseSignal){};
+  explicit Effect(int newPosition, float newPhase, BaseSignal newBaseSignal,
+                  EffectType newEffectType)
+      : position(newPosition)
+      , phase(newPhase)
+      , keyframes({})
+      , baseSignal(newBaseSignal)
+      , effectType(newEffectType){};
 
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
   [[nodiscard]] auto getPosition() const -> int;
   auto setPosition(int newPosition) -> void;
   [[nodiscard]] auto getPhase() const -> float;
@@ -74,6 +93,8 @@ public:
   auto setPhase(float newPhase) -> void;
   [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
+  [[nodiscard]] auto getEffectType() const -> EffectType;
+  auto setEffectType(EffectType newEffectType) -> void;
   auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe &;
   auto replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool;
@@ -84,6 +105,7 @@ public:
   auto addFrequencyAt(std::optional<int> frequency, int position) -> bool;
   auto getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
                            double transientDuration) -> double;
+  auto isEquivalent(Effect &effect) -> bool;
   // Use Absolute position not relative
   auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluateWavelet(double position, double windowLength) -> double;
@@ -91,10 +113,14 @@ public:
   auto EvaluateKeyframes(double position, types::CurveType curveType) -> double;
 
 private:
+  int id = -1;
   int position = 0;
   float phase = 0;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
   BaseSignal baseSignal = BaseSignal::Sine;
+  EffectType effectType = EffectType::Basis;
+  std::vector<Effect> timeline = std::vector<Effect>{};
+
   [[nodiscard]] auto computeBaseSignal(double time, double frequency, double phase) const -> double;
 };
 } // namespace haptics::types

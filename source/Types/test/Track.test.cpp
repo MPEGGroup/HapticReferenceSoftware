@@ -118,7 +118,8 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
-  haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle);
+  haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle,
+                           haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf1(0, effectA, effectF);
   haptics::types::Keyframe kf2(effectSize, effectA, effectF);
   e.addKeyframe(kf1);
@@ -191,7 +192,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   haptics::types::Band b1(haptics::types::BandType::Wave, haptics::types::CurveType::Cubic,
                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
-  haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle);
+  haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle,
+                            haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf1(0, 1.0, 0);
   haptics::types::Keyframe kf2(effect1Size, 1.0, effect1F);
   e1.addKeyframe(kf1);
@@ -200,13 +202,15 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   t.addBand(b1);
   haptics::types::Band b2(haptics::types::BandType::Wave, haptics::types::CurveType::Linear,
                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
-  haptics::types::Effect e2(effect2Pos, 0.0, haptics::types::BaseSignal::Triangle);
+  haptics::types::Effect e2(effect2Pos, 0.0, haptics::types::BaseSignal::Triangle,
+                            haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf3(0, 1.0, effect2F);
   haptics::types::Keyframe kf4(effect2Size, 1.0, effect2F);
   e2.addKeyframe(kf3);
   e2.addKeyframe(kf4);
   b2.addEffect(e2);
-  haptics::types::Effect e3(effect3Pos, 0.0, haptics::types::BaseSignal::Triangle);
+  haptics::types::Effect e3(effect3Pos, 0.0, haptics::types::BaseSignal::Triangle,
+                            haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf5(0, 1.0, effect3F);
   haptics::types::Keyframe kf6(effect3Size, 1.0, effect3F);
   e3.addKeyframe(kf5);

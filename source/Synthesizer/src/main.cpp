@@ -124,6 +124,7 @@ auto main(int argc, char *argv[]) -> int {
 
   Haptics hapticFile;
   IOJson::loadFile(filename, hapticFile);
+  hapticFile.linearize();
   const double timeLength = Helper::getTimeLength(hapticFile);
 
   if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {

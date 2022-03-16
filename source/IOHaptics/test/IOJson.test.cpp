@@ -473,7 +473,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::vector<std::tuple<int, float>> testingKeyframes_effect0 = {
       {0, 0}, {176, .2143543}, {177, 1}, {52345, .453}};
   haptics::types::Effect testingEffect0(testingPosition_effect0, testingPhase_effect0,
-                                        testingBaseSignal_effect0);
+                                        testingBaseSignal_effect0,
+                                        haptics::types::EffectType::Basis);
   for (auto value : testingKeyframes_effect0) {
     testingEffect0.addAmplitudeAt(std::get<1>(value), std::get<0>(value));
   }
@@ -481,7 +482,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::vector<std::tuple<int, float, int>> testingKeyframes_effect1 = {
       {0, 0, 90}, {176, .2143543, 90}, {177, 1, 65}, {52345, .453, 300}};
   for (auto value : testingKeyframes_effect1) {
-    haptics::types::Effect testingEffect(std::get<0>(value), 0, haptics::types::BaseSignal::Sine);
+    haptics::types::Effect testingEffect(std::get<0>(value), 0, haptics::types::BaseSignal::Sine,
+                                         haptics::types::EffectType::Basis);
     testingEffect.addAmplitudeAt(std::get<1>(value), 0);
     testingEffect.addFrequencyAt(std::get<2>(value), 0);
     testingBand1.addEffect(testingEffect);
@@ -491,7 +493,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const float testingPhase_effect2 = 0;
   const auto testingBaseSignal_effect2 = haptics::types::BaseSignal::Square;
   haptics::types::Effect testingEffect2(testingPosition_effect2, testingPhase_effect2,
-                                        testingBaseSignal_effect2);
+                                        testingBaseSignal_effect2,
+                                        haptics::types::EffectType::Basis);
 
   testingBand0.addEffect(testingEffect0);
   testingBand2.addEffect(testingEffect2);
