@@ -18,12 +18,12 @@ dc6ffdd3164e3f15b93fb37823d90507  ./Training/Training1-3/WAV_noPad/IDCC-kin-Hors
 54514701dcea863e0aa7933cb8ad5c5f  ./Training/Training1-3/WAV_noPad/IDCC-kin-ForceXZ-training-8kHz-16-nopad.ohm
 e69ce6516252c13d46042a67c43b7e3b  ./Training/Training1-3/WAV_noPad/IDCC-kin-BikeRiding-training-8kHz-16-nopad.wav
 d969a37cb1d1ac097a3d3e40fad23fa4  ./Training/Training1-3/WAV_noPad/IDCC-kin-BikeRiding-training-8kHz-16-nopad.ohm
-2423a22cbbc48867fc5c5412e6be68e1  ./Training/Training1-2/AHAP/APPL-vib-drums-nopad.ahap
+66b50d02981233a731000e271f50a701  ./Training/Training1-2/AHAP/APPL-vib-drums-nopad.ahap
 94af97d1adc214d923129b4ded3b984f  ./Training/Training1-2/AHAP/APPL-vib-drums-nopad.ohm
 1c7c4399d69c27a34a56aff710eca3b7  ./Training/Training1-2/AHAP/APPL-vib-gravel-nopad.ohm
-bb3e24635fe31ad4b9cb08296d647bb6  ./Training/Training1-2/AHAP/APPL-vib-gravel-nopad.ahap
+e7d74E58348b3772ab4a98c7b5511bf5  ./Training/Training1-2/AHAP/APPL-vib-gravel-nopad.ahap
 6d4c5bd419954a7ac1678fa82af84a7f  ./Training/Training1-2/AHAP/APPL-vib-sparkle-nopad.ohm
-f0c1c516e29b3dfb3eaeb29b6499bd5f  ./Training/Training1-2/AHAP/APPL-vib-sparkle-nopad.ahap
+a808d9ae56e59bb09296169a5820b74f  ./Training/Training1-2/AHAP/APPL-vib-sparkle-nopad.ahap
 8197773434e6c2d427565e2b70fe636e  ./Training/Training1-2/WAV_noPad/IMMR-vib-Content2-8KHz-16-nopad.wav
 b11ce9e370db89ff35a9b0db5262acaa  ./Training/Training1-2/WAV_noPad/IMMR-vib-Ringtone2-8KHz-16-nopad.wav
 ac855cd19944e3fe70af2272a11caff3  ./Training/Training1-2/WAV_noPad/APPL-vib-drums-8kHz-16-nopad.wav
@@ -75,7 +75,6 @@ a4da78988969242ddbec56efe08eefef  ./Test/Test1-2/WAV_Pad/IMMR-vib-Content1-8kHz-
 fc155f630648ecce818b9c7e2025134c  ./Test/Test1-2/WAV_Pad/IMMR-vib-Ringtone1-8kHz-16-pad.png
 98ed6198dd432ebe3f663bb078dd0dcd  ./Test/Test1-2/WAV_Pad/APPL-vib-inflate-8kHz-16-pad.ohm
 d1286213e6a42828bcac0df13ad6b49d  ./Test/Test1-2/WAV_Pad/IMMR-vib-Weapon1-8kHz-16-pad.wav
-266dc27adf397870c432e4a77261c34c  ./Test/Test1-2/WAV_Pad/APPL-vib-gravel-8kHz-16-pad.png
 8b6c40373950649f2168755b5b2e5833  ./Test/Test1-2/WAV_Pad/IMMR-vib-PersTexture1-8kHz-16-pad.ohm
 7a250b6bbfecac53ee4672aa8682eecf  ./Test/Test1-2/WAV_Pad/APPL-vib-oscillate-8kHz-16-pad.wav
 ced9e5564c9bd1006df84a20ee3a227e  ./Test/Test1-2/WAV_Pad/APPL-vib-heartbeats-8kHz-16-pad.ohm
