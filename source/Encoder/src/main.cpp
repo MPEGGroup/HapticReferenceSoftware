@@ -166,6 +166,9 @@ auto main(int argc, char *argv[]) -> int {
     haptics::encoder::EncodingConfig config = haptics::encoder::EncodingConfig::generateConfig();
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
+  } else if (ext == "gmpg") {
+    std::cout << "The GMPG file to encode : " << filename << std::endl;
+    IOJson::loadFile(filename, hapticFile);
   } else {
     codeExit = EXIT_FAILURE;
   }
