@@ -57,8 +57,9 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   wavParser.loadFile(filename);
   size_t numChannels = wavParser.getNumChannels();
   Track myTrack;
-  if (out.getTracksSize() == 0) {
-    for (uint32_t channelIndex = 0; channelIndex < numChannels; channelIndex++) {
+  auto tracksSize = out.getTracksSize();
+  if (tracksSize == 0 || tracksSize < numChannels) {
+    for (uint32_t channelIndex = tracksSize; channelIndex < numChannels; channelIndex++) {
       myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0));
       out.addTrack(myTrack);
     }
