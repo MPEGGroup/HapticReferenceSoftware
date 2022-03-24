@@ -36,6 +36,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <string>
@@ -87,7 +88,7 @@ public:
     auto normalizedValue = (value - minValue) / (maxValue - minValue);
     normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
     auto maxIntValue = static_cast<T>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
-    auto intValue = static_cast<T>(std::round((double)(normalizedValue)*maxIntValue));
+    auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
     writeNBytes<T, bytesCount>(intValue, file);
   }
 };
