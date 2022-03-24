@@ -34,17 +34,21 @@
 #ifndef IOBINARYPRIMITIVES_H
 #define IOBINARYPRIMITIVES_H
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <fstream>
 #include <string>
 
 namespace haptics::io {
-static const int byteSize = 8;
+constexpr float MAX_FLOAT = 10000;
+constexpr float MAX_FREQUENCY = 10000;
+constexpr float MAX_AMPLITUDE = 1;
+constexpr float MAX_PHASE = 3.14159;
+constexpr int BYTE_SIZE = 8;
 class IOBinaryPrimitives {
 public:
   static auto readString(std::ifstream &file) -> std::string;
-  static auto readFloat(std::ifstream &file) -> float;
 
   template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
     std::array<char, bytesCount> bytes{};
@@ -53,21 +57,38 @@ public:
     for (size_t i = 0; i < bytes.size(); i++) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
       auto byteVal = static_cast<uint8_t>(bytes[i]);
-      value |= static_cast<T>(byteVal) << byteSize * i;
+      value |= static_cast<T>(byteVal) << BYTE_SIZE * i;
     }
+    return value;
+  }
+  template <class T, size_t bytesCount>
+  static auto readFloatNBytes(std::ifstream &file, float minValue, float maxValue) -> float {
+    auto intValue = readNBytes<T, bytesCount>(file);
+    auto maxIntValue = static_cast<uint64_t>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+    auto normalizedValue = intValue / static_cast<float>(maxIntValue);
+    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+    auto value = normalizedValue * (maxValue - minValue) + minValue;
     return value;
   }
 
   static auto writeString(const std::string &text, std::ofstream &file) -> void;
-  static auto writeFloat(float f, std::ofstream &file) -> void;
   template <class T, size_t bytesCount>
   static auto writeNBytes(T value, std::ofstream &file) -> void {
     std::array<char, bytesCount> bytes{};
     for (size_t i = 0; i < bytes.size(); i++) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-      bytes[i] = static_cast<uint8_t>(value >> i * byteSize);
+      bytes[i] = static_cast<uint8_t>(value >> i * BYTE_SIZE);
     }
     file.write(bytes.data(), bytesCount);
+  }
+  template <class T, size_t bytesCount>
+  static auto writeFloatNBytes(float value, std::ofstream &file, float minValue, float maxValue)
+      -> void {
+    auto normalizedValue = (value - minValue) / (maxValue - minValue);
+    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+    auto maxIntValue = static_cast<T>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+    auto intValue = static_cast<T>(std::round((double)(normalizedValue)*maxIntValue));
+    writeNBytes<T, bytesCount>(intValue, file);
   }
 };
 } // namespace haptics::io

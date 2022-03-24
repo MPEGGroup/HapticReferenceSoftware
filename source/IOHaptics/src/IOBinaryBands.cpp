@@ -182,9 +182,10 @@ auto IOBinaryBands::readTransientBandBody(types::Band &band, std::ifstream &file
   types::Effect myEffect;
   types::Keyframe myKeyframe;
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
-    float amplitude = IOBinaryPrimitives::readFloat(file);
-    auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
-    auto frequency = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+    float amplitude =
+        IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
+    auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    auto frequency = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
     myKeyframe = types::Keyframe(0, amplitude, static_cast<int>(frequency));
     myEffect = types::Effect(static_cast<int>(position), 0, types::BaseSignal::Sine);
@@ -207,19 +208,20 @@ auto IOBinaryBands::writeTransientBandBody(types::Band &band, std::ofstream &fil
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         amplitude = myKeyframe.getAmplitudeModulation().value();
       }
-      IOBinaryPrimitives::writeFloat(amplitude, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
+                                                        MAX_AMPLITUDE);
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
 
       unsigned int frequency = 0;
       if (myKeyframe.getFrequencyModulation().has_value()) {
         frequency = static_cast<unsigned int>(myKeyframe.getFrequencyModulation().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(frequency, file);
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(frequency, file);
     }
   }
 
@@ -237,8 +239,9 @@ auto IOBinaryBands::readCurveBandBody(types::Band &band, std::ifstream &file) ->
     effectPosition = 0;
     for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize());
          keyframeIndex++) {
-      float amplitude = IOBinaryPrimitives::readFloat(file);
-      auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+      float amplitude =
+          IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
+      auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
       if (keyframeIndex == 0) {
         effectPosition = position;
@@ -270,17 +273,19 @@ auto IOBinaryBands::writeCurveBandBody(types::Band &band, std::ofstream &file) -
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         amplitude = myKeyframe.getAmplitudeModulation().value();
       }
-      IOBinaryPrimitives::writeFloat(amplitude, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
+                                                        MAX_AMPLITUDE);
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
       if (kfIndex == 0 && myKeyframe.getRelativePosition().value_or(0) != 0) {
-        IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
-        IOBinaryPrimitives::writeFloat(amplitude, file);
+        IOBinaryPrimitives::writeNBytes<uint16_t, 2>(static_cast<uint32_t>(position), file);
+        IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
+                                                          MAX_AMPLITUDE);
       }
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(static_cast<uint32_t>(position), file);
     }
   }
 
@@ -291,24 +296,25 @@ auto IOBinaryBands::readVectorialBandBody(types::Band &band, std::ifstream &file
   types::Effect myEffect;
   types::Keyframe myKeyframe;
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
-    auto keyframeCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+    auto keyframeCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
     for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(keyframeCount); keyframeIndex++) {
-      auto amplitudeFrequencyMask = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
+      auto amplitudeFrequencyMask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
 
       myKeyframe = types::Keyframe(std::nullopt, std::nullopt, std::nullopt);
       if ((amplitudeFrequencyMask & 0b0000'0001) != 0) {
-        float amplitude = IOBinaryPrimitives::readFloat(file);
+        float amplitude =
+            IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
         myKeyframe.setAmplitudeModulation(amplitude);
       }
-      auto position = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+      auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
       if ((amplitudeFrequencyMask & 0b0000'0010) != 0) {
-        auto frequency = IOBinaryPrimitives::readNBytes<unsigned int, 4>(file);
+        auto frequency = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
         myKeyframe.setFrequencyModulation(static_cast<int>(frequency));
       }
 
       if (keyframeIndex == 0) {
-        float phase = IOBinaryPrimitives::readFloat(file);
-        auto baseSignal = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+        float phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_PHASE, MAX_PHASE);
+        auto baseSignal = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
 
         myEffect = types::Effect(static_cast<int>(position), phase,
                                  static_cast<types::BaseSignal>(baseSignal));
@@ -338,45 +344,46 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
         myEffect.addFrequencyAt(myKeyframe.getFrequencyModulation(), 0);
       }
     }
-    auto keyframeCount = static_cast<unsigned short>(myEffect.getKeyframesSize());
-    IOBinaryPrimitives::writeNBytes<unsigned short, 2>(keyframeCount, file);
+    auto keyframeCount = static_cast<uint16_t>(myEffect.getKeyframesSize());
+    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(keyframeCount, file);
 
     for (unsigned short kfIndex = 0; kfIndex < keyframeCount; kfIndex++) {
       myKeyframe = myEffect.getKeyframeAt(kfIndex);
 
-      unsigned char valueMask = 0;
+      uint8_t valueMask = 0;
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         valueMask |= 0b0000'0001;
       }
       if (myKeyframe.getFrequencyModulation().has_value()) {
         valueMask |= 0b0000'0010;
       }
-      IOBinaryPrimitives::writeNBytes<unsigned char, 1>(valueMask, file);
+      IOBinaryPrimitives::writeNBytes<uint8_t, 1>(valueMask, file);
 
       float amplitude = 0;
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         amplitude = myKeyframe.getAmplitudeModulation().value();
-        IOBinaryPrimitives::writeFloat(amplitude, file);
+        IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
+                                                          MAX_AMPLITUDE);
       }
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
       }
-      IOBinaryPrimitives::writeNBytes<unsigned int, 4>(position, file);
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
 
       unsigned int frequency = 0;
       if (myKeyframe.getFrequencyModulation().has_value()) {
         frequency = static_cast<unsigned int>(myKeyframe.getFrequencyModulation().value());
-        IOBinaryPrimitives::writeNBytes<unsigned int, 4>(frequency, file);
+        IOBinaryPrimitives::writeNBytes<uint16_t, 2>(frequency, file);
       }
 
       if (kfIndex == 0) {
         float phase = myEffect.getPhase();
-        IOBinaryPrimitives::writeFloat(phase, file);
+        IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, -MAX_PHASE, MAX_PHASE);
 
-        auto baseSignal = static_cast<unsigned short>(myEffect.getBaseSignal());
-        IOBinaryPrimitives::writeNBytes<unsigned short, 2>(baseSignal, file);
+        auto baseSignal = static_cast<uint8_t>(myEffect.getBaseSignal());
+        IOBinaryPrimitives::writeNBytes<uint8_t, 1>(baseSignal, file);
       }
     }
   }

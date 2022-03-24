@@ -49,18 +49,4 @@ auto IOBinaryPrimitives::readString(std::ifstream &file) -> std::string {
   }
   return str;
 }
-
-auto IOBinaryPrimitives::writeFloat(float f, std::ofstream &file) -> void {
-  std::array<char, 4> bytes{};
-  memcpy(&bytes, &f, sizeof(f));
-  file.write(bytes.data(), 4);
-}
-
-auto IOBinaryPrimitives::readFloat(std::ifstream &file) -> float {
-  float value = 0;
-  std::array<char, 4> bytes{};
-  file.read(bytes.data(), 4);
-  memcpy(&value, &bytes, sizeof(value));
-  return value;
-}
 } // namespace haptics::io
