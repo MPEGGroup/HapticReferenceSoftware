@@ -110,17 +110,12 @@ def psnr_two_files(original, decompressed, autopad=False):
             if padLen < 0:
                 # zero-pads the decompressed file
                 data_decompressed = np.concatenate((data_decompressed, zPad))
-                print("[.] Adding automatic zero-padding of", abs(padLen), "samples to the decompressed file.")
             
             # if the sample length difference is positive, the original file is shorter
             elif padLen > 0:
                 # zero-pads the original file
                 data_original = np.concatenate((data_original, zPad))
-                print("[.] Adding automatic zero-padding of", abs(padLen), "samples to the original file.")
             
-            # Theoretically unreachable - as for the length check above, but implemented for logic completeness.
-            else:
-                print("[.] Both signals are equally long. No padding added.")
         else:
             sys.exit("[!] The files have different sizes. Automatic padding is off. Exiting.")
         
@@ -140,14 +135,6 @@ def compute_bitrate(wav_file, encoded_file):
         bit_size = len(f.read()) * 8
     bit_rate = bit_size / duration_s / num_channels / 1000.0
     return bit_rate
-
-def get_duration_and_num_channels(wav_file):
-    data_original, sample_rate_original = read(wav_file)
-    duration_s = len(data_original) / sample_rate_original
-    num_channels = 1
-    if len(data_original.shape) > 1:
-        num_channels = data_original.shape[1]
-    return duration_s, num_channels
 
 def addPadding(input_wav_file, output_wav_file, padding_duration):
     data, sample_rate = read(input_wav_file)
@@ -242,16 +229,17 @@ def main():
 
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {mpg_file_path} -kb {current_bitrate} --binary", stdout=log_file)
-                        # print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        # subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {mpg_file_path} -o {gmpg_file_path}", stdout=log_file)
-                        # print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        # subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {gmpg_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
-                        # if padding:
-                            # print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                            # addPadding(nopad_file_path, pad_file_path, padding)
+                        print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {mpg_file_path} -o {gmpg_file_path}", stdout=log_file)
+                        print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {gmpg_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
+                        if padding:
+                            print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                            addPadding(nopad_file_path, pad_file_path, padding)
                         bitrate = compute_bitrate(reference_file_path, mpg_file_path)
+                        psnr = psnr_two_files(nopad_file_path, reference_file_path, True)
                         csvRow.append(bitrate)
-                        csvRow.append("0")
+                        csvRow.append(psnr)
                     writer.writerow(csvRow)
 
     print(datetime.now().strftime("\n[ %Hh : %Mm : %Ss ] => FINISH"))
@@ -259,7 +247,7 @@ def main():
 
 if __name__ == "__main__":
     DEFAULT_OUTPUT = "./out"
-    DEFAULT_BITRATES = [2]
+    DEFAULT_BITRATES = [2, 16, 64]
     DEFAULT_PAD = 1
     DEFAULT_FILTER_BY_TYPE = ""
 
