@@ -183,7 +183,7 @@ auto IOBinaryBands::readTransientBandBody(types::Band &band, std::ifstream &file
   types::Keyframe myKeyframe;
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
     float amplitude =
-        IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
+        IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
     auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
     auto frequency = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
@@ -208,8 +208,8 @@ auto IOBinaryBands::writeTransientBandBody(types::Band &band, std::ofstream &fil
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         amplitude = myKeyframe.getAmplitudeModulation().value();
       }
-      IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
-                                                        MAX_AMPLITUDE);
+      IOBinaryPrimitives::writeFloatNBytes<uint8_t, 1>(amplitude, file, -MAX_AMPLITUDE,
+                                                       MAX_AMPLITUDE);
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
       if (myKeyframe.getRelativePosition().has_value()) {
@@ -240,7 +240,7 @@ auto IOBinaryBands::readCurveBandBody(types::Band &band, std::ifstream &file) ->
     for (int keyframeIndex = 0; keyframeIndex < static_cast<int>(myEffect.getKeyframesSize());
          keyframeIndex++) {
       float amplitude =
-          IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
+          IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
       auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
       if (keyframeIndex == 0) {
@@ -273,14 +273,14 @@ auto IOBinaryBands::writeCurveBandBody(types::Band &band, std::ofstream &file) -
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         amplitude = myKeyframe.getAmplitudeModulation().value();
       }
-      IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
-                                                        MAX_AMPLITUDE);
+      IOBinaryPrimitives::writeFloatNBytes<uint8_t, 1>(amplitude, file, -MAX_AMPLITUDE,
+                                                       MAX_AMPLITUDE);
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
       if (kfIndex == 0 && myKeyframe.getRelativePosition().value_or(0) != 0) {
         IOBinaryPrimitives::writeNBytes<uint16_t, 2>(static_cast<uint32_t>(position), file);
-        IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
-                                                          MAX_AMPLITUDE);
+        IOBinaryPrimitives::writeFloatNBytes<uint8_t, 1>(amplitude, file, -MAX_AMPLITUDE,
+                                                         MAX_AMPLITUDE);
       }
       if (myKeyframe.getRelativePosition().has_value()) {
         position += static_cast<unsigned int>(myKeyframe.getRelativePosition().value());
@@ -303,7 +303,7 @@ auto IOBinaryBands::readVectorialBandBody(types::Band &band, std::ifstream &file
       myKeyframe = types::Keyframe(std::nullopt, std::nullopt, std::nullopt);
       if ((amplitudeFrequencyMask & 0b0000'0001) != 0) {
         float amplitude =
-            IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
+            IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
         myKeyframe.setAmplitudeModulation(amplitude);
       }
       auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -362,8 +362,8 @@ auto IOBinaryBands::writeVectorialBandBody(types::Band &band, std::ofstream &fil
       float amplitude = 0;
       if (myKeyframe.getAmplitudeModulation().has_value()) {
         amplitude = myKeyframe.getAmplitudeModulation().value();
-        IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(amplitude, file, -MAX_AMPLITUDE,
-                                                          MAX_AMPLITUDE);
+        IOBinaryPrimitives::writeFloatNBytes<uint8_t, 1>(amplitude, file, -MAX_AMPLITUDE,
+                                                         MAX_AMPLITUDE);
       }
 
       auto position = static_cast<unsigned int>(myEffect.getPosition());
