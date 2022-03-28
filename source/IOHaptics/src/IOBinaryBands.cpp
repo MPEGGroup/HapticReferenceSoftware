@@ -398,8 +398,20 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
   band.setWindowLength((int)blocklength * S2MS / band.getUpperFrequencyLimit());
   int position = 0;
   for (uint16_t i = 0; i < effects_size; i++) {
-    std::vector<unsigned char> instream;
     auto size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    if (size == 0) {
+      types::Effect effect;
+      effect.setPosition(position);
+      int pos = 0;
+      for (int index = 0; index < blocklength + 2; index++) {
+        Keyframe keyframe(pos, 0, 0);
+        effect.addKeyframe(keyframe);
+        pos++;
+      }
+      position += (int)blocklength * S2MS / band.getUpperFrequencyLimit();
+      band.addEffect(effect);
+    }
+    std::vector<unsigned char> instream;
     instream.resize(size);
     for (auto &b : instream) {
       b = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
