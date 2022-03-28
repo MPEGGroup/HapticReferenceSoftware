@@ -396,7 +396,7 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
       types::Effect effect;
       effect.setPosition(position);
       int pos = 0;
-      for (size_t index = 0; index < blocklength + 2; index++) {
+      for (int index = 0; index < blocklength + 2; index++) {
         Keyframe keyframe(pos, 0, 0);
         effect.addKeyframe(keyframe);
         pos++;
