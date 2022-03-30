@@ -60,7 +60,6 @@ static constexpr int WINDOW_LENGTH_2 = 1024;
 static constexpr int WINDOW_LENGTH_16 = 512;
 static constexpr int WINDOW_LENGTH_64 = 512;
 
-
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
   int wavelet_windowLength = 0;
