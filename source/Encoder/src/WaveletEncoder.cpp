@@ -263,8 +263,8 @@ template <class T> auto WaveletEncoder::findMax(std::vector<T> &data) -> T {
   T max = data[0];
 
   for (size_t i = 1; i < data.size(); i++) {
-    if (data[i] > max) {
-      max = data[i];
+    if (fabs(data[i]) > max) {
+      max = fabs(data[i]);
     }
   }
 

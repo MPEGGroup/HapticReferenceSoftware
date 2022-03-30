@@ -68,35 +68,37 @@ PsychohapticModel::PsychohapticModel(size_t bl_new, int fs_new) : bl(bl_new), fs
 
 auto PsychohapticModel::getSMR(std::vector<double> &block) -> modelResult {
 
-  std::vector<double> spect;
-  spect.resize(bl);
-  std::copy(block.begin(), block.end(), spect.begin());
-
   std::vector<std::complex<double>> block_complex(bl * 2, 0);
   std::transform(block.begin(), block.end(), block_complex.begin(),
                  [](double a) { return std::complex<double>(a, 0); });
 
   std::vector<std::complex<double>> spect_complex = dj::fft1d(block_complex, dj::fft_dir::DIR_FWD);
 
-  std::vector<double> spect_real;
-  spect_real.resize(bl);
+  std::vector<double> spect_mag;
+  spect_mag.resize(bl);
 
-  static double correction = sqrt(2);
-  std::transform(
-      spect_complex.begin(), spect_complex.end() - (long long)bl, spect_real.begin(),
-      [](std::complex<double> a) { return LOGFACTOR_SPECT * log10(fabs(correction * a.real())); });
+  for (auto &i : spect_complex) {
+    i = i * sqrt(2 * bl);
+  }
 
-  std::vector<double> globalmask = globalMaskingThreshold(spect);
+  static double correction = 1 / sqrt(bl);
+  std::transform(spect_complex.begin(), spect_complex.end() - (long long)bl, spect_mag.begin(),
+                 [](std::complex<double> a) {
+                   return LOGFACTOR_SPECT *
+                          log10(correction * sqrt(a.real() * a.real() + a.imag() * a.imag()));
+                 });
+
+  std::vector<double> globalmask = globalMaskingThreshold(spect_mag);
   modelResult result;
   result.SMR.resize(book.size());
   result.bandenergy.resize(book.size());
-  std::vector<double> maskenergy(bl, 0);
+  std::vector<double> maskenergy(book.size(), 0);
   int i = 0;
   for (uint32_t b = 0; b < book.size(); b++) {
     result.bandenergy[b] = 0;
     maskenergy[b] = 0;
     for (; i < book_cumulative[b + 1]; i++) {
-      result.bandenergy[b] += pow(base, spect[i] / factor);
+      result.bandenergy[b] += pow(base, spect_mag[i] / factor);
       maskenergy[b] += globalmask[i];
     }
     result.SMR[b] = factor * log10(result.bandenergy[b] / maskenergy[b]);
@@ -121,6 +123,7 @@ auto PsychohapticModel::globalMaskingThreshold(std::vector<double> &spect) -> st
                                                                      // domain
     }
   }
+
   return globalmask;
 }
 
@@ -297,18 +300,6 @@ auto PsychohapticModel::findPeaks(std::vector<double> &spectrum, double min_peak
                                   double min_peak_height) -> peaks {
 
   if (spectrum.empty()) {
-    peaks p;
-    return p;
-  }
-  bool zeros = true;
-  for (auto v : spectrum) {
-    if (v > ZERO_COMP) {
-      zeros = false;
-      break;
-    }
-  }
-
-  if (zeros) {
     peaks p;
     return p;
   }
