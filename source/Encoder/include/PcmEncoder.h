@@ -47,12 +47,19 @@
 
 namespace haptics::encoder {
 
-static constexpr int BITBUDGET_2KBS = 3;
+static constexpr int BITBUDGET_2KBS = 4;
 static constexpr int BITBUDGET_16KBS = 13;
 static constexpr int BITBUDGET_64KBS = 80;
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
+static constexpr int CUTOFF_FREQUENCY_2 = 20;
+static constexpr int CUTOFF_FREQUENCY_16 = 72.5;
+static constexpr int CUTOFF_FREQUENCY_64 = 72.5;
+static constexpr int WINDOW_LENGTH_2 = 1024;
+static constexpr int WINDOW_LENGTH_16 = 512;
+static constexpr int WINDOW_LENGTH_64 = 512;
+
 
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
@@ -74,18 +81,18 @@ struct EncodingConfig {
     switch (bitrate) {
     case BITR_2:
       wavelet_bitbudget = BITBUDGET_2KBS;
-      curveFrequencyLimit = 20;
-      wavelet_windowLength = 1024;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_2;
+      wavelet_windowLength = WINDOW_LENGTH_2;
       break;
     case BITR_16:
       wavelet_bitbudget = BITBUDGET_16KBS;
-      curveFrequencyLimit = 72.5;
-      wavelet_windowLength = 512;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_16;
+      wavelet_windowLength = WINDOW_LENGTH_16;
       break;
     case BITR_64:
       wavelet_bitbudget = BITBUDGET_64KBS;
-      curveFrequencyLimit = 72.5;
-      wavelet_windowLength = 512;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_64;
+      wavelet_windowLength = WINDOW_LENGTH_16;
       break;
     default:
       std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
