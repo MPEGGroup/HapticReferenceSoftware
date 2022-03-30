@@ -410,17 +410,18 @@ auto IOBinaryBands::readWaveletBandBody(types::Band &band, std::ifstream &file) 
       }
       position += (int)blocklength * S2MS / band.getUpperFrequencyLimit();
       band.addEffect(effect);
+    } else {
+      std::vector<unsigned char> instream;
+      instream.resize(size);
+      for (auto &b : instream) {
+        b = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
+      }
+      types::Effect effect;
+      dec.decodeEffect(instream, effect, (int)blocklength);
+      effect.setPosition(position);
+      position += (int)blocklength * S2MS / band.getUpperFrequencyLimit();
+      band.addEffect(effect);
     }
-    std::vector<unsigned char> instream;
-    instream.resize(size);
-    for (auto &b : instream) {
-      b = IOBinaryPrimitives::readNBytes<unsigned char, 1>(file);
-    }
-    types::Effect effect;
-    dec.decodeEffect(instream, effect, (int)blocklength);
-    effect.setPosition(position);
-    position += (int)blocklength * S2MS / band.getUpperFrequencyLimit();
-    band.addEffect(effect);
   }
   return true;
 }
