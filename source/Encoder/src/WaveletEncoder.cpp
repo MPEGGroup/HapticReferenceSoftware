@@ -96,6 +96,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
 
 auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar,
                                  int &maxbits) -> std::vector<double> {
+
   std::vector<double> block_dwt(bl, 0);
   Wavelet wavelet;
   wavelet.DWT(block_time, dwtlevel, block_dwt);
