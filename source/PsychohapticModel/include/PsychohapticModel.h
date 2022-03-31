@@ -38,7 +38,7 @@
 #include <iostream>
 #include <vector>
 
-constexpr double a = 45; //62
+constexpr double a = 45; // 62
 constexpr double c = (double)1 / (double)550;
 constexpr double b = 1 - (250 * c);
 constexpr double e = 55; // 77
