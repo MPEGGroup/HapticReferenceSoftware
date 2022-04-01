@@ -307,13 +307,13 @@
         "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-training-8kHz-16-nopad.wav"
       },
       {
-        "name": "IDCC-kin-BikeRinding2",
+        "name": "IDCC-kin-BikeRiding2",
         "type": "Training",
         "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding2-training-8kHz-16-nopad.ohm",
         "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding2-training-8kHz-16-nopad.wav"
       },
       {
-        "name": "IDCC-kin-BikeRinding",
+        "name": "IDCC-kin-BikeRiding",
         "type": "Training",
         "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding-training-8kHz-16-nopad.ohm",
         "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding-training-8kHz-16-nopad.wav"
