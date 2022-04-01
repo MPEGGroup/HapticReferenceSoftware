@@ -143,6 +143,12 @@
         "reference_file":"Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain-8kHz-16-nopad.wav"
       },
       {
+        "name": "IDCC-vib-Rain_chan2",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain_chan2-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain_chan2-8kHz-16-nopad.wav"
+      },
+      {
         "name": "IDCC-vib-Towel",
         "type": "Test",
         "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Towel-8kHz-16-nopad.ohm",
