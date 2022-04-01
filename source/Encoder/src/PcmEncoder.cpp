@@ -88,26 +88,30 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
                                        config.curveFrequencyLimit, &myBand)) {
       if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
         myBand.setCurveType(CurveType::Linear);
+      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration) {
+        myBand.setCurveType(CurveType::Cubic);
       }
       myTrack.addBand(myBand);
     }
     myTrack.setFrequencySampling(wavParser.getSamplerate());
     myTrack.setSampleCount(
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
-    out.replaceTrackAt((int)channelIndex, myTrack);
 
     // wavelet processing
-    signal_wavelet = wavParser.getSamplesChannel(channelIndex);
-    Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
-    signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
-    waveletBand = Band();
-    if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
-                                config.curveFrequencyLimit, waveletBand)) {
-      myTrack.addBand(waveletBand);
+    if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic) {
+      signal_wavelet = wavParser.getSamplesChannel(channelIndex);
+      Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
+      signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+      waveletBand = Band();
+      if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
+                                  config.curveFrequencyLimit, waveletBand)) {
+        myTrack.addBand(waveletBand);
+      }
+      myTrack.setFrequencySampling(wavParser.getSamplerate());
+      myTrack.setSampleCount(
+          static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     }
-    myTrack.setFrequencySampling(wavParser.getSamplerate());
-    myTrack.setSampleCount(
-        static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
+
     out.replaceTrackAt((int)channelIndex, myTrack);
   }
 

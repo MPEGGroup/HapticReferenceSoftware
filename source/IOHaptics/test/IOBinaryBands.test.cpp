@@ -40,6 +40,7 @@
 using haptics::io::IOBinaryBands;
 
 const std::string filename = "testing_IOBinaryBands.bin";
+constexpr float floatPrecision = 0.01;
 
 auto addEffect(
     haptics::types::Band &myBand, const int position, const float phase,
@@ -282,7 +283,7 @@ TEST_CASE("write/read BandBody on curve") {
     file.close();
 
     CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
-          expectedKeyframeCount * (4 + 4));
+          expectedKeyframeCount * (1 + 2));
   }
 
   SECTION("read band body") {
@@ -311,8 +312,8 @@ TEST_CASE("write/read BandBody on curve") {
       CHECK(keyframe.getRelativePosition().has_value());
       CHECK(keyframe.getRelativePosition().value() == i);
       CHECK(keyframe.getAmplitudeModulation().has_value());
-      CHECK(keyframe.getAmplitudeModulation().value() ==
-            Approx(static_cast<float>(i) / expectedKeyframeCount));
+      CHECK(std::fabs(keyframe.getAmplitudeModulation().value() -
+                      (static_cast<float>(i) / expectedKeyframeCount)) < floatPrecision);
       CHECK_FALSE(keyframe.getFrequencyModulation().has_value());
     }
   }
@@ -348,7 +349,7 @@ TEST_CASE("write/read BandBody on transient") {
     file.close();
 
     CHECK(std::filesystem::file_size(filename) ==
-          static_cast<uintmax_t>(expectedTransientCount * (4 + 4 + 4)));
+          static_cast<uintmax_t>(expectedTransientCount * (2 + 2 + 1)));
   }
 
   SECTION("read band body") {
@@ -375,8 +376,8 @@ TEST_CASE("write/read BandBody on transient") {
       haptics::types::Keyframe keyframe = res.getEffectAt(i).getKeyframeAt(0);
       CHECK(effect.getPosition() == i);
       CHECK(keyframe.getAmplitudeModulation().has_value());
-      CHECK(keyframe.getAmplitudeModulation().value() ==
-            Approx(static_cast<float>(i) / expectedTransientCount));
+      CHECK(std::fabs(keyframe.getAmplitudeModulation().value() -
+                      (static_cast<float>(i) / expectedTransientCount)) < floatPrecision);
       CHECK(keyframe.getFrequencyModulation().has_value());
       CHECK(keyframe.getFrequencyModulation().value() == 90);
     }
@@ -421,7 +422,8 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
 
-    const uintmax_t expectedFileSize = 2 * (2 + 4 + 2) + 4 * (1 + 4 + 4 + 4) + 2 * (1 + 4 + 4);
+    const uintmax_t expectedFileSize =
+        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2);
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -446,7 +448,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 
     resEffect1 = res.getEffectAt(0);
     CHECK(resEffect1.getPosition() == testingEffect1_position);
-    CHECK(resEffect1.getPhase() == testingEffect1_phase);
+    CHECK(std::fabs(resEffect1.getPhase() - (testingEffect1_phase)) < floatPrecision);
     CHECK(resEffect1.getBaseSignal() == testingEffect1_baseSignal);
     REQUIRE(resEffect1.getKeyframesSize() == testingEffect1_keyframes.size());
     for (int i = 0; i < static_cast<int>(resEffect1.getKeyframesSize()); i++) {
@@ -459,18 +461,20 @@ TEST_CASE("write/read BandBody on vectorial wave") {
       CHECK(resKeyframe.getAmplitudeModulation().has_value() ==
             std::get<1>(expectedKeyframeValue).has_value());
       if (resKeyframe.getAmplitudeModulation().has_value()) {
-        CHECK(resKeyframe.getAmplitudeModulation().value() == std::get<1>(expectedKeyframeValue));
+        CHECK(std::fabs(resKeyframe.getAmplitudeModulation().value() -
+                        std::get<1>(expectedKeyframeValue).value()) < floatPrecision);
       }
       CHECK(resKeyframe.getFrequencyModulation().has_value() ==
             std::get<2>(expectedKeyframeValue).has_value());
       if (resKeyframe.getFrequencyModulation().has_value()) {
-        CHECK(resKeyframe.getFrequencyModulation().value() == std::get<2>(expectedKeyframeValue));
+        CHECK(std::fabs(resKeyframe.getFrequencyModulation().value() -
+                        std::get<2>(expectedKeyframeValue).value()) < floatPrecision);
       }
     }
 
     resEffect2 = res.getEffectAt(1);
     CHECK(resEffect2.getPosition() == testingEffect2_position);
-    CHECK(resEffect2.getPhase() == testingEffect2_phase);
+    CHECK(std::fabs(resEffect2.getPhase() - testingEffect2_phase) < floatPrecision);
     CHECK(resEffect2.getBaseSignal() == testingEffect2_baseSignal);
     REQUIRE(resEffect2.getKeyframesSize() == testingEffect2_keyframes.size());
     for (int i = 0; i < static_cast<int>(resEffect2.getKeyframesSize()); i++) {
@@ -483,12 +487,14 @@ TEST_CASE("write/read BandBody on vectorial wave") {
       CHECK(resKeyframe.getAmplitudeModulation().has_value() ==
             std::get<1>(expectedKeyframeValue).has_value());
       if (resKeyframe.getAmplitudeModulation().has_value()) {
-        CHECK(resKeyframe.getAmplitudeModulation().value() == std::get<1>(expectedKeyframeValue));
+        CHECK(std::fabs(resKeyframe.getAmplitudeModulation().value() -
+                        std::get<1>(expectedKeyframeValue).value()) < floatPrecision);
       }
       CHECK(resKeyframe.getFrequencyModulation().has_value() ==
             std::get<2>(expectedKeyframeValue).has_value());
       if (resKeyframe.getFrequencyModulation().has_value()) {
-        CHECK(resKeyframe.getFrequencyModulation().value() == std::get<2>(expectedKeyframeValue));
+        CHECK(std::fabs(resKeyframe.getFrequencyModulation().value() -
+                        std::get<2>(expectedKeyframeValue).value()) < floatPrecision);
       }
     }
   }

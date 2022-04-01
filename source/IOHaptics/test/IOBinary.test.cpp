@@ -40,6 +40,7 @@
 using haptics::io::IOBinary;
 
 const std::string filename = "testing_IOBinary.bin";
+constexpr float floatPrecision = 0.01;
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read file header without avatar and perceptions") {
@@ -242,17 +243,82 @@ TEST_CASE("write/read file header for reference device testing") {
       CHECK(myDevice.getBodyPartMask() == (std::get<bodyPartIndex>(testingValues).has_value()
                                                ? std::get<bodyPartIndex>(testingValues).value()
                                                : 0));
-      CHECK(myDevice.getMaximumFrequency() == std::get<maximumFrequencyIndex>(testingValues));
-      CHECK(myDevice.getMinimumFrequency() == std::get<minimumFrequencyIndex>(testingValues));
-      CHECK(myDevice.getResonanceFrequency() == std::get<resonanceFrequencyIndex>(testingValues));
-      CHECK(myDevice.getMaximumAmplitude() == std::get<maximumAmplitudeIndex>(testingValues));
-      CHECK(myDevice.getImpedance() == std::get<impedanceIndex>(testingValues));
-      CHECK(myDevice.getMaximumVoltage() == std::get<maximumVoltageIndex>(testingValues));
-      CHECK(myDevice.getMaximumCurrent() == std::get<maximumCurrentIndex>(testingValues));
-      CHECK(myDevice.getMaximumDisplacement() == std::get<maximumDisplacementIndex>(testingValues));
-      CHECK(myDevice.getWeight() == std::get<weightIndex>(testingValues));
-      CHECK(myDevice.getSize() == std::get<sizeIndex>(testingValues));
-      CHECK(myDevice.getCustom() == std::get<customIndex>(testingValues));
+
+      CHECK(myDevice.getMaximumFrequency().has_value() ==
+            std::get<maximumFrequencyIndex>(testingValues).has_value());
+      if (myDevice.getMaximumFrequency().has_value()) {
+        CHECK(std::fabs(myDevice.getMaximumFrequency().value() -
+                        std::get<maximumFrequencyIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getMinimumFrequency().has_value() ==
+            std::get<minimumFrequencyIndex>(testingValues).has_value());
+      if (myDevice.getMinimumFrequency().has_value()) {
+        CHECK(std::fabs(myDevice.getMinimumFrequency().value() -
+                        std::get<minimumFrequencyIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getResonanceFrequency().has_value() ==
+            std::get<resonanceFrequencyIndex>(testingValues).has_value());
+      if (myDevice.getResonanceFrequency().has_value()) {
+        CHECK(std::fabs(myDevice.getResonanceFrequency().value() -
+                        std::get<resonanceFrequencyIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getMaximumAmplitude().has_value() ==
+            std::get<maximumAmplitudeIndex>(testingValues).has_value());
+      if (myDevice.getMaximumAmplitude().has_value()) {
+        CHECK(std::fabs(myDevice.getMaximumAmplitude().value() -
+                        std::get<maximumAmplitudeIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getImpedance().has_value() ==
+            std::get<impedanceIndex>(testingValues).has_value());
+      if (myDevice.getImpedance().has_value()) {
+        CHECK(std::fabs(myDevice.getImpedance().value() -
+                        std::get<impedanceIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getMaximumVoltage().has_value() ==
+            std::get<maximumVoltageIndex>(testingValues).has_value());
+      if (myDevice.getMaximumVoltage().has_value()) {
+        CHECK(std::fabs(myDevice.getMaximumVoltage().value() -
+                        std::get<maximumVoltageIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getMaximumCurrent().has_value() ==
+            std::get<maximumCurrentIndex>(testingValues).has_value());
+      if (myDevice.getMaximumCurrent().has_value()) {
+        CHECK(std::fabs(myDevice.getMaximumCurrent().value() -
+                        std::get<maximumCurrentIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getMaximumDisplacement().has_value() ==
+            std::get<maximumDisplacementIndex>(testingValues).has_value());
+      if (myDevice.getMaximumDisplacement().has_value()) {
+        CHECK(std::fabs(myDevice.getMaximumDisplacement().value() -
+                        std::get<maximumDisplacementIndex>(testingValues).value()) <
+              floatPrecision);
+      }
+
+      CHECK(myDevice.getWeight().has_value() == std::get<weightIndex>(testingValues).has_value());
+      if (myDevice.getWeight().has_value()) {
+        CHECK(std::fabs(myDevice.getWeight().value() -
+                        std::get<weightIndex>(testingValues).value()) < floatPrecision);
+      }
+
+      CHECK(myDevice.getSize().has_value() == std::get<sizeIndex>(testingValues).has_value());
+      if (myDevice.getSize().has_value()) {
+        CHECK(std::fabs(myDevice.getSize().value() - std::get<sizeIndex>(testingValues).value()) <
+              floatPrecision);
+      }
+
+      CHECK(myDevice.getCustom().has_value() == std::get<customIndex>(testingValues).has_value());
+      if (myDevice.getCustom().has_value()) {
+        CHECK(std::fabs(myDevice.getCustom().value() -
+                        std::get<customIndex>(testingValues).value()) < floatPrecision);
+      }
+
       CHECK(myDevice.getType() == std::get<typeIndex>(testingValues));
     }
 
@@ -373,9 +439,10 @@ TEST_CASE("write/read file header for track testing") {
 
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getGain() == Approx(testingGain_track0));
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() ==
-          Approx(testingMixingWeight_track0));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getGain() - testingGain_track0) <
+          floatPrecision);
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() -
+                    testingMixingWeight_track0));
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
             testingVertices_track0.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
@@ -385,9 +452,10 @@ TEST_CASE("write/read file header for track testing") {
 
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getGain() == Approx(testingGain_track1));
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() ==
-          Approx(testingMixingWeight_track1));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getGain() - testingGain_track1) <
+          floatPrecision);
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() -
+                    testingMixingWeight_track1) < floatPrecision);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
 
@@ -399,9 +467,10 @@ TEST_CASE("write/read file header for track testing") {
 
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getGain() == Approx(testingGain_track2));
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() ==
-          Approx(testingMixingWeight_track2));
+    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getGain() - testingGain_track2) <
+          floatPrecision);
+    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() -
+                    testingMixingWeight_track2) < floatPrecision);
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
@@ -583,7 +652,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 385;
+        testingVertices_track2.size() + 337;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -621,10 +690,11 @@ TEST_CASE("write/read file for body testing") {
     // CHECK track 0
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBodyPartMask() == testingBodyPartMask_track0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getGain() == Approx(testingGain_track0));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getGain() - testingGain_track0) <
+          floatPrecision);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() ==
-          Approx(testingMixingWeight_track0));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() -
+                    testingMixingWeight_track0) < floatPrecision);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
             testingVertices_track0.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
@@ -649,8 +719,8 @@ TEST_CASE("write/read file for body testing") {
     // CHECK effect
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getPosition() ==
           testingPosition_effect0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getPhase() ==
-          Approx(testingPhase_effect0));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getPhase() -
+                    testingPhase_effect0) < floatPrecision);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getBaseSignal() ==
           testingBaseSignal_effect0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
@@ -663,17 +733,18 @@ TEST_CASE("write/read file for body testing") {
       CHECK_FALSE(resKeyframe.getFrequencyModulation().has_value());
       CHECK(resKeyframe.getRelativePosition().value() ==
             std::get<0>(testingKeyframes_effect0.at(i)));
-      CHECK(resKeyframe.getAmplitudeModulation().value() ==
-            Approx(std::get<1>(testingKeyframes_effect0.at(i))));
+      CHECK(std::fabs(resKeyframe.getAmplitudeModulation().value() -
+                      std::get<1>(testingKeyframes_effect0.at(i))) < floatPrecision);
     }
 
     // CHECK track 1
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBodyPartMask() == testingBodyPartMask_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getGain() == Approx(testingGain_track1));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getGain() - testingGain_track1) <
+          floatPrecision);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() ==
-          Approx(testingMixingWeight_track1));
+    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() -
+                    testingMixingWeight_track1) < floatPrecision);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
 
     // CHECK band
@@ -697,14 +768,14 @@ TEST_CASE("write/read file for body testing") {
       haptics::types::Effect resEffect =
           res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEffectAt(i);
       CHECK(resEffect.getPosition() == std::get<0>(testingKeyframes_effect1.at(i)));
-      CHECK(resEffect.getPhase() == Approx(0));
+      CHECK(std::fabs(resEffect.getPhase() - 0) < floatPrecision);
       REQUIRE(resEffect.getKeyframesSize() == 1);
       REQUIRE(resEffect.getKeyframeAt(0).getRelativePosition().has_value());
       REQUIRE(resEffect.getKeyframeAt(0).getAmplitudeModulation().has_value());
       REQUIRE(resEffect.getKeyframeAt(0).getFrequencyModulation().has_value());
       CHECK(resEffect.getKeyframeAt(0).getRelativePosition().value() == 0);
-      CHECK(resEffect.getKeyframeAt(0).getAmplitudeModulation().value() ==
-            Approx(std::get<1>(testingKeyframes_effect1.at(i))));
+      CHECK(std::fabs(resEffect.getKeyframeAt(0).getAmplitudeModulation().value() -
+                      std::get<1>(testingKeyframes_effect1.at(i))) < floatPrecision);
       CHECK(resEffect.getKeyframeAt(0).getFrequencyModulation().value() ==
             std::get<2>(testingKeyframes_effect1.at(i)));
     }
@@ -720,10 +791,11 @@ TEST_CASE("write/read file for body testing") {
     // CHECK track
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartMask() == testingBodyPartMask_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getGain() == Approx(testingGain_track2));
+    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getGain() - testingGain_track2) <
+          floatPrecision);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() ==
-          Approx(testingMixingWeight_track2));
+    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() -
+                    testingMixingWeight_track2) < floatPrecision);
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
