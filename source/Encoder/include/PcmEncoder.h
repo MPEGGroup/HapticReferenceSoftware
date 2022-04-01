@@ -47,8 +47,8 @@
 
 namespace haptics::encoder {
 
-static constexpr int BITBUDGET_2KBS = 1;
-static constexpr int BITBUDGET_16KBS = 28;
+static constexpr int BITBUDGET_2KBS = 3;
+static constexpr int BITBUDGET_16KBS = 16;
 static constexpr int BITBUDGET_64KBS = 66;
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
