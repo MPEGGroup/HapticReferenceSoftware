@@ -132,11 +132,12 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   if (inputParser.cmdOptionExists("--generate_ohm")) {
-    std::filesystem::path p(output);
-    std::string str = p.filename().u8string();
-    haptics::tools::OHMData ohm = hapticFile.extractMetadataToOHM(str);
-    std::string ohmPath = output.substr(0, filename.find_last_of('.')) + ".ohm";
-    ohm.writeFile(ohmPath);
+    std::filesystem::path outputPath(output);
+    auto relativeFilename = outputPath.filename().string();
+    haptics::tools::OHMData ohm = hapticFile.extractMetadataToOHM(relativeFilename);
+    auto ohmPath = outputPath;
+    ohmPath.replace_extension(".ohm");
+    ohm.writeFile(ohmPath.string());
   }
 
   return EXIT_SUCCESS;

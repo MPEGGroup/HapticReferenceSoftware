@@ -231,57 +231,57 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
 
     float value = 0;
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_FREQUENCY) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FREQUENCY);
       myReferenceDevice.setMaximumFrequency(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MINIMUM_FREQUENCY) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FREQUENCY);
       myReferenceDevice.setMinimumFrequency(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::RESONANCE_FREQUENCY) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FREQUENCY);
       myReferenceDevice.setResonanceFrequency(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_AMPLITUDE) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setMaximumAmplitude(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::IMPEDANCE) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setImpedance(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_VOLTAGE) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setMaximumVoltage(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setMaximumCurrent(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_DISPLACEMENT) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setMaximumDisplacement(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::WEIGHT) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setWeight(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::SIZE) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
       myReferenceDevice.setSize(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::CUSTOM) != 0) {
-      value = IOBinaryPrimitives::readFloat(file);
+      value = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_FLOAT, MAX_FLOAT);
       myReferenceDevice.setCustom(value);
     }
 
@@ -323,57 +323,57 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
     float value = 0;
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_FREQUENCY) != 0) {
       value = myReferenceDevice.getMaximumFrequency().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FREQUENCY);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MINIMUM_FREQUENCY) != 0) {
       value = myReferenceDevice.getMinimumFrequency().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FREQUENCY);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::RESONANCE_FREQUENCY) != 0) {
       value = myReferenceDevice.getResonanceFrequency().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FREQUENCY);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_AMPLITUDE) != 0) {
       value = myReferenceDevice.getMaximumAmplitude().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::IMPEDANCE) != 0) {
       value = myReferenceDevice.getImpedance().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_VOLTAGE) != 0) {
       value = myReferenceDevice.getMaximumVoltage().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
       value = myReferenceDevice.getMaximumCurrent().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_DISPLACEMENT) != 0) {
       value = myReferenceDevice.getMaximumDisplacement().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::WEIGHT) != 0) {
       value = myReferenceDevice.getWeight().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::SIZE) != 0) {
       value = myReferenceDevice.getSize().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::CUSTOM) != 0) {
       value = myReferenceDevice.getCustom().value();
-      IOBinaryPrimitives::writeFloat(value, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(value, file, -MAX_FLOAT, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
@@ -387,14 +387,13 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
 
 auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool {
   auto trackCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
-
   // for each track
   for (unsigned short i = 0; i < trackCount; i++) {
     auto trackId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     std::string trackDescription = IOBinaryPrimitives::readString(file);
     auto deviceId = IOBinaryPrimitives::readNBytes<short, 2>(file);
-    auto trackGain = IOBinaryPrimitives::readFloat(file);
-    auto trackMixingWeight = IOBinaryPrimitives::readFloat(file);
+    auto trackGain = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_FLOAT, MAX_FLOAT);
+    auto trackMixingWeight = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     auto frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     std::optional<uint32_t> sampleCount = std::nullopt;
@@ -450,10 +449,10 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     IOBinaryPrimitives::writeNBytes<short, 2>(deviceId, file);
 
     float trackGain = myTrack.getGain();
-    IOBinaryPrimitives::writeFloat(trackGain, file);
+    IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(trackGain, file, -MAX_FLOAT, MAX_FLOAT);
 
     float trackMixingWeight = myTrack.getMixingWeight();
-    IOBinaryPrimitives::writeFloat(trackMixingWeight, file);
+    IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(trackMixingWeight, file, 0, MAX_FLOAT);
 
     uint32_t bodyPartMask = myTrack.getBodyPartMask();
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);

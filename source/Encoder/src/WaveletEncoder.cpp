@@ -96,6 +96,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
 
 auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar,
                                  int &maxbits) -> std::vector<double> {
+
   std::vector<double> block_dwt(bl, 0);
   Wavelet wavelet;
   wavelet.DWT(block_time, dwtlevel, block_dwt);
@@ -263,8 +264,8 @@ template <class T> auto WaveletEncoder::findMax(std::vector<T> &data) -> T {
   T max = data[0];
 
   for (size_t i = 1; i < data.size(); i++) {
-    if (data[i] > max) {
-      max = data[i];
+    if (fabs(data[i]) > max) {
+      max = fabs(data[i]);
     }
   }
 

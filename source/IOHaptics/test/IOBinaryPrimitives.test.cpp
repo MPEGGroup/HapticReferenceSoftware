@@ -40,6 +40,7 @@
 using haptics::io::IOBinaryPrimitives;
 
 const std::string filename = "testing_IOBinaryPrimitives.bin";
+constexpr float precision_threshold = 0.001;
 
 TEST_CASE("haptics::types::IOBinaryPrimitives on strings") {
   const std::vector<const char *> testingSet = {
@@ -81,22 +82,24 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on floats") {
       std::ofstream file(filename, std::ios::out | std::ios::binary);
       REQUIRE(file);
 
-      IOBinaryPrimitives::writeFloat(testingFloat, file);
+      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(testingFloat, file, -haptics::io::MAX_FLOAT,
+                                                        haptics::io::MAX_FLOAT);
       file.close();
 
       CHECK(std::filesystem::file_size(filename) == sizeof(float));
     }
 
-    DYNAMIC_SECTION("Read string (TESTING CASE: " + std::to_string(testingFloat) + ")") {
+    DYNAMIC_SECTION("Read float (TESTING CASE: " + std::to_string(testingFloat) + ")") {
       const uintmax_t startedFileSize = std::filesystem::file_size(filename);
       std::ifstream file(filename, std::ios::binary | std::ifstream::in);
       REQUIRE(file);
 
-      float res = IOBinaryPrimitives::readFloat(file);
+      float res = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -haptics::io::MAX_FLOAT,
+                                                                   haptics::io::MAX_FLOAT);
       file.close();
 
       CHECK(std::filesystem::file_size(filename) == startedFileSize);
-      CHECK(res == testingFloat);
+      CHECK(std::abs(res - testingFloat) < precision_threshold);
     }
   }
 }
