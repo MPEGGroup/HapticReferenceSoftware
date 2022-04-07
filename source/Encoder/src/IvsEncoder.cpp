@@ -50,7 +50,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   }
 
   std::string date = IvsEncoder::getLastModified(&doc);
-  haptics::types::Track myTrack(0, date, 1, 1, 0, std::nullopt, std::nullopt);
+  haptics::types::Track myTrack(0, date, 1, 1, 0, std::nullopt);
   if (out.getTracksSize() == 0) {
     out.addTrack(myTrack);
   }

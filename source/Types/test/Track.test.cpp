@@ -44,13 +44,11 @@ const int bodypartMask = 42;
 const int lowF = 0;
 const int highF = 1000;
 const haptics::types::Direction direction(127, 1, -34);
-const int8_t unitLength = 3;
 
 TEST_CASE("Track::generateBand without parameters", "[generateBand][withoutParameters]") {
   const int bandcount = 19;
 
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction,
-                          unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
   for (int i = 0; i < bandcount; i++) {
     haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
                            haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
@@ -75,7 +73,7 @@ TEST_CASE("Track::generateBand with parameters", "[generateBand][withParameters]
   const int testingMinF = 65;
   const int testingMaxF = 300;
 
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction, unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
   for (int i = 0; i < bandcount; i++) {
     haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
                            haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
@@ -100,7 +98,7 @@ TEST_CASE("Track::generateBand with parameters", "[generateBand][withParameters]
 }
 
 TEST_CASE("Track::findWaveBandAvailable without band", "[findWaveBandAvailable][empty]") {
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction, unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
 
   const int testingStart = 42;
   const int testingLength = 24;
@@ -118,7 +116,7 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
   const int effectF = 75;
   const float effectA = 0.75;
 
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction, unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
   haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
   haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle);
@@ -140,7 +138,7 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
 
 TEST_CASE("Track::findWaveBandAvailable band available but with types",
           "[findWaveBandAvailable][withWrongType]") {
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction, unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
   haptics::types::Band b1(haptics::types::BandType::Curve, haptics::types::CurveType::Cubic,
                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
   t.addBand(b1);
@@ -158,7 +156,7 @@ TEST_CASE("Track::findWaveBandAvailable band available but with types",
 }
 
 TEST_CASE("Track::findWaveBandAvailable empty band available", "[findWaveBandAvailable][empty]") {
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction, unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
   haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Linear,
                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
   t.addBand(b);
@@ -191,7 +189,7 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   const int effect3Size = 42;
   const int effect3F = 10;
 
-  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction, unitLength);
+  haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask, direction);
   haptics::types::Band b1(haptics::types::BandType::Wave, haptics::types::CurveType::Cubic,
                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
   haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle);

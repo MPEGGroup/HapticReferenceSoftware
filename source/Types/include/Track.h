@@ -60,15 +60,13 @@ class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                 uint32_t newBodyPartMask, std::optional<Direction> newDirection,
-                 std::optional<int8_t> newUnitLength)
+                 uint32_t newBodyPartMask, std::optional<Direction> newDirection)
       : id(newId)
       , description(std::move(newDescription))
       , gain(newGain)
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
       , direction(newDirection)
-      , unitLength(newUnitLength)
       , vertices({})
       , bands({})
       , frequencySampling(std::nullopt)
@@ -106,8 +104,6 @@ public:
   auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
   [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
   auto setDirection(std::optional<Direction> newDirection) -> void;
-  [[nodiscard]] auto getUnitLength() const -> std::optional<int8_t>;
-  auto setUnitLength(std::optional<int8_t> newUnitLength) -> void;
 
 private:
   int id = -1;
@@ -121,7 +117,6 @@ private:
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;
   std::optional<Direction> direction;
-  std::optional<int8_t> unitLength;
 };
 } // namespace haptics::types
 #endif // TRACK_H

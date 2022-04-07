@@ -59,8 +59,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   auto tracksSize = out.getTracksSize();
   if (tracksSize < numChannels) {
     for (uint32_t channelIndex = tracksSize; channelIndex < numChannels; channelIndex++) {
-      myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0), std::nullopt,
-                      std::nullopt);
+      myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0), std::nullopt);
       out.addTrack(myTrack);
     }
   } else if (out.getTracksSize() != numChannels) {

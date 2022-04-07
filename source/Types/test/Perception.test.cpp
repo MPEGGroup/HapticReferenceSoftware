@@ -37,7 +37,7 @@
 TEST_CASE("haptics::types::Perception checking getters") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
-  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature, 0);
 
   SECTION("Checking getId", "[getId]") { CHECK(perception.getId() == 0); }
 
@@ -57,7 +57,7 @@ TEST_CASE("haptics::types::Perception checking getters") {
 TEST_CASE("haptics::types::Perception checking setters") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
-  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature, 0);
 
   SECTION("Checking setId", "[setId]") {
     perception.setId(2);
@@ -87,8 +87,8 @@ TEST_CASE("haptics::types::Perception checking setters") {
 TEST_CASE("haptics::types::Perception testing tracks") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
-  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
-  haptics::types::Track track(0, "Test track", 1, 1, 0, std::nullopt, -2);
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature, 0);
+  haptics::types::Track track(0, "Test track", 1, 1, 0, std::nullopt);
   SECTION("Checking addTrack", "[addTrack]") {
     perception.addTrack(track);
     CHECK(perception.getTracksSize() == 1);
@@ -99,14 +99,13 @@ TEST_CASE("haptics::types::Perception testing tracks") {
     CHECK(track.getMixingWeight() == Approx(addedTrack.getMixingWeight()));
     CHECK(track.getBodyPartMask() == addedTrack.getBodyPartMask());
     CHECK(track.getDirection() == addedTrack.getDirection());
-    CHECK(track.getUnitLength() == addedTrack.getUnitLength());
   }
 }
 
 TEST_CASE("haptics::types::Perception testing referenceDevice") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
-  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature, 0);
   haptics::types::ReferenceDevice device(0, "Test Device");
   SECTION("Checking addReferenceDevice", "[addReferenceDevice]") {
     perception.addReferenceDevice(device);

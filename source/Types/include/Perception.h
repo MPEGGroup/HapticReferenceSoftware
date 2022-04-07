@@ -54,7 +54,7 @@ enum class PerceptionModality {
   Water = 7,
   Wind = 8,
   Kinesthetic = 9,
-  Texture = 10,
+  VibrotactileTexture = 10,
   Stiffness = 11
 };
 
@@ -69,7 +69,7 @@ static const std::map<std::string, PerceptionModality> stringToPerceptionModalit
     {"Water", PerceptionModality::Water},
     {"Wind", PerceptionModality::Wind},
     {"Kinesthetic", PerceptionModality::Kinesthetic},
-    {"Texture", PerceptionModality::Texture},
+    {"Vibrotactile Texture", PerceptionModality::VibrotactileTexture},
     {"Stiffness", PerceptionModality::Stiffness}};
 static const std::map<PerceptionModality, std::string> perceptionModalityToString = {
     {PerceptionModality::Other, "Other"},
@@ -82,19 +82,20 @@ static const std::map<PerceptionModality, std::string> perceptionModalityToStrin
     {PerceptionModality::Water, "Water"},
     {PerceptionModality::Wind, "Wind"},
     {PerceptionModality::Kinesthetic, "Kinesthetic"},
-    {PerceptionModality::Texture, "Texture"},
+    {PerceptionModality::VibrotactileTexture, "Vibrotactile Texture"},
     {PerceptionModality::Stiffness, "Stiffness"}};
 
 class Perception {
 public:
   explicit Perception() = default;
   explicit Perception(int newId, int newAvatarId, std::string newDescription,
-                      PerceptionModality newPerceptionModality)
+                      PerceptionModality newPerceptionModality, int8_t newUnitExponent)
       : id(newId)
       , avatarId(newAvatarId)
       , description(std::move(newDescription))
       , perceptionModality(newPerceptionModality)
-      , tracks({}){};
+      , tracks({})
+      , unitExponent(newUnitExponent){};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
@@ -104,6 +105,8 @@ public:
   auto setDescription(std::string &newDescription) -> void;
   [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
+  [[nodiscard]] auto getUnitExponent() const -> int8_t;
+  auto setUnitExponent(int8_t newUnitExponent) -> void;
   auto getTracksSize() -> size_t;
   auto getTrackAt(int index) -> Track &;
   auto addTrack(haptics::types::Track &newTrack) -> void;
@@ -127,6 +130,7 @@ private:
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Track> tracks = {};
   std::vector<ReferenceDevice> referenceDevices;
+  int8_t unitExponent = 0;
 };
 } // namespace haptics::types
 #endif // PERCEPTION_H

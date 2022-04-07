@@ -90,15 +90,20 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
       std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
+    if (!jsonPerception.contains("unit_exponent") || !jsonPerception["unit_exponent"].is_number_integer()) {
+      std::cerr << "Missing or invalid unit_exponent" << std::endl;
+      continue;
+    }
 
     auto perceptionId = jsonPerception["id"].get<int>();
     auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
     auto perceptionDescription = jsonPerception["description"].get<std::string>();
     auto perceptionPerceptionModality = types::stringToPerceptionModality.at(
         jsonPerception["perception_modality"].get<std::string>());
+    auto perceptionExponentUnit = jsonPerception["unit_exponent"].get<int8_t>();
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
-                                          perceptionPerceptionModality);
+                                          perceptionPerceptionModality, perceptionExponentUnit);
     auto jsonTracks = jsonPerception["tracks"];
     loadingSuccess = loadingSuccess && loadTracks(jsonTracks, perception);
     if (jsonPerception.contains("reference_devices") &&
@@ -145,46 +150,30 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
     auto trackGain = jsonTrack["gain"].get<float>();
     auto trackMixingWeight = jsonTrack["mixing_weight"].get<float>();
     auto trackBodyPart = jsonTrack["body_part_mask"].get<uint32_t>();
-    std::optional<types::Direction> direction;
-    const int axisCount = 3;
-    if (jsonTrack.contains("direction") && jsonTrack["direction"].is_array() &&
-        jsonTrack["direction"].size() == axisCount) {
-      bool axisAreCorrect = true;
-      for (auto directionit = jsonTrack["direction"].begin();
-           directionit != jsonTrack["direction"].end(); ++directionit) {
-        axisAreCorrect &= directionit.value().is_number();
-      }
-      if (axisAreCorrect) {
-        auto _x = jsonTrack["direction"][0].get<double>();
-        auto _y = jsonTrack["direction"][1].get<double>();
-        auto _z = jsonTrack["direction"][2].get<double>();
-        double directionMagnitude = std::sqrt(_x * _x + _y * _y + _z * _z);
+    std::optional<types::Direction> direction = std::nullopt;
+    if (jsonTrack.contains("direction") && jsonTrack["direction"].is_object() &&
+        jsonTrack["direction"].contains("X") && jsonTrack["direction"].contains("Y") &&
+        jsonTrack["direction"].contains("Z") && jsonTrack["direction"]["X"].is_number() &&
+        jsonTrack["direction"]["Y"].is_number() && jsonTrack["direction"]["Z"].is_number()) {
+      auto _x = jsonTrack["direction"]["X"].get<double>();
+      auto _y = jsonTrack["direction"]["Y"].get<double>();
+      auto _z = jsonTrack["direction"]["Z"].get<double>();
+      double directionMagnitude = std::sqrt(_x * _x + _y * _y + _z * _z);
 
-        auto x = static_cast<int8_t>(tools::genericNormalization(
-            -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
-            std::numeric_limits<int8_t>::max(), _x));
-        auto y = static_cast<int8_t>(tools::genericNormalization(
-            -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
-            std::numeric_limits<int8_t>::max(), _y));
-        auto z = static_cast<int8_t>(tools::genericNormalization(
-            -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
-            std::numeric_limits<int8_t>::max(), _z));
-        direction = types::Direction(x, y, z);
-      } else {
-        direction = std::nullopt;
-      }
-    } else {
-      direction = std::nullopt;
-    }
-    std::optional<int8_t> unitLength;
-    if (jsonTrack.contains("unit_length") && jsonTrack["unit_length"].is_number_integer()) {
-      unitLength = jsonTrack["unit_length"].get<int8_t>();
-    } else {
-      unitLength = std::nullopt;
+      auto x = static_cast<int8_t>(tools::genericNormalization(
+          -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
+          std::numeric_limits<int8_t>::max(), _x));
+      auto y = static_cast<int8_t>(tools::genericNormalization(
+          -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
+          std::numeric_limits<int8_t>::max(), _y));
+      auto z = static_cast<int8_t>(tools::genericNormalization(
+          -directionMagnitude, directionMagnitude, std::numeric_limits<int8_t>::min(),
+          std::numeric_limits<int8_t>::max(), _z));
+      direction = types::Direction(x, y, z);
     }
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart,
-                       direction, unitLength);
+                       direction);
 
     if (jsonTrack.contains("frequency_sampling") &&
         jsonTrack["frequency_sampling"].is_number_integer()) {
@@ -453,6 +442,7 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerc
     jsonPerception["description"] = perception.getDescription();
     jsonPerception["perception_modality"] =
         types::perceptionModalityToString.at(perception.getPerceptionModality());
+    jsonPerception["unit_exponent"] = perception.getUnitExponent();
 
     auto jsonReferenceDevices = json::array();
     extractReferenceDevices(perception, jsonReferenceDevices);
@@ -495,10 +485,10 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     }
     if (track.getDirection().has_value()) {
       types::Direction direction = track.getDirection().value();
-      jsonTrack["direction"] = json::array({direction.X, direction.Y, direction.Z});
-    }
-    if (track.getUnitLength().has_value()) {
-      jsonTrack["unit_length"] = track.getUnitLength().value();
+      jsonTrack["direction"] = json::object();
+      jsonTrack["direction"]["X"] = direction.X;
+      jsonTrack["direction"]["Y"] = direction.Y;
+      jsonTrack["direction"]["Z"] = direction.Z;
     }
     if (track.getFrequencySampling().has_value()) {
       jsonTrack["frequency_sampling"] = track.getFrequencySampling().value();
