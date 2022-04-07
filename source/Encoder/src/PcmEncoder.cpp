@@ -56,8 +56,9 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   wavParser.loadFile(filename);
   size_t numChannels = wavParser.getNumChannels();
   Track myTrack;
-  if (out.getTracksSize() == 0) {
-    for (uint32_t channelIndex = 0; channelIndex < numChannels; channelIndex++) {
+  auto tracksSize = out.getTracksSize();
+  if (tracksSize < numChannels) {
+    for (uint32_t channelIndex = tracksSize; channelIndex < numChannels; channelIndex++) {
       myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0), std::nullopt,
                       std::nullopt);
       out.addTrack(myTrack);
@@ -88,20 +89,30 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
                                        config.curveFrequencyLimit, &myBand)) {
       if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
         myBand.setCurveType(CurveType::Linear);
+      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration) {
+        myBand.setCurveType(CurveType::Cubic);
       }
       myTrack.addBand(myBand);
     }
-    out.replaceTrackAt((int)channelIndex, myTrack);
+    myTrack.setFrequencySampling(wavParser.getSamplerate());
+    myTrack.setSampleCount(
+        static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
 
     // wavelet processing
-    signal_wavelet = wavParser.getSamplesChannel(channelIndex);
-    Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
-    signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
-    waveletBand = Band();
-    if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
-                                config.curveFrequencyLimit, waveletBand)) {
-      myTrack.addBand(waveletBand);
+    if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic) {
+      signal_wavelet = wavParser.getSamplesChannel(channelIndex);
+      Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
+      signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+      waveletBand = Band();
+      if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
+                                  config.curveFrequencyLimit, waveletBand)) {
+        myTrack.addBand(waveletBand);
+      }
+      myTrack.setFrequencySampling(wavParser.getSamplerate());
+      myTrack.setSampleCount(
+          static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     }
+
     out.replaceTrackAt((int)channelIndex, myTrack);
   }
 

@@ -46,20 +46,25 @@ namespace haptics::encoder {
 class AhapEncoder {
 public:
   [[nodiscard]] auto static encode(std::string &filename, types::Perception &out) -> int;
-  [[nodiscard]] auto static extractTransients(nlohmann::json *event,
-                                              std::vector<haptics::types::Effect> *transients,
-                                              std::vector<std::pair<int, double>> *amplitudes,
-                                              std::vector<std::pair<int, double>> *frequencies)
-      -> int;
-  [[nodiscard]] auto static extractContinuous(nlohmann::json *event,
-                                              std::vector<haptics::types::Effect> *continuous,
-                                              std::vector<std::pair<int, double>> *amplitudes,
-                                              std::vector<std::pair<int, double>> *frequencies)
-      -> int;
+  [[nodiscard]] auto static extractTransients(
+      nlohmann::json *event, std::vector<haptics::types::Effect> *transients,
+      const std::vector<std::pair<int, double>> *amplitudes,
+      const std::vector<std::pair<int, double>> *frequencies) -> int;
+  [[nodiscard]] auto static extractContinuous(
+      nlohmann::json *event, std::vector<haptics::types::Effect> *continuous,
+      const std::vector<std::pair<int, double>> *amplitudes,
+      const std::vector<std::pair<int, double>> *frequencies) -> int;
   [[nodiscard]] auto static extractKeyframes(nlohmann::json *parameterCurve,
                                              std::vector<std::pair<int, double>> *keyframes) -> int;
 
 private:
+  auto static modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>> *amplitudes,
+                                            types::Effect &continuous,
+                                            const Keyframe &firstKeyframe, Keyframe &lastKeyframe)
+      -> void;
+  auto static modulateContinuousOnFrequency(const std::vector<std::pair<int, double>> *frequencies,
+                                            types::Effect &continuous, Keyframe &lastKeyframe,
+                                            double base_freq) -> void;
   static const int MIN_AHAP_FREQUENCY = 65;
   static const int MAX_AHAP_FREQUENCY = 300;
 };

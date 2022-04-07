@@ -39,12 +39,22 @@ void Spiht_Enc::encodeEffect(Effect &effect, std::vector<unsigned char> &outstre
   auto bl = (int)effect.getKeyframesSize() - 2;
   double scalar = effect.getKeyframeAt(bl).getAmplitudeModulation().value();
   auto bits = (int)effect.getKeyframeAt(bl + 1).getAmplitudeModulation().value();
+  if (bits == 0) {
+    return;
+  }
   double multiplier = pow(2, (double)bits);
   std::vector<int> block(bl, 0);
   int index = 0;
+  bool zeros = true;
   for (auto &v : block) {
     v = (int)((double)effect.getKeyframeAt(index).getAmplitudeModulation().value() * multiplier);
+    if (v != 0) {
+      zeros = false;
+    }
     index++;
+  }
+  if (zeros) {
+    return;
   }
   std::vector<unsigned char> bitwavmax;
   maximumWaveletCoefficient(scalar, bitwavmax);
@@ -275,7 +285,7 @@ void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<unsigned c
 
   int integerpart = 0;
   char mode = 0;
-  quantMode m = {0, 0};
+  encoder::quantMode m = {0, 0};
   if (qwavmax < 1) {
     m.integerbits = 0;
     m.fractionbits = FRACTIONBITS_0;

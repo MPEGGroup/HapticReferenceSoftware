@@ -70,7 +70,9 @@ public:
       , direction(newDirection)
       , unitLength(newUnitLength)
       , vertices({})
-      , bands({}){};
+      , bands({})
+      , frequencySampling(std::nullopt)
+      , sampleCount(std::nullopt){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -98,13 +100,16 @@ public:
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
+  [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
+  auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
+  [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
+  auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
   [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
   auto setDirection(std::optional<Direction> newDirection) -> void;
   [[nodiscard]] auto getUnitLength() const -> std::optional<int8_t>;
   auto setUnitLength(std::optional<int8_t> newUnitLength) -> void;
 
 private:
-  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   int id = -1;
   std::string description;
   float gain = 1;
@@ -113,6 +118,8 @@ private:
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;
+  std::optional<uint32_t> frequencySampling = std::nullopt;
+  std::optional<uint32_t> sampleCount = std::nullopt;
   std::optional<Direction> direction;
   std::optional<int8_t> unitLength;
 };

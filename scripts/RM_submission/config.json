@@ -1,0 +1,365 @@
+{
+  "RM_install_dir":"..\\..\\out\\build\\x64-Debug\\source\\",
+  "encoder_path": "Encoder\\Encoder.exe",
+  "decoder_path": "Decoder\\Decoder.exe",
+  "synthesizer_path": "Synthesizer\\Synthesizer.exe",
+
+  "reference_files": {
+    "main_folder": "..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
+
+    "short_effects": [
+      {
+        "name": "APPL-vib-boing",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\AHAP\\APPL-vib-boing-nopad.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\APPL-vib-boing-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-DoubleTick",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-DoubleTick.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-DoubleTick-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Explosion1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Explosion1.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-Explosion1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-FastPulse1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-FastPulse1.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-FastPulse1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Fill1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Fill1.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-Fill1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Grain1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Grain1.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-Grain1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Sweep1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Sweep1.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-Sweep1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Tick1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Tick1.ohm",
+        "reference_file":"Test\\Test1-1\\WAV_noPad\\IMMR-vib-Tick1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Explosion3",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Explosion3.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-Explosion3-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-FastPulse2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-FastPulse2.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-FastPulse2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-FastPulse3",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-FastPulse3.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-FastPulse3-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Fill2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Fill2.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-Fill2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Grain2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Grain2.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-Grain2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-RepeatTicks",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-RepeatTicks.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-RepeatTicks-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Sweep2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Sweep2.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-Sweep2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Tick2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Tick2.ivs",
+        "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-Tick2-8kHz-16-nopad.wav"
+      }
+    ],
+    "long_effects": [
+      {
+        "name": "ACTK-vib-pantheongrandstarfall",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-heartbeats",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-heartbeats-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\APPL-vib-heartbeats-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-inflate",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-inflate-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\APPL-vib-inflate-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-oscillate",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-oscillate-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\APPL-vib-oscillate-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-rumble",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-rumble-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\APPL-vib-rumble-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-vib-Rain",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-vib-Rain_chan2",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain_chan2-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain_chan2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-vib-Towel",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Towel-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IDCC-vib-Towel-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Content1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-Content1.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IMMR-vib-Content1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-PersTexture1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-PersTexture1.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IMMR-vib-PersTexture1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Ringtone1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-Ringtone1.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IMMR-vib-Ringtone1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Weapon1",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-Weapon1.ohm",
+        "reference_file":"Test\\Test1-2\\WAV_noPad\\IMMR-vib-Weapon1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-drums",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-drums-nopad.ahap",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\APPL-vib-drums-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-gravel",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-gravel-nopad.ahap",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\APPL-vib-gravel-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "APPL-vib-sparkle",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-sparkle-nopad.ahap",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\APPL-vib-sparkle-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-vib-Carpet",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Carpet-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IDCC-vib-Carpet-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-vib-HeartBeat",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-HeartBeat-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IDCC-vib-HeartBeat-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-vib-Paper",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Paper-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IDCC-vib-Paper-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Content2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Content2.ivs",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IMMR-vib-Content2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-RandTexture1",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-RandTexture1.ivs",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IMMR-vib-RandTexture1-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Ringtone2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Ringtone2.ivs",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IMMR-vib-Ringtone2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IMMR-vib-Weapon2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Weapon2.ivs",
+        "reference_file":"Training\\Training1-2\\WAV_noPad\\IMMR-vib-Weapon2-8kHz-16-nopad.wav"
+      }
+    ],
+    "kinesthetic_effects": [
+      {
+        "name": "IDCC-kin-BigBuckBunny",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-BikeRiding",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-BikeRiding-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-BikeRiding-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceXFast",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXFast-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXFast-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceXSlow",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXSlow-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXSlow-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceYFast",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYFast-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYFast-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceYSlow",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYSlow-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYSlow-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceZFast",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZFast-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZFast-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceZSlow",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZSlow-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZSlow-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-HorseRiding",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-HorseRiding-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-HorseRiding-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-Rollercoaster",
+        "type": "Test",
+        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-8kHz-16-nopad.ohm",
+        "reference_file":"Test\\Test1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-BigBuckBunny",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-BikeRiding2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding2-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding2-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-BikeRiding",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceXY",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXY-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXY-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceXYZ",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXYZ-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXYZ-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceXZ",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXZ-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXZ-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-ForceYZ",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceYZ-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceYZ-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-HorseRiding2",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding2-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding2-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-HorseRiding",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "IDCC-kin-Rollercoaster",
+        "type": "Training",
+        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.ohm",
+        "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.wav"
+      }
+    ]
+  }
+}

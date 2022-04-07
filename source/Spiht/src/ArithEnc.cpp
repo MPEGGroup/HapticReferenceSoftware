@@ -158,7 +158,8 @@ void ArithEnc::resetCounter() {
 
 void ArithEnc::rescaleCounter() {
   for (size_t i = 0; i < CONTEXT_SIZE; i++) {
-    counter.at(i) = (int)((double)counter.at(i) / (double)(counter_total.at(i) * RESIZE_TOTAL));
+    counter.at(i) =
+        (int)((double)counter.at(i) / (double)(counter_total.at(i)) * (double)RESIZE_TOTAL);
     if (counter.at(i) == 0) {
       counter.at(i) = 1;
     }

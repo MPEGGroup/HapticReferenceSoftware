@@ -67,6 +67,7 @@ auto help() -> void {
       << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
          "the encoder will output a file in a human-readable format"
       << std::endl
+      << "\t-kb, --bitrate\t\t\ttarget bitrate of the encoded file" << std::endl
       << "\t-kin, --kinesthetic\t\tIf provided, the file will be encoded as a kinesthetic effect. "
          "Otherwise it will be considered as a vibrotactile effect (this option is currently "
          "available only for wav files encoding)"
@@ -140,8 +141,14 @@ auto main(int argc, char *argv[]) -> int {
         codeExit = IvsEncoder::encode(filename, myPerception);
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
-        haptics::encoder::EncodingConfig config =
-            haptics::encoder::EncodingConfig::generateConfig();
+        haptics::encoder::EncodingConfig config;
+        if (inputParser.cmdOptionExists("-kb")) {
+          int bitrate = std::stoi(inputParser.getCmdOption("-kb"));
+          std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
+          config = haptics::encoder::EncodingConfig::generateConfig(bitrate);
+        } else {
+          config = haptics::encoder::EncodingConfig::generateConfig();
+        }
         codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
 
@@ -159,7 +166,14 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
-    haptics::encoder::EncodingConfig config = haptics::encoder::EncodingConfig::generateConfig();
+    haptics::encoder::EncodingConfig config;
+    if (inputParser.cmdOptionExists("-kb")) {
+      int bitrate = std::stoi(inputParser.getCmdOption("-kb"));
+      std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
+      config = haptics::encoder::EncodingConfig::generateConfig(bitrate);
+    } else {
+      config = haptics::encoder::EncodingConfig::generateConfig();
+    }
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
   } else {

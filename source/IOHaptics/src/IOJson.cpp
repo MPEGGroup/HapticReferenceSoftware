@@ -180,11 +180,22 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
     if (jsonTrack.contains("unit_length") && jsonTrack["unit_length"].is_number_integer()) {
       unitLength = jsonTrack["unit_length"].get<int8_t>();
     } else {
-      unitLength = std::nullopt; 
+      unitLength = std::nullopt;
     }
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart,
                        direction, unitLength);
+
+    if (jsonTrack.contains("frequency_sampling") &&
+        jsonTrack["frequency_sampling"].is_number_integer()) {
+      auto frequencySampling = jsonTrack["frequency_sampling"].get<uint32_t>();
+      track.setFrequencySampling(frequencySampling);
+    }
+
+    if (jsonTrack.contains("sample_count") && jsonTrack["sample_count"].is_number_integer()) {
+      auto frequencySampling = jsonTrack["sample_count"].get<uint32_t>();
+      track.setSampleCount(frequencySampling);
+    }
 
     if (jsonTrack.contains("reference_device_id") && jsonTrack["reference_device_id"].is_number()) {
       auto device_id = jsonTrack["reference_device_id"].get<int>();
@@ -488,6 +499,12 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     }
     if (track.getUnitLength().has_value()) {
       jsonTrack["unit_length"] = track.getUnitLength().value();
+    }
+    if (track.getFrequencySampling().has_value()) {
+      jsonTrack["frequency_sampling"] = track.getFrequencySampling().value();
+    }
+    if (track.getSampleCount().has_value()) {
+      jsonTrack["sample_count"] = track.getSampleCount().value();
     }
 
     auto jsonVertices = json::array();

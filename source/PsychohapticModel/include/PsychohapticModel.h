@@ -38,10 +38,10 @@
 #include <iostream>
 #include <vector>
 
-constexpr double a = 62;
+constexpr double a = 50;
 constexpr double c = (double)1 / (double)550;
 constexpr double b = 1 - (250 * c);
-constexpr double e = 77;
+constexpr double e = 45;
 constexpr double base = 10;
 constexpr double factor = 10;
 
