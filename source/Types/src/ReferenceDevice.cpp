@@ -35,20 +35,12 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto ReferenceDevice::getId() const -> int {
-    return id;
-}
-auto ReferenceDevice::setId(int newId) -> void { 
-    id = newId;
-}
+[[nodiscard]] auto ReferenceDevice::getId() const -> int { return id; }
+auto ReferenceDevice::setId(int newId) -> void { id = newId; }
 
-[[nodiscard]] auto ReferenceDevice::getName() const -> std::string {
-            return name; 
-}
+[[nodiscard]] auto ReferenceDevice::getName() const -> std::string { return name; }
 
-auto ReferenceDevice::setName(std::string &newName) -> void {
-    name = newName;
-}
+auto ReferenceDevice::setName(std::string &newName) -> void { name = newName; }
 
 [[nodiscard]] auto ReferenceDevice::getBodyPartMask() const -> std::optional<uint32_t> {
   return bodyPartMask;
@@ -91,9 +83,7 @@ auto ReferenceDevice::setMaximumAmplitude(float newMaximumAmplitude) -> void {
   return impedance;
 }
 
-auto ReferenceDevice::setImpedance(float newImpedance) -> void {
-  impedance = newImpedance;
-}
+auto ReferenceDevice::setImpedance(float newImpedance) -> void { impedance = newImpedance; }
 
 [[nodiscard]] auto ReferenceDevice::getMaximumVoltage() const -> std::optional<float> {
   return maximumVoltage;
@@ -119,20 +109,20 @@ auto ReferenceDevice::setMaximumDisplacement(float newMaximumDisplacement) -> vo
   maximumDisplacement = newMaximumDisplacement;
 }
 
-[[nodiscard]] auto ReferenceDevice::getWeight() const -> std::optional<float> {
-    return weight;
-}
+[[nodiscard]] auto ReferenceDevice::getWeight() const -> std::optional<float> { return weight; }
 
-auto ReferenceDevice::setWeight(float newWeight) -> void {
-    weight = newWeight;
-}
+auto ReferenceDevice::setWeight(float newWeight) -> void { weight = newWeight; }
 
-[[nodiscard]] auto ReferenceDevice::getSize() const -> std::optional<float> {
-    return size;
-}
+[[nodiscard]] auto ReferenceDevice::getSize() const -> std::optional<float> { return size; }
 
-auto ReferenceDevice::setSize(float newSize) -> void {
-    size = newSize;
-}
+auto ReferenceDevice::setSize(float newSize) -> void { size = newSize; }
+
+[[nodiscard]] auto ReferenceDevice::getCustom() const -> std::optional<float> { return custom; }
+
+auto ReferenceDevice::setCustom(float newCustom) -> void { custom = newCustom; }
+
+[[nodiscard]] auto ReferenceDevice::getType() const -> std::optional<ActuatorType> { return type; }
+
+auto ReferenceDevice::setType(ActuatorType newType) -> void { type = newType; }
 
 } // namespace haptics::types

@@ -39,6 +39,34 @@
 
 constexpr int fs = 8000;
 
+auto checkCorrect(std::vector<double> buffer, std::vector<double> buffer_rec) -> bool {
+  bool correct = true;
+  for (size_t i = 0; i < buffer.size(); i++) {
+    if (fabs(buffer[i]) >= 1) {
+      if (buffer[i] >= 1) {
+        // NOLINTNEXTLINE
+        if (!((buffer_rec[i] <= 1) && (buffer_rec[i] > 0.999))) {
+          std::cout << "clamping not correct, values: " << buffer[i] << ", " << buffer_rec[i]
+                    << std::endl;
+          correct = false;
+        }
+      } else if (fabs(buffer_rec[i]) != 1) {
+
+        std::cout << "clamping not correct, values: " << buffer[i] << ", " << buffer_rec[i]
+                  << std::endl;
+        correct = false;
+      }
+    } else {
+      if (buffer[i] != buffer_rec[i]) {
+        std::cout << "value not correct, values: " << buffer[i] << ", " << buffer_rec[i]
+                  << std::endl;
+        correct = false;
+      }
+    }
+  }
+  return correct;
+}
+
 TEST_CASE("haptics::tools::WavParser") {
 
   using haptics::tools::WavParser;
@@ -53,13 +81,15 @@ TEST_CASE("haptics::tools::WavParser") {
     wavParser2.loadFile(filename);
     std::vector<double> buffer2 = wavParser2.getSamplesChannel(0);
     CHECK(buffer2.size() == buffer.size());
+    std::remove("test.wav");
+    CHECK(!std::filesystem::is_regular_file("test.wav"));
   }
 
   SECTION("Output to Input test MD") {
 
     std::string filename = "test_MD.wav";
-    std::vector<double> buffer{0, 0.5, 0.75, 1}; //NOLINT
-    std::vector<double> buffer2{1, 0.75, 0.5, 0}; //NOLINT
+    std::vector<double> buffer{0, 0.5, 0.75, 1};  // NOLINT
+    std::vector<double> buffer2{1, 0.75, 0.5, 0}; // NOLINT
     std::vector<std::vector<double>> buffer_MD;
     buffer_MD.push_back(buffer);
     buffer_MD.push_back(buffer2);
@@ -69,6 +99,51 @@ TEST_CASE("haptics::tools::WavParser") {
     wavParser2.loadFile(filename);
     std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
     std::vector<double> buffer_rec2 = wavParser2.getSamplesChannel(1);
+    std::remove("test_MD.wav");
+    CHECK(!std::filesystem::is_regular_file("test_MD.wav"));
+  }
+}
+
+TEST_CASE("haptics::tools::WavParser overflow") {
+
+  using haptics::tools::WavParser;
+
+  SECTION("Overflow test") {
+
+    std::string filename = "test_overflow.wav";
+    std::vector<double> buffer{0, 0.5, 0.75, 1, 1.25};      // NOLINT
+    std::vector<double> buffer2{-1, -0.75, -0.5, 0, -1.25}; // NOLINT
+    std::vector<std::vector<double>> buffer_MD;
+    buffer_MD.push_back(buffer);
+    buffer_MD.push_back(buffer2);
+    WavParser::saveFile(filename, buffer_MD, fs);
+    CHECK(std::filesystem::is_regular_file(filename));
+    WavParser wavParser2;
+    wavParser2.loadFile(filename);
+    std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
+    std::vector<double> buffer_rec2 = wavParser2.getSamplesChannel(1);
+    bool correct = true;
+    correct = checkCorrect(buffer, buffer_rec);
+    CHECK(correct);
+    correct = checkCorrect(buffer2, buffer_rec2);
+    CHECK(correct);
+    std::remove("test_overflow.wav");
+    CHECK(!std::filesystem::is_regular_file("test_overflow.wav"));
   }
 
+  SECTION("Overflow test 1D") {
+
+    std::string filename = "test_overflow_1D.wav";
+    std::vector<double> buffer{0, 0.5, -1, 1, 1.25}; // NOLINT
+    WavParser::saveFile(filename, buffer, fs);
+    CHECK(std::filesystem::is_regular_file(filename));
+    WavParser wavParser2;
+    wavParser2.loadFile(filename);
+    std::vector<double> buffer_rec = wavParser2.getSamplesChannel(0);
+    bool correct = true;
+    correct = checkCorrect(buffer, buffer_rec);
+    CHECK(correct);
+    std::remove("test_overflow_1D.wav");
+    CHECK(!std::filesystem::is_regular_file("test_overflow_1D.wav"));
+  }
 }

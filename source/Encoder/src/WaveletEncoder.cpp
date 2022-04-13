@@ -62,7 +62,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   band.setWindowLength((int)((double)bl / fs * S_2_MS_WAVELET));
   int pos_effect = 0;
   long add_start = 0;
-  long add_end = bl;
+  unsigned int add_end = bl;
   for (int b = 0; b < numBlocks; b++) {
     Effect effect;
     std::vector<double> block_time(bl, 0);
@@ -72,7 +72,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     std::copy(sig_time.begin() + add_start, sig_time.begin() + add_end, block_time.begin());
 
     double scalar = 0;
-    std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar);
+    int maxbits = 0;
+    std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar, maxbits);
 
     int pos = 0;
     for (auto v : block_quant) {
@@ -82,6 +83,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     }
     Keyframe keyframe(bl, (float)scalar, 0); // add scalar of block to block data for now
     effect.addKeyframe(keyframe);
+    Keyframe keyframeBits(bl + 1, (float)maxbits, 0); // add maxbits to block data for now
+    effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
     pos_effect += band.getWindowLength();
@@ -91,8 +94,9 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   return true;
 }
 
-auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar)
-    -> std::vector<double> {
+auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar,
+                                 int &maxbits) -> std::vector<double> {
+
   std::vector<double> block_dwt(bl, 0);
   Wavelet wavelet;
   wavelet.DWT(block_time, dwtlevel, block_dwt);
@@ -113,7 +117,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
 
   // Quantization
   int i = 0;
-  for (int block = 0; block < book.size(); block++) {
+  for (uint32_t block = 0; block < book.size(); block++) {
     bitalloc[block] = 0;
     noiseenergy[block] = 0;
     for (; i < book_cumulative[block + 1]; i++) {
@@ -124,7 +128,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   while (bitalloc_sum < bitbudget) {
 
     updateNoise(pm_result.bandenergy, noiseenergy, SNR, MNR, pm_result.SMR);
-    for (int i = 0; i < book.size(); i++) {
+    for (uint32_t i = 0; i < book.size(); i++) {
       if (bitalloc[i] >= MAXBITS) {
         MNR[i] = INFINITY;
       }
@@ -153,10 +157,6 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   int bitmax = findMax(bitalloc);
   int intmax = 1 << bitmax;
   double multiplicator = (double)intmax / (double)qwavmax;
-  // double multiplicator = (double)1 / qwavmax;
-
-  std::vector<double> test(bl, 0);
-  wavelet.inv_DWT(block_dwt_quant, dwtlevel, test);
 
   if (qwavmax != 0) {
     for (int i = 0; i < bl; i++) {
@@ -165,6 +165,8 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     }
   }
   scalar = qwavmax;
+  maxbits = bitmax;
+
   return block_dwt_quant;
 }
 
@@ -174,18 +176,15 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
   double wavmax = findMax(sig);
 
   int integerpart = 0;
-  int integerbits = 0;
-  int fractionbits = 0;
   char mode = 0;
   quantMode m = {0, 0};
   if (wavmax < 1) {
-    fractionbits = FRACTIONBITS_0;
     m.integerbits = 0;
     m.fractionbits = FRACTIONBITS_0;
   } else {
     integerpart = 1;
-    m.integerbits = 3;
-    m.fractionbits = 4;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
     mode = 1;
   }
 
@@ -197,11 +196,34 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
         m.integerbits + m.fractionbits);
 }
 
+void WaveletEncoder::maximumWaveletCoefficient(double qwavmax,
+                                               std::vector<unsigned char> &bitwavmax) {
+
+  int integerpart = 0;
+  char mode = 0;
+  quantMode m = {0, 0};
+  if (qwavmax < 1) {
+    m.integerbits = 0;
+    m.fractionbits = FRACTIONBITS_0;
+  } else {
+    integerpart = 1;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
+    mode = 1;
+  }
+
+  bitwavmax.clear();
+  bitwavmax.reserve(WAVMAXLENGTH);
+  bitwavmax.push_back(mode);
+  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
+        m.integerbits + m.fractionbits);
+}
+
 void WaveletEncoder::updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
                                  std::vector<double> &SNR, std::vector<double> &MNR,
                                  std::vector<double> &SMR) {
 
-  for (int i = 0; i < book.size(); i++) {
+  for (uint32_t i = 0; i < book.size(); i++) {
     SNR[i] = LOGFACTOR * log10(bandenergy[i] / noiseenergy[i]);
     MNR[i] = SNR[i] - SMR[i];
   }
@@ -216,8 +238,8 @@ void WaveletEncoder::uniformQuant(std::vector<double> &in, size_t start, double 
     if (max == 0) {
       out[i] = 0;
     } else {
-      double q = sign * delta * floor(abs(in[i]) / delta + QUANT_ADD);
-      if (abs(q) > max_q) {
+      double q = sign * delta * floor(fabs(in[i]) / delta + QUANT_ADD);
+      if (fabs(q) > max_q) {
         out[i] = sign * max_q;
       } else {
         out[i] = q;
@@ -242,8 +264,8 @@ template <class T> auto WaveletEncoder::findMax(std::vector<T> &data) -> T {
   T max = data[0];
 
   for (size_t i = 1; i < data.size(); i++) {
-    if (data[i] > max) {
-      max = data[i];
+    if (fabs(data[i]) > max) {
+      max = fabs(data[i]);
     }
   }
 
@@ -253,7 +275,7 @@ template <class T> auto WaveletEncoder::findMax(std::vector<T> &data) -> T {
 auto WaveletEncoder::findMinInd(std::vector<double> &data) -> size_t {
   double min = data[0];
   size_t index = 0;
-  for (int i = 1; i < data.size(); i++) {
+  for (uint32_t i = 1; i < data.size(); i++) {
     if (data[i] < min) {
       min = data[i];
       index = i;
@@ -270,7 +292,7 @@ auto WaveletEncoder::sgn(double val) -> double {
 void WaveletEncoder::de2bi(int val, std::vector<unsigned char> &outstream, int length) {
   int n = length;
   while (n > 0) {
-    outstream.push_back((unsigned char)val % 2);
+    outstream.push_back((unsigned char)(val % 2));
     val = val >> 1;
     n--;
   }

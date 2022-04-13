@@ -51,7 +51,9 @@ public:
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
       , vertices({})
-      , bands({}){};
+      , bands({})
+      , frequencySampling(std::nullopt)
+      , sampleCount(std::nullopt){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -63,19 +65,28 @@ public:
   auto setMixingWeight(float newMixingWeight) -> void;
   [[nodiscard]] auto getBodyPartMask() const -> uint32_t;
   auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
+  [[nodiscard]] auto getReferenceDeviceId() const -> std::optional<int>;
+  auto setReferenceDeviceId(int newReferenceDeviceId) -> void;
   auto getVerticesSize() -> size_t;
   auto getVertexAt(int index) -> int &;
   auto addVertex(int &newVertice) -> void;
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
-  auto addBand(haptics::types::Band &newBand) -> void;
   auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
+  auto addBand(haptics::types::Band &newBand) -> void;
+  auto generateBand() -> haptics::types::Band *;
+  auto generateBand(BandType bandType, CurveType curveType, EncodingModality encodingModality,
+                    int windowLength, int lowerFrequencyLimit, int upperFrequencyLimit)
+      -> haptics::types::Band *;
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
+  [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
+  auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
+  [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
+  auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
 
 private:
-  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   int id = -1;
   std::string description;
   float gain = 1;
@@ -83,6 +94,9 @@ private:
   uint32_t bodyPartMask = 0;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
+  std::optional<int> referenceDeviceId;
+  std::optional<uint32_t> frequencySampling = std::nullopt;
+  std::optional<uint32_t> sampleCount = std::nullopt;
 };
 } // namespace haptics::types
 #endif // TRACK_H

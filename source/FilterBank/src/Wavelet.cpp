@@ -52,7 +52,7 @@ void Wavelet::DWT(std::vector<double> &in, int levels, std::vector<double> &out)
 
     auto out_ind = 0;
     auto out_add = len >> 1;
-    for (int j = 0; j < len; j += 2) {
+    for (uint32_t j = 0; j < len; j += 2) {
       out[out_ind] = l[j];
       out[out_ind + out_add] = h[j + 1];
       x[out_ind] = l[j];
@@ -62,27 +62,26 @@ void Wavelet::DWT(std::vector<double> &in, int levels, std::vector<double> &out)
 }
 
 void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
+
   std::copy(in.begin(), in.end(), out.begin());
+
   for (int i = levels - 1; i >= 0; i--) {
     auto len = in.size() >> i;
     std::vector<double> l(len, 0);
     std::vector<double> h(len, 0);
-    for (int j = 0; j < len; j += 2) {
+    for (uint32_t j = 0; j < len; j += 2) {
       l[j] = out[j / 2];
       h[j + 1] = out[j / 2 + (len / 2)];
     }
-    /*for (int j = 0; j < len; j += 2) {
-      l[j + 1] = 0;
-      h[j] = 0;
-    }*/
     symconv1D(h, hpr, out);
     symconv1DAdd(l, lpr, out);
   }
 }
 
 template <size_t hSize>
-void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out) {
-  
+void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h,
+                        std::vector<double> &out) {
+
   size_t inSize = in.size();
 
   // symmetric extension
@@ -122,13 +121,14 @@ void Wavelet::symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h
   auto extension = 2 * lext;
   std::vector<double> conv(inSize + hSize - 1 + extension, 0);
   conv1D(temp, h, conv);
-  for (int i = 0; i < inSize; i++) {
+  for (uint32_t i = 0; i < inSize; i++) {
     out[i] += conv[i + hSize - 1];
   }
 }
 
 template <size_t hSize>
-void Wavelet::conv1D(std::vector<double> &in, std::array<double, hSize> &h, std::vector<double> &out) {
+void Wavelet::conv1D(std::vector<double> &in, std::array<double, hSize> &h,
+                     std::vector<double> &out) {
 
   size_t j = 0;
   size_t inSize = in.size();
@@ -138,7 +138,7 @@ void Wavelet::conv1D(std::vector<double> &in, std::array<double, hSize> &h, std:
   for (; j < inSize + hSize - 1; j++) {
     out[j] = 0;
   }
-  for (int i = 1; i < hSize; i++) {
+  for (uint32_t i = 1; i < hSize; i++) {
     for (j = i; j < inSize + i; j++) {
       out[j] += in[j - i] * h.at(i);
     }

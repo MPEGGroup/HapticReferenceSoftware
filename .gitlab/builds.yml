@@ -1,0 +1,51 @@
+Clang 12 Debug:
+  stage: build
+  image: cbachhuber/clang:12
+  tags: [linux]
+  script:
+    - mkdir -p build && cd build
+    - > 
+      cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++
+      -Wall -Wextra -Wpedantic -Werror 
+      -Wunreachable-code-aggressive 
+      -fprofile-arcs -ftest-coverage"
+      -DCMAKE_BUILD_TYPE=Debug
+      ..
+    - make -j
+    - make test
+    - cd ..
+    - mkdir coverage_html
+    - >
+      gcovr build --gcov-executable 'llvm-cov-12 gcov' -f 'source/' -e '.*\.test\.cpp'
+      --xml coverage.xml --xml-pretty --html-details coverage_html/index.html --print-summary
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    reports:
+      cobertura: coverage.xml
+    paths:
+      - coverage_html/
+    expire_in: 1 week
+
+
+GCC 10 Release:
+  stage: build
+  image: rikorose/gcc-cmake
+  tags: [linux]
+  before_script:
+    - export CXX=/usr/bin/g++-10
+    - export CC=/usr/bin/gcc-10
+  script:
+    - mkdir -p build && cd build
+    - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror" -DCMAKE_BUILD_TYPE=Release ..
+    - make -j
+    - mkdir reports
+    - ctest --output-junit reports/report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: build/reports/report.xml
+    paths:
+      - build/reports/
+    expire_in: 1 week
+

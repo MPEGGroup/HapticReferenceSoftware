@@ -31,13 +31,86 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Types/include/Perception.h>
+#include <catch2/catch.hpp>
 
-TEST_CASE("haptics::types::Perception") {
-using haptics::types::Perception;
-using haptics::types::PerceptionModality;
-const Perception h(0, 0, "Some perception test content", PerceptionModality::Temperature);
-// TODO : some tests
-CHECK(true);
+TEST_CASE("haptics::types::Perception checking getters") {
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+
+  SECTION("Checking getId", "[getId]") { CHECK(perception.getId() == 0); }
+
+  SECTION("Checking getDescription", "[getDescription]") {
+    auto checkDescription = perception.getDescription();
+    CHECK(checkDescription == "Some perception test content");
+  }
+
+  SECTION("Checking getAvatarId", "[getAvatarId]") { CHECK(perception.getAvatarId() == 0); }
+
+  SECTION("Checking getPerceptionModality", "[getPerceptionModality]") {
+    auto checkPerceptionModality = perception.getPerceptionModality();
+    CHECK(checkPerceptionModality == PerceptionModality::Temperature);
+  }
+}
+
+TEST_CASE("haptics::types::Perception checking setters") {
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+
+  SECTION("Checking setId", "[setId]") {
+    perception.setId(2);
+    CHECK(perception.getId() == 2);
+  }
+
+  SECTION("Checking setDescription", "[setDescription]") {
+    std::string newDescription = "Some perception test content 2";
+    perception.setDescription(newDescription);
+    auto checkDescription = perception.getDescription();
+    CHECK(checkDescription == newDescription);
+  }
+
+  SECTION("Checking setAvatarId", "[setAvatarId]") {
+    perception.setAvatarId(1);
+    CHECK(perception.getAvatarId() == 1);
+  }
+
+  SECTION("Checking setPerceptionModality", "[setPerceptionModality]") {
+    perception.setPerceptionModality(PerceptionModality::Vibration);
+    auto checkPerceptionModality = perception.getPerceptionModality();
+    CHECK(checkPerceptionModality == PerceptionModality::Vibration);
+  }
+}
+
+TEST_CASE("haptics::types::Perception testing tracks") {
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+  haptics::types::Track track(0, "Test track", 1, 1, 0);
+  SECTION("Checking addTrack", "[addTrack]") {
+    perception.addTrack(track);
+    CHECK(perception.getTracksSize() == 1);
+    haptics::types::Track addedTrack = perception.getTrackAt(0);
+    CHECK(track.getId() == addedTrack.getId());
+    CHECK(track.getDescription() == addedTrack.getDescription());
+    CHECK(track.getGain() == Approx(addedTrack.getGain()));
+    CHECK(track.getMixingWeight() == Approx(addedTrack.getMixingWeight()));
+    CHECK(track.getBodyPartMask() == addedTrack.getBodyPartMask());
+  }
+}
+
+TEST_CASE("haptics::types::Perception testing referenceDevice") {
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+  haptics::types::ReferenceDevice device(0, "Test Device");
+  SECTION("Checking addReferenceDevice", "[addReferenceDevice]") {
+    perception.addReferenceDevice(device);
+    CHECK(perception.getReferenceDevicesSize() == 1);
+    haptics::types::ReferenceDevice addedDevice = perception.getReferenceDeviceAt(0);
+    bool sameDevice =
+        (device.getId() == addedDevice.getId()) && (device.getName() == addedDevice.getName());
+    CHECK(sameDevice);
+  }
 }

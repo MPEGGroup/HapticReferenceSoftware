@@ -108,7 +108,6 @@ public:
 private:
   std::string header;
   short version = 1;
-  short numElements = 0;
   std::string description;
   std::vector<HapticElementMetadata> elementsMetadata;
 
@@ -116,24 +115,18 @@ private:
 
 public:
   explicit OHMData() = default;
-  explicit OHMData(std::string &_header, short _version, short _numElements, std::string &_description)
-      : header(_header)
-      , version(_version)
-      , numElements(_numElements)
-      , description(_description)
-      , elementsMetadata({}) {};
+  explicit OHMData(std::string &_header, short _version, std::string &_description)
+      : header(_header), version(_version), description(_description), elementsMetadata({}){};
   explicit OHMData(const std::string &filePath);
   auto loadFile(const std::string &filePath) -> bool;
   auto writeFile(const std::string &filePath) -> bool;
 
   [[nodiscard]] auto getVersion() const -> short;
   auto setVersion(short newVersion) -> void;
-  [[nodiscard]] auto getNumElements() const -> short;
-  auto setNumElements(short newNumElements) -> void;
   [[nodiscard]] auto getHeader() const -> std::string;
-  auto setHeader(std::string &newHeader) -> void;
+  auto setHeader(const std::string &newHeader) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
-  auto setDescription(std::string &newDescription) -> void;
+  auto setDescription(const std::string &newDescription) -> void;
   auto getHapticElementMetadataSize() -> size_t;
   auto getHapticElementMetadataAt(int index) -> HapticElementMetadata &;
   auto addHapticElementMetadata(HapticElementMetadata &newElementMetadata) -> void;

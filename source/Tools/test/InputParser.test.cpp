@@ -51,18 +51,17 @@ TEST_CASE("haptics::tools") {
 }
 
 TEST_CASE("InputParser::getFileExt") {
-  const std::vector<std::vector<const char*>> testingValues = {
-    {"filename.ext", "ext"},
-    {"path/filename.json", "json"},
-    {"very/long/path/filename.xml", "xml"},
-    {"../../other/folder/filename.h", "h"},
-    {"multiple.test.cpp", "cpp"},
-    {"no/ext", ""}
-  };
+  const std::vector<std::vector<const char *>> testingValues = {
+      {"filename.ext", "ext"},
+      {"path/filename.json", "json"},
+      {"very/long/path/filename.xml", "xml"},
+      {"../../other/folder/filename.h", "h"},
+      {"multiple.test.cpp", "cpp"},
+      {"no/ext", ""}};
 
-  for (std::vector<const char*> v : testingValues) {
+  for (std::vector<const char *> v : testingValues) {
     REQUIRE(v.size() == 2);
-    
+
     DYNAMIC_SECTION("Test getFileExtension in every cases") {
       std::string filename = std::string(v[0]);
       std::string res = InputParser::getFileExt(filename);

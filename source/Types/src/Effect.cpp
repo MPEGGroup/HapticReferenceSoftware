@@ -31,100 +31,82 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Types/include/Effect.h>
 #include <Tools/include/Tools.h>
-#include <cmath>
+#include <Types/include/Effect.h>
 #include <algorithm>
+#include <cmath>
 #include <functional>
 
 namespace haptics::types {
 
-[[nodiscard]] auto Effect::getPosition() const -> int {
-  return position;
+[[nodiscard]] auto Effect::getPosition() const -> int { return position; }
+
+auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
+
+[[nodiscard]] auto Effect::getPhase() const -> float { return phase; }
+
+auto Effect::setPhase(float newPhase) -> void { phase = newPhase; }
+
+[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal { return baseSignal; }
+
+auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void { baseSignal = newBaseSignal; }
+
+auto Effect::getKeyframesSize() -> size_t { return keyframes.size(); }
+
+auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe & { return keyframes.at(index); }
+
+auto Effect::replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool {
+  if (index < 0 || index >= static_cast<int>(keyframes.size())) {
+    return false;
+  }
+
+  this->keyframes[index] = newKeyframe;
+  return true;
 }
 
-auto Effect::setPosition(int newPosition) -> void {
-  position = newPosition;
-}
-
-[[nodiscard]] auto Effect::getPhase() const -> float {
-  return phase;
-}
-
-auto Effect::setPhase(float newPhase) -> void {
-  phase = newPhase;
-}
-
-[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal {
-  return baseSignal;
-}
-
-auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void {
-  baseSignal = newBaseSignal;
-}
-
-auto Effect::getKeyframesSize() -> size_t {
-  return keyframes.size();
-}
-
-auto Effect::getKeyframeAt(int index) -> haptics::types::Keyframe& {
-  return keyframes.at(index);
-}
-
-auto Effect::addKeyframe(haptics::types::Keyframe& newKeyframe) -> void {
+auto Effect::addKeyframe(haptics::types::Keyframe &newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
 }
 
-auto Effect::addAmplitudeAt(float amplitude, int position) -> bool {
-
-  bool ret = false;
-
+auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position) -> bool {
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
       });
 
-  if (kit == keyframes.begin()) {
-    return ret;
-  }
-
   if (kit == keyframes.end()) {
-    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
+    Keyframe kf = Keyframe(position, amplitude, std::nullopt);
     keyframes.push_back(kf);
     return true;
   }
 
-  if ((kit)->getRelativePosition() == position && !(kit)->getAmplitudeModulation().has_value()) {
+  if ((kit)->getRelativePosition() == position) {
     (kit)->setAmplitudeModulation(amplitude);
   } else {
-    Keyframe kf = Keyframe(position, amplitude, std::optional<int>());
-    keyframes.insert(kit+1, kf);
+    Keyframe kf = Keyframe(position, amplitude, std::nullopt);
+    keyframes.insert(kit, kf);
   }
 
   return true;
 }
 
-auto Effect::addFrequencyAt(int frequency, int position) -> bool {
+auto Effect::addFrequencyAt(std::optional<int> frequency, int position) -> bool {
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
       });
 
-  if (kit == keyframes.begin()) {
-    return false;
-  }
-
   if (kit == keyframes.end()) {
-    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
+    Keyframe kf = Keyframe(position, std::nullopt, frequency);
     keyframes.push_back(kf);
     return true;
   }
 
-  if (kit->getRelativePosition() == position && !kit->getFrequencyModulation().has_value()) {
+  if (kit->getRelativePosition() == position) {
     kit->setFrequencyModulation(frequency);
   } else {
-    Keyframe kf = Keyframe(position, std::optional<float>(), frequency);
-    keyframes.insert(kit + 1, kf);
+    Keyframe kf = Keyframe(position, std::nullopt, frequency);
+    keyframes.insert(kit, kf);
   }
 
   return true;
@@ -132,145 +114,145 @@ auto Effect::addFrequencyAt(int frequency, int position) -> bool {
 
 auto Effect::addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
                          std::optional<int> frequencyModulation) -> void {
-  this->addKeyframe(*(new Keyframe(position, amplitudeModulation, frequencyModulation)));
+  Keyframe newKf(position, amplitudeModulation, frequencyModulation);
+  this->addKeyframe(newKf);
 }
 
-//NOLINTNEXTLINE(readability-function-size)
 auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
     -> double {
   double res = 0;
 
-  if (position < this->position ||
-      position > this->position + this->getEffectTimeLength(BandType::Wave,
-                                                            EncodingModality::Vectorial, 0, 0)) {
-    return res;
-  }
+  double max_position =
+      this->position + this->getEffectTimeLength(BandType::Wave, EncodingModality::Vectorial, 0);
 
-  if (keyframes.empty()) {
+  if (position < this->position || position > max_position || keyframes.empty()) {
     return res;
   }
 
   double relativePosition = position - this->position;
 
-  // IF AMPLITUDE MODULATION (SHOULD BE BUT TO BE SURE)
-
-  double amp_modulation = 0;
-  //First KF AFTER
-  auto k_a_after = std::find_if(
+  // AMPLITUDE MODULATION
+  double amp_modulation = 1;
+  // First amplitude keyframe after the relative position
+  auto firstAmplitudeKeyframeAfterPositionIt = std::find_if(
       keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
-        return k.getRelativePosition().has_value() && k.getAmplitudeModulation() &&
-               k.getAmplitudeModulation().has_value() &&
-               k.getRelativePosition().value() > relativePosition;
+        return k.getAmplitudeModulation().has_value() && k.getRelativePosition().has_value() &&
+               k.getRelativePosition().value() >= relativePosition;
       });
-  if (k_a_after < keyframes.end()) {
-    // first KF before position
-    auto k_a_before = std::find_if(
-        keyframes.rbegin(), keyframes.rend(), [relativePosition](haptics::types::Keyframe k) {
-          return k.getRelativePosition().has_value() &&
-                 k.getRelativePosition().value() <= relativePosition &&
-                 k.getAmplitudeModulation().has_value();
-        });
-    if (k_a_before == keyframes.rend()) {
-      amp_modulation = (keyframes.rend() - 1)->getAmplitudeModulation().value();
+  if (firstAmplitudeKeyframeAfterPositionIt < keyframes.end()) {
+    // First amplitude keyframe before the keyframe previously found
+    auto firstAmplitudeKeyframeBeforePositionIt = std::find_if(
+        std::make_reverse_iterator(firstAmplitudeKeyframeAfterPositionIt), keyframes.rend(),
+        [](haptics::types::Keyframe k) { return k.getAmplitudeModulation().has_value(); });
+    if (firstAmplitudeKeyframeBeforePositionIt == keyframes.rend()) {
+      amp_modulation = firstAmplitudeKeyframeAfterPositionIt->getAmplitudeModulation().value();
     } else {
-      amp_modulation = haptics::tools::linearInterpolation(
-          {k_a_before->getRelativePosition().value(),
-           k_a_before->getAmplitudeModulation().value()},
-          {k_a_after->getRelativePosition().value(), k_a_after->getAmplitudeModulation().value()},
-          relativePosition);
+      float a0 = firstAmplitudeKeyframeBeforePositionIt->getAmplitudeModulation().value();
+      int t0 = firstAmplitudeKeyframeBeforePositionIt->getRelativePosition().has_value()
+                   ? firstAmplitudeKeyframeBeforePositionIt->getRelativePosition().value()
+                   : 0;
+      float a1 = firstAmplitudeKeyframeAfterPositionIt->getAmplitudeModulation().value();
+      int t1 = firstAmplitudeKeyframeAfterPositionIt->getRelativePosition().value();
+      amp_modulation = haptics::tools::linearInterpolation({t0, a0}, {t1, a1}, relativePosition);
     }
   } else {
-    amp_modulation = (keyframes.end() - 1)->getAmplitudeModulation().value();
+    auto amplitudeKeyframeIt =
+        std::find_if(keyframes.rbegin(), keyframes.rend(), [](haptics::types::Keyframe k) {
+          return k.getAmplitudeModulation().has_value();
+        });
+    if (amplitudeKeyframeIt < keyframes.rend()) {
+      amp_modulation = amplitudeKeyframeIt->getAmplitudeModulation().value();
+    }
   }
 
-  // IF FREQUENCY MODULATION (SHOULD BE BUT TO BE SURE)
-
-  double evaluatedBaseSignal = 1;
-  // first KF after position
-  auto k_f_after = std::find_if(
-      keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
-        return k.getRelativePosition().has_value() && k.getFrequencyModulation().has_value() &&
-               k.getRelativePosition() > relativePosition;
-      });
-  if (k_f_after < keyframes.end()) {
-    // first KF before position
-    auto k_f_before = keyframes.begin();
-    for (auto it = k_f_after; it >= keyframes.begin(); it--) {
-      if (it->getRelativePosition() <= relativePosition && it->getFrequencyModulation().has_value()) {
-        k_f_before = it;
+  // FREQUENCY MODULATION
+  double freq_modulation = 0;
+  double phi = this->getPhase();
+  // First frequency keyframe after the relative position
+  // Find phase corresponding to this keyframe
+  auto firstFrequencyKeyframeAfterPositionIt = keyframes.begin();
+  auto firstFrequencyKeyframeBeforePositionIt = keyframes.rend();
+  while (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
+    if (firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().has_value()) {
+      int pos = firstFrequencyKeyframeAfterPositionIt->getRelativePosition().has_value()
+                    ? firstFrequencyKeyframeAfterPositionIt->getRelativePosition().value()
+                    : 0;
+      firstFrequencyKeyframeBeforePositionIt = std::find_if(
+          std::make_reverse_iterator(firstFrequencyKeyframeAfterPositionIt), keyframes.rend(),
+          [](haptics::types::Keyframe k) { return k.getFrequencyModulation().has_value(); });
+      if (pos >= relativePosition) {
         break;
       }
+      if (firstFrequencyKeyframeBeforePositionIt < keyframes.rend()) {
+        int deltaT =
+            pos - (firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
+                       ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
+                       : 0);
+        phi += M_PI * deltaT * MS_2_S *
+               (firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value() +
+                firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
+      } else if (pos > 0) { // first keyframe with frequency value
+        phi += 2 * M_PI * pos * MS_2_S *
+               firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value();
+      }
     }
-    auto k_a_before = std::find_if(keyframes.rbegin(), keyframes.rend(),
-                                   [relativePosition](haptics::types::Keyframe k) {
-                                     return k.getRelativePosition().has_value() &&
-                                            k.getRelativePosition().value() <= relativePosition &&
-                                            k.getFrequencyModulation().has_value();
-                                   });
-    double t = MS_2_S * relativePosition;
-    double freq_modulation = 0;
-    if (k_a_before == keyframes.rend()) {
-      freq_modulation = (keyframes.rend() - 1)->getFrequencyModulation().value();
+
+    firstFrequencyKeyframeAfterPositionIt++;
+  }
+
+  if (firstFrequencyKeyframeAfterPositionIt < keyframes.end()) {
+    if (firstFrequencyKeyframeBeforePositionIt == keyframes.rend()) {
+      freq_modulation = static_cast<double>(
+          firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
     } else {
-      // Modulation
-      double f0 = std::max(k_f_before->getFrequencyModulation().value(),0);
-      double f1 = std::max(k_f_after->getFrequencyModulation().value(),0);
-      double DeltaT = MS_2_S * (static_cast<double>(k_f_after->getRelativePosition().value()) -
-                                static_cast<double>(k_f_before->getRelativePosition().value()));
+      double f0 = static_cast<double>(
+          firstFrequencyKeyframeBeforePositionIt->getFrequencyModulation().value());
+      int t0 = firstFrequencyKeyframeBeforePositionIt->getRelativePosition().has_value()
+                   ? firstFrequencyKeyframeBeforePositionIt->getRelativePosition().value()
+                   : 0;
+      auto f1 = static_cast<double>(
+          firstFrequencyKeyframeAfterPositionIt->getFrequencyModulation().value());
+      int t1 = firstFrequencyKeyframeAfterPositionIt->getRelativePosition().has_value()
+                   ? firstFrequencyKeyframeAfterPositionIt->getRelativePosition().value()
+                   : 0;
 
-      freq_modulation =
-          std::clamp(f0 + t * (f1 - f0) / DeltaT, static_cast<double>(lowFrequencyLimit),
-                     static_cast<double>(highFrequencyLimit)) +
-          f0;
+      freq_modulation = tools::chirpInterpolation(t0, t1, f0, f1, relativePosition);
+      freq_modulation = std::clamp(freq_modulation, static_cast<double>(lowFrequencyLimit),
+                                   static_cast<double>(highFrequencyLimit));
+      // To replace the evaluated relative position in the range [0; t1-t0], this will prevent
+      // unexpected behaviours on the chirp evaluation
+      relativePosition -= t0;
     }
-
-    evaluatedBaseSignal = this->computeBaseSignal(t, freq_modulation);
+  } else {
+    auto frequencyKeyframeIt =
+        std::find_if(keyframes.rbegin(), keyframes.rend(), [](haptics::types::Keyframe k) {
+          return k.getFrequencyModulation().has_value();
+        });
+    if (frequencyKeyframeIt < keyframes.rend()) {
+      freq_modulation = frequencyKeyframeIt->getFrequencyModulation().value();
+    }
   }
 
-  return amp_modulation * evaluatedBaseSignal;
-}
-
-auto Effect::EvaluateQuantized(double position, double windowLength) -> double {
-  double relativePosition = position - this->getPosition();
-  int index = std::floor(relativePosition / windowLength);
-  if (index >= this->getKeyframesSize()) {
-    return 0;
-  }
-
-  auto myKeyframe = keyframes.begin() + index;
-  if (!myKeyframe->getAmplitudeModulation().has_value() ||
-      !myKeyframe->getFrequencyModulation().has_value()) {
-    return 0;
-  }
-
-  double t = MS_2_S * relativePosition;
-  return std::sin(t * myKeyframe->getFrequencyModulation().value() * 2 * M_PI + this->getPhase()) *
-         myKeyframe->getAmplitudeModulation().value();
+  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
 }
 
 auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
-    double relativePosition = position - this->getPosition();
-    int index = std::floor(relativePosition / windowLength * (double)this->getKeyframesSize());
+  double relativePosition = position - this->getPosition();
+  int index = std::floor(relativePosition / windowLength * (double)this->getKeyframesSize());
 
-    //std::cout << "windowLength: " << windowLength << std::endl;
-    //std::cout << "EvaluateWavelet position: " << position << std::endl;
-    //std::cout << "relativePosition: " << relativePosition << std::endl;
-    //std::cout << "EvaluateWavelet index: " << index << std::endl;
+  if (index >= (int)this->getKeyframesSize()) {
+    return 0;
+  }
+  auto myKeyframe = keyframes.begin() + index;
+  if (!myKeyframe->getAmplitudeModulation().has_value()) {
+    return 0;
+  }
 
-    if (index >= this->getKeyframesSize()) {
-        return 0;
-    }
-
-    auto myKeyframe = keyframes.begin() + index;
-    if (!myKeyframe->getAmplitudeModulation().has_value()) {
-        return 0;
-    }
-
-    return myKeyframe->getAmplitudeModulation().value();
+  return myKeyframe->getAmplitudeModulation().value();
 }
 
 auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
-    const double relativePosition = position - this->getPosition();
+  const double relativePosition = position - this->getPosition();
 
   auto checkingFunction = [&](Keyframe kf) {
     return kf.getRelativePosition().has_value() &&
@@ -285,109 +267,88 @@ auto Effect::EvaluateTransient(double position, double transientDuration) -> dou
       continue;
     }
 
-    res +=
-        std::sin(4 * M_PI * (relativePosition - it->getRelativePosition().value()) / transientDuration) *
-        it->getAmplitudeModulation().value();
+    res += std::sin(4 * M_PI * (relativePosition - it->getRelativePosition().value()) /
+                    transientDuration) *
+           it->getAmplitudeModulation().value();
     it++;
   }
 
   return res;
 }
 
-auto Effect::EvaluateKeyframes(double position) -> double {
+auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> double {
+  const double relativePosition = position - this->getPosition();
   double res = 0;
-  auto k_after =
-      std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
+  auto k_after = std::find_if(
+      keyframes.begin(), keyframes.end(), [relativePosition](haptics::types::Keyframe k) {
         return k.getRelativePosition().has_value() && k.getAmplitudeModulation().has_value() &&
-               k.getRelativePosition() > position;
+               k.getRelativePosition() > relativePosition;
       });
 
   if (k_after < keyframes.end()) {
     // first KF before position
-    auto k_before = keyframes.begin();
-    bool found = true;
-    for (auto it = k_after - 1; it > keyframes.begin(); it--) {
-      if (it->getRelativePosition().has_value() && it->getAmplitudeModulation().has_value()) {
-        k_before = it;
-        break;
-      }
-      if (it == keyframes.begin()) {
-        found = false;
-      }
-    }
-    if (!found) {
+    auto k_before = std::find_if(
+        std::make_reverse_iterator(k_after), keyframes.rend(), [](haptics::types::Keyframe k) {
+          return k.getRelativePosition().has_value() && k.getAmplitudeModulation().has_value();
+        });
+    if (k_before == keyframes.rend()) {
       return k_after->getAmplitudeModulation().value();
     }
 
-    double x0 = MS_2_S * k_before->getRelativePosition().value();
+    double t0 = MS_2_S * k_before->getRelativePosition().value();
     double f0 = k_before->getAmplitudeModulation().value();
-    double t0 = 0;
-    double x1 = MS_2_S * k_after->getRelativePosition().value();
+    double t1 = MS_2_S * k_after->getRelativePosition().value();
     double f1 = k_after->getAmplitudeModulation().value();
-    double t1 = 0;
 
-    double t = MS_2_S * position;
-
-    double c2 = 0;
-    double c3 = 0;
-    double df = 0;
-    double h = 0;
-    h = x1 - x0;
-    df = (f1 - f0) / h;
-
-    c2 = -(2 * t0 - 3 * df + t1) / h;
-    c3 = (t0 - 2 * df + t1) / h / h;
-
-    auto result = static_cast<float>(f0 + (t - x0) * (t0 + (t - x0) * (c2 + (t - x0) * c3)));
-    return std::max(std::min(1.0F, result), -1.0F);
+    double t = MS_2_S * relativePosition;
+    switch (curveType) {
+    case types::CurveType::Cubic: {
+      double h = t1 - t0;
+      return f0 + (f1 - f0) * (3 * h + 2 * (t0 - t)) * std::pow(t - t0, 2) / std::pow(h, 3);
+    }
+    case types::CurveType::Linear:
+      return (f0 * (t1 - t) + f1 * (t - t0)) / (t1 - t0);
+    default:
+      return 0;
+    }
   }
 
   return res;
 }
 
-[[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency) const -> double {
+[[nodiscard]] auto Effect::computeBaseSignal(double time, double frequency, double phase) const
+    -> double {
   const double half = .5;
   const double quarter = .25;
 
-  double phi = this->getPhase();
+  if (frequency != 0) {
+    time += phase / (2 * M_PI * frequency);
+  }
   switch (this->getBaseSignal()) {
   case BaseSignal::Sine:
-    return std::sin(M_PI * time * frequency + phi);
-    break;
+    return std::sin(2 * M_PI * time * frequency);
   case BaseSignal::Square:
-    return std::copysign(1, std::sin(M_PI * time * frequency + phi));
-    break;
+    return 1 - 2 * std::round(time * frequency - std::floor(time * frequency));
   case BaseSignal::Triangle:
-    time += phi / (2 * M_PI * frequency);
     return 1 - 4 * std::abs(std::round(time * frequency - quarter) - (time * frequency - quarter));
-    break;
   case BaseSignal::SawToothUp:
-    time += phi / (2 * M_PI * frequency);
     return 2 * (time * frequency - std::floor(time * frequency + half));
-    break;
   case BaseSignal::SawToothDown:
-    time += phi / (2 * M_PI * frequency);
     return 2 * (std::floor(time * frequency + half) - time * frequency);
-    break;
   default:
     return 1;
-    break;
   }
-
-  return 0;
 }
 
-auto Effect::getEffectTimeLength(types::BandType bandType,
-                                 types::EncodingModality encodingModality, int windowLength,
+auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
                                  double transientDuration) -> double {
   if (this->getKeyframesSize() == 0) {
     return 0;
   }
 
   auto lastKeyframe =
-      std::find_if(keyframes.rbegin(), keyframes.rend(), [](haptics::types::Keyframe k) {
-        return k.getRelativePosition().has_value();
-      });
+      std::find_if(keyframes.rbegin(), keyframes.rend(),
+                   [](haptics::types::Keyframe k) { return k.getRelativePosition().has_value(); });
   switch (bandType) {
   case types::BandType::Transient:
     return lastKeyframe->getRelativePosition().has_value()
@@ -399,8 +360,6 @@ auto Effect::getEffectTimeLength(types::BandType bandType,
                : 0;
   case types::BandType::Wave:
     switch (encodingModality) {
-    case types::EncodingModality::Quantized:
-      return static_cast<int>(this->getKeyframesSize()) * windowLength;
     case types::EncodingModality::Vectorial:
       return lastKeyframe->getRelativePosition().has_value()
                  ? lastKeyframe->getRelativePosition().value()

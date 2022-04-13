@@ -31,15 +31,16 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Types/include/Band.h>
+#include <catch2/catch.hpp>
 
 using haptics::types::Band;
 using haptics::types::BandType;
+using haptics::types::CurveType;
 using haptics::types::EncodingModality;
 
 TEST_CASE("haptics::types::Band", "[placeholder]") {
-  const Band b(BandType::Wave, EncodingModality::Quantized, 10, 70, 1000);
+  const Band b(BandType::Wave, CurveType::Cubic, EncodingModality::Vectorial, 10, 70, 1000);
 
   CHECK(true);
 }

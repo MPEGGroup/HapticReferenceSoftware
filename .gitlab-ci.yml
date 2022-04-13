@@ -1,0 +1,41 @@
+stages:
+  - check
+  - build
+  - test
+
+default:
+  interruptible: true
+
+include:
+  - /.gitlab/checks.yml
+  - /.gitlab/builds.yml
+  - /.gitlab/tests.yml
+
+.trigger: &trigger_launch
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - .clang-format
+        - .clang-tidy
+        - .gitlab-ci.yml
+        - ".gitlab/*.yml"
+        - "**/CMakeLists.txt"
+        - "**/*.cmake"
+        - "**/*.cmake.in"
+        - "**/*.cpp"
+        - "**/*.h"
+        - "**/*.hpp"
+        - "scripts/test/*.py"
+
+clang-format:
+  <<: *trigger_launch
+
+Clang 12 Debug:
+  <<: *trigger_launch
+
+GCC 10 Release:
+  <<: *trigger_launch
+
+Metrics:
+  <<: *trigger_launch

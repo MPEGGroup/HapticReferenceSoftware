@@ -34,7 +34,6 @@
 #ifndef PCMENCODER_H
 #define PCMENCODER_H
 
-#include <Filterbank/include/FourierTools.h>
 #include <FilterBank/include/Filterbank.h>
 #include <Tools/include/WavParser.h>
 #include <Types/include/Band.h>
@@ -47,40 +46,71 @@
 #include <vector>
 
 namespace haptics::encoder {
+
+static constexpr int BITBUDGET_2KBS = 3;
+static constexpr int BITBUDGET_16KBS = 16;
+static constexpr int BITBUDGET_64KBS = 66;
+static constexpr int BITR_2 = 2;
+static constexpr int BITR_16 = 16;
+static constexpr int BITR_64 = 64;
+static constexpr float CUTOFF_FREQUENCY_2 = 20;
+static constexpr float CUTOFF_FREQUENCY_16 = 72.5;
+static constexpr float CUTOFF_FREQUENCY_64 = 72.5;
+static constexpr int WINDOW_LENGTH_2 = 1024;
+static constexpr int WINDOW_LENGTH_16 = 512;
+static constexpr int WINDOW_LENGTH_64 = 512;
+
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
-  std::vector<std::pair<double, double>> frequencyBandLimits;
-  int windowLength = 0;
   int wavelet_windowLength = 0;
   int wavelet_bitbudget = 0;
 
   explicit EncodingConfig() = default;
-  explicit EncodingConfig(double _curveFrequencyLimit,
-                          std::vector<std::pair<double, double>> &_frequencyBandLimits,
-                          int _windowLength, int _wavelet_windowLength, int _wavelet_bitbudget)
+  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_windowLength,
+                          int _wavelet_bitbudget)
       : curveFrequencyLimit(_curveFrequencyLimit)
-      , frequencyBandLimits(_frequencyBandLimits)
-      , windowLength(_windowLength)
       , wavelet_windowLength(_wavelet_windowLength)
       , wavelet_bitbudget(_wavelet_bitbudget){};
+
+  auto static generateConfig(int bitrate = 2) -> EncodingConfig {
+
+    int wavelet_windowLength = 0;
+    double curveFrequencyLimit = 0;
+    int wavelet_bitbudget = 0;
+    switch (bitrate) {
+    case BITR_2:
+      wavelet_bitbudget = BITBUDGET_2KBS;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_2;
+      wavelet_windowLength = WINDOW_LENGTH_2;
+      break;
+    case BITR_16:
+      wavelet_bitbudget = BITBUDGET_16KBS;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_16;
+      wavelet_windowLength = WINDOW_LENGTH_16;
+      break;
+    case BITR_64:
+      wavelet_bitbudget = BITBUDGET_64KBS;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_64;
+      wavelet_windowLength = WINDOW_LENGTH_16;
+      break;
+    default:
+      std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
+      wavelet_bitbudget = BITBUDGET_2KBS;
+      break;
+    }
+
+    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
+  }
 };
 
 class PcmEncoder {
 public:
-  auto static encode(std::string &filename, EncodingConfig &config, types::Perception &out)
-      -> int;
+  auto static encode(std::string &filename, EncodingConfig &config, types::Perception &out) -> int;
   [[nodiscard]] auto static convertToCurveBand(std::vector<std::pair<int, double>> &points,
                                                double samplerate, double curveFrequencyLimit,
                                                haptics::types::Band *out) -> bool;
   [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
       -> std::vector<std::pair<int, double>>;
-
-private:
-  [[nodiscard]] auto static PcmEncoder::encodeIntoWaveBand(
-      std::vector<double> &signal, filterbank::Filterbank &filterbank, double samplerate,
-      std::pair<double, double> frequencyBandLimits, EncodingConfig &config, types::Band *out)
-      -> bool;
-
 };
 } // namespace haptics::encoder
 #endif // PCMENCODER_H

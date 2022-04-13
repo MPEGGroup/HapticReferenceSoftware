@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <catch2/catch.hpp>
 #include <Types/include/Keyframe.h>
+#include <catch2/catch.hpp>
 
 using haptics::types::Keyframe;
 

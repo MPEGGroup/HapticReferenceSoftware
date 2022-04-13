@@ -45,7 +45,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   version = 1;
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
-    std::cout << filePath << ": Cannot open file!" << std::endl;
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
     file.close();
     return false;
   }
@@ -54,8 +54,8 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   unsigned int length = static_cast<unsigned int>(file.tellg());
   file.seekg(0, std::ios::beg);
 
-  std::cout << "Open: " << length << std::endl;
   if (length == 0) { // avoid undefined behavior
+    std::cerr << "Opening empty file" << std::endl;
     file.close();
     return false;
   }
@@ -65,7 +65,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   file.read(headerBytes.data(), 4);
   header = std::string(headerBytes.data(), 4);
   if (header != "OHM ") {
-    std::cout << "Incorrect header: " << header << std::endl;
+    std::cerr << "Incorrect header: " << header << std::endl;
     file.close();
     return false;
   }
@@ -77,6 +77,7 @@ auto OHMData::loadFile(const std::string &filePath) -> bool {
   memcpy(&version, &versionBytes, sizeof(version));
 
   // Get the number of elements
+  short numElements = 0;
   std::array<char, 2> numElementsBytes{};
   file.read(numElementsBytes.data(), 2);
   std::reverse(numElementsBytes.begin(), numElementsBytes.end());
@@ -141,7 +142,7 @@ auto OHMData::fillString(const std::string &text, const unsigned int numCharacte
 auto OHMData::writeFile(const std::string &filePath) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
-    std::cout << filePath << ": Cannot open file!" << std::endl;
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
     return false;
   }
   // Writing the header
@@ -154,6 +155,7 @@ auto OHMData::writeFile(const std::string &filePath) -> bool {
   file.write(versionBytes.data(), 2);
 
   // Writing the number of elements
+  auto numElements = static_cast<short>(getHapticElementMetadataSize());
   std::array<char, 2> numElementsBytes{};
   memcpy(&numElementsBytes, &numElements, sizeof(numElements));
   std::reverse(numElementsBytes.begin(), numElementsBytes.end());
@@ -202,16 +204,15 @@ auto OHMData::writeFile(const std::string &filePath) -> bool {
 
 auto OHMData::setVersion(short newVersion) -> void { version = newVersion; }
 
-[[nodiscard]] auto OHMData::getNumElements() const -> short { return numElements; }
-auto OHMData::setNumElements(short newNumElements) -> void { numElements = newNumElements; }
-
 [[nodiscard]] auto OHMData::getHeader() const -> std::string { return header; }
 
-auto OHMData::setHeader(std::string &newHeader) -> void { header = newHeader; }
+auto OHMData::setHeader(const std::string &newHeader) -> void { header = newHeader; }
 
 [[nodiscard]] auto OHMData::getDescription() const -> std::string { return description; }
 
-auto OHMData::setDescription(std::string &newDescription) -> void { description = newDescription; }
+auto OHMData::setDescription(const std::string &newDescription) -> void {
+  description = newDescription;
+}
 
 auto OHMData::getHapticElementMetadataSize() -> size_t { return elementsMetadata.size(); }
 

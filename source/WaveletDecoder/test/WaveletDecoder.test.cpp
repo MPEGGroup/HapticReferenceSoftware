@@ -39,16 +39,9 @@
 #include "../include/WaveletDecoder.h"
 #include "Encoder/include/WaveletEncoder.h"
 
-/*constexpr int FS = 8000;
-constexpr size_t BL = 128;
-constexpr size_t BITS = 90;
-constexpr double F_CUTOFF = 72;*/
-
 TEST_CASE("haptics::WaveletDecoder") {
 
-    using haptics::waveletdecoder::WaveletDecoder;
+  using haptics::waveletdecoder::WaveletDecoder;
 
-  SECTION("Input/Output test") {
-	CHECK(true);
-  }
+  SECTION("Input/Output test") { CHECK(true); }
 }
