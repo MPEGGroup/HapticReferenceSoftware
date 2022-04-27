@@ -155,4 +155,10 @@ auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
   sampleCount = newSampleCount;
 }
 
+[[nodiscard]] auto Track::getDirection() const -> std::optional<Direction> { return direction; }
+
+auto Track::setDirection(std::optional<Direction> newDirection) -> void {
+  direction = newDirection;
+}
+
 } // namespace haptics::types
