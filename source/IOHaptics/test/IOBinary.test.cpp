@@ -160,7 +160,8 @@ TEST_CASE("write/read file header for reference device testing") {
   const int testingId_perception0 = 0;
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
-  const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
+  const auto testingPerceptionModality_perception0 =
+      haptics::types::PerceptionModality::Vibrotactile;
   haptics::types::Perception testingPerception(testingId_perception0, testingAvatarId_perception0,
                                                testingDescription_perception0,
                                                testingPerceptionModality_perception0);
@@ -337,7 +338,8 @@ TEST_CASE("write/read file header for track testing") {
   const int testingId_perception0 = 0;
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
-  const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
+  const auto testingPerceptionModality_perception0 =
+      haptics::types::PerceptionModality::Vibrotactile;
   haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
                                                 testingDescription_perception0,
                                                 testingPerceptionModality_perception0);
@@ -507,7 +509,8 @@ TEST_CASE("write/read file for body testing") {
   const int testingId_perception0 = 0;
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
-  const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
+  const auto testingPerceptionModality_perception0 =
+      haptics::types::PerceptionModality::Vibrotactile;
   haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
                                                 testingDescription_perception0,
                                                 testingPerceptionModality_perception0);

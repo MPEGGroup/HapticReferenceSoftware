@@ -86,9 +86,9 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     myBand = Band();
     if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
                                        config.curveFrequencyLimit, &myBand)) {
-      if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
+      if (out.getPerceptionModality() == types::PerceptionModality::Force) {
         myBand.setCurveType(CurveType::Linear);
-      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration) {
+      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile) {
         myBand.setCurveType(CurveType::Cubic);
       }
       myTrack.addBand(myBand);
@@ -98,7 +98,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
 
     // wavelet processing
-    if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic) {
+    if (out.getPerceptionModality() != types::PerceptionModality::Force) {
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
       Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
       signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
