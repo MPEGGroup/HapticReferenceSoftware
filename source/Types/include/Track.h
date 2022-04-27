@@ -40,6 +40,15 @@
 
 namespace haptics::types {
 
+struct Direction {
+  int8_t X;
+  int8_t Y;
+  int8_t Z;
+
+  explicit Direction() = default;
+  explicit Direction(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+};
+
 class Track {
 public:
   explicit Track() = default;
@@ -53,7 +62,8 @@ public:
       , vertices({})
       , bands({})
       , frequencySampling(std::nullopt)
-      , sampleCount(std::nullopt){};
+      , sampleCount(std::nullopt)
+      , direction(std::nullopt){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -85,6 +95,8 @@ public:
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
   auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
+  [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
+  auto setDirection(std::optional<Direction> newDirection) -> void;
 
 private:
   int id = -1;
@@ -97,6 +109,7 @@ private:
   std::optional<int> referenceDeviceId;
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;
+  std::optional<Direction> direction = std::nullopt;
 };
 } // namespace haptics::types
 #endif // TRACK_H
