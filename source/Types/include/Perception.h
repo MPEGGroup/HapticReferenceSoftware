@@ -133,7 +133,7 @@ public:
 
 private:
   static constexpr int8_t DEFAULT_UNIT_EXPONENT = -3;
-  static constexpr int8_t DEFAULT_PERCEPTION_UNIT_EXPONENT = -3;
+  static constexpr int8_t DEFAULT_PERCEPTION_UNIT_EXPONENT = 0;
 
   int id = -1;
   int avatarId = -1;
