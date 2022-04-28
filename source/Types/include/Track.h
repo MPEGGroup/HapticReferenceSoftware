@@ -47,6 +47,10 @@ struct Direction {
 
   explicit Direction() = default;
   explicit Direction(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+
+  auto operator==(const Direction &other) const -> int {
+    return X == other.X && Y == other.Y && Z == other.Z;
+  };
 };
 
 class Track {
