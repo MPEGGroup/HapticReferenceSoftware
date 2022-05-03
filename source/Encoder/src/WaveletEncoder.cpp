@@ -261,7 +261,7 @@ auto WaveletEncoder::maxQuant(double in, quantMode m) -> double {
 }
 
 template <class T> auto WaveletEncoder::findMax(std::vector<T> &data) -> T {
-  T max = data[0];
+  T max = fabs(data[0]);
 
   for (size_t i = 1; i < data.size(); i++) {
     if (fabs(data[i]) > max) {
