@@ -87,7 +87,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     } else {
       filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
     }
-    
+
     points = PcmEncoder::localExtrema(filteredSignal, true);
     myBand = Band();
     if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
@@ -98,7 +98,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       } else if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
                  out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture) {
         myBand.setCurveType(CurveType::Cubic);
-      } else  {
+      } else {
         myBand.setCurveType(CurveType::Unknown);
       }
       myTrack.addBand(myBand);
