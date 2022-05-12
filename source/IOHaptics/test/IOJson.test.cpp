@@ -340,11 +340,10 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
     CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
     CHECK(res.getPerceptionAt(1).getAvatarId() == testingAvatarId_perception1);
     CHECK(res.getPerceptionAt(1).getDescription() == testingDescription_perception1);
-    CHECK(res.getPerceptionAt(1).getPerceptionUnitExponent().value() ==
-          testingPerceptionUnitExponent_perception1);
     CHECK_FALSE(res.getPerceptionAt(1).getUnitExponent().has_value());
     REQUIRE(res.getPerceptionAt(1).getPerceptionUnitExponent().has_value());
-    CHECK(res.getPerceptionAt(1).getPerceptionUnitExponent().value() == testingPerceptionUnitExponent_perception1);
+    CHECK(res.getPerceptionAt(1).getPerceptionUnitExponent().value() ==
+          testingPerceptionUnitExponent_perception1);
 
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
