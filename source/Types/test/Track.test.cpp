@@ -230,8 +230,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
 }
 
 TEST_CASE("haptics::types::Track testing direction") {
-  using haptics::types::Track;
   using haptics::types::Direction;
+  using haptics::types::Track;
   Track track(1, "I'm a placeholder", 0, 0, 1);
 
   SECTION("checking direction") {
