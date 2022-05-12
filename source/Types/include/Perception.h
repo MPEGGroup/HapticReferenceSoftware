@@ -97,9 +97,9 @@ public:
       , avatarId(newAvatarId)
       , description(std::move(newDescription))
       , perceptionModality(newPerceptionModality)
+      , tracks({})
       , unitExponent(std::nullopt)
-      , perceptionUnitExponent(std::nullopt)
-      , tracks({}){};
+      , perceptionUnitExponent(std::nullopt){};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
