@@ -689,7 +689,6 @@ TEST_CASE("write/read file for body testing") {
 
     REQUIRE(res.getPerceptionsSize() == 2);
 
-
     // CHECK perception 0
     CHECK(res.getPerceptionAt(0).getAvatarId() == testingAvatarId_perception0);
     CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);

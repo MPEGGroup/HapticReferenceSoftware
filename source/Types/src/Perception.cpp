@@ -78,7 +78,7 @@ auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void 
 }
 
 auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
--> void {
+    -> void {
   this->perceptionUnitExponent = newPerceptionUnitExponent;
 }
 

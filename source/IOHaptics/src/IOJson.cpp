@@ -104,7 +104,8 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
     }
     if (jsonPerception.contains("perception_unit_exponent") &&
         jsonPerception["perception_unit_exponent"].is_number_integer()) {
-      perception.setPerceptionUnitExponent(jsonPerception["perception_unit_exponent"].get<int8_t>());
+      perception.setPerceptionUnitExponent(
+          jsonPerception["perception_unit_exponent"].get<int8_t>());
     }
 
     auto jsonTracks = jsonPerception["tracks"];
