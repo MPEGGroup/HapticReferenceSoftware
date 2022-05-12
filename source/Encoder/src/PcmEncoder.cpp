@@ -81,15 +81,25 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     signal = wavParser.getSamplesChannel(channelIndex);
 
     // CURVE BAND
-    filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
+    if (out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture ||
+        out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
+      filteredSignal = signal;
+    } else {
+      filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
+    }
+    
     points = PcmEncoder::localExtrema(filteredSignal, true);
     myBand = Band();
     if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
                                        config.curveFrequencyLimit, &myBand)) {
-      if (out.getPerceptionModality() == types::PerceptionModality::Force) {
+      if (out.getPerceptionModality() == types::PerceptionModality::Force ||
+          out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
         myBand.setCurveType(CurveType::Linear);
-      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile) {
+      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
+                 out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture) {
         myBand.setCurveType(CurveType::Cubic);
+      } else  {
+        myBand.setCurveType(CurveType::Unknown);
       }
       myTrack.addBand(myBand);
     }
@@ -98,7 +108,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
 
     // wavelet processing
-    if (out.getPerceptionModality() != types::PerceptionModality::Force) {
+    if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
+        out.getPerceptionModality() == types::PerceptionModality::Other) {
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
       Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
       signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
