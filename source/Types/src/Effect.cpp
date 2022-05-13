@@ -73,9 +73,7 @@ auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position) -> boo
 }
 
 auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position,
-                            bool overrideIfAlreadyExists)
-    -> bool
-{
+                            bool overrideIfAlreadyExists) -> bool {
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
