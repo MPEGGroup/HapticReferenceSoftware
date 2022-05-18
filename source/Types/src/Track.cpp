@@ -128,7 +128,7 @@ auto Track::Evaluate(double position) -> double {
 
   double res = 0;
 
-  for (haptics::types::Band b : bands) {
+  for (haptics::types::Band& b : bands) {
     res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
   }
 
