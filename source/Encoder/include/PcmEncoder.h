@@ -53,7 +53,7 @@ static constexpr int BITBUDGET_64KBS = 66;
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
-static constexpr float CUTOFF_FREQUENCY_2 = 20;
+static constexpr float CUTOFF_FREQUENCY_2 = 0;
 static constexpr float CUTOFF_FREQUENCY_16 = 72.5;
 static constexpr float CUTOFF_FREQUENCY_64 = 72.5;
 static constexpr int WINDOW_LENGTH_2 = 1024;
@@ -101,6 +101,36 @@ struct EncodingConfig {
 
     return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }
+
+auto static generateConfigBudget(int bitrate = 2, int budget = 3) -> EncodingConfig {
+
+  int wavelet_windowLength = 0;
+  double curveFrequencyLimit = 0;
+  int wavelet_bitbudget = 0;
+  switch (bitrate) {
+  case BITR_2:
+    wavelet_bitbudget = budget;
+    curveFrequencyLimit = CUTOFF_FREQUENCY_2;
+    wavelet_windowLength = WINDOW_LENGTH_2;
+    break;
+  case BITR_16:
+    wavelet_bitbudget = budget;
+    curveFrequencyLimit = CUTOFF_FREQUENCY_16;
+    wavelet_windowLength = WINDOW_LENGTH_16;
+    break;
+  case BITR_64:
+    wavelet_bitbudget = budget;
+    curveFrequencyLimit = CUTOFF_FREQUENCY_64;
+    wavelet_windowLength = WINDOW_LENGTH_16;
+    break;
+  default:
+    std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
+    wavelet_bitbudget = BITBUDGET_2KBS;
+    break;
+  }
+
+  return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
+}
 };
 
 class PcmEncoder {

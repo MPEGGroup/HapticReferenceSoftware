@@ -81,17 +81,19 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     signal = wavParser.getSamplesChannel(channelIndex);
 
     // CURVE BAND
-    filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
-    points = PcmEncoder::localExtrema(filteredSignal, true);
-    myBand = Band();
-    if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
-                                       config.curveFrequencyLimit, &myBand)) {
-      if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
-        myBand.setCurveType(CurveType::Linear);
-      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration) {
-        myBand.setCurveType(CurveType::Cubic);
+    if (config.curveFrequencyLimit > 0) {
+      filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
+      points = PcmEncoder::localExtrema(filteredSignal, true);
+      myBand = Band();
+      if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
+                                         config.curveFrequencyLimit, &myBand)) {
+        if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
+          myBand.setCurveType(CurveType::Linear);
+        } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration) {
+          myBand.setCurveType(CurveType::Cubic);
+        }
+        myTrack.addBand(myBand);
       }
-      myTrack.addBand(myBand);
     }
     myTrack.setFrequencySampling(wavParser.getSamplerate());
     myTrack.setSampleCount(
@@ -100,8 +102,10 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     // wavelet processing
     if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic) {
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
-      Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
-      signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+      if (config.curveFrequencyLimit > 0) {
+        Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
+        signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+      }
       waveletBand = Band();
       if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
                                   config.curveFrequencyLimit, waveletBand)) {
