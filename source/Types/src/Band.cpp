@@ -106,7 +106,9 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
                      effects.back().getEffectTimeLength(bandType, encodingModality,
                                                         TRANSIENT_DURATION_MS) ||
       position < 0) {
-    return 0;
+    if (this->encodingModality != types::EncodingModality::Wavelet) {
+      return 0;
+    }
   }
 
   for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
