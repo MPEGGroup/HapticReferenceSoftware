@@ -67,7 +67,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     Effect effect;
     std::vector<double> block_time(bl, 0);
     if (add_end > sig_time.size()) {
-      add_end = (long)sig_time.size() - 1;
+      add_end = (long)sig_time.size();
     }
     std::copy(sig_time.begin() + add_start, sig_time.begin() + add_end, block_time.begin());
 
