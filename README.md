@@ -10,9 +10,9 @@
 > A reference model is proposed in collaboration between **InterDigital Corporation**, **Technical University of Munich** and **Interhaptics** in this repository. This project contains 3 reference software corresponding to an encoder, a decoder and a synthesizer.
 
 > The software coordinators are the following:
-- [Alexandre Hulsken](alexandre.hulsken@interhaptics.com) (InterHaptics)
-- [Quentin Galvane](quentin.galvane@interdigital.com) (InterDigital)
-- [Lars Nockenberg](lars.nockenberg@tum.de) (TUM)
+- Alexandre Hulsken (InterHaptics): alexandre.hulsken@interhaptics.com
+- Quentin Galvane (InterDigital): quentin.galvane@interdigital.com
+- Lars Nockenberg (TUM): lars.nockenberg@tum.de
 
 ---
 
