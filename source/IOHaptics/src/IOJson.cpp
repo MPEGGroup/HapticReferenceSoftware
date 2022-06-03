@@ -97,6 +97,17 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
+
+    if (jsonPerception.contains("unit_exponent") &&
+        jsonPerception["unit_exponent"].is_number_integer()) {
+      perception.setUnitExponent(jsonPerception["unit_exponent"].get<int8_t>());
+    }
+    if (jsonPerception.contains("perception_unit_exponent") &&
+        jsonPerception["perception_unit_exponent"].is_number_integer()) {
+      perception.setPerceptionUnitExponent(
+          jsonPerception["perception_unit_exponent"].get<int8_t>());
+    }
+
     auto jsonTracks = jsonPerception["tracks"];
     loadingSuccess = loadingSuccess && loadTracks(jsonTracks, perception);
     if (jsonPerception.contains("reference_devices") &&
@@ -144,6 +155,16 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
     auto trackBodyPart = jsonTrack["body_part_mask"].get<uint32_t>();
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
+
+    if (jsonTrack.contains("direction") && jsonTrack["direction"].is_object() &&
+        jsonTrack["direction"].contains("X") && jsonTrack["direction"]["X"].is_number_integer() &&
+        jsonTrack["direction"].contains("Y") && jsonTrack["direction"]["Y"].is_number_integer() &&
+        jsonTrack["direction"].contains("Z") && jsonTrack["direction"]["Z"].is_number_integer()) {
+      types::Direction direction(jsonTrack["direction"]["X"].get<int8_t>(),
+                                 jsonTrack["direction"]["Y"].get<int8_t>(),
+                                 jsonTrack["direction"]["Z"].get<int8_t>());
+      track.setDirection(direction);
+    }
 
     if (jsonTrack.contains("frequency_sampling") &&
         jsonTrack["frequency_sampling"].is_number_integer()) {
@@ -413,6 +434,13 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerc
     jsonPerception["perception_modality"] =
         types::perceptionModalityToString.at(perception.getPerceptionModality());
 
+    if (perception.getUnitExponent().has_value()) {
+      jsonPerception["unit_exponent"] = perception.getUnitExponent().value();
+    }
+    if (perception.getPerceptionUnitExponent().has_value()) {
+      jsonPerception["perception_unit_exponent"] = perception.getPerceptionUnitExponent().value();
+    }
+
     auto jsonReferenceDevices = json::array();
     extractReferenceDevices(perception, jsonReferenceDevices);
     jsonPerception["reference_devices"] = jsonReferenceDevices;
@@ -457,6 +485,12 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     }
     if (track.getSampleCount().has_value()) {
       jsonTrack["sample_count"] = track.getSampleCount().value();
+    }
+    if (track.getDirection().has_value()) {
+      jsonTrack["direction"] = json::object();
+      jsonTrack["direction"]["X"] = track.getDirection().value().X;
+      jsonTrack["direction"]["Y"] = track.getDirection().value().Y;
+      jsonTrack["direction"]["Z"] = track.getDirection().value().Z;
     }
 
     auto jsonVertices = json::array();

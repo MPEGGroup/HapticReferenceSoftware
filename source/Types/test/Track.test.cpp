@@ -228,3 +228,24 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
     REQUIRE_FALSE(res->isOverlapping(e, testingPosition, testingPosition + testingDuration));
   }
 }
+
+TEST_CASE("haptics::types::Track testing direction") {
+  using haptics::types::Direction;
+  using haptics::types::Track;
+  Track track(1, "I'm a placeholder", 0, 0, 1);
+
+  SECTION("checking direction") {
+    const Direction testing_direction(0, -127, 42);
+    track.setDirection(testing_direction);
+
+    REQUIRE(track.getDirection().has_value());
+    CHECK(track.getDirection().value().X == testing_direction.X);
+    CHECK(track.getDirection().value().Y == testing_direction.Y);
+    CHECK(track.getDirection().value().Z == testing_direction.Z);
+  }
+
+  SECTION("checking null direction") {
+    track.setDirection(std::nullopt);
+    CHECK_FALSE(track.getDirection().has_value());
+  }
+}
