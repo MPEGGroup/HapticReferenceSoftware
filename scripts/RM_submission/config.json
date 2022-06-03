@@ -237,6 +237,24 @@
         "type": "Training",
         "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Weapon2.ivs",
         "reference_file":"Training\\Training1-2\\WAV_noPad\\IMMR-vib-Weapon2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "a1",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\IVS\\a1.ivs",
+        "reference_file":"Evaluation\\WAV_noPad\\a1.wav"
+      },
+      {
+        "name": "a2",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\IVS\\a2.ivs",
+        "reference_file":"Evaluation\\WAV_noPad\\a2.wav"
+      },
+      {
+        "name": "a3",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\IVS\\a3.ivs",
+        "reference_file":"Evaluation\\WAV_noPad\\a3.wav"
       }
     ],
     "kinesthetic_effects": [
