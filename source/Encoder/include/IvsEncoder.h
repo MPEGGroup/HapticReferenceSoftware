@@ -51,9 +51,11 @@ public:
   [[nodiscard]] auto static getLastModified(const pugi::xml_document *doc) -> std::string;
   [[nodiscard]] auto static getBasisEffects(const pugi::xml_document *doc)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
-  [[nodiscard]] auto static getLaunchEvents(const pugi::xml_document *doc)
+  [[nodiscard]] auto static getTimelineEffects(const pugi::xml_document *doc)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
-  [[nodiscard]] auto static getRepeatEvents(const pugi::xml_document *doc)
+  [[nodiscard]] auto static getLaunchEvents(const pugi::xml_node *timeline)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static getRepeatEvents(const pugi::xml_node *timeline)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
   [[nodiscard]] auto static getLaunchedEffect(
       const pugi::xml_object_range<pugi::xml_named_node_iterator> *basisEffects,
@@ -63,6 +65,7 @@ public:
                                             const pugi::xml_node *launchEvent,
                                             haptics::types::Effect *out) -> bool;
 
+  [[nodiscard]] auto static getName(const pugi::xml_node *node) -> std::string;
   [[nodiscard]] auto static getTime(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getCount(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getDuration(const pugi::xml_node *node) -> int;
