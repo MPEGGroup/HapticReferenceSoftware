@@ -38,7 +38,6 @@
 
 namespace haptics::encoder {
 
-// NOLINTNEXTLINE
 auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> int {
   if (filename.empty() || out.getTracksSize() > 1) {
     return EXIT_FAILURE;
@@ -64,7 +63,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     };
     myTrack = out.getTrackAt(trackId);
 
-#pragma region "My region name"
     pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
         IvsEncoder::getBasisEffects(&doc);
     pugi::xml_node basisEffect = {};
@@ -144,8 +142,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       }
     }
 
-#pragma endregion "My region name"
-
     out.replaceTrackAt(trackId, myTrack);
     trackId++;
   }
@@ -153,7 +149,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   return EXIT_SUCCESS;
 }
 
-#pragma region "My region name"
 [[nodiscard]] auto IvsEncoder::convertToEffect(const pugi::xml_node *basisEffect,
                                                const pugi::xml_node *launchEvent,
                                                haptics::types::Effect *out) -> bool {
@@ -412,5 +407,4 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 
   return f;
 }
-#pragma endregion "HIDE"
 } // namespace haptics::encoder
