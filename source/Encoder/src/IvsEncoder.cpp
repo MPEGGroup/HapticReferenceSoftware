@@ -38,7 +38,6 @@
 
 namespace haptics::encoder {
 
-// NOLINTNEXTLINE
 auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> int {
   if (filename.empty() || out.getTracksSize() > 1) {
     return EXIT_FAILURE;
@@ -51,13 +50,11 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   }
 
   std::string date = IvsEncoder::getLastModified(&doc);
-  pugi::xml_object_range<pugi::xml_named_node_iterator> timelineEffect =
-      IvsEncoder::getTimelineEffects(&doc);
 
   int trackId = 0;
   for (const pugi::xml_node timeline : IvsEncoder::getTimelineEffects(&doc)) {
     haptics::types::Track myTrack;
-    if (out.getTracksSize() <= trackId) {
+    if (out.getTracksSize() <= static_cast<size_t>(trackId)) {
       std::string timelineName = IvsEncoder::getName(&timeline);
       myTrack = haptics::types::Track(0, timelineName.append(" - ").append(date), 1, 1, 0);
       out.addTrack(myTrack);
