@@ -84,6 +84,7 @@ public:
   [[nodiscard]] auto static floatToInt(int f) -> int;
 
 private:
+  auto static injectIntoBands(types::Effect &effect, types::Track &track) -> void;
   static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
   static const int MIN_FREQUENCY = 0;
   static const int MAX_FREQUENCY = 1000;

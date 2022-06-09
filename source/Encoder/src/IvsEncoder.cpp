@@ -39,7 +39,7 @@
 namespace haptics::encoder {
 
 auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> int {
-  if (filename.empty() || out.getTracksSize() > 1) {
+  if (filename.empty()) {
     return EXIT_FAILURE;
   }
 
@@ -64,7 +64,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
         IvsEncoder::getBasisEffects(&doc);
     pugi::xml_node basisEffect = {};
-    haptics::types::Band *myBand = nullptr;
     haptics::types::Effect myEffect;
     for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&timeline)) {
       if (!IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, basisEffect)) {
@@ -72,23 +71,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       }
 
       myEffect = haptics::types::Effect();
-      if (!IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &myEffect)) {
-        continue;
+      if (IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &myEffect)) {
+        IvsEncoder::injectIntoBands(myEffect, myTrack);
       }
-
-      myBand = myTrack.findBandAvailable(
-          myEffect.getPosition(),
-          myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
-              .getRelativePosition()
-              .value(),
-          types::BandType::Wave, types::EncodingModality::Vectorial);
-      if (myBand == nullptr) {
-        myBand =
-            myTrack.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                                 haptics::types::EncodingModality::Vectorial, 0,
-                                 IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
-      }
-      myBand->addEffect(myEffect);
     }
 
     int time = -1;
@@ -96,6 +81,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     int duration = -1;
     int effectIndex = 0;
     std::vector<haptics::types::Effect> effectToRepeat = {};
+    types::Band myBand;
     for (pugi::xml_node repeatEvent : IvsEncoder::getRepeatEvents(&timeline)) {
       count = IvsEncoder::getCount(&repeatEvent);
       if (count == 0) {
@@ -106,15 +92,15 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       for (uint32_t bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
         time = IvsEncoder::getTime(&repeatEvent);
         duration = IvsEncoder::getDuration(&repeatEvent);
-        myBand = &myTrack.getBandAt((int)bandIndex);
+        myBand = myTrack.getBandAt((int)bandIndex);
 
-        for (effectIndex = 0; effectIndex < (int)myBand->getEffectsSize(); effectIndex++) {
-          myEffect = myBand->getEffectAt(effectIndex);
+        for (effectIndex = 0; effectIndex < (int)myBand.getEffectsSize(); effectIndex++) {
+          myEffect = myBand.getEffectAt(effectIndex);
           if (time <= myEffect.getPosition() && myEffect.getPosition() < time + duration) {
             effectToRepeat.push_back(myEffect);
           } else if (time + duration <= myEffect.getPosition()) {
             myEffect.setPosition(myEffect.getPosition() + count * duration);
-            myBand->replaceEffectAt(effectIndex, myEffect);
+            myBand.replaceEffectAt(effectIndex, myEffect);
           }
         }
       }
@@ -123,19 +109,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
         for (effectIndex = 1; effectIndex <= count; effectIndex++) {
           myEffect = haptics::types::Effect(e);
           myEffect.setPosition(myEffect.getPosition() + duration * (int)effectIndex);
-          myBand = myTrack.findBandAvailable(
-              myEffect.getPosition(),
-              myEffect.getKeyframeAt(static_cast<int>(myEffect.getKeyframesSize()) - 1)
-                  .getRelativePosition()
-                  .value(),
-              types::BandType::Wave, types::EncodingModality::Vectorial);
-          if (myBand == nullptr) {
-            myBand = myTrack.generateBand(haptics::types::BandType::Wave,
-                                          haptics::types::CurveType::Unknown,
-                                          haptics::types::EncodingModality::Vectorial, 0,
-                                          IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
-          }
-          myBand->addEffect(myEffect);
+          IvsEncoder::injectIntoBands(myEffect, myTrack);
         }
       }
     }
@@ -145,6 +119,22 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   }
 
   return EXIT_SUCCESS;
+}
+
+auto IvsEncoder::injectIntoBands(types::Effect& effect, types::Track& track) -> void {
+  haptics::types::Band *myBand =
+      track.findBandAvailable(effect.getPosition(),
+                              effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1)
+                                  .getRelativePosition()
+                                  .value(),
+                              types::BandType::Wave, types::EncodingModality::Vectorial);
+  if (myBand == nullptr) {
+    myBand = track.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
+                                haptics::types::EncodingModality::Vectorial, 0,
+                                IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
+  }
+  myBand->addEffect(effect);
+   
 }
 
 [[nodiscard]] auto IvsEncoder::convertToEffect(const pugi::xml_node *basisEffect,
