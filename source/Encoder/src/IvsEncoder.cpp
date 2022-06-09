@@ -38,6 +38,7 @@
 
 namespace haptics::encoder {
 
+// NOLINTNEXTLINE
 auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> int {
   if (filename.empty() || out.getTracksSize() > 1) {
     return EXIT_FAILURE;
@@ -407,4 +408,5 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 
   return f;
 }
+
 } // namespace haptics::encoder
