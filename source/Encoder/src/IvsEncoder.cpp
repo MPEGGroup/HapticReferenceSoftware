@@ -121,7 +121,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   return EXIT_SUCCESS;
 }
 
-auto IvsEncoder::injectIntoBands(types::Effect& effect, types::Track& track) -> void {
+auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> void {
   haptics::types::Band *myBand =
       track.findBandAvailable(effect.getPosition(),
                               effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1)
@@ -134,7 +134,6 @@ auto IvsEncoder::injectIntoBands(types::Effect& effect, types::Track& track) -> 
                                 IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
   }
   myBand->addEffect(effect);
-   
 }
 
 [[nodiscard]] auto IvsEncoder::convertToEffect(const pugi::xml_node *basisEffect,
