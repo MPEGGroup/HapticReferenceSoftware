@@ -166,8 +166,7 @@ TEST_CASE("IvsEncoder::getTimelineEffects without node", "[getTimelineEffects][w
 
 TEST_CASE("IvsEncoder::getTimelineEffects with wrong node", "[getTimelineEffects][wrongNode]") {
   pugi::xml_document doc;
-  pugi::xml_node node =
-      doc.append_child("ivs-file").append_child("wrong effects").append_child("timeline-effect");
+  doc.append_child("ivs-file").append_child("wrong effects").append_child("timeline-effect");
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
 
@@ -231,8 +230,8 @@ TEST_CASE("IvsEncoder::getLaunchEvents", "[getLaunchEvents][correctParam]") {
   pugi::xml_node launchNode;
   pugi::xml_node effectNode;
   std::vector<std::string> testingEffectValue;
-  int16_t i = 0;
-  for (; i < static_cast<int16_t>(testingValues.size()); i++) {
+  size_t i = 0;
+  for (; i < testingValues.size(); i++) {
     testingEffectValue = testingValues[i];
 
     launchNode = timelineNode.append_child("launch-event");
@@ -298,8 +297,8 @@ TEST_CASE("IvsEncoder::getRepeatEvents", "[getRepeatEvents][correctParam]") {
       doc.append_child("ivs-file").append_child("effects").append_child("timeline-effect");
   pugi::xml_node n;
   std::vector<int> testingEffectValue;
-  int16_t i = 0;
-  for (; i < static_cast<int16_t>(testingValues.size()); i++) {
+  size_t i = 0;
+  for (; i < testingValues.size(); i++) {
     testingEffectValue = testingValues[i];
 
     n = node.append_child("repeat-event");
