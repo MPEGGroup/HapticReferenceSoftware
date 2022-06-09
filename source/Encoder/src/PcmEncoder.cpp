@@ -39,6 +39,7 @@
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
 using haptics::tools::WavParser;
+using haptics::tools::interpolationCodec;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::BaseSignal;
@@ -99,9 +100,23 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
 
     // wavelet processing
     if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic) {
+
+      std::vector<double> interpolationSignal = interpolationCodec(points, myBand.getCurveType());
+
+      std::vector<double> differenceSignal;
+      for (int i = 0; i < filteredSignal.size(); i++) {
+        float difference = filteredSignal[i] - interpolationSignal[i];
+        differenceSignal.push_back(difference);
+      }
+
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
       Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
       signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+
+      for (int i = 0; i < signal_wavelet.size(); i++) {
+        signal_wavelet[i] += differenceSignal[i];
+      }
+
       waveletBand = Band();
       if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
                                   config.curveFrequencyLimit, waveletBand)) {
