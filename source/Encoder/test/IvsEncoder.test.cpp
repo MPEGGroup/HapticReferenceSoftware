@@ -166,9 +166,8 @@ TEST_CASE("IvsEncoder::getTimelineEffects without node", "[getTimelineEffects][w
 
 TEST_CASE("IvsEncoder::getTimelineEffects with wrong node", "[getTimelineEffects][wrongNode]") {
   pugi::xml_document doc;
-  pugi::xml_node node = doc.append_child("ivs-file")
-                            .append_child("wrong effects")
-                            .append_child("timeline-effect");
+  pugi::xml_node node =
+      doc.append_child("ivs-file").append_child("wrong effects").append_child("timeline-effect");
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> res = IvsEncoder::getLaunchEvents(&doc);
 
