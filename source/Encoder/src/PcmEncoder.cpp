@@ -38,8 +38,8 @@
 
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
-using haptics::tools::WavParser;
 using haptics::tools::interpolationCodec;
+using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::BaseSignal;

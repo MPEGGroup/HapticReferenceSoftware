@@ -34,9 +34,9 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include <Types/include/CurveType.h>
 #include <iostream>
 #include <vector>
-#include <Types/include/CurveType.h>
 
 constexpr auto S_2_MS = 1000.0;
 constexpr auto MS_2_S = 0.001;
@@ -57,8 +57,7 @@ namespace haptics::tools {
 [[nodiscard]] auto is_eq(double a, double b) -> bool;
 
 [[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
-                                      types::CurveType curveType)
-    -> std::vector<double>;
+                                      types::CurveType curveType) -> std::vector<double>;
 
 } // namespace haptics::tools
 #endif

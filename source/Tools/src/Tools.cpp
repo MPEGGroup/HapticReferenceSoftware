@@ -59,8 +59,8 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return std::fabs(a - b) <= std::numeric_limits<double>::epsilon() * threshold;
 }
 
-[[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points, types::CurveType curveType)
-    -> std::vector<double> {
+[[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
+                                      types::CurveType curveType) -> std::vector<double> {
   std::vector<double> interpolation;
   double t = 0;
   int i = 0;
