@@ -101,11 +101,11 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
 
 auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double {
   // OUT OUF BOUND CHECK
-  if (effects.empty() ||
-      position > effects.back().getPosition() +
-                     effects.back().getEffectTimeLength(bandType, encodingModality,
-                                                        TRANSIENT_DURATION_MS) ||
-      position < 0) {
+  if (effects.empty() || ((position > effects.back().getPosition() +
+                                          effects.back().getEffectTimeLength(
+                                              bandType, encodingModality, TRANSIENT_DURATION_MS) ||
+                           position < 0) &&
+                          (this->encodingModality != types::EncodingModality::Wavelet))) {
     return 0;
   }
 

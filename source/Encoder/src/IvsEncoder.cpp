@@ -172,7 +172,7 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
     float attackAmplitude = static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
     out->addAmplitudeAt(attackAmplitude, 0);
-    if (attackTime > duration) {
+    if (attackTime >= duration) {
       std::pair<int, double> attackStart(0, attackAmplitude);
       std::pair<int, double> attackEnd(attackTime, amplitude);
       out->addAmplitudeAt(
@@ -185,23 +185,21 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 
   int fadeDuration = IvsEncoder::getFadeTime(basisEffect);
   if (fadeDuration != -1) {
-    int fadeTime = IvsEncoder::getDuration(basisEffect) - fadeDuration;
-    if (fadeTime >= duration) {
-      return true;
-    }
+    int fadeTime = duration - fadeDuration;
 
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     float fadeAmplitude = static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
-    out->addAmplitudeAt(amplitude, fadeTime);
 
-    if (fadeTime + fadeDuration > duration) {
+    if (fadeTime < attackTime) {
       std::pair<int, double> fadeStart(fadeTime, amplitude);
-      std::pair<int, double> fadeEnd(fadeTime + fadeDuration, fadeAmplitude);
+      std::pair<int, double> fadeEnd(duration, fadeAmplitude);
       out->addAmplitudeAt(
-          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, duration)), duration);
-    } else {
-      out->addAmplitudeAt(fadeAmplitude, duration);
+          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, attackTime)),
+          attackTime, false);
+    } else if (fadeTime > attackTime) {
+      out->addAmplitudeAt(amplitude, fadeTime);
     }
+    out->addAmplitudeAt(fadeAmplitude, duration);
   }
 
   return true;
