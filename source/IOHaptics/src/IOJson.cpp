@@ -86,12 +86,13 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
       std::cerr << "Missing or invalid perception modality" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("unit_exponent") ||
-        !jsonPerception["unit_exponent"].is_number_integer()) {
+    if (!jsonPerception.contains("tracks") ||
+        !jsonPerception["tracks"].is_number_integer()) {
       std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("unit_exponent") || !jsonPerception["unit_exponent"].is_number_integer()) {
+    if (!jsonPerception.contains("unit_exponent") ||
+        !jsonPerception["unit_exponent"].is_number_integer()) {
       std::cerr << "Missing or invalid unit_exponent" << std::endl;
       continue;
     }
