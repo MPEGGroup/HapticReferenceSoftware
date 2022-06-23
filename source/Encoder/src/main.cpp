@@ -75,7 +75,8 @@ auto help() -> void {
       << std::endl;
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size, readability-function-cognitive-complexity)
+// NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size,
+// readability-function-cognitive-complexity)
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);

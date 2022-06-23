@@ -107,50 +107,51 @@ struct EncodingConfig {
     return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }
 
-auto static generateConfigBudget(int bitrate = 2, int budget = 3) -> EncodingConfig {
+  auto static generateConfigBudget(int bitrate = 2, int budget = 3) -> EncodingConfig {
 
-  int wavelet_windowLength = 0;
-  double curveFrequencyLimit = 0;
-  int wavelet_bitbudget = 0;
-  switch (bitrate) {
-  case BITR_2:
-    wavelet_bitbudget = budget;
-    curveFrequencyLimit = CUTOFF_FREQUENCY_2;
-    wavelet_windowLength = WINDOW_LENGTH_2;
-    break;
-  case BITR_16:
-    wavelet_bitbudget = budget;
-    curveFrequencyLimit = CUTOFF_FREQUENCY_16;
-    wavelet_windowLength = WINDOW_LENGTH_16;
-    break;
-  case BITR_64:
-    wavelet_bitbudget = budget;
-    curveFrequencyLimit = CUTOFF_FREQUENCY_64;
-    wavelet_windowLength = WINDOW_LENGTH_16;
-    break;
-  default:
-    std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
-    wavelet_bitbudget = BITBUDGET_2KBS;
-    break;
+    int wavelet_windowLength = 0;
+    double curveFrequencyLimit = 0;
+    int wavelet_bitbudget = 0;
+    switch (bitrate) {
+    case BITR_2:
+      wavelet_bitbudget = budget;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_2;
+      wavelet_windowLength = WINDOW_LENGTH_2;
+      break;
+    case BITR_16:
+      wavelet_bitbudget = budget;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_16;
+      wavelet_windowLength = WINDOW_LENGTH_16;
+      break;
+    case BITR_64:
+      wavelet_bitbudget = budget;
+      curveFrequencyLimit = CUTOFF_FREQUENCY_64;
+      wavelet_windowLength = WINDOW_LENGTH_16;
+      break;
+    default:
+      std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
+      wavelet_bitbudget = BITBUDGET_2KBS;
+      break;
+    }
+
+    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }
 
-  return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
-}
+  auto static generateConfigParam(int bitrate = 2) -> EncodingConfig {
 
-auto static generateConfigParam(int bitrate = 2) -> EncodingConfig {
-
-  int wavelet_windowLength = WINDOW_LENGTH_2;
-  double curveFrequencyLimit = 0;
-  double temp = (double)bitrate;
-  auto wavelet_bitbudget = (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
-  //auto wavelet_bitbudget = bitrate;
-  if (wavelet_bitbudget > (log2(wavelet_windowLength) - 2) * MAXBITS) {
-    wavelet_bitbudget = (log2(wavelet_windowLength) - 2) * MAXBITS;
-  } else if (wavelet_bitbudget < 1) {
-    wavelet_bitbudget = 1;
+    int wavelet_windowLength = WINDOW_LENGTH_2;
+    double curveFrequencyLimit = 0;
+    double temp = (double)bitrate;
+    auto wavelet_bitbudget =
+        (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
+    // auto wavelet_bitbudget = bitrate;
+    if (wavelet_bitbudget > (log2(wavelet_windowLength) - 2) * MAXBITS) {
+      wavelet_bitbudget = (log2(wavelet_windowLength) - 2) * MAXBITS;
+    } else if (wavelet_bitbudget < 1) {
+      wavelet_bitbudget = 1;
+    }
+    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }
-  return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
-}
 };
 
 class PcmEncoder {
