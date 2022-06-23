@@ -32,7 +32,6 @@
  */
 
 #include <Encoder/include/PcmEncoder.h>
-#include <Encoder/include/WaveletEncoder.h>
 #include <Tools/include/Tools.h>
 #include <Types/include/CurveType.h>
 

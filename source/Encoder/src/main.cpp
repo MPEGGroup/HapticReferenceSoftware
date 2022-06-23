@@ -75,8 +75,8 @@ auto help() -> void {
       << std::endl;
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
-auto main(int argc, char *argv[]) -> int { //NOLINT
+// NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size, readability-function-cognitive-complexity)
+auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
   if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
@@ -150,7 +150,7 @@ auto main(int argc, char *argv[]) -> int { //NOLINT
             int budget = std::stoi(inputParser.getCmdOption("-bu"));
             config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget);
           } else {
-            config = haptics::encoder::EncodingConfig::generateConfig(bitrate);
+            config = haptics::encoder::EncodingConfig::generateConfigParam(bitrate);
           }
         } else {
           config = haptics::encoder::EncodingConfig::generateConfig();
@@ -180,7 +180,7 @@ auto main(int argc, char *argv[]) -> int { //NOLINT
         int budget = std::stoi(inputParser.getCmdOption("-bu"));
         config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget);
       } else {
-        config = haptics::encoder::EncodingConfig::generateConfig(bitrate);
+        config = haptics::encoder::EncodingConfig::generateConfigParam(bitrate);
       }
     } else {
       config = haptics::encoder::EncodingConfig::generateConfig();
