@@ -55,7 +55,8 @@ enum class PerceptionModality {
   Wind = 8,
   Kinesthetic = 9,
   VibrotactileTexture = 10,
-  Stiffness = 11
+  Stiffness = 11,
+  Friction = 12
 };
 
 static const std::map<std::string, PerceptionModality> stringToPerceptionModality = {
@@ -70,7 +71,8 @@ static const std::map<std::string, PerceptionModality> stringToPerceptionModalit
     {"Wind", PerceptionModality::Wind},
     {"Kinesthetic", PerceptionModality::Kinesthetic},
     {"Vibrotactile Texture", PerceptionModality::VibrotactileTexture},
-    {"Stiffness", PerceptionModality::Stiffness}};
+    {"Stiffness", PerceptionModality::Stiffness},
+    {"Friction", PerceptionModality::Friction}};
 static const std::map<PerceptionModality, std::string> perceptionModalityToString = {
     {PerceptionModality::Other, "Other"},
     {PerceptionModality::Pressure, "Pressure"},
@@ -83,7 +85,8 @@ static const std::map<PerceptionModality, std::string> perceptionModalityToStrin
     {PerceptionModality::Wind, "Wind"},
     {PerceptionModality::Kinesthetic, "Kinesthetic"},
     {PerceptionModality::VibrotactileTexture, "Vibrotactile Texture"},
-    {PerceptionModality::Stiffness, "Stiffness"}};
+    {PerceptionModality::Stiffness, "Stiffness"},
+    {PerceptionModality::Friction, "Friction"}};
 
 class Perception {
 public:

@@ -108,7 +108,6 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic &&
         out.getPerceptionModality() != types::PerceptionModality::VibrotactileTexture &&
         out.getPerceptionModality() != types::PerceptionModality::Stiffness) {
-
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
       Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
       signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);

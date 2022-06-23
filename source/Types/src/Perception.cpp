@@ -195,6 +195,9 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   if (modalityString == "Stiffness effect") {
     return PerceptionModality::Stiffness;
   }
+  if (modalityString == "Friction effect") {
+    return PerceptionModality::Friction;
+  }
 
   return PerceptionModality::Other;
 }
