@@ -232,10 +232,9 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
   const int8_t testingUnitExponent_perception1 = 0;
-  haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
-                                                testingDescription_perception1,
-                                                testingPerceptionModality_perception1,
-                                                testingUnitExponent_perception1);
+  haptics::types::Perception testingPerception1(
+      testingId_perception1, testingAvatarId_perception1, testingDescription_perception1,
+      testingPerceptionModality_perception1, testingUnitExponent_perception1);
 
   const int testingId_track0 = 0;
   const std::string testingDescription_track0 = "testingDescription_track0";

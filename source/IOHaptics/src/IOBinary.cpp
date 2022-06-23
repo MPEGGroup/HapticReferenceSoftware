@@ -172,9 +172,9 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
     auto avatarId = IOBinaryPrimitives::readNBytes<int, 4>(file);
     auto unitExponent = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
 
-    myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
-                                     static_cast<types::PerceptionModality>(perceptionModality),
-                                     unitExponent);
+    myPerception =
+        types::Perception(perceptionId, avatarId, perceptionDescription,
+                          static_cast<types::PerceptionModality>(perceptionModality), unitExponent);
     if (!IOBinary::readReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -420,8 +420,8 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     }
 
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
-
-    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask, direction);
+    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask,
+                   direction);
     if (frequencySampling.has_value()) {
       t.setFrequencySampling(frequencySampling);
     }
