@@ -246,8 +246,8 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const haptics::types::Direction testingDirection_track0(127, 4, -128);
   const haptics::types::Direction expectedDirection_track0(89, 2, -90);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
-      testingGain_track0, testingMixingWeight_track0,
-      testingBodyPartMask_track0, testingDirection_track0);
+                                      testingGain_track0, testingMixingWeight_track0,
+                                      testingBodyPartMask_track0, testingDirection_track0);
 
   for (auto vertex : testingVertices_track0) {
     testingTrack0.addVertex(vertex);
