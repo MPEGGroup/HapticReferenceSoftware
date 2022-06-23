@@ -170,9 +170,11 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
     auto perceptionModality = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
     std::string perceptionDescription = IOBinaryPrimitives::readString(file);
     auto avatarId = IOBinaryPrimitives::readNBytes<int, 4>(file);
+    auto unitExponent = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
 
-    myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
-                                     static_cast<types::PerceptionModality>(perceptionModality));
+    myPerception =
+        types::Perception(perceptionId, avatarId, perceptionDescription,
+                          static_cast<types::PerceptionModality>(perceptionModality), unitExponent);
     if (!IOBinary::readReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -204,6 +206,9 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
 
     int avatarId = myPerception.getAvatarId();
     IOBinaryPrimitives::writeNBytes<int, 4>(avatarId, file);
+
+    int8_t unitExponent = myPerception.getUnitExponent();
+    IOBinaryPrimitives::writeNBytes<int8_t, 1>(unitExponent, file);
 
     if (!IOBinary::writeReferenceDevices(myPerception, file)) {
       return false;
@@ -395,15 +400,29 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto trackGain = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_FLOAT, MAX_FLOAT);
     auto trackMixingWeight = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
-    auto frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
-    std::optional<uint32_t> sampleCount = std::nullopt;
-    if (frequencySampling != 0) {
-      sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
-    }
-    auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
+    auto optionalFieldsMasking = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
 
-    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
-    if (frequencySampling != 0) {
+    std::optional<uint32_t> frequencySampling = std::nullopt;
+    std::optional<uint32_t> sampleCount = std::nullopt;
+    if ((optionalFieldsMasking & (uint8_t)(0b0000'0001)) != 0) {
+      frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+      if (frequencySampling > 0) {
+        sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+      }
+    }
+
+    std::optional<types::Direction> direction = std::nullopt;
+    if ((optionalFieldsMasking & (uint8_t)(0b0000'0010)) != 0) {
+      auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      direction = types::Direction(X, Y, Z);
+    }
+
+    auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
+    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask,
+                   direction);
+    if (frequencySampling.has_value()) {
       t.setFrequencySampling(frequencySampling);
     }
     if (sampleCount.has_value()) {
@@ -457,12 +476,30 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     uint32_t bodyPartMask = myTrack.getBodyPartMask();
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
 
-    uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
-    IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
+    auto optionalFieldsMasking = (uint8_t)(0b0000'0000);
+    if (myTrack.getFrequencySampling().has_value()) {
+      optionalFieldsMasking |= (uint8_t)(0b0000'0001);
+    }
+    if (myTrack.getDirection().has_value()) {
+      optionalFieldsMasking |= (uint8_t)(0b0000'0010);
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalFieldsMasking, file);
 
-    if (frequencySampling != 0) {
-      uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
-      IOBinaryPrimitives::writeNBytes<uint32_t, 4>(sampleCount, file);
+    if (myTrack.getFrequencySampling().has_value()) {
+      uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
+      IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
+
+      if (frequencySampling > 0) {
+        uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
+        IOBinaryPrimitives::writeNBytes<uint32_t, 4>(sampleCount, file);
+      }
+    }
+
+    if (myTrack.getDirection().has_value()) {
+      types::Direction direction = myTrack.getDirection().value();
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.X, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Y, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Z, file);
     }
 
     auto verticesCount = static_cast<int>(myTrack.getVerticesSize());

@@ -59,7 +59,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   auto tracksSize = out.getTracksSize();
   if (tracksSize < numChannels) {
     for (uint32_t channelIndex = tracksSize; channelIndex < numChannels; channelIndex++) {
-      myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0));
+      myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0), std::nullopt);
       out.addTrack(myTrack);
     }
   } else if (out.getTracksSize() != numChannels) {
@@ -81,14 +81,21 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     signal = wavParser.getSamplesChannel(channelIndex);
 
     // CURVE BAND
-    filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
+    if (out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture ||
+        out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
+      filteredSignal = signal;
+    } else {
+      filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
+    }
     points = PcmEncoder::localExtrema(filteredSignal, true);
     myBand = Band();
     if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
                                        config.curveFrequencyLimit, &myBand)) {
-      if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic) {
+      if (out.getPerceptionModality() == types::PerceptionModality::Kinesthetic ||
+          out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
         myBand.setCurveType(CurveType::Linear);
-      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration) {
+      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibration ||
+                 out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture) {
         myBand.setCurveType(CurveType::Cubic);
       }
       myTrack.addBand(myBand);
@@ -98,7 +105,9 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
 
     // wavelet processing
-    if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic) {
+    if (out.getPerceptionModality() != types::PerceptionModality::Kinesthetic &&
+        out.getPerceptionModality() != types::PerceptionModality::VibrotactileTexture &&
+        out.getPerceptionModality() != types::PerceptionModality::Stiffness) {
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
       Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
       signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);

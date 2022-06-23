@@ -161,9 +161,10 @@ TEST_CASE("write/read file header for reference device testing") {
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
-  haptics::types::Perception testingPerception(testingId_perception0, testingAvatarId_perception0,
-                                               testingDescription_perception0,
-                                               testingPerceptionModality_perception0);
+  const int8_t testingUnitExponent_perception0 = 0;
+  haptics::types::Perception testingPerception(
+      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
+      testingPerceptionModality_perception0, testingUnitExponent_perception0);
 
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
@@ -194,7 +195,7 @@ TEST_CASE("write/read file header for reference device testing") {
         testingDescription_perception0.size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 109;
+        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 110;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -338,17 +339,19 @@ TEST_CASE("write/read file header for track testing") {
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
-  haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
-                                                testingDescription_perception0,
-                                                testingPerceptionModality_perception0);
+  const int8_t testingUnitExponent_perception0 = 0;
+  haptics::types::Perception testingPerception0(
+      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
+      testingPerceptionModality_perception0, testingUnitExponent_perception0);
 
   const int testingId_perception1 = 423;
   const int testingAvatarId_perception1 = 3;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
-  haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
-                                                testingDescription_perception1,
-                                                testingPerceptionModality_perception1);
+  const int8_t testingUnitExponent_perception1 = -3;
+  haptics::types::Perception testingPerception1(
+      testingId_perception1, testingAvatarId_perception1, testingDescription_perception1,
+      testingPerceptionModality_perception1, testingUnitExponent_perception1);
 
   const int testingId_track0 = 0;
   const std::string testingDescription_track0 = "testingDescription_track0";
@@ -357,9 +360,10 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
+  const haptics::types::Direction testingDirection_track0(127, 4, -128);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0);
+                                      testingBodyPartMask_track0, testingDirection_track0);
   for (auto vertex : testingVertices_track0) {
     testingTrack0.addVertex(vertex);
   }
@@ -373,9 +377,10 @@ TEST_CASE("write/read file header for track testing") {
   const float testingMixingWeight_track1 = .333;
   const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
   const size_t testingBandsCount_track1 = 0;
+  const haptics::types::Direction testingDirection_track1(0, 0, -1);
   haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
                                       testingGain_track1, testingMixingWeight_track1,
-                                      testingBodyPartMask_track1);
+                                      testingBodyPartMask_track1, testingDirection_track1);
   for (size_t i = 0; i < testingBandsCount_track1; i++) {
     testingTrack1.generateBand();
   }
@@ -387,9 +392,10 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track2 = 0;
   const std::vector<int> testingVertices_track2 = {0, 6};
   const size_t testingBandsCount_track2 = 1;
+  const haptics::types::Direction testingDirection_track2(1, 0, 1);
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
-                                      testingBodyPartMask_track2);
+                                      testingBodyPartMask_track2, testingDirection_track2);
   for (auto vertex : testingVertices_track2) {
     testingTrack2.addVertex(vertex);
   }
@@ -415,7 +421,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 132;
+        testingVertices_track2.size() + 134;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -436,6 +442,7 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getAvatarId() == testingAvatarId_perception0);
     CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);
     CHECK(res.getPerceptionAt(0).getPerceptionModality() == testingPerceptionModality_perception0);
+    CHECK(res.getPerceptionAt(0).getUnitExponent() == testingUnitExponent_perception0);
 
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
@@ -443,6 +450,8 @@ TEST_CASE("write/read file header for track testing") {
           floatPrecision);
     CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() -
                     testingMixingWeight_track0));
+    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
             testingVertices_track0.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
@@ -456,6 +465,8 @@ TEST_CASE("write/read file header for track testing") {
           floatPrecision);
     CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() -
                     testingMixingWeight_track1) < floatPrecision);
+    REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getDirection().value() == testingDirection_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
 
@@ -464,6 +475,7 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(1).getAvatarId() == testingAvatarId_perception1);
     CHECK(res.getPerceptionAt(1).getDescription() == testingDescription_perception1);
     CHECK(res.getPerceptionAt(1).getPerceptionModality() == testingPerceptionModality_perception1);
+    CHECK(res.getPerceptionAt(1).getUnitExponent() == testingUnitExponent_perception1);
 
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
@@ -471,6 +483,8 @@ TEST_CASE("write/read file header for track testing") {
           floatPrecision);
     CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() -
                     testingMixingWeight_track2) < floatPrecision);
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getDirection().value() == testingDirection_track2);
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
@@ -508,9 +522,10 @@ TEST_CASE("write/read file for body testing") {
   const int testingAvatarId_perception0 = 0;
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
-  haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
-                                                testingDescription_perception0,
-                                                testingPerceptionModality_perception0);
+  const int8_t testingUnitExponent_perception0 = 0;
+  haptics::types::Perception testingPerception0(
+      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
+      testingPerceptionModality_perception0, testingUnitExponent_perception0);
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
@@ -531,9 +546,10 @@ TEST_CASE("write/read file for body testing") {
   const int testingAvatarId_perception1 = 3;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
-  haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
-                                                testingDescription_perception1,
-                                                testingPerceptionModality_perception1);
+  const int8_t testingUnitExponent_perception1 = 42;
+  haptics::types::Perception testingPerception1(
+      testingId_perception1, testingAvatarId_perception1, testingDescription_perception1,
+      testingPerceptionModality_perception1, testingUnitExponent_perception1);
 
   const int testingId_track0 = 0;
   const std::string testingDescription_track0 = "testingDescription_track0";
@@ -541,9 +557,10 @@ TEST_CASE("write/read file for body testing") {
   const float testingMixingWeight_track0 = 1;
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
+  const haptics::types::Direction testingDirection_track0(127, 4, -128);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0);
+                                      testingBodyPartMask_track0, testingDirection_track0);
   for (auto vertex : testingVertices_track0) {
     testingTrack0.addVertex(vertex);
   }
@@ -555,7 +572,7 @@ TEST_CASE("write/read file for body testing") {
   const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
   haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
                                       testingGain_track1, testingMixingWeight_track1,
-                                      testingBodyPartMask_track1);
+                                      testingBodyPartMask_track1, std::nullopt);
 
   const int testingId_track2 = 4;
   const std::string testingDescription_track2 = "I'm inside a test";
@@ -565,7 +582,7 @@ TEST_CASE("write/read file for body testing") {
   const std::vector<int> testingVertices_track2 = {0, 6};
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
-                                      testingBodyPartMask_track2);
+                                      testingBodyPartMask_track2, std::nullopt);
   for (auto vertex : testingVertices_track2) {
     testingTrack2.addVertex(vertex);
   }
@@ -652,7 +669,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 337;
+        testingVertices_track2.size() + 333;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -685,6 +702,7 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
     CHECK(res.getPerceptionAt(0).getPerceptionModality() == testingPerceptionModality_perception0);
+    CHECK(res.getPerceptionAt(0).getUnitExponent() == testingUnitExponent_perception0);
     REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
 
     // CHECK track 0
@@ -695,6 +713,8 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
     CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() -
                     testingMixingWeight_track0) < floatPrecision);
+    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
             testingVertices_track0.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
@@ -745,6 +765,7 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
     CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() -
                     testingMixingWeight_track1) < floatPrecision);
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
 
     // CHECK band
@@ -786,6 +807,7 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
     CHECK(res.getPerceptionAt(1).getPerceptionModality() == testingPerceptionModality_perception1);
     CHECK(res.getPerceptionAt(1).getReferenceDevicesSize() == 0);
+    CHECK(res.getPerceptionAt(1).getUnitExponent() == testingUnitExponent_perception1);
     REQUIRE(res.getPerceptionAt(1).getTracksSize() == 1);
 
     // CHECK track
@@ -796,6 +818,7 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
     CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() -
                     testingMixingWeight_track2) < floatPrecision);
+    CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
             testingVertices_track2.size());
     for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {

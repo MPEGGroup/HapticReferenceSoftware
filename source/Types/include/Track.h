@@ -40,16 +40,30 @@
 
 namespace haptics::types {
 
+struct Direction {
+  int8_t X = 0;
+  int8_t Y = 0;
+  int8_t Z = 0;
+
+  explicit Direction() = default;
+  explicit Direction(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+
+  auto operator==(const Direction &other) const -> bool {
+    return X == other.X && Y == other.Y && Z == other.Z;
+  };
+};
+
 class Track {
 public:
   explicit Track() = default;
   explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                 uint32_t newBodyPartMask)
+                 uint32_t newBodyPartMask, std::optional<Direction> newDirection)
       : id(newId)
       , description(std::move(newDescription))
       , gain(newGain)
       , mixingWeight(newMixingWeight)
       , bodyPartMask(newBodyPartMask)
+      , direction(newDirection)
       , vertices({})
       , bands({})
       , frequencySampling(std::nullopt)
@@ -85,6 +99,8 @@ public:
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
   auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
+  [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
+  auto setDirection(std::optional<Direction> newDirection) -> void;
 
 private:
   int id = -1;
@@ -92,6 +108,7 @@ private:
   float gain = 1;
   float mixingWeight = 1;
   uint32_t bodyPartMask = 0;
+  std::optional<Direction> direction = std::nullopt;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;

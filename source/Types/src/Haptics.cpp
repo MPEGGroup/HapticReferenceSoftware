@@ -31,6 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <Tools/include/Tools.h>
 #include <Types/include/Haptics.h>
 #include <ctime>
 
@@ -80,12 +81,12 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     auto element = data.getHapticElementMetadataAt(i);
     std::string elemDescription = element.elementDescription;
     PerceptionModality perceptionModality = Perception::convertToModality(elemDescription);
-    Perception perception(i, 0, elemDescription, perceptionModality);
+    Perception perception(i, 0, elemDescription, perceptionModality, MILLISECONDS_EXPONENT);
     short numChannels = element.numHapticChannels;
     for (int j = 0; j < numChannels; j++) {
       auto channel = element.channelsMetadata[j];
       Track track(j, channel.channelDescription, channel.gain, 1,
-                  static_cast<uint32_t>(channel.bodyPartMask));
+                  static_cast<uint32_t>(channel.bodyPartMask), std::nullopt);
       perception.addTrack(track);
     }
     perceptions.push_back(perception);

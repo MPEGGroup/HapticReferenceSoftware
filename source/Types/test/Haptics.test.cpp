@@ -43,7 +43,7 @@ TEST_CASE("haptics::types::Haptics") {
   Haptics h("1", "02/04/2022", "test content");
   haptics::types::Avatar avatar(0, 0, haptics::types::AvatarType::Vibration);
   haptics::types::Perception perception(0, 0, "Vibration effect",
-                                        haptics::types::PerceptionModality::Vibration);
+                                        haptics::types::PerceptionModality::Vibration, 1);
 
   SECTION("Checking avatars", "[addAvatar]") {
     h.addAvatar(avatar);

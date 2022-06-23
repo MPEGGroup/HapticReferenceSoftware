@@ -38,6 +38,7 @@
 #include <IOHaptics/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
+#include <Tools/include/Tools.h>
 #include <Types/include/Haptics.h>
 #include <Types/include/Perception.h>
 #include <filesystem>
@@ -102,7 +103,8 @@ auto main(int argc, char *argv[]) -> int {
   std::cout << "The generated file will be : " << output << "\n";
 
   Haptics hapticFile;
-  Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
+  Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other,
+                          MILLISECONDS_EXPONENT);
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
   if (ext == "ohm") {

@@ -40,6 +40,7 @@ constexpr auto S_2_MS = 1000.0;
 constexpr auto MS_2_S = 0.001;
 constexpr auto MS_2_MICROSECONDS = 1000;
 constexpr auto MICROSECONDS_2_MS = 0.001;
+constexpr int8_t MILLISECONDS_EXPONENT = -3;
 
 namespace haptics::tools {
 

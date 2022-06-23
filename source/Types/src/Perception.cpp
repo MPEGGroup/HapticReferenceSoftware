@@ -57,6 +57,10 @@ auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality)
   perceptionModality = newPerceptionModality;
 }
 
+[[nodiscard]] auto Perception::getUnitExponent() const -> int8_t { return unitExponent; }
+
+auto Perception::setUnitExponent(int8_t newUnitExponent) -> void { unitExponent = newUnitExponent; }
+
 auto Perception::getTracksSize() -> size_t { return tracks.size(); }
 
 auto Perception::getTrackAt(int index) -> haptics::types::Track & { return tracks.at(index); }
@@ -184,6 +188,15 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   }
   if (modalityString == "Kinesthetic effect") {
     return PerceptionModality::Kinesthetic;
+  }
+  if (modalityString == "Texture effect") {
+    return PerceptionModality::VibrotactileTexture;
+  }
+  if (modalityString == "Stiffness effect") {
+    return PerceptionModality::Stiffness;
+  }
+  if (modalityString == "Friction effect") {
+    return PerceptionModality::Friction;
   }
 
   return PerceptionModality::Other;
