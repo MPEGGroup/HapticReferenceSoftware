@@ -48,7 +48,7 @@ struct Direction {
   explicit Direction() = default;
   explicit Direction(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
 
-  auto operator==(const Direction &other) const -> int {
+  auto operator==(const Direction &other) const -> bool {
     return X == other.X && Y == other.Y && Z == other.Z;
   };
 };
@@ -108,12 +108,12 @@ private:
   float gain = 1;
   float mixingWeight = 1;
   uint32_t bodyPartMask = 0;
+  std::optional<Direction> direction = std::nullopt;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> referenceDeviceId;
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;
-  std::optional<Direction> direction;
 };
 } // namespace haptics::types
 #endif // TRACK_H
