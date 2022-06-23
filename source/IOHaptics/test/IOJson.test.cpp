@@ -130,10 +130,9 @@ TEST_CASE("write/read gmpg haptic file for reference device testing") {
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
   const int8_t testingUnitExponent_perception0 = -3;
-  haptics::types::Perception testingPerception(testingId_perception0, testingAvatarId_perception0,
-                                               testingDescription_perception0,
-                                               testingPerceptionModality_perception0,
-                                               testingUnitExponent_perception0);
+  haptics::types::Perception testingPerception(
+      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
+      testingPerceptionModality_perception0, testingUnitExponent_perception0);
 
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
@@ -224,10 +223,9 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
   const int8_t testingUnitExponent_perception0 = -3;
-  haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
-                                                testingDescription_perception0,
-                                                testingPerceptionModality_perception0,
-                                                testingUnitExponent_perception0);
+  haptics::types::Perception testingPerception0(
+      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
+      testingPerceptionModality_perception0, testingUnitExponent_perception0);
 
   const int testingId_perception1 = 423;
   const int testingAvatarId_perception1 = 3;
@@ -248,9 +246,9 @@ TEST_CASE("write/read gmpg haptic file for track testing") {
   const size_t testingBandsCount_track0 = 45;
   const haptics::types::Direction testingDirection_track0(127, 4, -128);
   const haptics::types::Direction expectedDirection_track0(89, 2, -90);
-  haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
-                                      testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0, testingDirection_track0);
+  haptics::types::Perception testingPerception1(
+      testingId_perception1, testingAvatarId_perception1, testingDescription_perception1,
+      testingPerceptionModality_perception1, testingUnitExponent_perception1);
   for (auto vertex : testingVertices_track0) {
     testingTrack0.addVertex(vertex);
   }
@@ -388,10 +386,9 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::string testingDescription_perception0 = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception0 = haptics::types::PerceptionModality::Vibration;
   const int8_t testingUnitExponent_perception0 = 0;
-  haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
-                                                testingDescription_perception0,
-                                                testingPerceptionModality_perception0,
-                                                testingUnitExponent_perception0);
+  haptics::types::Perception testingPerception0(
+      testingId_perception0, testingAvatarId_perception0, testingDescription_perception0,
+      testingPerceptionModality_perception0, testingUnitExponent_perception0);
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
@@ -413,10 +410,9 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
   const int8_t testingUnitExponent_perception1 = 42;
-  haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
-                                                testingDescription_perception1,
-                                                testingPerceptionModality_perception1,
-                                                testingUnitExponent_perception1);
+  haptics::types::Perception testingPerception1(
+      testingId_perception1, testingAvatarId_perception1, testingDescription_perception1,
+      testingPerceptionModality_perception1, testingUnitExponent_perception1);
 
   const int testingId_track0 = 0;
   const std::string testingDescription_track0 = "testingDescription_track0";

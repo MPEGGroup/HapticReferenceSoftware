@@ -83,7 +83,7 @@ TEST_CASE("haptics::types::Perception checking setters") {
   }
 }
 
-//NOLINTNEXTLINE(readability-function-cognitive-complexity)
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("haptics::types::Perception testing tracks") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
