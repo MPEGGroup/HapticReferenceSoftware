@@ -5,9 +5,14 @@
 ![Version](https://img.shields.io/badge/version-RM0-blueviolet.svg?style=flat-square)
 
 
-> This project answer the Call for Proposals (CfP) on a Coded Representation of Haptics - Phase 1 (*refs. m56255_v6*).
+> This project answers the Call for Proposals (CfP) on a Coded Representation of Haptics - Phase 1 (*refs. m56255_v6*).
 >
 > A reference model is proposed in collaboration between **InterDigital Corporation**, **Technical University of Munich** and **Interhaptics** in this repository. This project contains 3 reference software corresponding to an encoder, a decoder and a synthesizer.
+
+> The software coordinators are the following:
+- Alexandre Hulsken (InterHaptics): alexandre.hulsken@interhaptics.com
+- Quentin Galvane (InterDigital): quentin.galvane@interdigital.com
+- Lars Nockenberg (TUM): lars.nockenberg@tum.de
 
 ---
 

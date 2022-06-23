@@ -69,6 +69,11 @@ auto Effect::addKeyframe(haptics::types::Keyframe &newKeyframe) -> void {
 }
 
 auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position) -> bool {
+  return this->addAmplitudeAt(amplitude, position, true);
+}
+
+auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position,
+                            bool overrideIfAlreadyExists) -> bool {
   auto kit =
       std::find_if(keyframes.begin(), keyframes.end(), [position](haptics::types::Keyframe k) {
         return k.getRelativePosition() >= position;
@@ -81,7 +86,12 @@ auto Effect::addAmplitudeAt(std::optional<float> amplitude, int position) -> boo
   }
 
   if ((kit)->getRelativePosition() == position) {
-    (kit)->setAmplitudeModulation(amplitude);
+    if (overrideIfAlreadyExists) {
+      (kit)->setAmplitudeModulation(amplitude);
+    } else {
+      Keyframe kf = Keyframe(position, amplitude, std::nullopt);
+      keyframes.insert(kit + 1, kf);
+    }
   } else {
     Keyframe kf = Keyframe(position, amplitude, std::nullopt);
     keyframes.insert(kit, kf);
