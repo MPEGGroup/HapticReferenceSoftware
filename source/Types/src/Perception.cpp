@@ -238,7 +238,7 @@ auto Perception::refactorEffects() -> void {
     auto numBands = static_cast<int>(track.getBandsSize());
     for (int j = 0; j < numBands; j++) {
       auto band = track.getBandAt(j);
-      if (band.getEncodingModality() == EncodingModality::Wavelet) {
+      if (band.getEncodingModality() == EncodingModality::Wavelet || band.getBandType() == BandType::Transient) {
         continue;
       }
       auto numEffects = static_cast<int>(band.getEffectsSize());
@@ -252,13 +252,13 @@ auto Perception::refactorEffects() -> void {
           basisEffect.setPosition(0);
           for (const auto &t : sameEffects) {
             auto [l, m, n] = t;
-            if (i != l || j != m || k != n) {
+            //if (i != l || j != m || k != n) {
               Effect libEffect;
               libEffect.setId(newId);
               libEffect.setPosition(getTrackAt(l).getBandAt(m).getEffectAt(n).getPosition());
               libEffect.setEffectType(EffectType::Reference);
               getTrackAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
-            }
+            //}
           }
           addBasisEffect(basisEffect);
         }

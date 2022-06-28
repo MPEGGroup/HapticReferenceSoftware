@@ -399,4 +399,9 @@ auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModali
   return 0;
 }
 
+auto Effect::getTimelineSize() -> size_t {return timeline.size();}
+auto Effect::getTimelineEffectAt(int index) -> haptics::types::Effect & {
+  return timeline.at(index);}
+auto Effect::addTimelineEffect(Effect& newEffect) -> void { timeline.push_back(newEffect); }
+
 } // namespace haptics::types

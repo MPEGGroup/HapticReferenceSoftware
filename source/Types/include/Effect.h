@@ -105,6 +105,11 @@ public:
   auto addFrequencyAt(std::optional<int> frequency, int position) -> bool;
   auto getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
                            double transientDuration) -> double;
+
+  auto getTimelineSize() -> size_t;
+  auto getTimelineEffectAt(int index) -> Effect &;
+  auto addTimelineEffect(Effect &newEffect) -> void;
+
   auto isEquivalent(Effect &effect) -> bool;
   // Use Absolute position not relative
   auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;

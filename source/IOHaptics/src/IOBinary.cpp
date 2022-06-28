@@ -173,6 +173,9 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
 
     myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
                                      static_cast<types::PerceptionModality>(perceptionModality));
+    if (!IOBinary::readLibrary(myPerception, file)) {
+      return false;
+    }
     if (!IOBinary::readReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -205,6 +208,10 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
     int avatarId = myPerception.getAvatarId();
     IOBinaryPrimitives::writeNBytes<int, 4>(avatarId, file);
 
+    if (!IOBinary::writeLibrary(myPerception, file)) {
+      return false;
+    }
+
     if (!IOBinary::writeReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -214,6 +221,123 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
     }
   }
   return true;
+}
+
+auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
+  auto id = IOBinaryPrimitives::readNBytes<int, 4>(file);
+  auto position = IOBinaryPrimitives::readNBytes<int, 4>(file);
+  auto phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_PHASE, MAX_PHASE);
+  auto baseSignal = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+  auto effectType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+  auto keyframeCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+  types::Effect effect(static_cast<int>(position), phase, static_cast<types::BaseSignal>(baseSignal), static_cast<types::EffectType>(effectType));
+  effect.setId(id);
+  for (unsigned short i = 0; i < keyframeCount; i++) {
+    auto mask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    std::optional<int> position = std::nullopt;
+    std::optional<float> amplitude = std::nullopt;
+    std::optional<int> frequency = std::nullopt;
+    if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
+      position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
+      amplitude = IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file,-MAX_AMPLITUDE,
+                                                       MAX_AMPLITUDE);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
+      frequency = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    }
+    types::Keyframe myKeyframe(position, amplitude, frequency);
+    effect.addKeyframe(myKeyframe);
+  }
+  auto timelineEffectCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  for (unsigned short i = 0; i < timelineEffectCount; i++) {
+    auto timelineEffect = readLibraryEffect(file);
+    effect.addTimelineEffect(timelineEffect);
+  }
+  return effect;
+}
+
+auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &file) -> bool {
+  int id = libraryEffect.getId();
+  IOBinaryPrimitives::writeNBytes<int, 4>(id, file);
+  int position = libraryEffect.getPosition();
+  IOBinaryPrimitives::writeNBytes<int, 4>(position, file);
+  float phase = libraryEffect.getPhase();
+  IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, -MAX_PHASE, MAX_PHASE);
+  auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
+  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(baseSignal, file);
+  auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());
+  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(effectType, file);
+
+  auto keyframeCount = static_cast<uint16_t>(libraryEffect.getKeyframesSize());
+  IOBinaryPrimitives::writeNBytes<uint16_t, 2>(keyframeCount, file);
+  types::Keyframe keyframe;
+  for (unsigned short i = 0; i < keyframeCount; i++) {
+    keyframe = libraryEffect.getKeyframeAt(i);
+    auto mask = (uint8_t)KeyframeMask::NOTHING;
+    if (keyframe.getRelativePosition().has_value()) {
+      mask |= (uint8_t)KeyframeMask::RELATIVE_POSITION;
+    }
+    if (keyframe.getAmplitudeModulation().has_value()) {
+      mask |= (uint8_t)KeyframeMask::AMPLITUDE_MODULATION;
+    }
+    if (keyframe.getFrequencyModulation().has_value()) {
+      mask |= (uint8_t)KeyframeMask::FREQUENCY_MODULATION;
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(mask, file);
+    if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
+      auto position = keyframe.getRelativePosition().value();
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
+      auto amplitude = keyframe.getAmplitudeModulation().value();
+      IOBinaryPrimitives::writeFloatNBytes<uint8_t, 1>(amplitude, file, -MAX_AMPLITUDE,
+                                                       MAX_AMPLITUDE);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
+      auto frequency = keyframe.getFrequencyModulation().value();
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(frequency, file);
+    }
+  }
+
+  auto timelineEffectCount = static_cast<uint16_t>(libraryEffect.getTimelineSize());
+  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(timelineEffectCount, file);
+  // for each library effect
+  types::Effect timelineEffect;
+  for (unsigned short i = 0; i < timelineEffectCount; i++) {
+   timelineEffect = libraryEffect.getTimelineEffectAt(i);
+   writeLibraryEffect(libraryEffect, file);
+  }
+  return true;
+}
+
+auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file) -> bool {
+  auto effectCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  bool success = true;
+  for (unsigned short i = 0; i < effectCount; i++) {
+    auto effect = readLibraryEffect(file);
+    perception.addBasisEffect(effect);
+  }
+  return success;
+}
+
+auto IOBinary::writeLibrary(types::Perception &perception, std::ofstream &file) -> bool {
+  auto effectCount = static_cast<unsigned short>(perception.getEffectLibrarySize());
+  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(effectCount, file);
+
+  // for each library effect
+  types::Effect libraryEffect;
+  bool success = true;
+  for (unsigned short i = 0; i < effectCount; i++) {
+    libraryEffect = perception.getBasisEffectAt(i);
+    success &= writeLibraryEffect(libraryEffect, file);
+  }
+  return success;
 }
 
 auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool {
