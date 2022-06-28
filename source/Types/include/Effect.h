@@ -102,6 +102,8 @@ public:
   auto addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
                    std::optional<int> frequencyModulation) -> void;
   auto addAmplitudeAt(std::optional<float> amplitude, int position) -> bool;
+  auto addAmplitudeAt(std::optional<float> amplitude, int position, bool overrideIfAlreadyExists)
+      -> bool;
   auto addFrequencyAt(std::optional<int> frequency, int position) -> bool;
   auto getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
                            double transientDuration) -> double;

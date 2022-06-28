@@ -523,7 +523,7 @@ TEST_CASE("write/read BandBody on wavelet") {
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 0);
+    CHECK(std::filesystem::file_size(filename) == 2);
   }
 
   SECTION("read band body") {
