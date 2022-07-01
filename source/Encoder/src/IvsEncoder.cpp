@@ -127,11 +127,11 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
                               effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1)
                                   .getRelativePosition()
                                   .value(),
-                              types::BandType::Wave, types::EncodingModality::Vectorial);
+                              types::BandType::VectorialWave);
   if (myBand == nullptr) {
-    myBand = track.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                                haptics::types::EncodingModality::Vectorial, 0,
-                                IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
+    myBand = track.generateBand(haptics::types::BandType::VectorialWave,
+                                haptics::types::CurveType::Unknown, 0, IvsEncoder::MIN_FREQUENCY,
+                                IvsEncoder::MAX_FREQUENCY);
   }
   myBand->addEffect(effect);
 }
@@ -253,7 +253,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
 [[nodiscard]] auto IvsEncoder::getName(const pugi::xml_node *node) -> std::string {
   pugi::xml_attribute timeAttribute = node->attribute("name");
   if (!std::string(timeAttribute.name()).empty()) {
-    return std::string(timeAttribute.as_string());
+    return timeAttribute.as_string();
   }
 
   return "";

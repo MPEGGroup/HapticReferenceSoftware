@@ -47,7 +47,6 @@ public:
 
 private:
   [[nodiscard]] auto static getEffectTimeLength(types::Effect &effect, types::BandType bandType,
-                                                types::EncodingModality encodingModality,
                                                 int windowLength) -> double;
 };
 } // namespace haptics::synthesizer

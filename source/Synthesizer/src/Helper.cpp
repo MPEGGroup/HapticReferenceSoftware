@@ -83,11 +83,9 @@ namespace haptics::synthesizer {
       for (uint32_t k = 0; k < haptic.getPerceptionAt((int)i).getTrackAt((int)j).getBandsSize();
            k++) {
         types::Band band = haptic.getPerceptionAt((int)i).getTrackAt((int)j).getBandAt((int)k);
-        if (band.getBandType() == types::BandType::Wave) {
-          if (band.getEncodingModality() == types::EncodingModality::Wavelet) {
-            WaveletDecoder::transformBand(band);
-            haptic.getPerceptionAt((int)i).getTrackAt((int)j).replaceBandAt((int)k, band);
-          }
+        if (band.getBandType() == types::BandType::WaveletWave) {
+          WaveletDecoder::transformBand(band);
+          haptic.getPerceptionAt((int)i).getTrackAt((int)j).replaceBandAt((int)k, band);
         }
       }
     }

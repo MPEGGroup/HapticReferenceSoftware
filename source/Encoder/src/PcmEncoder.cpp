@@ -44,7 +44,6 @@ using haptics::types::BandType;
 using haptics::types::BaseSignal;
 using haptics::types::CurveType;
 using haptics::types::Effect;
-using haptics::types::EncodingModality;
 using haptics::types::Keyframe;
 using haptics::types::Perception;
 using haptics::types::Track;
@@ -128,7 +127,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
 
   out->setBandType(BandType::Curve);
   out->setCurveType(CurveType::Cubic);
-  out->setEncodingModality(EncodingModality::Wavelet);
+  // out->setEncodingModality(EncodingModality::Wavelet);
   out->setWindowLength(0);
   out->setLowerFrequencyLimit(0);
   out->setUpperFrequencyLimit((int)curveFrequencyLimit);

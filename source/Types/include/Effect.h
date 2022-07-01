@@ -36,7 +36,6 @@
 
 #include <Types/include/BandType.h>
 #include <Types/include/CurveType.h>
-#include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
 #include <map>
 #include <string>
@@ -84,8 +83,7 @@ public:
   auto addAmplitudeAt(std::optional<float> amplitude, int position, bool overrideIfAlreadyExists)
       -> bool;
   auto addFrequencyAt(std::optional<int> frequency, int position) -> bool;
-  auto getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
-                           double transientDuration) -> double;
+  auto getEffectTimeLength(types::BandType bandType, double transientDuration) -> double;
   // Use Absolute position not relative
   auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluateWavelet(double position, double windowLength) -> double;

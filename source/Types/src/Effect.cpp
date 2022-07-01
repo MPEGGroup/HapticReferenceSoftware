@@ -132,8 +132,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     -> double {
   double res = 0;
 
-  double max_position =
-      this->position + this->getEffectTimeLength(BandType::Wave, EncodingModality::Vectorial, 0);
+  double max_position = this->position + this->getEffectTimeLength(BandType::VectorialWave, 0);
 
   if (position < this->position || position > max_position || keyframes.empty()) {
     return res;
@@ -350,8 +349,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
   }
 }
 
-auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
-                                 double transientDuration) -> double {
+auto Effect::getEffectTimeLength(types::BandType bandType, double transientDuration) -> double {
   if (this->getKeyframesSize() == 0) {
     return 0;
   }
@@ -365,18 +363,10 @@ auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModali
                ? (lastKeyframe->getRelativePosition().value() + transientDuration)
                : 0;
   case types::BandType::Curve:
+  case types::BandType::VectorialWave:
     return lastKeyframe->getRelativePosition().has_value()
                ? lastKeyframe->getRelativePosition().value()
                : 0;
-  case types::BandType::Wave:
-    switch (encodingModality) {
-    case types::EncodingModality::Vectorial:
-      return lastKeyframe->getRelativePosition().has_value()
-                 ? lastKeyframe->getRelativePosition().value()
-                 : 0;
-    default:
-      break;
-    }
   default:
     break;
   }
