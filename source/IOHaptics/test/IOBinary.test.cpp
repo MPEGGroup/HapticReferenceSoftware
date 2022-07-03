@@ -572,35 +572,29 @@ TEST_CASE("write/read file for body testing") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const auto testingEncodingModality_band0 = haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingEncodingModality_band0, testingWindowLength_band0,
-                                    testingLowerFrequencyLimit_band0,
+                                    testingWindowLength_band0, testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
   const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const auto testingEncodingModality_band1 = haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
   haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingEncodingModality_band1, testingWindowLength_band1,
-                                    testingLowerFrequencyLimit_band1,
+                                    testingWindowLength_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
-  const auto testingBandType_band2 = haptics::types::BandType::Wave;
+  const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
   const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const auto testingEncodingModality_band2 = haptics::types::EncodingModality::Vectorial;
   const int testingWindowLength_band2 = 0;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
   haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingEncodingModality_band2, testingWindowLength_band2,
-                                    testingLowerFrequencyLimit_band2,
+                                    testingWindowLength_band2, testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
@@ -655,7 +649,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 337;
+        testingVertices_track2.size() + 331;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -709,8 +703,6 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getBandType() == testingBandType_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getCurveType() ==
           testingCurveType_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEncodingModality() ==
-          testingEncodingModality_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
@@ -755,8 +747,6 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getBandType() == testingBandType_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getCurveType() ==
           testingCurveType_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEncodingModality() ==
-          testingEncodingModality_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getUpperFrequencyLimit() ==
@@ -810,8 +800,6 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getBandType() == testingBandType_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getCurveType() ==
           testingCurveType_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEncodingModality() ==
-          testingEncodingModality_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==

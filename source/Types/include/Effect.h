@@ -36,7 +36,6 @@
 
 #include <Types/include/BandType.h>
 #include <Types/include/CurveType.h>
-#include <Types/include/EncodingModality.h>
 #include <Types/include/Keyframe.h>
 #include <map>
 #include <string>
@@ -105,7 +104,7 @@ public:
   auto addAmplitudeAt(std::optional<float> amplitude, int position, bool overrideIfAlreadyExists)
       -> bool;
   auto addFrequencyAt(std::optional<int> frequency, int position) -> bool;
-  auto getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
+  auto getEffectTimeLength(types::BandType bandType,
                            double transientDuration) -> double;
 
   auto getTimelineSize() -> size_t;

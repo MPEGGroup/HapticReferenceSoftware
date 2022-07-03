@@ -255,10 +255,6 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
       std::cerr << "Missing or invalid curve type" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("encoding_modality") || !jsonBand["encoding_modality"].is_string()) {
-      std::cerr << "Missing or invalid encoding modality" << std::endl;
-      continue;
-    }
     if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_number_integer()) {
       std::cerr << "Missing or invalid window length" << std::endl;
       continue;
@@ -281,13 +277,11 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
     types::CurveType curveType =
         types::stringToCurveType.at(jsonBand["curve_type"].get<std::string>());
-    types::EncodingModality encodingModality =
-        types::stringToModality.at(jsonBand["encoding_modality"]);
     int windowLength = jsonBand["window_length"].get<int>();
     int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();
     int upperLimit = jsonBand["upper_frequency_limit"].get<int>();
 
-    types::Band band(bandType, curveType, encodingModality, windowLength, lowerLimit, upperLimit);
+    types::Band band(bandType, curveType, windowLength, lowerLimit, upperLimit);
     auto jsonEffects = jsonBand["effects"];
     loadingSuccess = loadingSuccess && loadEffects(jsonEffects, band);
 
@@ -605,7 +599,6 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       auto jsonBand = json::object();
       jsonBand["band_type"] = types::bandTypeToString.at(band.getBandType());
       jsonBand["curve_type"] = types::curveTypeToString.at(band.getCurveType());
-      jsonBand["encoding_modality"] = types::modalityToString.at(band.getEncodingModality());
       jsonBand["window_length"] = band.getWindowLength();
       jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
       jsonBand["upper_frequency_limit"] = band.getUpperFrequencyLimit();

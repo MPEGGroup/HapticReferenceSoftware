@@ -52,17 +52,17 @@ public:
   static auto writeBandBody(types::Band &band, std::ofstream &file) -> bool;
 
 private:
-  static auto readTransientBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readCurveBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readVectorialBandBody(types::Band &band, std::ifstream &file) -> bool;
-  static auto readWaveletBandBody(types::Band &band, std::ifstream &file) -> bool;
+  static auto readTransientEffect(types::Effect &effect, std::ifstream &file) -> bool;
+  static auto readCurveEffect(types::Effect &effect, std::ifstream &file) -> bool;
+  static auto readVectorialEffect(types::Effect &effect, std::ifstream &file) -> bool;
+  static auto readWaveletEffect(types::Effect &effect, std::ifstream &file) -> bool;
   static auto readReferenceEffect(types::Effect &effect, std::ifstream &file) -> bool;
   static auto readTimelineEffect(types::Effect &effect, std::ifstream &file) -> bool;
 
-  static auto writeTransientBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeCurveBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeVectorialBandBody(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeWaveletBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeTransientEffect(types::Effect &effect, std::ofstream &file) -> bool;
+  static auto writeCurveEffect(types::Effect &effect, std::ofstream &file) -> bool;
+  static auto writeVectorialEffect(types::Effect &effect, std::ofstream &file) -> bool;
+  static auto writeWaveletEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeReferenceEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeTimelineEffect(types::Effect &effect, std::ofstream &file) -> bool;
 };

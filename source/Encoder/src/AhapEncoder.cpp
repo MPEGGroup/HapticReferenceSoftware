@@ -119,9 +119,8 @@ namespace haptics::encoder {
   myTrack = out.getTrackAt(0);
 
   // TRANSIENTS
-  types::Band myBand =
-      types::Band(types::BandType::Transient, haptics::types::CurveType::Unknown,
-                  types::EncodingModality::Vectorial, 0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY);
+  types::Band myBand = types::Band(types::BandType::Transient, haptics::types::CurveType::Unknown,
+                                   0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY);
 
   for (types::Effect e : transients) {
     myBand.addEffect(e);
@@ -136,10 +135,10 @@ namespace haptics::encoder {
     b = myTrack.findBandAvailable(
         e.getPosition(),
         e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition().value(),
-        types::BandType::Wave, types::EncodingModality::Vectorial);
+        types::BandType::VectorialWave);
     if (b == nullptr) {
-      b = myTrack.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                               haptics::types::EncodingModality::Vectorial, 0, MIN_AHAP_FREQUENCY,
+      b = myTrack.generateBand(haptics::types::BandType::VectorialWave,
+                               haptics::types::CurveType::Unknown, 0, MIN_AHAP_FREQUENCY,
                                MAX_AHAP_FREQUENCY);
     }
     b->addEffect(e);

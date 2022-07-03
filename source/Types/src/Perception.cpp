@@ -238,7 +238,7 @@ auto Perception::refactorEffects() -> void {
     auto numBands = static_cast<int>(track.getBandsSize());
     for (int j = 0; j < numBands; j++) {
       auto band = track.getBandAt(j);
-      if (band.getEncodingModality() == EncodingModality::Wavelet || band.getBandType() == BandType::Transient) {
+      if (band.getBandType() == BandType::WaveletWave) {
         continue;
       }
       auto numEffects = static_cast<int>(band.getEffectsSize());

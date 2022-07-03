@@ -49,8 +49,8 @@ TEST_CASE("Track::generateBand without parameters", "[generateBand][withoutParam
 
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   for (int i = 0; i < bandcount; i++) {
-    haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+    haptics::types::Band b(haptics::types::BandType::VectorialWave,
+                           haptics::types::CurveType::Unknown, 0, lowF, highF);
     t.addBand(b);
   }
 
@@ -66,30 +66,26 @@ TEST_CASE("Track::generateBand with parameters", "[generateBand][withParameters]
   const int bandcount = 19;
   const haptics::types::BandType testingBandType = haptics::types::BandType::Curve;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Linear;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength = 32;
   const int testingMinF = 65;
   const int testingMaxF = 300;
 
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   for (int i = 0; i < bandcount; i++) {
-    haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                           haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+    haptics::types::Band b(haptics::types::BandType::VectorialWave,
+                           haptics::types::CurveType::Unknown, 0, lowF, highF);
     t.addBand(b);
   }
 
   REQUIRE(t.getBandsSize() == static_cast<size_t>(bandcount));
 
-  haptics::types::Band *res =
-      t.generateBand(testingBandType, testingCurveType, testingEncodingModality,
-                     testingWindowLength, testingMinF, testingMaxF);
+  haptics::types::Band *res = t.generateBand(testingBandType, testingCurveType, testingWindowLength,
+                                             testingMinF, testingMaxF);
 
   CHECK(t.getBandsSize() == static_cast<size_t>(bandcount) + 1);
   CHECK_FALSE(res == nullptr);
   CHECK(res->getBandType() == testingBandType);
   CHECK(res->getCurveType() == testingCurveType);
-  CHECK(res->getEncodingModality() == testingEncodingModality);
   CHECK(res->getWindowLength() == testingWindowLength);
   CHECK(res->getLowerFrequencyLimit() == testingMinF);
   CHECK(res->getUpperFrequencyLimit() == testingMaxF);
@@ -102,8 +98,7 @@ TEST_CASE("Track::findWaveBandAvailable without band", "[findWaveBandAvailable][
   const int testingStart = 42;
   const int testingLength = 24;
   haptics::types::Band *res =
-      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
-                          haptics::types::EncodingModality::Vectorial);
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::VectorialWave);
 
   CHECK(res == nullptr);
 }
@@ -116,10 +111,9 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
   const float effectA = 0.75;
 
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
-  haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                         haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
-  haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle,
-                           haptics::types::EffectType::Basis);
+  haptics::types::Band b(haptics::types::BandType::VectorialWave,
+                         haptics::types::CurveType::Unknown, 0, lowF, highF);
+  haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle, haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf1(0, effectA, effectF);
   haptics::types::Keyframe kf2(effectSize, effectA, effectF);
   e.addKeyframe(kf1);
@@ -130,8 +124,7 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
   const int testingStart = 42;
   const int testingLength = 24;
   haptics::types::Band *res =
-      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
-                          haptics::types::EncodingModality::Vectorial);
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::VectorialWave);
 
   CHECK(res == nullptr);
 }
@@ -139,39 +132,36 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
 TEST_CASE("Track::findWaveBandAvailable band available but with types",
           "[findWaveBandAvailable][withWrongType]") {
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
-  haptics::types::Band b1(haptics::types::BandType::Curve, haptics::types::CurveType::Cubic,
-                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+  haptics::types::Band b1(haptics::types::BandType::Curve, haptics::types::CurveType::Cubic, 0,
+                          lowF, highF);
   t.addBand(b1);
-  haptics::types::Band b2(haptics::types::BandType::Transient, haptics::types::CurveType::Linear,
-                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+  haptics::types::Band b2(haptics::types::BandType::Transient, haptics::types::CurveType::Linear, 0,
+                          lowF, highF);
   t.addBand(b2);
 
   const int testingStart = 42;
   const int testingLength = 24;
   haptics::types::Band *res =
-      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
-                          haptics::types::EncodingModality::Vectorial);
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::VectorialWave);
 
   CHECK(res == nullptr);
 }
 
 TEST_CASE("Track::findWaveBandAvailable empty band available", "[findWaveBandAvailable][empty]") {
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
-  haptics::types::Band b(haptics::types::BandType::Wave, haptics::types::CurveType::Linear,
-                         haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
+  haptics::types::Band b(haptics::types::BandType::VectorialWave, haptics::types::CurveType::Linear,
+                         0, lowF, highF);
   t.addBand(b);
 
   const int testingStart = 42;
   const int testingLength = 24;
   haptics::types::Band *res =
-      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::Wave,
-                          haptics::types::EncodingModality::Vectorial);
+      t.findBandAvailable(testingStart, testingLength, haptics::types::BandType::VectorialWave);
 
   REQUIRE(res != nullptr);
   CHECK(res == &t.getBandAt(0));
-  CHECK(res->getBandType() == haptics::types::BandType::Wave);
+  CHECK(res->getBandType() == haptics::types::BandType::VectorialWave);
   CHECK(res->getCurveType() == haptics::types::CurveType::Linear);
-  CHECK(res->getEncodingModality() == haptics::types::EncodingModality::Vectorial);
   CHECK(res->getWindowLength() == 0);
   CHECK(res->getLowerFrequencyLimit() == lowF);
   CHECK(res->getUpperFrequencyLimit() == highF);
@@ -190,20 +180,18 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   const int effect3F = 10;
 
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
-  haptics::types::Band b1(haptics::types::BandType::Wave, haptics::types::CurveType::Cubic,
-                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
-  haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle,
-                            haptics::types::EffectType::Basis);
+  haptics::types::Band b1(haptics::types::BandType::VectorialWave, haptics::types::CurveType::Cubic,
+                          0, lowF, highF);
+  haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle, haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf1(0, 1.0, 0);
   haptics::types::Keyframe kf2(effect1Size, 1.0, effect1F);
   e1.addKeyframe(kf1);
   e1.addKeyframe(kf2);
   b1.addEffect(e1);
   t.addBand(b1);
-  haptics::types::Band b2(haptics::types::BandType::Wave, haptics::types::CurveType::Linear,
-                          haptics::types::EncodingModality::Vectorial, 0, lowF, highF);
-  haptics::types::Effect e2(effect2Pos, 0.0, haptics::types::BaseSignal::Triangle,
-                            haptics::types::EffectType::Basis);
+  haptics::types::Band b2(haptics::types::BandType::VectorialWave,
+                          haptics::types::CurveType::Linear, 0, lowF, highF);
+  haptics::types::Effect e2(effect2Pos, 0.0, haptics::types::BaseSignal::Triangle, haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf3(0, 1.0, effect2F);
   haptics::types::Keyframe kf4(effect2Size, 1.0, effect2F);
   e2.addKeyframe(kf3);
@@ -220,9 +208,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
 
   const int testingPosition = 100;
   const int testingDuration = 24;
-  haptics::types::Band *res =
-      t.findBandAvailable(testingPosition, testingDuration, haptics::types::BandType::Wave,
-                          haptics::types::EncodingModality::Vectorial);
+  haptics::types::Band *res = t.findBandAvailable(testingPosition, testingDuration,
+                                                  haptics::types::BandType::VectorialWave);
 
   REQUIRE(res != nullptr);
   CHECK(res == &t.getBandAt(1));

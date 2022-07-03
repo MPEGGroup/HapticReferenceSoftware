@@ -88,23 +88,20 @@ auto Track::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Track::generateBand(BandType bandType, CurveType curveType, EncodingModality encodingModality,
-                         int windowLength, int lowerFrequencyLimit, int upperFrequencyLimit)
+auto Track::generateBand(BandType bandType, CurveType curveType, int windowLength,
+                         int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, encodingModality, windowLength, lowerFrequencyLimit,
-               upperFrequencyLimit);
+  Band newBand(bandType, curveType, windowLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
 
 auto Track::findBandAvailable(const int position, const int duration,
-                              const types::BandType bandType,
-                              const types::EncodingModality encodingModality)
-    -> haptics::types::Band * {
+                              const types::BandType bandType) -> haptics::types::Band * {
   haptics::types::Effect e;
   bool bandIsAvailable = true;
   for (haptics::types::Band &b : bands) {
-    if (b.getBandType() != bandType || b.getEncodingModality() != encodingModality) {
+    if (b.getBandType() != bandType) {
       continue;
     }
 
