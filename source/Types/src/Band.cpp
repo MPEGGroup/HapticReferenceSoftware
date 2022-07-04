@@ -135,8 +135,6 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   default:
     return 0;
   }
-
-  return -1;
 }
 
 auto Band::getBandTimeLength() -> double {
