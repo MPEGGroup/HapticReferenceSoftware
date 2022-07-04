@@ -252,12 +252,12 @@ auto Perception::refactorEffects() -> void {
           basisEffect.setPosition(0);
           for (const auto &t : sameEffects) {
             auto [l, m, n] = t;
-            //if (i != l || j != m || k != n) {
-              Effect libEffect;
-              libEffect.setId(newId);
-              libEffect.setPosition(getTrackAt(l).getBandAt(m).getEffectAt(n).getPosition());
-              libEffect.setEffectType(EffectType::Reference);
-              getTrackAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
+            // if (i != l || j != m || k != n) {
+            Effect libEffect;
+            libEffect.setId(newId);
+            libEffect.setPosition(getTrackAt(l).getBandAt(m).getEffectAt(n).getPosition());
+            libEffect.setEffectType(EffectType::Reference);
+            getTrackAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
             //}
           }
           addBasisEffect(basisEffect);
