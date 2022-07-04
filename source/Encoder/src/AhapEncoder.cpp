@@ -124,7 +124,7 @@ namespace haptics::encoder {
   types::Effect transientEffect;
   for (types::Effect e : transients) {
     auto pos = e.getPosition();
-    for (auto i = 0; i < e.getKeyframesSize(); i++) {
+    for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
       auto keyframe = e.getKeyframeAt(i);
       keyframe.setRelativePosition(keyframe.getRelativePosition().value_or(0) + pos);
       transientEffect.addKeyframe(keyframe);
