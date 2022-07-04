@@ -113,7 +113,8 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ofstream &file) -> b
 auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file) -> bool {
   for (int effectIndex = 0; effectIndex < static_cast<int>(band.getEffectsSize()); effectIndex++) {
     auto myEffect = band.getEffectAt(effectIndex);
-    auto effectType = static_cast<types::EffectType>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
+    auto effectType =
+        static_cast<types::EffectType>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
     myEffect.setEffectType(effectType);
     auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
     myEffect.setPosition(position);
@@ -361,7 +362,7 @@ auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::ofstream &fil
   return true;
 }
 
-auto IOBinaryBands::readReferenceEffect(types::Effect& effect, std::ifstream& file) -> bool {
+auto IOBinaryBands::readReferenceEffect(types::Effect &effect, std::ifstream &file) -> bool {
   auto id = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   effect.setId(id);
   return true;
@@ -373,8 +374,7 @@ auto IOBinaryBands::writeReferenceEffect(types::Effect &effect, std::ofstream &f
   return true;
 }
 auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::BandType bandType,
-                                       std::ifstream &file)
-    -> bool {
+                                       std::ifstream &file) -> bool {
   auto timelineEffectCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
     types::Effect myEffect;
@@ -406,14 +406,12 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::BandType ba
       }
     }
     effect.addTimelineEffect(myEffect);
-
-
   }
   return true;
 }
 
-auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::BandType bandType, std::ofstream &file)
-    -> bool {
+auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::BandType bandType,
+                                        std::ofstream &file) -> bool {
   auto timelineEffectCount = static_cast<uint16_t>(effect.getTimelineSize());
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>(timelineEffectCount, file);
   // for each library effect
@@ -446,7 +444,6 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::BandType b
         return false;
       }
     }
-
   }
   return true;
 }

@@ -58,8 +58,7 @@ private:
   static auto readWaveletEffect(types::Effect &effect, std::ifstream &file) -> bool;
   static auto readReferenceEffect(types::Effect &effect, std::ifstream &file) -> bool;
   static auto readTimelineEffect(types::Effect &effect, types::BandType bandType,
-                                 std::ifstream &file)
-      -> bool;
+                                 std::ifstream &file) -> bool;
 
   static auto writeTransientEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeCurveEffect(types::Effect &effect, std::ofstream &file) -> bool;

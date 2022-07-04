@@ -230,7 +230,9 @@ auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
   auto baseSignal = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   auto effectType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   auto keyframeCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
-  types::Effect effect(static_cast<int>(position), phase, static_cast<types::BaseSignal>(baseSignal), static_cast<types::EffectType>(effectType));
+  types::Effect effect(static_cast<int>(position), phase,
+                       static_cast<types::BaseSignal>(baseSignal),
+                       static_cast<types::EffectType>(effectType));
   effect.setId(id);
   for (unsigned short i = 0; i < keyframeCount; i++) {
     auto mask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
@@ -242,8 +244,8 @@ auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
     }
 
     if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
-      amplitude = IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file,-MAX_AMPLITUDE,
-                                                       MAX_AMPLITUDE);
+      amplitude =
+          IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
     }
 
     if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
@@ -310,8 +312,8 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &f
   // for each library effect
   types::Effect timelineEffect;
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
-   timelineEffect = libraryEffect.getTimelineEffectAt(i);
-   writeLibraryEffect(libraryEffect, file);
+    timelineEffect = libraryEffect.getTimelineEffectAt(i);
+    writeLibraryEffect(libraryEffect, file);
   }
   return true;
 }
