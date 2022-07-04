@@ -57,14 +57,17 @@ private:
   static auto readVectorialEffect(types::Effect &effect, std::ifstream &file) -> bool;
   static auto readWaveletEffect(types::Effect &effect, std::ifstream &file) -> bool;
   static auto readReferenceEffect(types::Effect &effect, std::ifstream &file) -> bool;
-  static auto readTimelineEffect(types::Effect &effect, std::ifstream &file) -> bool;
+  static auto readTimelineEffect(types::Effect &effect, types::BandType bandType,
+                                 std::ifstream &file)
+      -> bool;
 
   static auto writeTransientEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeCurveEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeVectorialEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeWaveletEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeReferenceEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeTimelineEffect(types::Effect &effect, std::ofstream &file) -> bool;
+  static auto writeTimelineEffect(types::Effect &effect, types::BandType bandType,
+                                  std::ofstream &file) -> bool;
 };
 } // namespace haptics::io
 #endif // IOBINARYBANDS_H

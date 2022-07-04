@@ -121,10 +121,16 @@ namespace haptics::encoder {
   // TRANSIENTS
   types::Band myBand = types::Band(types::BandType::Transient, haptics::types::CurveType::Unknown,
                                    0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY);
-
+  types::Effect transientEffect;
   for (types::Effect e : transients) {
-    myBand.addEffect(e);
+    auto pos = e.getPosition();
+    for (auto i = 0; i < e.getKeyframesSize(); i++) {
+      auto keyframe = e.getKeyframeAt(i);
+      keyframe.setRelativePosition(keyframe.getRelativePosition().value_or(0) + pos);
+      transientEffect.addKeyframe(keyframe);
+    }
   }
+  myBand.addEffect(transientEffect);
   if (myBand.getEffectsSize() > 0) {
     myTrack.addBand(myBand);
   }
