@@ -113,7 +113,8 @@ TEST_CASE("Track::findWaveBandAvailable with overlapping effects",
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   haptics::types::Band b(haptics::types::BandType::VectorialWave,
                          haptics::types::CurveType::Unknown, 0, lowF, highF);
-  haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle, haptics::types::EffectType::Basis);
+  haptics::types::Effect e(effectPos, 0.0, haptics::types::BaseSignal::Triangle,
+                           haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf1(0, effectA, effectF);
   haptics::types::Keyframe kf2(effectSize, effectA, effectF);
   e.addKeyframe(kf1);
@@ -182,7 +183,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   haptics::types::Track t(id, desctription, gain, mixingWeight, bodypartMask);
   haptics::types::Band b1(haptics::types::BandType::VectorialWave, haptics::types::CurveType::Cubic,
                           0, lowF, highF);
-  haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle, haptics::types::EffectType::Basis);
+  haptics::types::Effect e1(0, 0.0, haptics::types::BaseSignal::Triangle,
+                            haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf1(0, 1.0, 0);
   haptics::types::Keyframe kf2(effect1Size, 1.0, effect1F);
   e1.addKeyframe(kf1);
@@ -191,7 +193,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
   t.addBand(b1);
   haptics::types::Band b2(haptics::types::BandType::VectorialWave,
                           haptics::types::CurveType::Linear, 0, lowF, highF);
-  haptics::types::Effect e2(effect2Pos, 0.0, haptics::types::BaseSignal::Triangle, haptics::types::EffectType::Basis);
+  haptics::types::Effect e2(effect2Pos, 0.0, haptics::types::BaseSignal::Triangle,
+                            haptics::types::EffectType::Basis);
   haptics::types::Keyframe kf3(0, 1.0, effect2F);
   haptics::types::Keyframe kf4(effect2Size, 1.0, effect2F);
   e2.addKeyframe(kf3);
