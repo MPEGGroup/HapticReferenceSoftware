@@ -60,10 +60,10 @@ static constexpr float CUTOFF_FREQUENCY_64 = 72.5;
 static constexpr int WINDOW_LENGTH_2 = 1024;
 static constexpr int WINDOW_LENGTH_16 = 512;
 static constexpr int WINDOW_LENGTH_64 = 512;
-static constexpr double PARAM_A = -8.976;
-static constexpr double PARAM_B = 3.814;
-static constexpr double PARAM_C = -0.05707;
-static constexpr double PARAM_D = 0.0003714;
+static constexpr double PARAM_A = -6.506;
+static constexpr double PARAM_B = 3.433;
+static constexpr double PARAM_C = -0.04421;
+static constexpr double PARAM_D = 0.0002573;
 
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
@@ -144,7 +144,7 @@ struct EncodingConfig {
     auto temp = (double)bitrate;
     auto wavelet_bitbudget =
         (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
-    auto max_bitbudget = (int)(log2(wavelet_windowLength) - 2) * MAXBITS;
+    auto max_bitbudget = (int)(log2(wavelet_windowLength) - 1) * MAXBITS;
     if (wavelet_bitbudget > max_bitbudget) {
       wavelet_bitbudget = max_bitbudget;
     } else if (wavelet_bitbudget < 1) {
