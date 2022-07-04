@@ -67,11 +67,10 @@ TEST_CASE("write/read BandHeader on curve") {
   const int testingWindowLength = 42;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   haptics::types::Effect testingEffect(0, 0, haptics::types::BaseSignal::Sine,
-      haptics::types::EffectType::Basis);
+                                       haptics::types::EffectType::Basis);
   const int expectedKeyframeCount = 42;
   for (int i = 0; i < expectedKeyframeCount; i++) {
     const float amplitude = static_cast<float>(i) / expectedKeyframeCount;
