@@ -94,10 +94,10 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
 auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double {
   // OUT OUF BOUND CHECK
   if (effects.empty() ||
-      ((this->bandType != types::BandType::WaveletWave)) &&
-          (position > effects.back().getPosition() +
-                          effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
-           position < 0)) {
+      ((this->bandType != types::BandType::WaveletWave) &&
+       (position > effects.back().getPosition() +
+                       effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
+        position < 0))) {
     return 0;
   }
 
@@ -123,7 +123,6 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
   case BandType::WaveletWave:
     return effect->EvaluateWavelet(position, this->getWindowLength());
-    break;
   case BandType::Transient: {
     double res = 0;
     for (Effect e : effects) {
