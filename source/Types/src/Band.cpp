@@ -126,7 +126,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::Transient: {
     double res = 0;
     for (Effect e : effects) {
-      if (e.getPosition() <= position && position <= e.getPosition() + TRANSIENT_DURATION_MS) {
+      if (e.getPosition() <= position) {
         res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
       }
     }
