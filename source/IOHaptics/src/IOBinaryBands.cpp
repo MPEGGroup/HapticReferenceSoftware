@@ -105,7 +105,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file) -> bool
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file);
     } else if (effectType == types::EffectType::Timeline) {
-      readTimelineEffect(myEffect, band.getBandType(), file);
+      readTimelineEffect(myEffect, band, file);
     } else {
       switch (band.getBandType()) {
       case types::BandType::Transient:
@@ -124,7 +124,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file) -> bool
         }
         break;
       case types::BandType::WaveletWave:
-        if (!IOBinaryBands::readWaveletEffect(myEffect, file)) {
+        if (!IOBinaryBands::readWaveletEffect(myEffect, band, file)) {
           return false;
         }
         break;
@@ -150,7 +150,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
     if (myEffect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(myEffect, file);
     } else if (myEffect.getEffectType() == types::EffectType::Timeline) {
-      writeTimelineEffect(myEffect, band.getBandType(), file);
+      writeTimelineEffect(myEffect, band, file);
     } else {
       switch (band.getBandType()) {
       case types::BandType::Transient:
@@ -169,7 +169,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
         }
         break;
       case types::BandType::WaveletWave:
-        if (!IOBinaryBands::writeWaveletEffect(myEffect, file)) {
+        if (!IOBinaryBands::writeWaveletEffect(myEffect, band, file)) {
           return false;
         }
         break;
@@ -322,9 +322,10 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::ofstream &f
   return true;
 }
 
-auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::ifstream &file) -> bool {
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::ifstream &file)
+    -> bool {
   spiht::Spiht_Dec dec;
-  auto blocklength = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file) * WAVELET_BL_FACTOR;
+  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
   auto size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
   std::vector<unsigned char> instream;
@@ -337,10 +338,10 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::ifstream &file
   return true;
 }
 
-auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::ofstream &file) -> bool {
+auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, types::Band &band,
+                                       std::ofstream &file) -> bool {
   spiht::Spiht_Enc enc;
-  auto blocklength = (uint16_t)effect.getKeyframesSize() - 2;
-  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(blocklength / WAVELET_BL_FACTOR, file);
+  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
   std::vector<unsigned char> outstream;
   enc.encodeEffect(effect, outstream);
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>((uint16_t)outstream.size(), file);
@@ -362,7 +363,7 @@ auto IOBinaryBands::writeReferenceEffect(types::Effect &effect, std::ofstream &f
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>(id, file);
   return true;
 }
-auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::BandType bandType,
+auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
                                        std::ifstream &file) -> bool {
   auto timelineEffectCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
@@ -375,9 +376,9 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::BandType ba
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file);
     } else if (effectType == types::EffectType::Timeline) {
-      readTimelineEffect(myEffect, bandType, file);
+      readTimelineEffect(myEffect, band, file);
     } else {
-      switch (bandType) {
+      switch (band.getBandType()) {
       case types::BandType::Transient:
         IOBinaryBands::readTransientEffect(myEffect, file);
         break;
@@ -388,7 +389,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::BandType ba
         IOBinaryBands::readVectorialEffect(myEffect, file);
         break;
       case types::BandType::WaveletWave:
-        IOBinaryBands::readWaveletEffect(myEffect, file);
+        IOBinaryBands::readWaveletEffect(myEffect, band, file);
         break;
       default:
         return false;
@@ -399,7 +400,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::BandType ba
   return true;
 }
 
-auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::BandType bandType,
+auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band,
                                         std::ofstream &file) -> bool {
   auto timelineEffectCount = static_cast<uint16_t>(effect.getTimelineSize());
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>(timelineEffectCount, file);
@@ -414,9 +415,9 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::BandType b
     if (effect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(effect, file);
     } else if (effect.getEffectType() == types::EffectType::Timeline) {
-      writeTimelineEffect(effect, bandType, file);
+      writeTimelineEffect(effect, band, file);
     } else {
-      switch (bandType) {
+      switch (band.getBandType()) {
       case types::BandType::Transient:
         IOBinaryBands::writeTransientEffect(effect, file);
         break;
@@ -427,7 +428,7 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::BandType b
         IOBinaryBands::writeVectorialEffect(effect, file);
         break;
       case types::BandType::WaveletWave:
-        IOBinaryBands::writeWaveletEffect(effect, file);
+        IOBinaryBands::writeWaveletEffect(effect, band, file);
         break;
       default:
         return false;
