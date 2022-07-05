@@ -173,7 +173,7 @@ def checkSoftwarePath(config: dict):
 
 def generateOutputFolderTree(folder: str):
     os.makedirs(folder)
-    for testType in ["Test", "Training"]:
+    for testType in ["Test", "Training", "Evaluation"]:
         for testId in range(1, 4):
             test_directory = os.path.join(folder, rf"{testType}1_{testId}")
             os.mkdir(test_directory)
