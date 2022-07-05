@@ -186,14 +186,14 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
 
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     float fadeAmplitude = static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
-
-    if (fadeTime < attackTime) {
+    auto actualAttackTime = std::max(attackTime, 0);
+    if (fadeTime < actualAttackTime) {
       std::pair<int, double> fadeStart(fadeTime, amplitude);
       std::pair<int, double> fadeEnd(duration, fadeAmplitude);
       out->addAmplitudeAt(
-          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, attackTime)),
-          attackTime, false);
-    } else if (fadeTime > attackTime) {
+          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, actualAttackTime)),
+          actualAttackTime, false);
+    } else if (fadeTime > actualAttackTime) {
       out->addAmplitudeAt(amplitude, fadeTime);
     }
     out->addAmplitudeAt(fadeAmplitude, duration);
