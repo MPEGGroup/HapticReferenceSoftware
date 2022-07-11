@@ -128,6 +128,7 @@ auto Track::Evaluate(double position) -> double {
 
   double res = 0;
 
+
   for (haptics::types::Band &b : bands) {
     res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
   }
@@ -139,6 +140,18 @@ auto Track::Evaluate(double position) -> double {
     return 1;
   }
   return res;
+}
+
+
+auto Track::EvaluateTrack(uint32_t sampleCount, const int fs, const int pad) -> std::vector<double> {
+  std::vector<double> trackAmp(sampleCount); // intialiser à 0?
+  for (haptics::types::Band &b : bands) {
+    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
+    for (uint32_t i = 0; i < bandAmp.size(); i++){
+      trackAmp[i] += bandAmp[i];
+    }
+  }
+  return trackAmp;
 }
 
 [[nodiscard]] auto Track::getFrequencySampling() const -> std::optional<uint32_t> {

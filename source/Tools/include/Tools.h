@@ -35,6 +35,7 @@
 #define TOOLS_H
 
 #include <iostream>
+#include <vector>
 
 constexpr auto S_2_MS = 1000.0;
 constexpr auto MS_2_S = 0.001;
@@ -53,6 +54,12 @@ namespace haptics::tools {
                                         double end_out, double x_in) -> double;
 
 [[nodiscard]] auto is_eq(double a, double b) -> bool;
+
+[[nodiscard]] auto linearInterpolation2(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
 
 } // namespace haptics::tools
 #endif

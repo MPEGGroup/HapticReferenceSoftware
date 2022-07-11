@@ -33,6 +33,9 @@
 
 #include <Types/include/Band.h>
 #include <algorithm>
+#include <Tools/include/Tools.h>
+
+using haptics::tools::akimaInterpolation;
 
 namespace haptics::types {
 
@@ -126,7 +129,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position, this->getCurveType());
+    return 0;
   case BandType::Wave:
     if (encodingModality == EncodingModality::Vectorial) {
       return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
@@ -150,6 +153,96 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   return -1;
 }
+
+auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit,
+                          int highFrequencyLimit) -> std::vector<double> {
+  std::vector<double> bandAmp(sampleCount);
+  switch (this->bandType) {
+  case BandType::Curve:
+    for (haptics::types::Effect e : effects) {
+      std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
+      for (uint32_t i = 0; i < e.getKeyframesSize(); i++) {
+        types::Keyframe myKeyframe;
+        myKeyframe = e.getKeyframeAt(i);
+        keyframes[i].first = myKeyframe.getRelativePosition().value() * fs / 1000;
+        keyframes[i].second =  myKeyframe.getAmplitudeModulation().value();
+      }
+      bandAmp = akimaInterpolation(keyframes);
+      return bandAmp; // On considère n'avoir qu'un seul effet pour le type curve, à modifier pour les cas où on aura plusieurs effets
+    }
+  default:
+    for (uint32_t ti = 0; ti < sampleCount; ti++) {
+      double position = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
+      if (effects.empty() ||
+          ((position > effects.back().getPosition() +
+                           effects.back().getEffectTimeLength(bandType, encodingModality,
+                                                              TRANSIENT_DURATION_MS) ||
+            position < 0) &&
+           (this->encodingModality != types::EncodingModality::Wavelet))) {
+        bandAmp[ti] = 0;
+      }
+
+      for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+        if (it->getPosition() <= position) {
+          bandAmp[ti] = EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
+        }
+        if (it == effects.begin()) {
+          break;
+        }
+      }
+    }
+    return bandAmp;
+  }
+}
+
+/*
+auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit, int highFrequencyLimit) -> std::vector<double> {
+  std::vector<double> bandAmp(sampleCount);
+  switch (this->bandType) {
+  case BandType::Curve:
+    for (Effect e : effects) {
+      std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
+      for (uint32_t i = 0; i < e.getKeyframesSize(); i++) {
+        keyframes[i] = e.getKeyframeAt(i);
+      }
+      bandAmp = akimaInterpolation(keyframes);
+      return bandAmp;
+    }
+  case BandType::Wave:
+    for (uint32_t ti = 0; ti < sampleCount; ti++) {
+      for (Effect e : effects) {
+        double t = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
+        double sample = 0;
+        if (encodingModality == EncodingModality::Vectorial) {
+          sample =  e.EvaluateVectorial(t, lowFrequencyLimit, highFrequencyLimit);
+        }
+        else if (encodingModality == EncodingModality::Wavelet) {
+          sample = e.EvaluateWavelet(t, this->getWindowLength());
+        }
+        bandAmp[ti] = sample;
+      }
+      return bandAmp;
+    }
+  case BandType::Transient:
+    for (uint32_t ti = 0; ti < sampleCount; ti++) {
+      double t = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
+      double res = 0;
+      for (Effect e : effects) {
+        if (e.getPosition() <= t && t <= e.getPosition() + TRANSIENT_DURATION_MS) {
+          res += e.EvaluateTransient(t, TRANSIENT_DURATION_MS);
+        }
+      }
+      bandAmp[ti] = res;
+    }
+    return bandAmp;
+  default:
+    for (uint32_t ti = 0; ti < sampleCount; ti++) {
+      bandAmp[ti] = 0;
+    }
+    return (bandAmp);
+  }
+}
+*/
 
 auto Band::getBandTimeLength() -> double {
   if (this->effects.empty()) {
