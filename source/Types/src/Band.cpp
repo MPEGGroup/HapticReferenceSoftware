@@ -156,15 +156,15 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
 auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit,
                           int highFrequencyLimit) -> std::vector<double> {
-  std::vector<double> bandAmp(sampleCount);
+  std::vector<double> bandAmp(sampleCount,0);
   switch (this->bandType) {
   case BandType::Curve:
     for (haptics::types::Effect e : effects) {
       std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
-      for (uint32_t i = 0; i < e.getKeyframesSize(); i++) {
+      for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
         types::Keyframe myKeyframe;
         myKeyframe = e.getKeyframeAt(i);
-        keyframes[i].first = myKeyframe.getRelativePosition().value() * fs / 1000;
+        keyframes[i].first = static_cast<int>((e.getPosition() + myKeyframe.getRelativePosition().value()) * fs * MS_2_S);
         keyframes[i].second =  myKeyframe.getAmplitudeModulation().value();
       }
       bandAmp = akimaInterpolation(keyframes);

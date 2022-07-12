@@ -253,7 +253,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
 [[nodiscard]] auto IvsEncoder::getName(const pugi::xml_node *node) -> std::string {
   pugi::xml_attribute timeAttribute = node->attribute("name");
   if (!std::string(timeAttribute.name()).empty()) {
-    return std::string(timeAttribute.as_string());
+    return timeAttribute.as_string();
   }
 
   return "";

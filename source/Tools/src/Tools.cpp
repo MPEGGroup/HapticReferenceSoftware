@@ -82,7 +82,7 @@ return Ylinear;
 
 [[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double> {
-  int n = points.size();
+  int n = static_cast<int>(points.size());
   std::vector<double> dx(n - 1);
   std::vector<double> dy(dx.size());
   std::vector<double> m(dx.size());
@@ -114,7 +114,7 @@ return Ylinear;
     }
   }
 
-  double max = std::pow(1, -50);
+  double max = std::pow(1, AKIMA_CST_2);
 
   for (int i = 0; i < f.size(); i++) {
     f1[i] = dm[i + 2];
@@ -126,7 +126,7 @@ return Ylinear;
   }
 
   for (int i = 0; i < f.size(); i++) {
-    if (f[i] > std::pow(10, -8) * max) {
+    if (f[i] > std::pow(AKIMA_CST_1, AKIMA_CST_3) * max) {
       b[i] = (f1[i] * m1[i + 1] + f2[i] * m1[i + 2]) / f[i];
     }
   }
