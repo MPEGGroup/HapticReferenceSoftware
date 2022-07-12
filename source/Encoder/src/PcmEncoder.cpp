@@ -105,7 +105,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
 
       std::vector<double> differenceSignal;
       for (int i = 0; i < filteredSignal.size(); i++) {
-        float difference = filteredSignal[i] - interpolationSignal[i];
+        double difference = filteredSignal[i] - interpolationSignal[i];
         differenceSignal.push_back(difference);
       }
 

@@ -64,7 +64,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   std::vector<double> interpolation;
   double t = 0;
   int i = 0;
-  double amp;
+  double amp = 0;
 
   while (t < points.back().first) {
     double t0 = points[i].first;
