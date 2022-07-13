@@ -184,7 +184,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
         if (it->getPosition() <= position) {
-          bandAmp[ti] = EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
+          bandAmp[ti] += EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
         }
         if (it == effects.begin()) {
           break;
