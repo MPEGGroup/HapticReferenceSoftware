@@ -36,6 +36,7 @@
 #include <Tools/include/Tools.h>
 
 using haptics::tools::akimaInterpolation;
+using haptics::tools::linearInterpolation2;
 
 namespace haptics::types {
 
@@ -167,7 +168,11 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
         keyframes[i].first = static_cast<int>((e.getPosition() + myKeyframe.getRelativePosition().value()) * fs * MS_2_S);
         keyframes[i].second =  myKeyframe.getAmplitudeModulation().value();
       }
-      bandAmp = akimaInterpolation(keyframes);
+      if (keyframes.size() == 2) {
+        bandAmp = linearInterpolation2(keyframes);
+      } else {
+        bandAmp = akimaInterpolation(keyframes);
+      }
       return bandAmp; // On considère n'avoir qu'un seul effet pour le type curve, à modifier pour les cas où on aura plusieurs effets
     }
   default:

@@ -149,6 +149,12 @@ auto Track::EvaluateTrack(uint32_t sampleCount, const int fs, const int pad) -> 
     std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
     for (uint32_t i = 0; i < bandAmp.size(); i++){
       trackAmp[i] += bandAmp[i];
+      if (trackAmp[i] < -1) {
+        trackAmp[i] = -1;
+      }
+      if (trackAmp[i] > 1) {
+        trackAmp[i] = 1;
+      }
     }
   }
   return trackAmp;

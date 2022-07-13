@@ -114,7 +114,7 @@ return Ylinear;
     }
   }
 
-  double max = std::pow(1, AKIMA_CST_2);
+  double max = AKIMA_EPSILON;
 
   for (int i = 0; i < f.size(); i++) {
     f1[i] = dm[i + 2];
@@ -126,7 +126,7 @@ return Ylinear;
   }
 
   for (int i = 0; i < f.size(); i++) {
-    if (f[i] > std::pow(AKIMA_CST_1, AKIMA_CST_3) * max) {
+    if (f[i] > std::pow(AKIMA_THRESHOLD, AKIMA_THRESHOLD2) * max) {
       b[i] = (f1[i] * m1[i + 1] + f2[i] * m1[i + 2]) / f[i];
     }
   }
