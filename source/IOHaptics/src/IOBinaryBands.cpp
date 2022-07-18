@@ -338,8 +338,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
   return true;
 }
 
-auto IOBinaryBands::writeWaveletEffect(types::Effect &effect,
-                                       std::ofstream &file) -> bool {
+auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::ofstream &file) -> bool {
   spiht::Spiht_Enc enc;
   std::vector<unsigned char> outstream;
   enc.encodeEffect(effect, outstream);
