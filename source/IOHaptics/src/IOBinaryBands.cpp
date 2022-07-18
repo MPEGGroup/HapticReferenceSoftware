@@ -169,7 +169,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
         }
         break;
       case types::BandType::WaveletWave:
-        if (!IOBinaryBands::writeWaveletEffect(myEffect, band, file)) {
+        if (!IOBinaryBands::writeWaveletEffect(myEffect, file)) {
           return false;
         }
         break;
@@ -338,10 +338,9 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
   return true;
 }
 
-auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, types::Band &band,
+auto IOBinaryBands::writeWaveletEffect(types::Effect &effect,
                                        std::ofstream &file) -> bool {
   spiht::Spiht_Enc enc;
-  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
   std::vector<unsigned char> outstream;
   enc.encodeEffect(effect, outstream);
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>((uint16_t)outstream.size(), file);
@@ -428,7 +427,7 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
         IOBinaryBands::writeVectorialEffect(effect, file);
         break;
       case types::BandType::WaveletWave:
-        IOBinaryBands::writeWaveletEffect(effect, band, file);
+        IOBinaryBands::writeWaveletEffect(effect, file);
         break;
       default:
         return false;

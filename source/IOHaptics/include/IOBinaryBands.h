@@ -64,7 +64,7 @@ private:
   static auto writeTransientEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeCurveEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeVectorialEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeWaveletEffect(types::Effect &effect, types::Band &band, std::ofstream &file)
+  static auto writeWaveletEffect(types::Effect &effect, std::ofstream &file)
       -> bool;
   static auto writeReferenceEffect(types::Effect &effect, std::ofstream &file) -> bool;
   static auto writeTimelineEffect(types::Effect &effect, types::Band &band, std::ofstream &file)
