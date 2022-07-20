@@ -69,7 +69,6 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     double f0 = points[i].second;
     double t1 = points[i + 1].first;
     double f1 = points[i + 1].second;
-    double h = t1 - t0;
     while (t <= t1) {
       double amp = (f0 * (t1 - t) + f1 * (t - t0)) / (t1 - t0);
       Ylinear.push_back(amp);
@@ -93,16 +92,16 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   std::vector<std::vector<double>> invA(diag[0].size(), std::vector<double>(diag[0].size()));
   std::vector<double> DDg(points.size());
 
-  for (int i = 0; i < xquery.size(); i++) {
+  for (size_t i = 0; i < xquery.size(); i++) {
     xquery[i] = i;
   }
 
-  for (int i = 0; i < dx.size(); i++) {
+  for (size_t i = 0; i < dx.size(); i++) {
     dx[i] = points[i + 1].first - points[i].first;
     dy[i] = points[i + 1].second - points[i].second;
   }
 
-  for (int i = 0; i < diag[0].size(); i++) {
+  for (size_t i = 0; i < diag[0].size(); i++) {
     diag[0][i] = dx[i] / 6;
     diag[1][i] = (dx[i] + dx[i + 1]) / 3;
     diag[2][i] = dx[i + 1] / 6;
@@ -111,7 +110,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
   int count = 0;
 
-  for (int i = 0; i < diag[0].size(); i++) {
+  for (size_t i = 0; i < diag[0].size(); i++) {
     for (int j = 0; j < 3; j++) {
       A[j + count][i] = diag[j][i];
     }
@@ -121,31 +120,31 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   A.erase(A.begin());
   A.pop_back();
 
-  for (int i = 0; i < diag[0].size(); i++) {
+  for (size_t i = 0; i < diag[0].size(); i++) {
     A[i].push_back(B[i]);
   }
 
   double ratio = 0;
 
-  for (int i = 0; i < A.size(); i++) {
-    for (int j = 0; j < A.size(); j++) {
+  for (size_t i = 0; i < A.size(); i++) {
+    for (size_t j = 0; j < A.size(); j++) {
       if (i != j) {
         ratio = A[j][i] / A[i][i];
-        for (int k = 0; k < A.size() + 1; k++) {
+        for (size_t k = 0; k < A.size() + 1; k++) {
           A[j][k] = A[j][k] - ratio * A[i][k];
         }
       }
     }
   }
 
-  for (int i = 0; i < A.size(); i++) {
+  for (size_t i = 0; i < A.size(); i++) {
     DDg[i + 1] = A[i][A.size()] / A[i][i];
   }
 
   std::vector<double> Ycubique(xquery.size());
 
-  for (int i = 0; i < xquery.size(); i++) {
-    int k = 0;
+  for (size_t i = 0; i < xquery.size(); i++) {
+    size_t k = 0;
 
     while (xquery[i] > points[k + 1].first) {
       k++;
@@ -177,7 +176,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   std::vector<double> c(n - 1);
   std::vector<double> d(n - 1);
 
-  for (int i = 0; i < dx.size(); i++) {
+  for (size_t i = 0; i < dx.size(); i++) {
     dx[i] = points[i + 1].first - points[i].first;
     dy[i] = points[i + 1].second - points[i].second;
     m[i] = dy[i] / dx[i];
@@ -189,7 +188,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   m1[n + 1] = 2 * m[n - 2] - m[n - 3];
   m1[n + 2] = 3 * m[n - 2] - 2 * m[n - 3];
 
-  for (int i = 0; i < m1.size() - 1; i++) {
+  for (size_t i = 0; i < m1.size() - 1; i++) {
     dm[i] = abs(m1[i + 1] - m1[i]);
     if (i < n) {
       b[i] = m1[i + 1];
@@ -198,7 +197,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
   double max = AKIMA_EPSILON;
 
-  for (int i = 0; i < f.size(); i++) {
+  for (size_t i = 0; i < f.size(); i++) {
     f1[i] = dm[i + 2];
     f2[i] = dm[i];
     f[i] = f1[i] + f2[i];
@@ -207,13 +206,13 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     }
   }
 
-  for (int i = 0; i < f.size(); i++) {
+  for (size_t i = 0; i < f.size(); i++) {
     if (f[i] > std::pow(AKIMA_THRESHOLD, AKIMA_THRESHOLD2) * max) {
       b[i] = (f1[i] * m1[i + 1] + f2[i] * m1[i + 2]) / f[i];
     }
   }
 
-  for (int i = 0; i < c.size(); i++) {
+  for (size_t i = 0; i < c.size(); i++) {
     c[i] = (3 * m[i] - 2 * b[i] - b[i + 1]) / dx[i];
     d[i] = (b[i] + b[i + 1] - 2 * m[i]) / std::pow(dx[i], 2);
   }
@@ -221,7 +220,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   int count = 0;
   std::vector<double> Yakima(points.back().first + 1);
 
-  for (int i = 0; i < points.size() - 1; i++) {
+  for (size_t i = 0; i < points.size() - 1; i++) {
     for (int j = points[i].first; j < points[i + 1].first; j++) {
       Yakima[count] =
           (((count - points[i].first) * d[i] + c[i]) * (count - points[i].first) + b[i]) *
@@ -293,8 +292,10 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   Ybspline[0] = points[0].second;
 
   double t0 = 0;
-  double num, s, wt;
-  int k;
+  double num = 0;
+  double s = 0;
+  double wt = 0;
+  int k = 0;
 
   for (double m = 1; m < n; m++) {
     while (X1[2][2] < m) {
