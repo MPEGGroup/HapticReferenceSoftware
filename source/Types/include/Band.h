@@ -74,7 +74,7 @@ public:
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit,
-                            int highFrequencyLimit) -> std::vector<double>;
+                      int highFrequencyLimit) -> std::vector<double>;
   auto getBandTimeLength() -> double;
 
 private:
