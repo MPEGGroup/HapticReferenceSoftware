@@ -168,35 +168,41 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
       for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
         types::Keyframe myKeyframe;
         myKeyframe = e.getKeyframeAt(i);
-        // keyframes[i].first = static_cast<int>((e.getPosition() + myKeyframe.getRelativePosition().value()) * fs * MS_2_S);
-        keyframes[i].first = static_cast<int>(myKeyframe.getRelativePosition().value() * fs * MS_2_S);
+        keyframes[i].first =
+            static_cast<int>(myKeyframe.getRelativePosition().value() * fs * MS_2_S);
+        keyframes[i].first -= keyframes[0].first;
         keyframes[i].second = myKeyframe.getAmplitudeModulation().value();
       }
-      // std::vector<double> effectAmp(keyframes.back().first - keyframes[0].first + 1, 0);
-      std::vector<double> effectAmp(keyframes.back().first + 1, 0);
+      std::vector<double> effectAmp(keyframes.back().first - keyframes[0].first + 1, 0);
       if (keyframes.size() == 2) {
         effectAmp = linearInterpolation2(keyframes);
       } else {
         switch (this->curveType) {
         case CurveType::Linear:
           effectAmp = linearInterpolation2(keyframes);
+          break;
         case CurveType::Cubic:
           effectAmp = cubicInterpolation(keyframes);
+          break;
         case CurveType::Akima:
           effectAmp = akimaInterpolation(keyframes);
+          break;
         case CurveType::Bezier:
           effectAmp = bezierInterpolation(keyframes);
+          break;
         case CurveType::Bspline:
           effectAmp = bsplineInterpolation(keyframes);
+          break;
         }
+
         int count = 0;
-        for (int i = static_cast<int>(e.getPosition() * fs * MS_2_S); i < static_cast<int>(e.getPosition() * fs * MS_2_S) + effectAmp.size(); i++) {
-          bandAmp[i] = effectAmp[count];
+        int position = static_cast<int>((e.getPosition() + keyframes[0].first) * fs * MS_2_S);
+        for (int i = position; i < position + effectAmp.size(); i++) {
+          bandAmp[i] += effectAmp[count];
           count++;
         }
       }
       return bandAmp;
-      // keyframes independament de l'effet et du padding toujours 0?
     }
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
