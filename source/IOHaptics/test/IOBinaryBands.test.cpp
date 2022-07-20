@@ -85,7 +85,7 @@ TEST_CASE("write/read BandHeader on curve") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 15);
+    CHECK(std::filesystem::file_size(filename) == 8);
   }
 
   SECTION("read band header") {
@@ -103,8 +103,7 @@ TEST_CASE("write/read BandHeader on curve") {
     CHECK(res.getCurveType() == testingCurveType);
     CHECK(res.getLowerFrequencyLimit() == testingLowerFrequencyLimit);
     CHECK(res.getUpperFrequencyLimit() == testingUpperFrequencyLimit);
-    REQUIRE(res.getEffectsSize() == 1);
-    CHECK(res.getEffectAt(0).getKeyframesSize() == expectedKeyframeCount);
+    CHECK(res.getEffectsSize() == 1);
   }
 }
 
@@ -132,7 +131,7 @@ TEST_CASE("write/read BandHeader on transient") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 14);
+    CHECK(std::filesystem::file_size(filename) == 7);
   }
 
   SECTION("read band header") {
@@ -175,7 +174,7 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 14);
+    CHECK(std::filesystem::file_size(filename) == 7);
   }
 
   SECTION("read band header") {
@@ -218,7 +217,7 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 14);
+    CHECK(std::filesystem::file_size(filename) == 9);
   }
 
   SECTION("read band header") {
@@ -236,7 +235,7 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     CHECK(res.getWindowLength() == testingWindowLength);
     CHECK(res.getLowerFrequencyLimit() == testingLowerFrequencyLimit);
     CHECK(res.getUpperFrequencyLimit() == testingUpperFrequencyLimit);
-    CHECK(res.getEffectsSize() == 0);
+    CHECK(res.getEffectsSize() == expectedEffectCount);
   }
 }
 
@@ -263,9 +262,9 @@ TEST_CASE("write/read BandBody on curve") {
 
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
-
+    // effectType + position + keyframe count + Keyframes
     CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
-          expectedKeyframeCount * (1 + 2));
+          1 + 2 + 2 + expectedKeyframeCount * (1 + 2));
   }
 
   SECTION("read band body") {
@@ -276,10 +275,6 @@ TEST_CASE("write/read BandBody on curve") {
     haptics::types::Band res(testingBandType, testingCurveType, testingWindowLength,
                              testingLowerFrequencyLimit, testingUpperFrequencyLimit);
     haptics::types::Effect resEffect;
-    for (int i = 0; i < expectedKeyframeCount; i++) {
-      haptics::types::Keyframe keyframe;
-      resEffect.addKeyframe(keyframe);
-    }
     res.addEffect(resEffect);
     bool succeed = IOBinaryBands::readBandBody(res, file);
     file.close();
@@ -326,9 +321,9 @@ TEST_CASE("write/read BandBody on transient") {
 
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
-
+    // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative position + frequency)
     CHECK(std::filesystem::file_size(filename) ==
-          static_cast<uintmax_t>(expectedTransientCount * (2 + 2 + 1)));
+          static_cast<uintmax_t>(expectedTransientCount * (1 + 2 + 2 + 1 + 2 + 2)));
   }
 
   SECTION("read band body") {
@@ -399,7 +394,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     file.close();
 
     const uintmax_t expectedFileSize =
-        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2);
+        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2 + 1 + 2);
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -492,7 +487,7 @@ TEST_CASE("write/read BandBody on wavelet") {
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 2);
+    CHECK(std::filesystem::file_size(filename) == 0);
   }
 
   SECTION("read band body") {
