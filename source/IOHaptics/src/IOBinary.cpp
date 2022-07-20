@@ -170,9 +170,13 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
     auto perceptionModality = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
     std::string perceptionDescription = IOBinaryPrimitives::readString(file);
     auto avatarId = IOBinaryPrimitives::readNBytes<int, 4>(file);
+    auto unitExponent = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+    auto perceptionUnitExponent = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
 
     myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
                                      static_cast<types::PerceptionModality>(perceptionModality));
+    myPerception.setUnitExponent(unitExponent);
+    myPerception.setPerceptionUnitExponent(perceptionUnitExponent);
     if (!IOBinary::readReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -204,6 +208,12 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
 
     int avatarId = myPerception.getAvatarId();
     IOBinaryPrimitives::writeNBytes<int, 4>(avatarId, file);
+
+    int8_t unitExponent = myPerception.getUnitExponentOrDefault();
+    IOBinaryPrimitives::writeNBytes<int8_t, 1>(unitExponent, file);
+
+    int8_t perceptionUnitExponent = myPerception.getPerceptionUnitExponentOrDefault();
+    IOBinaryPrimitives::writeNBytes<int8_t, 1>(perceptionUnitExponent, file);
 
     if (!IOBinary::writeReferenceDevices(myPerception, file)) {
       return false;
@@ -395,10 +405,18 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto trackGain = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_FLOAT, MAX_FLOAT);
     auto trackMixingWeight = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    auto optionalMetadataMask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     auto frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     std::optional<uint32_t> sampleCount = std::nullopt;
     if (frequencySampling != 0) {
       sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    }
+    std::optional<types::Direction> direction = std::nullopt;
+    if ((optionalMetadataMask & 0b0000'0001) != 0) {
+      auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      direction = types::Direction(X, Y, Z);
     }
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
@@ -408,6 +426,9 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     }
     if (sampleCount.has_value()) {
       t.setSampleCount(sampleCount);
+    }
+    if (direction.has_value()) {
+      t.setDirection(direction);
     }
     if (deviceId >= 0) {
       t.setReferenceDeviceId(deviceId);
@@ -457,12 +478,25 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     uint32_t bodyPartMask = myTrack.getBodyPartMask();
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
 
+    auto optionalMetadataMask = (uint8_t)0b0000'0000;
+    if (myTrack.getDirection().has_value()) {
+      optionalMetadataMask |= (uint8_t)0b0000'0001;
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalMetadataMask, file);
+
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
 
     if (frequencySampling != 0) {
       uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
       IOBinaryPrimitives::writeNBytes<uint32_t, 4>(sampleCount, file);
+    }
+
+    if (myTrack.getDirection().has_value()) {
+      types::Direction direction = myTrack.getDirection().value();
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.X, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Y, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Z, file);
     }
 
     auto verticesCount = static_cast<int>(myTrack.getVerticesSize());
