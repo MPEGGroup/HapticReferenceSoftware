@@ -104,7 +104,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       std::vector<double> interpolationSignal = interpolationCodec(points, myBand.getCurveType());
 
       std::vector<double> differenceSignal;
-      for (int i = 0; i < filteredSignal.size(); i++) {
+      for (size_t i = 0; i < filteredSignal.size(); i++) {
         double difference = filteredSignal[i] - interpolationSignal[i];
         differenceSignal.push_back(difference);
       }
@@ -113,7 +113,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
       signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
 
-      for (int i = 0; i < signal_wavelet.size(); i++) {
+      for (size_t i = 0; i < signal_wavelet.size(); i++) {
         signal_wavelet[i] += differenceSignal[i];
       }
 
