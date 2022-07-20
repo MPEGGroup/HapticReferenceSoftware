@@ -31,11 +31,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <Tools/include/Tools.h>
 #include <Types/include/Band.h>
 #include <algorithm>
-#include <Tools/include/Tools.h>
 
 using haptics::tools::akimaInterpolation;
+using haptics::tools::bezierInterpolation;
+using haptics::tools::bsplineInterpolation;
+using haptics::tools::cubicInterpolation;
 using haptics::tools::linearInterpolation2;
 
 namespace haptics::types {
@@ -157,7 +160,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
 auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit,
                           int highFrequencyLimit) -> std::vector<double> {
-  std::vector<double> bandAmp(sampleCount,0);
+  std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
   case BandType::Curve:
     for (haptics::types::Effect e : effects) {
@@ -165,15 +168,35 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
       for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
         types::Keyframe myKeyframe;
         myKeyframe = e.getKeyframeAt(i);
-        keyframes[i].first = static_cast<int>((e.getPosition() + myKeyframe.getRelativePosition().value()) * fs * MS_2_S);
-        keyframes[i].second =  myKeyframe.getAmplitudeModulation().value();
+        // keyframes[i].first = static_cast<int>((e.getPosition() + myKeyframe.getRelativePosition().value()) * fs * MS_2_S);
+        keyframes[i].first = static_cast<int>(myKeyframe.getRelativePosition().value() * fs * MS_2_S);
+        keyframes[i].second = myKeyframe.getAmplitudeModulation().value();
       }
+      // std::vector<double> effectAmp(keyframes.back().first - keyframes[0].first + 1, 0);
+      std::vector<double> effectAmp(keyframes.back().first + 1, 0);
       if (keyframes.size() == 2) {
-        bandAmp = linearInterpolation2(keyframes);
+        effectAmp = linearInterpolation2(keyframes);
       } else {
-        bandAmp = akimaInterpolation(keyframes);
+        switch (this->curveType) {
+        case CurveType::Linear:
+          effectAmp = linearInterpolation2(keyframes);
+        case CurveType::Cubic:
+          effectAmp = cubicInterpolation(keyframes);
+        case CurveType::Akima:
+          effectAmp = akimaInterpolation(keyframes);
+        case CurveType::Bezier:
+          effectAmp = bezierInterpolation(keyframes);
+        case CurveType::Bspline:
+          effectAmp = bsplineInterpolation(keyframes);
+        }
+        int count = 0;
+        for (int i = static_cast<int>(e.getPosition() * fs * MS_2_S); i < static_cast<int>(e.getPosition() * fs * MS_2_S) + effectAmp.size(); i++) {
+          bandAmp[i] = effectAmp[count];
+          count++;
+        }
       }
-      return bandAmp; // On considère n'avoir qu'un seul effet pour le type curve, à modifier pour les cas où on aura plusieurs effets
+      return bandAmp;
+      // keyframes independament de l'effet et du padding toujours 0?
     }
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
@@ -199,55 +222,6 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
     return bandAmp;
   }
 }
-
-/*
-auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit, int highFrequencyLimit) -> std::vector<double> {
-  std::vector<double> bandAmp(sampleCount);
-  switch (this->bandType) {
-  case BandType::Curve:
-    for (Effect e : effects) {
-      std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
-      for (uint32_t i = 0; i < e.getKeyframesSize(); i++) {
-        keyframes[i] = e.getKeyframeAt(i);
-      }
-      bandAmp = akimaInterpolation(keyframes);
-      return bandAmp;
-    }
-  case BandType::Wave:
-    for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      for (Effect e : effects) {
-        double t = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
-        double sample = 0;
-        if (encodingModality == EncodingModality::Vectorial) {
-          sample =  e.EvaluateVectorial(t, lowFrequencyLimit, highFrequencyLimit);
-        }
-        else if (encodingModality == EncodingModality::Wavelet) {
-          sample = e.EvaluateWavelet(t, this->getWindowLength());
-        }
-        bandAmp[ti] = sample;
-      }
-      return bandAmp;
-    }
-  case BandType::Transient:
-    for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double t = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
-      double res = 0;
-      for (Effect e : effects) {
-        if (e.getPosition() <= t && t <= e.getPosition() + TRANSIENT_DURATION_MS) {
-          res += e.EvaluateTransient(t, TRANSIENT_DURATION_MS);
-        }
-      }
-      bandAmp[ti] = res;
-    }
-    return bandAmp;
-  default:
-    for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      bandAmp[ti] = 0;
-    }
-    return (bandAmp);
-  }
-}
-*/
 
 auto Band::getBandTimeLength() -> double {
   if (this->effects.empty()) {

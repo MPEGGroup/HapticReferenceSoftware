@@ -61,7 +61,16 @@ namespace haptics::tools {
 [[nodiscard]] auto linearInterpolation2(std::vector<std::pair<int, double>> points)
     -> std::vector<double>;
 
+[[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
 [[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto bezierInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double>;
 
 } // namespace haptics::tools

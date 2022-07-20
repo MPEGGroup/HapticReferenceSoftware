@@ -77,7 +77,89 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     }
     i++;
   }
-return Ylinear;
+  return Ylinear;
+}
+
+[[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double> {
+
+  std::vector<int> xquery(points.back().first + 1);
+  std::vector<double> dx(points.size() - 1);
+  std::vector<double> dy(points.size() - 1);
+  std::vector<std::vector<double>> diag(3, std::vector<double>(dx.size() - 1));
+  std::vector<double> B(dx.size() - 1);
+  std::vector<std::vector<double>> A(points.size(), std::vector<double>(diag[0].size()));
+  std::vector<std::vector<double>> cofA(diag[0].size(), std::vector<double>(diag[0].size()));
+  std::vector<std::vector<double>> invA(diag[0].size(), std::vector<double>(diag[0].size()));
+  std::vector<double> DDg(points.size());
+
+  for (int i = 0; i < xquery.size(); i++) {
+    xquery[i] = i;
+  }
+
+  for (int i = 0; i < dx.size(); i++) {
+    dx[i] = points[i + 1].first - points[i].first;
+    dy[i] = points[i + 1].second - points[i].second;
+  }
+
+  for (int i = 0; i < diag[0].size(); i++) {
+    diag[0][i] = dx[i] / 6;
+    diag[1][i] = (dx[i] + dx[i + 1]) / 3;
+    diag[2][i] = dx[i + 1] / 6;
+    B[i] = dy[i + 1] / dx[i + 1] - dy[i] / dx[i];
+  }
+
+  int count = 0;
+
+  for (int i = 0; i < diag[0].size(); i++) {
+    for (int j = 0; j < 3; j++) {
+      A[j + count][i] = diag[j][i];
+    }
+    count++;
+  }
+
+  A.erase(A.begin());
+  A.pop_back();
+
+  for (int i = 0; i < diag[0].size(); i++) {
+    A[i].push_back(B[i]);
+  }
+
+  double ratio = 0;
+
+  for (int i = 0; i < A.size(); i++) {
+    for (int j = 0; j < A.size(); j++) {
+      if (i != j) {
+        ratio = A[j][i] / A[i][i];
+        for (int k = 0; k < A.size() + 1; k++) {
+          A[j][k] = A[j][k] - ratio * A[i][k];
+        }
+      }
+    }
+  }
+
+  for (int i = 0; i < A.size(); i++) {
+    DDg[i + 1] = A[i][A.size()] / A[i][i];
+  }
+
+  std::vector<double> Ycubique(xquery.size());
+
+  for (int i = 0; i < xquery.size(); i++) {
+    int k = 0;
+
+    while (xquery[i] > points[k + 1].first) {
+      k++;
+    }
+
+    Ycubique[i] = (DDg[k] / 6) * (std::pow((points[k + 1].first - xquery[i]), 3) / dx[k] -
+                                  dx[k] * (points[k + 1].first - xquery[i])) +
+                  (DDg[k + 1] / 6) * (std::pow((xquery[i] - points[k].first), 3) / dx[k] -
+                                      dx[k] * (xquery[i] - points[k].first)) +
+                  points[k].second * (points[k + 1].first - xquery[i]) / dx[k] +
+                  points[k + 1].second * (xquery[i] - points[k].first) / dx[k];
+  }
+
+  return Ycubique;
 }
 
 [[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
@@ -156,6 +238,111 @@ return Ylinear;
       points.back().second;
 
   return Yakima;
+}
+
+[[nodiscard]] auto bezierInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double> {
+
+  std::vector<double> Ybezier;
+  int dx1, dx2 = 0;
+  double f0, f1, f2, t;
+  int i = 0;
+
+  while (i < points.size() - 1) {
+    dx1 = points[i + 1].first - points[i].first + 1;
+    dx2 = points[i + 2].first - points[i].first + 1;
+    f0 = points[i].second;
+    f1 = points[i + 1].second;
+    f2 = points[i + 2].second;
+
+    for (int j = 1; j < dx2; j++) {
+      if (1 - 2 * dx1 + dx2 != 0) {
+        t = (1 - dx1 + std::sqrt(std::pow(dx1, 2) - 2 * j * dx1 + j * 1 + j * dx2 - 1 * dx2)) /
+            (1 - 2 * dx1 + dx2);
+      } else {
+        t = (1 - j) / (2 * (1 - dx1));
+      }
+      Ybezier.push_back(std::pow(1 - t, 2) * f0 + (1 - t) * 2 * t * f1 + std::pow(t, 2) * f2);
+    }
+
+    i += 2;
+  }
+
+  Ybezier.push_back(points.back().second);
+
+  return Ybezier;
+}
+
+[[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double> {
+  int p = points.size();
+  double n = points.back().first;
+  std::vector<std::vector<double>> X1(3, std::vector<double>(3));
+  std::vector<std::vector<double>> X2(3, std::vector<double>(3));
+  std::vector<double> t(p + 3);
+  std::vector<double> Ybspline(n + 1);
+
+  t[0] = 0;
+  t[1] = 0;
+  for (double i = 0; i < p - 1; i++) {
+    t[i + 2] = i / (p - 2);
+  }
+  t[p + 1] = 1;
+  t[p + 2] = 1;
+
+  Ybspline[0] = points[0].second;
+
+  double t0 = 0;
+  double num, s, wt;
+  int k;
+
+  for (double m = 1; m < n; m++) {
+    while (X1[2][2] < m) {
+      t0 = t0 + (1 / n) / 10;
+      k = 0;
+      while (t0 >= t[k]) {
+        k = k + 1;
+      }
+      X1[0][0] = points[k - 3].first;
+      X1[0][1] = points[k - 2].first;
+      X1[0][2] = points[k - 1].first;
+
+      for (int i = 1; i < 3; i++) {
+        for (int j = i; j < 3; j++) {
+          num = t0 - t[k - 3 + j];
+          if (num == 0) {
+            wt = 0;
+          } else {
+            s = t[k + j - i] - t[k - 3 + j];
+            wt = num / s;
+          }
+          X1[i][j] = (1 - wt) * X1[i - 1][j - 1] + wt * X1[i - 1][j];
+        }
+      }
+    }
+
+    X2[0][0] = points[k - 3].second;
+    X2[0][1] = points[k - 2].second;
+    X2[0][2] = points[k - 1].second;
+
+    for (int i = 1; i < 3; i++) {
+      for (int j = i; j < 3; j++) {
+        num = t0 - t[k - 3 + j];
+        if (num == 0) {
+          wt = 0;
+        } else {
+          s = t[k + j - i] - t[k - 3 + j];
+          wt = num / s;
+        }
+        X2[i][j] = (1 - wt) * X2[i - 1][j - 1] + wt * X2[i - 1][j];
+      }
+    }
+    Ybspline[m] = X2[2][2];
+  }
+
+  Ybspline[n] = points.back().second;
+
+  return Ybspline;
 }
 
 } // namespace haptics::tools
