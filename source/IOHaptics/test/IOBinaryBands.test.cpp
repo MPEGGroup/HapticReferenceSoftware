@@ -321,7 +321,8 @@ TEST_CASE("write/read BandBody on transient") {
 
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
-    // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative position + frequency)
+    // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative
+    // position + frequency)
     CHECK(std::filesystem::file_size(filename) ==
           static_cast<uintmax_t>(expectedTransientCount * (1 + 2 + 2 + 1 + 2 + 2)));
   }
