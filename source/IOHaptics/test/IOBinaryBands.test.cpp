@@ -44,10 +44,10 @@ constexpr float floatPrecision = 0.01;
 
 auto addEffect(
     haptics::types::Band &myBand, const int position, const float phase,
-    const haptics::types::BaseSignal baseSignal,
+    const haptics::types::BaseSignal baseSignal, const haptics::types::EffectType effectType,
     const std::vector<std::tuple<int, std::optional<float>, std::optional<int>>> &keyframes)
     -> void {
-  haptics::types::Effect myEffect(position, phase, baseSignal);
+  haptics::types::Effect myEffect(position, phase, baseSignal, effectType);
   for (auto keyframeValue : keyframes) {
     if (std::get<1>(keyframeValue).has_value()) {
       myEffect.addAmplitudeAt(std::get<1>(keyframeValue).value(), std::get<0>(keyframeValue));
@@ -64,15 +64,13 @@ auto addEffect(
 TEST_CASE("write/read BandHeader on curve") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::Curve;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Cubic;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Vectorial;
   const int testingWindowLength = 42;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
-  haptics::types::Effect testingEffect(0, 0, haptics::types::BaseSignal::Sine);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
+  haptics::types::Effect testingEffect(0, 0, haptics::types::BaseSignal::Sine,
+                                       haptics::types::EffectType::Basis);
   const int expectedKeyframeCount = 42;
   for (int i = 0; i < expectedKeyframeCount; i++) {
     const float amplitude = static_cast<float>(i) / expectedKeyframeCount;
@@ -87,7 +85,7 @@ TEST_CASE("write/read BandHeader on curve") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 17);
+    CHECK(std::filesystem::file_size(filename) == 8);
   }
 
   SECTION("read band header") {
@@ -103,11 +101,9 @@ TEST_CASE("write/read BandHeader on curve") {
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getBandType() == testingBandType);
     CHECK(res.getCurveType() == testingCurveType);
-    CHECK(res.getEncodingModality() == testingEncodingModality);
     CHECK(res.getLowerFrequencyLimit() == testingLowerFrequencyLimit);
     CHECK(res.getUpperFrequencyLimit() == testingUpperFrequencyLimit);
-    REQUIRE(res.getEffectsSize() == 1);
-    CHECK(res.getEffectAt(0).getKeyframesSize() == expectedKeyframeCount);
+    CHECK(res.getEffectsSize() == 1);
   }
 }
 
@@ -115,14 +111,11 @@ TEST_CASE("write/read BandHeader on curve") {
 TEST_CASE("write/read BandHeader on transient") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::Transient;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength = 42;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   const int expectedTransientCount = 42;
   for (int i = 0; i < expectedTransientCount; i++) {
     haptics::types::Effect testingEffect;
@@ -138,7 +131,7 @@ TEST_CASE("write/read BandHeader on transient") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 16);
+    CHECK(std::filesystem::file_size(filename) == 7);
   }
 
   SECTION("read band header") {
@@ -153,7 +146,6 @@ TEST_CASE("write/read BandHeader on transient") {
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getBandType() == testingBandType);
-    CHECK(res.getEncodingModality() == testingEncodingModality);
     CHECK(res.getLowerFrequencyLimit() == testingLowerFrequencyLimit);
     CHECK(res.getUpperFrequencyLimit() == testingUpperFrequencyLimit);
     CHECK(res.getEffectsSize() == expectedTransientCount);
@@ -162,16 +154,13 @@ TEST_CASE("write/read BandHeader on transient") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandHeader on vectorial wave") {
-  const haptics::types::BandType testingBandType = haptics::types::BandType::Wave;
+  const haptics::types::BandType testingBandType = haptics::types::BandType::VectorialWave;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Vectorial;
   const int testingWindowLength = 42;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   const int expectedEffectCount = 42;
   for (int i = 0; i < expectedEffectCount; i++) {
     haptics::types::Effect testingEffect;
@@ -185,7 +174,7 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 16);
+    CHECK(std::filesystem::file_size(filename) == 7);
   }
 
   SECTION("read band header") {
@@ -200,7 +189,6 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getBandType() == testingBandType);
-    CHECK(res.getEncodingModality() == testingEncodingModality);
     CHECK(res.getLowerFrequencyLimit() == testingLowerFrequencyLimit);
     CHECK(res.getUpperFrequencyLimit() == testingUpperFrequencyLimit);
     CHECK(res.getEffectsSize() == expectedEffectCount);
@@ -209,16 +197,13 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandHeader on wavelet wave") {
-  const haptics::types::BandType testingBandType = haptics::types::BandType::Wave;
+  const haptics::types::BandType testingBandType = haptics::types::BandType::WaveletWave;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength = 42;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   const int expectedEffectCount = 42;
   for (int i = 0; i < expectedEffectCount; i++) {
     haptics::types::Effect testingEffect;
@@ -232,7 +217,7 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     IOBinaryBands::writeBandHeader(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 16);
+    CHECK(std::filesystem::file_size(filename) == 9);
   }
 
   SECTION("read band header") {
@@ -247,11 +232,10 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getBandType() == testingBandType);
-    CHECK(res.getEncodingModality() == testingEncodingModality);
     CHECK(res.getWindowLength() == testingWindowLength);
     CHECK(res.getLowerFrequencyLimit() == testingLowerFrequencyLimit);
     CHECK(res.getUpperFrequencyLimit() == testingUpperFrequencyLimit);
-    CHECK(res.getEffectsSize() == 0);
+    CHECK(res.getEffectsSize() == expectedEffectCount);
   }
 }
 
@@ -259,14 +243,11 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
 TEST_CASE("write/read BandBody on curve") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::Curve;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Cubic;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength = 0;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   const int expectedKeyframeCount = 42;
   haptics::types::Effect testingEffect;
   for (int i = 0; i < expectedKeyframeCount; i++) {
@@ -281,9 +262,9 @@ TEST_CASE("write/read BandBody on curve") {
 
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
-
+    // effectType + position + keyframe count + Keyframes
     CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
-          expectedKeyframeCount * (1 + 2));
+          1 + 2 + 2 + expectedKeyframeCount * (1 + 2));
   }
 
   SECTION("read band body") {
@@ -291,14 +272,9 @@ TEST_CASE("write/read BandBody on curve") {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     REQUIRE(file);
 
-    haptics::types::Band res(testingBandType, testingCurveType, testingEncodingModality,
-                             testingWindowLength, testingLowerFrequencyLimit,
-                             testingUpperFrequencyLimit);
+    haptics::types::Band res(testingBandType, testingCurveType, testingWindowLength,
+                             testingLowerFrequencyLimit, testingUpperFrequencyLimit);
     haptics::types::Effect resEffect;
-    for (int i = 0; i < expectedKeyframeCount; i++) {
-      haptics::types::Keyframe keyframe;
-      resEffect.addKeyframe(keyframe);
-    }
     res.addEffect(resEffect);
     bool succeed = IOBinaryBands::readBandBody(res, file);
     file.close();
@@ -323,17 +299,15 @@ TEST_CASE("write/read BandBody on curve") {
 TEST_CASE("write/read BandBody on transient") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::Transient;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Vectorial;
   const int testingWindowLength = 0;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   const int expectedTransientCount = 12;
   for (int i = 0; i < expectedTransientCount; i++) {
-    haptics::types::Effect testingEffect(i, 0, haptics::types::BaseSignal::Sine);
+    haptics::types::Effect testingEffect(i, 0, haptics::types::BaseSignal::Sine,
+                                         haptics::types::EffectType::Basis);
     const auto amplitude = static_cast<float>(i) / expectedTransientCount;
     const int frequency = 90;
     haptics::types::Keyframe testingKeyframe(0, amplitude, frequency);
@@ -347,9 +321,10 @@ TEST_CASE("write/read BandBody on transient") {
 
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
-
+    // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative
+    // position + frequency)
     CHECK(std::filesystem::file_size(filename) ==
-          static_cast<uintmax_t>(expectedTransientCount * (2 + 2 + 1)));
+          static_cast<uintmax_t>(expectedTransientCount * (1 + 2 + 2 + 1 + 2 + 2)));
   }
 
   SECTION("read band body") {
@@ -357,11 +332,11 @@ TEST_CASE("write/read BandBody on transient") {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     REQUIRE(file);
 
-    haptics::types::Band res(testingBandType, testingCurveType, testingEncodingModality,
-                             testingWindowLength, testingLowerFrequencyLimit,
-                             testingUpperFrequencyLimit);
+    haptics::types::Band res(testingBandType, testingCurveType, testingWindowLength,
+                             testingLowerFrequencyLimit, testingUpperFrequencyLimit);
     for (int i = 0; i < expectedTransientCount; i++) {
-      haptics::types::Effect resEffect(0, 0, haptics::types::BaseSignal::Square);
+      haptics::types::Effect resEffect(0, 0, haptics::types::BaseSignal::Square,
+                                       haptics::types::EffectType::Basis);
       res.addEffect(resEffect);
     }
     bool succeed = IOBinaryBands::readBandBody(res, file);
@@ -386,16 +361,13 @@ TEST_CASE("write/read BandBody on transient") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandBody on vectorial wave") {
-  const haptics::types::BandType testingBandType = haptics::types::BandType::Wave;
+  const haptics::types::BandType testingBandType = haptics::types::BandType::VectorialWave;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Vectorial;
   const int testingWindowLength = 0;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 300;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
 
   const int testingEffect1_position = 42;
   const float testingEffect1_phase = 0;
@@ -404,7 +376,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
   const std::vector<std::tuple<int, std::optional<float>, std::optional<int>>>
       testingEffect1_keyframes = {{0, .1F, 90}, {36, .1F, 90}};
   addEffect(testingBand, testingEffect1_position, testingEffect1_phase, testingEffect1_baseSignal,
-            testingEffect1_keyframes);
+            haptics::types::EffectType::Basis, testingEffect1_keyframes);
 
   const int testingEffect2_position = 654;
   const float testingEffect2_phase = 2.65;
@@ -413,7 +385,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
       testingEffect2_keyframes = {
           {0, .1F, 90}, {72, .954F, 90}, {1000, std::nullopt, 300}, {1036, 0.0F, std::nullopt}};
   addEffect(testingBand, testingEffect2_position, testingEffect2_phase, testingEffect2_baseSignal,
-            testingEffect2_keyframes);
+            haptics::types::EffectType::Basis, testingEffect2_keyframes);
 
   SECTION("write band body") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -423,7 +395,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     file.close();
 
     const uintmax_t expectedFileSize =
-        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2);
+        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2 + 1 + 2);
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -432,9 +404,8 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     REQUIRE(file);
 
-    haptics::types::Band res(testingBandType, testingCurveType, testingEncodingModality,
-                             testingWindowLength, testingLowerFrequencyLimit,
-                             testingUpperFrequencyLimit);
+    haptics::types::Band res(testingBandType, testingCurveType, testingWindowLength,
+                             testingLowerFrequencyLimit, testingUpperFrequencyLimit);
     haptics::types::Effect resEffect1;
     haptics::types::Effect resEffect2;
     res.addEffect(resEffect1);
@@ -502,16 +473,13 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandBody on wavelet") {
-  const haptics::types::BandType testingBandType = haptics::types::BandType::Wave;
+  const haptics::types::BandType testingBandType = haptics::types::BandType::WaveletWave;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const haptics::types::EncodingModality testingEncodingModality =
-      haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength = 255;
   const int testingLowerFrequencyLimit = 75;
   const int testingUpperFrequencyLimit = 1000;
-  haptics::types::Band testingBand(testingBandType, testingCurveType, testingEncodingModality,
-                                   testingWindowLength, testingLowerFrequencyLimit,
-                                   testingUpperFrequencyLimit);
+  haptics::types::Band testingBand(testingBandType, testingCurveType, testingWindowLength,
+                                   testingLowerFrequencyLimit, testingUpperFrequencyLimit);
 
   SECTION("write band body") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -520,7 +488,7 @@ TEST_CASE("write/read BandBody on wavelet") {
     IOBinaryBands::writeBandBody(testingBand, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 2);
+    CHECK(std::filesystem::file_size(filename) == 0);
   }
 
   SECTION("read band body") {
@@ -528,9 +496,8 @@ TEST_CASE("write/read BandBody on wavelet") {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     REQUIRE(file);
 
-    haptics::types::Band res(testingBandType, testingCurveType, testingEncodingModality,
-                             testingWindowLength, testingLowerFrequencyLimit,
-                             testingUpperFrequencyLimit);
+    haptics::types::Band res(testingBandType, testingCurveType, testingWindowLength,
+                             testingLowerFrequencyLimit, testingUpperFrequencyLimit);
     bool succeed = IOBinaryBands::readBandBody(res, file);
     file.close();
 

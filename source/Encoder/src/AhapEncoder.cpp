@@ -119,13 +119,18 @@ namespace haptics::encoder {
   myTrack = out.getTrackAt(0);
 
   // TRANSIENTS
-  types::Band myBand =
-      types::Band(types::BandType::Transient, haptics::types::CurveType::Unknown,
-                  types::EncodingModality::Vectorial, 0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY);
-
+  types::Band myBand = types::Band(types::BandType::Transient, haptics::types::CurveType::Unknown,
+                                   0, MIN_AHAP_FREQUENCY, MAX_AHAP_FREQUENCY);
+  types::Effect transientEffect;
   for (types::Effect e : transients) {
-    myBand.addEffect(e);
+    auto pos = e.getPosition();
+    for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
+      auto keyframe = e.getKeyframeAt(i);
+      keyframe.setRelativePosition(keyframe.getRelativePosition().value_or(0) + pos);
+      transientEffect.addKeyframe(keyframe);
+    }
   }
+  myBand.addEffect(transientEffect);
   if (myBand.getEffectsSize() > 0) {
     myTrack.addBand(myBand);
   }
@@ -136,10 +141,10 @@ namespace haptics::encoder {
     b = myTrack.findBandAvailable(
         e.getPosition(),
         e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition().value(),
-        types::BandType::Wave, types::EncodingModality::Vectorial);
+        types::BandType::VectorialWave);
     if (b == nullptr) {
-      b = myTrack.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                               haptics::types::EncodingModality::Vectorial, 0, MIN_AHAP_FREQUENCY,
+      b = myTrack.generateBand(haptics::types::BandType::VectorialWave,
+                               haptics::types::CurveType::Unknown, 0, MIN_AHAP_FREQUENCY,
                                MAX_AHAP_FREQUENCY);
     }
     b->addEffect(e);
@@ -189,9 +194,9 @@ AhapEncoder::extractTransients(nlohmann::json *event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect t =
-      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)),
-                             0, haptics::types::BaseSignal::Sine);
+  haptics::types::Effect t = haptics::types::Effect(
+      static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
@@ -269,9 +274,9 @@ AhapEncoder::extractContinuous(nlohmann::json *event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect c =
-      haptics::types::Effect(static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)),
-                             0, haptics::types::BaseSignal::Sine);
+  haptics::types::Effect c = haptics::types::Effect(
+      static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;

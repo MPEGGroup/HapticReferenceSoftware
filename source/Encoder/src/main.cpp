@@ -66,6 +66,10 @@ auto help() -> void {
       << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
       << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
          "the encoder will output a file in a human-readable format"
+      << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
+         "be placed in the library and replaced by a referennce"
+      << "\t-l, --linearize\t\t\tthe file will be linearized. Every referenced effect from the "
+         "library will be copied into the main timeline."
       << std::endl
       << "\t-kb, --bitrate\t\t\ttarget bitrate of the encoded file" << std::endl
       << "\t-kin, --kinesthetic\t\tIf provided, the file will be encoded as a kinesthetic effect. "
@@ -74,7 +78,7 @@ auto help() -> void {
       << std::endl;
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape, readability-function-size)
+// NOLINTNEXTLINE
 auto main(int argc, char *argv[]) -> int {
   const auto args = std::vector<const char *>(argv, argv + argc);
   InputParser inputParser(args);
@@ -176,6 +180,9 @@ auto main(int argc, char *argv[]) -> int {
     }
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
+  } else if (ext == "gmpg") {
+    std::cout << "The GMPG file to encode : " << filename << std::endl;
+    IOJson::loadFile(filename, hapticFile);
   } else {
     codeExit = EXIT_FAILURE;
   }
@@ -183,6 +190,12 @@ auto main(int argc, char *argv[]) -> int {
   if (codeExit == EXIT_FAILURE) {
     help();
     return codeExit;
+  }
+  if (inputParser.cmdOptionExists("-r") || inputParser.cmdOptionExists("--refactor")) {
+    hapticFile.refactor();
+  }
+  if (inputParser.cmdOptionExists("-l") || inputParser.cmdOptionExists("--linearize")) {
+    hapticFile.linearize();
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {

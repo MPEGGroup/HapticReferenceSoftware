@@ -47,6 +47,7 @@ public:
       -> bool;
   static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> bool;
   static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool;
+  static auto loadLibrary(const nlohmann::json &jsonLibrary, types::Perception &perception) -> bool;
   static auto loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
                                    types::Perception &perception) -> bool;
   static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool;
@@ -56,6 +57,7 @@ public:
   static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
   static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;
   static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void;
+  static auto extractLibrary(types::Perception &perception, nlohmann::json &jsonLibrary) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
                                       nlohmann::json &jsonReferenceDevices) -> void;
 

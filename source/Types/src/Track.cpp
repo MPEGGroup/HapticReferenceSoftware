@@ -1,4 +1,4 @@
-/* The copyright in this software is being made available under the BSD
+ï»¿/* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
@@ -88,23 +88,20 @@ auto Track::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Track::generateBand(BandType bandType, CurveType curveType, EncodingModality encodingModality,
-                         int windowLength, int lowerFrequencyLimit, int upperFrequencyLimit)
+auto Track::generateBand(BandType bandType, CurveType curveType, int windowLength,
+                         int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, encodingModality, windowLength, lowerFrequencyLimit,
-               upperFrequencyLimit);
+  Band newBand(bandType, curveType, windowLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
 
 auto Track::findBandAvailable(const int position, const int duration,
-                              const types::BandType bandType,
-                              const types::EncodingModality encodingModality)
-    -> haptics::types::Band * {
+                              const types::BandType bandType) -> haptics::types::Band * {
   haptics::types::Effect e;
   bool bandIsAvailable = true;
   for (haptics::types::Band &b : bands) {
-    if (b.getBandType() != bandType || b.getEncodingModality() != encodingModality) {
+    if (b.getBandType() != bandType) {
       continue;
     }
 
@@ -142,7 +139,7 @@ auto Track::Evaluate(double position) -> double {
 }
 
 auto Track::EvaluateTrack(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
-  std::vector<double> trackAmp(sampleCount, 0); // intialiser à 0?
+  std::vector<double> trackAmp(sampleCount, 0); // intialiser ï¿½ 0?
   for (haptics::types::Band &b : bands) {
     std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, b.getLowerFrequencyLimit(),
                                                    b.getUpperFrequencyLimit());
@@ -171,6 +168,12 @@ auto Track::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -
 
 auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
   sampleCount = newSampleCount;
+}
+
+[[nodiscard]] auto Track::getDirection() const -> std::optional<Direction> { return direction; }
+
+auto Track::setDirection(std::optional<Direction> newDirection) -> void {
+  direction = newDirection;
 }
 
 } // namespace haptics::types

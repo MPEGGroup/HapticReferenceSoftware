@@ -57,6 +57,31 @@ auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality)
   perceptionModality = newPerceptionModality;
 }
 
+[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int8_t> {
+  return this->unitExponent;
+}
+
+[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int8_t {
+  return this->getUnitExponent().value_or(Perception::DEFAULT_UNIT_EXPONENT);
+}
+
+auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void {
+  this->unitExponent = newUnitExponent;
+}
+
+[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int8_t> {
+  return this->perceptionUnitExponent;
+}
+
+[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int8_t {
+  return this->getPerceptionUnitExponent().value_or(Perception::DEFAULT_PERCEPTION_UNIT_EXPONENT);
+}
+
+auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
+    -> void {
+  this->perceptionUnitExponent = newPerceptionUnitExponent;
+}
+
 auto Perception::getTracksSize() -> size_t { return tracks.size(); }
 
 auto Perception::getTrackAt(int index) -> haptics::types::Track & { return tracks.at(index); }
@@ -151,6 +176,16 @@ auto Perception::addReferenceDevice(
   }
 }
 
+auto Perception::getEffectLibrarySize() -> size_t { return effectLibrary.size(); }
+
+auto Perception::getBasisEffectAt(int index) -> haptics::types::Effect & {
+  return effectLibrary.at(index);
+}
+
+auto Perception::addBasisEffect(haptics::types::Effect &newEffect) -> void {
+  effectLibrary.push_back(newEffect);
+}
+
 auto Perception::convertToModality(const std::string &modalityString) -> PerceptionModality {
   if (stringToPerceptionModality.count(modalityString) != 0) {
     return stringToPerceptionModality.at(modalityString);
@@ -170,8 +205,8 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   if (modalityString == "Temperature effect") {
     return PerceptionModality::Temperature;
   }
-  if (modalityString == "Vibration effect") {
-    return PerceptionModality::Vibration;
+  if (modalityString == "Vibration effect" || modalityString == "Vibrotactile effect") {
+    return PerceptionModality::Vibrotactile;
   }
   if (modalityString == "Water effect") {
     return PerceptionModality::Water;
@@ -182,11 +217,107 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   if (modalityString == "Velocity effect") {
     return PerceptionModality::Velocity;
   }
-  if (modalityString == "Kinesthetic effect") {
-    return PerceptionModality::Kinesthetic;
+  if (modalityString == "Kinesthetic effect" || modalityString == "Force effect") {
+    return PerceptionModality::Force;
+  }
+  if (modalityString == "Vibrotactile Texture effect" || modalityString == "Texture effect") {
+    return PerceptionModality::VibrotactileTexture;
+  }
+  if (modalityString == "Stiffness effect") {
+    return PerceptionModality::Stiffness;
+  }
+  if (modalityString == "Friction effect") {
+    return PerceptionModality::Friction;
   }
 
   return PerceptionModality::Other;
+}
+
+auto Perception::getEffectById(int id) -> std::optional<Effect> {
+  for (auto effect : effectLibrary) {
+    if (effect.getId() == id) {
+      return effect;
+    }
+  }
+  return {};
+}
+
+auto Perception::linearizeLibrary() -> void {
+  for (int i = 0; i < static_cast<int>(getTracksSize()); i++) {
+    auto track = getTrackAt(i);
+    auto numBands = static_cast<int>(track.getBandsSize());
+    for (int j = 0; j < numBands; j++) {
+      auto band = track.getBandAt(j);
+      auto numEffects = static_cast<int>(band.getEffectsSize());
+      for (int k = 0; k < numEffects; k++) {
+        auto effect = band.getEffectAt(k);
+        if (effect.getEffectType() == EffectType::Reference) {
+          auto refEffect = getEffectById(effect.getId());
+          if (refEffect.has_value()) {
+            Effect basisEffect(refEffect.value());
+            basisEffect.setPosition(effect.getPosition());
+            basisEffect.setId(-1);
+            getTrackAt(i).getBandAt(j).replaceEffectAt(k, basisEffect);
+          }
+        }
+      }
+    }
+  }
+  effectLibrary.clear();
+}
+
+auto Perception::refactorEffects() -> void {
+  for (int i = 0; i < static_cast<int>(getTracksSize()); i++) {
+    auto track = getTrackAt(i);
+    auto numBands = static_cast<int>(track.getBandsSize());
+    for (int j = 0; j < numBands; j++) {
+      auto band = track.getBandAt(j);
+      if (band.getBandType() == BandType::WaveletWave) {
+        continue;
+      }
+      auto numEffects = static_cast<int>(band.getEffectsSize());
+      for (int k = 0; k < numEffects; k++) {
+        auto refEffect = band.getEffectAt(k);
+        auto sameEffects = searchForEquivalentEffects(refEffect, i);
+        if (sameEffects.size() > 1) {
+          Effect basisEffect(refEffect);
+          auto newId = static_cast<int>(getEffectLibrarySize());
+          basisEffect.setId(newId);
+          basisEffect.setPosition(0);
+          for (const auto &t : sameEffects) {
+            auto [l, m, n] = t;
+            // if (i != l || j != m || k != n) {
+            Effect libEffect;
+            libEffect.setId(newId);
+            libEffect.setPosition(getTrackAt(l).getBandAt(m).getEffectAt(n).getPosition());
+            libEffect.setEffectType(EffectType::Reference);
+            getTrackAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
+            //}
+          }
+          addBasisEffect(basisEffect);
+        }
+      }
+    }
+  }
+}
+
+auto Perception::searchForEquivalentEffects(Effect &effect, int startingTrack)
+    -> std::vector<std::tuple<int, int, int>> {
+  std::vector<std::tuple<int, int, int>> sameEffects;
+  for (int l = startingTrack; l < static_cast<int>(getTracksSize()); l++) {
+    auto track2 = getTrackAt(l);
+    auto numBands2 = static_cast<int>(track2.getBandsSize());
+    for (int m = 0; m < numBands2; m++) {
+      auto band2 = track2.getBandAt(m);
+      auto numEffects2 = static_cast<int>(band2.getEffectsSize());
+      for (int n = 0; n < numEffects2; n++) {
+        if (effect.isEquivalent(band2.getEffectAt(n))) {
+          sameEffects.emplace_back(l, m, n);
+        }
+      }
+    }
+  }
+  return sameEffects;
 }
 
 } // namespace haptics::types

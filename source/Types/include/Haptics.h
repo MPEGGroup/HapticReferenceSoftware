@@ -67,6 +67,8 @@ public:
   auto addAvatar(Avatar &newAvatar) -> void;
   auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
   auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
+  auto linearize() -> void;
+  auto refactor() -> void;
 
 private:
   std::string version;

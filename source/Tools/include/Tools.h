@@ -34,6 +34,7 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include <Types/include/CurveType.h>
 #include <iostream>
 #include <vector>
 
@@ -77,6 +78,9 @@ namespace haptics::tools {
 
 [[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double>;
+
+[[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
+                                      types::CurveType curveType) -> std::vector<double>;
 
 } // namespace haptics::tools
 #endif

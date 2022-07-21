@@ -170,9 +170,16 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
     auto perceptionModality = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
     std::string perceptionDescription = IOBinaryPrimitives::readString(file);
     auto avatarId = IOBinaryPrimitives::readNBytes<int, 4>(file);
+    auto unitExponent = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+    auto perceptionUnitExponent = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
 
     myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
                                      static_cast<types::PerceptionModality>(perceptionModality));
+    myPerception.setUnitExponent(unitExponent);
+    myPerception.setPerceptionUnitExponent(perceptionUnitExponent);
+    if (!IOBinary::readLibrary(myPerception, file)) {
+      return false;
+    }
     if (!IOBinary::readReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -205,6 +212,16 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
     int avatarId = myPerception.getAvatarId();
     IOBinaryPrimitives::writeNBytes<int, 4>(avatarId, file);
 
+    int8_t unitExponent = myPerception.getUnitExponentOrDefault();
+    IOBinaryPrimitives::writeNBytes<int8_t, 1>(unitExponent, file);
+
+    int8_t perceptionUnitExponent = myPerception.getPerceptionUnitExponentOrDefault();
+    IOBinaryPrimitives::writeNBytes<int8_t, 1>(perceptionUnitExponent, file);
+
+    if (!IOBinary::writeLibrary(myPerception, file)) {
+      return false;
+    }
+
     if (!IOBinary::writeReferenceDevices(myPerception, file)) {
       return false;
     }
@@ -214,6 +231,125 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
     }
   }
   return true;
+}
+
+auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
+  auto id = IOBinaryPrimitives::readNBytes<int, 4>(file);
+  auto position = IOBinaryPrimitives::readNBytes<int, 4>(file);
+  auto phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_PHASE, MAX_PHASE);
+  auto baseSignal = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+  auto effectType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+  auto keyframeCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+  types::Effect effect(static_cast<int>(position), phase,
+                       static_cast<types::BaseSignal>(baseSignal),
+                       static_cast<types::EffectType>(effectType));
+  effect.setId(id);
+  for (unsigned short i = 0; i < keyframeCount; i++) {
+    auto mask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    std::optional<int> position = std::nullopt;
+    std::optional<float> amplitude = std::nullopt;
+    std::optional<int> frequency = std::nullopt;
+    if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
+      position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
+      amplitude =
+          IOBinaryPrimitives::readFloatNBytes<uint8_t, 1>(file, -MAX_AMPLITUDE, MAX_AMPLITUDE);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
+      frequency = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    }
+    types::Keyframe myKeyframe(position, amplitude, frequency);
+    effect.addKeyframe(myKeyframe);
+  }
+  auto timelineEffectCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  for (unsigned short i = 0; i < timelineEffectCount; i++) {
+    auto timelineEffect = readLibraryEffect(file);
+    effect.addTimelineEffect(timelineEffect);
+  }
+  return effect;
+}
+
+auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &file) -> bool {
+  int id = libraryEffect.getId();
+  IOBinaryPrimitives::writeNBytes<int, 4>(id, file);
+  int position = libraryEffect.getPosition();
+  IOBinaryPrimitives::writeNBytes<int, 4>(position, file);
+  float phase = libraryEffect.getPhase();
+  IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, -MAX_PHASE, MAX_PHASE);
+  auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
+  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(baseSignal, file);
+  auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());
+  IOBinaryPrimitives::writeNBytes<uint8_t, 1>(effectType, file);
+
+  auto keyframeCount = static_cast<uint16_t>(libraryEffect.getKeyframesSize());
+  IOBinaryPrimitives::writeNBytes<uint16_t, 2>(keyframeCount, file);
+  types::Keyframe keyframe;
+  for (unsigned short i = 0; i < keyframeCount; i++) {
+    keyframe = libraryEffect.getKeyframeAt(i);
+    auto mask = (uint8_t)KeyframeMask::NOTHING;
+    if (keyframe.getRelativePosition().has_value()) {
+      mask |= (uint8_t)KeyframeMask::RELATIVE_POSITION;
+    }
+    if (keyframe.getAmplitudeModulation().has_value()) {
+      mask |= (uint8_t)KeyframeMask::AMPLITUDE_MODULATION;
+    }
+    if (keyframe.getFrequencyModulation().has_value()) {
+      mask |= (uint8_t)KeyframeMask::FREQUENCY_MODULATION;
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(mask, file);
+    if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
+      auto position = keyframe.getRelativePosition().value();
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
+      auto amplitude = keyframe.getAmplitudeModulation().value();
+      IOBinaryPrimitives::writeFloatNBytes<uint8_t, 1>(amplitude, file, -MAX_AMPLITUDE,
+                                                       MAX_AMPLITUDE);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
+      auto frequency = keyframe.getFrequencyModulation().value();
+      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(frequency, file);
+    }
+  }
+
+  auto timelineEffectCount = static_cast<uint16_t>(libraryEffect.getTimelineSize());
+  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(timelineEffectCount, file);
+  // for each library effect
+  types::Effect timelineEffect;
+  for (unsigned short i = 0; i < timelineEffectCount; i++) {
+    timelineEffect = libraryEffect.getTimelineEffectAt(i);
+    writeLibraryEffect(libraryEffect, file);
+  }
+  return true;
+}
+
+auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file) -> bool {
+  auto effectCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
+  bool success = true;
+  for (unsigned short i = 0; i < effectCount; i++) {
+    auto effect = readLibraryEffect(file);
+    perception.addBasisEffect(effect);
+  }
+  return success;
+}
+
+auto IOBinary::writeLibrary(types::Perception &perception, std::ofstream &file) -> bool {
+  auto effectCount = static_cast<unsigned short>(perception.getEffectLibrarySize());
+  IOBinaryPrimitives::writeNBytes<unsigned short, 2>(effectCount, file);
+
+  // for each library effect
+  types::Effect libraryEffect;
+  bool success = true;
+  for (unsigned short i = 0; i < effectCount; i++) {
+    libraryEffect = perception.getBasisEffectAt(i);
+    success &= writeLibraryEffect(libraryEffect, file);
+  }
+  return success;
 }
 
 auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool {
@@ -395,10 +531,18 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto trackGain = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_FLOAT, MAX_FLOAT);
     auto trackMixingWeight = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
     auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    auto optionalMetadataMask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     auto frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     std::optional<uint32_t> sampleCount = std::nullopt;
     if (frequencySampling != 0) {
       sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    }
+    std::optional<types::Direction> direction = std::nullopt;
+    if ((optionalMetadataMask & 0b0000'0001) != 0) {
+      auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      direction = types::Direction(X, Y, Z);
     }
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
@@ -408,6 +552,9 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     }
     if (sampleCount.has_value()) {
       t.setSampleCount(sampleCount);
+    }
+    if (direction.has_value()) {
+      t.setDirection(direction);
     }
     if (deviceId >= 0) {
       t.setReferenceDeviceId(deviceId);
@@ -457,12 +604,25 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     uint32_t bodyPartMask = myTrack.getBodyPartMask();
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
 
+    auto optionalMetadataMask = (uint8_t)0b0000'0000;
+    if (myTrack.getDirection().has_value()) {
+      optionalMetadataMask |= (uint8_t)0b0000'0001;
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalMetadataMask, file);
+
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
 
     if (frequencySampling != 0) {
       uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
       IOBinaryPrimitives::writeNBytes<uint32_t, 4>(sampleCount, file);
+    }
+
+    if (myTrack.getDirection().has_value()) {
+      types::Direction direction = myTrack.getDirection().value();
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.X, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Y, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Z, file);
     }
 
     auto verticesCount = static_cast<int>(myTrack.getVerticesSize());

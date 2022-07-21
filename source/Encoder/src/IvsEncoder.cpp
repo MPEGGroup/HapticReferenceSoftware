@@ -127,11 +127,11 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
                               effect.getKeyframeAt(static_cast<int>(effect.getKeyframesSize()) - 1)
                                   .getRelativePosition()
                                   .value(),
-                              types::BandType::Wave, types::EncodingModality::Vectorial);
+                              types::BandType::VectorialWave);
   if (myBand == nullptr) {
-    myBand = track.generateBand(haptics::types::BandType::Wave, haptics::types::CurveType::Unknown,
-                                haptics::types::EncodingModality::Vectorial, 0,
-                                IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
+    myBand = track.generateBand(haptics::types::BandType::VectorialWave,
+                                haptics::types::CurveType::Unknown, 0, IvsEncoder::MIN_FREQUENCY,
+                                IvsEncoder::MAX_FREQUENCY);
   }
   myBand->addEffect(effect);
 }
@@ -186,14 +186,14 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
 
     int fadeLevel = IvsEncoder::getFadeLevel(basisEffect);
     float fadeAmplitude = static_cast<float>(fadeLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
-
-    if (fadeTime < attackTime) {
+    auto actualAttackTime = std::max(attackTime, 0);
+    if (fadeTime < actualAttackTime) {
       std::pair<int, double> fadeStart(fadeTime, amplitude);
       std::pair<int, double> fadeEnd(duration, fadeAmplitude);
       out->addAmplitudeAt(
-          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, attackTime)),
-          attackTime, false);
-    } else if (fadeTime > attackTime) {
+          static_cast<float>(tools::linearInterpolation(fadeStart, fadeEnd, actualAttackTime)),
+          actualAttackTime, false);
+    } else if (fadeTime > actualAttackTime) {
       out->addAmplitudeAt(amplitude, fadeTime);
     }
     out->addAmplitudeAt(fadeAmplitude, duration);
