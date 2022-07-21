@@ -93,7 +93,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   std::vector<double> DDg(points.size());
 
   for (size_t i = 0; i < xquery.size(); i++) {
-    xquery[i] = i;
+    xquery[i] = static_cast<int>(i);
   }
 
   for (size_t i = 0; i < dx.size(); i++) {
@@ -163,7 +163,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
 [[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double> {
-  int n = static_cast<int>(points.size());
+  auto n = points.size();
   std::vector<double> dx(n - 1);
   std::vector<double> dy(dx.size());
   std::vector<double> m(dx.size());
@@ -243,11 +243,15 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     -> std::vector<double> {
 
   std::vector<double> Ybezier;
-  int dx1, dx2 = 0;
-  double f0, f1, f2, t;
+  int dx1 = 0;
+  int dx2 = 0;
+  double f0 = 0;
+  double f1 = 0;
+  double f2 = 0;
+  double t = 0;
   int i = 0;
 
-  while (i < points.size() - 1) {
+  while (i < static_cast<int>(points.size()) - 1) {
     dx1 = points[i + 1].first - points[i].first + 1;
     dx2 = points[i + 2].first - points[i].first + 1;
     f0 = points[i].second;
@@ -259,7 +263,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
         t = (1 - dx1 + std::sqrt(std::pow(dx1, 2) - 2 * j * dx1 + j * 1 + j * dx2 - 1 * dx2)) /
             (1 - 2 * dx1 + dx2);
       } else {
-        t = (1 - j) / (2 * (1 - dx1));
+        t = (1 - j) / static_cast<double>(2 * (1 - dx1));
       }
       Ybezier.push_back(std::pow(1 - t, 2) * f0 + (1 - t) * 2 * t * f1 + std::pow(t, 2) * f2);
     }
@@ -274,8 +278,8 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
 [[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double> {
-  int p = points.size();
-  double n = points.back().first;
+  auto p = static_cast<int>(points.size());
+  auto n = points.back().first;
   std::vector<std::vector<double>> X1(3, std::vector<double>(3));
   std::vector<std::vector<double>> X2(3, std::vector<double>(3));
   std::vector<double> t(p + 3);
@@ -283,8 +287,8 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
   t[0] = 0;
   t[1] = 0;
-  for (double i = 0; i < p - 1; i++) {
-    t[i + 2] = i / (p - 2);
+  for (int i = 0; i < p - 1; i++) {
+    t[i + 2] = i / static_cast<double>(p - 2);
   }
   t[p + 1] = 1;
   t[p + 2] = 1;
@@ -299,7 +303,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
   for (double m = 1; m < n; m++) {
     while (X1[2][2] < m) {
-      t0 = t0 + (1 / n) / 10;
+      t0 = t0 + (1 / static_cast<double>(n)) / 10;
       k = 0;
       while (t0 >= t[k]) {
         k = k + 1;
