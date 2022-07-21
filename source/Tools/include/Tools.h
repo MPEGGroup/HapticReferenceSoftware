@@ -42,6 +42,11 @@ constexpr auto S_2_MS = 1000.0;
 constexpr auto MS_2_S = 0.001;
 constexpr auto MS_2_MICROSECONDS = 1000;
 constexpr auto MICROSECONDS_2_MS = 0.001;
+constexpr auto AKIMA_EPSILON = -100;
+constexpr auto AKIMA_THRESHOLD = 10;
+constexpr auto AKIMA_THRESHOLD2 = -8;
+constexpr auto BSPLINE_STEP = 10;
+constexpr auto CUBIC_COEFFICIENT = 6;
 
 namespace haptics::tools {
 
@@ -55,6 +60,24 @@ namespace haptics::tools {
                                         double end_out, double x_in) -> double;
 
 [[nodiscard]] auto is_eq(double a, double b) -> bool;
+
+[[nodiscard]] auto linearInterpolation2(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto cubicInterpolation2(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto bezierInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
+[[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
 
 [[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
                                       types::CurveType curveType) -> std::vector<double>;

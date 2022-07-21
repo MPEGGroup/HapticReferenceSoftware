@@ -43,12 +43,19 @@ enum class CurveType {
   Unknown = 0,
   Cubic = 1,
   Linear = 2,
+  Akima = 3,
+  Bezier = 4,
+  Bspline = 5,
 };
 
 static const std::map<std::string, CurveType> stringToCurveType = {
-    {"Unknown", CurveType::Unknown}, {"Cubic", CurveType::Cubic}, {"Linear", CurveType::Linear}};
+    {"Unknown", CurveType::Unknown}, {"Cubic", CurveType::Cubic},
+    {"Linear", CurveType::Linear},   {"Akima", CurveType::Akima},
+    {"Bezier", CurveType::Bezier},   {"Bspline", CurveType::Bspline}};
 static const std::map<CurveType, std::string> curveTypeToString = {
-    {CurveType::Unknown, "Unknown"}, {CurveType::Cubic, "Cubic"}, {CurveType::Linear, "Linear"}};
+    {CurveType::Unknown, "Unknown"}, {CurveType::Cubic, "Cubic"},
+    {CurveType::Linear, "Linear"},   {CurveType::Akima, "Akima"},
+    {CurveType::Bezier, "Bezier"},   {CurveType::Bspline, "Bspline"}};
 } // namespace haptics::types
 
 #endif // CURVETYPE_H
