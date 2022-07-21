@@ -198,8 +198,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
       double position = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
-                           effects.back().getEffectTimeLength(bandType,
-                                                              TRANSIENT_DURATION_MS) ||
+                           effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
             position < 0) &&
            (this->bandType != types::BandType::WaveletWave))) {
         bandAmp[ti] = 0;
