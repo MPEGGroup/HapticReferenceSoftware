@@ -373,40 +373,39 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 }
 
 [[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
-    types::CurveType curveType) -> std::vector<double> {
-    std::vector<double> interpolation;
-    double t = 0;
-    int i = 0;
-    double amp = 0;
+                                      types::CurveType curveType) -> std::vector<double> {
+  std::vector<double> interpolation;
+  double t = 0;
+  int i = 0;
+  double amp = 0;
 
-    while (t < points.back().first) {
-        double t0 = points[i].first;
-        double f0 = points[i].second;
-        double t1 = points[i + 1].first;
-        double f1 = points[i + 1].second;
-        double h = t1 - t0;
+  while (t < points.back().first) {
+    double t0 = points[i].first;
+    double f0 = points[i].second;
+    double t1 = points[i + 1].first;
+    double f1 = points[i + 1].second;
+    double h = t1 - t0;
 
-        while (t <= t1) {
-            switch (curveType) {
-            case types::CurveType::Cubic: {
-                amp = f0 + (f1 - f0) * (3 * h + 2 * (t0 - t)) * std::pow(t - t0, 2) / std::pow(h, 3);
-                break;
-            }
-            case types::CurveType::Linear: {
-                amp = (f0 * (t1 - t) + f1 * (t - t0)) / (t1 - t0);
-                break;
-            }
-            default:
-                amp = 0;
-                break;
-            }
-            interpolation.push_back(amp);
-            t += 1;
-        }
-        i++;
+    while (t <= t1) {
+      switch (curveType) {
+      case types::CurveType::Cubic: {
+        amp = f0 + (f1 - f0) * (3 * h + 2 * (t0 - t)) * std::pow(t - t0, 2) / std::pow(h, 3);
+        break;
+      }
+      case types::CurveType::Linear: {
+        amp = (f0 * (t1 - t) + f1 * (t - t0)) / (t1 - t0);
+        break;
+      }
+      default:
+        amp = 0;
+        break;
+      }
+      interpolation.push_back(amp);
+      t += 1;
     }
-    return interpolation;
+    i++;
+  }
+  return interpolation;
 }
-
 
 } // namespace haptics::tools
