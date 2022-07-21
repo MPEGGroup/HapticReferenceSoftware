@@ -5,8 +5,8 @@
   "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "reference_files": {
-    "main_folder": "..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
-
+    "main_folder": "..\\..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
+    "reference_bitratePSNR": "reference_bitratePSNR.csv",
     "short_effects": [
       {
         "name": "APPL-vib-boing",
@@ -103,6 +103,36 @@
         "type": "Training",
         "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Tick2.ivs",
         "reference_file":"Training\\Training1-1\\WAV_noPad\\IMMR-vib-Tick2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "ERM_010_Bounce100",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\ERM_010_Bounce100.ivs",
+        "reference_file":"Evaluation\\Evaluation1-1\\WAV_noPad\\ERM_010_Bounce100.wav"
+      },
+      {
+        "name": "ERM_074_Explosion1",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\ERM_074_Explosion1.ivs",
+        "reference_file":"Evaluation\\Evaluation1-1\\WAV_noPad\\ERM_074_Explosion1.wav"
+      },
+      {
+        "name": "LRA_014_DoubleSharpClick66",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\LRA_014_DoubleSharpClick66.ivs",
+        "reference_file":"Evaluation\\Evaluation1-1\\WAV_noPad\\LRA_014_DoubleSharpClick66.wav"
+      },
+      {
+        "name": "LRA_079_Explosion6",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\LRA_079_Explosion6.ivs",
+        "reference_file":"Evaluation\\Evaluation1-1\\WAV_noPad\\LRA_079_Explosion6.wav"
+      },
+      {
+        "name": "Piezo_010_Bounce100",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\Piezo_010_Bounce100.ivs",
+        "reference_file":"Evaluation\\Evaluation1-1\\WAV_noPad\\Piezo_010_Bounce100.wav"
       }
     ],
     "long_effects": [
@@ -237,6 +267,48 @@
         "type": "Training",
         "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Weapon2.ivs",
         "reference_file":"Training\\Training1-2\\WAV_noPad\\IMMR-vib-Weapon2-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "a1",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\a1.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\a1.wav"
+      },
+      {
+        "name": "a2",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\a2.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\a2.wav"
+      },
+      {
+        "name": "a3",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\a3.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\a3.wav"
+      },
+      {
+        "name": "ERM_068_Alert5",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\ERM_068_Alert5.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\ERM_068_Alert5.wav"
+      },
+      {
+        "name": "LRA_066_Alert3",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\LRA_066_Alert3.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\LRA_066_Alert3.wav"
+      },
+      {
+        "name": "Piezo_073_Alert10",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\Piezo_073_Alert10.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\Piezo_073_Alert10.wav"
+      },
+      {
+        "name": "Piezo_091_Weapon8",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\Piezo_091_Weapon8.ivs",
+        "reference_file":"Evaluation\\Evaluation1-2\\WAV_noPad\\Piezo_091_Weapon8.wav"
       }
     ],
     "kinesthetic_effects": [
@@ -359,6 +431,12 @@
         "type": "Training",
         "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.ohm",
         "reference_file":"Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "rollercoaster",
+        "type": "Evaluation",
+        "haptic_file_path": "Evaluation\\Evaluation1-3\\WAV_noPad\\rollercoaster.wav",
+        "reference_file":"Evaluation\\Evaluation1-3\\WAV_noPad\\rollercoaster.wav"
       }
     ]
   }

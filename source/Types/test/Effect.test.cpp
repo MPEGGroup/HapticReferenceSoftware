@@ -37,10 +37,11 @@
 
 using haptics::types::BaseSignal;
 using haptics::types::Effect;
+using haptics::types::EffectType;
 using haptics::types::Keyframe;
 
 TEST_CASE("addKeyframe with only position", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp);
+  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
   const size_t n = e.getKeyframesSize();
 
   const int testingPosition = 42;
@@ -54,7 +55,7 @@ TEST_CASE("addKeyframe with only position", "[addKeyframe]") {
 }
 
 TEST_CASE("addKeyframe with amplitude", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp);
+  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
   const size_t n = e.getKeyframesSize();
 
   const int testingPosition = 42;
@@ -70,7 +71,7 @@ TEST_CASE("addKeyframe with amplitude", "[addKeyframe]") {
 }
 
 TEST_CASE("addKeyframe with frequency", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp);
+  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
   const size_t n = e.getKeyframesSize();
 
   const int testingPosition = 42;
@@ -86,7 +87,7 @@ TEST_CASE("addKeyframe with frequency", "[addKeyframe]") {
 }
 
 TEST_CASE("addKeyframe with amplitude and frequency", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp);
+  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
   const size_t n = e.getKeyframesSize();
 
   const int testingPosition = 24;

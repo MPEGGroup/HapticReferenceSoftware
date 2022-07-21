@@ -40,6 +40,19 @@
 
 namespace haptics::types {
 
+struct Direction {
+  int8_t X;
+  int8_t Y;
+  int8_t Z;
+
+  explicit Direction() = default;
+  explicit Direction(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+
+  auto operator==(const Direction &other) const -> bool {
+    return X == other.X && Y == other.Y && Z == other.Z;
+  };
+};
+
 class Track {
 public:
   explicit Track() = default;
@@ -53,7 +66,8 @@ public:
       , vertices({})
       , bands({})
       , frequencySampling(std::nullopt)
-      , sampleCount(std::nullopt){};
+      , sampleCount(std::nullopt)
+      , direction(std::nullopt){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -75,16 +89,17 @@ public:
   auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
   auto addBand(haptics::types::Band &newBand) -> void;
   auto generateBand() -> haptics::types::Band *;
-  auto generateBand(BandType bandType, CurveType curveType, EncodingModality encodingModality,
-                    int windowLength, int lowerFrequencyLimit, int upperFrequencyLimit)
+  auto generateBand(BandType bandType, CurveType curveType, int windowLength,
+                    int lowerFrequencyLimit, int upperFrequencyLimit) -> haptics::types::Band *;
+  auto findBandAvailable(int position, int duration, types::BandType bandType)
       -> haptics::types::Band *;
-  auto findBandAvailable(int position, int duration, types::BandType bandType,
-                         types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
   [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
   auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
+  [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
+  auto setDirection(std::optional<Direction> newDirection) -> void;
 
 private:
   int id = -1;
@@ -97,6 +112,7 @@ private:
   std::optional<int> referenceDeviceId;
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;
+  std::optional<Direction> direction = std::nullopt;
 };
 } // namespace haptics::types
 #endif // TRACK_H

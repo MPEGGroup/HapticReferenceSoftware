@@ -37,7 +37,6 @@
 #include <Types/include/BandType.h>
 #include <Types/include/CurveType.h>
 #include <Types/include/Effect.h>
-#include <Types/include/EncodingModality.h>
 #include <vector>
 
 namespace haptics::types {
@@ -45,11 +44,10 @@ namespace haptics::types {
 class Band {
 public:
   explicit Band() = default;
-  explicit Band(BandType newBandType, CurveType newCurveType, EncodingModality newEncodingModality,
-                int newWindowLength, int newLowerFrequencyLimit, int newUpperFrequencyLimit)
+  explicit Band(BandType newBandType, CurveType newCurveType, int newWindowLength,
+                int newLowerFrequencyLimit, int newUpperFrequencyLimit)
       : bandType(newBandType)
       , curveType(newCurveType)
-      , encodingModality(newEncodingModality)
       , windowLength(newWindowLength)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
@@ -59,8 +57,6 @@ public:
   auto setBandType(BandType newBandType) -> void;
   [[nodiscard]] auto getCurveType() const -> CurveType;
   auto setCurveType(CurveType newCurveType) -> void;
-  [[nodiscard]] auto getEncodingModality() const -> EncodingModality;
-  auto setEncodingModality(EncodingModality newEncodingModality) -> void;
   [[nodiscard]] auto getWindowLength() const -> int;
   auto setWindowLength(int newWindowLength) -> void;
   [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
@@ -80,9 +76,8 @@ private:
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit) -> double;
 
-  BandType bandType = BandType::Wave;
+  BandType bandType = BandType::VectorialWave;
   CurveType curveType = CurveType::Unknown;
-  EncodingModality encodingModality = EncodingModality::Vectorial;
   int windowLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
