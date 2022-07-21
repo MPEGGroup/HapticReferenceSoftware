@@ -59,4 +59,11 @@ auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation)
   frequencyModulation = newFrequencyModulation;
 }
 
+auto Keyframe::operator==(const Keyframe &keyframe) -> bool {
+  return (relativePosition == keyframe.getRelativePosition() &&
+          amplitudeModulation == keyframe.getAmplitudeModulation() &&
+          frequencyModulation == keyframe.getFrequencyModulation());
+}
+
+auto Keyframe::operator!=(const Keyframe &keyframe) -> bool { return !(*this == keyframe); }
 } // namespace haptics::types

@@ -48,7 +48,6 @@ using haptics::filterbank::Wavelet;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::Effect;
-using haptics::types::EncodingModality;
 
 namespace haptics::waveletdecoder {
 

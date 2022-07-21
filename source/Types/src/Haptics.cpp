@@ -119,5 +119,16 @@ auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHM
   }
   return res;
 }
+auto Haptics::linearize() -> void {
+  for (types::Perception &p : perceptions) {
+    p.linearizeLibrary();
+  }
+}
+
+auto Haptics::refactor() -> void {
+  for (types::Perception &p : perceptions) {
+    p.refactorEffects();
+  }
+}
 
 } // namespace haptics::types

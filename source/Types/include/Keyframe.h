@@ -56,6 +56,9 @@ public:
   [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
   auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
+  auto operator==(const Keyframe &keyframe) -> bool;
+  auto operator!=(const Keyframe &keyframe) -> bool;
+
 private:
   std::optional<int> relativePosition = 0;
   std::optional<float> amplitudeModulation;

@@ -88,6 +88,11 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
       std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
+    if (!jsonPerception.contains("effect_library") ||
+        !jsonPerception["effect_library"].is_array()) {
+      std::cerr << "Missing or invalid library" << std::endl;
+      continue;
+    }
 
     auto perceptionId = jsonPerception["id"].get<int>();
     auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
@@ -97,6 +102,20 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
+
+    if (jsonPerception.contains("unit_exponent") &&
+        jsonPerception["unit_exponent"].is_number_integer()) {
+      perception.setUnitExponent(jsonPerception["unit_exponent"].get<int8_t>());
+    }
+    if (jsonPerception.contains("perception_unit_exponent") &&
+        jsonPerception["perception_unit_exponent"].is_number_integer()) {
+      perception.setPerceptionUnitExponent(
+          jsonPerception["perception_unit_exponent"].get<int8_t>());
+    }
+
+    auto jsonLibrary = jsonPerception["effect_library"];
+    loadingSuccess = loadingSuccess && loadLibrary(jsonLibrary, perception);
+
     auto jsonTracks = jsonPerception["tracks"];
     loadingSuccess = loadingSuccess && loadTracks(jsonTracks, perception);
     if (jsonPerception.contains("reference_devices") &&
@@ -108,6 +127,65 @@ auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Hapti
   }
   return loadingSuccess;
 }
+
+auto IOJson::loadLibrary(const nlohmann::json &jsonLibrary, types::Perception &perception) -> bool {
+  bool loadingSuccess = true;
+  for (auto it = jsonLibrary.begin(); it != jsonLibrary.end(); ++it) {
+    auto jsonEffect = it.value();
+
+    if (!jsonEffect.contains("effect_type") || !jsonEffect["effect_type"].is_string()) {
+      std::cerr << "Missing or invalid effect type" << std::endl;
+      continue;
+    }
+
+    auto effectType = types::stringToEffectType.at(jsonEffect["effect_type"]);
+    if (effectType == types::EffectType::Reference) {
+      if (!jsonEffect.contains("id") || !jsonEffect["id"].is_number_integer()) {
+        std::cerr << "Missing or invalid effect id" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+        std::cerr << "Missing or invalid effect position" << std::endl;
+        continue;
+      }
+    } else if (effectType == types::EffectType::Basis) {
+      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+        std::cerr << "Missing or invalid effect position" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("phase") || !jsonEffect["phase"].is_number()) {
+        std::cerr << "Missing or invalid effect phase" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("base_signal") || !jsonEffect["base_signal"].is_string()) {
+        std::cerr << "Missing or invalid effect base_signal" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("keyframes") || !jsonEffect["keyframes"].is_array()) {
+        std::cerr << "Missing or invalid list of keyframes" << std::endl;
+        continue;
+      }
+    }
+
+    auto id = jsonEffect["id"].get<int>();
+    auto position = jsonEffect["position"].get<int>();
+    auto phase = jsonEffect.contains("phase") ? jsonEffect["phase"].get<float>() : 0;
+    auto baseSignal = jsonEffect.contains("base_signal")
+                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"])
+                          : types::BaseSignal::Sine;
+
+    types::Effect effect(position, phase, baseSignal, effectType);
+    effect.setId(id);
+    if (jsonEffect.contains("keyframes")) {
+      auto jsonKeyframes = jsonEffect["keyframes"];
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+    }
+
+    perception.addBasisEffect(effect);
+  }
+  return loadingSuccess;
+}
+
 auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
@@ -144,6 +222,16 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
     auto trackBodyPart = jsonTrack["body_part_mask"].get<uint32_t>();
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
+
+    if (jsonTrack.contains("direction") && jsonTrack["direction"].is_object() &&
+        jsonTrack["direction"].contains("X") && jsonTrack["direction"]["X"].is_number_integer() &&
+        jsonTrack["direction"].contains("Y") && jsonTrack["direction"]["Y"].is_number_integer() &&
+        jsonTrack["direction"].contains("Z") && jsonTrack["direction"]["Z"].is_number_integer()) {
+      types::Direction direction(jsonTrack["direction"]["X"].get<int8_t>(),
+                                 jsonTrack["direction"]["Y"].get<int8_t>(),
+                                 jsonTrack["direction"]["Z"].get<int8_t>());
+      track.setDirection(direction);
+    }
 
     if (jsonTrack.contains("frequency_sampling") &&
         jsonTrack["frequency_sampling"].is_number_integer()) {
@@ -187,10 +275,6 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
       std::cerr << "Missing or invalid curve type" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("encoding_modality") || !jsonBand["encoding_modality"].is_string()) {
-      std::cerr << "Missing or invalid encoding modality" << std::endl;
-      continue;
-    }
     if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_number_integer()) {
       std::cerr << "Missing or invalid window length" << std::endl;
       continue;
@@ -213,13 +297,11 @@ auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
     types::CurveType curveType =
         types::stringToCurveType.at(jsonBand["curve_type"].get<std::string>());
-    types::EncodingModality encodingModality =
-        types::stringToModality.at(jsonBand["encoding_modality"]);
     int windowLength = jsonBand["window_length"].get<int>();
     int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();
     int upperLimit = jsonBand["upper_frequency_limit"].get<int>();
 
-    types::Band band(bandType, curveType, encodingModality, windowLength, lowerLimit, upperLimit);
+    types::Band band(bandType, curveType, windowLength, lowerLimit, upperLimit);
     auto jsonEffects = jsonBand["effects"];
     loadingSuccess = loadingSuccess && loadEffects(jsonEffects, band);
 
@@ -232,30 +314,56 @@ auto IOJson::loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -
   bool loadingSuccess = true;
   for (auto it = jsonEffects.begin(); it != jsonEffects.end(); ++it) {
     auto jsonEffect = it.value();
-    if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
-      std::cerr << "Missing or invalid effect position" << std::endl;
+
+    if (!jsonEffect.contains("effect_type") || !jsonEffect["effect_type"].is_string()) {
+      std::cerr << "Missing or invalid effect type" << std::endl;
       continue;
     }
-    if (!jsonEffect.contains("phase") || !jsonEffect["phase"].is_number()) {
-      std::cerr << "Missing or invalid effect phase" << std::endl;
-      continue;
-    }
-    if (!jsonEffect.contains("base_signal") || !jsonEffect["base_signal"].is_string()) {
-      std::cerr << "Missing or invalid effect base_signal" << std::endl;
-      continue;
-    }
-    if (!jsonEffect.contains("keyframes") || !jsonEffect["keyframes"].is_array()) {
-      std::cerr << "Missing or invalid list of keyframes" << std::endl;
-      continue;
+
+    auto effectType = types::stringToEffectType.at(jsonEffect["effect_type"]);
+    if (effectType == types::EffectType::Reference) {
+      if (!jsonEffect.contains("id") || !jsonEffect["id"].is_number_integer()) {
+        std::cerr << "Missing or invalid effect id" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+        std::cerr << "Missing or invalid effect position" << std::endl;
+        continue;
+      }
+    } else if (effectType == types::EffectType::Basis) {
+      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+        std::cerr << "Missing or invalid effect position" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("phase") || !jsonEffect["phase"].is_number()) {
+        std::cerr << "Missing or invalid effect phase" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("base_signal") || !jsonEffect["base_signal"].is_string()) {
+        std::cerr << "Missing or invalid effect base_signal" << std::endl;
+        continue;
+      }
+      if (!jsonEffect.contains("keyframes") || !jsonEffect["keyframes"].is_array()) {
+        std::cerr << "Missing or invalid list of keyframes" << std::endl;
+        continue;
+      }
     }
 
     auto position = jsonEffect["position"].get<int>();
-    auto phase = jsonEffect["phase"].get<float>();
-    auto baseSignal = types::stringToBaseSignal.at(jsonEffect["base_signal"]);
+    auto phase = jsonEffect.contains("phase") ? jsonEffect["phase"].get<float>() : 0;
+    auto baseSignal = jsonEffect.contains("base_signal")
+                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"])
+                          : types::BaseSignal::Sine;
 
-    types::Effect effect(position, phase, baseSignal);
-    auto jsonKeyframes = jsonEffect["keyframes"];
-    loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+    types::Effect effect(position, phase, baseSignal, effectType);
+    if (jsonEffect.contains("id") && jsonEffect["id"].is_number_integer()) {
+      auto id = jsonEffect["id"].get<int>();
+      effect.setId(id);
+    }
+    if (jsonEffect.contains("keyframes") && jsonEffect["keyframes"].is_array()) {
+      auto jsonKeyframes = jsonEffect["keyframes"];
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+    }
 
     band.addEffect(effect);
   }
@@ -402,6 +510,7 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   std::ofstream file(filePath);
   file << jsonTree;
 }
+
 auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void {
   auto numPerceptions = haptic.getPerceptionsSize();
   for (uint32_t i = 0; i < numPerceptions; i++) {
@@ -413,15 +522,57 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerc
     jsonPerception["perception_modality"] =
         types::perceptionModalityToString.at(perception.getPerceptionModality());
 
+    if (perception.getUnitExponent().has_value()) {
+      jsonPerception["unit_exponent"] = perception.getUnitExponent().value();
+    }
+    if (perception.getPerceptionUnitExponent().has_value()) {
+      jsonPerception["perception_unit_exponent"] = perception.getPerceptionUnitExponent().value();
+    }
+
     auto jsonReferenceDevices = json::array();
     extractReferenceDevices(perception, jsonReferenceDevices);
     jsonPerception["reference_devices"] = jsonReferenceDevices;
 
+    auto jsonLibrary = json::array();
+    extractLibrary(perception, jsonLibrary);
+    jsonPerception["effect_library"] = jsonLibrary;
     auto jsonTracks = json::array();
     extractTracks(perception, jsonTracks);
     jsonPerception["tracks"] = jsonTracks;
 
     jsonPerceptions.push_back(jsonPerception);
+  }
+}
+
+auto IOJson::extractLibrary(types::Perception &perception, nlohmann::json &jsonLibrary) -> void {
+  auto numEffects = perception.getEffectLibrarySize();
+  for (uint32_t m = 0; m < numEffects; m++) {
+    auto effect = perception.getBasisEffectAt((int)m);
+    auto jsonEffect = json::object();
+    jsonEffect["effect_type"] = types::effectTypeToString.at(effect.getEffectType());
+    jsonEffect["id"] = effect.getId();
+    jsonEffect["position"] = effect.getPosition();
+    jsonEffect["phase"] = effect.getPhase();
+    jsonEffect["base_signal"] = types::baseSignalToString.at(effect.getBaseSignal());
+
+    auto jsonKeyframes = json::array();
+    auto numKeyframes = effect.getKeyframesSize();
+    for (uint32_t n = 0; n < numKeyframes; n++) {
+      const auto &keyframe = effect.getKeyframeAt((int)n);
+      auto jsonKeyframe = json::object();
+      if (keyframe.getRelativePosition().has_value()) {
+        jsonKeyframe["relative_position"] = keyframe.getRelativePosition().value();
+      }
+      if (keyframe.getAmplitudeModulation().has_value()) {
+        jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
+      }
+      if (keyframe.getFrequencyModulation().has_value()) {
+        jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
+      }
+      jsonKeyframes.push_back(jsonKeyframe);
+    }
+    jsonEffect["keyframes"] = jsonKeyframes;
+    jsonLibrary.push_back(jsonEffect);
   }
 }
 
@@ -458,6 +609,12 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     if (track.getSampleCount().has_value()) {
       jsonTrack["sample_count"] = track.getSampleCount().value();
     }
+    if (track.getDirection().has_value()) {
+      jsonTrack["direction"] = json::object();
+      jsonTrack["direction"]["X"] = track.getDirection().value().X;
+      jsonTrack["direction"]["Y"] = track.getDirection().value().Y;
+      jsonTrack["direction"]["Z"] = track.getDirection().value().Z;
+    }
 
     auto jsonVertices = json::array();
     auto numVertices = track.getVerticesSize();
@@ -475,7 +632,6 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       auto jsonBand = json::object();
       jsonBand["band_type"] = types::bandTypeToString.at(band.getBandType());
       jsonBand["curve_type"] = types::curveTypeToString.at(band.getCurveType());
-      jsonBand["encoding_modality"] = types::modalityToString.at(band.getEncodingModality());
       jsonBand["window_length"] = band.getWindowLength();
       jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
       jsonBand["upper_frequency_limit"] = band.getUpperFrequencyLimit();
@@ -485,27 +641,32 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       for (uint32_t m = 0; m < numEffects; m++) {
         auto effect = band.getEffectAt((int)m);
         auto jsonEffect = json::object();
-        jsonEffect["position"] = effect.getPosition();
-        jsonEffect["phase"] = effect.getPhase();
-        jsonEffect["base_signal"] = types::baseSignalToString.at(effect.getBaseSignal());
 
-        auto jsonKeyframes = json::array();
-        auto numKeyframes = effect.getKeyframesSize();
-        for (uint32_t n = 0; n < numKeyframes; n++) {
-          const auto &keyframe = effect.getKeyframeAt((int)n);
-          auto jsonKeyframe = json::object();
-          if (keyframe.getRelativePosition().has_value()) {
-            jsonKeyframe["relative_position"] = keyframe.getRelativePosition().value();
+        jsonEffect["effect_type"] = types::effectTypeToString.at(effect.getEffectType());
+        jsonEffect["position"] = effect.getPosition();
+        if (effect.getEffectType() == types::EffectType::Reference) {
+          jsonEffect["id"] = effect.getId();
+        } else if (effect.getEffectType() == types::EffectType::Basis) {
+          jsonEffect["phase"] = effect.getPhase();
+          jsonEffect["base_signal"] = types::baseSignalToString.at(effect.getBaseSignal());
+          auto jsonKeyframes = json::array();
+          auto numKeyframes = effect.getKeyframesSize();
+          for (uint32_t n = 0; n < numKeyframes; n++) {
+            const auto &keyframe = effect.getKeyframeAt((int)n);
+            auto jsonKeyframe = json::object();
+            if (keyframe.getRelativePosition().has_value()) {
+              jsonKeyframe["relative_position"] = keyframe.getRelativePosition().value();
+            }
+            if (keyframe.getAmplitudeModulation().has_value()) {
+              jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
+            }
+            if (keyframe.getFrequencyModulation().has_value()) {
+              jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
+            }
+            jsonKeyframes.push_back(jsonKeyframe);
           }
-          if (keyframe.getAmplitudeModulation().has_value()) {
-            jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
-          }
-          if (keyframe.getFrequencyModulation().has_value()) {
-            jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
-          }
-          jsonKeyframes.push_back(jsonKeyframe);
+          jsonEffect["keyframes"] = jsonKeyframes;
         }
-        jsonEffect["keyframes"] = jsonKeyframes;
         jsonEffects.push_back(jsonEffect);
       }
       jsonBand["effects"] = jsonEffects;

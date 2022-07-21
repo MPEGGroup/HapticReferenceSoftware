@@ -39,6 +39,9 @@
 
 namespace haptics::types {
 
+[[nodiscard]] auto Effect::getId() const -> int { return id; }
+auto Effect::setId(int newId) -> void { id = newId; }
+
 [[nodiscard]] auto Effect::getPosition() const -> int { return position; }
 
 auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
@@ -50,6 +53,10 @@ auto Effect::setPhase(float newPhase) -> void { phase = newPhase; }
 [[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal { return baseSignal; }
 
 auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void { baseSignal = newBaseSignal; }
+
+[[nodiscard]] auto Effect::getEffectType() const -> EffectType { return effectType; }
+
+auto Effect::setEffectType(EffectType newEffectType) -> void { effectType = newEffectType; }
 
 auto Effect::getKeyframesSize() -> size_t { return keyframes.size(); }
 
@@ -128,12 +135,30 @@ auto Effect::addKeyframe(std::optional<int> position, std::optional<double> ampl
   this->addKeyframe(newKf);
 }
 
+auto Effect::isEquivalent(Effect &effect) -> bool {
+  if (effectType != EffectType::Basis || effect.effectType != EffectType::Basis ||
+      phase != effect.getPhase() || baseSignal != effect.getBaseSignal()) {
+    return false;
+  }
+
+  auto size = keyframes.size();
+  if (size != effect.getKeyframesSize()) {
+    return false;
+  }
+
+  for (uint32_t i = 0; i < size; i++) {
+    if (getKeyframeAt((int)i) != effect.getKeyframeAt((int)i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
     -> double {
   double res = 0;
 
-  double max_position =
-      this->position + this->getEffectTimeLength(BandType::Wave, EncodingModality::Vectorial, 0);
+  double max_position = this->position + this->getEffectTimeLength(BandType::VectorialWave, 0);
 
   if (position < this->position || position > max_position || keyframes.empty()) {
     return res;
@@ -350,8 +375,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
   }
 }
 
-auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModality encodingModality,
-                                 double transientDuration) -> double {
+auto Effect::getEffectTimeLength(types::BandType bandType, double transientDuration) -> double {
   if (this->getKeyframesSize() == 0) {
     return 0;
   }
@@ -365,22 +389,20 @@ auto Effect::getEffectTimeLength(types::BandType bandType, types::EncodingModali
                ? (lastKeyframe->getRelativePosition().value() + transientDuration)
                : 0;
   case types::BandType::Curve:
+  case types::BandType::VectorialWave:
     return lastKeyframe->getRelativePosition().has_value()
                ? lastKeyframe->getRelativePosition().value()
                : 0;
-  case types::BandType::Wave:
-    switch (encodingModality) {
-    case types::EncodingModality::Vectorial:
-      return lastKeyframe->getRelativePosition().has_value()
-                 ? lastKeyframe->getRelativePosition().value()
-                 : 0;
-    default:
-      break;
-    }
   default:
     break;
   }
   return 0;
 }
+
+auto Effect::getTimelineSize() -> size_t { return timeline.size(); }
+auto Effect::getTimelineEffectAt(int index) -> haptics::types::Effect & {
+  return timeline.at(index);
+}
+auto Effect::addTimelineEffect(Effect &newEffect) -> void { timeline.push_back(newEffect); }
 
 } // namespace haptics::types

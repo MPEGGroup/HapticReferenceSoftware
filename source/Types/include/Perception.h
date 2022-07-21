@@ -50,10 +50,13 @@ enum class PerceptionModality {
   Velocity = 3,
   Position = 4,
   Temperature = 5,
-  Vibration = 6,
+  Vibrotactile = 6,
   Water = 7,
   Wind = 8,
-  Kinesthetic = 9
+  Force = 9,
+  VibrotactileTexture = 10,
+  Stiffness = 11,
+  Friction = 12
 };
 
 static const std::map<std::string, PerceptionModality> stringToPerceptionModality = {
@@ -63,10 +66,16 @@ static const std::map<std::string, PerceptionModality> stringToPerceptionModalit
     {"Velocity", PerceptionModality::Velocity},
     {"Position", PerceptionModality::Position},
     {"Temperature", PerceptionModality::Temperature},
-    {"Vibration", PerceptionModality::Vibration},
+    {"Vibration", PerceptionModality::Vibrotactile},
+    {"Vibrotactile", PerceptionModality::Vibrotactile},
     {"Water", PerceptionModality::Water},
     {"Wind", PerceptionModality::Wind},
-    {"Kinesthetic", PerceptionModality::Kinesthetic}};
+    {"Kinesthetic", PerceptionModality::Force},
+    {"Force", PerceptionModality::Force},
+    {"Vibrotactile Texture", PerceptionModality::VibrotactileTexture},
+    {"Texture", PerceptionModality::VibrotactileTexture},
+    {"Stiffness", PerceptionModality::Stiffness},
+    {"Friction", PerceptionModality::Friction}};
 static const std::map<PerceptionModality, std::string> perceptionModalityToString = {
     {PerceptionModality::Other, "Other"},
     {PerceptionModality::Pressure, "Pressure"},
@@ -74,10 +83,13 @@ static const std::map<PerceptionModality, std::string> perceptionModalityToStrin
     {PerceptionModality::Velocity, "Velocity"},
     {PerceptionModality::Position, "Position"},
     {PerceptionModality::Temperature, "Temperature"},
-    {PerceptionModality::Vibration, "Vibration"},
+    {PerceptionModality::Vibrotactile, "Vibrotactile"},
     {PerceptionModality::Water, "Water"},
     {PerceptionModality::Wind, "Wind"},
-    {PerceptionModality::Kinesthetic, "Kinesthetic"}};
+    {PerceptionModality::Force, "Force"},
+    {PerceptionModality::VibrotactileTexture, "Vibrotactile Texture"},
+    {PerceptionModality::Stiffness, "Stiffness"},
+    {PerceptionModality::Friction, "Friction"}};
 
 class Perception {
 public:
@@ -88,7 +100,9 @@ public:
       , avatarId(newAvatarId)
       , description(std::move(newDescription))
       , perceptionModality(newPerceptionModality)
-      , tracks({}){};
+      , tracks({})
+      , unitExponent(std::nullopt)
+      , perceptionUnitExponent(std::nullopt){};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
@@ -98,6 +112,12 @@ public:
   auto setDescription(std::string &newDescription) -> void;
   [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
+  [[nodiscard]] auto getUnitExponent() const -> std::optional<int8_t>;
+  [[nodiscard]] auto getUnitExponentOrDefault() const -> int8_t;
+  auto setUnitExponent(std::optional<int8_t> newUnitExponent) -> void;
+  [[nodiscard]] auto getPerceptionUnitExponent() const -> std::optional<int8_t>;
+  [[nodiscard]] auto getPerceptionUnitExponentOrDefault() const -> int8_t;
+  auto setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent) -> void;
   auto getTracksSize() -> size_t;
   auto getTrackAt(int index) -> Track &;
   auto addTrack(haptics::types::Track &newTrack) -> void;
@@ -113,14 +133,28 @@ public:
           std::optional<float>, std::optional<haptics::types::ActuatorType>>>
           &referenceDeviceValues) -> void;
   static auto convertToModality(const std::string &modalityString) -> PerceptionModality;
+  auto getEffectLibrarySize() -> size_t;
+  auto getBasisEffectAt(int index) -> haptics::types::Effect &;
+  auto addBasisEffect(haptics::types::Effect &newEffect) -> void;
+  auto refactorEffects() -> void;
+  auto searchForEquivalentEffects(Effect &effect, int startingTrack)
+      -> std::vector<std::tuple<int, int, int>>;
+  auto linearizeLibrary() -> void;
+  auto getEffectById(int id) -> std::optional<Effect>;
 
 private:
+  static constexpr int8_t DEFAULT_UNIT_EXPONENT = -3;
+  static constexpr int8_t DEFAULT_PERCEPTION_UNIT_EXPONENT = 0;
+
   int id = -1;
   int avatarId = -1;
   std::string description;
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Track> tracks = {};
   std::vector<ReferenceDevice> referenceDevices;
+  std::optional<int8_t> unitExponent = std::nullopt;
+  std::optional<int8_t> perceptionUnitExponent = std::nullopt;
+  std::vector<Effect> effectLibrary = std::vector<Effect>{};
 };
 } // namespace haptics::types
 #endif // PERCEPTION_H
