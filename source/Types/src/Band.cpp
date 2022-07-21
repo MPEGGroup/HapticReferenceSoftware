@@ -158,12 +158,12 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   return -1;
 }
 
-auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int lowFrequencyLimit,
+auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequencyLimit,
                           int highFrequencyLimit) -> std::vector<double> {
   std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
   case BandType::Curve:
-    for (haptics::types::Effect e : effects) {
+    for (auto e : effects) {
       std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
       for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
         types::Keyframe myKeyframe;
@@ -193,17 +193,19 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
         case CurveType::Bspline:
           effectAmp = bsplineInterpolation(keyframes);
           break;
+        default:
+          break;
         }
 
         int count = 0;
         int position = static_cast<int>((e.getPosition() + keyframes[0].first) * fs * MS_2_S);
-        for (int i = position; i < position + effectAmp.size(); i++) {
+        for (int i = position; i < position + static_cast<int>(effectAmp.size()); i++) {
           bandAmp[i] += effectAmp[count];
           count++;
         }
       }
-      return bandAmp;
     }
+    break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
       double position = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
@@ -225,8 +227,9 @@ auto Band::EvaluationBand(uint32_t sampleCount, const int fs, const int pad, int
         }
       }
     }
-    return bandAmp;
+    break;
   }
+  return bandAmp;
 }
 
 auto Band::getBandTimeLength() -> double {

@@ -81,7 +81,7 @@ public:
   auto findBandAvailable(int position, int duration, types::BandType bandType,
                          types::EncodingModality encodingModality) -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
-  auto EvaluateTrack(uint32_t sampleCount, const int fs, const int pad) -> std::vector<double>;
+  auto EvaluateTrack(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
   [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
