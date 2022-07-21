@@ -54,6 +54,9 @@ static constexpr int BITBUDGET_64KBS = 66;
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
+static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_2 = 20;
+static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_16 = 72.5;
+static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_64 = 72.5;
 static constexpr float CUTOFF_FREQUENCY_2 = 0;
 static constexpr float CUTOFF_FREQUENCY_16 = 72.5;
 static constexpr float CUTOFF_FREQUENCY_64 = 72.5;
@@ -77,7 +80,7 @@ struct EncodingConfig {
       , wavelet_windowLength(_wavelet_windowLength)
       , wavelet_bitbudget(_wavelet_bitbudget){};
 
-  auto static generateConfig(int bitrate = 2) -> EncodingConfig {
+  auto static generateConfig(int bitrate = 2, bool kinestheticData = false) -> EncodingConfig {
 
     int wavelet_windowLength = 0;
     double curveFrequencyLimit = 0;
@@ -85,17 +88,17 @@ struct EncodingConfig {
     switch (bitrate) {
     case BITR_2:
       wavelet_bitbudget = BITBUDGET_2KBS;
-      curveFrequencyLimit = CUTOFF_FREQUENCY_2;
+      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_2 : CUTOFF_FREQUENCY_2;
       wavelet_windowLength = WINDOW_LENGTH_2;
       break;
     case BITR_16:
       wavelet_bitbudget = BITBUDGET_16KBS;
-      curveFrequencyLimit = CUTOFF_FREQUENCY_16;
+      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_16 : CUTOFF_FREQUENCY_16;
       wavelet_windowLength = WINDOW_LENGTH_16;
       break;
     case BITR_64:
       wavelet_bitbudget = BITBUDGET_64KBS;
-      curveFrequencyLimit = CUTOFF_FREQUENCY_64;
+      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_64 : CUTOFF_FREQUENCY_64;
       wavelet_windowLength = WINDOW_LENGTH_16;
       break;
     default:
@@ -107,7 +110,8 @@ struct EncodingConfig {
     return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }
 
-  auto static generateConfigBudget(int bitrate = 2, int budget = 3) -> EncodingConfig {
+  auto static generateConfigBudget(int bitrate = 2, int budget = 3, bool kinestheticData = false)
+      -> EncodingConfig {
 
     int wavelet_windowLength = 0;
     double curveFrequencyLimit = 0;
@@ -115,17 +119,17 @@ struct EncodingConfig {
     switch (bitrate) {
     case BITR_2:
       wavelet_bitbudget = budget;
-      curveFrequencyLimit = CUTOFF_FREQUENCY_2;
+      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_2 : CUTOFF_FREQUENCY_2;
       wavelet_windowLength = WINDOW_LENGTH_2;
       break;
     case BITR_16:
       wavelet_bitbudget = budget;
-      curveFrequencyLimit = CUTOFF_FREQUENCY_16;
+      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_16 : CUTOFF_FREQUENCY_16;
       wavelet_windowLength = WINDOW_LENGTH_16;
       break;
     case BITR_64:
       wavelet_bitbudget = budget;
-      curveFrequencyLimit = CUTOFF_FREQUENCY_64;
+      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_64 : CUTOFF_FREQUENCY_64;
       wavelet_windowLength = WINDOW_LENGTH_16;
       break;
     default:
@@ -137,10 +141,19 @@ struct EncodingConfig {
     return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
   }
 
-  auto static generateConfigParam(int bitrate = 2) -> EncodingConfig {
+  auto static generateConfigParam(int bitrate = 2, bool kinestheticData = false) -> EncodingConfig {
 
     int wavelet_windowLength = WINDOW_LENGTH_2;
     double curveFrequencyLimit = 0;
+    if (kinestheticData) {
+      if (bitrate <= 2) {
+        curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_2;
+      } else if (bitrate <= 16) {
+        curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_16;
+      } else {
+        curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_64;
+      }
+    }
     auto temp = (double)bitrate;
     auto wavelet_bitbudget =
         (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
