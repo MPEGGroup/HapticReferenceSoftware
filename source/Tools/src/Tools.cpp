@@ -79,6 +79,27 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return Ylinear;
 }
 
+[[nodiscard]] auto cubicInterpolation2(std::vector<std::pair<int, double>> points)
+    -> std::vector<double> {
+  std::vector<double> Ylinear;
+  double t = 0;
+  int i = 0;
+  while (t < points.back().first) {
+    double t0 = points[i].first;
+    double f0 = points[i].second;
+    double t1 = points[i + 1].first;
+    double f1 = points[i + 1].second;
+    double h = t1 - t0;
+    while (t <= t1) {
+      double amp = f0 + (f1 - f0) * (3 * h + 2 * (t0 - t)) * std::pow(t - t0, 2) / std::pow(h, 3);
+      Ylinear.push_back(amp);
+      t += 1;
+    }
+    i++;
+  }
+  return Ylinear;
+}
+
 [[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double> {
 

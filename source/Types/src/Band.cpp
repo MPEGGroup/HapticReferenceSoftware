@@ -39,6 +39,7 @@ using haptics::tools::akimaInterpolation;
 using haptics::tools::bezierInterpolation;
 using haptics::tools::bsplineInterpolation;
 using haptics::tools::cubicInterpolation;
+using haptics::tools::cubicInterpolation2;
 using haptics::tools::linearInterpolation2;
 
 namespace haptics::types {
@@ -181,7 +182,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
           effectAmp = linearInterpolation2(keyframes);
           break;
         case CurveType::Cubic:
-          effectAmp = cubicInterpolation(keyframes);
+          // effectAmp = cubicInterpolation(keyframes);
+          effectAmp = cubicInterpolation2(keyframes);
           break;
         case CurveType::Akima:
           effectAmp = akimaInterpolation(keyframes);

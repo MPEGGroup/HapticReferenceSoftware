@@ -63,6 +63,9 @@ namespace haptics::tools {
 [[nodiscard]] auto linearInterpolation2(std::vector<std::pair<int, double>> points)
     -> std::vector<double>;
 
+[[nodiscard]] auto cubicInterpolation2(std::vector<std::pair<int, double>> points)
+    -> std::vector<double>;
+
 [[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
     -> std::vector<double>;
 
