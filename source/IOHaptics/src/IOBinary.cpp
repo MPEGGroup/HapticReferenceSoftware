@@ -212,7 +212,6 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
     int avatarId = myPerception.getAvatarId();
     IOBinaryPrimitives::writeNBytes<int, 4>(avatarId, file);
 
-
     int8_t unitExponent = myPerception.getUnitExponentOrDefault();
     IOBinaryPrimitives::writeNBytes<int8_t, 1>(unitExponent, file);
 
