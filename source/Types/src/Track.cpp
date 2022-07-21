@@ -1,4 +1,4 @@
-/* The copyright in this software is being made available under the BSD
+﻿/* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
@@ -136,6 +136,24 @@ auto Track::Evaluate(double position) -> double {
     return 1;
   }
   return res;
+}
+
+auto Track::EvaluateTrack(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
+  std::vector<double> trackAmp(sampleCount, 0); // intialiser � 0?
+  for (haptics::types::Band &b : bands) {
+    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, b.getLowerFrequencyLimit(),
+                                                   b.getUpperFrequencyLimit());
+    for (uint32_t i = 0; i < bandAmp.size(); i++) {
+      trackAmp[i] += bandAmp[i];
+      if (trackAmp[i] < -1) {
+        trackAmp[i] = -1;
+      }
+      if (trackAmp[i] > 1) {
+        trackAmp[i] = 1;
+      }
+    }
+  }
+  return trackAmp;
 }
 
 [[nodiscard]] auto Track::getFrequencySampling() const -> std::optional<uint32_t> {
