@@ -32,7 +32,6 @@
  */
 
 #include <Encoder/include/PcmEncoder.h>
-#include <Encoder/include/WaveletEncoder.h>
 #include <Tools/include/Tools.h>
 #include <Types/include/CurveType.h>
 
@@ -82,27 +81,28 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     signal = wavParser.getSamplesChannel(channelIndex);
 
     // CURVE BAND
-    if (out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture ||
-        out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
-      filteredSignal = signal;
-    } else {
-      filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
-    }
-
-    points = PcmEncoder::localExtrema(filteredSignal, true);
-    myBand = Band();
-    if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
-                                       config.curveFrequencyLimit, &myBand)) {
-      if (out.getPerceptionModality() == types::PerceptionModality::Force ||
+    if (config.curveFrequencyLimit > 0) {
+      if (out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture ||
           out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
-        myBand.setCurveType(CurveType::Linear);
-      } else if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
-                 out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture) {
-        myBand.setCurveType(CurveType::Cubic);
+        filteredSignal = signal;
       } else {
-        myBand.setCurveType(CurveType::Unknown);
+        filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
       }
-      myTrack.addBand(myBand);
+
+      points = PcmEncoder::localExtrema(filteredSignal, true);
+      myBand = Band();
+      if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
+                                         config.curveFrequencyLimit, &myBand)) {
+        if (out.getPerceptionModality() == types::PerceptionModality::Force ||
+            out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
+          myBand.setCurveType(CurveType::Linear);
+        } else if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
+                   out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture) {
+          myBand.setCurveType(CurveType::Cubic);
+        } else {
+          myBand.setCurveType(CurveType::Unknown);
+        }
+      }
     }
     myTrack.setFrequencySampling(wavParser.getSamplerate());
     myTrack.setSampleCount(
@@ -112,20 +112,23 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
         out.getPerceptionModality() == types::PerceptionModality::Other) {
 
-      std::vector<double> interpolationSignal = interpolationCodec(points, myBand.getCurveType());
-
-      std::vector<double> differenceSignal;
-      for (size_t i = 0; i < filteredSignal.size(); i++) {
-        double difference = filteredSignal[i] - interpolationSignal[i];
-        differenceSignal.push_back(difference);
-      }
-
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
-      Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
-      signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
 
-      for (size_t i = 0; i < signal_wavelet.size(); i++) {
-        signal_wavelet[i] += differenceSignal[i];
+      if (config.curveFrequencyLimit > 0) {
+        std::vector<double> interpolationSignal = interpolationCodec(points, myBand.getCurveType());
+
+        std::vector<double> differenceSignal;
+        for (size_t i = 0; i < filteredSignal.size(); i++) {
+          double difference = filteredSignal[i] - interpolationSignal[i];
+          differenceSignal.push_back(difference);
+        }
+
+        Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
+        signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
+
+        for (size_t i = 0; i < signal_wavelet.size(); i++) {
+          signal_wavelet[i] += differenceSignal[i];
+        }
       }
 
       waveletBand = Band();

@@ -72,6 +72,7 @@ auto help() -> void {
          "library will be copied into the main timeline."
       << std::endl
       << "\t-kb, --bitrate\t\t\ttarget bitrate of the encoded file" << std::endl
+      << "\t-bu, \t\t\twavelet bitbudget, if custom setting needed" << std::endl
       << "\t-kin, --kinesthetic\t\tIf provided, the file will be encoded as a kinesthetic effect. "
          "Otherwise it will be considered as a vibrotactile effect (this option is currently "
          "available only for wav files encoding)"
@@ -149,7 +150,12 @@ auto main(int argc, char *argv[]) -> int {
         if (inputParser.cmdOptionExists("-kb")) {
           int bitrate = std::stoi(inputParser.getCmdOption("-kb"));
           std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
-          config = haptics::encoder::EncodingConfig::generateConfig(bitrate);
+          if (inputParser.cmdOptionExists("-bu")) {
+            int budget = std::stoi(inputParser.getCmdOption("-bu"));
+            config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget);
+          } else {
+            config = haptics::encoder::EncodingConfig::generateConfigParam(bitrate);
+          }
         } else {
           config = haptics::encoder::EncodingConfig::generateConfig();
         }
@@ -174,7 +180,12 @@ auto main(int argc, char *argv[]) -> int {
     if (inputParser.cmdOptionExists("-kb")) {
       int bitrate = std::stoi(inputParser.getCmdOption("-kb"));
       std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
-      config = haptics::encoder::EncodingConfig::generateConfig(bitrate);
+      if (inputParser.cmdOptionExists("-bu")) {
+        int budget = std::stoi(inputParser.getCmdOption("-bu"));
+        config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget);
+      } else {
+        config = haptics::encoder::EncodingConfig::generateConfigParam(bitrate);
+      }
     } else {
       config = haptics::encoder::EncodingConfig::generateConfig();
     }
