@@ -44,6 +44,8 @@ constexpr auto MICROSECONDS_2_MS = 0.001;
 constexpr auto AKIMA_EPSILON = -100;
 constexpr auto AKIMA_THRESHOLD = 10;
 constexpr auto AKIMA_THRESHOLD2 = -8;
+constexpr auto BSPLINE_STEP = 10;
+constexpr auto CUBIC_COEFFICIENT = 6;
 
 namespace haptics::tools {
 

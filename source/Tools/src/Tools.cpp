@@ -102,9 +102,9 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   }
 
   for (size_t i = 0; i < diag[0].size(); i++) {
-    diag[0][i] = dx[i] / 6;
+    diag[0][i] = dx[i] / CUBIC_COEFFICIENT;
     diag[1][i] = (dx[i] + dx[i + 1]) / 3;
-    diag[2][i] = dx[i + 1] / 6;
+    diag[2][i] = dx[i + 1] / CUBIC_COEFFICIENT;
     B[i] = dy[i + 1] / dx[i + 1] - dy[i] / dx[i];
   }
 
@@ -150,12 +150,13 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
       k++;
     }
 
-    Ycubique[i] = (DDg[k] / 6) * (std::pow((points[k + 1].first - xquery[i]), 3) / dx[k] -
-                                  dx[k] * (points[k + 1].first - xquery[i])) +
-                  (DDg[k + 1] / 6) * (std::pow((xquery[i] - points[k].first), 3) / dx[k] -
-                                      dx[k] * (xquery[i] - points[k].first)) +
-                  points[k].second * (points[k + 1].first - xquery[i]) / dx[k] +
-                  points[k + 1].second * (xquery[i] - points[k].first) / dx[k];
+    Ycubique[i] =
+        (DDg[k] / CUBIC_COEFFICIENT) * (std::pow((points[k + 1].first - xquery[i]), 3) / dx[k] -
+                                        dx[k] * (points[k + 1].first - xquery[i])) +
+        (DDg[k + 1] / CUBIC_COEFFICIENT) * (std::pow((xquery[i] - points[k].first), 3) / dx[k] -
+                                            dx[k] * (xquery[i] - points[k].first)) +
+        points[k].second * (points[k + 1].first - xquery[i]) / dx[k] +
+        points[k + 1].second * (xquery[i] - points[k].first) / dx[k];
   }
 
   return Ycubique;
@@ -301,9 +302,9 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   double wt = 0;
   int k = 0;
 
-  for (double m = 1; m < n; m++) {
+  for (int m = 1; m < n; m++) {
     while (X1[2][2] < m) {
-      t0 = t0 + (1 / static_cast<double>(n)) / 10;
+      t0 = t0 + (1 / static_cast<double>(n)) / BSPLINE_STEP;
       k = 0;
       while (t0 >= t[k]) {
         k = k + 1;
