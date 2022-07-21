@@ -60,7 +60,7 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
 
 void WaveletDecoder::transformBand(Band &band) {
 
-  if (band.getEncodingModality() != EncodingModality::Wavelet) {
+  if (band.getBandType() != BandType::WaveletWave) {
     return;
   }
   size_t numBlocks = band.getEffectsSize();

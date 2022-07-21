@@ -453,35 +453,29 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const auto testingEncodingModality_band0 = haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingEncodingModality_band0, testingWindowLength_band0,
-                                    testingLowerFrequencyLimit_band0,
+                                    testingWindowLength_band0, testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
   const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const auto testingEncodingModality_band1 = haptics::types::EncodingModality::Wavelet;
   const int testingWindowLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
   haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingEncodingModality_band1, testingWindowLength_band1,
-                                    testingLowerFrequencyLimit_band1,
+                                    testingWindowLength_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
-  const auto testingBandType_band2 = haptics::types::BandType::Wave;
+  const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
   const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const auto testingEncodingModality_band2 = haptics::types::EncodingModality::Vectorial;
   const int testingWindowLength_band2 = 0;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
   haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingEncodingModality_band2, testingWindowLength_band2,
-                                    testingLowerFrequencyLimit_band2,
+                                    testingWindowLength_band2, testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
@@ -490,7 +484,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::vector<std::tuple<int, float>> testingKeyframes_effect0 = {
       {0, 0}, {176, .2143543}, {177, 1}, {52345, .453}};
   haptics::types::Effect testingEffect0(testingPosition_effect0, testingPhase_effect0,
-                                        testingBaseSignal_effect0);
+                                        testingBaseSignal_effect0,
+                                        haptics::types::EffectType::Basis);
   for (auto value : testingKeyframes_effect0) {
     testingEffect0.addAmplitudeAt(std::get<1>(value), std::get<0>(value));
   }
@@ -498,7 +493,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const std::vector<std::tuple<int, float, int>> testingKeyframes_effect1 = {
       {0, 0, 90}, {176, .2143543, 90}, {177, 1, 65}, {52345, .453, 300}};
   for (auto value : testingKeyframes_effect1) {
-    haptics::types::Effect testingEffect(std::get<0>(value), 0, haptics::types::BaseSignal::Sine);
+    haptics::types::Effect testingEffect(std::get<0>(value), 0, haptics::types::BaseSignal::Sine,
+                                         haptics::types::EffectType::Basis);
     testingEffect.addAmplitudeAt(std::get<1>(value), 0);
     testingEffect.addFrequencyAt(std::get<2>(value), 0);
     testingBand1.addEffect(testingEffect);
@@ -508,7 +504,8 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
   const float testingPhase_effect2 = 0;
   const auto testingBaseSignal_effect2 = haptics::types::BaseSignal::Square;
   haptics::types::Effect testingEffect2(testingPosition_effect2, testingPhase_effect2,
-                                        testingBaseSignal_effect2);
+                                        testingBaseSignal_effect2,
+                                        haptics::types::EffectType::Basis);
 
   testingBand0.addEffect(testingEffect0);
   testingBand2.addEffect(testingEffect2);
@@ -573,8 +570,6 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getBandType() == testingBandType_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getCurveType() ==
           testingCurveType_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEncodingModality() ==
-          testingEncodingModality_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
@@ -618,8 +613,6 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getBandType() == testingBandType_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getCurveType() ==
           testingCurveType_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEncodingModality() ==
-          testingEncodingModality_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getUpperFrequencyLimit() ==
@@ -672,8 +665,6 @@ TEST_CASE("write/read gmpg haptic file for signal testing") {
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getBandType() == testingBandType_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getCurveType() ==
           testingCurveType_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEncodingModality() ==
-          testingEncodingModality_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==

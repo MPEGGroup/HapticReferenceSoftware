@@ -38,7 +38,6 @@ using haptics::encoder::PcmEncoder;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::Effect;
-using haptics::types::EncodingModality;
 using haptics::types::Keyframe;
 
 TEST_CASE("localExtrema with empty input and no border", "[localExtrema][empty][withoutBorder]") {
