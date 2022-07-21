@@ -57,6 +57,31 @@ auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality)
   perceptionModality = newPerceptionModality;
 }
 
+[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int8_t> {
+  return this->unitExponent;
+}
+
+[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int8_t {
+  return this->getUnitExponent().value_or(Perception::DEFAULT_UNIT_EXPONENT);
+}
+
+auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void {
+  this->unitExponent = newUnitExponent;
+}
+
+[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int8_t> {
+  return this->perceptionUnitExponent;
+}
+
+[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int8_t {
+  return this->getPerceptionUnitExponent().value_or(Perception::DEFAULT_PERCEPTION_UNIT_EXPONENT);
+}
+
+auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
+    -> void {
+  this->perceptionUnitExponent = newPerceptionUnitExponent;
+}
+
 auto Perception::getTracksSize() -> size_t { return tracks.size(); }
 
 auto Perception::getTrackAt(int index) -> haptics::types::Track & { return tracks.at(index); }
@@ -180,8 +205,8 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   if (modalityString == "Temperature effect") {
     return PerceptionModality::Temperature;
   }
-  if (modalityString == "Vibration effect") {
-    return PerceptionModality::Vibration;
+  if (modalityString == "Vibration effect" || modalityString == "Vibrotactile effect") {
+    return PerceptionModality::Vibrotactile;
   }
   if (modalityString == "Water effect") {
     return PerceptionModality::Water;
@@ -192,8 +217,17 @@ auto Perception::convertToModality(const std::string &modalityString) -> Percept
   if (modalityString == "Velocity effect") {
     return PerceptionModality::Velocity;
   }
-  if (modalityString == "Kinesthetic effect") {
-    return PerceptionModality::Kinesthetic;
+  if (modalityString == "Kinesthetic effect" || modalityString == "Force effect") {
+    return PerceptionModality::Force;
+  }
+  if (modalityString == "Vibrotactile Texture effect" || modalityString == "Texture effect") {
+    return PerceptionModality::VibrotactileTexture;
+  }
+  if (modalityString == "Stiffness effect") {
+    return PerceptionModality::Stiffness;
+  }
+  if (modalityString == "Friction effect") {
+    return PerceptionModality::Friction;
   }
 
   return PerceptionModality::Other;

@@ -100,7 +100,9 @@ namespace haptics::synthesizer {
       for (uint32_t ti = 0; ti < sampleCount; ti++) {
         myTrack = haptic.getPerceptionAt((int)i).getTrackAt((int)j);
         double t = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
-        double amp = myTrack.Evaluate(t) * myTrack.getGain();
+        const double perceptionUnitFactor =
+            std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
+        double amp = myTrack.Evaluate(t) * myTrack.getGain() * perceptionUnitFactor;
         trackAmp.push_back(amp);
       }
       amplitudes.push_back(trackAmp);

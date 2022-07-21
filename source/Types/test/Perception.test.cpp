@@ -77,9 +77,9 @@ TEST_CASE("haptics::types::Perception checking setters") {
   }
 
   SECTION("Checking setPerceptionModality", "[setPerceptionModality]") {
-    perception.setPerceptionModality(PerceptionModality::Vibration);
+    perception.setPerceptionModality(PerceptionModality::Vibrotactile);
     auto checkPerceptionModality = perception.getPerceptionModality();
-    CHECK(checkPerceptionModality == PerceptionModality::Vibration);
+    CHECK(checkPerceptionModality == PerceptionModality::Vibrotactile);
   }
 }
 
@@ -113,4 +113,39 @@ TEST_CASE("haptics::types::Perception testing referenceDevice") {
         (device.getId() == addedDevice.getId()) && (device.getName() == addedDevice.getName());
     CHECK(sameDevice);
   }
+}
+
+TEST_CASE("haptics::types::Perception testing unit exponents with correct values") {
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+
+  const int8_t testing_unitExponent = 0;
+  const int8_t testing_perceptionUnitExponent = -42;
+  perception.setUnitExponent(testing_unitExponent);
+  perception.setPerceptionUnitExponent(testing_perceptionUnitExponent);
+
+  REQUIRE(perception.getUnitExponent().has_value());
+  CHECK(perception.getUnitExponent().value() == testing_unitExponent);
+  CHECK(perception.getUnitExponentOrDefault() == testing_unitExponent);
+  REQUIRE(perception.getPerceptionUnitExponent().has_value());
+  CHECK(perception.getPerceptionUnitExponent().value() == testing_perceptionUnitExponent);
+  CHECK(perception.getPerceptionUnitExponentOrDefault() == testing_perceptionUnitExponent);
+}
+
+TEST_CASE("haptics::types::Perception testing unit exponents with null values") {
+  using haptics::types::Perception;
+  using haptics::types::PerceptionModality;
+  Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
+
+  const int8_t expected_unitExponent = -3;
+  const int8_t expected_perceptionUnitExponent = 0;
+
+  perception.setUnitExponent(std::nullopt);
+  perception.setPerceptionUnitExponent(std::nullopt);
+
+  CHECK_FALSE(perception.getUnitExponent().has_value());
+  CHECK(perception.getUnitExponentOrDefault() == expected_unitExponent);
+  CHECK_FALSE(perception.getPerceptionUnitExponent().has_value());
+  CHECK(perception.getPerceptionUnitExponentOrDefault() == expected_perceptionUnitExponent);
 }
