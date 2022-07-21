@@ -145,9 +145,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::Transient: {
     double res = 0;
     for (Effect e : effects) {
-      if (e.getPosition() <= position && position <= e.getPosition() + TRANSIENT_DURATION_MS) {
-        res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
-      }
+      res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
     }
     return res;
   }
@@ -219,7 +217,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
       }
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-        if (it->getPosition() <= position) {
+        if (it->getPosition() <= position &&
+            position <= it->getPosition() + TRANSIENT_DURATION_MS) {
           bandAmp[ti] += EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
         }
         if (it == effects.begin()) {
