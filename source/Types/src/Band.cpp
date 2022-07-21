@@ -133,7 +133,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return 0;
+    return effect->EvaluateKeyframes(position, this->getCurveType());
   case BandType::Wave:
     if (encodingModality == EncodingModality::Vectorial) {
       return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
@@ -144,8 +144,9 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
     break;
   case BandType::Transient: {
     double res = 0;
-    for (Effect e : effects) {
-      res += e.EvaluateTransient(position, TRANSIENT_DURATION_MS);
+    if (effect->getPosition() <= position &&
+        position <= effect->getPosition() + TRANSIENT_DURATION_MS) {
+      res = effect->EvaluateTransient(position, TRANSIENT_DURATION_MS);
     }
     return res;
   }
@@ -217,8 +218,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
       }
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-        if (it->getPosition() <= position &&
-            position <= it->getPosition() + TRANSIENT_DURATION_MS) {
+        if (it->getPosition() <= position) {
           bandAmp[ti] += EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
         }
         if (it == effects.begin()) {
