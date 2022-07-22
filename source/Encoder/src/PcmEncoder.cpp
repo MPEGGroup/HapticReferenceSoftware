@@ -102,6 +102,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         } else {
           myBand.setCurveType(CurveType::Unknown);
         }
+        myTrack.addBand(myBand);
       }
     }
     myTrack.setFrequencySampling(wavParser.getSamplerate());

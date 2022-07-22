@@ -138,6 +138,8 @@ auto main(int argc, char *argv[]) -> int {
 
       ext = InputParser::getFileExt(filename);
       myPerception = hapticFile.getPerceptionAt((int)i);
+      auto kinestheticData =
+          myPerception.getPerceptionModality() == haptics::types::PerceptionModality::Force;
       if (ext == "json" || ext == "ahap") {
         std::cout << "The AHAP file to encode : " << filename << std::endl;
         codeExit = AhapEncoder::encode(filename, myPerception);
@@ -152,12 +154,14 @@ auto main(int argc, char *argv[]) -> int {
           std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
           if (inputParser.cmdOptionExists("-bu")) {
             int budget = std::stoi(inputParser.getCmdOption("-bu"));
-            config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget);
+            config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget,
+                                                                            kinestheticData);
           } else {
-            config = haptics::encoder::EncodingConfig::generateConfigParam(bitrate);
+            config =
+                haptics::encoder::EncodingConfig::generateConfigParam(bitrate, kinestheticData);
           }
         } else {
-          config = haptics::encoder::EncodingConfig::generateConfig();
+          config = haptics::encoder::EncodingConfig::generateConfig(2, kinestheticData);
         }
         codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
