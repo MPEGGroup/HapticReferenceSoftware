@@ -1,9 +1,9 @@
 {
     "long_effets":
     {
-        "ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.ohm" : 31.63,
+        "ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.ohm" : 31.5,
         "IDCC-vib-Rain-8kHz-16-nopad.ohm" : 27.94,
-        "IDCC-vib-Towel-8kHz-16-nopad.ohm" : 28.04,
+        "IDCC-vib-Towel-8kHz-16-nopad.ohm" : 26.41,
         "APPL-vib-heartbeats-nopad.ohm" : 30.59,
         "IMMR-vib-Content1.ohm" : 26.35,
         "APPL-vib-inflate-nopad.ohm" : 20.82,
