@@ -146,9 +146,9 @@ struct EncodingConfig {
     int wavelet_windowLength = WINDOW_LENGTH_2;
     double curveFrequencyLimit = 0;
     if (kinestheticData) {
-      if (bitrate <= 2) {
+      if (bitrate <= BITR_2) {
         curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_2;
-      } else if (bitrate <= 16) {
+      } else if (bitrate <= BITR_16) {
         curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_16;
       } else {
         curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_64;
