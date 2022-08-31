@@ -169,8 +169,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
           effectAmp = linearInterpolation2(keyframes);
           break;
         case CurveType::Cubic:
-          // effectAmp = cubicInterpolation(keyframes);
-          effectAmp = cubicInterpolation2(keyframes);
+          effectAmp = cubicInterpolation(keyframes);
           break;
         case CurveType::Akima:
           effectAmp = akimaInterpolation(keyframes);
@@ -182,6 +181,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
           effectAmp = bsplineInterpolation(keyframes);
           break;
         default:
+          effectAmp = cubicInterpolation(keyframes);
           break;
         }
 
