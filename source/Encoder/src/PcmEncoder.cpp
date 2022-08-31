@@ -37,11 +37,11 @@
 
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
-using haptics::tools::linearInterpolation2;
-using haptics::tools::cubicInterpolation;
 using haptics::tools::akimaInterpolation;
 using haptics::tools::bezierInterpolation;
 using haptics::tools::bsplineInterpolation;
+using haptics::tools::cubicInterpolation;
+using haptics::tools::linearInterpolation2;
 using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
