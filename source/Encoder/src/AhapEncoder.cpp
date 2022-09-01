@@ -65,7 +65,7 @@ namespace haptics::encoder {
   } catch (const nlohmann::detail::parse_error &e) {
     std::cerr << e.what() << std::endl;
     std::cerr << "Impossible to encode the given file due to JSON parsing issues" << std::endl;
-    return false;
+    return EXIT_FAILURE;
   }
 
   nlohmann::json pattern = json.at("Pattern");
