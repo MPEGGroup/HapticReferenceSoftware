@@ -59,7 +59,14 @@ namespace haptics::encoder {
   }
 
   std::ifstream ifs(filename);
-  nlohmann::json json = nlohmann::json::parse(ifs);
+  nlohmann::json json;
+  try {
+    json = nlohmann::json::parse(ifs);
+  } catch (const nlohmann::detail::parse_error& e) {
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Impossible to encode the given file due to JSON parsing issues" << std::endl;
+    return false;   
+  }
 
   nlohmann::json pattern = json.at("Pattern");
 
