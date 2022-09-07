@@ -32,6 +32,13 @@ This git is decomposed into 3 majors folders:
 
 This piece of software requires Windows 10 with Visual Studio 2019, or Linux with gcc-10/clang-11. Git and cmake are needed to clone and generate the project. Instructions are provided in [doc/building.md](doc/building.md).
 
+## Versions
+
+The master branch contains the last released version of the software.
+The develop branch contains the current version under development.
+The different versions of the software are referenced with specific tags and can be fetched using the assossiated commit id. All versions of the reference software are listed  [here](-/tags).
+
+
 ## Usage
 
 A successul build  will produce the two *Encoder* and *Synthesizer* executables, in the build/source/[Encoder|Synthesizer] folder. Runtime instructions are provided in [doc/usage.md](doc/usage.md)
