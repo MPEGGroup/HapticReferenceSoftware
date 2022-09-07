@@ -36,7 +36,7 @@ This piece of software requires Windows 10 with Visual Studio 2019, or Linux wit
 
 The master branch contains the last released version of the software.
 The develop branch contains the current version under development.
-The different versions of the software are referenced with specific tags and can be fetched using the assossiated commit id. All versions of the reference software are listed  [here](-/tags).
+The different versions of the software are referenced with specific tags and can be fetched using the assossiated commit id. All versions of the reference software are listed  [here](http://mpegx.int-evry.fr/software/haptics/rm0/-/tags).
 
 
 ## Usage
