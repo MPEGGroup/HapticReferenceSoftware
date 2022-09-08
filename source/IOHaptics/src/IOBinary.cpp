@@ -542,15 +542,15 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
       auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
       auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
       types::Vector trackResolution(X, Y, Z);
-      uint8_t bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+      auto bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
       std::vector<types::BodyPartTarget> bodyPartTarget;
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-        types::BodyPartTarget target =
+        auto target =
             static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<int8_t, 1>(file));
         bodyPartTarget.push_back(target);
       }
 
-      uint8_t actuatorTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+      auto actuatorTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
       std::vector<types::Vector> actuatorTarget;
       for (uint8_t i = 0; i < actuatorTargetCount; i++) {
         auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
@@ -659,7 +659,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
           myTrack.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
       auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
       IOBinaryPrimitives::writeNBytes<uint8_t, 1>(bodyPartTargetCount, file);
-      for (uint8_t i; i < bodyPartTargetCount; i++) {
+      for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(static_cast<int8_t>(bodyPartTarget[i]), file);
       }
 
@@ -667,7 +667,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
           myTrack.getActuatorTarget().value_or(std::vector<types::Vector>{});
       auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
       IOBinaryPrimitives::writeNBytes<uint8_t, 1>(actuatorTargetCount, file);
-      for (uint8_t i; i < actuatorTargetCount; i++) {
+      for (uint8_t i = 0; i < actuatorTargetCount; i++) {
         types::Vector target = actuatorTarget[i];
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.X, file);
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Y, file);
