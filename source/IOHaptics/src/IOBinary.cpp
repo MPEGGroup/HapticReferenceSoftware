@@ -535,7 +535,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     std::optional<
         std::tuple<types::Vector, std::vector<types::BodyPartTarget>, std::vector<types::Vector>>>
         bodypartTargetting = std::nullopt;
-    if((optionalMetadataMask & 0b0000'0001) != 0) {
+    if ((optionalMetadataMask & 0b0000'0001) != 0) {
       bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
       auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
@@ -677,7 +677,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
       uint32_t bodyPartMask = myTrack.getBodyPartMask();
       IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
     }
-    
+
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
 
