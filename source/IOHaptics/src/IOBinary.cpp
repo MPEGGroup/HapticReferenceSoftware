@@ -521,6 +521,7 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
   return true;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool {
   auto trackCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
   // for each track
@@ -614,7 +615,6 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
   return true;
 }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool {
   auto trackCount = static_cast<unsigned short>(perception.getTracksSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(trackCount, file);
