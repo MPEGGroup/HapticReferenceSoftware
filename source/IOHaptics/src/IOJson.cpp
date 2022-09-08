@@ -186,6 +186,7 @@ auto IOJson::loadLibrary(const nlohmann::json &jsonLibrary, types::Perception &p
   return loadingSuccess;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
@@ -286,6 +287,7 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
   }
   return loadingSuccess;
 }
+
 auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool {
   bool loadingSuccess = true;
   for (auto it = jsonBands.begin(); it != jsonBands.end(); ++it) {
@@ -422,6 +424,7 @@ auto IOJson::loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &hapt
   }
   return true;
 }
+
 auto IOJson::loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
                                   types::Perception &perception) -> bool {
   for (auto it = jsonReferenceDevices.begin(); it != jsonReferenceDevices.end(); ++it) {
@@ -624,6 +627,8 @@ auto IOJson::extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars)
     jsonAvatars.push_back(jsonAvatar);
   }
 }
+
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void {
   auto numTracks = perception.getTracksSize();
   for (uint32_t j = 0; j < numTracks; j++) {
@@ -730,6 +735,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
     jsonTracks.push_back(jsonTrack);
   }
 }
+
 auto IOJson::extractReferenceDevices(types::Perception &perception,
                                      nlohmann::json &jsonReferenceDevices) -> void {
   auto numReferenceDevices = perception.getReferenceDevicesSize();
