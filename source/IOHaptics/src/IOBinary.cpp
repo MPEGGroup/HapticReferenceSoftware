@@ -537,12 +537,12 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     if (frequencySampling != 0) {
       sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     }
-    std::optional<types::Direction> direction = std::nullopt;
+    std::optional<types::Vector> direction = std::nullopt;
     if ((optionalMetadataMask & 0b0000'0001) != 0) {
       auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
       auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
       auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
-      direction = types::Direction(X, Y, Z);
+      direction = types::Vector(X, Y, Z);
     }
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
@@ -619,7 +619,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     }
 
     if (myTrack.getDirection().has_value()) {
-      types::Direction direction = myTrack.getDirection().value();
+      types::Vector direction = myTrack.getDirection().value();
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.X, file);
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Y, file);
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(direction.Z, file);

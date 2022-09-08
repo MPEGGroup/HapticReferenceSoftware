@@ -359,7 +359,7 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
-  const haptics::types::Direction testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
+  const haptics::types::Vector testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
                                       testingBodyPartMask_track0);

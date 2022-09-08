@@ -227,9 +227,9 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
         jsonTrack["direction"].contains("X") && jsonTrack["direction"]["X"].is_number_integer() &&
         jsonTrack["direction"].contains("Y") && jsonTrack["direction"]["Y"].is_number_integer() &&
         jsonTrack["direction"].contains("Z") && jsonTrack["direction"]["Z"].is_number_integer()) {
-      types::Direction direction(jsonTrack["direction"]["X"].get<int8_t>(),
-                                 jsonTrack["direction"]["Y"].get<int8_t>(),
-                                 jsonTrack["direction"]["Z"].get<int8_t>());
+      types::Vector direction(jsonTrack["direction"]["X"].get<int8_t>(),
+                              jsonTrack["direction"]["Y"].get<int8_t>(),
+                              jsonTrack["direction"]["Z"].get<int8_t>());
       track.setDirection(direction);
     }
 

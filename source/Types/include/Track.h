@@ -35,20 +35,21 @@
 #define TRACK_H
 
 #include <Types/include/Band.h>
+#include <Types/include/BodyPartTarget.h>
 #include <fstream>
 #include <vector>
 
 namespace haptics::types {
 
-struct Direction {
+struct Vector {
   int8_t X;
   int8_t Y;
   int8_t Z;
 
-  explicit Direction() = default;
-  explicit Direction(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+  explicit Vector() = default;
+  explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
 
-  auto operator==(const Direction &other) const -> bool {
+  auto operator==(const Vector &other) const -> bool {
     return X == other.X && Y == other.Y && Z == other.Z;
   };
 };
@@ -99,8 +100,14 @@ public:
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
   auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
-  [[nodiscard]] auto getDirection() const -> std::optional<Direction>;
-  auto setDirection(std::optional<Direction> newDirection) -> void;
+  [[nodiscard]] auto getDirection() const -> std::optional<Vector>;
+  auto setDirection(std::optional<Vector> newDirection) -> void;
+  [[nodiscard]] auto getTrackResolution() const -> std::optional<Vector>;
+  auto setTrackResolution(std::optional<Vector> newTrackResolution) -> void;
+  [[nodiscard]] auto getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>>;
+  auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
+  [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
+  auto setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void;
 
 private:
   int id = -1;
@@ -113,7 +120,10 @@ private:
   std::optional<int> referenceDeviceId;
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;
-  std::optional<Direction> direction = std::nullopt;
+  std::optional<Vector> direction = std::nullopt;
+  std::optional<Vector> trackResolution = std::nullopt;
+  std::optional<std::vector<BodyPartTarget>> bodyPartTarget = std::nullopt;
+  std::optional<std::vector<Vector>> actuatorTarget = std::nullopt;
 };
 } // namespace haptics::types
 #endif // TRACK_H
