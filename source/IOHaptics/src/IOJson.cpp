@@ -223,14 +223,38 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
 
-    if (jsonTrack.contains("direction") && jsonTrack["direction"].is_object() &&
-        jsonTrack["direction"].contains("X") && jsonTrack["direction"]["X"].is_number_integer() &&
-        jsonTrack["direction"].contains("Y") && jsonTrack["direction"]["Y"].is_number_integer() &&
-        jsonTrack["direction"].contains("Z") && jsonTrack["direction"]["Z"].is_number_integer()) {
-      types::Vector direction(jsonTrack["direction"]["X"].get<int8_t>(),
-                              jsonTrack["direction"]["Y"].get<int8_t>(),
-                              jsonTrack["direction"]["Z"].get<int8_t>());
+
+    types::Vector direction{};
+    if (jsonTrack.contains("direction") && loadVector(jsonTrack["direction"], direction)) {
       track.setDirection(direction);
+    }
+    
+    types::Vector trackResolution{};
+    if (jsonTrack.contains("track_resolution") &&
+        loadVector(jsonTrack["track_resolution"], trackResolution)) {
+      track.setTrackResolution(trackResolution);
+    }
+    if (jsonTrack.contains("body_part_target") && jsonTrack["body_part_target"].is_array()) {
+      auto jsonBodyPartTarget = jsonTrack["body_part_target"];
+      std::vector<types::BodyPartTarget> bodyPartTarget;
+      for (auto itv = jsonBodyPartTarget.begin(); itv != jsonBodyPartTarget.end(); ++itv) {
+        if (itv.value().is_string()) {
+          bodyPartTarget.push_back(
+              types::stringToBodyPartTarget.at(itv.value().get<std::string>()));
+        }
+      }
+      track.setBodyPartTarget(bodyPartTarget);
+    }
+    if (jsonTrack.contains("actuator_target") && jsonTrack["actuator_target"].is_array()) {
+      auto jsonActuactorTarget = jsonTrack["actuator_target"];
+      std::vector<types::Vector> actuatorTarget;
+      for (auto itv = jsonActuactorTarget.begin(); itv != jsonActuactorTarget.end(); ++itv) {
+        types::Vector target{};
+        if (itv.value().is_object() && loadVector(itv.value(), target)) {
+          actuatorTarget.push_back(target);
+        }
+      }
+      track.setActuatorTarget(actuatorTarget);
     }
 
     if (jsonTrack.contains("frequency_sampling") &&
@@ -495,6 +519,17 @@ auto IOJson::loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &e
   return true;
 }
 
+auto IOJson::loadVector(const nlohmann::json &jsonVector, types::Vector &vector) -> bool {
+  if (!(jsonVector.is_object() && jsonVector.contains("X") && jsonVector["X"].is_number_integer() &&
+        jsonVector.contains("Y") && jsonVector["Y"].is_number_integer() &&
+        jsonVector.contains("Z") && jsonVector["Z"].is_number_integer())) {
+    return false;
+  }
+  vector = types::Vector(jsonVector["X"].get<int8_t>(), jsonVector["Y"].get<int8_t>(),
+                         jsonVector["Z"].get<int8_t>());
+  return true;
+}
+
 auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &filePath) -> void {
   nlohmann::json jsonTree;
   jsonTree["version"] = haptic.getVersion();
@@ -610,10 +645,30 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       jsonTrack["sample_count"] = track.getSampleCount().value();
     }
     if (track.getDirection().has_value()) {
-      jsonTrack["direction"] = json::object();
-      jsonTrack["direction"]["X"] = track.getDirection().value().X;
-      jsonTrack["direction"]["Y"] = track.getDirection().value().Y;
-      jsonTrack["direction"]["Z"] = track.getDirection().value().Z;
+      types::Vector direction = track.getDirection().value();
+      extractVector(direction, jsonTrack["direction"]);
+    }
+    if (track.getTrackResolution().has_value()) {
+      types::Vector trackResolution = track.getTrackResolution().value();
+      extractVector(trackResolution, jsonTrack["track_resolution"]);
+    }
+    if (track.getBodyPartTarget().has_value()) {
+      auto jsonBodyPartTarget = json::array();
+      std::vector<types::BodyPartTarget> bodyPartTargetList = track.getBodyPartTarget().value();
+      for (types::BodyPartTarget &bodyPartTarget : bodyPartTargetList) {
+        jsonBodyPartTarget.push_back(bodyPartTarget);
+      }
+      jsonTrack["body_part_target"] = jsonBodyPartTarget;
+    }
+    if (track.getActuatorTarget().has_value()) {
+      auto jsonBodyPartTarget = json::array();
+      std::vector<types::Vector> actuatorTargetList = track.getActuatorTarget().value();
+      for (types::Vector &actuatorTarget : actuatorTargetList) {
+        nlohmann::json jsonTarget;
+        extractVector(actuatorTarget, jsonTarget);
+        jsonBodyPartTarget.push_back(jsonTarget);
+      }
+      jsonTrack["actuator_target"] = jsonBodyPartTarget;
     }
 
     auto jsonVertices = json::array();
@@ -729,5 +784,12 @@ auto IOJson::extractReferenceDevices(types::Perception &perception,
 
     jsonReferenceDevices.push_back(jsonReferenceDevice);
   }
+}
+
+auto IOJson::extractVector(types::Vector &vector, nlohmann::json &jsonVector) -> void {
+  jsonVector = json::object();
+  jsonVector["X"] = vector.X;
+  jsonVector["Y"] = vector.Y;
+  jsonVector["Z"] = vector.Z;
 }
 } // namespace haptics::io

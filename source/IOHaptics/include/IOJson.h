@@ -53,6 +53,7 @@ public:
   static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool;
   static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> bool;
   static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> bool;
+  static auto loadVector(const nlohmann::json &jsonVector, types::Vector &vector) -> bool;
 
   static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
   static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;
@@ -60,6 +61,7 @@ public:
   static auto extractLibrary(types::Perception &perception, nlohmann::json &jsonLibrary) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
                                       nlohmann::json &jsonReferenceDevices) -> void;
+  static auto extractVector(types::Vector &vector, nlohmann::json &jsonVector) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };

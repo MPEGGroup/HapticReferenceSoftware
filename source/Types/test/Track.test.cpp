@@ -224,8 +224,8 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
 }
 
 TEST_CASE("haptics::types::Track testing direction") {
-  using haptics::types::Vector;
   using haptics::types::Track;
+  using haptics::types::Vector;
   Track track(1, "I'm a placeholder", 0, 0, 1);
 
   SECTION("checking direction") {
@@ -290,14 +290,15 @@ TEST_CASE("haptics::types::Track testing actuator target") {
   Track track(1, "I'm a placeholder", 0, 0, 1);
 
   SECTION("checking track actuator target") {
-    std::vector<Vector> testing_actuatorTarget = {Vector{0, -127, 42}, Vector{43, -1, 4},
-                                                  Vector{-35, 120, 9}};
+    const std::vector<Vector> testing_actuatorTarget = {Vector{0, -127, 42}, Vector{43, -1, 4},
+                                                        Vector{-35, 120, 9}};
     track.setActuatorTarget(testing_actuatorTarget);
 
     REQUIRE(track.getActuatorTarget().value_or(std::vector<Vector>{}).size() ==
             testing_actuatorTarget.size());
     std::vector<Vector> actuatorTargetList = track.getActuatorTarget().value();
-    for (auto it = actuatorTargetList.begin(), testing_it = testing_actuatorTarget.begin();
+    auto testing_it = testing_actuatorTarget.begin();
+    for (auto it = actuatorTargetList.begin();
          it < actuatorTargetList.end() && testing_it < testing_actuatorTarget.end();
          it++, testing_it++) {
       CHECK(*it == *testing_it);

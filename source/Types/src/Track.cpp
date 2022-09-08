@@ -172,9 +172,7 @@ auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
 
 [[nodiscard]] auto Track::getDirection() const -> std::optional<Vector> { return direction; }
 
-auto Track::setDirection(std::optional<Vector> newDirection) -> void {
-  direction = newDirection;
-}
+auto Track::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
 
 [[nodiscard]] auto Track::getTrackResolution() const -> std::optional<Vector> {
   return trackResolution;
@@ -190,7 +188,7 @@ auto Track::setTrackResolution(std::optional<Vector> newTrackResolution) -> void
 
 auto Track::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget)
     -> void {
-  bodyPartTarget = newBodyPartTarget;
+  bodyPartTarget = std::move(newBodyPartTarget);
 }
 
 [[nodiscard]] auto Track::getActuatorTarget() const -> std::optional<std::vector<Vector>> {
@@ -198,7 +196,7 @@ auto Track::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBody
 }
 
 auto Track::setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void {
-  actuatorTarget = newActuatorTarget;
+  actuatorTarget = std::move(newActuatorTarget);
 }
 
 } // namespace haptics::types
