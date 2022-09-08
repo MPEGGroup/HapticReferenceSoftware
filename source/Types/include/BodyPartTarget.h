@@ -39,7 +39,7 @@
 
 namespace haptics::types {
 
-enum class BodyPartTarget { Unknown = 0 };
+enum class BodyPartTarget: int8_t { Unknown = 0 };
 
 static const std::map<std::string, BodyPartTarget> stringToBodyPartTarget = {
     {"Unknown", BodyPartTarget::Unknown}};

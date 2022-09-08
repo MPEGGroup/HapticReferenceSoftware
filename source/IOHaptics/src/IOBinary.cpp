@@ -530,15 +530,47 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto deviceId = IOBinaryPrimitives::readNBytes<short, 2>(file);
     auto trackGain = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_FLOAT, MAX_FLOAT);
     auto trackMixingWeight = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, 0, MAX_FLOAT);
-    auto bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     auto optionalMetadataMask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    uint32_t bodyPartMask = 0;
+    std::optional<
+        std::tuple<types::Vector, std::vector<types::BodyPartTarget>, std::vector<types::Vector>>>
+        bodypartTargetting = std::nullopt;
+    if((optionalMetadataMask & 0b0000'0001) != 0) {
+      bodyPartMask = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
+      auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+      types::Vector trackResolution(X, Y, Z);
+      uint8_t bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+      std::vector<types::BodyPartTarget> bodyPartTarget;
+      for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
+        types::BodyPartTarget target =
+            static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<int8_t, 1>(file));
+        bodyPartTarget.push_back(target);
+      }
+
+      uint8_t actuatorTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+      std::vector<types::Vector> actuatorTarget;
+      for (uint8_t i = 0; i < actuatorTargetCount; i++) {
+        auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+        auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+        auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+        types::Vector target(X, Y, Z);
+        actuatorTarget.push_back(target);
+      }
+
+      bodypartTargetting =
+          std::tuple<types::Vector, std::vector<types::BodyPartTarget>, std::vector<types::Vector>>(
+              trackResolution, bodyPartTarget, actuatorTarget);
+    }
     auto frequencySampling = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     std::optional<uint32_t> sampleCount = std::nullopt;
     if (frequencySampling != 0) {
       sampleCount = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
     }
     std::optional<types::Vector> direction = std::nullopt;
-    if ((optionalMetadataMask & 0b0000'0001) != 0) {
+    if ((optionalMetadataMask & 0b0000'0100) != 0) {
       auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
       auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
       auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
@@ -547,6 +579,11 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     auto verticesCount = IOBinaryPrimitives::readNBytes<int, 4>(file);
 
     types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
+    if (bodypartTargetting.has_value()) {
+      t.setTrackResolution(std::get<0>(bodypartTargetting.value()));
+      t.setBodyPartTarget(std::get<1>(bodypartTargetting.value()));
+      t.setActuatorTarget(std::get<2>(bodypartTargetting.value()));
+    }
     if (frequencySampling != 0) {
       t.setFrequencySampling(frequencySampling);
     }
@@ -601,15 +638,46 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
     float trackMixingWeight = myTrack.getMixingWeight();
     IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(trackMixingWeight, file, 0, MAX_FLOAT);
 
-    uint32_t bodyPartMask = myTrack.getBodyPartMask();
-    IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
-
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
-    if (myTrack.getDirection().has_value()) {
+    if (myTrack.getTrackResolution().has_value()) {
+      optionalMetadataMask |= (uint8_t)0b0000'0010;
+    } else {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
+    }
+    if (myTrack.getDirection().has_value()) {
+      optionalMetadataMask |= (uint8_t)0b0000'0100;
     }
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalMetadataMask, file);
 
+    if (myTrack.getTrackResolution().has_value()) {
+      types::Vector trackResolution = myTrack.getTrackResolution().value();
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.X, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.Y, file);
+      IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.Z, file);
+
+      std::vector<types::BodyPartTarget> bodyPartTarget =
+          myTrack.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
+      auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
+      IOBinaryPrimitives::writeNBytes<uint8_t, 1>(bodyPartTargetCount, file);
+      for (uint8_t i; i < bodyPartTargetCount; i++) {
+        IOBinaryPrimitives::writeNBytes<int8_t, 1>(static_cast<int8_t>(bodyPartTarget[i]), file);
+      }
+
+      std::vector<types::Vector> actuatorTarget =
+          myTrack.getActuatorTarget().value_or(std::vector<types::Vector>{});
+      auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
+      IOBinaryPrimitives::writeNBytes<uint8_t, 1>(actuatorTargetCount, file);
+      for (uint8_t i; i < actuatorTargetCount; i++) {
+        types::Vector target = actuatorTarget[i];
+        IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.X, file);
+        IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Y, file);
+        IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Z, file);
+      }
+    } else {
+      uint32_t bodyPartMask = myTrack.getBodyPartMask();
+      IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
+    }
+    
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
     IOBinaryPrimitives::writeNBytes<uint32_t, 4>(frequencySampling, file);
 
