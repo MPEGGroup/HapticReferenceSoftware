@@ -223,12 +223,11 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
 
-
     types::Vector direction{};
     if (jsonTrack.contains("direction") && loadVector(jsonTrack["direction"], direction)) {
       track.setDirection(direction);
     }
-    
+
     types::Vector trackResolution{};
     if (jsonTrack.contains("track_resolution") &&
         loadVector(jsonTrack["track_resolution"], trackResolution)) {
