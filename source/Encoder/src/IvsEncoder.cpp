@@ -64,56 +64,50 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
         IvsEncoder::getBasisEffects(&doc);
     pugi::xml_node basisEffect = {};
-    haptics::types::Effect myEffect;
+    std::vector<haptics::types::Effect> myEffects;
     for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&timeline)) {
       if (!IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, basisEffect)) {
         continue;
       }
 
-      myEffect = haptics::types::Effect();
+      haptics::types::Effect myEffect{};
       if (IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &myEffect)) {
-        IvsEncoder::injectIntoBands(myEffect, myTrack);
+        myEffects.push_back(myEffect);
       }
     }
 
     int time = -1;
     int count = 0;
     int duration = -1;
-    int effectIndex = 0;
-    std::vector<haptics::types::Effect> effectToRepeat = {};
-    types::Band myBand;
     for (pugi::xml_node repeatEvent : IvsEncoder::getRepeatEvents(&timeline)) {
       count = IvsEncoder::getCount(&repeatEvent);
       if (count == 0) {
         continue;
       }
 
-      effectToRepeat = {};
-      for (uint32_t bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
-        time = IvsEncoder::getTime(&repeatEvent);
-        duration = IvsEncoder::getDuration(&repeatEvent);
-        myBand = myTrack.getBandAt((int)bandIndex);
-
-        for (effectIndex = 0; effectIndex < (int)myBand.getEffectsSize(); effectIndex++) {
-          myEffect = myBand.getEffectAt(effectIndex);
-          if (time <= myEffect.getPosition() && myEffect.getPosition() < time + duration) {
-            effectToRepeat.push_back(myEffect);
-          } else if (time + duration <= myEffect.getPosition()) {
-            myEffect.setPosition(myEffect.getPosition() + count * duration);
-            myBand.replaceEffectAt(effectIndex, myEffect);
-          }
+      time = IvsEncoder::getTime(&repeatEvent);
+      duration = IvsEncoder::getDuration(&repeatEvent);
+      std::vector<haptics::types::Effect> effectToRepeat;
+      for (haptics::types::Effect &myEffect : myEffects) {
+        if (time <= myEffect.getPosition() && myEffect.getPosition() < time + duration) {
+          effectToRepeat.push_back(myEffect);
+        } else if (time + duration <= myEffect.getPosition()) {
+          myEffect.setPosition(myEffect.getPosition() + count * duration);
         }
       }
 
       for (haptics::types::Effect &e : effectToRepeat) {
-        for (effectIndex = 1; effectIndex <= count; effectIndex++) {
-          myEffect = haptics::types::Effect(e);
+        for (int effectIndex = 1; effectIndex <= count; effectIndex++) {
+          haptics::types::Effect myEffect(e);
           myEffect.setPosition(myEffect.getPosition() + duration * (int)effectIndex);
-          IvsEncoder::injectIntoBands(myEffect, myTrack);
+          myEffects.push_back(myEffect);
         }
       }
     }
 
+    for (haptics::types::Effect &myEffect : myEffects) {
+      IvsEncoder::injectIntoBands(myEffect, myTrack);
+    }
     out.replaceTrackAt(trackId, myTrack);
     trackId++;
   }
