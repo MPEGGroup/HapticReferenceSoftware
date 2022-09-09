@@ -32,12 +32,14 @@
  */
 
 #include <IOHaptics/include/IOBinaryBands.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
 #include <fstream>
 #include <vector>
 
 using haptics::io::IOBinaryBands;
+using haptics::io::IOBinaryPrimitives;
 
 const std::string filename = "testing_IOBinaryBands.bin";
 constexpr float floatPrecision = 0.01;
@@ -81,8 +83,10 @@ TEST_CASE("write/read BandHeader on curve") {
   SECTION("write band header") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
-
-    IOBinaryBands::writeBandHeader(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandHeader(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 8);
@@ -94,7 +98,8 @@ TEST_CASE("write/read BandHeader on curve") {
     REQUIRE(file);
 
     haptics::types::Band res;
-    bool succeed = IOBinaryBands::readBandHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -128,7 +133,10 @@ TEST_CASE("write/read BandHeader on transient") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandHeader(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandHeader(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 7);
@@ -140,7 +148,8 @@ TEST_CASE("write/read BandHeader on transient") {
     REQUIRE(file);
 
     haptics::types::Band res;
-    bool succeed = IOBinaryBands::readBandHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -171,7 +180,10 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandHeader(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandHeader(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 7);
@@ -183,7 +195,8 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
     REQUIRE(file);
 
     haptics::types::Band res;
-    bool succeed = IOBinaryBands::readBandHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -214,7 +227,10 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandHeader(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandHeader(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 9);
@@ -226,7 +242,8 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     REQUIRE(file);
 
     haptics::types::Band res;
-    bool succeed = IOBinaryBands::readBandHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -260,7 +277,10 @@ TEST_CASE("write/read BandBody on curve") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandBody(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandBody(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
     // effectType + position + keyframe count + Keyframes
     CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
@@ -276,7 +296,8 @@ TEST_CASE("write/read BandBody on curve") {
                              testingLowerFrequencyLimit, testingUpperFrequencyLimit);
     haptics::types::Effect resEffect;
     res.addEffect(resEffect);
-    bool succeed = IOBinaryBands::readBandBody(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandBody(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -319,7 +340,10 @@ TEST_CASE("write/read BandBody on transient") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandBody(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandBody(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
     // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative
     // position + frequency)
@@ -339,7 +363,8 @@ TEST_CASE("write/read BandBody on transient") {
                                        haptics::types::EffectType::Basis);
       res.addEffect(resEffect);
     }
-    bool succeed = IOBinaryBands::readBandBody(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandBody(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -391,7 +416,10 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandBody(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandBody(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     const uintmax_t expectedFileSize =
@@ -410,7 +438,8 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     haptics::types::Effect resEffect2;
     res.addEffect(resEffect1);
     res.addEffect(resEffect2);
-    bool succeed = IOBinaryBands::readBandBody(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandBody(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -485,7 +514,10 @@ TEST_CASE("write/read BandBody on wavelet") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    IOBinaryBands::writeBandBody(testingBand, file);
+    std::vector<bool> output;
+    IOBinaryBands::writeBandBody(testingBand, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 0);
@@ -498,7 +530,8 @@ TEST_CASE("write/read BandBody on wavelet") {
 
     haptics::types::Band res(testingBandType, testingCurveType, testingWindowLength,
                              testingLowerFrequencyLimit, testingUpperFrequencyLimit);
-    bool succeed = IOBinaryBands::readBandBody(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinaryBands::readBandBody(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);

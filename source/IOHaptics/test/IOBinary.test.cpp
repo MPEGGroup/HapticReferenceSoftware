@@ -32,12 +32,14 @@
  */
 
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
 #include <fstream>
 #include <vector>
 
 using haptics::io::IOBinary;
+using haptics::io::IOBinaryPrimitives;
 
 const std::string filename = "testing_IOBinary.bin";
 constexpr float floatPrecision = 0.01;
@@ -54,7 +56,10 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
+    std::vector<bool> output;
+    bool succeed = IOBinary::writeFileHeader(testingHaptic, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     REQUIRE(succeed);
@@ -70,7 +75,9 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     REQUIRE(file);
 
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
+
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinary::readFileHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -113,7 +120,10 @@ TEST_CASE("write/read file header for avatar testing") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
 
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
+    std::vector<bool> output;
+    bool succeed = IOBinary::writeFileHeader(testingHaptic, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     REQUIRE(succeed);
@@ -127,7 +137,8 @@ TEST_CASE("write/read file header for avatar testing") {
     REQUIRE(file);
 
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinary::readFileHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -186,8 +197,10 @@ TEST_CASE("write/read file header for reference device testing") {
   SECTION("write reference devices") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
-
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
+    std::vector<bool> output;
+    bool succeed = IOBinary::writeFileHeader(testingHaptic, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     REQUIRE(succeed);
@@ -205,7 +218,8 @@ TEST_CASE("write/read file header for reference device testing") {
     REQUIRE(file);
 
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinary::readFileHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);
@@ -410,8 +424,10 @@ TEST_CASE("write/read file header for track testing") {
   SECTION("write tracks header") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
-
-    bool succeed = IOBinary::writeFileHeader(testingHaptic, file);
+    std::vector<bool> output;
+    bool succeed = IOBinary::writeFileHeader(testingHaptic, output);
+    IOBinaryPrimitives::fillBitset(output);
+    IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
     REQUIRE(succeed);
@@ -429,7 +445,8 @@ TEST_CASE("write/read file header for track testing") {
     REQUIRE(file);
 
     haptics::types::Haptics res;
-    bool succeed = IOBinary::readFileHeader(res, file);
+    std::vector<bool> unusedBits;
+    bool succeed = IOBinary::readFileHeader(res, file, unusedBits);
     file.close();
 
     REQUIRE(succeed);

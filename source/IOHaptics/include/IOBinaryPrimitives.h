@@ -40,6 +40,7 @@
 #include <cstring>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace haptics::io {
 constexpr float MAX_FLOAT = 10000;
@@ -49,48 +50,125 @@ constexpr float MAX_PHASE = 3.14159;
 constexpr int BYTE_SIZE = 8;
 class IOBinaryPrimitives {
 public:
-  static auto readString(std::ifstream &file) -> std::string;
+  static auto readString(std::ifstream &file, std::vector<bool> &unusedBits) -> std::string;
 
-  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
-    std::array<char, bytesCount> bytes{};
-    file.read(bytes.data(), bytesCount);
+  template <class T, size_t bitCount> static auto readNBits(std::ifstream &file, std::vector<bool> &unusedBits) -> T {
+    auto nbBitsToRead = bitCount - unusedBits.size();
+    auto const nbBytesToRead = nbBitsToRead % 8 == 0 ? nbBitsToRead / 8 : nbBitsToRead / 8 + 1;
+    std::vector<char> bytes(nbBytesToRead);
+    file.read(bytes.data(), nbBytesToRead);
+    std::vector<bool> bitset = unusedBits;
+    for (auto byte: bytes) {
+      for (uint8_t i = 0; i < BYTE_SIZE; i++) {
+        bitset.push_back(((byte >> (BYTE_SIZE - i - 1)) & 1U) == 1);
+      }
+    }
+    unusedBits.clear();
     T value = 0;
-    for (size_t i = 0; i < bytes.size(); i++) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-      auto byteVal = static_cast<uint8_t>(bytes[i]);
-      value |= static_cast<T>(byteVal) << BYTE_SIZE * i;
+    for (size_t i = 0; i < bitset.size(); i++) {
+      if (i < bitCount) {
+        if (bitset[i]) {
+          value |= 1U << (bitCount - i - 1);
+        }
+      } else {
+        unusedBits.push_back(bitset[i]);
+      }
     }
     return value;
   }
-  template <class T, size_t bytesCount>
-  static auto readFloatNBytes(std::ifstream &file, float minValue, float maxValue) -> float {
-    auto intValue = readNBytes<T, bytesCount>(file);
-    auto maxIntValue = static_cast<uint64_t>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+
+  
+  template <class T, size_t bitCount>
+  static auto readFloatNBits(std::ifstream &file, float minValue, float maxValue,
+                             std::vector<bool> &unusedBits) -> float {
+    auto intValue = readNBits<T, bitCount>(file, unusedBits);
+    auto maxIntValue = static_cast<uint64_t>(std::pow(2, bitCount) - 1);
     auto normalizedValue = intValue / static_cast<float>(maxIntValue);
     normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
     auto value = normalizedValue * (maxValue - minValue) + minValue;
     return value;
   }
 
-  static auto writeString(const std::string &text, std::ofstream &file) -> void;
-  template <class T, size_t bytesCount>
-  static auto writeNBytes(T value, std::ofstream &file) -> void {
-    std::array<char, bytesCount> bytes{};
-    for (size_t i = 0; i < bytes.size(); i++) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-      bytes[i] = static_cast<uint8_t>(value >> i * BYTE_SIZE);
+  //template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
+  //  std::array<char, bytesCount> bytes{};
+  //  file.read(bytes.data(), bytesCount);
+  //  T value = 0;
+  //  for (size_t i = 0; i < bytes.size(); i++) {
+  //    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+  //    auto byteVal = static_cast<uint8_t>(bytes[i]);
+  //    value |= static_cast<T>(byteVal) << BYTE_SIZE * i;
+  //  }
+  //  return value;
+  //}
+  //template <class T, size_t bytesCount>
+  //static auto readFloatNBytes(std::ifstream &file, float minValue, float maxValue) -> float {
+  //  auto intValue = readNBytes<T, bytesCount>(file);
+  //  auto maxIntValue = static_cast<uint64_t>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+  //  auto normalizedValue = intValue / static_cast<float>(maxIntValue);
+  //  normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+  //  auto value = normalizedValue * (maxValue - minValue) + minValue;
+  //  return value;
+  //}
+
+  static auto writeString(const std::string &text, std::vector<bool> &output) -> void;
+
+
+  template <class T, size_t bitCount>
+  static auto writeNBits(T value,  std::vector<bool> &output) -> void {
+    for (size_t i = 0; i < bitCount; i++) {
+      output.push_back((value >> (bitCount - i - 1)) & 1U);
     }
-    file.write(bytes.data(), bytesCount);
   }
-  template <class T, size_t bytesCount>
-  static auto writeFloatNBytes(float value, std::ofstream &file, float minValue, float maxValue)
+
+  template <class T, size_t bitCount>
+  static auto writeFloatNBits(float value, std::vector<bool> &output, float minValue,
+                              float maxValue)
       -> void {
     auto normalizedValue = (value - minValue) / (maxValue - minValue);
     normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
-    auto maxIntValue = static_cast<T>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+    auto maxIntValue = static_cast<T>(std::pow(2, bitCount) - 1);
     auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
-    writeNBytes<T, bytesCount>(intValue, file);
+    writeNBits<T, bitCount>(intValue, output);
   }
+
+  static auto fillBitset(std::vector<bool> &bitset) -> void{
+    auto fillCount = (BYTE_SIZE - bitset.size() % 8) % 8;
+    for (int i = 0; i < fillCount; i++) {
+      bitset.push_back(false);
+    }
+  }
+
+  static auto writeBitset(const std::vector<bool> &bitset, std::ofstream &file) -> void {
+    auto bitsetSize = bitset.size();
+    for (size_t i = 0; i < bitset.size(); i += BYTE_SIZE) {
+      char byte = 0;
+      for (uint8_t j = 0; j < BYTE_SIZE; j++) {
+        if ((i+j < bitsetSize) && bitset[i + j]) {
+          byte |= (1U << (BYTE_SIZE - 1 - j));
+        }
+      }
+      file.write(&byte, 1);
+    }
+  }
+
+  //template <class T, size_t bytesCount>
+  //static auto writeNBytes(T value, std::ofstream &file) -> void {
+  //  std::array<char, bytesCount> bytes{};
+  //  for (size_t i = 0; i < bytes.size(); i++) {
+  //    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+  //    bytes[i] = static_cast<uint8_t>(value >> i * BYTE_SIZE);
+  //  }
+  //  file.write(bytes.data(), bytesCount);
+  //}
+  //template <class T, size_t bytesCount>
+  //static auto writeFloatNBytes(float value, std::ofstream &file, float minValue, float maxValue)
+  //    -> void {
+  //  auto normalizedValue = (value - minValue) / (maxValue - minValue);
+  //  normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+  //  auto maxIntValue = static_cast<T>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+  //  auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
+  //  writeNBytes<T, bytesCount>(intValue, file);
+  //}
 };
 } // namespace haptics::io
 #endif // IOBINARYPRIMITIVES_H

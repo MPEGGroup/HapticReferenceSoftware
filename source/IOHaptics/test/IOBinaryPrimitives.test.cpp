@@ -52,10 +52,12 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on strings") {
     DYNAMIC_SECTION("Write string (TESTING CASE: " + testingString + ")") {
       std::ofstream file(filename, std::ios::out | std::ios::binary);
       REQUIRE(file);
-
-      IOBinaryPrimitives::writeString(testingString, file);
+      std::vector<bool> bitset;
+      IOBinaryPrimitives::writeString(testingString, bitset);
+      IOBinaryPrimitives::writeBitset(bitset, file);
       file.close();
-
+      auto val1 = std::filesystem::file_size(filename);
+      auto val2 = static_cast<uintmax_t>(testingString.size()) + 1;
       CHECK(std::filesystem::file_size(filename) ==
             static_cast<uintmax_t>(testingString.size()) + 1);
     }
@@ -65,7 +67,8 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on strings") {
       std::ifstream file(filename, std::ios::binary | std::ifstream::in);
       REQUIRE(file);
 
-      std::string res = IOBinaryPrimitives::readString(file);
+      std::vector<bool> unusedBits;
+      std::string res = IOBinaryPrimitives::readString(file, unusedBits);
       file.close();
 
       CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -81,9 +84,12 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on floats") {
     DYNAMIC_SECTION("Write float (TESTING CASE: " + std::to_string(testingFloat) + ")") {
       std::ofstream file(filename, std::ios::out | std::ios::binary);
       REQUIRE(file);
-
-      IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(testingFloat, file, -haptics::io::MAX_FLOAT,
+      std::vector<bool> bitset;
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * haptics::io::BYTE_SIZE>(
+          testingFloat, bitset, -haptics::io::MAX_FLOAT,
                                                         haptics::io::MAX_FLOAT);
+
+      IOBinaryPrimitives::writeBitset(bitset, file);
       file.close();
 
       CHECK(std::filesystem::file_size(filename) == sizeof(float));
@@ -94,8 +100,10 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on floats") {
       std::ifstream file(filename, std::ios::binary | std::ifstream::in);
       REQUIRE(file);
 
-      float res = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -haptics::io::MAX_FLOAT,
-                                                                   haptics::io::MAX_FLOAT);
+      std::vector<bool> unusedBits;
+      float res = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * haptics::io::BYTE_SIZE>(
+          file, -haptics::io::MAX_FLOAT, haptics::io::MAX_FLOAT, unusedBits);
+
       file.close();
 
       CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -111,8 +119,9 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
   SECTION("Write 1 byte") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
-
-    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(testingValue, file);
+    std::vector<bool> bitset;
+    IOBinaryPrimitives::writeNBits<uint8_t, haptics::io::BYTE_SIZE>(testingValue, bitset);
+    IOBinaryPrimitives::writeBitset(bitset, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 1);
@@ -123,7 +132,9 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+    std::vector<bool> unusedBits;
+    auto res =
+        IOBinaryPrimitives::readNBits<int8_t, haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -135,7 +146,9 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    std::vector<bool> unusedBits;
+    auto res =
+        IOBinaryPrimitives::readNBits<uint8_t, haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -150,8 +163,9 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
   SECTION("Write 4 byte") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
-
-    IOBinaryPrimitives::writeNBytes<int, 4>(testingValue, file);
+    std::vector<bool> bitset;
+    IOBinaryPrimitives::writeNBits<int, 4 * haptics::io::BYTE_SIZE>(testingValue, bitset);
+    IOBinaryPrimitives::writeBitset(bitset, file);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == 4);
@@ -162,7 +176,9 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytes<int32_t, 4>(file);
+    std::vector<bool> unusedBits;
+    auto res = IOBinaryPrimitives::readNBits<int32_t, 4 * haptics::io::BYTE_SIZE>(
+        file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -174,7 +190,9 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res = IOBinaryPrimitives::readNBytes<uint32_t, 4>(file);
+    std::vector<bool> unusedBits;
+    auto res = IOBinaryPrimitives::readNBits<uint32_t, 4 * haptics::io::BYTE_SIZE>(
+        file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -186,12 +204,13 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     std::ifstream file(filename, std::ios::binary | std::ifstream::in);
     REQUIRE(file);
 
-    auto res_part1 = IOBinaryPrimitives::readNBytes<int16_t, 2>(file);
-    auto res_part2 = IOBinaryPrimitives::readNBytes<int16_t, 2>(file);
+    std::vector<bool> unusedBits;
+    auto res_part1 = IOBinaryPrimitives::readNBits<int16_t, 2 * haptics::io::BYTE_SIZE>(file, unusedBits);
+    auto res_part2 = IOBinaryPrimitives::readNBits<int16_t, 2 * haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
-    const auto expectedFirstHalf = (int16_t)(testingValue & 0x0000FFFF);
-    const auto expectedSecondHalf = (int16_t)((testingValue & 0xFFFF0000) >> 16);
+    const auto expectedFirstHalf = (int16_t)((testingValue & 0xFFFF0000) >> 16);
+    const auto expectedSecondHalf = (int16_t)(testingValue & 0x0000FFFF);
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res_part1 == expectedFirstHalf);

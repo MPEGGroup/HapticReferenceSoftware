@@ -35,17 +35,27 @@
 
 namespace haptics::io {
 
-auto IOBinaryPrimitives::writeString(const std::string &text, std::ofstream &file) -> void {
-  std::string str = text;
-  str.append(1, '\x00');
-  file.write(str.c_str(), static_cast<int>(str.size()));
+auto IOBinaryPrimitives::writeString(const std::string &text, std::vector<bool>& output) -> void {
+  
+  writeNBits<uint8_t, BYTE_SIZE>(static_cast<uint8_t>(text.size()), output);
+  for (auto byte : text){
+  //for (size_t i = 0; i < text.size() ; i++) {
+  //  char byte = text[i];
+    for (uint8_t j = 0; j < BYTE_SIZE; j++) {
+      output.push_back(((byte >> (BYTE_SIZE - j - 1)) & 1U) == 1);
+    }
+  }
 }
 
-auto IOBinaryPrimitives::readString(std::ifstream &file) -> std::string {
+auto IOBinaryPrimitives::readString(std::ifstream &file, std::vector<bool> &unusedBits) -> std::string {
+  auto size = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
   char c = 0;
   std::string str;
-  while (file.get(c), c != '\0') {
+  unsigned int i = 0;
+  while (i < size) {
+    c = IOBinaryPrimitives::readNBits<char, BYTE_SIZE>(file, unusedBits);
     str += c;
+    i++;
   }
   return str;
 }
