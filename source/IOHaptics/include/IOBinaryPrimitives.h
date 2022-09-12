@@ -143,7 +143,7 @@ public:
       char byte = 0;
       for (uint8_t j = 0; j < BYTE_SIZE; j++) {
         if ((i + j < bitsetSize) && bitset[i + j]) {
-          byte |= static_cast<char>(1U << (BYTE_SIZE - 1 - j));
+          byte |= (0b1 << (BYTE_SIZE - 1 - j));
         }
       }
       file.write(&byte, 1);
