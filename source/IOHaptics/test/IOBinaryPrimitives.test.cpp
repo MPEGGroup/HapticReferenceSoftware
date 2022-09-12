@@ -56,8 +56,6 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on strings") {
       IOBinaryPrimitives::writeString(testingString, bitset);
       IOBinaryPrimitives::writeBitset(bitset, file);
       file.close();
-      auto val1 = std::filesystem::file_size(filename);
-      auto val2 = static_cast<uintmax_t>(testingString.size()) + 1;
       CHECK(std::filesystem::file_size(filename) ==
             static_cast<uintmax_t>(testingString.size()) + 1);
     }
