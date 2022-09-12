@@ -55,8 +55,8 @@ public:
   template <class T, size_t bitCount>
   static auto readNBits(std::ifstream &file, std::vector<bool> &unusedBits) -> T {
     auto nbBitsToRead = bitCount - unusedBits.size();
-    auto const nbBytesToRead =
-        static_cast<size_t>(nbBitsToRead % 8 == 0 ? nbBitsToRead / 8 : nbBitsToRead / 8 + 1);
+    auto const nbBytesToRead = static_cast<std::streamsize>(
+        nbBitsToRead % BYTE_SIZE == 0 ? nbBitsToRead / BYTE_SIZE : (nbBitsToRead / BYTE_SIZE) + 1);
     std::vector<char> bytes(nbBytesToRead);
     file.read(bytes.data(), nbBytesToRead);
     std::vector<bool> bitset = unusedBits;
@@ -132,7 +132,7 @@ public:
 
   static auto fillBitset(std::vector<bool> &bitset) -> void {
     auto fillCount = (BYTE_SIZE - (bitset.size() % BYTE_SIZE)) % BYTE_SIZE;
-    for (int i = 0; i < fillCount; i++) {
+    for (unsigned int i = 0; i < fillCount; i++) {
       bitset.push_back(false);
     }
   }
