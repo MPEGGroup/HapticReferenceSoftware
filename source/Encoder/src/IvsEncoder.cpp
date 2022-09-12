@@ -79,7 +79,17 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     int time = -1;
     int count = 0;
     int duration = -1;
-    for (pugi::xml_node repeatEvent : IvsEncoder::getRepeatEvents(&timeline)) {
+    pugi::xml_object_range<pugi::xml_named_node_iterator> repeatEvents =
+        IvsEncoder::getRepeatEvents(&timeline);
+    std::vector<pugi::xml_node> sortedRepeatEvents;
+    for (pugi::xml_node repeatEvent : repeatEvents) {
+      auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent,
+                                 [](pugi::xml_node a, pugi::xml_node b) -> bool {
+                                   return IvsEncoder::getTime(&a) <= IvsEncoder::getTime(&b);
+                                 });
+      sortedRepeatEvents.insert(it, repeatEvent);
+    }
+    for (pugi::xml_node repeatEvent : sortedRepeatEvents) {
       count = IvsEncoder::getCount(&repeatEvent);
       if (count == 0) {
         continue;
