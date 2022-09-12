@@ -37,7 +37,7 @@ GCC 10 Release:
     - export CC=/usr/bin/gcc-10
   script:
     - mkdir -p build && cd build
-    - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_CXX_FLAGS="-stdlib=libc++ -Wall -Wextra -Wpedantic -Werror" -DCMAKE_BUILD_TYPE=Release ..
+    - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror" -DCMAKE_BUILD_TYPE=Release ..
     - make -j
     - mkdir reports
     - ctest --output-junit reports/report.xml
