@@ -76,7 +76,8 @@ public:
 private:
   static auto readFileBody(types::Haptics &haptic, std::ifstream &file,
                            std::vector<bool> &unusedBits) -> bool;
-  static auto readAvatars(types::Haptics &haptic, std::ifstream &file, std::vector<bool> &unusedBits) -> bool;
+  static auto readAvatars(types::Haptics &haptic, std::ifstream &file,
+                          std::vector<bool> &unusedBits) -> bool;
   static auto readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file,
                                     std::vector<bool> &unusedBits) -> bool;
   static auto readReferenceDevices(types::Perception &perception, std::ifstream &file,

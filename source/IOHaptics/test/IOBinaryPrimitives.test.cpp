@@ -86,8 +86,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on floats") {
       REQUIRE(file);
       std::vector<bool> bitset;
       IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * haptics::io::BYTE_SIZE>(
-          testingFloat, bitset, -haptics::io::MAX_FLOAT,
-                                                        haptics::io::MAX_FLOAT);
+          testingFloat, bitset, -haptics::io::MAX_FLOAT, haptics::io::MAX_FLOAT);
 
       IOBinaryPrimitives::writeBitset(bitset, file);
       file.close();
@@ -133,8 +132,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     REQUIRE(file);
 
     std::vector<bool> unusedBits;
-    auto res =
-        IOBinaryPrimitives::readNBits<int8_t, haptics::io::BYTE_SIZE>(file, unusedBits);
+    auto res = IOBinaryPrimitives::readNBits<int8_t, haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -147,8 +145,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 1 byte") {
     REQUIRE(file);
 
     std::vector<bool> unusedBits;
-    auto res =
-        IOBinaryPrimitives::readNBits<uint8_t, haptics::io::BYTE_SIZE>(file, unusedBits);
+    auto res = IOBinaryPrimitives::readNBits<uint8_t, haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -177,8 +174,7 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     REQUIRE(file);
 
     std::vector<bool> unusedBits;
-    auto res = IOBinaryPrimitives::readNBits<int32_t, 4 * haptics::io::BYTE_SIZE>(
-        file, unusedBits);
+    auto res = IOBinaryPrimitives::readNBits<int32_t, 4 * haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -191,8 +187,8 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     REQUIRE(file);
 
     std::vector<bool> unusedBits;
-    auto res = IOBinaryPrimitives::readNBits<uint32_t, 4 * haptics::io::BYTE_SIZE>(
-        file, unusedBits);
+    auto res =
+        IOBinaryPrimitives::readNBits<uint32_t, 4 * haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
@@ -205,8 +201,10 @@ TEST_CASE("haptics::types::IOBinaryPrimitives on 4 bytes") {
     REQUIRE(file);
 
     std::vector<bool> unusedBits;
-    auto res_part1 = IOBinaryPrimitives::readNBits<int16_t, 2 * haptics::io::BYTE_SIZE>(file, unusedBits);
-    auto res_part2 = IOBinaryPrimitives::readNBits<int16_t, 2 * haptics::io::BYTE_SIZE>(file, unusedBits);
+    auto res_part1 =
+        IOBinaryPrimitives::readNBits<int16_t, 2 * haptics::io::BYTE_SIZE>(file, unusedBits);
+    auto res_part2 =
+        IOBinaryPrimitives::readNBits<int16_t, 2 * haptics::io::BYTE_SIZE>(file, unusedBits);
     file.close();
 
     const auto expectedFirstHalf = (int16_t)((testingValue & 0xFFFF0000) >> 16);
