@@ -173,7 +173,7 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
 
   types::Perception myPerception;
   for (unsigned short i = 0; i < perceptionCount; i++) {
-    auto perceptionId = IOBinaryPrimitives::readNBits<short, 2>(file, unusedBits);
+    auto perceptionId = IOBinaryPrimitives::readNBits<short, 2 * BYTE_SIZE>(file, unusedBits);
     auto perceptionModality = IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
     std::string perceptionDescription = IOBinaryPrimitives::readString(file, unusedBits);
     auto avatarId = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
