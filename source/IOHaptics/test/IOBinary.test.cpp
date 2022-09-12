@@ -127,7 +127,12 @@ TEST_CASE("write/read file header for avatar testing") {
     file.close();
 
     REQUIRE(succeed);
-    const uintmax_t expectedFileSize = 3 + 2 * 2 + 2 * (2 + 4 + 2) + testingMesh_avatar1.size() + 1;
+    uintmax_t expectedBitFileSize = 3 * haptics::io::BYTE_SIZE + 2 * 2 * haptics::io::BYTE_SIZE +
+                                    2 * ((2 + 1) * haptics::io::BYTE_SIZE + 3) +
+                                    testingMesh_avatar1.size() * haptics::io::BYTE_SIZE +
+                                    haptics::io::BYTE_SIZE;
+    const uintmax_t expectedFileSize =
+        expectedBitFileSize % 8 == 0 ? expectedBitFileSize / 8 : expectedBitFileSize / 8 + 1;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -675,7 +680,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 352;
+        testingVertices_track2.size() + 343;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 

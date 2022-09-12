@@ -33,6 +33,7 @@
 
 #include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOBinaryBands.h>
+#include <IOHaptics/include/IOBinaryFields.h>
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -121,14 +122,14 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::vector<bool> &output
 
 auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file,
                            std::vector<bool> &unusedBits) -> bool {
-  auto avatarCount = IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+  auto avatarCount =
+      IOBinaryPrimitives::readNBits<unsigned short, MDEXP_AVATAR_COUNT>(file, unusedBits);
 
   types::Avatar myAvatar;
   for (unsigned short i = 0; i < avatarCount; i++) {
-    auto avatarId = IOBinaryPrimitives::readNBits<short, 2 * BYTE_SIZE>(file, unusedBits);
-    auto avatarLod = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
-    auto avatarType =
-        IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+    auto avatarId = IOBinaryPrimitives::readNBits<short, AVATAR_ID>(file, unusedBits);
+    auto avatarLod = IOBinaryPrimitives::readNBits<uint8_t, AVATAR_LOD>(file, unusedBits);
+    auto avatarType = IOBinaryPrimitives::readNBits<uint8_t, AVATAR_TYPE>(file, unusedBits);
 
     std::string avatarURI;
     myAvatar = types::Avatar(avatarId, avatarLod, static_cast<types::AvatarType>(avatarType));
@@ -145,20 +146,20 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file,
 
 auto IOBinary::writeAvatars(types::Haptics &haptic, std::vector<bool> &output) -> bool {
   auto avatarCount = static_cast<unsigned short>(haptic.getAvatarsSize());
-  IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(avatarCount, output);
+  IOBinaryPrimitives::writeNBits<unsigned short, MDEXP_AVATAR_COUNT>(avatarCount, output);
 
   types::Avatar myAvatar;
   for (unsigned short i = 0; i < avatarCount; i++) {
     myAvatar = haptic.getAvatarAt(i);
 
     auto avatarId = static_cast<short>(myAvatar.getId());
-    IOBinaryPrimitives::writeNBits<short, 2 * BYTE_SIZE>(avatarId, output);
+    IOBinaryPrimitives::writeNBits<short, AVATAR_ID>(avatarId, output);
 
     int avatarLod = myAvatar.getLod();
-    IOBinaryPrimitives::writeNBits<int, 4 * BYTE_SIZE>(avatarLod, output);
+    IOBinaryPrimitives::writeNBits<uint8_t, AVATAR_LOD>(avatarLod, output);
 
     auto avatarType = static_cast<unsigned short>(myAvatar.getType());
-    IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(avatarType, output);
+    IOBinaryPrimitives::writeNBits<uint8_t, AVATAR_TYPE>(avatarType, output);
 
     if (myAvatar.getType() == types::AvatarType::Custom) {
       const std::string avatarURI = myAvatar.getMesh().value_or("");
@@ -171,18 +172,18 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::vector<bool> &output) -
 auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file,
                                      std::vector<bool> &unusedBits) -> bool {
   auto perceptionCount =
-      IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+      IOBinaryPrimitives::readNBits<unsigned short, MDEXP_PERC_COUNT>(file, unusedBits);
 
   types::Perception myPerception;
   for (unsigned short i = 0; i < perceptionCount; i++) {
-    auto perceptionId = IOBinaryPrimitives::readNBits<short, 2 * BYTE_SIZE>(file, unusedBits);
+    auto perceptionId = IOBinaryPrimitives::readNBits<short, MDPERCE_ID>(file, unusedBits);
     auto perceptionModality =
-        IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_MODALITY>(file, unusedBits);
     std::string perceptionDescription = IOBinaryPrimitives::readString(file, unusedBits);
-    auto avatarId = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
-    auto unitExponent = IOBinaryPrimitives::readNBits<int8_t, BYTE_SIZE>(file, unusedBits);
+    auto avatarId = IOBinaryPrimitives::readNBits<int, AVATAR_ID>(file, unusedBits);
+    auto unitExponent = IOBinaryPrimitives::readNBits<int8_t, MDPERCE_UNIT_EXP>(file, unusedBits);
     auto perceptionUnitExponent =
-        IOBinaryPrimitives::readNBits<int8_t, BYTE_SIZE>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<int8_t, MDPERCE_PERCE_UNIT_EXP>(file, unusedBits);
 
     myPerception = types::Perception(perceptionId, avatarId, perceptionDescription,
                                      static_cast<types::PerceptionModality>(perceptionModality));
@@ -205,29 +206,29 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
 
 auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> &output) -> bool {
   auto perceptionCount = static_cast<unsigned short>(haptic.getPerceptionsSize());
-  IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(perceptionCount, output);
+  IOBinaryPrimitives::writeNBits<unsigned short, MDEXP_PERC_COUNT>(perceptionCount, output);
 
   types::Perception myPerception;
   for (unsigned short i = 0; i < perceptionCount; i++) {
     myPerception = haptic.getPerceptionAt(i);
 
     auto perceptionId = static_cast<short>(myPerception.getId());
-    IOBinaryPrimitives::writeNBits<short, 2 * BYTE_SIZE>(perceptionId, output);
+    IOBinaryPrimitives::writeNBits<short, MDPERCE_ID>(perceptionId, output);
 
     auto perceptionModality = static_cast<unsigned short>(myPerception.getPerceptionModality());
-    IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(perceptionModality, output);
+    IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_MODALITY>(perceptionModality, output);
 
     std::string perceptionDescription = myPerception.getDescription();
     IOBinaryPrimitives::writeString(perceptionDescription, output);
 
     int avatarId = myPerception.getAvatarId();
-    IOBinaryPrimitives::writeNBits<int, 4 * BYTE_SIZE>(avatarId, output);
+    IOBinaryPrimitives::writeNBits<int, AVATAR_ID>(avatarId, output);
 
     int8_t unitExponent = myPerception.getUnitExponentOrDefault();
-    IOBinaryPrimitives::writeNBits<int8_t, BYTE_SIZE>(unitExponent, output);
+    IOBinaryPrimitives::writeNBits<int8_t, MDPERCE_UNIT_EXP>(unitExponent, output);
 
     int8_t perceptionUnitExponent = myPerception.getPerceptionUnitExponentOrDefault();
-    IOBinaryPrimitives::writeNBits<int8_t, BYTE_SIZE>(perceptionUnitExponent, output);
+    IOBinaryPrimitives::writeNBits<int8_t, MDPERCE_PERCE_UNIT_EXP>(perceptionUnitExponent, output);
 
     if (!IOBinary::writeLibrary(myPerception, output)) {
       return false;
@@ -246,39 +247,40 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> 
 
 auto IOBinary::readLibraryEffect(std::ifstream &file, std::vector<bool> &unusedBits)
     -> types::Effect {
-  auto id = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
-  auto position = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
-  auto phase = IOBinaryPrimitives::readFloatNBits<uint16_t, 2 * BYTE_SIZE>(file, -MAX_PHASE,
-                                                                           MAX_PHASE, unusedBits);
-  auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
-  auto effectType = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
-  auto keyframeCount = IOBinaryPrimitives::readNBits<uint16_t, 2 * BYTE_SIZE>(file, unusedBits);
+  auto id = IOBinaryPrimitives::readNBits<int, EFFECT_ID>(file, unusedBits);
+  auto position = IOBinaryPrimitives::readNBits<int, EFFECT_POSITION>(file, unusedBits);
+  auto phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, -MAX_PHASE,
+                                                                          MAX_PHASE, unusedBits);
+  auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
+  auto effectType = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_TYPE>(file, unusedBits);
+  auto keyframeCount =
+      IOBinaryPrimitives::readNBits<uint16_t, EFFECT_KEYFRAME_COUNT>(file, unusedBits);
   types::Effect effect(static_cast<int>(position), phase,
                        static_cast<types::BaseSignal>(baseSignal),
                        static_cast<types::EffectType>(effectType));
   effect.setId(id);
   for (unsigned short i = 0; i < keyframeCount; i++) {
-    auto mask = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
+    auto mask = IOBinaryPrimitives::readNBits<uint8_t, KEYFRAME_MASK>(file, unusedBits);
     std::optional<int> position = std::nullopt;
     std::optional<float> amplitude = std::nullopt;
     std::optional<int> frequency = std::nullopt;
     if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
-      position = IOBinaryPrimitives::readNBits<uint16_t, 2 * BYTE_SIZE>(file, unusedBits);
+      position = IOBinaryPrimitives::readNBits<uint16_t, KEYFRAME_POSITION>(file, unusedBits);
     }
 
     if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
-      amplitude = IOBinaryPrimitives::readFloatNBits<uint8_t, BYTE_SIZE>(file, -MAX_AMPLITUDE,
-                                                                         MAX_AMPLITUDE, unusedBits);
+      amplitude = IOBinaryPrimitives::readFloatNBits<uint8_t, KEYFRAME_AMPLITUDE>(
+          file, -MAX_AMPLITUDE, MAX_AMPLITUDE, unusedBits);
     }
 
     if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
-      frequency = IOBinaryPrimitives::readNBits<uint16_t, 2 * BYTE_SIZE>(file, unusedBits);
+      frequency = IOBinaryPrimitives::readNBits<uint16_t, KEYFRAME_FREQUENCY>(file, unusedBits);
     }
     types::Keyframe myKeyframe(position, amplitude, frequency);
     effect.addKeyframe(myKeyframe);
   }
   auto timelineEffectCount =
-      IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+      IOBinaryPrimitives::readNBits<unsigned short, EFFECT_TIMELINE_COUNT>(file, unusedBits);
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
     auto timelineEffect = readLibraryEffect(file, unusedBits);
     effect.addTimelineEffect(timelineEffect);
@@ -288,19 +290,18 @@ auto IOBinary::readLibraryEffect(std::ifstream &file, std::vector<bool> &unusedB
 
 auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &output) -> bool {
   int id = libraryEffect.getId();
-  IOBinaryPrimitives::writeNBits<int, 4 * BYTE_SIZE>(id, output);
+  IOBinaryPrimitives::writeNBits<int, EFFECT_ID>(id, output);
   int position = libraryEffect.getPosition();
-  IOBinaryPrimitives::writeNBits<int, 4 * BYTE_SIZE>(position, output);
+  IOBinaryPrimitives::writeNBits<int, EFFECT_POSITION>(position, output);
   float phase = libraryEffect.getPhase();
-  IOBinaryPrimitives::writeFloatNBits<uint16_t, 2 * BYTE_SIZE>(phase, output, -MAX_PHASE,
-                                                               MAX_PHASE);
+  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, -MAX_PHASE, MAX_PHASE);
   auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
-  IOBinaryPrimitives::writeNBits<uint8_t, BYTE_SIZE>(baseSignal, output);
+  IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());
-  IOBinaryPrimitives::writeNBits<uint8_t, BYTE_SIZE>(effectType, output);
+  IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_TYPE>(effectType, output);
 
   auto keyframeCount = static_cast<uint16_t>(libraryEffect.getKeyframesSize());
-  IOBinaryPrimitives::writeNBits<uint16_t, 2 * BYTE_SIZE>(keyframeCount, output);
+  IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_KEYFRAME_COUNT>(keyframeCount, output);
   types::Keyframe keyframe;
   for (unsigned short i = 0; i < keyframeCount; i++) {
     keyframe = libraryEffect.getKeyframeAt(i);
@@ -314,26 +315,27 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
     if (keyframe.getFrequencyModulation().has_value()) {
       mask |= (uint8_t)KeyframeMask::FREQUENCY_MODULATION;
     }
-    IOBinaryPrimitives::writeNBits<uint8_t, BYTE_SIZE>(mask, output);
+    IOBinaryPrimitives::writeNBits<uint8_t, KEYFRAME_MASK>(mask, output);
     if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
       auto position = keyframe.getRelativePosition().value();
-      IOBinaryPrimitives::writeNBits<uint16_t, 2 * BYTE_SIZE>(position, output);
+      IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_POSITION>(position, output);
     }
 
     if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
       auto amplitude = keyframe.getAmplitudeModulation().value();
-      IOBinaryPrimitives::writeFloatNBits<uint8_t, BYTE_SIZE>(amplitude, output, -MAX_AMPLITUDE,
-                                                              MAX_AMPLITUDE);
+      IOBinaryPrimitives::writeFloatNBits<uint8_t, KEYFRAME_AMPLITUDE>(
+          amplitude, output, -MAX_AMPLITUDE, MAX_AMPLITUDE);
     }
 
     if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
       auto frequency = keyframe.getFrequencyModulation().value();
-      IOBinaryPrimitives::writeNBits<uint16_t, 2 * BYTE_SIZE>(frequency, output);
+      IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_FREQUENCY>(frequency, output);
     }
   }
 
   auto timelineEffectCount = static_cast<uint16_t>(libraryEffect.getTimelineSize());
-  IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(timelineEffectCount, output);
+  IOBinaryPrimitives::writeNBits<unsigned short, EFFECT_TIMELINE_COUNT>(timelineEffectCount,
+                                                                        output);
   // for each library effect
   types::Effect timelineEffect;
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
@@ -345,7 +347,8 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
 
 auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file,
                            std::vector<bool> &unusedBits) -> bool {
-  auto effectCount = IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+  auto effectCount =
+      IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_LIBRARY_COUNT>(file, unusedBits);
   bool success = true;
   for (unsigned short i = 0; i < effectCount; i++) {
     auto effect = readLibraryEffect(file, unusedBits);
@@ -356,7 +359,7 @@ auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file,
 
 auto IOBinary::writeLibrary(types::Perception &perception, std::vector<bool> &output) -> bool {
   auto effectCount = static_cast<unsigned short>(perception.getEffectLibrarySize());
-  IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(effectCount, output);
+  IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_LIBRARY_COUNT>(effectCount, output);
 
   // for each library effect
   types::Effect libraryEffect;
@@ -371,88 +374,89 @@ auto IOBinary::writeLibrary(types::Perception &perception, std::vector<bool> &ou
 auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream &file,
                                     std::vector<bool> &unusedBits) -> bool {
   auto referenceDeviceCount =
-      IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+      IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_REFDEVICE_COUNT>(file, unusedBits);
 
   for (unsigned short i = 0; i < referenceDeviceCount; i++) {
-    auto referenceDeviceId = IOBinaryPrimitives::readNBits<short, 2 * BYTE_SIZE>(file, unusedBits);
+    auto referenceDeviceId = IOBinaryPrimitives::readNBits<short, REFDEV_ID>(file, unusedBits);
     std::string referenceDeviceName = IOBinaryPrimitives::readString(file, unusedBits);
-    auto bodyPartMask = IOBinaryPrimitives::readNBits<uint32_t, 4 * BYTE_SIZE>(file, unusedBits);
+    auto bodyPartMask =
+        IOBinaryPrimitives::readNBits<uint32_t, REFDEV_BODY_PART_MASK>(file, unusedBits);
 
     types::ReferenceDevice myReferenceDevice(referenceDeviceId, referenceDeviceName);
     myReferenceDevice.setBodyPartMask(bodyPartMask);
 
     auto deviceInformationMask =
-        IOBinaryPrimitives::readNBits<uint16_t, 2 * BYTE_SIZE>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<uint16_t, REFDEV_OPT_FIELDS>(file, unusedBits);
 
     float value = 0;
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_FREQUENCY) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FREQUENCY,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_MAX_FREQ>(file, 0, MAX_FREQUENCY,
+                                                                            unusedBits);
       myReferenceDevice.setMaximumFrequency(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MINIMUM_FREQUENCY) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FREQUENCY,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_MIN_FREQ>(file, 0, MAX_FREQUENCY,
+                                                                            unusedBits);
       myReferenceDevice.setMinimumFrequency(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::RESONANCE_FREQUENCY) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FREQUENCY,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_RES_FREQ>(file, 0, MAX_FREQUENCY,
+                                                                            unusedBits);
       myReferenceDevice.setResonanceFrequency(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_AMPLITUDE) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_MAX_AMP>(file, 0, MAX_FLOAT,
+                                                                           unusedBits);
       myReferenceDevice.setMaximumAmplitude(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::IMPEDANCE) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_IMPEDANCE>(file, 0, MAX_FLOAT,
+                                                                             unusedBits);
       myReferenceDevice.setImpedance(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_VOLTAGE) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_MAX_VOLT>(file, 0, MAX_FLOAT,
+                                                                            unusedBits);
       myReferenceDevice.setMaximumVoltage(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_MAX_CURR>(file, 0, MAX_FLOAT,
+                                                                            unusedBits);
       myReferenceDevice.setMaximumCurrent(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_DISPLACEMENT) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
-                                                                          unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_MAX_DISP>(file, 0, MAX_FLOAT,
+                                                                            unusedBits);
       myReferenceDevice.setMaximumDisplacement(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::WEIGHT) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_WEIGHT>(file, 0, MAX_FLOAT,
                                                                           unusedBits);
       myReferenceDevice.setWeight(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::SIZE) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT,
-                                                                          unusedBits);
+      value =
+          IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_SIZE>(file, 0, MAX_FLOAT, unusedBits);
       myReferenceDevice.setSize(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::CUSTOM) != 0) {
-      value = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, -MAX_FLOAT,
-                                                                          MAX_FLOAT, unusedBits);
+      value = IOBinaryPrimitives::readFloatNBits<uint32_t, REFDEV_SIZE>(file, -MAX_FLOAT, MAX_FLOAT,
+                                                                        unusedBits);
       myReferenceDevice.setCustom(value);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
-      auto type = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
+      auto type = IOBinaryPrimitives::readNBits<uint8_t, REFDEV_TYPE>(file, unusedBits);
       myReferenceDevice.setType(static_cast<types::ActuatorType>(type));
     }
 
@@ -465,7 +469,8 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
 auto IOBinary::writeReferenceDevices(types::Perception &perception, std::vector<bool> &output)
     -> bool {
   auto referenceDeviceCount = static_cast<unsigned short>(perception.getReferenceDevicesSize());
-  IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(referenceDeviceCount, output);
+  IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_REFDEVICE_COUNT>(referenceDeviceCount,
+                                                                          output);
 
   // for each reference device
   types::ReferenceDevice myReferenceDevice;
@@ -473,7 +478,7 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::vector<
     myReferenceDevice = perception.getReferenceDeviceAt(i);
 
     auto referenceDeviceId = static_cast<short>(myReferenceDevice.getId());
-    IOBinaryPrimitives::writeNBits<short, 2 * BYTE_SIZE>(referenceDeviceId, output);
+    IOBinaryPrimitives::writeNBits<short, REFDEV_ID>(referenceDeviceId, output);
 
     IOBinaryPrimitives::writeString(myReferenceDevice.getName(), output);
 
@@ -481,72 +486,75 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::vector<
     if (myReferenceDevice.getBodyPartMask().has_value()) {
       bodyPartMask = myReferenceDevice.getBodyPartMask().value();
     }
-    IOBinaryPrimitives::writeNBits<uint32_t, 4 * BYTE_SIZE>(bodyPartMask, output);
+    IOBinaryPrimitives::writeNBits<uint32_t, REFDEV_BODY_PART_MASK>(bodyPartMask, output);
 
     uint16_t deviceInformationMask =
         IOBinary::generateReferenceDeviceInformationMask(myReferenceDevice);
-    IOBinaryPrimitives::writeNBits<uint16_t, 2 * BYTE_SIZE>(deviceInformationMask, output);
+    IOBinaryPrimitives::writeNBits<uint16_t, REFDEV_OPT_FIELDS>(deviceInformationMask, output);
 
     float value = 0;
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_FREQUENCY) != 0) {
       value = myReferenceDevice.getMaximumFrequency().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FREQUENCY);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_MAX_FREQ>(value, output, 0,
+                                                                     MAX_FREQUENCY);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MINIMUM_FREQUENCY) != 0) {
       value = myReferenceDevice.getMinimumFrequency().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FREQUENCY);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_MIN_FREQ>(value, output, 0,
+                                                                     MAX_FREQUENCY);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::RESONANCE_FREQUENCY) != 0) {
       value = myReferenceDevice.getResonanceFrequency().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FREQUENCY);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_RES_FREQ>(value, output, 0,
+                                                                     MAX_FREQUENCY);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_AMPLITUDE) != 0) {
       value = myReferenceDevice.getMaximumAmplitude().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_MAX_AMP>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::IMPEDANCE) != 0) {
       value = myReferenceDevice.getImpedance().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_IMPEDANCE>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_VOLTAGE) != 0) {
       value = myReferenceDevice.getMaximumVoltage().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_MAX_VOLT>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_CURRENT) != 0) {
       value = myReferenceDevice.getMaximumCurrent().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_MAX_CURR>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::MAXIMUM_DISPLACEMENT) != 0) {
       value = myReferenceDevice.getMaximumDisplacement().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_MAX_DISP>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::WEIGHT) != 0) {
       value = myReferenceDevice.getWeight().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_WEIGHT>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::SIZE) != 0) {
       value = myReferenceDevice.getSize().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, 0, MAX_FLOAT);
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_SIZE>(value, output, 0, MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::CUSTOM) != 0) {
       value = myReferenceDevice.getCustom().value();
-      IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(value, output, -MAX_FLOAT,
+      IOBinaryPrimitives::writeFloatNBits<uint32_t, REFDEV_CUSTOM>(value, output, -MAX_FLOAT,
                                                                    MAX_FLOAT);
     }
 
     if ((deviceInformationMask & (uint16_t)DeviceInformationMask::TYPE) != 0) {
       uint8_t type = static_cast<uint8_t>(myReferenceDevice.getType().value());
-      IOBinaryPrimitives::writeNBits<uint8_t, BYTE_SIZE>(type, output);
+      IOBinaryPrimitives::writeNBits<uint8_t, REFDEV_TYPE>(type, output);
     }
   }
 
@@ -555,32 +563,35 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::vector<
 
 auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &file,
                                 std::vector<bool> &unusedBits) -> bool {
-  auto trackCount = IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+  auto trackCount =
+      IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_TRACK_COUNT>(file, unusedBits);
   // for each track
   for (unsigned short i = 0; i < trackCount; i++) {
-    auto trackId = IOBinaryPrimitives::readNBits<short, 2 * BYTE_SIZE>(file, unusedBits);
+    auto trackId = IOBinaryPrimitives::readNBits<short, MDTRACK_ID>(file, unusedBits);
     std::string trackDescription = IOBinaryPrimitives::readString(file, unusedBits);
-    auto deviceId = IOBinaryPrimitives::readNBits<short, 2 * BYTE_SIZE>(file, unusedBits);
-    auto trackGain = IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(
+    auto deviceId = IOBinaryPrimitives::readNBits<short, MDTRACK_DEVICE_ID>(file, unusedBits);
+    auto trackGain = IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_GAIN>(
         file, -MAX_FLOAT, MAX_FLOAT, unusedBits);
-    auto trackMixingWeight =
-        IOBinaryPrimitives::readFloatNBits<uint32_t, 4 * BYTE_SIZE>(file, 0, MAX_FLOAT, unusedBits);
-    auto bodyPartMask = IOBinaryPrimitives::readNBits<uint32_t, 4 * BYTE_SIZE>(file, unusedBits);
-    auto optionalMetadataMask = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
+    auto trackMixingWeight = IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(
+        file, 0, MAX_FLOAT, unusedBits);
+    auto bodyPartMask =
+        IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_BODY_PART_MASK>(file, unusedBits);
+    auto optionalMetadataMask =
+        IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_OPT_FIELDS>(file, unusedBits);
     auto frequencySampling =
-        IOBinaryPrimitives::readNBits<uint32_t, 4 * BYTE_SIZE>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_FREQ_SAMPLING>(file, unusedBits);
     std::optional<uint32_t> sampleCount = std::nullopt;
     if (frequencySampling != 0) {
-      sampleCount = IOBinaryPrimitives::readNBits<uint32_t, 4 * BYTE_SIZE>(file, unusedBits);
+      sampleCount = IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_SAMPLE_COUNT>(file, unusedBits);
     }
     std::optional<types::Direction> direction = std::nullopt;
     if ((optionalMetadataMask & 0b0000'0001) != 0) {
-      auto X = IOBinaryPrimitives::readNBits<int8_t, BYTE_SIZE>(file, unusedBits);
-      auto Y = IOBinaryPrimitives::readNBits<int8_t, BYTE_SIZE>(file, unusedBits);
-      auto Z = IOBinaryPrimitives::readNBits<int8_t, BYTE_SIZE>(file, unusedBits);
+      auto X = IOBinaryPrimitives::readNBits<int8_t, MDTRACK_DIRECTION_AXIS>(file, unusedBits);
+      auto Y = IOBinaryPrimitives::readNBits<int8_t, MDTRACK_DIRECTION_AXIS>(file, unusedBits);
+      auto Z = IOBinaryPrimitives::readNBits<int8_t, MDTRACK_DIRECTION_AXIS>(file, unusedBits);
       direction = types::Direction(X, Y, Z);
     }
-    auto verticesCount = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
+    auto verticesCount = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT_COUNT>(file, unusedBits);
 
     types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
     if (frequencySampling != 0) {
@@ -597,11 +608,12 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
     }
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
-      vertex = IOBinaryPrimitives::readNBits<int, 4 * BYTE_SIZE>(file, unusedBits);
+      vertex = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT>(file, unusedBits);
       t.addVertex(vertex);
     }
 
-    auto bandCount = IOBinaryPrimitives::readNBits<unsigned short, 2 * BYTE_SIZE>(file, unusedBits);
+    auto bandCount =
+        IOBinaryPrimitives::readNBits<unsigned short, MDTRACK_BANDS_COUNT>(file, unusedBits);
     for (unsigned short j = 0; j < bandCount; j++) {
       types::Band emptyBand;
       t.addBand(emptyBand);
@@ -615,7 +627,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
 
 auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool> &output) -> bool {
   auto trackCount = static_cast<unsigned short>(perception.getTracksSize());
-  IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(trackCount, output);
+  IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_TRACK_COUNT>(trackCount, output);
 
   // for each track
   types::Track myTrack;
@@ -623,57 +635,57 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool
     myTrack = perception.getTrackAt(i);
 
     auto trackId = static_cast<short>(myTrack.getId());
-    IOBinaryPrimitives::writeNBits<short, 2 * BYTE_SIZE>(trackId, output);
+    IOBinaryPrimitives::writeNBits<short, MDTRACK_ID>(trackId, output);
 
     std::string trackDescription = myTrack.getDescription();
     IOBinaryPrimitives::writeString(trackDescription, output);
 
     short deviceId = static_cast<short>(myTrack.getReferenceDeviceId().value_or(-1));
-    IOBinaryPrimitives::writeNBits<short, 2 * BYTE_SIZE>(deviceId, output);
+    IOBinaryPrimitives::writeNBits<short, MDTRACK_DEVICE_ID>(deviceId, output);
 
     float trackGain = myTrack.getGain();
-    IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(trackGain, output, -MAX_FLOAT,
-                                                                 MAX_FLOAT);
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_GAIN>(trackGain, output, -MAX_FLOAT,
+                                                                MAX_FLOAT);
 
     float trackMixingWeight = myTrack.getMixingWeight();
-    IOBinaryPrimitives::writeFloatNBits<uint32_t, 4 * BYTE_SIZE>(trackMixingWeight, output, 0,
-                                                                 MAX_FLOAT);
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(trackMixingWeight, output,
+                                                                         0, MAX_FLOAT);
 
     uint32_t bodyPartMask = myTrack.getBodyPartMask();
-    IOBinaryPrimitives::writeNBits<uint32_t, 4 * BYTE_SIZE>(bodyPartMask, output);
+    IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_BODY_PART_MASK>(bodyPartMask, output);
 
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
     if (myTrack.getDirection().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
     }
-    IOBinaryPrimitives::writeNBits<uint8_t, BYTE_SIZE>(optionalMetadataMask, output);
+    IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_OPT_FIELDS>(optionalMetadataMask, output);
 
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
-    IOBinaryPrimitives::writeNBits<uint32_t, 4 * BYTE_SIZE>(frequencySampling, output);
+    IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_FREQ_SAMPLING>(frequencySampling, output);
 
     if (frequencySampling != 0) {
       uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
-      IOBinaryPrimitives::writeNBits<uint32_t, 4 * BYTE_SIZE>(sampleCount, output);
+      IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_SAMPLE_COUNT>(sampleCount, output);
     }
 
     if (myTrack.getDirection().has_value()) {
       types::Direction direction = myTrack.getDirection().value();
-      IOBinaryPrimitives::writeNBits<int8_t, BYTE_SIZE>(direction.X, output);
-      IOBinaryPrimitives::writeNBits<int8_t, BYTE_SIZE>(direction.Y, output);
-      IOBinaryPrimitives::writeNBits<int8_t, BYTE_SIZE>(direction.Z, output);
+      IOBinaryPrimitives::writeNBits<int8_t, MDTRACK_DIRECTION_AXIS>(direction.X, output);
+      IOBinaryPrimitives::writeNBits<int8_t, MDTRACK_DIRECTION_AXIS>(direction.Y, output);
+      IOBinaryPrimitives::writeNBits<int8_t, MDTRACK_DIRECTION_AXIS>(direction.Z, output);
     }
 
     auto verticesCount = static_cast<int>(myTrack.getVerticesSize());
-    IOBinaryPrimitives::writeNBits<int, 4 * BYTE_SIZE>(verticesCount, output);
+    IOBinaryPrimitives::writeNBits<int, MDTRACK_VERT_COUNT>(verticesCount, output);
 
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
       vertex = myTrack.getVertexAt(j);
-      IOBinaryPrimitives::writeNBits<int, 4 * BYTE_SIZE>(vertex, output);
+      IOBinaryPrimitives::writeNBits<int, MDTRACK_VERT>(vertex, output);
     }
 
     auto bandCount = static_cast<unsigned short>(myTrack.getBandsSize());
-    IOBinaryPrimitives::writeNBits<unsigned short, 2 * BYTE_SIZE>(bandCount, output);
+    IOBinaryPrimitives::writeNBits<unsigned short, MDTRACK_BANDS_COUNT>(bandCount, output);
   }
 
   return true;
