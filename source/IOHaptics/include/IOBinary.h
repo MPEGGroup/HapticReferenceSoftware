@@ -65,29 +65,35 @@ enum class KeyframeMask : uint8_t {
   ALL = 0b0000'0111
 };
 
+class IOMemoryBuffer : public std::streambuf {
+public:
+  IOMemoryBuffer(char *p, std::size_t n) { setg(p, p, p + n); }
+};
+
 class IOBinary {
 public:
+  static auto loadMemory(IOMemoryBuffer &in, types::Haptics &out) -> bool;
   static auto loadFile(const std::string &filePath, types::Haptics &out) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> bool;
-  static auto readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
-  static auto writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
+  static auto readFileHeader(types::Haptics &haptic, std::istream &file) -> bool;
+  static auto writeFileHeader(types::Haptics &haptic, std::ostream &file) -> bool;
 
 private:
-  static auto readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool;
-  static auto readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool;
-  static auto readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file) -> bool;
-  static auto readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool;
-  static auto readLibrary(types::Perception &perception, std::ifstream &file) -> bool;
-  static auto readLibraryEffect(std::ifstream &file) -> types::Effect;
-  static auto readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool;
+  static auto readFileBody(types::Haptics &haptic, std::istream &file) -> bool;
+  static auto readAvatars(types::Haptics &haptic, std::istream &file) -> bool;
+  static auto readPerceptionsHeader(types::Haptics &haptic, std::istream &file) -> bool;
+  static auto readReferenceDevices(types::Perception &perception, std::istream &file) -> bool;
+  static auto readLibrary(types::Perception &perception, std::istream &file) -> bool;
+  static auto readLibraryEffect(std::istream &file) -> types::Effect;
+  static auto readTracksHeader(types::Perception &perception, std::istream &file) -> bool;
 
-  static auto writeFileBody(types::Haptics &haptic, std::ofstream &file) -> bool;
-  static auto writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool;
-  static auto writePerceptionsHeader(types::Haptics &haptic, std::ofstream &file) -> bool;
-  static auto writeLibrary(types::Perception &perception, std::ofstream &file) -> bool;
-  static auto writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &file) -> bool;
-  static auto writeReferenceDevices(types::Perception &perception, std::ofstream &file) -> bool;
-  static auto writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool;
+  static auto writeFileBody(types::Haptics &haptic, std::ostream &file) -> bool;
+  static auto writeAvatars(types::Haptics &haptic, std::ostream &file) -> bool;
+  static auto writePerceptionsHeader(types::Haptics &haptic, std::ostream &file) -> bool;
+  static auto writeLibrary(types::Perception &perception, std::ostream &file) -> bool;
+  static auto writeLibraryEffect(types::Effect &libraryEffect, std::ostream &file) -> bool;
+  static auto writeReferenceDevices(types::Perception &perception, std::ostream &file) -> bool;
+  static auto writeTracksHeader(types::Perception &perception, std::ostream &file) -> bool;
 
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice)
       -> uint16_t;
