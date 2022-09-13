@@ -102,7 +102,11 @@ auto main(int argc, char *argv[]) -> int {
     output = inputParser.getCmdOption("--output");
   }
   if (output.empty()) {
-    output = "out.impg";
+    if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+      output = "out.hmpg";
+    } else {
+      output = "out.hjif";
+    }
   }
   std::cout << "The generated file will be : " << output << "\n";
 
@@ -195,8 +199,8 @@ auto main(int argc, char *argv[]) -> int {
     }
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
-  } else if (ext == "gmpg") {
-    std::cout << "The GMPG file to encode : " << filename << std::endl;
+  } else if (ext == "hjif") {
+    std::cout << "The HJIF file to encode : " << filename << std::endl;
     IOJson::loadFile(filename, hapticFile);
   } else {
     codeExit = EXIT_FAILURE;
