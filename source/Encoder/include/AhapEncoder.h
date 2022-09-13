@@ -39,7 +39,15 @@
 #include <Types/include/Keyframe.h>
 #include <Types/include/Perception.h>
 #include <iostream>
-#include <nlohmann/json.hpp>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996 26451 26495 26812 33010)
+#endif
+#include <rapidjson/document.h>
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 namespace haptics::encoder {
 
@@ -47,14 +55,14 @@ class AhapEncoder {
 public:
   [[nodiscard]] auto static encode(std::string &filename, types::Perception &out) -> int;
   [[nodiscard]] auto static extractTransients(
-      nlohmann::json *event, std::vector<haptics::types::Effect> *transients,
+      const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
       const std::vector<std::pair<int, double>> *amplitudes,
       const std::vector<std::pair<int, double>> *frequencies) -> int;
   [[nodiscard]] auto static extractContinuous(
-      nlohmann::json *event, std::vector<haptics::types::Effect> *continuous,
+      const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *continuous,
       const std::vector<std::pair<int, double>> *amplitudes,
       const std::vector<std::pair<int, double>> *frequencies) -> int;
-  [[nodiscard]] auto static extractKeyframes(nlohmann::json *parameterCurve,
+  [[nodiscard]] auto static extractKeyframes(const rapidjson::Value::Object &parameterCurve,
                                              std::vector<std::pair<int, double>> *keyframes) -> int;
 
 private:
