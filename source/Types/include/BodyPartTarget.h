@@ -47,7 +47,7 @@ enum class BodyPartTarget : uint8_t {
   Down = 11,
   Right = 12,
   Left = 13,
-  
+
   Arm = 20,
   Head = 21,
   Chest = 22,
@@ -62,7 +62,7 @@ enum class BodyPartTarget : uint8_t {
   UpperLeg = 35,
   LowerLeg = 36,
   Foot = 37,
-  
+
   Palm = 40,
   Finger = 41,
   Sole = 42,
