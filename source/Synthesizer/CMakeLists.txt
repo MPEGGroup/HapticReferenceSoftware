@@ -2,7 +2,6 @@ project(Synthesizer)
 
 add_executable(Synthesizer src/main.cpp src/Helper.cpp include/Helper.h)
 target_link_libraries(Synthesizer PUBLIC tools types waveletdecoder iohaptics)
-target_link_libraries(Synthesizer PRIVATE nlohmann_json::nlohmann_json)
 
 install(TARGETS Synthesizer DESTINATION bin)
 

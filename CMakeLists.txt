@@ -15,7 +15,6 @@ option(NO_INTERNET "Use pre-downloaded source archives for external libraries, e
 
 include(cmake/dr_libs.cmake)
 include(cmake/dj_fft.cmake)
-include(cmake/nlohmann_json.cmake)
 include(cmake/rapidjson.cmake)
 include(cmake/catch2.cmake)
 include(cmake/iir.cmake)

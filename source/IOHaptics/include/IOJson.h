@@ -36,7 +36,6 @@
 
 #include <Types/include/Haptics.h>
 #include <map>
-#include <nlohmann/json.hpp>
 #include <string>
 
 #if defined(_MSC_VER)
@@ -67,12 +66,17 @@ public:
   static auto loadKeyframes(const rapidjson::Value::Array &jsonKeyframes, types::Effect &effect)
       -> bool;
 
-  static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
-  static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;
-  static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void;
-  static auto extractLibrary(types::Perception &perception, nlohmann::json &jsonLibrary) -> void;
+  static auto extractPerceptions(types::Haptics &haptic, rapidjson::Value::Array &jsonPerceptions,
+                                 rapidjson::Document &jsonTree) -> void;
+  static auto extractAvatars(types::Haptics &haptic, rapidjson::Value::Array &jsonAvatars,
+                             rapidjson::Document &jsonTree) -> void;
+  static auto extractTracks(types::Perception &perception, rapidjson::Value::Array &jsonTracks,
+                            rapidjson::Document &jsonTree) -> void;
+  static auto extractLibrary(types::Perception &perception, rapidjson::Value::Array &jsonLibrary,
+                             rapidjson::Document &jsonTree) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
-                                      nlohmann::json &jsonReferenceDevices) -> void;
+                                      rapidjson::Value::Array &jsonReferenceDevices,
+                                      rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };
