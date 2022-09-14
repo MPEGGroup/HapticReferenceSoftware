@@ -361,8 +361,8 @@ auto IOBinaryBands::writeReferenceEffect(types::Effect &effect, std::ostream &fi
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>(id, file);
   return true;
 }
-auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
-                                       std::istream &file) -> bool {
+auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file)
+    -> bool {
   auto timelineEffectCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
     types::Effect myEffect;
