@@ -99,7 +99,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file) -> bool
          band.getBandType() == types::BandType::WaveletWave)) {
       position = effectIndex * band.getWindowLength();
     } else {
-      position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+      position = static_cast<int>(IOBinaryPrimitives::readNBytes<uint32_t, 4>(file));
     }
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
@@ -144,8 +144,8 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ofstream &file) -> boo
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(effectType, file);
     if ((myEffect.getEffectType() != types::EffectType::Basis ||
          band.getBandType() != types::BandType::WaveletWave)) {
-      auto position = static_cast<uint16_t>(myEffect.getPosition());
-      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
+      auto position = static_cast<uint32_t>(myEffect.getPosition());
+      IOBinaryPrimitives::writeNBytes<uint32_t, 4>(position, file);
     }
     if (myEffect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(myEffect, file);
@@ -369,7 +369,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     auto effectType =
         static_cast<types::EffectType>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
     myEffect.setEffectType(effectType);
-    auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    auto position = static_cast<int>(IOBinaryPrimitives::readNBytes<uint32_t, 4>(file));
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file);
@@ -407,8 +407,8 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
     auto timelineEffect = effect.getTimelineEffectAt(i);
     auto effectType = static_cast<uint8_t>(timelineEffect.getEffectType());
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(effectType, file);
-    auto position = static_cast<uint16_t>(timelineEffect.getPosition());
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
+    auto position = static_cast<uint32_t>(timelineEffect.getPosition());
+    IOBinaryPrimitives::writeNBytes<uint32_t, 4>(position, file);
 
     if (effect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(effect, file);
