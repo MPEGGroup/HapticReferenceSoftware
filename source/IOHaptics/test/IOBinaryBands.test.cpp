@@ -32,6 +32,7 @@
  */
 
 #include <IOHaptics/include/IOBinaryBands.h>
+#include <IOHaptics/include/IOBinaryFields.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
@@ -88,8 +89,13 @@ TEST_CASE("write/read BandHeader on curve") {
     IOBinaryPrimitives::fillBitset(output);
     IOBinaryPrimitives::writeBitset(output, file);
     file.close();
-
-    CHECK(std::filesystem::file_size(filename) == 8);
+    auto bitStreamSize = haptics::io::MDBAND_BAND_TYPE + haptics::io::MDBAND_CURVE_TYPE +
+                         haptics::io::MDBAND_LOW_FREQ + haptics::io::MDBAND_UP_FREQ +
+                         haptics::io::MDBAND_EFFECT_COUNT;
+    auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
+                              ? bitStreamSize / haptics::io::BYTE_SIZE
+                              : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
+    CHECK(std::filesystem::file_size(filename) == byteStreamSize);
   }
 
   SECTION("read band header") {
@@ -282,9 +288,15 @@ TEST_CASE("write/read BandBody on curve") {
     IOBinaryPrimitives::fillBitset(output);
     IOBinaryPrimitives::writeBitset(output, file);
     file.close();
-    // effectType + position + keyframe count + Keyframes
-    CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
-          1 + 2 + 2 + expectedKeyframeCount * (1 + 2));
+
+    auto bitStreamSize =
+        haptics::io::EFFECT_TYPE + haptics::io::EFFECT_POSITION +
+        haptics::io::EFFECT_KEYFRAME_COUNT +
+        expectedKeyframeCount * (haptics::io::KEYFRAME_AMPLITUDE + haptics::io::KEYFRAME_POSITION);
+    auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
+                              ? bitStreamSize / haptics::io::BYTE_SIZE
+                              : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
+    CHECK(static_cast<int>(std::filesystem::file_size(filename)) == byteStreamSize);
   }
 
   SECTION("read band body") {
@@ -345,10 +357,15 @@ TEST_CASE("write/read BandBody on transient") {
     IOBinaryPrimitives::fillBitset(output);
     IOBinaryPrimitives::writeBitset(output, file);
     file.close();
-    // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative
-    // position + frequency)
-    CHECK(std::filesystem::file_size(filename) ==
-          static_cast<uintmax_t>(expectedTransientCount * (1 + 2 + 2 + 1 + 2 + 2)));
+
+    auto bitStreamSize = expectedTransientCount *
+                         (haptics::io::EFFECT_TYPE + haptics::io::EFFECT_POSITION +
+                          haptics::io::EFFECT_KEYFRAME_COUNT + haptics::io::KEYFRAME_AMPLITUDE +
+                          haptics::io::KEYFRAME_POSITION + haptics::io::KEYFRAME_FREQUENCY);
+    auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
+                              ? bitStreamSize / haptics::io::BYTE_SIZE
+                              : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
+    CHECK(std::filesystem::file_size(filename) == static_cast<uintmax_t>(byteStreamSize));
   }
 
   SECTION("read band body") {
@@ -422,9 +439,15 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
-    const uintmax_t expectedFileSize =
-        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2 + 1 + 2);
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+    auto bitStreamSize =
+        2 * (haptics::io::EFFECT_TYPE + haptics::io::EFFECT_POSITION + haptics::io::EFFECT_PHASE +
+             haptics::io::EFFECT_BASE_SIGNAL + haptics::io::EFFECT_KEYFRAME_COUNT) +
+        (2 + 4) * (haptics::io::KEYFRAME_MASK + haptics::io::KEYFRAME_POSITION) +
+        (2 + 3) * haptics::io::KEYFRAME_AMPLITUDE + (2 + 3) * haptics::io::KEYFRAME_FREQUENCY;
+    auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
+                              ? bitStreamSize / haptics::io::BYTE_SIZE
+                              : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
+    CHECK(std::filesystem::file_size(filename) == static_cast<uintmax_t>(byteStreamSize));
   }
 
   SECTION("read band body") {

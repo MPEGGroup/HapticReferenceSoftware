@@ -32,6 +32,7 @@
  */
 
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOBinaryFields.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
@@ -63,10 +64,14 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     file.close();
 
     REQUIRE(succeed);
-    const int expectedFileSize =
-        static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size()) +
-        3 + 2 * 2;
-    CHECK(static_cast<int>(std::filesystem::file_size(filename)) == expectedFileSize);
+    auto bitStreamSize =
+        (testingVersion.size() + testingDate.size() + testingDescription.size() + 3) *
+            haptics::io::BYTE_SIZE +
+        +haptics::io::MDEXP_AVATAR_COUNT + haptics::io::MDEXP_PERC_COUNT;
+    auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
+                              ? bitStreamSize / haptics::io::BYTE_SIZE
+                              : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
+    CHECK(static_cast<int>(std::filesystem::file_size(filename)) == byteStreamSize);
   }
 
   SECTION("read haptic header") {
@@ -127,13 +132,19 @@ TEST_CASE("write/read file header for avatar testing") {
     file.close();
 
     REQUIRE(succeed);
-    uintmax_t expectedBitFileSize = 3 * haptics::io::BYTE_SIZE + 2 * 2 * haptics::io::BYTE_SIZE +
-                                    2 * ((2 + 1) * haptics::io::BYTE_SIZE + 3) +
-                                    testingMesh_avatar1.size() * haptics::io::BYTE_SIZE +
-                                    haptics::io::BYTE_SIZE;
-    const uintmax_t expectedFileSize =
-        expectedBitFileSize % 8 == 0 ? expectedBitFileSize / 8 : expectedBitFileSize / 8 + 1;
-    CHECK(std::filesystem::file_size(filename) == expectedFileSize);
+
+    auto bitStreamSize =
+        static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size() +
+                         3) *
+            haptics::io::BYTE_SIZE +
+        2 * (haptics::io::AVATAR_ID + haptics::io::AVATAR_LOD + haptics::io::AVATAR_TYPE) +
+        haptics::io::MDEXP_AVATAR_COUNT + haptics::io::MDEXP_PERC_COUNT +
+        (testingMesh_avatar1.size() + 1) * haptics::io::BYTE_SIZE;
+    auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
+                              ? bitStreamSize / haptics::io::BYTE_SIZE
+                              : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
+
+    CHECK(std::filesystem::file_size(filename) == byteStreamSize);
   }
 
   SECTION("read avatars") {
@@ -213,7 +224,7 @@ TEST_CASE("write/read file header for reference device testing") {
         testingDescription_perception0.size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 113;
+        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 98;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
