@@ -71,7 +71,7 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
                               ? bitStreamSize / haptics::io::BYTE_SIZE
                               : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
-    CHECK(static_cast<int>(std::filesystem::file_size(filename)) == byteStreamSize);
+    CHECK(std::filesystem::file_size(filename) == static_cast<uintmax_t>(byteStreamSize));
   }
 
   SECTION("read haptic header") {
@@ -144,7 +144,7 @@ TEST_CASE("write/read file header for avatar testing") {
                               ? bitStreamSize / haptics::io::BYTE_SIZE
                               : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
 
-    CHECK(std::filesystem::file_size(filename) == byteStreamSize);
+    CHECK(std::filesystem::file_size(filename) == static_cast<uintmax_t>(byteStreamSize));
   }
 
   SECTION("read avatars") {
