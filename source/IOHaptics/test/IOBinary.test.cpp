@@ -199,10 +199,10 @@ TEST_CASE("write/read file header for reference device testing") {
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
-          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
+          {0, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
            haptics::types::ActuatorType::LRA},
-          {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
+          {134, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
           {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
@@ -374,7 +374,7 @@ TEST_CASE("write/read file header for track testing") {
                                                 testingDescription_perception0,
                                                 testingPerceptionModality_perception0);
 
-  const int testingId_perception1 = 423;
+  const int testingId_perception1 = 123;
   const int testingAvatarId_perception1 = 3;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
@@ -401,7 +401,7 @@ TEST_CASE("write/read file header for track testing") {
     testingTrack0.generateBand();
   }
 
-  const int testingId_track1 = 432;
+  const int testingId_track1 = 132;
   const std::string testingDescription_track1 = "again another string";
   const float testingGain_track1 = 0;
   const float testingMixingWeight_track1 = .333;
@@ -451,7 +451,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 146;
+        testingVertices_track2.size() + 116;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -569,7 +569,7 @@ TEST_CASE("write/read file for body testing") {
            std::nullopt, std::nullopt}};
   testingPerception0.addReferenceDevice(testingReferenceDeviceValue_perception0);
 
-  const int testingId_perception1 = 423;
+  const int testingId_perception1 = 123;
   const int testingAvatarId_perception1 = 3;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
@@ -590,7 +590,7 @@ TEST_CASE("write/read file for body testing") {
     testingTrack0.addVertex(vertex);
   }
 
-  const int testingId_track1 = 432;
+  const int testingId_track1 = 132;
   const std::string testingDescription_track1 = "again another string";
   const float testingGain_track1 = 0;
   const float testingMixingWeight_track1 = .333;
@@ -691,7 +691,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 343;
+        testingVertices_track2.size() + 309;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
