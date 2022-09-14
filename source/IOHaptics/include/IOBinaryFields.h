@@ -42,10 +42,10 @@
 
 namespace haptics::io {
 
-//static constexpr int H_NBITS = 16;
-//static constexpr int H_NALU_TYPE = 3;
-//static constexpr int H_LEVEL = 2;
-//static constexpr int H_PAYLOAD_LENGTH = 8;
+// static constexpr int H_NBITS = 16;
+// static constexpr int H_NALU_TYPE = 3;
+// static constexpr int H_LEVEL = 2;
+// static constexpr int H_PAYLOAD_LENGTH = 8;
 
 // static constexpr int MDEXP_VERSION = 8;
 // static constexpr int MDEXP_DATE = 8;
@@ -98,7 +98,7 @@ static constexpr int MDTRACK_VERT_COUNT = 16;
 static constexpr int MDTRACK_VERT = 32;
 static constexpr int MDTRACK_BANDS_COUNT = 16;
 
-//static constexpr int MDBAND_ID = 8;
+// static constexpr int MDBAND_ID = 8;
 static constexpr int MDBAND_BAND_TYPE = 2;
 static constexpr int MDBAND_CURVE_TYPE = 3;
 static constexpr int MDBAND_WIN_LEN = 16;
@@ -120,10 +120,10 @@ static constexpr int KEYFRAME_POSITION = 16;
 static constexpr int KEYFRAME_AMPLITUDE = 8;
 static constexpr int KEYFRAME_FREQUENCY = 16;
 
-//static constexpr int DB_AU_TYPE = 1;
-//static constexpr int DB_TIMESTAMP = 32;
-//static constexpr int DB_FX_COUNT = 16;
-//static constexpr int FX_ID = 16;
+// static constexpr int DB_AU_TYPE = 1;
+// static constexpr int DB_TIMESTAMP = 32;
+// static constexpr int DB_FX_COUNT = 16;
+// static constexpr int FX_ID = 16;
 
 } // namespace haptics::io
 #endif // IOBINARYFIELDS_H

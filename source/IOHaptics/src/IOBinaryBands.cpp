@@ -32,8 +32,8 @@
  */
 
 #include <IOHaptics/include/IOBinaryBands.h>
-#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <IOHaptics/include/IOBinaryFields.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <limits>
 
 namespace haptics::io {
@@ -46,8 +46,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::ifstream &file,
     auto curveType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_CURVE_TYPE>(file, unusedBits);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength =
-        IOBinaryPrimitives::readNBits<uint16_t, MDBAND_WIN_LEN>(file, unusedBits);
+    auto windowLength = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_WIN_LEN>(file, unusedBits);
     band.setWindowLength(static_cast<int>(windowLength));
   }
 
@@ -105,7 +104,8 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::ifstream &file,
          band.getBandType() == types::BandType::WaveletWave)) {
       position = effectIndex * band.getWindowLength();
     } else {
-      position = static_cast<int>(IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
+      position = static_cast<int>(
+          IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
     }
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
@@ -216,8 +216,7 @@ auto IOBinaryBands::writeTransientEffect(types::Effect &effect, std::vector<bool
       amplitude = myKeyframe.getAmplitudeModulation().value();
     }
     IOBinaryPrimitives::writeFloatNBits<uint8_t, KEYFRAME_AMPLITUDE>(amplitude, output,
-                                                                     -MAX_AMPLITUDE,
-                                                            MAX_AMPLITUDE);
+                                                                     -MAX_AMPLITUDE, MAX_AMPLITUDE);
 
     uint16_t position = 0;
     if (myKeyframe.getRelativePosition().has_value()) {
@@ -259,15 +258,14 @@ auto IOBinaryBands::writeCurveEffect(types::Effect &effect, std::vector<bool> &o
       amplitude = myKeyframe.getAmplitudeModulation().value();
     }
     IOBinaryPrimitives::writeFloatNBits<uint8_t, KEYFRAME_AMPLITUDE>(amplitude, output,
-                                                                     -MAX_AMPLITUDE,
-                                                            MAX_AMPLITUDE);
+                                                                     -MAX_AMPLITUDE, MAX_AMPLITUDE);
 
     uint16_t position = 0;
     if (myKeyframe.getRelativePosition().has_value()) {
       position += static_cast<uint16_t>(myKeyframe.getRelativePosition().value());
     }
     IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_POSITION>(static_cast<uint16_t>(position),
-                                                            output);
+                                                                output);
   }
 
   return true;
@@ -276,7 +274,7 @@ auto IOBinaryBands::writeCurveEffect(types::Effect &effect, std::vector<bool> &o
 auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::ifstream &file,
                                         std::vector<bool> &unusedBits) -> bool {
   float phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, -MAX_PHASE,
-                                                                            MAX_PHASE, unusedBits);
+                                                                           MAX_PHASE, unusedBits);
   effect.setPhase(phase);
   auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
   effect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
@@ -307,8 +305,7 @@ auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::ifstream &fi
 auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
 
   float phase = effect.getPhase();
-  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, -MAX_PHASE,
-                                                               MAX_PHASE);
+  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, -MAX_PHASE, MAX_PHASE);
   auto baseSignal = static_cast<uint8_t>(effect.getBaseSignal());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto keyframeCount = static_cast<uint16_t>(effect.getKeyframesSize());
@@ -327,8 +324,7 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
     if (myKeyframe.getAmplitudeModulation().has_value()) {
       auto amplitude = myKeyframe.getAmplitudeModulation().value();
       IOBinaryPrimitives::writeFloatNBits<uint8_t, KEYFRAME_AMPLITUDE>(
-          amplitude, output, -MAX_AMPLITUDE,
-                                                              MAX_AMPLITUDE);
+          amplitude, output, -MAX_AMPLITUDE, MAX_AMPLITUDE);
     }
     auto position = static_cast<uint16_t>(myKeyframe.getRelativePosition().value());
     IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_POSITION>(position, output);
@@ -391,7 +387,8 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     auto effectType = static_cast<types::EffectType>(
         IOBinaryPrimitives::readNBits<uint8_t, EFFECT_TYPE>(file, unusedBits));
     myEffect.setEffectType(effectType);
-    auto position = static_cast<int>(IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
+    auto position = static_cast<int>(
+        IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
