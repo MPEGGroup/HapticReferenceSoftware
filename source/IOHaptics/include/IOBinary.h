@@ -67,6 +67,7 @@ enum class KeyframeMask : uint8_t {
 
 class IOMemoryBuffer : public std::streambuf {
 public:
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   IOMemoryBuffer(char *p, std::size_t n) { setg(p, p, p + n); }
 };
 
