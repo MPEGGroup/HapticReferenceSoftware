@@ -381,14 +381,12 @@ TEST_CASE("write/read gmpg haptic file for body targetting testing") {
   const float testingMixingWeight_track = 1;
   const uint32_t testingBodyPartMask_track = 32;
   haptics::types::Perception testingPerception(testingId_perception, testingAvatarId_perception,
-                                                testingDescription_perception,
-                                                testingPerceptionModality_perception);
-  haptics::types::Track testingTrack0(testingId_track, testingDescription_track,
-                                      testingGain_track, testingMixingWeight_track,
-                                      testingBodyPartMask_track);
-  haptics::types::Track testingTrack1(testingId_track, testingDescription_track,
-                                      testingGain_track, testingMixingWeight_track,
-                                      testingBodyPartMask_track);
+                                               testingDescription_perception,
+                                               testingPerceptionModality_perception);
+  haptics::types::Track testingTrack0(testingId_track, testingDescription_track, testingGain_track,
+                                      testingMixingWeight_track, testingBodyPartMask_track);
+  haptics::types::Track testingTrack1(testingId_track, testingDescription_track, testingGain_track,
+                                      testingMixingWeight_track, testingBodyPartMask_track);
 
   const haptics::types::Vector testingTrackResolution_track0(32, 110, 3);
   const std::vector<haptics::types::Vector> testingActuatorTarget_track0 {
