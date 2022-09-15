@@ -54,10 +54,12 @@ TEST_EFFECT_KEYS = [
     "kinesthetic_effects"
 ]
 TYPE_KEY = "type"
+EXTENSION_KEY = "extension"
 NAME_KEY = "name"
 HAPTIC_FILE_PATH_KEY = "haptic_file_path"
 REFERENCE_FILE = "reference_file"
 MAIN_FOLDER_KEY = "main_folder"
+COMPARISON_DATA_KEY = "comparison_data"
 REFERENCE_BITRATEPSNR_KEY = "reference_bitratePSNR"
 
 # implements PSNR metric (verified)
@@ -239,7 +241,7 @@ def main():
     with open("logs.txt", 'w') as log_file:
         with open('bitratePSNR.csv', 'w', newline='') as csvFile:
             writer = csv.writer(csvFile)
-            firstRow = ["File", "Test set"]
+            firstRow = ["File", "Test set", "Type"]
             for current_bitrate in bitrates:
                 firstRow.append(str(current_bitrate)+"kbps bitrate")
                 firstRow.append(str(current_bitrate)+"kbps psnr")
@@ -253,7 +255,7 @@ def main():
                         continue
                     if filter_by_type and filter_by_type != my_effect[TYPE_KEY]:
                         continue
-                    csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}"]
+                    csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}", f"{my_effect[EXTENSION_KEY]}"]
                     for current_bitrate in bitrates:
                         formatted_output_name = f"{my_effect[TYPE_KEY]}1_{testId}rv_CRM{CRM_version}_{current_bitrate}_{my_effect[NAME_KEY]}"
                         input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
@@ -285,7 +287,7 @@ def main():
                     writer.writerow(csvRow)
 
     
-    if bjontegaard:
+    if compute_bjontegaard:
         try:
             os.makedirs('Bjontegaard/Plots')
         except FileExistsError:
@@ -373,6 +375,7 @@ if __name__ == "__main__":
     bitrates = args.bitrates if args.bitrates else DEFAULT_BITRATES
     padding = args.padding
     filter_by_type = args.filter_by_type
+    compute_bjontegaard = args.bjontegaard
 
     assert not config_file.isspace(), "config_file should be provided"
     assert os.path.isfile(config_file), "config_file should be a file"
