@@ -236,7 +236,7 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
 auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
   auto id = IOBinaryPrimitives::readNBytes<int, 4>(file);
   auto position = IOBinaryPrimitives::readNBytes<int, 4>(file);
-  auto phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_PHASE, MAX_PHASE);
+  auto phase = IOBinaryPrimitives::readFloatNBytes<uint32_t, 4>(file, -MAX_PHASE, MAX_PHASE);
   auto baseSignal = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   auto effectType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   auto keyframeCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -278,7 +278,7 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &f
   int position = libraryEffect.getPosition();
   IOBinaryPrimitives::writeNBytes<int, 4>(position, file);
   float phase = libraryEffect.getPhase();
-  IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, -MAX_PHASE, MAX_PHASE);
+  IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(phase, file, -MAX_PHASE, MAX_PHASE);
   auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
   IOBinaryPrimitives::writeNBytes<uint8_t, 1>(baseSignal, file);
   auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());
