@@ -264,21 +264,21 @@ def main():
                         if(not os.path.exists(input_file_path)):
                             print(f"FILE NOT FOUND: {input_file_path}")
                             continue
-                        mpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HMPG/{formatted_output_name}.mpg")
+                        hmpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HMPG/{formatted_output_name}.hmpg")
                         hjif_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HJIF/{formatted_output_name}.hjif")
                         nopad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_nopad/{formatted_output_name}_nopad.wav")
                         pad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_pad/{formatted_output_name}_pad.wav")
 
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {mpg_file_path} -kb {current_bitrate} --binary --refactor", stdout=log_file)
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} --binary --refactor", stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {mpg_file_path} -o {hjif_file_path}", stdout=log_file)
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
                         if padding:
                             print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                             addPadding(nopad_file_path, pad_file_path, padding)
-                        bitrate = compute_bitrate(reference_file_path, mpg_file_path)
+                        bitrate = compute_bitrate(reference_file_path, hmpg_file_path)
                         psnr = psnr_two_files(nopad_file_path, reference_file_path, True)
                         csvRow.append(bitrate)
                         csvRow.append(psnr)
