@@ -38,13 +38,23 @@
 #include <map>
 #include <string>
 
+// Disable warnings from RapidJSON v1.1.0. At the time of this writing, that's the latest tag. Some
+// of these issues may be fixed in the RapidJson master branch but we don't want to be using a
+// potentially unstable branch.
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4996 26451 26495 26812 33010)
 #endif
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 800)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
 #include <rapidjson/document.h>
 #if defined(_MSC_VER)
 #pragma warning(pop)
+#endif
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 800)
+#pragma GCC diagnostic pop
 #endif
 
 namespace haptics::io {

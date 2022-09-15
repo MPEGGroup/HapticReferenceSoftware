@@ -34,6 +34,7 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Tools/include/Tools.h>
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 
 #if defined(_MSC_VER)
@@ -217,9 +218,9 @@ AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect t =
-      haptics::types::Effect(static_cast<int>(round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
-                             haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect t = haptics::types::Effect(
+      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
+      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
@@ -297,9 +298,9 @@ AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect c =
-      haptics::types::Effect(static_cast<int>(round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
-                             haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect c = haptics::types::Effect(
+      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
+      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;
@@ -310,7 +311,7 @@ AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
   double base_freq = BASE_FREQUENCY_MAX;
 
   k_end.setRelativePosition(
-      static_cast<int>(round(event["EventDuration"].GetDouble() * SEC_TO_MSEC)));
+      static_cast<int>(std::round(event["EventDuration"].GetDouble() * SEC_TO_MSEC)));
 
   // SET VALUES AS DEFINED
   for (auto &param : event["EventParameters"].GetArray()) {
