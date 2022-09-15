@@ -426,7 +426,7 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
     auto timelineEffect = effect.getTimelineEffectAt(i);
     auto effectType = static_cast<uint8_t>(timelineEffect.getEffectType());
     IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_TYPE>(effectType, output);
-    auto position = static_cast<uint16_t>(timelineEffect.getPosition());
+    auto position = static_cast<uint32_t>(timelineEffect.getPosition());
     IOBinaryPrimitives::writeNBits<uint32_t, EFFECT_POSITION>(position, output);
 
     if (effect.getEffectType() == types::EffectType::Reference) {
