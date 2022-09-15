@@ -547,7 +547,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
       std::vector<types::BodyPartTarget> bodyPartTarget;
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
         auto target =
-            static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<int8_t, 1>(file));
+            static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
         bodyPartTarget.push_back(target);
       }
 
@@ -661,7 +661,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
       auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
       IOBinaryPrimitives::writeNBytes<uint8_t, 1>(bodyPartTargetCount, file);
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-        IOBinaryPrimitives::writeNBytes<int8_t, 1>(static_cast<int8_t>(bodyPartTarget[i]), file);
+        IOBinaryPrimitives::writeNBytes<uint8_t, 1>(static_cast<uint8_t>(bodyPartTarget[i]), file);
       }
 
       std::vector<types::Vector> actuatorTarget =

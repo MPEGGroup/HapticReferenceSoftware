@@ -238,6 +238,7 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
       auto jsonBodyPartTarget = jsonTrack["body_part_target"];
       std::vector<types::BodyPartTarget> bodyPartTarget;
       for (auto itv = jsonBodyPartTarget.begin(); itv != jsonBodyPartTarget.end(); ++itv) {
+        auto tmp = itv.value();
         if (itv.value().is_string()) {
           bodyPartTarget.push_back(
               types::stringToBodyPartTarget.at(itv.value().get<std::string>()));
@@ -660,7 +661,7 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       auto jsonBodyPartTarget = json::array();
       std::vector<types::BodyPartTarget> bodyPartTargetList = track.getBodyPartTarget().value();
       for (types::BodyPartTarget &bodyPartTarget : bodyPartTargetList) {
-        jsonBodyPartTarget.push_back(bodyPartTarget);
+        jsonBodyPartTarget.push_back(types::bodyPartTargetToString.at(bodyPartTarget));
       }
       jsonTrack["body_part_target"] = jsonBodyPartTarget;
     }
