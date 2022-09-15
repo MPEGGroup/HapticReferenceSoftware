@@ -45,7 +45,7 @@
 #pragma warning(push)
 #pragma warning(disable : 4996 26451 26495 26812 33010)
 #endif
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 800)
+#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
@@ -53,7 +53,7 @@
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && (((__GNUC__ * 100) + __GNUC_MINOR__) >= 800)
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
