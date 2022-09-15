@@ -400,14 +400,10 @@ TEST_CASE("write/read gmpg haptic file for body targetting testing") {
   testingTrack0.setActuatorTarget(testingActuatorTarget_track0);
 
   const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_track1{
-      haptics::types::BodyPartTarget::Left,
-      haptics::types::BodyPartTarget::Index,
-      haptics::types::BodyPartTarget::ThirdPhalanx,
-      haptics::types::BodyPartTarget::Plus,
-      haptics::types::BodyPartTarget::Right,
-      haptics::types::BodyPartTarget::Leg,
-      haptics::types::BodyPartTarget::Minus,
-      haptics::types::BodyPartTarget::Hallux,
+      haptics::types::BodyPartTarget::Left,         haptics::types::BodyPartTarget::Index,
+      haptics::types::BodyPartTarget::ThirdPhalanx, haptics::types::BodyPartTarget::Plus,
+      haptics::types::BodyPartTarget::Right,        haptics::types::BodyPartTarget::Leg,
+      haptics::types::BodyPartTarget::Minus,        haptics::types::BodyPartTarget::Hallux,
   };
   testingTrack1.setBodyPartTarget(testingBodyPartTarget_track1);
 
