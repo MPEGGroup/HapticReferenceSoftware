@@ -264,7 +264,7 @@ TEST_CASE("write/read BandBody on curve") {
     file.close();
     // effectType + position + keyframe count + Keyframes
     CHECK(static_cast<int>(std::filesystem::file_size(filename)) ==
-          1 + 2 + 2 + expectedKeyframeCount * (1 + 2));
+          1 + 2 + 4 + expectedKeyframeCount * (1 + 2));
   }
 
   SECTION("read band body") {
@@ -324,7 +324,7 @@ TEST_CASE("write/read BandBody on transient") {
     // expectedTransientCount * (effectType + position + keyframeCount + amplitude + relative
     // position + frequency)
     CHECK(std::filesystem::file_size(filename) ==
-          static_cast<uintmax_t>(expectedTransientCount * (1 + 2 + 2 + 1 + 2 + 2)));
+          static_cast<uintmax_t>(expectedTransientCount * (1 + 4 + 2 + 1 + 2 + 2)));
   }
 
   SECTION("read band body") {
@@ -395,7 +395,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
     file.close();
 
     const uintmax_t expectedFileSize =
-        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 2 + 1 + 2);
+        (1 + 2 + 2) + (1 + 1 + 2) + 4 * (1 + 1 + 2 + 2) + 2 * (1 + 2 + 4 + 1 + 2);
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
