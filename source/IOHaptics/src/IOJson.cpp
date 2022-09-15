@@ -67,28 +67,26 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
     std::cerr << "Invalid GMPG input file: missing required field" << std::endl;
     return false;
   }
-  auto version = jsonTree["version"].GetString();
-  auto date = jsonTree["date"].GetString();
-  auto description = jsonTree["description"].GetString();
-  haptic.setVersion(std::string(version));
-  haptic.setDate(std::string(date));
-  haptic.setDescription(std::string(description));
-  auto jsonAvatars = jsonTree["avatars"].GetArray();
-  loadingSuccess = loadingSuccess && loadAvatars(jsonAvatars, haptic);
-  auto jsonPerceptions = jsonTree["perceptions"].GetArray();
-  loadingSuccess = loadingSuccess && loadPerceptions(jsonPerceptions, haptic);
+  auto version = std::string(jsonTree["version"].GetString());
+  auto date = std::string(jsonTree["date"].GetString());
+  auto description = std::string(jsonTree["description"].GetString());
+  haptic.setVersion(version);
+  haptic.setDate(date);
+  haptic.setDescription(description);
+  loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
+  loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
   return loadingSuccess;
 }
 
-auto IOJson::loadPerceptions(const rapidjson::Value::Array &jsonPerceptions, types::Haptics &haptic)
+auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
     -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonPerceptions.begin(); it != jsonPerceptions.end(); ++it) {
-    if (!it->IsObject()) {
+  for (const auto &jpv : jsonPerceptions.GetArray()) {
+    if (!jpv.IsObject()) {
       std::cerr << "Invalid perception: not an object" << std::endl;
       continue;
     }
-    auto jsonPerception = it->GetObject();
+    auto jsonPerception = jpv.GetObject();
 
     if (!jsonPerception.HasMember("id") || !jsonPerception["id"].IsInt()) {
       std::cerr << "Missing or invalid perception id" << std::endl;
@@ -119,7 +117,7 @@ auto IOJson::loadPerceptions(const rapidjson::Value::Array &jsonPerceptions, typ
 
     auto perceptionId = jsonPerception["id"].GetInt();
     auto perceptionAvatarId = jsonPerception["avatar_id"].GetInt();
-    auto perceptionDescription = jsonPerception["description"].GetString();
+    const auto *perceptionDescription = jsonPerception["description"].GetString();
     auto perceptionPerceptionModality =
         types::stringToPerceptionModality.at(jsonPerception["perception_modality"].GetString());
 
@@ -134,30 +132,27 @@ auto IOJson::loadPerceptions(const rapidjson::Value::Array &jsonPerceptions, typ
       perception.setPerceptionUnitExponent(jsonPerception["perception_unit_exponent"].GetInt());
     }
 
-    auto jsonLibrary = jsonPerception["effect_library"].GetArray();
-    loadingSuccess = loadingSuccess && loadLibrary(jsonLibrary, perception);
-
-    auto jsonTracks = jsonPerception["tracks"].GetArray();
-    loadingSuccess = loadingSuccess && loadTracks(jsonTracks, perception);
+    loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
+    loadingSuccess = loadingSuccess && loadTracks(jsonPerception["tracks"], perception);
     if (jsonPerception.HasMember("reference_devices") &&
         jsonPerception["reference_devices"].IsArray()) {
-      auto jsonReferenceDevices = jsonPerception["reference_devices"].GetArray();
-      loadingSuccess = loadingSuccess && loadReferenceDevices(jsonReferenceDevices, perception);
+      loadingSuccess =
+          loadingSuccess && loadReferenceDevices(jsonPerception["reference_devices"], perception);
     }
     haptic.addPerception(perception);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadLibrary(const rapidjson::Value::Array &jsonLibrary, types::Perception &perception)
+auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
     -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonLibrary.begin(); it != jsonLibrary.end(); ++it) {
-    if (!it->IsObject()) {
+  for (const auto &jev : jsonLibrary.GetArray()) {
+    if (!jev.IsObject()) {
       std::cerr << "Invalid effect library: not an object" << std::endl;
       continue;
     }
-    auto jsonEffect = it->GetObject();
+    auto jsonEffect = jev.GetObject();
 
     if (!jsonEffect.HasMember("effect_type") || !jsonEffect["effect_type"].IsString()) {
       std::cerr << "Missing or invalid effect type" << std::endl;
@@ -193,7 +188,7 @@ auto IOJson::loadLibrary(const rapidjson::Value::Array &jsonLibrary, types::Perc
       }
     }
 
-    auto id = jsonEffect["id"].GetInt();
+    auto effectId = jsonEffect["id"].GetInt();
     auto position = jsonEffect["position"].GetInt();
     auto phase = jsonEffect.HasMember("phase") ? jsonEffect["phase"].GetFloat() : 0;
     auto baseSignal = jsonEffect.HasMember("base_signal")
@@ -201,10 +196,9 @@ auto IOJson::loadLibrary(const rapidjson::Value::Array &jsonLibrary, types::Perc
                           : types::BaseSignal::Sine;
 
     types::Effect effect(position, phase, baseSignal, effectType);
-    effect.setId(id);
+    effect.setId(effectId);
     if (jsonEffect.HasMember("keyframes")) {
-      auto jsonKeyframes = jsonEffect["keyframes"].GetArray();
-      loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
 
     perception.addBasisEffect(effect);
@@ -212,15 +206,14 @@ auto IOJson::loadLibrary(const rapidjson::Value::Array &jsonLibrary, types::Perc
   return loadingSuccess;
 }
 
-auto IOJson::loadTracks(const rapidjson::Value::Array &jsonTracks, types::Perception &perception)
-    -> bool {
+auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
-    if (!it->IsObject()) {
+  for (const auto &jtv : jsonTracks.GetArray()) {
+    if (!jtv.IsObject()) {
       std::cerr << "Invalid track: not an object" << std::endl;
       continue;
     }
-    auto jsonTrack = it->GetObject();
+    auto jsonTrack = jtv.GetObject();
 
     if (!jsonTrack.HasMember("id") || !jsonTrack["id"].IsInt()) {
       std::cerr << "Missing or invalid track id" << std::endl;
@@ -248,7 +241,7 @@ auto IOJson::loadTracks(const rapidjson::Value::Array &jsonTracks, types::Percep
     }
 
     auto trackId = jsonTrack["id"].GetInt();
-    auto trackDescription = jsonTrack["description"].GetString();
+    const auto *trackDescription = jsonTrack["description"].GetString();
     auto trackGain = jsonTrack["gain"].GetFloat();
     auto trackMixingWeight = jsonTrack["mixing_weight"].GetFloat();
     auto trackBodyPart = jsonTrack["body_part_mask"].GetUint();
@@ -259,9 +252,9 @@ auto IOJson::loadTracks(const rapidjson::Value::Array &jsonTracks, types::Percep
         jsonTrack["direction"].HasMember("X") && jsonTrack["direction"]["X"].IsInt() &&
         jsonTrack["direction"].HasMember("Y") && jsonTrack["direction"]["Y"].IsInt() &&
         jsonTrack["direction"].HasMember("Z") && jsonTrack["direction"]["Z"].IsInt()) {
-      types::Direction direction(jsonTrack["direction"]["X"].GetInt(),
-                                 jsonTrack["direction"]["Y"].GetInt(),
-                                 jsonTrack["direction"]["Z"].GetInt());
+      types::Direction direction(static_cast<int8_t>(jsonTrack["direction"]["X"].GetInt()),
+                                 static_cast<int8_t>(jsonTrack["direction"]["Y"].GetInt()),
+                                 static_cast<int8_t>(jsonTrack["direction"]["Z"].GetInt()));
       track.setDirection(direction);
     }
 
@@ -281,28 +274,27 @@ auto IOJson::loadTracks(const rapidjson::Value::Array &jsonTracks, types::Percep
     }
     if (jsonTrack.HasMember("vertices") && jsonTrack["vertices"].IsArray()) {
       auto jsonVertices = jsonTrack["vertices"].GetArray();
-      for (auto itv = jsonVertices.begin(); itv != jsonVertices.end(); ++itv) {
-        if (itv->IsInt()) {
-          auto vertex = itv->GetInt();
+      for (const auto &jvv : jsonVertices) {
+        if (jvv.IsInt()) {
+          auto vertex = jvv.GetInt();
           track.addVertex(vertex);
         }
       }
     }
-    auto jsonBands = jsonTrack["bands"].GetArray();
-    loadingSuccess = loadingSuccess && loadBands(jsonBands, track);
+    loadingSuccess = loadingSuccess && loadBands(jsonTrack["bands"], track);
     perception.addTrack(track);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadBands(const rapidjson::Value::Array &jsonBands, types::Track &track) -> bool {
+auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonBands.begin(); it != jsonBands.end(); ++it) {
-    if (!it->IsObject()) {
+  for (const auto &jbv : jsonBands.GetArray()) {
+    if (!jbv.IsObject()) {
       std::cerr << "Invalid band: not an object" << std::endl;
       continue;
     }
-    auto jsonBand = it->GetObject();
+    auto jsonBand = jbv.GetObject();
 
     if (!jsonBand.HasMember("band_type") || !jsonBand["band_type"].IsString()) {
       std::cerr << "Missing or invalid band type" << std::endl;
@@ -338,22 +330,21 @@ auto IOJson::loadBands(const rapidjson::Value::Array &jsonBands, types::Track &t
     int upperLimit = jsonBand["upper_frequency_limit"].GetInt();
 
     types::Band band(bandType, curveType, windowLength, lowerLimit, upperLimit);
-    auto jsonEffects = jsonBand["effects"].GetArray();
-    loadingSuccess = loadingSuccess && loadEffects(jsonEffects, band);
+    loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
     track.addBand(band);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadEffects(const rapidjson::Value::Array &jsonEffects, types::Band &band) -> bool {
+auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonEffects.begin(); it != jsonEffects.end(); ++it) {
-    if (!it->IsObject()) {
+  for (const auto &jev : jsonEffects.GetArray()) {
+    if (!jev.IsObject()) {
       std::cerr << "Invalid effect: not an object" << std::endl;
       continue;
     }
-    auto jsonEffect = it->GetObject();
+    auto jsonEffect = jev.GetObject();
 
     if (!jsonEffect.HasMember("effect_type") || !jsonEffect["effect_type"].IsString()) {
       std::cerr << "Missing or invalid effect type" << std::endl;
@@ -397,12 +388,10 @@ auto IOJson::loadEffects(const rapidjson::Value::Array &jsonEffects, types::Band
 
     types::Effect effect(position, phase, baseSignal, effectType);
     if (jsonEffect.HasMember("id") && jsonEffect["id"].IsInt()) {
-      auto id = jsonEffect["id"].GetInt();
-      effect.setId(id);
+      effect.setId(jsonEffect["id"].GetInt());
     }
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
-      auto jsonKeyframes = jsonEffect["keyframes"].GetArray();
-      loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
 
     band.addEffect(effect);
@@ -410,14 +399,13 @@ auto IOJson::loadEffects(const rapidjson::Value::Array &jsonEffects, types::Band
   return loadingSuccess;
 }
 
-auto IOJson::loadAvatars(const rapidjson::Value::Array &jsonAvatars, types::Haptics &haptic)
-    -> bool {
-  for (auto it = jsonAvatars.begin(); it != jsonAvatars.end(); ++it) {
-    if (!it->IsObject()) {
+auto IOJson::loadAvatars(const rapidjson::Value &jsonAvatars, types::Haptics &haptic) -> bool {
+  for (const auto &jav : jsonAvatars.GetArray()) {
+    if (!jav.IsObject()) {
       std::cerr << "Invalid avatar: not an object" << std::endl;
       continue;
     }
-    auto jsonAvatar = it->GetObject();
+    auto jsonAvatar = jav.GetObject();
 
     if (!jsonAvatar.HasMember("id") || !jsonAvatar["id"].IsInt()) {
       std::cerr << "Missing or invalid avatar id" << std::endl;
@@ -431,11 +419,11 @@ auto IOJson::loadAvatars(const rapidjson::Value::Array &jsonAvatars, types::Hapt
       std::cerr << "Missing or invalid avatar type" << std::endl;
       continue;
     }
-    auto id = jsonAvatar["id"].GetInt();
+    auto avatarId = jsonAvatar["id"].GetInt();
     auto lod = jsonAvatar["lod"].GetInt();
     auto type = types::stringToAvatarType.at(jsonAvatar["type"].GetString());
 
-    types::Avatar avatar(id, lod, type);
+    types::Avatar avatar(avatarId, lod, type);
 
     if (jsonAvatar.HasMember("mesh") && jsonAvatar["mesh"].IsString()) {
       avatar.setMesh(jsonAvatar["mesh"].GetString());
@@ -445,14 +433,15 @@ auto IOJson::loadAvatars(const rapidjson::Value::Array &jsonAvatars, types::Hapt
   return true;
 }
 
-auto IOJson::loadReferenceDevices(const rapidjson::Value::Array &jsonReferenceDevices,
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+auto IOJson::loadReferenceDevices(const rapidjson::Value &jsonReferenceDevices,
                                   types::Perception &perception) -> bool {
-  for (auto it = jsonReferenceDevices.begin(); it != jsonReferenceDevices.end(); ++it) {
-    if (!it->IsObject()) {
+  for (const auto &jrdv : jsonReferenceDevices.GetArray()) {
+    if (!jrdv.IsObject()) {
       std::cerr << "Invalid reference device: not an object" << std::endl;
       continue;
     }
-    auto jsonReferenceDevice = it->GetObject();
+    auto jsonReferenceDevice = jrdv.GetObject();
 
     if (!jsonReferenceDevice.HasMember("id") || !jsonReferenceDevice["id"].IsInt()) {
       std::cerr << "Missing or invalid reference device id" << std::endl;
@@ -462,10 +451,10 @@ auto IOJson::loadReferenceDevices(const rapidjson::Value::Array &jsonReferenceDe
       std::cerr << "Missing or invalid reference device name" << std::endl;
       continue;
     }
-    auto id = jsonReferenceDevice["id"].GetInt();
-    auto name = jsonReferenceDevice["name"].GetString();
+    auto referenceDeviceId = jsonReferenceDevice["id"].GetInt();
+    const auto *name = jsonReferenceDevice["name"].GetString();
 
-    types::ReferenceDevice referenceDevice(id, name);
+    types::ReferenceDevice referenceDevice(referenceDeviceId, name);
     if (jsonReferenceDevice.HasMember("body_part_mask") &&
         jsonReferenceDevice["body_part_mask"].IsUint()) {
       referenceDevice.setBodyPartMask(jsonReferenceDevice["body_part_mask"].GetUint());
@@ -512,22 +501,21 @@ auto IOJson::loadReferenceDevices(const rapidjson::Value::Array &jsonReferenceDe
       referenceDevice.setCustom(jsonReferenceDevice["custom"].GetFloat());
     }
     if (jsonReferenceDevice.HasMember("type") && jsonReferenceDevice["type"].IsString()) {
-      auto type = jsonReferenceDevice["type"].GetString();
-      referenceDevice.setType(types::stringToActuatorType.at(type));
+      referenceDevice.setType(
+          types::stringToActuatorType.at(jsonReferenceDevice["type"].GetString()));
     }
     perception.addReferenceDevice(referenceDevice);
   }
   return true;
 }
 
-auto IOJson::loadKeyframes(const rapidjson::Value::Array &jsonKeyframes, types::Effect &effect)
-    -> bool {
-  for (auto it = jsonKeyframes.begin(); it != jsonKeyframes.end(); ++it) {
-    if (!it->IsObject()) {
+auto IOJson::loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool {
+  for (const auto &jkfv : jsonKeyframes.GetArray()) {
+    if (!jkfv.IsObject()) {
       std::cerr << "Invalid keyframe: not an object" << std::endl;
       continue;
     }
-    auto jsonKeyframe = it->GetObject();
+    auto jsonKeyframe = jkfv.GetObject();
 
     std::optional<int> relativePosition;
     std::optional<float> amplitudeModulation;
@@ -560,10 +548,10 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
   auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
-  extractAvatars(haptic, jsonAvatars.GetArray(), jsonTree);
+  extractAvatars(haptic, jsonAvatars, jsonTree);
   jsonTree.AddMember("avatars", jsonAvatars, jsonTree.GetAllocator());
   auto jsonPerceptions = rapidjson::Value(rapidjson::kArrayType);
-  extractPerceptions(haptic, jsonPerceptions.GetArray(), jsonTree);
+  extractPerceptions(haptic, jsonPerceptions, jsonTree);
   jsonTree.AddMember("perceptions", jsonPerceptions, jsonTree.GetAllocator());
 
   std::ofstream file(filePath);
@@ -572,11 +560,11 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   jsonTree.Accept(writer);
 }
 
-auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value::Array &jsonPerceptions,
+auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPerceptions,
                                 rapidjson::Document &jsonTree) -> void {
   auto numPerceptions = haptic.getPerceptionsSize();
-  for (uint32_t i = 0; i < numPerceptions; i++) {
-    auto perception = haptic.getPerceptionAt((int)i);
+  for (decltype(numPerceptions) pix = 0; pix < numPerceptions; pix++) {
+    auto perception = haptic.getPerceptionAt(static_cast<int>(pix));
     auto jsonPerception = rapidjson::Value(rapidjson::kObjectType);
     jsonPerception.AddMember("id", perception.getId(), jsonTree.GetAllocator());
     jsonPerception.AddMember("avatar_id", perception.getAvatarId(), jsonTree.GetAllocator());
@@ -602,25 +590,25 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value::Array 
     }
 
     auto jsonReferenceDevices = rapidjson::Value(rapidjson::kArrayType);
-    extractReferenceDevices(perception, jsonReferenceDevices.GetArray(), jsonTree);
+    extractReferenceDevices(perception, jsonReferenceDevices, jsonTree);
     jsonPerception.AddMember("reference_devices", jsonReferenceDevices, jsonTree.GetAllocator());
 
     auto jsonLibrary = rapidjson::Value(rapidjson::kArrayType);
-    extractLibrary(perception, jsonLibrary.GetArray(), jsonTree);
+    extractLibrary(perception, jsonLibrary, jsonTree);
     jsonPerception.AddMember("effect_library", jsonLibrary, jsonTree.GetAllocator());
     auto jsonTracks = rapidjson::Value(rapidjson::kArrayType);
-    extractTracks(perception, jsonTracks.GetArray(), jsonTree);
+    extractTracks(perception, jsonTracks, jsonTree);
     jsonPerception.AddMember("tracks", jsonTracks, jsonTree.GetAllocator());
 
     jsonPerceptions.PushBack(jsonPerception, jsonTree.GetAllocator());
   }
 }
 
-auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value::Array &jsonLibrary,
+auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
                             rapidjson::Document &jsonTree) -> void {
   auto numEffects = perception.getEffectLibrarySize();
-  for (uint32_t m = 0; m < numEffects; m++) {
-    auto effect = perception.getBasisEffectAt((int)m);
+  for (decltype(numEffects) eix = 0; eix < numEffects; eix++) {
+    auto effect = perception.getBasisEffectAt(static_cast<int>(eix));
     auto jsonEffect = rapidjson::Value(rapidjson::kObjectType);
     jsonEffect.AddMember(
         "effect_type",
@@ -638,8 +626,8 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value::Arr
 
     auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
     auto numKeyframes = effect.getKeyframesSize();
-    for (uint32_t n = 0; n < numKeyframes; n++) {
-      const auto &keyframe = effect.getKeyframeAt((int)n);
+    for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
+      const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
       auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
       if (keyframe.getRelativePosition().has_value()) {
         jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
@@ -660,11 +648,11 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value::Arr
   }
 }
 
-auto IOJson::extractAvatars(types::Haptics &haptic, rapidjson::Value::Array &jsonAvatars,
+auto IOJson::extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatars,
                             rapidjson::Document &jsonTree) -> void {
   auto numAvatars = haptic.getAvatarsSize();
-  for (uint32_t i = 0; i < numAvatars; i++) {
-    auto avatar = haptic.getAvatarAt((int)i);
+  for (decltype(numAvatars) aix = 0; aix < numAvatars; aix++) {
+    auto avatar = haptic.getAvatarAt(static_cast<int>(aix));
     auto jsonAvatar = rapidjson::Value(rapidjson::kObjectType);
     jsonAvatar.AddMember("id", avatar.getId(), jsonTree.GetAllocator());
     jsonAvatar.AddMember("lod", avatar.getLod(), jsonTree.GetAllocator());
@@ -681,11 +669,11 @@ auto IOJson::extractAvatars(types::Haptics &haptic, rapidjson::Value::Array &jso
   }
 }
 
-auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value::Array &jsonTracks,
+auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
                            rapidjson::Document &jsonTree) -> void {
   auto numTracks = perception.getTracksSize();
-  for (uint32_t j = 0; j < numTracks; j++) {
-    haptics::types::Track track = perception.getTrackAt((int)j);
+  for (decltype(numTracks) tix = 0; tix < numTracks; tix++) {
+    haptics::types::Track track = perception.getTrackAt(static_cast<int>(tix));
     auto jsonTrack = rapidjson::Value(rapidjson::kObjectType);
     jsonTrack.AddMember("id", track.getId(), jsonTree.GetAllocator());
     jsonTrack.AddMember("description",
@@ -718,8 +706,8 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value::Arra
 
     auto jsonVertices = rapidjson::Value(rapidjson::kArrayType);
     auto numVertices = track.getVerticesSize();
-    for (uint32_t k = 0; k < numVertices; k++) {
-      jsonVertices.PushBack(track.getVertexAt((int)k), jsonTree.GetAllocator());
+    for (decltype(numVertices) vix = 0; vix < numVertices; vix++) {
+      jsonVertices.PushBack(track.getVertexAt(static_cast<int>(vix)), jsonTree.GetAllocator());
     }
     if (numVertices > 0) {
       jsonTrack.AddMember("vertices", jsonVertices, jsonTree.GetAllocator());
@@ -727,8 +715,8 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value::Arra
 
     auto jsonBands = rapidjson::Value(rapidjson::kArrayType);
     auto numBands = track.getBandsSize();
-    for (uint32_t l = 0; l < numBands; l++) {
-      auto band = track.getBandAt((int)l);
+    for (decltype(numBands) bix = 0; bix < numBands; bix++) {
+      auto band = track.getBandAt(static_cast<int>(bix));
       auto jsonBand = rapidjson::Value(rapidjson::kObjectType);
       jsonBand.AddMember("band_type",
                          rapidjson::Value(types::bandTypeToString.at(band.getBandType()).c_str(),
@@ -746,8 +734,8 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value::Arra
 
       auto jsonEffects = rapidjson::Value(rapidjson::kArrayType);
       auto numEffects = band.getEffectsSize();
-      for (uint32_t m = 0; m < numEffects; m++) {
-        auto effect = band.getEffectAt((int)m);
+      for (decltype(numEffects) eix = 0; eix < numEffects; eix++) {
+        auto effect = band.getEffectAt(static_cast<int>(eix));
         auto jsonEffect = rapidjson::Value(rapidjson::kObjectType);
 
         jsonEffect.AddMember(
@@ -767,8 +755,8 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value::Arra
               jsonTree.GetAllocator());
           auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
           auto numKeyframes = effect.getKeyframesSize();
-          for (uint32_t n = 0; n < numKeyframes; n++) {
-            const auto &keyframe = effect.getKeyframeAt((int)n);
+          for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
+            const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
             auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
             if (keyframe.getRelativePosition().has_value()) {
               jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
@@ -799,11 +787,11 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value::Arra
 }
 
 auto IOJson::extractReferenceDevices(types::Perception &perception,
-                                     rapidjson::Value::Array &jsonReferenceDevices,
+                                     rapidjson::Value &jsonReferenceDevices,
                                      rapidjson::Document &jsonTree) -> void {
   auto numReferenceDevices = perception.getReferenceDevicesSize();
-  for (uint32_t i = 0; i < numReferenceDevices; i++) {
-    auto referenceDevice = perception.getReferenceDeviceAt((int)i);
+  for (decltype(numReferenceDevices) rdix = 0; rdix < numReferenceDevices; rdix++) {
+    auto referenceDevice = perception.getReferenceDeviceAt(static_cast<int>(rdix));
     auto jsonReferenceDevice = rapidjson::Value(rapidjson::kObjectType);
     jsonReferenceDevice.AddMember("id", referenceDevice.getId(), jsonTree.GetAllocator());
     jsonReferenceDevice.AddMember(

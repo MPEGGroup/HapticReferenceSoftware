@@ -51,31 +51,28 @@ namespace haptics::io {
 class IOJson {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
-  static auto loadPerceptions(const rapidjson::Value::Array &jsonPerceptions,
-                              types::Haptics &haptic) -> bool;
-  static auto loadAvatars(const rapidjson::Value::Array &jsonAvatars, types::Haptics &haptic)
+  static auto loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
       -> bool;
-  static auto loadTracks(const rapidjson::Value::Array &jsonTracks, types::Perception &perception)
+  static auto loadAvatars(const rapidjson::Value &jsonAvatars, types::Haptics &haptic) -> bool;
+  static auto loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool;
+  static auto loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
       -> bool;
-  static auto loadLibrary(const rapidjson::Value::Array &jsonLibrary, types::Perception &perception)
-      -> bool;
-  static auto loadReferenceDevices(const rapidjson::Value::Array &jsonReferenceDevices,
+  static auto loadReferenceDevices(const rapidjson::Value &jsonReferenceDevices,
                                    types::Perception &perception) -> bool;
-  static auto loadBands(const rapidjson::Value::Array &jsonBands, types::Track &track) -> bool;
-  static auto loadEffects(const rapidjson::Value::Array &jsonEffects, types::Band &band) -> bool;
-  static auto loadKeyframes(const rapidjson::Value::Array &jsonKeyframes, types::Effect &effect)
-      -> bool;
+  static auto loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool;
+  static auto loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool;
+  static auto loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool;
 
-  static auto extractPerceptions(types::Haptics &haptic, rapidjson::Value::Array &jsonPerceptions,
+  static auto extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPerceptions,
                                  rapidjson::Document &jsonTree) -> void;
-  static auto extractAvatars(types::Haptics &haptic, rapidjson::Value::Array &jsonAvatars,
+  static auto extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatars,
                              rapidjson::Document &jsonTree) -> void;
-  static auto extractTracks(types::Perception &perception, rapidjson::Value::Array &jsonTracks,
+  static auto extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
                             rapidjson::Document &jsonTree) -> void;
-  static auto extractLibrary(types::Perception &perception, rapidjson::Value::Array &jsonLibrary,
+  static auto extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
                              rapidjson::Document &jsonTree) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
-                                      rapidjson::Value::Array &jsonReferenceDevices,
+                                      rapidjson::Value &jsonReferenceDevices,
                                       rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
