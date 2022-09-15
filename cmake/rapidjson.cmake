@@ -11,7 +11,7 @@ else()
         GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
         GIT_PROGRESS TRUE
         GIT_SHALLOW TRUE
-        GIT_TAG v1.1.0
+        GIT_TAG master
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND "")
 endif()
@@ -22,7 +22,6 @@ FetchContent_GetProperties(RAPIDJSON)
 if(NOT RAPIDJSON_POPULATED)
     FetchContent_Populate(RAPIDJSON)
 endif()
-
 
 # Make RapidJSON header files available
 include_directories(${CMAKE_BINARY_DIR}/_deps/rapidjson-src/include)
