@@ -420,7 +420,7 @@ auto IvsEncoder::linearizeRepeatEvents(
   for (pugi::xml_node &repeatEvent : sortedRepeatEvents) {
     Node currentNode{&repeatEvent, {}};
     Node *researchNode = &repeatTree;
-    bool continue_search;
+    bool continue_search = false;
     do {
       if (researchNode->children.empty()) {
         break;
