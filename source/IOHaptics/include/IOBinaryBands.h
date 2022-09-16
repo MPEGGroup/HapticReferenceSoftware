@@ -45,28 +45,28 @@ constexpr int S2MS = 1000;
 
 class IOBinaryBands {
 public:
-  static auto readBandHeader(types::Band &band, std::ifstream &file) -> bool;
-  static auto readBandBody(types::Band &band, std::ifstream &file) -> bool;
+  static auto readBandHeader(types::Band &band, std::istream &file) -> bool;
+  static auto readBandBody(types::Band &band, std::istream &file) -> bool;
 
-  static auto writeBandHeader(types::Band &band, std::ofstream &file) -> bool;
-  static auto writeBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto writeBandHeader(types::Band &band, std::ostream &file) -> bool;
+  static auto writeBandBody(types::Band &band, std::ostream &file) -> bool;
 
 private:
-  static auto readTransientEffect(types::Effect &effect, std::ifstream &file) -> bool;
-  static auto readCurveEffect(types::Effect &effect, std::ifstream &file) -> bool;
-  static auto readVectorialEffect(types::Effect &effect, std::ifstream &file) -> bool;
-  static auto readWaveletEffect(types::Effect &effect, types::Band &band, std::ifstream &file)
+  static auto readTransientEffect(types::Effect &effect, std::istream &file) -> bool;
+  static auto readCurveEffect(types::Effect &effect, std::istream &file) -> bool;
+  static auto readVectorialEffect(types::Effect &effect, std::istream &file) -> bool;
+  static auto readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file)
       -> bool;
-  static auto readReferenceEffect(types::Effect &effect, std::ifstream &file) -> bool;
-  static auto readTimelineEffect(types::Effect &effect, types::Band &band, std::ifstream &file)
+  static auto readReferenceEffect(types::Effect &effect, std::istream &file) -> bool;
+  static auto readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file)
       -> bool;
 
-  static auto writeTransientEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeCurveEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeVectorialEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeWaveletEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeReferenceEffect(types::Effect &effect, std::ofstream &file) -> bool;
-  static auto writeTimelineEffect(types::Effect &effect, types::Band &band, std::ofstream &file)
+  static auto writeTransientEffect(types::Effect &effect, std::ostream &file) -> bool;
+  static auto writeCurveEffect(types::Effect &effect, std::ostream &file) -> bool;
+  static auto writeVectorialEffect(types::Effect &effect, std::ostream &file) -> bool;
+  static auto writeWaveletEffect(types::Effect &effect, std::ostream &file) -> bool;
+  static auto writeReferenceEffect(types::Effect &effect, std::ostream &file) -> bool;
+  static auto writeTimelineEffect(types::Effect &effect, types::Band &band, std::ostream &file)
       -> bool;
 };
 } // namespace haptics::io
