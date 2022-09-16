@@ -81,15 +81,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     int duration = -1;
     pugi::xml_object_range<pugi::xml_named_node_iterator> repeatEvents =
         IvsEncoder::getRepeatEvents(&timeline);
-    std::vector<pugi::xml_node> sortedRepeatEvents;
-    for (pugi::xml_node repeatEvent : repeatEvents) {
-      auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent,
-                                 [](pugi::xml_node a, pugi::xml_node b) -> bool {
-                                   return IvsEncoder::getTime(&a) <= IvsEncoder::getTime(&b);
-                                 });
-      sortedRepeatEvents.insert(it, repeatEvent);
-    }
-    for (pugi::xml_node repeatEvent : sortedRepeatEvents) {
+    std::vector<pugi::xml_node> linearizedRepeatEvents =
+        IvsEncoder::linearizeRepeatEvents(repeatEvents);
+    for (pugi::xml_node repeatEvent : linearizedRepeatEvents) {
       count = IvsEncoder::getCount(&repeatEvent);
       if (count == 0) {
         continue;
@@ -397,6 +391,49 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
   }
 
   return f;
+}
+
+auto IvsEncoder::linearizeRepeatEvents(pugi::xml_object_range<pugi::xml_named_node_iterator> &repeatEvents) -> std::vector<pugi::xml_node> {
+  struct Node {
+    pugi::xml_node *value;
+    std::vector<Node> children;
+  };
+  auto isRepeatNested = [](pugi::xml_node *parent, pugi::xml_node *child) {
+    auto parent_start = IvsEncoder::getTime(parent);
+    auto parent_end = parent_start + IvsEncoder::getDuration(parent);
+    auto child_start = IvsEncoder::getTime(child);
+    return parent_start <= child_start && child_start < parent_end;
+  };
+
+  std::vector<pugi::xml_node> sortedRepeatEvents;
+  for (pugi::xml_node &repeatEvent : repeatEvents) {
+    auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent,
+                               [](pugi::xml_node a, pugi::xml_node b) -> bool {
+                                 return IvsEncoder::getTime(&a) <= IvsEncoder::getTime(&b);
+                               });
+    sortedRepeatEvents.insert(it, repeatEvent);
+  }
+
+  Node repeatTree{{}, {}};
+  for (pugi::xml_node &repeatEvent : sortedRepeatEvents) {
+    Node currentNode{&repeatEvent, {}};
+    Node *researchNode = &repeatTree;
+    bool continue_search;
+    do {
+      if (researchNode->children.empty()) {
+        break;
+      }
+
+      Node &lastChild = researchNode->children.back();
+      continue_search = isRepeatNested(lastChild.value, currentNode.value);
+      if (continue_search) {
+        researchNode = &lastChild;
+      }
+    } while (continue_search);
+    researchNode->children.push_back(currentNode);
+  }
+
+  return sortedRepeatEvents;
 }
 
 } // namespace haptics::encoder

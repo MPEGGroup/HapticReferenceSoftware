@@ -85,6 +85,9 @@ public:
 
 private:
   auto static injectIntoBands(types::Effect &effect, types::Track &track) -> void;
+  auto static linearizeRepeatEvents(
+      pugi::xml_object_range<pugi::xml_named_node_iterator> &repeatEvents)
+      -> std::vector<pugi::xml_node>;
   static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
   static const int MIN_FREQUENCY = 0;
   static const int MAX_FREQUENCY = 1000;
