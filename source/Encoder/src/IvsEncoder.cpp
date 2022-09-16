@@ -393,7 +393,9 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
   return f;
 }
 
-auto IvsEncoder::linearizeRepeatEvents(pugi::xml_object_range<pugi::xml_named_node_iterator> &repeatEvents) -> std::vector<pugi::xml_node> {
+auto IvsEncoder::linearizeRepeatEvents(
+    pugi::xml_object_range<pugi::xml_named_node_iterator> &repeatEvents)
+    -> std::vector<pugi::xml_node> {
   struct Node {
     pugi::xml_node *value;
     std::vector<Node> children;
