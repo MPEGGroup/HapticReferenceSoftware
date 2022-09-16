@@ -389,7 +389,7 @@ TEST_CASE("write/read gmpg haptic file for body targetting testing") {
                                       testingMixingWeight_track, testingBodyPartMask_track);
 
   const haptics::types::Vector testingTrackResolution_track0(32, 110, 3);
-  const std::vector<haptics::types::Vector> testingActuatorTarget_track0 {
+  const std::vector<haptics::types::Vector> testingActuatorTarget_track0{
       haptics::types::Vector{31, 109, 2},
       haptics::types::Vector{0, 0, 0},
       haptics::types::Vector{15, 42, 1},

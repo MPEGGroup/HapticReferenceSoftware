@@ -512,7 +512,7 @@ TEST_CASE("write/read file header for track testing") {
           testingTrackResolution_track2);
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().has_value());
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value().size() ==
-          testingBodyPartTarget_track2.size());
+            testingBodyPartTarget_track2.size());
     for (size_t i = 0; i < testingBodyPartTarget_track2.size(); i++) {
       CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value()[i] ==
             testingBodyPartTarget_track2[i]);
