@@ -45,7 +45,7 @@ namespace haptics::io {
 constexpr float MAX_FLOAT = 10000;
 constexpr float MAX_FREQUENCY = 10000;
 constexpr float MAX_AMPLITUDE = 1;
-constexpr float MAX_PHASE = 3.14159;
+constexpr float MAX_PHASE = 6.28318;
 constexpr int BYTE_SIZE = 8;
 class IOBinaryPrimitives {
 public:
