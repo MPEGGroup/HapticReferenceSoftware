@@ -249,17 +249,17 @@ auto IOBinary::readLibraryEffect(std::ifstream &file, std::vector<bool> &unusedB
     -> types::Effect {
   auto id = IOBinaryPrimitives::readNBits<int, EFFECT_ID>(file, unusedBits);
   auto position = IOBinaryPrimitives::readNBits<int, EFFECT_POSITION>(file, unusedBits);
-  auto phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, -MAX_PHASE,
+  auto phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, 0,
                                                                           MAX_PHASE, unusedBits);
   auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
   auto effectType = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_TYPE>(file, unusedBits);
   auto keyframeCount =
-      IOBinaryPrimitives::readNBits<uint16_t, EFFECT_KEYFRAME_COUNT>(file, unusedBits);
+      IOBinaryPrimitives::readNBits<uint32_t, EFFECT_KEYFRAME_COUNT>(file, unusedBits);
   types::Effect effect(static_cast<int>(position), phase,
                        static_cast<types::BaseSignal>(baseSignal),
                        static_cast<types::EffectType>(effectType));
   effect.setId(id);
-  for (unsigned short i = 0; i < keyframeCount; i++) {
+  for (unsigned int i = 0; i < keyframeCount; i++) {
     auto mask = IOBinaryPrimitives::readNBits<uint8_t, KEYFRAME_MASK>(file, unusedBits);
     std::optional<int> position = std::nullopt;
     std::optional<float> amplitude = std::nullopt;
@@ -294,7 +294,7 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
   int position = libraryEffect.getPosition();
   IOBinaryPrimitives::writeNBits<int, EFFECT_POSITION>(position, output);
   float phase = libraryEffect.getPhase();
-  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, -MAX_PHASE, MAX_PHASE);
+  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
   auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());

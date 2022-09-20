@@ -107,7 +107,7 @@ static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_EFFECT_COUNT = 16;
 
 static constexpr int EFFECT_ID = 16;
-static constexpr int EFFECT_POSITION = 32;
+static constexpr int EFFECT_POSITION = 24;
 static constexpr int EFFECT_PHASE = 16;
 static constexpr int EFFECT_BASE_SIGNAL = 4;
 static constexpr int EFFECT_TYPE = 2;

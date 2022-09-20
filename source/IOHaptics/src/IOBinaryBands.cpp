@@ -273,7 +273,7 @@ auto IOBinaryBands::writeCurveEffect(types::Effect &effect, std::vector<bool> &o
 
 auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::ifstream &file,
                                         std::vector<bool> &unusedBits) -> bool {
-  float phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, -MAX_PHASE,
+  float phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, 0,
                                                                            MAX_PHASE, unusedBits);
   effect.setPhase(phase);
   auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
@@ -305,7 +305,7 @@ auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::ifstream &fi
 auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
 
   float phase = effect.getPhase();
-  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, -MAX_PHASE, MAX_PHASE);
+  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
   auto baseSignal = static_cast<uint8_t>(effect.getBaseSignal());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto keyframeCount = static_cast<uint16_t>(effect.getKeyframesSize());
