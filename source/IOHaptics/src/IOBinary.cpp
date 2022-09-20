@@ -39,6 +39,16 @@
 
 namespace haptics::io {
 
+auto IOBinary::loadMemory(IOMemoryBuffer &in, types::Haptics &out) -> bool {
+  std::istream istr(&in);
+
+  bool res = readFileHeader(out, istr);
+  if (res) {
+    readFileBody(out, istr);
+  }
+  return res;
+}
+
 auto IOBinary::loadFile(const std::string &filePath, types::Haptics &out) -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
@@ -81,7 +91,7 @@ auto IOBinary::writeFile(types::Haptics &haptic, const std::string &filePath) ->
   return res;
 }
 
-auto IOBinary::readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bool {
+auto IOBinary::readFileHeader(types::Haptics &haptic, std::istream &file) -> bool {
   std::string version = IOBinaryPrimitives::readString(file);
   std::string date = IOBinaryPrimitives::readString(file);
   std::string description = IOBinaryPrimitives::readString(file);
@@ -98,7 +108,7 @@ auto IOBinary::readFileHeader(types::Haptics &haptic, std::ifstream &file) -> bo
   return IOBinary::readPerceptionsHeader(haptic, file);
 }
 
-auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> bool {
+auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ostream &file) -> bool {
   const std::string version = haptic.getVersion();
   const std::string date = haptic.getDate();
   const std::string description = haptic.getDescription();
@@ -114,7 +124,7 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::ofstream &file) -> b
   return IOBinary::writePerceptionsHeader(haptic, file);
 }
 
-auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool {
+auto IOBinary::readAvatars(types::Haptics &haptic, std::istream &file) -> bool {
   auto avatarCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
   types::Avatar myAvatar;
@@ -136,7 +146,7 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool 
   return true;
 }
 
-auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool {
+auto IOBinary::writeAvatars(types::Haptics &haptic, std::ostream &file) -> bool {
   auto avatarCount = static_cast<unsigned short>(haptic.getAvatarsSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(avatarCount, file);
 
@@ -161,7 +171,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::ofstream &file) -> bool
   return true;
 }
 
-auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file) -> bool {
+auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::istream &file) -> bool {
   auto perceptionCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
   types::Perception myPerception;
@@ -192,7 +202,7 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
   return true;
 }
 
-auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &file) -> bool {
+auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ostream &file) -> bool {
   auto perceptionCount = static_cast<unsigned short>(haptic.getPerceptionsSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(perceptionCount, file);
 
@@ -233,7 +243,7 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::ofstream &fil
   return true;
 }
 
-auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
+auto IOBinary::readLibraryEffect(std::istream &file) -> types::Effect {
   auto id = IOBinaryPrimitives::readNBytes<int, 4>(file);
   auto position = IOBinaryPrimitives::readNBytes<int, 4>(file);
   auto phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, 0, MAX_PHASE);
@@ -272,7 +282,7 @@ auto IOBinary::readLibraryEffect(std::ifstream &file) -> types::Effect {
   return effect;
 }
 
-auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &file) -> bool {
+auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ostream &file) -> bool {
   int id = libraryEffect.getId();
   IOBinaryPrimitives::writeNBytes<int, 4>(id, file);
   int position = libraryEffect.getPosition();
@@ -328,7 +338,7 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::ofstream &f
   return true;
 }
 
-auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file) -> bool {
+auto IOBinary::readLibrary(types::Perception &perception, std::istream &file) -> bool {
   auto effectCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
   bool success = true;
   for (unsigned short i = 0; i < effectCount; i++) {
@@ -338,7 +348,7 @@ auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file) -
   return success;
 }
 
-auto IOBinary::writeLibrary(types::Perception &perception, std::ofstream &file) -> bool {
+auto IOBinary::writeLibrary(types::Perception &perception, std::ostream &file) -> bool {
   auto effectCount = static_cast<unsigned short>(perception.getEffectLibrarySize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(effectCount, file);
 
@@ -352,7 +362,7 @@ auto IOBinary::writeLibrary(types::Perception &perception, std::ofstream &file) 
   return success;
 }
 
-auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream &file) -> bool {
+auto IOBinary::readReferenceDevices(types::Perception &perception, std::istream &file) -> bool {
   auto referenceDeviceCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
 
   for (unsigned short i = 0; i < referenceDeviceCount; i++) {
@@ -432,7 +442,7 @@ auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream
   return true;
 }
 
-auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstream &file) -> bool {
+auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ostream &file) -> bool {
   auto referenceDeviceCount = static_cast<unsigned short>(perception.getReferenceDevicesSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(referenceDeviceCount, file);
 
@@ -521,7 +531,7 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ofstrea
   return true;
 }
 
-auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &file) -> bool {
+auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &file) -> bool {
   auto trackCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
   // for each track
   for (unsigned short i = 0; i < trackCount; i++) {
@@ -577,7 +587,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
   return true;
 }
 
-auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &file) -> bool {
+auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &file) -> bool {
   auto trackCount = static_cast<unsigned short>(perception.getTracksSize());
   IOBinaryPrimitives::writeNBytes<unsigned short, 2>(trackCount, file);
 
@@ -641,7 +651,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ofstream &f
   return true;
 }
 
-auto IOBinary::readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool {
+auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file) -> bool {
   types::Perception myPerception;
   types::Track myTrack;
   types::Band myBand;
@@ -674,7 +684,7 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::ifstream &file) -> bool
   return true;
 }
 
-auto IOBinary::writeFileBody(types::Haptics &haptic, std::ofstream &file) -> bool {
+auto IOBinary::writeFileBody(types::Haptics &haptic, std::ostream &file) -> bool {
   types::Perception myPerception;
   types::Track myTrack;
   types::Band myBand;

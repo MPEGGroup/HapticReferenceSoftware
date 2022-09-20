@@ -200,7 +200,7 @@ auto main(int argc, char *argv[]) -> int {
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
   } else if (ext == "hjif") {
-    std::cout << "The GMPG file to encode : " << filename << std::endl;
+    std::cout << "The HJIF file to encode : " << filename << std::endl;
     IOJson::loadFile(filename, hapticFile);
   } else {
     codeExit = EXIT_FAILURE;
