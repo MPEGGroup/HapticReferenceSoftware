@@ -260,7 +260,6 @@ auto IOBinaryBands::writeCurveEffect(types::Effect &effect, std::ostream &file) 
   return true;
 }
 
-
 auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::istream &file) -> bool {
   float phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, 0, MAX_PHASE);
 
