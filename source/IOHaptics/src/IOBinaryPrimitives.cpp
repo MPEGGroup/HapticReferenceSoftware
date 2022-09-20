@@ -39,15 +39,13 @@ auto IOBinaryPrimitives::writeString(const std::string &text, std::vector<bool> 
 
   writeNBits<uint8_t, BYTE_SIZE>(static_cast<uint8_t>(text.size()), output);
   for (auto byte : text) {
-    // for (size_t i = 0; i < text.size() ; i++) {
-    //  char byte = text[i];
     for (uint8_t j = 0; j < BYTE_SIZE; j++) {
       output.push_back(((byte >> (BYTE_SIZE - j - 1)) & 1U) == 1);
     }
   }
 }
 
-auto IOBinaryPrimitives::readString(std::ifstream &file, std::vector<bool> &unusedBits)
+auto IOBinaryPrimitives::readString(std::istream &file, std::vector<bool> &unusedBits)
     -> std::string {
   auto size = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
   char c = 0;

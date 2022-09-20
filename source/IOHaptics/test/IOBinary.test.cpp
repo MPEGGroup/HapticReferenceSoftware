@@ -691,7 +691,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 309;
+        testingVertices_track2.size() + 303;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 

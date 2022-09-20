@@ -45,26 +45,26 @@ constexpr int S2MS = 1000;
 
 class IOBinaryBands {
 public:
-  static auto readBandHeader(types::Band &band, std::ifstream &file, std::vector<bool> &unusedBits)
+  static auto readBandHeader(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
       -> bool;
-  static auto readBandBody(types::Band &band, std::ifstream &file, std::vector<bool> &unusedBits)
+  static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
       -> bool;
 
   static auto writeBandHeader(types::Band &band, std::vector<bool> &output) -> bool;
   static auto writeBandBody(types::Band &band, std::vector<bool> &output) -> bool;
 
 private:
-  static auto readTransientEffect(types::Effect &effect, std::ifstream &file,
+  static auto readTransientEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
-  static auto readCurveEffect(types::Effect &effect, std::ifstream &file,
+  static auto readCurveEffect(types::Effect &effect, std::istream &file,
                               std::vector<bool> &unusedBits) -> bool;
-  static auto readVectorialEffect(types::Effect &effect, std::ifstream &file,
+  static auto readVectorialEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
-  static auto readWaveletEffect(types::Effect &effect, types::Band &band, std::ifstream &file,
+  static auto readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                 std::vector<bool> &unusedBits) -> bool;
-  static auto readReferenceEffect(types::Effect &effect, std::ifstream &file,
+  static auto readReferenceEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
-  static auto readTimelineEffect(types::Effect &effect, types::Band &band, std::ifstream &file,
+  static auto readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                  std::vector<bool> &unusedBits) -> bool;
 
   static auto writeTransientEffect(types::Effect &effect, std::vector<bool> &output) -> bool;

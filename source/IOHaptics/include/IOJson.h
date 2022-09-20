@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2021, ISO/IEC
+ * Copyright (c) 2010-2022, ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,30 +36,44 @@
 
 #include <Types/include/Haptics.h>
 #include <map>
-#include <nlohmann/json.hpp>
 #include <string>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996 26451 26495 26812 33010)
+#endif
+#include <rapidjson/document.h>
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 namespace haptics::io {
 class IOJson {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
-  static auto loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
+  static auto loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
       -> bool;
-  static auto loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> bool;
-  static auto loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool;
-  static auto loadLibrary(const nlohmann::json &jsonLibrary, types::Perception &perception) -> bool;
-  static auto loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
+  static auto loadAvatars(const rapidjson::Value &jsonAvatars, types::Haptics &haptic) -> bool;
+  static auto loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool;
+  static auto loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
+      -> bool;
+  static auto loadReferenceDevices(const rapidjson::Value &jsonReferenceDevices,
                                    types::Perception &perception) -> bool;
-  static auto loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool;
-  static auto loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> bool;
-  static auto loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> bool;
+  static auto loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool;
+  static auto loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool;
+  static auto loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool;
 
-  static auto extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void;
-  static auto extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void;
-  static auto extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void;
-  static auto extractLibrary(types::Perception &perception, nlohmann::json &jsonLibrary) -> void;
+  static auto extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPerceptions,
+                                 rapidjson::Document &jsonTree) -> void;
+  static auto extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatars,
+                             rapidjson::Document &jsonTree) -> void;
+  static auto extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
+                            rapidjson::Document &jsonTree) -> void;
+  static auto extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
+                             rapidjson::Document &jsonTree) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
-                                      nlohmann::json &jsonReferenceDevices) -> void;
+                                      rapidjson::Value &jsonReferenceDevices,
+                                      rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };

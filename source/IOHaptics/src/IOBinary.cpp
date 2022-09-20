@@ -40,6 +40,17 @@
 
 namespace haptics::io {
 
+auto IOBinary::loadMemory(IOMemoryBuffer &in, types::Haptics &out) -> bool {
+  std::istream istr(&in);
+
+  std::vector<bool> unusedBits;
+  bool res = readFileHeader(out, istr, unusedBits);
+  if (res) {
+    readFileBody(out, istr, unusedBits);
+  }
+  return res;
+}
+
 auto IOBinary::loadFile(const std::string &filePath, types::Haptics &out) -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
@@ -84,7 +95,7 @@ auto IOBinary::writeFile(types::Haptics &haptic, const std::string &filePath) ->
   return res;
 }
 
-auto IOBinary::readFileHeader(types::Haptics &haptic, std::ifstream &file,
+auto IOBinary::readFileHeader(types::Haptics &haptic, std::istream &file,
                               std::vector<bool> &unusedBits) -> bool {
 
   std::string version = IOBinaryPrimitives::readString(file, unusedBits);
@@ -104,7 +115,6 @@ auto IOBinary::readFileHeader(types::Haptics &haptic, std::ifstream &file,
 }
 
 auto IOBinary::writeFileHeader(types::Haptics &haptic, std::vector<bool> &output) -> bool {
-
   const std::string version = haptic.getVersion();
   const std::string date = haptic.getDate();
   const std::string description = haptic.getDescription();
@@ -120,7 +130,7 @@ auto IOBinary::writeFileHeader(types::Haptics &haptic, std::vector<bool> &output
   return IOBinary::writePerceptionsHeader(haptic, output);
 }
 
-auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file,
+auto IOBinary::readAvatars(types::Haptics &haptic, std::istream &file,
                            std::vector<bool> &unusedBits) -> bool {
   auto avatarCount =
       IOBinaryPrimitives::readNBits<unsigned short, MDEXP_AVATAR_COUNT>(file, unusedBits);
@@ -147,7 +157,6 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file,
 auto IOBinary::writeAvatars(types::Haptics &haptic, std::vector<bool> &output) -> bool {
   auto avatarCount = static_cast<unsigned short>(haptic.getAvatarsSize());
   IOBinaryPrimitives::writeNBits<unsigned short, MDEXP_AVATAR_COUNT>(avatarCount, output);
-
   types::Avatar myAvatar;
   for (unsigned short i = 0; i < avatarCount; i++) {
     myAvatar = haptic.getAvatarAt(i);
@@ -169,7 +178,7 @@ auto IOBinary::writeAvatars(types::Haptics &haptic, std::vector<bool> &output) -
   return true;
 }
 
-auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file,
+auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::istream &file,
                                      std::vector<bool> &unusedBits) -> bool {
   auto perceptionCount =
       IOBinaryPrimitives::readNBits<unsigned short, MDEXP_PERC_COUNT>(file, unusedBits);
@@ -207,7 +216,6 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::ifstream &file
 auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> &output) -> bool {
   auto perceptionCount = static_cast<unsigned short>(haptic.getPerceptionsSize());
   IOBinaryPrimitives::writeNBits<unsigned short, MDEXP_PERC_COUNT>(perceptionCount, output);
-
   types::Perception myPerception;
   for (unsigned short i = 0; i < perceptionCount; i++) {
     myPerception = haptic.getPerceptionAt(i);
@@ -245,12 +253,12 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> 
   return true;
 }
 
-auto IOBinary::readLibraryEffect(std::ifstream &file, std::vector<bool> &unusedBits)
+auto IOBinary::readLibraryEffect(std::istream &file, std::vector<bool> &unusedBits)
     -> types::Effect {
   auto id = IOBinaryPrimitives::readNBits<int, EFFECT_ID>(file, unusedBits);
   auto position = IOBinaryPrimitives::readNBits<int, EFFECT_POSITION>(file, unusedBits);
-  auto phase = IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, 0,
-                                                                          MAX_PHASE, unusedBits);
+  auto phase =
+      IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, 0, MAX_PHASE, unusedBits);
   auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
   auto effectType = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_TYPE>(file, unusedBits);
   auto keyframeCount =
@@ -345,11 +353,12 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
   return true;
 }
 
-auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file,
+auto IOBinary::readLibrary(types::Perception &perception, std::istream &file,
                            std::vector<bool> &unusedBits) -> bool {
   auto effectCount =
       IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_LIBRARY_COUNT>(file, unusedBits);
   bool success = true;
+
   for (unsigned short i = 0; i < effectCount; i++) {
     auto effect = readLibraryEffect(file, unusedBits);
     perception.addBasisEffect(effect);
@@ -360,7 +369,6 @@ auto IOBinary::readLibrary(types::Perception &perception, std::ifstream &file,
 auto IOBinary::writeLibrary(types::Perception &perception, std::vector<bool> &output) -> bool {
   auto effectCount = static_cast<unsigned short>(perception.getEffectLibrarySize());
   IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_LIBRARY_COUNT>(effectCount, output);
-
   // for each library effect
   types::Effect libraryEffect;
   bool success = true;
@@ -371,7 +379,7 @@ auto IOBinary::writeLibrary(types::Perception &perception, std::vector<bool> &ou
   return success;
 }
 
-auto IOBinary::readReferenceDevices(types::Perception &perception, std::ifstream &file,
+auto IOBinary::readReferenceDevices(types::Perception &perception, std::istream &file,
                                     std::vector<bool> &unusedBits) -> bool {
   auto referenceDeviceCount =
       IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_REFDEVICE_COUNT>(file, unusedBits);
@@ -561,7 +569,7 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::vector<
   return true;
 }
 
-auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &file,
+auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &file,
                                 std::vector<bool> &unusedBits) -> bool {
   auto trackCount =
       IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_TRACK_COUNT>(file, unusedBits);
@@ -628,7 +636,6 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::ifstream &fi
 auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool> &output) -> bool {
   auto trackCount = static_cast<unsigned short>(perception.getTracksSize());
   IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_TRACK_COUNT>(trackCount, output);
-
   // for each track
   types::Track myTrack;
   for (unsigned short i = 0; i < trackCount; i++) {
@@ -691,7 +698,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool
   return true;
 }
 
-auto IOBinary::readFileBody(types::Haptics &haptic, std::ifstream &file,
+auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file,
                             std::vector<bool> &unusedBits) -> bool {
   types::Perception myPerception;
   types::Track myTrack;
