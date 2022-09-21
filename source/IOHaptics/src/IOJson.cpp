@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2021, ISO/IEC
+ * Copyright (c) 2010-2022, ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,151 +34,171 @@
 #include <IOHaptics/include/IOJson.h>
 #include <iostream>
 
-using json = nlohmann::json;
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/writer.h>
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 namespace haptics::io {
 
 auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bool {
   bool loadingSuccess = true;
   std::ifstream ifs(filePath);
-  json jsonTree = json::parse(ifs);
-  if (!(jsonTree.contains("version") && jsonTree.contains("date") &&
-        jsonTree.contains("description") && jsonTree.contains("perceptions") &&
-        jsonTree["perceptions"].is_array() && jsonTree.contains("avatars") &&
-        jsonTree["avatars"].is_array())) {
+  rapidjson::IStreamWrapper isw(ifs);
+  rapidjson::Document jsonTree;
+  if (jsonTree.ParseStream(isw).HasParseError()) {
+    std::cerr << "Invalid GMPG input file: JSON parsing error" << std::endl;
+    return false;
+  }
+  if (!jsonTree.IsObject()) {
+    std::cerr << "Invalid GMPG input file: not a JSON object" << std::endl;
+    return false;
+  }
+  if (!(jsonTree.HasMember("version") && jsonTree.HasMember("date") &&
+        jsonTree.HasMember("description") && jsonTree.HasMember("perceptions") &&
+        jsonTree["perceptions"].IsArray() && jsonTree.HasMember("avatars") &&
+        jsonTree["avatars"].IsArray())) {
     std::cerr << "Invalid GMPG input file: missing required field" << std::endl;
     return false;
   }
-  auto version = jsonTree["version"].get<std::string>();
-  auto date = jsonTree["date"].get<std::string>();
-  auto description = jsonTree["description"].get<std::string>();
+  auto version = std::string(jsonTree["version"].GetString());
+  auto date = std::string(jsonTree["date"].GetString());
+  auto description = std::string(jsonTree["description"].GetString());
   haptic.setVersion(version);
   haptic.setDate(date);
   haptic.setDescription(description);
-  auto jsonAvatars = jsonTree["avatars"];
-  loadingSuccess = loadingSuccess && loadAvatars(jsonAvatars, haptic);
-  auto jsonPerceptions = jsonTree["perceptions"];
-  loadingSuccess = loadingSuccess && loadPerceptions(jsonPerceptions, haptic);
+  loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
+  loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
   return loadingSuccess;
 }
 
-auto IOJson::loadPerceptions(const nlohmann::json &jsonPerceptions, types::Haptics &haptic)
+auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
     -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonPerceptions.begin(); it != jsonPerceptions.end(); ++it) {
-    auto jsonPerception = it.value();
-    if (!jsonPerception.contains("id") || !jsonPerception["id"].is_number_integer()) {
+  for (const auto &jpv : jsonPerceptions.GetArray()) {
+    if (!jpv.IsObject()) {
+      std::cerr << "Invalid perception: not an object" << std::endl;
+      continue;
+    }
+    auto jsonPerception = jpv.GetObject();
+
+    if (!jsonPerception.HasMember("id") || !jsonPerception["id"].IsInt()) {
       std::cerr << "Missing or invalid perception id" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("avatar_id") || !jsonPerception["avatar_id"].is_number_integer()) {
+    if (!jsonPerception.HasMember("avatar_id") || !jsonPerception["avatar_id"].IsInt()) {
       std::cerr << "Missing or invalid perception avatar id" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("description") || !jsonPerception["description"].is_string()) {
+    if (!jsonPerception.HasMember("description") || !jsonPerception["description"].IsString()) {
       std::cerr << "Missing or invalid perception description" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("perception_modality") ||
-        !jsonPerception["perception_modality"].is_string()) {
+    if (!jsonPerception.HasMember("perception_modality") ||
+        !jsonPerception["perception_modality"].IsString()) {
       std::cerr << "Missing or invalid perception modality" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("tracks") || !jsonPerception["tracks"].is_array()) {
+    if (!jsonPerception.HasMember("tracks") || !jsonPerception["tracks"].IsArray()) {
       std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
-    if (!jsonPerception.contains("effect_library") ||
-        !jsonPerception["effect_library"].is_array()) {
+    if (!jsonPerception.HasMember("effect_library") ||
+        !jsonPerception["effect_library"].IsArray()) {
       std::cerr << "Missing or invalid library" << std::endl;
       continue;
     }
 
-    auto perceptionId = jsonPerception["id"].get<int>();
-    auto perceptionAvatarId = jsonPerception["avatar_id"].get<int>();
-    auto perceptionDescription = jsonPerception["description"].get<std::string>();
-    auto perceptionPerceptionModality = types::stringToPerceptionModality.at(
-        jsonPerception["perception_modality"].get<std::string>());
+    auto perceptionId = jsonPerception["id"].GetInt();
+    auto perceptionAvatarId = jsonPerception["avatar_id"].GetInt();
+    const auto *perceptionDescription = jsonPerception["description"].GetString();
+    auto perceptionPerceptionModality =
+        types::stringToPerceptionModality.at(jsonPerception["perception_modality"].GetString());
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
 
-    if (jsonPerception.contains("unit_exponent") &&
-        jsonPerception["unit_exponent"].is_number_integer()) {
-      perception.setUnitExponent(jsonPerception["unit_exponent"].get<int8_t>());
+    if (jsonPerception.HasMember("unit_exponent") && jsonPerception["unit_exponent"].IsInt()) {
+      perception.setUnitExponent(jsonPerception["unit_exponent"].GetInt());
     }
-    if (jsonPerception.contains("perception_unit_exponent") &&
-        jsonPerception["perception_unit_exponent"].is_number_integer()) {
-      perception.setPerceptionUnitExponent(
-          jsonPerception["perception_unit_exponent"].get<int8_t>());
+    if (jsonPerception.HasMember("perception_unit_exponent") &&
+        jsonPerception["perception_unit_exponent"].IsInt()) {
+      perception.setPerceptionUnitExponent(jsonPerception["perception_unit_exponent"].GetInt());
     }
 
-    auto jsonLibrary = jsonPerception["effect_library"];
-    loadingSuccess = loadingSuccess && loadLibrary(jsonLibrary, perception);
-
-    auto jsonTracks = jsonPerception["tracks"];
-    loadingSuccess = loadingSuccess && loadTracks(jsonTracks, perception);
-    if (jsonPerception.contains("reference_devices") &&
-        jsonPerception["reference_devices"].is_array()) {
-      auto jsonReferenceDevices = jsonPerception["reference_devices"];
-      loadingSuccess = loadingSuccess && loadReferenceDevices(jsonReferenceDevices, perception);
+    loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
+    loadingSuccess = loadingSuccess && loadTracks(jsonPerception["tracks"], perception);
+    if (jsonPerception.HasMember("reference_devices") &&
+        jsonPerception["reference_devices"].IsArray()) {
+      loadingSuccess =
+          loadingSuccess && loadReferenceDevices(jsonPerception["reference_devices"], perception);
     }
     haptic.addPerception(perception);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadLibrary(const nlohmann::json &jsonLibrary, types::Perception &perception) -> bool {
+auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
+    -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonLibrary.begin(); it != jsonLibrary.end(); ++it) {
-    auto jsonEffect = it.value();
+  for (const auto &jev : jsonLibrary.GetArray()) {
+    if (!jev.IsObject()) {
+      std::cerr << "Invalid effect library: not an object" << std::endl;
+      continue;
+    }
+    auto jsonEffect = jev.GetObject();
 
-    if (!jsonEffect.contains("effect_type") || !jsonEffect["effect_type"].is_string()) {
+    if (!jsonEffect.HasMember("effect_type") || !jsonEffect["effect_type"].IsString()) {
       std::cerr << "Missing or invalid effect type" << std::endl;
       continue;
     }
 
-    auto effectType = types::stringToEffectType.at(jsonEffect["effect_type"]);
+    auto effectType = types::stringToEffectType.at(jsonEffect["effect_type"].GetString());
     if (effectType == types::EffectType::Reference) {
-      if (!jsonEffect.contains("id") || !jsonEffect["id"].is_number_integer()) {
+      if (!jsonEffect.HasMember("id") || !jsonEffect["id"].IsInt()) {
         std::cerr << "Missing or invalid effect id" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+      if (!jsonEffect.HasMember("position") || !jsonEffect["position"].IsInt()) {
         std::cerr << "Missing or invalid effect position" << std::endl;
         continue;
       }
     } else if (effectType == types::EffectType::Basis) {
-      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+      if (!jsonEffect.HasMember("position") || !jsonEffect["position"].IsInt()) {
         std::cerr << "Missing or invalid effect position" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("phase") || !jsonEffect["phase"].is_number()) {
+      if (!jsonEffect.HasMember("phase") || !jsonEffect["phase"].IsNumber()) {
         std::cerr << "Missing or invalid effect phase" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("base_signal") || !jsonEffect["base_signal"].is_string()) {
+      if (!jsonEffect.HasMember("base_signal") || !jsonEffect["base_signal"].IsString()) {
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("keyframes") || !jsonEffect["keyframes"].is_array()) {
+      if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
         std::cerr << "Missing or invalid list of keyframes" << std::endl;
         continue;
       }
     }
 
-    auto id = jsonEffect["id"].get<int>();
-    auto position = jsonEffect["position"].get<int>();
-    auto phase = jsonEffect.contains("phase") ? jsonEffect["phase"].get<float>() : 0;
-    auto baseSignal = jsonEffect.contains("base_signal")
-                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"])
+    auto effectId = jsonEffect["id"].GetInt();
+    auto position = jsonEffect["position"].GetInt();
+    auto phase = jsonEffect.HasMember("phase") ? jsonEffect["phase"].GetFloat() : 0;
+    auto baseSignal = jsonEffect.HasMember("base_signal")
+                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"].GetString())
                           : types::BaseSignal::Sine;
 
     types::Effect effect(position, phase, baseSignal, effectType);
-    effect.setId(id);
-    if (jsonEffect.contains("keyframes")) {
-      auto jsonKeyframes = jsonEffect["keyframes"];
-      loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+    effect.setId(effectId);
+    if (jsonEffect.HasMember("keyframes")) {
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
 
     perception.addBasisEffect(effect);
@@ -187,45 +207,50 @@ auto IOJson::loadLibrary(const nlohmann::json &jsonLibrary, types::Perception &p
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &perception) -> bool {
+auto IOJson::loadTracks(const rapidjson::Value&jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonTracks.begin(); it != jsonTracks.end(); ++it) {
-    auto jsonTrack = it.value();
-    if (!jsonTrack.contains("id") || !jsonTrack["id"].is_number_integer()) {
+  for (const auto &jtv : jsonTracks.GetArray()) {
+    if (!jtv.IsObject()) {
+      std::cerr << "Invalid track: not an object" << std::endl;
+      continue;
+    }
+    auto jsonTrack = jtv.GetObject();
+
+    if (!jsonTrack.HasMember("id") || !jsonTrack["id"].IsInt()) {
       std::cerr << "Missing or invalid track id" << std::endl;
       continue;
     }
-    if (!jsonTrack.contains("description") || !jsonTrack["description"].is_string()) {
+    if (!jsonTrack.HasMember("description") || !jsonTrack["description"].IsString()) {
       std::cerr << "Missing or invalid track description" << std::endl;
       continue;
     }
-    if (!jsonTrack.contains("gain") || !jsonTrack["gain"].is_number()) {
+    if (!jsonTrack.HasMember("gain") || !jsonTrack["gain"].IsNumber()) {
       std::cerr << "Missing or invalid track gain" << std::endl;
       continue;
     }
-    if (!jsonTrack.contains("mixing_weight") || !jsonTrack["mixing_weight"].is_number()) {
+    if (!jsonTrack.HasMember("mixing_weight") || !jsonTrack["mixing_weight"].IsNumber()) {
       std::cerr << "Missing or invalid track mixing weight" << std::endl;
       continue;
     }
-    if (!jsonTrack.contains("body_part_mask") || !jsonTrack["body_part_mask"].is_number_integer()) {
+    if (!jsonTrack.HasMember("body_part_mask") || !jsonTrack["body_part_mask"].IsUint()) {
       std::cerr << "Missing or invalid track body part mask" << std::endl;
       continue;
     }
-    if (!jsonTrack.contains("bands") || !jsonTrack["bands"].is_array()) {
+    if (!jsonTrack.HasMember("bands") || !jsonTrack["bands"].IsArray()) {
       std::cerr << "Missing or invalid bands" << std::endl;
       continue;
     }
 
-    auto trackId = jsonTrack["id"].get<int>();
-    auto trackDescription = jsonTrack["description"].get<std::string>();
-    auto trackGain = jsonTrack["gain"].get<float>();
-    auto trackMixingWeight = jsonTrack["mixing_weight"].get<float>();
-    auto trackBodyPart = jsonTrack["body_part_mask"].get<uint32_t>();
+    auto trackId = jsonTrack["id"].GetInt();
+    const auto *trackDescription = jsonTrack["description"].GetString();
+    auto trackGain = jsonTrack["gain"].GetFloat();
+    auto trackMixingWeight = jsonTrack["mixing_weight"].GetFloat();
+    auto trackBodyPart = jsonTrack["body_part_mask"].GetUint();
 
     types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
 
     types::Vector direction{};
-    if (jsonTrack.contains("direction") && loadVector(jsonTrack["direction"], direction)) {
+    if (jsonTrack.HasMember("direction") && loadVector(jsonTrack["direction"], direction)) {
       track.setDirection(direction);
     }
 
@@ -258,137 +283,140 @@ auto IOJson::loadTracks(const nlohmann::json &jsonTracks, types::Perception &per
       track.setActuatorTarget(actuatorTarget);
     }
 
-    if (jsonTrack.contains("frequency_sampling") &&
-        jsonTrack["frequency_sampling"].is_number_integer()) {
-      auto frequencySampling = jsonTrack["frequency_sampling"].get<uint32_t>();
-      track.setFrequencySampling(frequencySampling);
+    if (jsonTrack.HasMember("frequency_sampling") && jsonTrack["frequency_sampling"].IsUint()) {
+        auto frequencySampling = jsonTrack["frequency_sampling"].GetUint();
+        track.setFrequencySampling(frequencySampling);
     }
 
-    if (jsonTrack.contains("sample_count") && jsonTrack["sample_count"].is_number_integer()) {
-      auto frequencySampling = jsonTrack["sample_count"].get<uint32_t>();
+    if (jsonTrack.HasMember("sample_count") && jsonTrack["sample_count"].IsUint()) {
+      auto frequencySampling = jsonTrack["sample_count"].GetUint();
       track.setSampleCount(frequencySampling);
     }
 
-    if (jsonTrack.contains("reference_device_id") && jsonTrack["reference_device_id"].is_number()) {
-      auto device_id = jsonTrack["reference_device_id"].get<int>();
+    if (jsonTrack.HasMember("reference_device_id") && jsonTrack["reference_device_id"].IsInt()) {
+      auto device_id = jsonTrack["reference_device_id"].GetInt();
       track.setReferenceDeviceId(device_id);
     }
-    if (jsonTrack.contains("vertices") && jsonTrack["vertices"].is_array()) {
-      auto jsonVertices = jsonTrack["vertices"];
-      for (auto itv = jsonVertices.begin(); itv != jsonVertices.end(); ++itv) {
-        if (itv.value().is_number_integer()) {
-          auto vertex = itv.value().get<int>();
+    if (jsonTrack.HasMember("vertices") && jsonTrack["vertices"].IsArray()) {
+      auto jsonVertices = jsonTrack["vertices"].GetArray();
+      for (const auto &jvv : jsonVertices) {
+        if (jvv.IsInt()) {
+          auto vertex = jvv.GetInt();
           track.addVertex(vertex);
         }
       }
     }
-    auto jsonBands = jsonTrack["bands"];
-    loadingSuccess = loadingSuccess && loadBands(jsonBands, track);
+    loadingSuccess = loadingSuccess && loadBands(jsonTrack["bands"], track);
     perception.addTrack(track);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadBands(const nlohmann::json &jsonBands, types::Track &track) -> bool {
+auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonBands.begin(); it != jsonBands.end(); ++it) {
-    auto jsonBand = it.value();
-    if (!jsonBand.contains("band_type") || !jsonBand["band_type"].is_string()) {
+  for (const auto &jbv : jsonBands.GetArray()) {
+    if (!jbv.IsObject()) {
+      std::cerr << "Invalid band: not an object" << std::endl;
+      continue;
+    }
+    auto jsonBand = jbv.GetObject();
+
+    if (!jsonBand.HasMember("band_type") || !jsonBand["band_type"].IsString()) {
       std::cerr << "Missing or invalid band type" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("curve_type") || !jsonBand["curve_type"].is_string()) {
+    if (!jsonBand.HasMember("curve_type") || !jsonBand["curve_type"].IsString()) {
       std::cerr << "Missing or invalid curve type" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("window_length") || !jsonBand["window_length"].is_number_integer()) {
+    if (!jsonBand.HasMember("window_length") || !jsonBand["window_length"].IsInt()) {
       std::cerr << "Missing or invalid window length" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("lower_frequency_limit") ||
-        !jsonBand["lower_frequency_limit"].is_number_integer()) {
+    if (!jsonBand.HasMember("lower_frequency_limit") ||
+        !jsonBand["lower_frequency_limit"].IsInt()) {
       std::cerr << "Missing or invalid lower frequency limit" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("upper_frequency_limit") ||
-        !jsonBand["upper_frequency_limit"].is_number_integer()) {
+    if (!jsonBand.HasMember("upper_frequency_limit") ||
+        !jsonBand["upper_frequency_limit"].IsInt()) {
       std::cerr << "Missing or invalid upper frequency limit" << std::endl;
       continue;
     }
-    if (!jsonBand.contains("effects") || !jsonBand["effects"].is_array()) {
+    if (!jsonBand.HasMember("effects") || !jsonBand["effects"].IsArray()) {
       std::cerr << "Missing or invalid list of effects" << std::endl;
       continue;
     }
 
-    types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].get<std::string>());
-    types::CurveType curveType =
-        types::stringToCurveType.at(jsonBand["curve_type"].get<std::string>());
-    int windowLength = jsonBand["window_length"].get<int>();
-    int lowerLimit = jsonBand["lower_frequency_limit"].get<int>();
-    int upperLimit = jsonBand["upper_frequency_limit"].get<int>();
+    types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
+    types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
+    int windowLength = jsonBand["window_length"].GetInt();
+    int lowerLimit = jsonBand["lower_frequency_limit"].GetInt();
+    int upperLimit = jsonBand["upper_frequency_limit"].GetInt();
 
     types::Band band(bandType, curveType, windowLength, lowerLimit, upperLimit);
-    auto jsonEffects = jsonBand["effects"];
-    loadingSuccess = loadingSuccess && loadEffects(jsonEffects, band);
+    loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
     track.addBand(band);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -> bool {
+auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool {
   bool loadingSuccess = true;
-  for (auto it = jsonEffects.begin(); it != jsonEffects.end(); ++it) {
-    auto jsonEffect = it.value();
+  for (const auto &jev : jsonEffects.GetArray()) {
+    if (!jev.IsObject()) {
+      std::cerr << "Invalid effect: not an object" << std::endl;
+      continue;
+    }
+    auto jsonEffect = jev.GetObject();
 
-    if (!jsonEffect.contains("effect_type") || !jsonEffect["effect_type"].is_string()) {
+    if (!jsonEffect.HasMember("effect_type") || !jsonEffect["effect_type"].IsString()) {
       std::cerr << "Missing or invalid effect type" << std::endl;
       continue;
     }
 
-    auto effectType = types::stringToEffectType.at(jsonEffect["effect_type"]);
+    auto effectType = types::stringToEffectType.at(jsonEffect["effect_type"].GetString());
     if (effectType == types::EffectType::Reference) {
-      if (!jsonEffect.contains("id") || !jsonEffect["id"].is_number_integer()) {
+      if (!jsonEffect.HasMember("id") || !jsonEffect["id"].IsInt()) {
         std::cerr << "Missing or invalid effect id" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+      if (!jsonEffect.HasMember("position") || !jsonEffect["position"].IsInt()) {
         std::cerr << "Missing or invalid effect position" << std::endl;
         continue;
       }
     } else if (effectType == types::EffectType::Basis) {
-      if (!jsonEffect.contains("position") || !jsonEffect["position"].is_number_integer()) {
+      if (!jsonEffect.HasMember("position") || !jsonEffect["position"].IsInt()) {
         std::cerr << "Missing or invalid effect position" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("phase") || !jsonEffect["phase"].is_number()) {
+      if (!jsonEffect.HasMember("phase") || !jsonEffect["phase"].IsNumber()) {
         std::cerr << "Missing or invalid effect phase" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("base_signal") || !jsonEffect["base_signal"].is_string()) {
+      if (!jsonEffect.HasMember("base_signal") || !jsonEffect["base_signal"].IsString()) {
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      if (!jsonEffect.contains("keyframes") || !jsonEffect["keyframes"].is_array()) {
+      if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
         std::cerr << "Missing or invalid list of keyframes" << std::endl;
         continue;
       }
     }
 
-    auto position = jsonEffect["position"].get<int>();
-    auto phase = jsonEffect.contains("phase") ? jsonEffect["phase"].get<float>() : 0;
-    auto baseSignal = jsonEffect.contains("base_signal")
-                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"])
+    auto position = jsonEffect["position"].GetInt();
+    auto phase = jsonEffect.HasMember("phase") ? jsonEffect["phase"].GetFloat() : 0;
+    auto baseSignal = jsonEffect.HasMember("base_signal")
+                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"].GetString())
                           : types::BaseSignal::Sine;
 
     types::Effect effect(position, phase, baseSignal, effectType);
-    if (jsonEffect.contains("id") && jsonEffect["id"].is_number_integer()) {
-      auto id = jsonEffect["id"].get<int>();
-      effect.setId(id);
+    if (jsonEffect.HasMember("id") && jsonEffect["id"].IsInt()) {
+      effect.setId(jsonEffect["id"].GetInt());
     }
-    if (jsonEffect.contains("keyframes") && jsonEffect["keyframes"].is_array()) {
-      auto jsonKeyframes = jsonEffect["keyframes"];
-      loadingSuccess = loadingSuccess && loadKeyframes(jsonKeyframes, effect);
+    if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
 
     band.addEffect(effect);
@@ -396,125 +424,137 @@ auto IOJson::loadEffects(const nlohmann::json &jsonEffects, types::Band &band) -
   return loadingSuccess;
 }
 
-auto IOJson::loadAvatars(const nlohmann::json &jsonAvatars, types::Haptics &haptic) -> bool {
-  for (auto it = jsonAvatars.begin(); it != jsonAvatars.end(); ++it) {
-    auto jsonAvatar = it.value();
+auto IOJson::loadAvatars(const rapidjson::Value &jsonAvatars, types::Haptics &haptic) -> bool {
+  for (const auto &jav : jsonAvatars.GetArray()) {
+    if (!jav.IsObject()) {
+      std::cerr << "Invalid avatar: not an object" << std::endl;
+      continue;
+    }
+    auto jsonAvatar = jav.GetObject();
 
-    if (!jsonAvatar.contains("id") || !jsonAvatar["id"].is_number_integer()) {
+    if (!jsonAvatar.HasMember("id") || !jsonAvatar["id"].IsInt()) {
       std::cerr << "Missing or invalid avatar id" << std::endl;
       continue;
     }
-    if (!jsonAvatar.contains("lod") || !jsonAvatar["lod"].is_number_integer()) {
+    if (!jsonAvatar.HasMember("lod") || !jsonAvatar["lod"].IsInt()) {
       std::cerr << "Missing or invalid avatar lod" << std::endl;
       continue;
     }
-    if (!jsonAvatar.contains("type") || !jsonAvatar["type"].is_string()) {
+    if (!jsonAvatar.HasMember("type") || !jsonAvatar["type"].IsString()) {
       std::cerr << "Missing or invalid avatar type" << std::endl;
       continue;
     }
-    auto id = jsonAvatar["id"].get<int>();
-    auto lod = jsonAvatar["lod"].get<int>();
-    auto type = types::stringToAvatarType.at(jsonAvatar["type"]);
+    auto avatarId = jsonAvatar["id"].GetInt();
+    auto lod = jsonAvatar["lod"].GetInt();
+    auto type = types::stringToAvatarType.at(jsonAvatar["type"].GetString());
 
-    types::Avatar avatar(id, lod, type);
+    types::Avatar avatar(avatarId, lod, type);
 
-    if (jsonAvatar.contains("mesh") && jsonAvatar["mesh"].is_string()) {
-      avatar.setMesh(jsonAvatar["mesh"]);
+    if (jsonAvatar.HasMember("mesh") && jsonAvatar["mesh"].IsString()) {
+      avatar.setMesh(jsonAvatar["mesh"].GetString());
     }
     haptic.addAvatar(avatar);
   }
   return true;
 }
 
-auto IOJson::loadReferenceDevices(const nlohmann::json &jsonReferenceDevices,
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+auto IOJson::loadReferenceDevices(const rapidjson::Value &jsonReferenceDevices,
                                   types::Perception &perception) -> bool {
-  for (auto it = jsonReferenceDevices.begin(); it != jsonReferenceDevices.end(); ++it) {
-    auto jsonReferenceDevice = it.value();
+  for (const auto &jrdv : jsonReferenceDevices.GetArray()) {
+    if (!jrdv.IsObject()) {
+      std::cerr << "Invalid reference device: not an object" << std::endl;
+      continue;
+    }
+    auto jsonReferenceDevice = jrdv.GetObject();
 
-    if (!jsonReferenceDevice.contains("id") || !jsonReferenceDevice["id"].is_number_integer()) {
+    if (!jsonReferenceDevice.HasMember("id") || !jsonReferenceDevice["id"].IsInt()) {
       std::cerr << "Missing or invalid reference device id" << std::endl;
       continue;
     }
-    if (!jsonReferenceDevice.contains("name") || !jsonReferenceDevice["name"].is_string()) {
+    if (!jsonReferenceDevice.HasMember("name") || !jsonReferenceDevice["name"].IsString()) {
       std::cerr << "Missing or invalid reference device name" << std::endl;
       continue;
     }
-    auto id = jsonReferenceDevice["id"].get<int>();
-    auto name = jsonReferenceDevice["name"].get<std::string>();
+    auto referenceDeviceId = jsonReferenceDevice["id"].GetInt();
+    const auto *name = jsonReferenceDevice["name"].GetString();
 
-    types::ReferenceDevice referenceDevice(id, name);
-    if (jsonReferenceDevice.contains("body_part_mask") &&
-        jsonReferenceDevice["body_part_mask"].is_number_integer()) {
-      referenceDevice.setBodyPartMask(jsonReferenceDevice["body_part_mask"].get<uint32_t>());
+    types::ReferenceDevice referenceDevice(referenceDeviceId, name);
+    if (jsonReferenceDevice.HasMember("body_part_mask") &&
+        jsonReferenceDevice["body_part_mask"].IsUint()) {
+      referenceDevice.setBodyPartMask(jsonReferenceDevice["body_part_mask"].GetUint());
     }
-    if (jsonReferenceDevice.contains("maximum_frequency") &&
-        jsonReferenceDevice["maximum_frequency"].is_number()) {
-      referenceDevice.setMaximumFrequency(jsonReferenceDevice["maximum_frequency"].get<float>());
+    if (jsonReferenceDevice.HasMember("maximum_frequency") &&
+        jsonReferenceDevice["maximum_frequency"].IsNumber()) {
+      referenceDevice.setMaximumFrequency(jsonReferenceDevice["maximum_frequency"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("minimum_frequency") &&
-        jsonReferenceDevice["minimum_frequency"].is_number()) {
-      referenceDevice.setMinimumFrequency(jsonReferenceDevice["minimum_frequency"].get<float>());
+    if (jsonReferenceDevice.HasMember("minimum_frequency") &&
+        jsonReferenceDevice["minimum_frequency"].IsNumber()) {
+      referenceDevice.setMinimumFrequency(jsonReferenceDevice["minimum_frequency"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("resonance_frequency") &&
-        jsonReferenceDevice["resonance_frequency"].is_number()) {
-      referenceDevice.setResonanceFrequency(
-          jsonReferenceDevice["resonance_frequency"].get<float>());
+    if (jsonReferenceDevice.HasMember("resonance_frequency") &&
+        jsonReferenceDevice["resonance_frequency"].IsNumber()) {
+      referenceDevice.setResonanceFrequency(jsonReferenceDevice["resonance_frequency"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("maximum_amplitude") &&
-        jsonReferenceDevice["maximum_amplitude"].is_number()) {
-      referenceDevice.setMaximumAmplitude(jsonReferenceDevice["maximum_amplitude"].get<float>());
+    if (jsonReferenceDevice.HasMember("maximum_amplitude") &&
+        jsonReferenceDevice["maximum_amplitude"].IsNumber()) {
+      referenceDevice.setMaximumAmplitude(jsonReferenceDevice["maximum_amplitude"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("impedance") && jsonReferenceDevice["impedance"].is_number()) {
-      referenceDevice.setImpedance(jsonReferenceDevice["impedance"].get<float>());
+    if (jsonReferenceDevice.HasMember("impedance") && jsonReferenceDevice["impedance"].IsNumber()) {
+      referenceDevice.setImpedance(jsonReferenceDevice["impedance"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("maximum_voltage") &&
-        jsonReferenceDevice["maximum_voltage"].is_number()) {
-      referenceDevice.setMaximumVoltage(jsonReferenceDevice["maximum_voltage"].get<float>());
+    if (jsonReferenceDevice.HasMember("maximum_voltage") &&
+        jsonReferenceDevice["maximum_voltage"].IsNumber()) {
+      referenceDevice.setMaximumVoltage(jsonReferenceDevice["maximum_voltage"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("maximum_current") &&
-        jsonReferenceDevice["maximum_current"].is_number()) {
-      referenceDevice.setMaximumCurrent(jsonReferenceDevice["maximum_current"].get<float>());
+    if (jsonReferenceDevice.HasMember("maximum_current") &&
+        jsonReferenceDevice["maximum_current"].IsNumber()) {
+      referenceDevice.setMaximumCurrent(jsonReferenceDevice["maximum_current"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("maximum_displacement") &&
-        jsonReferenceDevice["maximum_displacement"].is_number()) {
+    if (jsonReferenceDevice.HasMember("maximum_displacement") &&
+        jsonReferenceDevice["maximum_displacement"].IsNumber()) {
       referenceDevice.setMaximumDisplacement(
-          jsonReferenceDevice["maximum_displacement"].get<float>());
+          jsonReferenceDevice["maximum_displacement"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("weight") && jsonReferenceDevice["weight"].is_number()) {
-      referenceDevice.setWeight(jsonReferenceDevice["weight"].get<float>());
+    if (jsonReferenceDevice.HasMember("weight") && jsonReferenceDevice["weight"].IsNumber()) {
+      referenceDevice.setWeight(jsonReferenceDevice["weight"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("size") && jsonReferenceDevice["size"].is_number()) {
-      referenceDevice.setSize(jsonReferenceDevice["size"].get<float>());
+    if (jsonReferenceDevice.HasMember("size") && jsonReferenceDevice["size"].IsNumber()) {
+      referenceDevice.setSize(jsonReferenceDevice["size"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("custom") && jsonReferenceDevice["custom"].is_number()) {
-      referenceDevice.setCustom(jsonReferenceDevice["custom"].get<float>());
+    if (jsonReferenceDevice.HasMember("custom") && jsonReferenceDevice["custom"].IsNumber()) {
+      referenceDevice.setCustom(jsonReferenceDevice["custom"].GetFloat());
     }
-    if (jsonReferenceDevice.contains("type") && jsonReferenceDevice["type"].is_string()) {
-      auto type = jsonReferenceDevice["type"].get<std::string>();
-      referenceDevice.setType(types::stringToActuatorType.at(type));
+    if (jsonReferenceDevice.HasMember("type") && jsonReferenceDevice["type"].IsString()) {
+      referenceDevice.setType(
+          types::stringToActuatorType.at(jsonReferenceDevice["type"].GetString()));
     }
     perception.addReferenceDevice(referenceDevice);
   }
   return true;
 }
 
-auto IOJson::loadKeyframes(const nlohmann::json &jsonKeyframes, types::Effect &effect) -> bool {
-  for (auto it = jsonKeyframes.begin(); it != jsonKeyframes.end(); ++it) {
-    auto jsonKeyframe = it.value();
+auto IOJson::loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool {
+  for (const auto &jkfv : jsonKeyframes.GetArray()) {
+    if (!jkfv.IsObject()) {
+      std::cerr << "Invalid keyframe: not an object" << std::endl;
+      continue;
+    }
+    auto jsonKeyframe = jkfv.GetObject();
+
     std::optional<int> relativePosition;
     std::optional<float> amplitudeModulation;
-    std::optional<float> frequencyModulation;
-    if (jsonKeyframe.contains("relative_position") &&
-        jsonKeyframe["relative_position"].is_number_integer()) {
-      relativePosition = jsonKeyframe["relative_position"].get<int>();
+    std::optional<int> frequencyModulation;
+    if (jsonKeyframe.HasMember("relative_position") && jsonKeyframe["relative_position"].IsInt()) {
+      relativePosition = jsonKeyframe["relative_position"].GetInt();
     }
-    if (jsonKeyframe.contains("amplitude_modulation") &&
-        jsonKeyframe["amplitude_modulation"].is_number()) {
-      amplitudeModulation = jsonKeyframe["amplitude_modulation"].get<float>();
+    if (jsonKeyframe.HasMember("amplitude_modulation") &&
+        jsonKeyframe["amplitude_modulation"].IsNumber()) {
+      amplitudeModulation = jsonKeyframe["amplitude_modulation"].GetFloat();
     }
-    if (jsonKeyframe.contains("frequency_modulation") &&
-        jsonKeyframe["frequency_modulation"].is_number_integer()) {
-      frequencyModulation = jsonKeyframe["frequency_modulation"].get<int>();
+    if (jsonKeyframe.HasMember("frequency_modulation") &&
+        jsonKeyframe["frequency_modulation"].IsInt()) {
+      frequencyModulation = jsonKeyframe["frequency_modulation"].GetInt();
     }
     types::Keyframe keyframe(relativePosition, amplitudeModulation, frequencyModulation);
     effect.addKeyframe(keyframe);
@@ -534,120 +574,161 @@ auto IOJson::loadVector(const nlohmann::json &jsonVector, types::Vector &vector)
 }
 
 auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &filePath) -> void {
-  nlohmann::json jsonTree;
-  jsonTree["version"] = haptic.getVersion();
-  jsonTree["description"] = haptic.getDescription();
-  jsonTree["date"] = haptic.getDate();
-  auto jsonAvatars = json::array();
-  extractAvatars(haptic, jsonAvatars);
-  jsonTree["avatars"] = jsonAvatars;
-  auto jsonPerceptions = json::array();
-  extractPerceptions(haptic, jsonPerceptions);
-  jsonTree["perceptions"] = jsonPerceptions;
+  auto jsonTree = rapidjson::Document(rapidjson::kObjectType);
+  jsonTree.AddMember("version",
+                     rapidjson::Value(haptic.getVersion().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
+  jsonTree.AddMember("description",
+                     rapidjson::Value(haptic.getDescription().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
+  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
+  auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
+  extractAvatars(haptic, jsonAvatars, jsonTree);
+  jsonTree.AddMember("avatars", jsonAvatars, jsonTree.GetAllocator());
+  auto jsonPerceptions = rapidjson::Value(rapidjson::kArrayType);
+  extractPerceptions(haptic, jsonPerceptions, jsonTree);
+  jsonTree.AddMember("perceptions", jsonPerceptions, jsonTree.GetAllocator());
 
   std::ofstream file(filePath);
-  file << jsonTree;
+  rapidjson::OStreamWrapper osw(file);
+  rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+  jsonTree.Accept(writer);
 }
 
-auto IOJson::extractPerceptions(types::Haptics &haptic, nlohmann::json &jsonPerceptions) -> void {
+auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPerceptions,
+                                rapidjson::Document &jsonTree) -> void {
   auto numPerceptions = haptic.getPerceptionsSize();
-  for (uint32_t i = 0; i < numPerceptions; i++) {
-    auto perception = haptic.getPerceptionAt((int)i);
-    auto jsonPerception = json::object();
-    jsonPerception["id"] = perception.getId();
-    jsonPerception["avatar_id"] = perception.getAvatarId();
-    jsonPerception["description"] = perception.getDescription();
-    jsonPerception["perception_modality"] =
-        types::perceptionModalityToString.at(perception.getPerceptionModality());
+  for (decltype(numPerceptions) pix = 0; pix < numPerceptions; pix++) {
+    auto perception = haptic.getPerceptionAt(static_cast<int>(pix));
+    auto jsonPerception = rapidjson::Value(rapidjson::kObjectType);
+    jsonPerception.AddMember("id", perception.getId(), jsonTree.GetAllocator());
+    jsonPerception.AddMember("avatar_id", perception.getAvatarId(), jsonTree.GetAllocator());
+    jsonPerception.AddMember(
+        "description",
+        rapidjson::Value(perception.getDescription().c_str(), jsonTree.GetAllocator()),
+        jsonTree.GetAllocator());
+    jsonPerception.AddMember(
+        "perception_modality",
+        rapidjson::Value(
+            types::perceptionModalityToString.at(perception.getPerceptionModality()).c_str(),
+            jsonTree.GetAllocator()),
+        jsonTree.GetAllocator());
 
     if (perception.getUnitExponent().has_value()) {
-      jsonPerception["unit_exponent"] = perception.getUnitExponent().value();
+      jsonPerception.AddMember("unit_exponent", perception.getUnitExponent().value(),
+                               jsonTree.GetAllocator());
     }
     if (perception.getPerceptionUnitExponent().has_value()) {
-      jsonPerception["perception_unit_exponent"] = perception.getPerceptionUnitExponent().value();
+      jsonPerception.AddMember("perception_unit_exponent",
+                               perception.getPerceptionUnitExponent().value(),
+                               jsonTree.GetAllocator());
     }
 
-    auto jsonReferenceDevices = json::array();
-    extractReferenceDevices(perception, jsonReferenceDevices);
-    jsonPerception["reference_devices"] = jsonReferenceDevices;
+    auto jsonReferenceDevices = rapidjson::Value(rapidjson::kArrayType);
+    extractReferenceDevices(perception, jsonReferenceDevices, jsonTree);
+    jsonPerception.AddMember("reference_devices", jsonReferenceDevices, jsonTree.GetAllocator());
 
-    auto jsonLibrary = json::array();
-    extractLibrary(perception, jsonLibrary);
-    jsonPerception["effect_library"] = jsonLibrary;
-    auto jsonTracks = json::array();
-    extractTracks(perception, jsonTracks);
-    jsonPerception["tracks"] = jsonTracks;
+    auto jsonLibrary = rapidjson::Value(rapidjson::kArrayType);
+    extractLibrary(perception, jsonLibrary, jsonTree);
+    jsonPerception.AddMember("effect_library", jsonLibrary, jsonTree.GetAllocator());
+    auto jsonTracks = rapidjson::Value(rapidjson::kArrayType);
+    extractTracks(perception, jsonTracks, jsonTree);
+    jsonPerception.AddMember("tracks", jsonTracks, jsonTree.GetAllocator());
 
-    jsonPerceptions.push_back(jsonPerception);
+    jsonPerceptions.PushBack(jsonPerception, jsonTree.GetAllocator());
   }
 }
 
-auto IOJson::extractLibrary(types::Perception &perception, nlohmann::json &jsonLibrary) -> void {
+auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
+                            rapidjson::Document &jsonTree) -> void {
   auto numEffects = perception.getEffectLibrarySize();
-  for (uint32_t m = 0; m < numEffects; m++) {
-    auto effect = perception.getBasisEffectAt((int)m);
-    auto jsonEffect = json::object();
-    jsonEffect["effect_type"] = types::effectTypeToString.at(effect.getEffectType());
-    jsonEffect["id"] = effect.getId();
-    jsonEffect["position"] = effect.getPosition();
-    jsonEffect["phase"] = effect.getPhase();
-    jsonEffect["base_signal"] = types::baseSignalToString.at(effect.getBaseSignal());
+  for (decltype(numEffects) eix = 0; eix < numEffects; eix++) {
+    auto effect = perception.getBasisEffectAt(static_cast<int>(eix));
+    auto jsonEffect = rapidjson::Value(rapidjson::kObjectType);
+    jsonEffect.AddMember(
+        "effect_type",
+        rapidjson::Value(types::effectTypeToString.at(effect.getEffectType()).c_str(),
+                         jsonTree.GetAllocator()),
+        jsonTree.GetAllocator());
+    jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());
+    jsonEffect.AddMember("position", effect.getPosition(), jsonTree.GetAllocator());
+    jsonEffect.AddMember("phase", effect.getPhase(), jsonTree.GetAllocator());
+    jsonEffect.AddMember(
+        "base_signal",
+        rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
+                         jsonTree.GetAllocator()),
+        jsonTree.GetAllocator());
 
-    auto jsonKeyframes = json::array();
+    auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
     auto numKeyframes = effect.getKeyframesSize();
-    for (uint32_t n = 0; n < numKeyframes; n++) {
-      const auto &keyframe = effect.getKeyframeAt((int)n);
-      auto jsonKeyframe = json::object();
+    for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
+      const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
+      auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
       if (keyframe.getRelativePosition().has_value()) {
-        jsonKeyframe["relative_position"] = keyframe.getRelativePosition().value();
+        jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
+                               jsonTree.GetAllocator());
       }
       if (keyframe.getAmplitudeModulation().has_value()) {
-        jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
+        jsonKeyframe.AddMember("amplitude_modulation", keyframe.getAmplitudeModulation().value(),
+                               jsonTree.GetAllocator());
       }
       if (keyframe.getFrequencyModulation().has_value()) {
-        jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
+        jsonKeyframe.AddMember("frequency_modulation", keyframe.getFrequencyModulation().value(),
+                               jsonTree.GetAllocator());
       }
-      jsonKeyframes.push_back(jsonKeyframe);
+      jsonKeyframes.PushBack(jsonKeyframe, jsonTree.GetAllocator());
     }
-    jsonEffect["keyframes"] = jsonKeyframes;
-    jsonLibrary.push_back(jsonEffect);
+    jsonEffect.AddMember("keyframes", jsonKeyframes, jsonTree.GetAllocator());
+    jsonLibrary.PushBack(jsonEffect, jsonTree.GetAllocator());
   }
 }
 
-auto IOJson::extractAvatars(types::Haptics &haptic, nlohmann::json &jsonAvatars) -> void {
+auto IOJson::extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatars,
+                            rapidjson::Document &jsonTree) -> void {
   auto numAvatars = haptic.getAvatarsSize();
-  for (uint32_t i = 0; i < numAvatars; i++) {
-    auto avatar = haptic.getAvatarAt((int)i);
-    auto jsonAvatar = json::object();
-    jsonAvatar["id"] = avatar.getId();
-    jsonAvatar["lod"] = avatar.getLod();
-    jsonAvatar["type"] = types::avatarTypeToString.at(avatar.getType());
+  for (decltype(numAvatars) aix = 0; aix < numAvatars; aix++) {
+    auto avatar = haptic.getAvatarAt(static_cast<int>(aix));
+    auto jsonAvatar = rapidjson::Value(rapidjson::kObjectType);
+    jsonAvatar.AddMember("id", avatar.getId(), jsonTree.GetAllocator());
+    jsonAvatar.AddMember("lod", avatar.getLod(), jsonTree.GetAllocator());
+    jsonAvatar.AddMember("type",
+                         rapidjson::Value(types::avatarTypeToString.at(avatar.getType()).c_str(),
+                                          jsonTree.GetAllocator()),
+                         jsonTree.GetAllocator());
     if (avatar.getMesh().has_value() && avatar.getType() == haptics::types::AvatarType::Custom) {
-      jsonAvatar["mesh"] = avatar.getMesh().value();
+      jsonAvatar.AddMember(
+          "mesh", rapidjson::Value(avatar.getMesh().value().c_str(), jsonTree.GetAllocator()),
+          jsonTree.GetAllocator());
     }
-    jsonAvatars.push_back(jsonAvatar);
+    jsonAvatars.PushBack(jsonAvatar, jsonTree.GetAllocator());
   }
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTracks) -> void {
+auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
+                           rapidjson::Document &jsonTree) -> void {
   auto numTracks = perception.getTracksSize();
-  for (uint32_t j = 0; j < numTracks; j++) {
-    haptics::types::Track track = perception.getTrackAt((int)j);
-    auto jsonTrack = json::object();
-    jsonTrack["id"] = track.getId();
-    jsonTrack["description"] = track.getDescription();
-    jsonTrack["gain"] = track.getGain();
-    jsonTrack["mixing_weight"] = track.getMixingWeight();
-    jsonTrack["body_part_mask"] = track.getBodyPartMask();
+  for (decltype(numTracks) tix = 0; tix < numTracks; tix++) {
+    haptics::types::Track track = perception.getTrackAt(static_cast<int>(tix));
+    auto jsonTrack = rapidjson::Value(rapidjson::kObjectType);
+    jsonTrack.AddMember("id", track.getId(), jsonTree.GetAllocator());
+    jsonTrack.AddMember("description",
+                        rapidjson::Value(track.getDescription().c_str(), jsonTree.GetAllocator()),
+                        jsonTree.GetAllocator());
+    jsonTrack.AddMember("gain", track.getGain(), jsonTree.GetAllocator());
+    jsonTrack.AddMember("mixing_weight", track.getMixingWeight(), jsonTree.GetAllocator());
+    jsonTrack.AddMember("body_part_mask", track.getBodyPartMask(), jsonTree.GetAllocator());
     if (track.getReferenceDeviceId().has_value()) {
-      jsonTrack["reference_device_id"] = track.getReferenceDeviceId().value();
+      jsonTrack.AddMember("reference_device_id", track.getReferenceDeviceId().value(),
+                          jsonTree.GetAllocator());
     }
     if (track.getFrequencySampling().has_value()) {
-      jsonTrack["frequency_sampling"] = track.getFrequencySampling().value();
+      jsonTrack.AddMember("frequency_sampling", track.getFrequencySampling().value(),
+                          jsonTree.GetAllocator());
     }
     if (track.getSampleCount().has_value()) {
-      jsonTrack["sample_count"] = track.getSampleCount().value();
+      jsonTrack.AddMember("sample_count", track.getSampleCount().value(), jsonTree.GetAllocator());
     }
     if (track.getDirection().has_value()) {
       types::Vector direction = track.getDirection().value();
@@ -676,119 +757,163 @@ auto IOJson::extractTracks(types::Perception &perception, nlohmann::json &jsonTr
       jsonTrack["actuator_target"] = jsonBodyPartTarget;
     }
 
-    auto jsonVertices = json::array();
+    auto jsonVertices = rapidjson::Value(rapidjson::kArrayType);
     auto numVertices = track.getVerticesSize();
-    for (uint32_t k = 0; k < numVertices; k++) {
-      jsonVertices.push_back(track.getVertexAt((int)k));
+    for (decltype(numVertices) vix = 0; vix < numVertices; vix++) {
+      jsonVertices.PushBack(track.getVertexAt(static_cast<int>(vix)), jsonTree.GetAllocator());
     }
     if (numVertices > 0) {
-      jsonTrack["vertices"] = jsonVertices;
+      jsonTrack.AddMember("vertices", jsonVertices, jsonTree.GetAllocator());
     }
 
-    auto jsonBands = json::array();
+    auto jsonBands = rapidjson::Value(rapidjson::kArrayType);
     auto numBands = track.getBandsSize();
-    for (uint32_t l = 0; l < numBands; l++) {
-      auto band = track.getBandAt((int)l);
-      auto jsonBand = json::object();
-      jsonBand["band_type"] = types::bandTypeToString.at(band.getBandType());
-      jsonBand["curve_type"] = types::curveTypeToString.at(band.getCurveType());
-      jsonBand["window_length"] = band.getWindowLength();
-      jsonBand["lower_frequency_limit"] = band.getLowerFrequencyLimit();
-      jsonBand["upper_frequency_limit"] = band.getUpperFrequencyLimit();
+    for (decltype(numBands) bix = 0; bix < numBands; bix++) {
+      auto band = track.getBandAt(static_cast<int>(bix));
+      auto jsonBand = rapidjson::Value(rapidjson::kObjectType);
+      jsonBand.AddMember("band_type",
+                         rapidjson::Value(types::bandTypeToString.at(band.getBandType()).c_str(),
+                                          jsonTree.GetAllocator()),
+                         jsonTree.GetAllocator());
+      jsonBand.AddMember("curve_type",
+                         rapidjson::Value(types::curveTypeToString.at(band.getCurveType()).c_str(),
+                                          jsonTree.GetAllocator()),
+                         jsonTree.GetAllocator());
+      jsonBand.AddMember("window_length", band.getWindowLength(), jsonTree.GetAllocator());
+      jsonBand.AddMember("lower_frequency_limit", band.getLowerFrequencyLimit(),
+                         jsonTree.GetAllocator());
+      jsonBand.AddMember("upper_frequency_limit", band.getUpperFrequencyLimit(),
+                         jsonTree.GetAllocator());
 
-      auto jsonEffects = json::array();
+      auto jsonEffects = rapidjson::Value(rapidjson::kArrayType);
       auto numEffects = band.getEffectsSize();
-      for (uint32_t m = 0; m < numEffects; m++) {
-        auto effect = band.getEffectAt((int)m);
-        auto jsonEffect = json::object();
+      for (decltype(numEffects) eix = 0; eix < numEffects; eix++) {
+        auto effect = band.getEffectAt(static_cast<int>(eix));
+        auto jsonEffect = rapidjson::Value(rapidjson::kObjectType);
 
-        jsonEffect["effect_type"] = types::effectTypeToString.at(effect.getEffectType());
-        jsonEffect["position"] = effect.getPosition();
+        jsonEffect.AddMember(
+            "effect_type",
+            rapidjson::Value(types::effectTypeToString.at(effect.getEffectType()).c_str(),
+                             jsonTree.GetAllocator()),
+            jsonTree.GetAllocator());
+        jsonEffect.AddMember("position", effect.getPosition(), jsonTree.GetAllocator());
         if (effect.getEffectType() == types::EffectType::Reference) {
-          jsonEffect["id"] = effect.getId();
+          jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());
         } else if (effect.getEffectType() == types::EffectType::Basis) {
-          jsonEffect["phase"] = effect.getPhase();
-          jsonEffect["base_signal"] = types::baseSignalToString.at(effect.getBaseSignal());
-          auto jsonKeyframes = json::array();
+          jsonEffect.AddMember("phase", effect.getPhase(), jsonTree.GetAllocator());
+          jsonEffect.AddMember(
+              "base_signal",
+              rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
+                               jsonTree.GetAllocator()),
+              jsonTree.GetAllocator());
+          auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
           auto numKeyframes = effect.getKeyframesSize();
-          for (uint32_t n = 0; n < numKeyframes; n++) {
-            const auto &keyframe = effect.getKeyframeAt((int)n);
-            auto jsonKeyframe = json::object();
+          for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
+            const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
+            auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
             if (keyframe.getRelativePosition().has_value()) {
-              jsonKeyframe["relative_position"] = keyframe.getRelativePosition().value();
+              jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
+                                     jsonTree.GetAllocator());
             }
             if (keyframe.getAmplitudeModulation().has_value()) {
-              jsonKeyframe["amplitude_modulation"] = keyframe.getAmplitudeModulation().value();
+              jsonKeyframe.AddMember("amplitude_modulation",
+                                     keyframe.getAmplitudeModulation().value(),
+                                     jsonTree.GetAllocator());
             }
             if (keyframe.getFrequencyModulation().has_value()) {
-              jsonKeyframe["frequency_modulation"] = keyframe.getFrequencyModulation().value();
+              jsonKeyframe.AddMember("frequency_modulation",
+                                     keyframe.getFrequencyModulation().value(),
+                                     jsonTree.GetAllocator());
             }
-            jsonKeyframes.push_back(jsonKeyframe);
+            jsonKeyframes.PushBack(jsonKeyframe, jsonTree.GetAllocator());
           }
-          jsonEffect["keyframes"] = jsonKeyframes;
+          jsonEffect.AddMember("keyframes", jsonKeyframes, jsonTree.GetAllocator());
         }
-        jsonEffects.push_back(jsonEffect);
+        jsonEffects.PushBack(jsonEffect, jsonTree.GetAllocator());
       }
-      jsonBand["effects"] = jsonEffects;
-      jsonBands.push_back(jsonBand);
+      jsonBand.AddMember("effects", jsonEffects, jsonTree.GetAllocator());
+      jsonBands.PushBack(jsonBand, jsonTree.GetAllocator());
     }
-    jsonTrack["bands"] = jsonBands;
-    jsonTracks.push_back(jsonTrack);
+    jsonTrack.AddMember("bands", jsonBands, jsonTree.GetAllocator());
+    jsonTracks.PushBack(jsonTrack, jsonTree.GetAllocator());
   }
 }
 
 auto IOJson::extractReferenceDevices(types::Perception &perception,
-                                     nlohmann::json &jsonReferenceDevices) -> void {
+                                     rapidjson::Value &jsonReferenceDevices,
+                                     rapidjson::Document &jsonTree) -> void {
   auto numReferenceDevices = perception.getReferenceDevicesSize();
-  for (uint32_t i = 0; i < numReferenceDevices; i++) {
-    auto referenceDevice = perception.getReferenceDeviceAt((int)i);
-    auto jsonReferenceDevice = json::object();
-    jsonReferenceDevice["id"] = referenceDevice.getId();
-    jsonReferenceDevice["name"] = referenceDevice.getName();
+  for (decltype(numReferenceDevices) rdix = 0; rdix < numReferenceDevices; rdix++) {
+    auto referenceDevice = perception.getReferenceDeviceAt(static_cast<int>(rdix));
+    auto jsonReferenceDevice = rapidjson::Value(rapidjson::kObjectType);
+    jsonReferenceDevice.AddMember("id", referenceDevice.getId(), jsonTree.GetAllocator());
+    jsonReferenceDevice.AddMember(
+        "name", rapidjson::Value(referenceDevice.getName().c_str(), jsonTree.GetAllocator()),
+        jsonTree.GetAllocator());
 
     if (referenceDevice.getBodyPartMask().has_value()) {
-      jsonReferenceDevice["body_part_mask"] = referenceDevice.getBodyPartMask().value();
+      jsonReferenceDevice.AddMember("body_part_mask", referenceDevice.getBodyPartMask().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getMaximumFrequency().has_value()) {
-      jsonReferenceDevice["maximum_frequency"] = referenceDevice.getMaximumFrequency().value();
+      jsonReferenceDevice.AddMember("maximum_frequency",
+                                    referenceDevice.getMaximumFrequency().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getMinimumFrequency().has_value()) {
-      jsonReferenceDevice["minimum_frequency"] = referenceDevice.getMinimumFrequency().value();
+      jsonReferenceDevice.AddMember("minimum_frequency",
+                                    referenceDevice.getMinimumFrequency().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getResonanceFrequency().has_value()) {
-      jsonReferenceDevice["resonance_frequency"] = referenceDevice.getResonanceFrequency().value();
+      jsonReferenceDevice.AddMember("resonance_frequency",
+                                    referenceDevice.getResonanceFrequency().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getMaximumAmplitude().has_value()) {
-      jsonReferenceDevice["maximum_amplitude"] = referenceDevice.getMaximumAmplitude().value();
+      jsonReferenceDevice.AddMember("maximum_amplitude",
+                                    referenceDevice.getMaximumAmplitude().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getImpedance().has_value()) {
-      jsonReferenceDevice["impedance"] = referenceDevice.getImpedance().value();
+      jsonReferenceDevice.AddMember("impedance", referenceDevice.getImpedance().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getMaximumVoltage().has_value()) {
-      jsonReferenceDevice["maximum_voltage"] = referenceDevice.getMaximumVoltage().value();
+      jsonReferenceDevice.AddMember("maximum_voltage", referenceDevice.getMaximumVoltage().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getMaximumCurrent().has_value()) {
-      jsonReferenceDevice["maximum_current"] = referenceDevice.getMaximumCurrent().value();
+      jsonReferenceDevice.AddMember("maximum_current", referenceDevice.getMaximumCurrent().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getMaximumDisplacement().has_value()) {
-      jsonReferenceDevice["maximum_displacement"] =
-          referenceDevice.getMaximumDisplacement().value();
+      jsonReferenceDevice.AddMember("maximum_displacement",
+                                    referenceDevice.getMaximumDisplacement().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getWeight().has_value()) {
-      jsonReferenceDevice["weight"] = referenceDevice.getWeight().value();
+      jsonReferenceDevice.AddMember("weight", referenceDevice.getWeight().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getSize().has_value()) {
-      jsonReferenceDevice["size"] = referenceDevice.getSize().value();
+      jsonReferenceDevice.AddMember("size", referenceDevice.getSize().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getCustom().has_value()) {
-      jsonReferenceDevice["custom"] = referenceDevice.getCustom().value();
+      jsonReferenceDevice.AddMember("custom", referenceDevice.getCustom().value(),
+                                    jsonTree.GetAllocator());
     }
     if (referenceDevice.getType().has_value()) {
-      jsonReferenceDevice["type"] =
-          types::actuatorTypeToString.at(referenceDevice.getType().value());
+      jsonReferenceDevice.AddMember(
+          "type",
+          rapidjson::Value(
+              types::actuatorTypeToString.at(referenceDevice.getType().value()).c_str(),
+              jsonTree.GetAllocator()),
+          jsonTree.GetAllocator());
     }
 
-    jsonReferenceDevices.push_back(jsonReferenceDevice);
+    jsonReferenceDevices.PushBack(jsonReferenceDevice, jsonTree.GetAllocator());
   }
 }
 

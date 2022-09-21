@@ -33,7 +33,18 @@
 
 #include <Encoder/include/AhapEncoder.h>
 #include <Tools/include/Tools.h>
+#include <algorithm>
+#include <cmath>
 #include <fstream>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 26812)
+#endif
+#include <rapidjson/istreamwrapper.h>
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 const double SEC_TO_MSEC = 1000.0;
 const float DEFAULT_AMPLITUDE = 0.5;
@@ -59,16 +70,22 @@ namespace haptics::encoder {
   }
 
   std::ifstream ifs(filename);
-  nlohmann::json json;
-  try {
-    json = nlohmann::json::parse(ifs);
-  } catch (const nlohmann::detail::parse_error &e) {
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Impossible to encode the given file due to JSON parsing issues" << std::endl;
+  rapidjson::IStreamWrapper isw(ifs);
+  rapidjson::Document json;
+  if (json.ParseStream<rapidjson::kParseTrailingCommasFlag>(isw).HasParseError()) {
+    std::cerr << "Invalid AHAP input file: JSON parsing error" << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (!json.IsObject()) {
+    std::cerr << "Invalid AHAP input file: not a JSON object" << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (!json.HasMember("Pattern") || !json["Pattern"].IsArray()) {
+    std::cerr << "Invalid AHAP input file: missing or invalid Pattern" << std::endl;
     return EXIT_FAILURE;
   }
 
-  nlohmann::json pattern = json.at("Pattern");
+  auto pattern = json["Pattern"].GetArray();
 
   std::vector<std::pair<int, double>> amplitudes;
   std::vector<std::pair<int, double>> frequencies;
@@ -78,18 +95,18 @@ namespace haptics::encoder {
   int ret = 0;
 
   // FOR LOOP ON KEYFRAMES
-  for (nlohmann::json e : pattern) {
-    if (e.contains("ParameterCurve")) {
-      if (e.at("ParameterCurve").at("ParameterID") == "HapticIntensityControl") {
-        ret = extractKeyframes(&(e.at("ParameterCurve")), &amplitudes);
+  for (auto &e : pattern) {
+    if (e.HasMember("ParameterCurve")) {
+      if (e["ParameterCurve"]["ParameterID"] == "HapticIntensityControl") {
+        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &amplitudes);
         if (ret != 0) {
           std::cerr << "ERROR IN AMPLITUDE EXTRACTION" << std::endl;
           return EXIT_FAILURE;
         }
       }
 
-      if (e.at("ParameterCurve").at("ParameterID") == "HapticSharpnessControl") {
-        ret = extractKeyframes(&(e.at("ParameterCurve")), &frequencies);
+      if (e["ParameterCurve"]["ParameterID"] == "HapticSharpnessControl") {
+        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &frequencies);
         if (ret != 0) {
           std::cerr << "ERROR IN FREQUENCY EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -98,19 +115,19 @@ namespace haptics::encoder {
     }
   }
 
-  for (nlohmann::json e : pattern) {
+  for (auto &e : pattern) {
 
-    if (e.contains("Event")) {
-      if (e.at("Event").at("EventType") == "HapticTransient") {
-        ret = extractTransients(&(e.at("Event")), &transients, &amplitudes, &frequencies);
+    if (e.HasMember("Event")) {
+      if (e["Event"]["EventType"] == "HapticTransient") {
+        ret = extractTransients(e["Event"].GetObject(), &transients, &amplitudes, &frequencies);
         if (ret != 0) {
           std::cerr << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
           return EXIT_FAILURE;
         }
       }
 
-      if (e.at("Event").at("EventType") == "HapticContinuous") {
-        ret = extractContinuous(&(e.at("Event")), &continuous, &amplitudes, &frequencies);
+      if (e["Event"]["EventType"] == "HapticContinuous") {
+        ret = extractContinuous(e["Event"].GetObject(), &continuous, &amplitudes, &frequencies);
         if (ret != 0) {
           std::cerr << "ERROR IN CONTINUOUS EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -161,27 +178,27 @@ namespace haptics::encoder {
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto AhapEncoder::extractKeyframes(nlohmann::json *parameterCurve,
+[[nodiscard]] auto AhapEncoder::extractKeyframes(const rapidjson::Value::Object &parameterCurve,
                                                  std::vector<std::pair<int, double>> *keyframes)
     -> int {
-  if (!parameterCurve->contains("Time") || !parameterCurve->at("Time").is_number() ||
-      !parameterCurve->contains("ParameterCurveControlPoints") ||
-      !parameterCurve->at("ParameterCurveControlPoints").is_array()) {
+  if (!parameterCurve.HasMember("Time") || !parameterCurve["Time"].IsNumber() ||
+      !parameterCurve.HasMember("ParameterCurveControlPoints") ||
+      !parameterCurve["ParameterCurveControlPoints"].IsArray()) {
     return EXIT_FAILURE;
   }
 
-  for (nlohmann::json kahap : parameterCurve->at("ParameterCurveControlPoints")) {
-    if (!kahap.contains("Time") || !kahap.at("Time").is_number() ||
-        !kahap.contains("ParameterValue") || !kahap.at("ParameterValue").is_number()) {
+  for (auto &kahap : parameterCurve["ParameterCurveControlPoints"].GetArray()) {
+    if (!kahap.HasMember("Time") || !kahap["Time"].IsNumber() ||
+        !kahap.HasMember("ParameterValue") || !kahap["ParameterValue"].IsNumber()) {
       continue;
     }
 
     std::pair<int, double> k;
     // TIME + curve offset
-    k.first = static_cast<int>(
-        (kahap.at("Time").get<double>() + parameterCurve->at("Time").get<double>()) * SEC_TO_MSEC);
+    k.first = static_cast<int>((kahap["Time"].GetDouble() + parameterCurve["Time"].GetDouble()) *
+                               SEC_TO_MSEC);
     // VALUE
-    k.second = kahap.at("ParameterValue").get<double>();
+    k.second = kahap["ParameterValue"].GetDouble();
 
     keyframes->push_back(k);
   }
@@ -190,19 +207,19 @@ namespace haptics::encoder {
 }
 
 [[nodiscard]] auto
-AhapEncoder::extractTransients(nlohmann::json *event,
+AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
                                std::vector<haptics::types::Effect> *transients,
                                const std::vector<std::pair<int, double>> *amplitudes,
                                const std::vector<std::pair<int, double>> *frequencies) -> int {
-  if (!event->contains("Time") || !event->at("Time").is_number() || !event->contains("EventType") ||
-      !event->at("EventType").is_string() ||
-      event->at("EventType").get<std::string>() != "HapticTransient" ||
-      !event->contains("EventParameters") || !event->at("EventParameters").is_array()) {
+  if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
+      !event["EventType"].IsString() ||
+      std::string(event["EventType"].GetString()) != "HapticTransient" ||
+      !event.HasMember("EventParameters") || !event["EventParameters"].IsArray()) {
     return EXIT_FAILURE;
   }
 
   haptics::types::Effect t = haptics::types::Effect(
-      static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
       haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
@@ -210,15 +227,15 @@ AhapEncoder::extractTransients(nlohmann::json *event,
   k.setFrequencyModulation(DEFAULT_FREQUENCY);
 
   // SET VALUES AS DEFINED
-  for (nlohmann::json param : event->at("EventParameters")) {
-    if (param.at("ParameterID") == "HapticIntensity") {
-      double amp = tools::genericNormalization(BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX,
-                                               ACTUAL_AMPLITUDE_MIN, ACTUAL_AMPLITUDE_MIN_T,
-                                               param.at("ParameterValue").get<double>());
+  for (auto &param : event["EventParameters"].GetArray()) {
+    if (param["ParameterID"] == "HapticIntensity") {
+      double amp =
+          tools::genericNormalization(BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX, ACTUAL_AMPLITUDE_MIN,
+                                      ACTUAL_AMPLITUDE_MIN_T, param["ParameterValue"].GetDouble());
       k.setAmplitudeModulation(static_cast<float>(amp));
     }
 
-    if (param.at("ParameterID") == "HapticSharpness") {
+    if (param["ParameterID"] == "HapticSharpness") {
       k.setFrequencyModulation(DEFAULT_FREQUENCY);
     }
   }
@@ -269,20 +286,20 @@ AhapEncoder::extractTransients(nlohmann::json *event,
 }
 
 [[nodiscard]] auto
-AhapEncoder::extractContinuous(nlohmann::json *event,
+AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
                                std::vector<haptics::types::Effect> *continuous,
                                const std::vector<std::pair<int, double>> *amplitudes,
                                const std::vector<std::pair<int, double>> *frequencies) -> int {
-  if (!event->contains("Time") || !event->at("Time").is_number() || !event->contains("EventType") ||
-      !event->at("EventType").is_string() ||
-      event->at("EventType").get<std::string>() != "HapticContinuous" ||
-      !event->contains("EventDuration") || !event->at("EventDuration").is_number() ||
-      !event->contains("EventParameters") || !event->at("EventParameters").is_array()) {
+  if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
+      !event["EventType"].IsString() ||
+      std::string(event["EventType"].GetString()) != "HapticContinuous" ||
+      !event.HasMember("EventDuration") || !event["EventDuration"].IsNumber() ||
+      !event.HasMember("EventParameters") || !event["EventParameters"].IsArray()) {
     return EXIT_FAILURE;
   }
 
   haptics::types::Effect c = haptics::types::Effect(
-      static_cast<int>(round(event->at("Time").get<double>() * SEC_TO_MSEC)), 0,
+      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
       haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
@@ -294,20 +311,20 @@ AhapEncoder::extractContinuous(nlohmann::json *event,
   double base_freq = BASE_FREQUENCY_MAX;
 
   k_end.setRelativePosition(
-      static_cast<int>(round(event->at("EventDuration").get<double>() * SEC_TO_MSEC)));
+      static_cast<int>(std::round(event["EventDuration"].GetDouble() * SEC_TO_MSEC)));
 
   // SET VALUES AS DEFINED
-  for (nlohmann::json param : event->at("EventParameters")) {
-    if (param.at("ParameterID") == "HapticIntensity") {
-      double amp = tools::genericNormalization(BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX,
-                                               ACTUAL_AMPLITUDE_MIN, ACTUAL_AMPLITUDE_MIN_C,
-                                               param.at("ParameterValue").get<double>());
+  for (auto &param : event["EventParameters"].GetArray()) {
+    if (param["ParameterID"] == "HapticIntensity") {
+      double amp =
+          tools::genericNormalization(BASE_AMPLITUDE_MIN, BASE_AMPLITUDE_MAX, ACTUAL_AMPLITUDE_MIN,
+                                      ACTUAL_AMPLITUDE_MIN_C, param["ParameterValue"].GetDouble());
       k_start.setAmplitudeModulation(static_cast<float>(amp));
       k_end.setAmplitudeModulation(k_start.getAmplitudeModulation());
     }
 
-    if (param.at("ParameterID") == "HapticSharpness") {
-      base_freq = param.at("ParameterValue").get<double>();
+    if (param["ParameterID"] == "HapticSharpness") {
+      base_freq = param["ParameterValue"].GetDouble();
       double freq =
           tools::genericNormalization(BASE_FREQUENCY_MIN, BASE_FREQUENCY_MAX, ACTUAL_FREQUENCY_MIN,
                                       ACTUAL_FREQUENCY_MAX, base_freq);
