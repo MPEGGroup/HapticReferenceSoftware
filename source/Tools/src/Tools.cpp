@@ -273,6 +273,10 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   double t = 0;
   int i = 0;
 
+  if (points.size() % 2 == 0) {
+    points.pop_back();
+  }
+
   while (i < static_cast<int>(points.size()) - 1) {
     dx1 = points[i + 1].first - points[i].first + 1;
     dx2 = points[i + 2].first - points[i].first + 1;

@@ -35,13 +35,13 @@
 
 namespace haptics::io {
 
-auto IOBinaryPrimitives::writeString(const std::string &text, std::ofstream &file) -> void {
+auto IOBinaryPrimitives::writeString(const std::string &text, std::ostream &file) -> void {
   std::string str = text;
   str.append(1, '\x00');
   file.write(str.c_str(), static_cast<int>(str.size()));
 }
 
-auto IOBinaryPrimitives::readString(std::ifstream &file) -> std::string {
+auto IOBinaryPrimitives::readString(std::istream &file) -> std::string {
   char c = 0;
   std::string str;
   while (file.get(c), c != '\0') {
