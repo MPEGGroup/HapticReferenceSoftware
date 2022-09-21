@@ -255,28 +255,24 @@ auto IOJson::loadTracks(const rapidjson::Value&jsonTracks, types::Perception &pe
     }
 
     types::Vector trackResolution{};
-    if (jsonTrack.contains("track_resolution") &&
+    if (jsonTrack.HasMember("track_resolution") &&
         loadVector(jsonTrack["track_resolution"], trackResolution)) {
       track.setTrackResolution(trackResolution);
     }
-    if (jsonTrack.contains("body_part_target") && jsonTrack["body_part_target"].is_array()) {
-      auto jsonBodyPartTarget = jsonTrack["body_part_target"];
+    if (jsonTrack.HasMember("body_part_target") && jsonTrack["body_part_target"].IsArray()) {
       std::vector<types::BodyPartTarget> bodyPartTarget;
-      for (auto itv = jsonBodyPartTarget.begin(); itv != jsonBodyPartTarget.end(); ++itv) {
-        auto tmp = itv.value();
-        if (itv.value().is_string()) {
-          bodyPartTarget.push_back(
-              types::stringToBodyPartTarget.at(itv.value().get<std::string>()));
+      for (const auto &itv : jsonTrack["body_part_target"].GetArray()) {
+        if (itv.IsString()) {
+          bodyPartTarget.push_back(types::stringToBodyPartTarget.at(itv.GetString()));
         }
       }
       track.setBodyPartTarget(bodyPartTarget);
     }
-    if (jsonTrack.contains("actuator_target") && jsonTrack["actuator_target"].is_array()) {
-      auto jsonActuactorTarget = jsonTrack["actuator_target"];
+    if (jsonTrack.HasMember("actuator_target") && jsonTrack["actuator_target"].IsArray()) {
       std::vector<types::Vector> actuatorTarget;
-      for (auto itv = jsonActuactorTarget.begin(); itv != jsonActuactorTarget.end(); ++itv) {
+      for (const auto &itv : jsonTrack["actuator_target"].GetArray()) {
         types::Vector target{};
-        if (itv.value().is_object() && loadVector(itv.value(), target)) {
+        if (itv.IsObject() && loadVector(itv.GetObject(), target)) {
           actuatorTarget.push_back(target);
         }
       }
@@ -562,14 +558,16 @@ auto IOJson::loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect 
   return true;
 }
 
-auto IOJson::loadVector(const nlohmann::json &jsonVector, types::Vector &vector) -> bool {
-  if (!(jsonVector.is_object() && jsonVector.contains("X") && jsonVector["X"].is_number_integer() &&
-        jsonVector.contains("Y") && jsonVector["Y"].is_number_integer() &&
-        jsonVector.contains("Z") && jsonVector["Z"].is_number_integer())) {
+auto IOJson::loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool {
+  if (!(jsonVector.IsObject() && jsonVector.HasMember("X") && jsonVector["X"].IsInt() &&
+        jsonVector.HasMember("Y") && jsonVector["Y"].IsInt() && jsonVector.HasMember("Z") &&
+        jsonVector["Z"].IsInt())) {
     return false;
   }
-  vector = types::Vector(jsonVector["X"].get<int8_t>(), jsonVector["Y"].get<int8_t>(),
-                         jsonVector["Z"].get<int8_t>());
+
+  vector = types::Vector(static_cast<int8_t>(jsonVector["X"].GetInt()),
+                         static_cast<int8_t>(jsonVector["Y"].GetInt()),
+                         static_cast<int8_t>(jsonVector["Z"].GetInt()));
   return true;
 }
 
@@ -732,29 +730,34 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &json
     }
     if (track.getDirection().has_value()) {
       types::Vector direction = track.getDirection().value();
-      extractVector(direction, jsonTrack["direction"]);
+      auto jsonDirection = rapidjson::Value(rapidjson::kObjectType);
+      extractVector(direction, jsonDirection, jsonTree);
+      jsonTrack.AddMember("direction", jsonDirection, jsonTree.GetAllocator());
     }
     if (track.getTrackResolution().has_value()) {
       types::Vector trackResolution = track.getTrackResolution().value();
-      extractVector(trackResolution, jsonTrack["track_resolution"]);
+      auto jsonTrackResolution = rapidjson::Value(rapidjson::kObjectType);
+      extractVector(trackResolution, jsonTrackResolution, jsonTree);
+      jsonTrack.AddMember("track_resolution", jsonTrackResolution, jsonTree.GetAllocator());
     }
     if (track.getBodyPartTarget().has_value()) {
-      auto jsonBodyPartTarget = json::array();
+      auto jsonBodyPartTarget = rapidjson::Value(rapidjson::kArrayType);
       std::vector<types::BodyPartTarget> bodyPartTargetList = track.getBodyPartTarget().value();
       for (types::BodyPartTarget &bodyPartTarget : bodyPartTargetList) {
-        jsonBodyPartTarget.push_back(types::bodyPartTargetToString.at(bodyPartTarget));
+        auto bpt_value = rapidjson::Value(types::bodyPartTargetToString.at(bodyPartTarget).c_str(), jsonTree.GetAllocator());
+        jsonBodyPartTarget.PushBack(bpt_value, jsonTree.GetAllocator());
       }
-      jsonTrack["body_part_target"] = jsonBodyPartTarget;
+      jsonTrack.AddMember("body_part_target", jsonBodyPartTarget, jsonTree.GetAllocator());
     }
     if (track.getActuatorTarget().has_value()) {
-      auto jsonBodyPartTarget = json::array();
+      auto jsonBodyPartTarget = rapidjson::Value(rapidjson::kArrayType);
       std::vector<types::Vector> actuatorTargetList = track.getActuatorTarget().value();
       for (types::Vector &actuatorTarget : actuatorTargetList) {
-        nlohmann::json jsonTarget;
-        extractVector(actuatorTarget, jsonTarget);
-        jsonBodyPartTarget.push_back(jsonTarget);
+        auto jsonTarget = rapidjson::Value(rapidjson::kObjectType);
+        extractVector(actuatorTarget, jsonTarget, jsonTree);
+        jsonBodyPartTarget.PushBack(jsonTarget, jsonTree.GetAllocator());
       }
-      jsonTrack["actuator_target"] = jsonBodyPartTarget;
+      jsonTrack.AddMember("actuator_target", jsonBodyPartTarget, jsonTree.GetAllocator());
     }
 
     auto jsonVertices = rapidjson::Value(rapidjson::kArrayType);
@@ -917,10 +920,11 @@ auto IOJson::extractReferenceDevices(types::Perception &perception,
   }
 }
 
-auto IOJson::extractVector(types::Vector &vector, nlohmann::json &jsonVector) -> void {
-  jsonVector = json::object();
-  jsonVector["X"] = vector.X;
-  jsonVector["Y"] = vector.Y;
-  jsonVector["Z"] = vector.Z;
+auto IOJson::extractVector(types::Vector &vector, rapidjson::Value &jsonVector,
+                           rapidjson::Document &jsonTree) -> void {
+  jsonVector = rapidjson::Value(rapidjson::kObjectType);
+  jsonVector.AddMember("X", vector.X, jsonTree.GetAllocator());
+  jsonVector.AddMember("Y", vector.Y, jsonTree.GetAllocator());
+  jsonVector.AddMember("Z", vector.Z, jsonTree.GetAllocator());
 }
 } // namespace haptics::io
