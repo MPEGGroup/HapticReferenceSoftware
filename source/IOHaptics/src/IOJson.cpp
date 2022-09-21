@@ -207,7 +207,7 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-auto IOJson::loadTracks(const rapidjson::Value&jsonTracks, types::Perception &perception) -> bool {
+auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (const auto &jtv : jsonTracks.GetArray()) {
     if (!jtv.IsObject()) {
@@ -280,8 +280,8 @@ auto IOJson::loadTracks(const rapidjson::Value&jsonTracks, types::Perception &pe
     }
 
     if (jsonTrack.HasMember("frequency_sampling") && jsonTrack["frequency_sampling"].IsUint()) {
-        auto frequencySampling = jsonTrack["frequency_sampling"].GetUint();
-        track.setFrequencySampling(frequencySampling);
+      auto frequencySampling = jsonTrack["frequency_sampling"].GetUint();
+      track.setFrequencySampling(frequencySampling);
     }
 
     if (jsonTrack.HasMember("sample_count") && jsonTrack["sample_count"].IsUint()) {
@@ -744,7 +744,8 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &json
       auto jsonBodyPartTarget = rapidjson::Value(rapidjson::kArrayType);
       std::vector<types::BodyPartTarget> bodyPartTargetList = track.getBodyPartTarget().value();
       for (types::BodyPartTarget &bodyPartTarget : bodyPartTargetList) {
-        auto bpt_value = rapidjson::Value(types::bodyPartTargetToString.at(bodyPartTarget).c_str(), jsonTree.GetAllocator());
+        auto bpt_value = rapidjson::Value(types::bodyPartTargetToString.at(bodyPartTarget).c_str(),
+                                          jsonTree.GetAllocator());
         jsonBodyPartTarget.PushBack(bpt_value, jsonTree.GetAllocator());
       }
       jsonTrack.AddMember("body_part_target", jsonBodyPartTarget, jsonTree.GetAllocator());
