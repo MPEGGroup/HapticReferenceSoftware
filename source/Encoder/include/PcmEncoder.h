@@ -144,7 +144,7 @@ struct EncodingConfig {
   auto static generateConfigParam(int bitrate = 2, bool kinestheticData = false) -> EncodingConfig {
 
     int wavelet_windowLength = WINDOW_LENGTH_2;
-    double curveFrequencyLimit = 0;
+    double curveFrequencyLimit = 72.5;
     if (kinestheticData) {
       if (bitrate <= BITR_2) {
         curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_2;

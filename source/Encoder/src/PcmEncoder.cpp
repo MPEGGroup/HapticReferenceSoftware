@@ -37,11 +37,6 @@
 
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
-using haptics::tools::akimaInterpolation;
-using haptics::tools::bezierInterpolation;
-using haptics::tools::bsplineInterpolation;
-using haptics::tools::cubicInterpolation;
-using haptics::tools::linearInterpolation2;
 using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
@@ -123,22 +118,22 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       if (config.curveFrequencyLimit > 0) {
         switch (myBand.getCurveType()) {
         case CurveType::Linear:
-          interpolationSignal = linearInterpolation2(points);
+          interpolationSignal = haptics::tools::linearInterpolation2(points);
           break;
         case CurveType::Cubic:
-          interpolationSignal = cubicInterpolation(points);
+          interpolationSignal = haptics::tools::cubicInterpolation(points);
           break;
         case CurveType::Akima:
-          interpolationSignal = akimaInterpolation(points);
+          interpolationSignal = haptics::tools::akimaInterpolation(points);
           break;
         case CurveType::Bezier:
-          interpolationSignal = bezierInterpolation(points);
+          interpolationSignal = haptics::tools::bezierInterpolation(points);
           break;
         case CurveType::Bspline:
-          interpolationSignal = bsplineInterpolation(points);
+          interpolationSignal = haptics::tools::bsplineInterpolation(points);
           break;
         default:
-          interpolationSignal = cubicInterpolation(points);
+          interpolationSignal = haptics::tools::cubicInterpolation(points);
           break;
         } // supposing only one effect with initial value 0
 
