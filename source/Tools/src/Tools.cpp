@@ -147,13 +147,12 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     d[j] = (c[j + 1] - c[j]) / 3 / h[j];
   }
 
-
   std::vector<double> output;
   double t = 0;
   int i = 0;
   while (t < x.back()) {
     double delta = t - x[i];
-    while (t <= x[i+1]) {
+    while (t <= x[i + 1]) {
       double amp = a[i] + b[i] * delta + c[i] * std::pow(delta, 2) + d[i] * std::pow(delta, 3);
       output.push_back(amp);
       t += 1;
@@ -278,7 +277,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     i += 2;
   }
 
-  Ybezier.push_back(points[size-1].second);
+  Ybezier.push_back(points[size - 1].second);
 
   return Ybezier;
 }
