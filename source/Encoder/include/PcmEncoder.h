@@ -54,6 +54,7 @@ static constexpr int BITBUDGET_64KBS = 66;
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
+static constexpr float DEFAULT_CUTOFF_FREQUENCY = 72.5;
 static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_2 = 20;
 static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_16 = 72.5;
 static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_64 = 72.5;
@@ -144,7 +145,7 @@ struct EncodingConfig {
   auto static generateConfigParam(int bitrate = 2, bool kinestheticData = false) -> EncodingConfig {
 
     int wavelet_windowLength = WINDOW_LENGTH_2;
-    double curveFrequencyLimit = 72.5;
+    double curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
     if (kinestheticData) {
       if (bitrate <= BITR_2) {
         curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_2;
