@@ -59,7 +59,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return std::fabs(a - b) <= std::numeric_limits<double>::epsilon() * threshold;
 }
 
-[[nodiscard]] auto linearInterpolation2(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto linearInterpolation2(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double> {
   std::vector<double> Ylinear;
   double t = 0;
@@ -79,7 +79,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return Ylinear;
 }
 
-[[nodiscard]] auto cubicInterpolation2(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto cubicInterpolation2(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double> {
   std::vector<double> Ylinear;
   double t = 0;
@@ -99,91 +99,70 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   }
   return Ylinear;
 }
-
-[[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto cubicInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double> {
+  std::vector<double> x;
+  std::vector<double> y;
+  for (auto point : points) {
+    x.push_back(point.first);
+    y.push_back(point.second);
+  }
+  auto n = points.size() - 1;
+  std::vector<double> a;
+  a.insert(a.begin(), y.begin(), y.end());
+  std::vector<double> b(n);
+  std::vector<double> d(n);
+  std::vector<double> h(n);
 
-  std::vector<int> xquery(points.back().first + 1);
-  std::vector<double> dx(points.size() - 1);
-  std::vector<double> dy(points.size() - 1);
-  std::vector<std::vector<double>> diag(3, std::vector<double>(dx.size() - 1));
-  std::vector<double> B(dx.size() - 1);
-  std::vector<std::vector<double>> A(points.size(), std::vector<double>(diag[0].size()));
-  std::vector<std::vector<double>> cofA(diag[0].size(), std::vector<double>(diag[0].size()));
-  std::vector<std::vector<double>> invA(diag[0].size(), std::vector<double>(diag[0].size()));
-  std::vector<double> DDg(points.size());
-
-  for (size_t i = 0; i < xquery.size(); i++) {
-    xquery[i] = static_cast<int>(i);
+  for (size_t i = 0; i < n; ++i) {
+    h[i] = x[i + 1] - x[i];
   }
 
-  for (size_t i = 0; i < dx.size(); i++) {
-    dx[i] = points[i + 1].first - points[i].first;
-    dy[i] = points[i + 1].second - points[i].second;
+  std::vector<double> alpha;
+  alpha.push_back(0);
+  for (size_t i = 1; i < n; ++i) {
+    alpha.push_back(3 * (a[i + 1] - a[i]) / h[i] - 3 * (a[i] - a[i - 1]) / h[i - 1]);
+  }
+  std::vector<double> c(n + 1);
+  std::vector<double> l(n + 1);
+  std::vector<double> mu(n + 1);
+  std::vector<double> z(n + 1);
+  l[0] = 1;
+  mu[0] = 0;
+  z[0] = 0;
+
+  for (size_t i = 1; i < n; ++i) {
+    l[i] = 2 * (x[i + 1] - x[i - 1]) - h[i - 1] * mu[i - 1];
+    mu[i] = h[i] / l[i];
+    z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
   }
 
-  for (size_t i = 0; i < diag[0].size(); i++) {
-    diag[0][i] = dx[i] / CUBIC_COEFFICIENT;
-    diag[1][i] = (dx[i] + dx[i + 1]) / 3;
-    diag[2][i] = dx[i + 1] / CUBIC_COEFFICIENT;
-    B[i] = dy[i + 1] / dx[i + 1] - dy[i] / dx[i];
+  l[n] = 1;
+  z[n] = 0;
+  c[n] = 0;
+
+  for (int j = static_cast<int>(n - 1); j >= 0; --j) {
+    c[j] = z[j] - mu[j] * c[j + 1];
+    b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2 * c[j]) / 3;
+    d[j] = (c[j + 1] - c[j]) / 3 / h[j];
   }
 
-  int count = 0;
-
-  for (size_t i = 0; i < diag[0].size(); i++) {
-    for (int j = 0; j < 3; j++) {
-      A[j + count][i] = diag[j][i];
+  std::vector<double> output;
+  double t = 0;
+  int i = 0;
+  while (t < x.back()) {
+    double delta = t - x[i];
+    while (t <= x[i + 1]) {
+      double amp = a[i] + b[i] * delta + c[i] * std::pow(delta, 2) + d[i] * std::pow(delta, 3);
+      output.push_back(amp);
+      t += 1;
     }
-    count++;
+    i++;
   }
-
-  A.erase(A.begin());
-  A.pop_back();
-
-  for (size_t i = 0; i < diag[0].size(); i++) {
-    A[i].push_back(B[i]);
-  }
-
-  double ratio = 0;
-
-  for (size_t i = 0; i < A.size(); i++) {
-    for (size_t j = 0; j < A.size(); j++) {
-      if (i != j) {
-        ratio = A[j][i] / A[i][i];
-        for (size_t k = 0; k < A.size() + 1; k++) {
-          A[j][k] = A[j][k] - ratio * A[i][k];
-        }
-      }
-    }
-  }
-
-  for (size_t i = 0; i < A.size(); i++) {
-    DDg[i + 1] = A[i][A.size()] / A[i][i];
-  }
-
-  std::vector<double> Ycubique(xquery.size());
-
-  for (size_t i = 0; i < xquery.size(); i++) {
-    size_t k = 0;
-
-    while (xquery[i] > points[k + 1].first) {
-      k++;
-    }
-
-    Ycubique[i] =
-        (DDg[k] / CUBIC_COEFFICIENT) * (std::pow((points[k + 1].first - xquery[i]), 3) / dx[k] -
-                                        dx[k] * (points[k + 1].first - xquery[i])) +
-        (DDg[k + 1] / CUBIC_COEFFICIENT) * (std::pow((xquery[i] - points[k].first), 3) / dx[k] -
-                                            dx[k] * (xquery[i] - points[k].first)) +
-        points[k].second * (points[k + 1].first - xquery[i]) / dx[k] +
-        points[k + 1].second * (xquery[i] - points[k].first) / dx[k];
-  }
-
-  return Ycubique;
+  return output;
 }
 
-[[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto akimaInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double> {
   auto n = points.size();
   std::vector<double> dx(n - 1);
@@ -261,7 +240,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return Yakima;
 }
 
-[[nodiscard]] auto bezierInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto bezierInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double> {
 
   std::vector<double> Ybezier;
@@ -273,11 +252,12 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   double t = 0;
   int i = 0;
 
-  if (points.size() % 2 == 0) {
-    points.pop_back();
+  auto size = points.size();
+  if (size % 2 == 0) {
+    size--;
   }
 
-  while (i < static_cast<int>(points.size()) - 1) {
+  while (i < static_cast<int>(size) - 1) {
     dx1 = points[i + 1].first - points[i].first + 1;
     dx2 = points[i + 2].first - points[i].first + 1;
     f0 = points[i].second;
@@ -297,12 +277,12 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
     i += 2;
   }
 
-  Ybezier.push_back(points.back().second);
+  Ybezier.push_back(points[size - 1].second);
 
   return Ybezier;
 }
 
-[[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto bsplineInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double> {
   auto p = static_cast<int>(points.size());
   auto n = points.back().first;
@@ -376,7 +356,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return Ybspline;
 }
 
-[[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
+[[nodiscard]] auto interpolationCodec(const std::vector<std::pair<int, double>> &points,
                                       types::CurveType curveType) -> std::vector<double> {
   std::vector<double> interpolation;
   double t = 0;

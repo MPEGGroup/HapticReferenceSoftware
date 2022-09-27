@@ -37,7 +37,6 @@
 
 using haptics::encoder::WaveletEncoder;
 using haptics::filterbank::Filterbank;
-using haptics::tools::interpolationCodec;
 using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
@@ -70,6 +69,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   std::vector<double> signal;
   std::vector<double> filteredSignal;
   std::vector<std::pair<int, double>> points;
+  std::vector<double> interpolationSignal;
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   // init of wavelet encoding
   Band waveletBand;
@@ -116,7 +116,26 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
 
       if (config.curveFrequencyLimit > 0) {
-        std::vector<double> interpolationSignal = interpolationCodec(points, myBand.getCurveType());
+        switch (myBand.getCurveType()) {
+        case CurveType::Linear:
+          interpolationSignal = haptics::tools::linearInterpolation2(points);
+          break;
+        case CurveType::Cubic:
+          interpolationSignal = haptics::tools::cubicInterpolation(points);
+          break;
+        case CurveType::Akima:
+          interpolationSignal = haptics::tools::akimaInterpolation(points);
+          break;
+        case CurveType::Bezier:
+          interpolationSignal = haptics::tools::bezierInterpolation(points);
+          break;
+        case CurveType::Bspline:
+          interpolationSignal = haptics::tools::bsplineInterpolation(points);
+          break;
+        default:
+          interpolationSignal = haptics::tools::cubicInterpolation(points);
+          break;
+        } // supposing only one effect with initial value 0
 
         std::vector<double> differenceSignal;
         for (size_t i = 0; i < filteredSignal.size(); i++) {
