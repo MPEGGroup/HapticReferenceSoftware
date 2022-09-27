@@ -75,9 +75,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       sortedRepeatEvents.insert(it, repeatEvent);
     }
 
-    auto repeatTree = new RepeatNode{nullptr, nullptr, {}, {}};
+    auto *repeatTree = new RepeatNode{nullptr, nullptr, {}, {}};
     for (pugi::xml_node &repeatEvent : sortedRepeatEvents) {
-      auto currentNode = new RepeatNode{&repeatEvent, repeatTree, {}, {}};
+      auto *currentNode = new RepeatNode{&repeatEvent, repeatTree, {}, {}};
       RepeatNode *researchNode = repeatTree;
       bool continue_search = false;
       do {
