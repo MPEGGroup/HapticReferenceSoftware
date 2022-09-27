@@ -63,7 +63,14 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     pugi::xml_object_range<pugi::xml_named_node_iterator> repeatEvents = IvsEncoder::getRepeatEvents(&timeline);
     std::vector<pugi::xml_node> sortedRepeatEvents;
     for (pugi::xml_node &repeatEvent : repeatEvents) {
-      auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent, [](pugi::xml_node a, pugi::xml_node b) -> bool { return IvsEncoder::getTime(&a) <= IvsEncoder::getTime(&b); });
+      auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent,
+                                 [](pugi::xml_node a, pugi::xml_node b) -> bool {
+                                   int time_a = IvsEncoder::getTime(&a);
+                                   int time_b = IvsEncoder::getTime(&b);
+                                   return time_a == time_b ? IvsEncoder::getDuration(&a) >=
+                                                                 IvsEncoder::getDuration(&b)
+                                                           : time_a <= time_b;
+                                 });
       sortedRepeatEvents.insert(it, repeatEvent);
     }
 
