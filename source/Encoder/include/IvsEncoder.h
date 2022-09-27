@@ -91,7 +91,7 @@ private:
   static const int MIN_FREQUENCY = 0;
   static const int MAX_FREQUENCY = 1000;
   static const int MAGSWEEP_FREQUENCY = 170;
-  
+
   struct RepeatNode {
     pugi::xml_node *value;
     RepeatNode *father;

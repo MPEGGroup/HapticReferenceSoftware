@@ -60,7 +60,8 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     };
     myTrack = out.getTrackAt(trackId);
 
-    pugi::xml_object_range<pugi::xml_named_node_iterator> repeatEvents = IvsEncoder::getRepeatEvents(&timeline);
+    pugi::xml_object_range<pugi::xml_named_node_iterator> repeatEvents =
+        IvsEncoder::getRepeatEvents(&timeline);
     std::vector<pugi::xml_node> sortedRepeatEvents;
     for (pugi::xml_node &repeatEvent : repeatEvents) {
       auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent,
@@ -95,7 +96,8 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 
     pugi::xml_node basisEffect = {};
     std::vector<haptics::types::Effect> myEffects;
-    pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects = IvsEncoder::getBasisEffects(&doc);
+    pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
+        IvsEncoder::getBasisEffects(&doc);
     for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&timeline)) {
       if (!IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, basisEffect)) {
         continue;
