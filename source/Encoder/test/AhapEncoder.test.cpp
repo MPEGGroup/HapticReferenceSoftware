@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2021, ISO/IEC
+ * Copyright (c) 2010-2022, ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,56 +33,66 @@
 
 #include <Encoder/include/AhapEncoder.h>
 #include <catch2/catch.hpp>
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
 
 using haptics::encoder::AhapEncoder;
 
 TEST_CASE("extractKeyframes with ParameterCurveControlPoints not set", "[extractKeyframes]") {
-  const std::string testingParameterID = "HapticIntensityControl";
+  const char *testingParameterID = "HapticIntensityControl";
   const float testingTime = 42.358;
 
-  nlohmann::json testingParameterCurve = nlohmann::json::object();
-  testingParameterCurve["ParameterID"] = testingParameterID;
-  testingParameterCurve["Time"] = testingTime;
+  auto testingParameterCurve = rapidjson::Document(rapidjson::kObjectType);
+  testingParameterCurve.AddMember("ParameterID", rapidjson::StringRef(testingParameterID),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("Time", testingTime, testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> resKeyframes;
-  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+  int res = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes);
 
   REQUIRE(res == EXIT_FAILURE);
 }
 
 TEST_CASE("extractKeyframes with empty ParameterCurveControlPoints", "[extractKeyframes]") {
-  const std::string testingParameterID = "HapticIntensityControl";
+  const char *testingParameterID = "HapticIntensityControl";
   const float testingTime = 42.358;
 
-  nlohmann::json testingParameterCurve = nlohmann::json::object();
-  testingParameterCurve["ParameterID"] = testingParameterID;
-  testingParameterCurve["Time"] = testingTime;
-  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::array();
+  auto testingParameterCurve = rapidjson::Document(rapidjson::kObjectType);
+  testingParameterCurve.AddMember("ParameterID", rapidjson::StringRef(testingParameterID),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("Time", testingTime, testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("ParameterCurveControlPoints",
+                                  rapidjson::Value(rapidjson::kArrayType),
+                                  testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> resKeyframes;
-  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+  int res = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes);
 
   REQUIRE(res == EXIT_SUCCESS);
   CHECK(resKeyframes.empty());
 }
 
 TEST_CASE("extractKeyframes with ParameterCurveControlPoints", "[extractKeyframes]") {
-  const std::string testingParameterID = "HapticSharpnessControl";
+  const char *testingParameterID = "HapticSharpnessControl";
   const float testingTime = 42.358;
   const std::vector<std::pair<float, float>> testingControlPoints = {{35, .05}, {-5.2, 114.05}};
 
-  nlohmann::json testingParameterCurve = nlohmann::json::object();
-  testingParameterCurve["ParameterID"] = testingParameterID;
-  testingParameterCurve["Time"] = testingTime;
-  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::array();
+  auto testingParameterCurve = rapidjson::Document(rapidjson::kObjectType);
+  testingParameterCurve.AddMember("ParameterID", rapidjson::StringRef(testingParameterID),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("Time", testingTime, testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("ParameterCurveControlPoints",
+                                  rapidjson::Value(rapidjson::kArrayType),
+                                  testingParameterCurve.GetAllocator());
   for (auto controlPoint : testingControlPoints) {
-    testingParameterCurve["ParameterCurveControlPoints"].push_back(
-        {{"Time", controlPoint.first}, {"ParameterValue", controlPoint.second}});
+    testingParameterCurve["ParameterCurveControlPoints"].PushBack(
+        rapidjson::Value(rapidjson::kObjectType)
+            .AddMember("Time", controlPoint.first, testingParameterCurve.GetAllocator())
+            .AddMember("ParameterValue", controlPoint.second, testingParameterCurve.GetAllocator()),
+        testingParameterCurve.GetAllocator());
   }
 
   std::vector<std::pair<int, double>> res;
-  int resExitCode = AhapEncoder::extractKeyframes(&testingParameterCurve, &res);
+  int resExitCode = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &res);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == testingControlPoints.size());
@@ -94,47 +104,73 @@ TEST_CASE("extractKeyframes with ParameterCurveControlPoints", "[extractKeyframe
 }
 
 TEST_CASE("extractKeyframes with incorrect ParameterCurveControlPoints", "[extractKeyframes]") {
-  const std::string testingParameterID = "HapticIntensityControl";
+  const char *testingParameterID = "HapticIntensityControl";
   const float testingTime = 42.358;
   const std::vector<std::pair<float, float>> testingControlPoints = {{35, .05}, {-5.2, 114.05}};
 
-  nlohmann::json testingParameterCurve = nlohmann::json::object();
-  testingParameterCurve["ParameterID"] = testingParameterID;
-  testingParameterCurve["Time"] = testingTime;
-  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::object();
-  testingParameterCurve["ParameterCurveControlPoints"]["Time"] = 0;
-  testingParameterCurve["ParameterCurveControlPoints"]["ParameterValue"] = 0;
+  auto testingParameterCurve = rapidjson::Document(rapidjson::kObjectType);
+  testingParameterCurve.AddMember("ParameterID", rapidjson::StringRef(testingParameterID),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("Time", testingTime, testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("ParameterCurveControlPoints",
+                                  rapidjson::Value(rapidjson::kObjectType),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve["ParameterCurveControlPoints"].AddMember(
+      "Time", 0, testingParameterCurve.GetAllocator());
+  testingParameterCurve["ParameterCurveControlPoints"].AddMember(
+      "ParameterValue", 0, testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> resKeyframes;
-  int res = AhapEncoder::extractKeyframes(&testingParameterCurve, &resKeyframes);
+  int res = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes);
 
   REQUIRE(res == EXIT_FAILURE);
 }
 
 TEST_CASE("extractKeyframes with incorrect ControlPoints", "[extractKeyframes]") {
-  const std::string testingParameterID = "HapticSharpnessControl";
+  const char *testingParameterID = "HapticSharpnessControl";
   const float testingTime = 42.358;
   const std::vector<std::pair<float, float>> testingControlPoints = {{}};
   const std::vector<float> testingIncorrectTime = {4536};
-  const nlohmann::json testingIncorrectParameterValue = nlohmann::json::object();
+  const auto testingIncorrectParameterValue = rapidjson::Value(rapidjson::kObjectType);
 
-  nlohmann::json testingParameterCurve = nlohmann::json::object();
-  testingParameterCurve["ParameterID"] = testingParameterID;
-  testingParameterCurve["Time"] = testingTime;
-  testingParameterCurve["ParameterCurveControlPoints"] = nlohmann::json::array();
-  testingParameterCurve["ParameterCurveControlPoints"].push_back(
-      {{"Time", testingControlPoints.at(0).first}});
+  auto testingParameterCurve = rapidjson::Document(rapidjson::kObjectType);
+  testingParameterCurve.AddMember("ParameterID", rapidjson::StringRef(testingParameterID),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("Time", testingTime, testingParameterCurve.GetAllocator());
+  testingParameterCurve.AddMember("ParameterCurveControlPoints",
+                                  rapidjson::Value(rapidjson::kArrayType),
+                                  testingParameterCurve.GetAllocator());
+  testingParameterCurve["ParameterCurveControlPoints"].PushBack(
+      rapidjson::Value(rapidjson::kObjectType)
+          .AddMember("Time", testingControlPoints.at(0).first,
+                     testingParameterCurve.GetAllocator()),
+      testingParameterCurve.GetAllocator());
   for (auto controlPoint : testingControlPoints) {
-    testingParameterCurve["ParameterCurveControlPoints"].push_back(
-        {{"Time", controlPoint.first}, {"ParameterValue", controlPoint.second}});
+    testingParameterCurve["ParameterCurveControlPoints"].PushBack(
+        rapidjson::Value(rapidjson::kObjectType)
+            .AddMember("Time", controlPoint.first, testingParameterCurve.GetAllocator())
+            .AddMember("ParameterValue", controlPoint.second, testingParameterCurve.GetAllocator()),
+        testingParameterCurve.GetAllocator());
   }
-  testingParameterCurve["ParameterCurveControlPoints"].push_back(
-      {{"Time", testingIncorrectTime}, {"ParameterValue", testingIncorrectParameterValue}});
-  testingParameterCurve["ParameterCurveControlPoints"].push_back(
-      {{"ParameterValue", testingControlPoints.at(0).second}});
+  testingParameterCurve["ParameterCurveControlPoints"].PushBack(
+      rapidjson::Value(rapidjson::kObjectType)
+          .AddMember("Time",
+                     rapidjson::Value(rapidjson::kArrayType)
+                         .PushBack(testingIncorrectTime[0], testingParameterCurve.GetAllocator()),
+                     testingParameterCurve.GetAllocator())
+          .AddMember("ParameterValue",
+                     rapidjson::Value(testingIncorrectParameterValue,
+                                      testingParameterCurve.GetAllocator()),
+                     testingParameterCurve.GetAllocator()),
+      testingParameterCurve.GetAllocator());
+  testingParameterCurve["ParameterCurveControlPoints"].PushBack(
+      rapidjson::Value(rapidjson::kObjectType)
+          .AddMember("ParameterValue", testingControlPoints[0].second,
+                     testingParameterCurve.GetAllocator()),
+      testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> res;
-  int resExitCode = AhapEncoder::extractKeyframes(&testingParameterCurve, &res);
+  int resExitCode = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &res);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == testingControlPoints.size());
@@ -146,68 +182,92 @@ TEST_CASE("extractKeyframes with incorrect ControlPoints", "[extractKeyframes]")
 }
 
 TEST_CASE("extractContinuous without duration", "[extractContinuous]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator()),
+      testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 TEST_CASE("extractContinuous without time", "[extractContinuous]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingDuration = 0.25;
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["EventDuration"] = testingDuration;
-  testingContinuous["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
+  testingContinuous.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator()),
+      testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 TEST_CASE("extractContinuous without event parameters", "[extractContinuous]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingDuration = 0.25;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventDuration"] = testingDuration;
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
@@ -218,53 +278,74 @@ TEST_CASE("extractContinuous without event type", "[extractContinuous]") {
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventDuration"] = testingDuration;
-  testingContinuous["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
+  testingContinuous.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator()),
+      testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 TEST_CASE("extractContinuous with incorrect event type", "[extractContinuous]") {
-  const std::string testingEventType = "HapticTransient";
+  const char *testingEventType = "HapticTransient";
   const float testingTime = 0.015;
   const float testingDuration = 0.25;
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventDuration"] = testingDuration;
-  testingContinuous["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
+  testingContinuous.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator()),
+      testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("extractContinuous without modulation function", "[extractContinuous]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingDuration = 0.25;
   const float testingIntensity = 1;
@@ -273,21 +354,32 @@ TEST_CASE("extractContinuous without modulation function", "[extractContinuous]"
   const float expectedAmplitude = 0.6138;
   const int expectedFrequency = 65;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventDuration"] = testingDuration;
-  testingContinuous["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
+  testingContinuous.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator()),
+      testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == 1);
@@ -318,24 +410,27 @@ TEST_CASE("extractContinuous without modulation function", "[extractContinuous]"
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("extractContinuous without modulation function and default values",
           "[extractContinuous]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingDuration = 0.25;
 
   const float expectedAmplitude = 0.5;
   const int expectedFrequency = 90;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventDuration"] = testingDuration;
-  testingContinuous["EventParameters"] = nlohmann::json::array();
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventParameters", rapidjson::Value(rapidjson::kArrayType),
+                              testingContinuous.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == 1);
@@ -365,29 +460,40 @@ TEST_CASE("extractContinuous without modulation function and default values",
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("extractContinuous with modulation function", "[extractContinuous]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingDuration = 0.25;
   const float testingIntensity = 1;
   const float testingSharpness = 0;
 
-  nlohmann::json testingContinuous = nlohmann::json::object();
-  testingContinuous["EventType"] = testingEventType;
-  testingContinuous["Time"] = testingTime;
-  testingContinuous["EventDuration"] = testingDuration;
-  testingContinuous["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingContinuous = rapidjson::Document(rapidjson::kObjectType);
+  testingContinuous.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                              testingContinuous.GetAllocator());
+  testingContinuous.AddMember("Time", testingTime, testingContinuous.GetAllocator());
+  testingContinuous.AddMember("EventDuration", testingDuration, testingContinuous.GetAllocator());
+  testingContinuous.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingContinuous.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingContinuous.GetAllocator()),
+              testingContinuous.GetAllocator()),
+      testingContinuous.GetAllocator());
 
   const std::vector<std::pair<int, double>> testingAmplitudeModulation = {{10, 0}, {100, 1}};
   const std::vector<std::pair<int, double>> testingFrequencyModulation = {
       {90, 0}, {200, 1}, {300, 0}};
 
   std::vector<haptics::types::Effect> res;
-  int resExitCode = AhapEncoder::extractContinuous(
-      &testingContinuous, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+  int resExitCode =
+      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                     &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == 1);
@@ -447,40 +553,51 @@ TEST_CASE("extractContinuous with modulation function", "[extractContinuous]") {
 }
 
 TEST_CASE("extractTransients without time", "[extractTransients]") {
-  const std::string testingEventType = "HapticTransient";
+  const char *testingEventType = "HapticTransient";
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["EventType"] = testingEventType;
-  testingTransient["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                             testingTransient.GetAllocator());
+  testingTransient.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator()),
+      testingTransient.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 TEST_CASE("extractTransients without event parameters", "[extractTransients]") {
-  const std::string testingEventType = "HapticTransient";
+  const char *testingEventType = "HapticTransient";
   const float testingTime = 0.015;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["EventType"] = testingEventType;
-  testingTransient["Time"] = testingTime;
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                             testingTransient.GetAllocator());
+  testingTransient.AddMember("Time", testingTime, testingTransient.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
@@ -490,68 +607,97 @@ TEST_CASE("extractTransients without event type", "[extractTransients]") {
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["Time"] = testingTime;
-  testingTransient["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("Time", testingTime, testingTransient.GetAllocator());
+  testingTransient.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator()),
+      testingTransient.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 TEST_CASE("extractTransients with incorrect event type", "[extractTransients]") {
-  const std::string testingEventType = "HapticContinuous";
+  const char *testingEventType = "HapticContinuous";
   const float testingTime = 0.015;
   const float testingIntensity = 0.8;
   const float testingSharpness = 0.4;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["EventType"] = testingEventType;
-  testingTransient["Time"] = testingTime;
-  testingTransient["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                             testingTransient.GetAllocator());
+  testingTransient.AddMember("Time", testingTime, testingTransient.GetAllocator());
+  testingTransient.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator()),
+      testingTransient.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("extractTransients without modulation function", "[extractTransients]") {
-  const std::string testingEventType = "HapticTransient";
+  const char *testingEventType = "HapticTransient";
   const float testingTime = 0.015;
   const float testingIntensity = 1;
   const float testingSharpness = 0.5;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["EventType"] = testingEventType;
-  testingTransient["Time"] = testingTime;
-  testingTransient["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                             testingTransient.GetAllocator());
+  testingTransient.AddMember("Time", testingTime, testingTransient.GetAllocator());
+  testingTransient.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator()),
+      testingTransient.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == 1);
@@ -573,19 +719,21 @@ TEST_CASE("extractTransients without modulation function", "[extractTransients]"
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("extractTransients without modulation function and default values",
           "[extractTransients]") {
-  const std::string testingEventType = "HapticTransient";
+  const char *testingEventType = "HapticTransient";
   const float testingTime = 0.015;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["EventType"] = testingEventType;
-  testingTransient["Time"] = testingTime;
-  testingTransient["EventParameters"] = nlohmann::json::array();
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                             testingTransient.GetAllocator());
+  testingTransient.AddMember("Time", testingTime, testingTransient.GetAllocator());
+  testingTransient.AddMember("EventParameters", rapidjson::Value(rapidjson::kArrayType),
+                             testingTransient.GetAllocator());
 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == 1);
@@ -606,25 +754,35 @@ TEST_CASE("extractTransients without modulation function and default values",
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("extractTransients with modulation function", "[extractTransients]") {
-  const std::string testingEventType = "HapticTransient";
+  const char *testingEventType = "HapticTransient";
   const float testingTime = 0.015;
   const float testingIntensity = 1;
   const float testingSharpness = 0.5;
 
-  nlohmann::json testingTransient = nlohmann::json::object();
-  testingTransient["EventType"] = testingEventType;
-  testingTransient["Time"] = testingTime;
-  testingTransient["EventParameters"] =
-      (nlohmann::json::array)({{{"ParameterID", "HapticIntensity"},
-                                {"ParameterValue", testingIntensity}},
-                               {{"ParameterID", "HapticSharpness"},
-                                {"ParameterValue", testingSharpness}}});
+  auto testingTransient = rapidjson::Document(rapidjson::kObjectType);
+  testingTransient.AddMember("EventType", rapidjson::StringRef(testingEventType),
+                             testingTransient.GetAllocator());
+  testingTransient.AddMember("Time", testingTime, testingTransient.GetAllocator());
+  testingTransient.AddMember(
+      "EventParameters",
+      rapidjson::Value(rapidjson::kArrayType)
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticIntensity", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingIntensity, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator())
+          .PushBack(
+              rapidjson::Value(rapidjson::kObjectType)
+                  .AddMember("ParameterID", "HapticSharpness", testingTransient.GetAllocator())
+                  .AddMember("ParameterValue", testingSharpness, testingTransient.GetAllocator()),
+              testingTransient.GetAllocator()),
+      testingTransient.GetAllocator());
 
   const std::vector<std::pair<int, double>> testingAmplitudeModulation = {{10, 0}, {100, 0.5}};
   const std::vector<std::pair<int, double>> testingFrequencyModulation = {};
   std::vector<haptics::types::Effect> res;
   int resExitCode = AhapEncoder::extractTransients(
-      &testingTransient, &res, &testingAmplitudeModulation, &testingFrequencyModulation);
+      testingTransient.GetObject(), &res, &testingAmplitudeModulation, &testingFrequencyModulation);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == 1);
