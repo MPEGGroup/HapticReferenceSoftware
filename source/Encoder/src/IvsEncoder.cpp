@@ -75,23 +75,23 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
       sortedRepeatEvents.insert(it, repeatEvent);
     }
 
-    auto *repeatTree = new RepeatNode{nullptr, nullptr, {}, {}};
+    auto repeatTree = RepeatNode{nullptr, {}, {}};
     for (pugi::xml_node &repeatEvent : sortedRepeatEvents) {
-      auto *currentNode = new RepeatNode{&repeatEvent, repeatTree, {}, {}};
-      RepeatNode *researchNode = repeatTree;
+      auto currentNode = RepeatNode{&repeatEvent, {}, {}};
+      RepeatNode &researchNode = repeatTree;
       bool continue_search = false;
       do {
-        if (researchNode->children.empty()) {
+        if (researchNode.children.empty()) {
           break;
         }
 
-        auto *lastChild = researchNode->children.back();
-        continue_search = isRepeatNested(lastChild->value, currentNode->value);
+        auto lastChild = researchNode.children.back();
+        continue_search = isRepeatNested(lastChild.value, currentNode.value);
         if (continue_search) {
-          currentNode->father = researchNode = lastChild;
+          researchNode = lastChild;
         }
       } while (continue_search);
-      researchNode->children.push_back(currentNode);
+      researchNode.children.push_back(currentNode);
     }
 
     pugi::xml_node basisEffect = {};
@@ -105,13 +105,13 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
 
       haptics::types::Effect myEffect{};
       if (IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &myEffect)) {
-        repeatTree->pushEffect(myEffect);
+        repeatTree.pushEffect(myEffect);
       }
     }
 
     std::vector<types::Effect> repeatedEffectsSet;
     int delay = 0;
-    repeatTree->linearize(repeatedEffectsSet, delay);
+    repeatTree.linearize(repeatedEffectsSet, delay);
 
     for (haptics::types::Effect &myEffect : repeatedEffectsSet) {
       IvsEncoder::injectIntoBands(myEffect, myTrack);
@@ -134,7 +134,6 @@ auto IvsEncoder::isRepeatNested(int parent_start, int parent_end, int child_star
   return parent_start <= child_start && child_start < parent_end;
 }
 
-#pragma region TMP
 auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> void {
   haptics::types::Band *myBand =
       track.findBandAvailable(effect.getPosition(),
@@ -408,5 +407,4 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
 
   return f;
 }
-#pragma endregion
 } // namespace haptics::encoder

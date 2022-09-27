@@ -94,9 +94,8 @@ private:
 
   struct RepeatNode {
     pugi::xml_node *value;
-    RepeatNode *father;
     std::vector<types::Effect> myEffects;
-    std::vector<RepeatNode *> children;
+    std::vector<RepeatNode> children;
 
     auto pushEffect(types::Effect &myEffect) -> bool {
       if (value != nullptr) {
@@ -109,7 +108,7 @@ private:
       }
 
       for (auto it = children.begin(); it < children.end(); it++) {
-        if ((*it)->pushEffect(myEffect)) {
+        if (it->pushEffect(myEffect)) {
           return true;
         }
       }
@@ -135,7 +134,7 @@ private:
       std::vector<types::Effect> linearized_effects;
       for (; myEffects_it < myEffects.end() && children_it < children.end();) {
         int repeat_position =
-            (*children_it)->value == nullptr ? 0 : IvsEncoder::getTime((*children_it)->value);
+            children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value);
 
         if (myEffects_it->getPosition() < repeat_position) {
           types::Effect e = *myEffects_it;
@@ -144,7 +143,7 @@ private:
           linearized_effects.push_back(e);
           myEffects_it++;
         } else {
-          delay_tmp = (*children_it)->linearize(linearized_effects, delay);
+          delay_tmp = children_it->linearize(linearized_effects, delay);
           duration += delay_tmp;
           delay += delay_tmp;
           children_it++;
@@ -157,7 +156,7 @@ private:
         linearized_effects.push_back(e);
       }
       for (; children_it < children.end(); children_it++) {
-        delay_tmp = (*children_it)->linearize(linearized_effects, delay);
+        delay_tmp = children_it->linearize(linearized_effects, delay);
         duration += delay_tmp;
         delay += delay_tmp;
       }
