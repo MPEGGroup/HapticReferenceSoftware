@@ -115,7 +115,7 @@ private:
       }
 
       auto it = std::lower_bound(myEffects.begin(), myEffects.end(), myEffect,
-                                 [](types::Effect a, types::Effect b) -> bool {
+                                 [](const types::Effect &a, const types::Effect &b) -> bool {
                                    return a.getPosition() <= b.getPosition();
                                  });
       myEffects.insert(it, myEffect);
@@ -129,8 +129,8 @@ private:
         count = IvsEncoder::getCount(value);
         duration = IvsEncoder::getDuration(value);
       }
-      std::vector<types::Effect>::iterator myEffects_it = myEffects.begin();
-      std::vector<RepeatNode *>::iterator children_it = children.begin();
+      auto myEffects_it = myEffects.begin();
+      auto children_it = children.begin();
       int delay_tmp = 0;
       std::vector<types::Effect> linearized_effects;
       for (; myEffects_it < myEffects.end() && children_it < children.end();) {
