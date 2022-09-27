@@ -35,13 +35,6 @@
 #include <Types/include/Band.h>
 #include <algorithm>
 
-using haptics::tools::akimaInterpolation;
-using haptics::tools::bezierInterpolation;
-using haptics::tools::bsplineInterpolation;
-using haptics::tools::cubicInterpolation;
-using haptics::tools::cubicInterpolation2;
-using haptics::tools::linearInterpolation2;
-
 namespace haptics::types {
 
 [[nodiscard]] auto Band::getBandType() const -> BandType { return bandType; }
@@ -162,26 +155,26 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
       }
       std::vector<double> effectAmp(keyframes.back().first - keyframes[0].first + 1, 0);
       if (keyframes.size() == 2) {
-        effectAmp = linearInterpolation2(keyframes);
+        effectAmp = haptics::tools::linearInterpolation2(keyframes);
       } else {
         switch (this->curveType) {
         case CurveType::Linear:
-          effectAmp = linearInterpolation2(keyframes);
+          effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;
         case CurveType::Cubic:
-          // effectAmp = cubicInterpolation(keyframes);
-          effectAmp = cubicInterpolation2(keyframes);
+          effectAmp = haptics::tools::cubicInterpolation(keyframes);
           break;
         case CurveType::Akima:
-          effectAmp = akimaInterpolation(keyframes);
+          effectAmp = haptics::tools::akimaInterpolation(keyframes);
           break;
         case CurveType::Bezier:
-          effectAmp = bezierInterpolation(keyframes);
+          effectAmp = haptics::tools::bezierInterpolation(keyframes);
           break;
         case CurveType::Bspline:
-          effectAmp = bsplineInterpolation(keyframes);
+          effectAmp = haptics::tools::bsplineInterpolation(keyframes);
           break;
         default:
+          effectAmp = haptics::tools::cubicInterpolation(keyframes);
           break;
         }
 
