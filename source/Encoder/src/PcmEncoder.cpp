@@ -81,9 +81,10 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     signal = wavParser.getSamplesChannel(channelIndex);
 
     // CURVE BAND
-    if (config.curveFrequencyLimit > 0) {
+    if (config.vectorial_enabled && (config.curveFrequencyLimit > 0 || !config.wavelet_enabled)) {
       if (out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture ||
-          out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
+          out.getPerceptionModality() == types::PerceptionModality::Stiffness ||
+          (!config.wavelet_enabled && config.curveFrequencyLimit == 0)) {
         filteredSignal = signal;
       } else {
         filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
@@ -110,8 +111,9 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
 
     // wavelet processing
-    if (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
-        out.getPerceptionModality() == types::PerceptionModality::Other) {
+    if (config.wavelet_enabled &&
+        (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
+         out.getPerceptionModality() == types::PerceptionModality::Other)) {
 
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
 

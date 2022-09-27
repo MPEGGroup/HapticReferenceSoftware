@@ -42,6 +42,7 @@
 #include <Types/include/Perception.h>
 #include <filesystem>
 #include <functional>
+#include <optional>
 
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
@@ -73,9 +74,16 @@ auto help() -> void {
       << std::endl
       << "\t-kb, --bitrate\t\t\ttarget bitrate of the encoded file" << std::endl
       << "\t-bu, \t\t\twavelet bitbudget, if custom setting needed" << std::endl
-      << "\t-kin, --kinesthetic\t\tIf provided, the file will be encoded as a kinesthetic effect. "
-         "Otherwise it will be considered as a vibrotactile effect (this option is currently "
-         "available only for wav files encoding)"
+      << "\t-bl, \t\t\twavelet block length, if custom setting needed" << std::endl
+      << "\t-cf, \t\t\tcutoff frequency used to split pcm signals in high and low frequencies. "
+         "Default value is 72 Hz. If the value is set to zero, the signal will not be split."
+      << std::endl
+      << "\t--disable-wavelet, \t\t\tthe encoder will encode the data using a single vectorial "
+         "band for low frequencies. This argument will only affect PCM input content."
+      << std::endl
+      << "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
+         "band for high frequencies. This argument will only affect PCM input content."
+      << std::endl
       << std::endl;
 }
 
@@ -110,6 +118,29 @@ auto main(int argc, char *argv[]) -> int {
   }
   std::cout << "The generated file will be : " << output << "\n";
 
+  std::optional<int> bitrate = std::nullopt;
+  if (inputParser.cmdOptionExists("-kb")) {
+    bitrate = std::stoi(inputParser.getCmdOption("-kb"));
+  }
+
+  std::optional<int> budget = std::nullopt;
+  if (inputParser.cmdOptionExists("-bu")) {
+    budget = std::stoi(inputParser.getCmdOption("-bu"));
+  }
+
+  std::optional<int> blocklength = std::nullopt;
+  if (inputParser.cmdOptionExists("-bl")) {
+    blocklength = std::stoi(inputParser.getCmdOption("-bl"));
+  }
+
+  std::optional<int> cutoff = std::nullopt;
+  if (inputParser.cmdOptionExists("-cf")) {
+    cutoff = std::stoi(inputParser.getCmdOption("-cf"));
+  }
+
+  bool enable_wavelet = !inputParser.cmdOptionExists("--disable_wavelet");
+  bool enable_vectorial = !inputParser.cmdOptionExists("--disable_vectorial");
+
   Haptics hapticFile;
   Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
   std::string ext = InputParser::getFileExt(filename);
@@ -142,8 +173,6 @@ auto main(int argc, char *argv[]) -> int {
 
       ext = InputParser::getFileExt(filename);
       myPerception = hapticFile.getPerceptionAt((int)i);
-      auto kinestheticData =
-          myPerception.getPerceptionModality() == haptics::types::PerceptionModality::Force;
       if (ext == "json" || ext == "ahap") {
         std::cout << "The AHAP file to encode : " << filename << std::endl;
         codeExit = AhapEncoder::encode(filename, myPerception);
@@ -153,19 +182,17 @@ auto main(int argc, char *argv[]) -> int {
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         haptics::encoder::EncodingConfig config;
-        if (inputParser.cmdOptionExists("-kb")) {
-          int bitrate = std::stoi(inputParser.getCmdOption("-kb"));
-          std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
-          if (inputParser.cmdOptionExists("-bu")) {
-            int budget = std::stoi(inputParser.getCmdOption("-bu"));
-            config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget,
-                                                                            kinestheticData);
-          } else {
-            config =
-                haptics::encoder::EncodingConfig::generateConfigParam(bitrate, kinestheticData);
-          }
+        if (bitrate.has_value()) {
+          std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
+          config = haptics::encoder::EncodingConfig::generateConfigParam(
+              bitrate.value(), enable_wavelet, enable_vectorial);
+        } else if (budget.has_value()) {
+          config = haptics::encoder::EncodingConfig::generateConfigBudget(
+              budget.value(), enable_wavelet, enable_vectorial);
+
         } else {
-          config = haptics::encoder::EncodingConfig::generateConfig(2, kinestheticData);
+          config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
+                                                                           enable_vectorial);
         }
         codeExit = PcmEncoder::encode(filename, config, myPerception);
       }
@@ -185,17 +212,18 @@ auto main(int argc, char *argv[]) -> int {
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
     haptics::encoder::EncodingConfig config;
-    if (inputParser.cmdOptionExists("-kb")) {
-      int bitrate = std::stoi(inputParser.getCmdOption("-kb"));
-      std::cout << "target bitrate: " << bitrate << " kb/s" << std::endl;
-      if (inputParser.cmdOptionExists("-bu")) {
-        int budget = std::stoi(inputParser.getCmdOption("-bu"));
-        config = haptics::encoder::EncodingConfig::generateConfigBudget(bitrate, budget);
+    if (bitrate.has_value()) {
+      std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
+      if (budget.has_value()) {
+        config = haptics::encoder::EncodingConfig::generateConfigBudget(
+            budget.value(), enable_wavelet, enable_vectorial);
       } else {
-        config = haptics::encoder::EncodingConfig::generateConfigParam(bitrate);
+        config = haptics::encoder::EncodingConfig::generateConfigParam(
+            bitrate.value(), enable_wavelet, enable_vectorial);
       }
     } else {
-      config = haptics::encoder::EncodingConfig::generateConfig();
+      config =
+          haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
     }
     codeExit = PcmEncoder::encode(filename, config, myPerception);
     hapticFile.addPerception(myPerception);
