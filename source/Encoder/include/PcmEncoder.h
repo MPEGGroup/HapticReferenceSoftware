@@ -51,7 +51,7 @@ namespace haptics::encoder {
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
-static constexpr int DEFAULT_CUTOFF_FREQUENCY = 72;
+static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72;
 static constexpr int DEFAULT_WINDOW_LENGTH = 1024;
 static constexpr int DEFAULT_BIT_BUDGET = 16;
 static constexpr double PARAM_A = -6.506;
@@ -60,14 +60,14 @@ static constexpr double PARAM_C = -0.04421;
 static constexpr double PARAM_D = 0.0002573;
 
 struct EncodingConfig {
-  float curveFrequencyLimit = 0;
+  double curveFrequencyLimit = 0;
   int wavelet_windowLength = 0;
   int wavelet_bitbudget = 0;
   bool wavelet_enabled = true;
   bool vectorial_enabled = true;
 
   explicit EncodingConfig() = default;
-  explicit EncodingConfig(float _curveFrequencyLimit, int _wavelet_windowLength,
+  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_windowLength,
                           int _wavelet_bitbudget, bool _wavelet_enabled, bool _vectorial_enabled)
       : curveFrequencyLimit(_curveFrequencyLimit)
       , wavelet_windowLength(_wavelet_windowLength)
