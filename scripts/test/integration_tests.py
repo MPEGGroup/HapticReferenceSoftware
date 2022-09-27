@@ -42,28 +42,28 @@ from pathlib import Path
 import time
 
 
-def encoding(encoder, wav_file, temp_file_path_mpg, record_property):
+def encoding(encoder, wav_file, temp_file_path_hmpg, record_property):
     print("--Encoding")
     t_start = time.time()
-    subprocess.run([encoder, "-f", wav_file, '-b', '-o', temp_file_path_mpg])
+    subprocess.run([encoder, "-f", wav_file, '-b', '-o', temp_file_path_hmpg])
     duration = time.time() - t_start
     record_property("encoder_duration_s", duration)
     print("Enconder time: "+str(duration))
 
 
-def decoding(decoder, temp_file_path_mpg, temp_file_path_gmpg, record_property):
+def decoding(decoder, temp_file_path_hmpg, temp_file_path_hjif, record_property):
     print("--Decoding")
     t_start = time.time()
-    subprocess.run([decoder, "-f", temp_file_path_mpg, '-o', temp_file_path_gmpg])
+    subprocess.run([decoder, "-f", temp_file_path_hmpg, '-o', temp_file_path_hjif])
     duration = time.time() - t_start
     record_property("decoder_duration_s", duration)
     print("Decoder time: "+str(duration))
 
 
-def synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property):
+def synthesizing(synthesizer, temp_file_path_hjif, temp_file_path_wav, record_property):
     print("--Synthesizing")
     t_start = time.time()
-    subprocess.run([synthesizer, "-f", temp_file_path_gmpg, '-o', temp_file_path_wav, '--generate_ohm'])
+    subprocess.run([synthesizer, "-f", temp_file_path_hjif, '-o', temp_file_path_wav, '--generate_ohm'])
     duration = time.time() - t_start
     record_property("synthesizer_duration_s", duration)
     print("Synthesizer time: "+str(duration))
@@ -76,17 +76,17 @@ def test_psnrs(ohm_file, encoder, synthesizer, decoder, autopad, tmpdirname, rec
         tmpdirname = tmpdir.name
     tmp_ohm_file = os.path.basename(ohm_file[0])
     tmp_wav_file = tmp_ohm_file.split('.')[0] + ".wav"
-    gmpg_file = tmp_ohm_file.split('.')[0] + ".gmpg"
-    mpg_file = tmp_ohm_file.split('.')[0] + ".mpg"
-    temp_file_path_gmpg = os.path.join(tmpdirname, gmpg_file)
+    hjif_file = tmp_ohm_file.split('.')[0] + ".hjif"
+    hmpg_file = tmp_ohm_file.split('.')[0] + ".hmpg"
+    temp_file_path_hjif = os.path.join(tmpdirname, hjif_file)
     temp_file_path_wav = os.path.join(tmpdirname, tmp_wav_file)
-    temp_file_path_mpg = os.path.join(tmpdirname, mpg_file)
+    temp_file_path_hmpg = os.path.join(tmpdirname, hmpg_file)
 
-    encoding(encoder, ohm_file[0], temp_file_path_mpg, record_property)
+    encoding(encoder, ohm_file[0], temp_file_path_hmpg, record_property)
 
-    decoding(decoder, temp_file_path_mpg, temp_file_path_gmpg, record_property)
+    decoding(decoder, temp_file_path_hmpg, temp_file_path_hjif, record_property)
 
-    synthesizing(synthesizer, temp_file_path_gmpg, temp_file_path_wav, record_property)
+    synthesizing(synthesizer, temp_file_path_hjif, temp_file_path_wav, record_property)
 
     # get original rendered wav if IVS ou AHAP
     wav_file = Path(ohm_file[0])
@@ -96,7 +96,7 @@ def test_psnrs(ohm_file, encoder, synthesizer, decoder, autopad, tmpdirname, rec
     wav_file = str(wav_file)
 
     print("--bitrate")
-    bit_rate = compute_bitrate(wav_file, temp_file_path_mpg)
+    bit_rate = compute_bitrate(wav_file, temp_file_path_hmpg)
     print("bitrate: "+ str(bit_rate))
     record_property("bitrate_kbps", bit_rate)
 

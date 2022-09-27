@@ -53,18 +53,18 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   rapidjson::IStreamWrapper isw(ifs);
   rapidjson::Document jsonTree;
   if (jsonTree.ParseStream(isw).HasParseError()) {
-    std::cerr << "Invalid GMPG input file: JSON parsing error" << std::endl;
+    std::cerr << "Invalid HJIF input file: JSON parsing error" << std::endl;
     return false;
   }
   if (!jsonTree.IsObject()) {
-    std::cerr << "Invalid GMPG input file: not a JSON object" << std::endl;
+    std::cerr << "Invalid HJIF input file: not a JSON object" << std::endl;
     return false;
   }
   if (!(jsonTree.HasMember("version") && jsonTree.HasMember("date") &&
         jsonTree.HasMember("description") && jsonTree.HasMember("perceptions") &&
         jsonTree["perceptions"].IsArray() && jsonTree.HasMember("avatars") &&
         jsonTree["avatars"].IsArray())) {
-    std::cerr << "Invalid GMPG input file: missing required field" << std::endl;
+    std::cerr << "Invalid HJIF input file: missing required field" << std::endl;
     return false;
   }
   auto version = std::string(jsonTree["version"].GetString());
@@ -109,11 +109,11 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
       std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
-    if (!jsonPerception.HasMember("effect_library") ||
-        !jsonPerception["effect_library"].IsArray()) {
-      std::cerr << "Missing or invalid library" << std::endl;
-      continue;
-    }
+    //if (!jsonPerception.HasMember("effect_library") ||
+    //    !jsonPerception["effect_library"].IsArray()) {
+    //  std::cerr << "Missing or invalid library" << std::endl;
+    //  continue;
+    //}
 
     auto perceptionId = jsonPerception["id"].GetInt();
     auto perceptionAvatarId = jsonPerception["avatar_id"].GetInt();
@@ -131,8 +131,9 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
         jsonPerception["perception_unit_exponent"].IsInt()) {
       perception.setPerceptionUnitExponent(jsonPerception["perception_unit_exponent"].GetInt());
     }
-
-    loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
+    if (jsonPerception.HasMember("effect_library") && jsonPerception["effect_library"].IsArray()) {
+      loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
+    }
     loadingSuccess = loadingSuccess && loadTracks(jsonPerception["tracks"], perception);
     if (jsonPerception.HasMember("reference_devices") &&
         jsonPerception["reference_devices"].IsArray()) {
@@ -322,7 +323,7 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -
       std::cerr << "Missing or invalid list of effects" << std::endl;
       continue;
     }
-
+    std::string test = jsonBand["band_type"].GetString();
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
     types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
     int windowLength = jsonBand["window_length"].GetInt();

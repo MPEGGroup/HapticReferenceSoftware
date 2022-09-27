@@ -21,7 +21,7 @@ optional arguments:
 
 Example
 ```shell
- ./Encoder -f IDCC-vib-Paper-8kHz-16-pad.wav -o IDCC-vib-Paper-8kHz-16-pad.gmpg
+ ./Encoder -f IDCC-vib-Paper-8kHz-16-pad.wav -o IDCC-vib-Paper-8kHz-16-pad.hjif
 ```
 
 ### Synthesizing
@@ -43,5 +43,5 @@ optional arguments:
 
 Example
 ```shell
- ./Synthesizer -f IDCC-vib-Paper-8kHz-16-pad.gmpg -o IDCC-vib-Paper-8kHz-16-pad.wav
+ ./Synthesizer -f IDCC-vib-Paper-8kHz-16-pad.hjif -o IDCC-vib-Paper-8kHz-16-pad.wav
 ```
