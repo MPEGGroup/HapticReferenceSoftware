@@ -109,7 +109,7 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
       std::cerr << "Missing or invalid tracks" << std::endl;
       continue;
     }
-    //if (!jsonPerception.HasMember("effect_library") ||
+    // if (!jsonPerception.HasMember("effect_library") ||
     //    !jsonPerception["effect_library"].IsArray()) {
     //  std::cerr << "Missing or invalid library" << std::endl;
     //  continue;
