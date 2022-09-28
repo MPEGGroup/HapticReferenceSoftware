@@ -51,9 +51,9 @@ namespace haptics::encoder {
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
-static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72.5;
+static constexpr double DEFAULT_CUTOFF_FREQUENCY = 0;
 static constexpr int DEFAULT_WINDOW_LENGTH = 1024;
-static constexpr int DEFAULT_BIT_BUDGET = 16;
+static constexpr int DEFAULT_BIT_BUDGET = 3;
 static constexpr double PARAM_A = -6.506;
 static constexpr double PARAM_B = 3.433;
 static constexpr double PARAM_C = -0.04421;
