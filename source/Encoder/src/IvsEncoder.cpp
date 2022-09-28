@@ -33,6 +33,7 @@
 
 #include <Encoder/include/IvsEncoder.h>
 #include <Tools/include/Tools.h>
+#include <algorithm>
 #include <fstream>
 #include <limits>
 
@@ -64,16 +65,15 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
         IvsEncoder::getRepeatEvents(&timeline);
     std::vector<pugi::xml_node> sortedRepeatEvents;
     for (pugi::xml_node &repeatEvent : repeatEvents) {
-      auto it = std::lower_bound(sortedRepeatEvents.begin(), sortedRepeatEvents.end(), repeatEvent,
-                                 [](pugi::xml_node a, pugi::xml_node b) -> bool {
-                                   int time_a = IvsEncoder::getTime(&a);
-                                   int time_b = IvsEncoder::getTime(&b);
-                                   return time_a == time_b ? IvsEncoder::getDuration(&a) >=
-                                                                 IvsEncoder::getDuration(&b)
-                                                           : time_a <= time_b;
-                                 });
-      sortedRepeatEvents.insert(it, repeatEvent);
+      sortedRepeatEvents.push_back(repeatEvent);
     }
+    std::sort(sortedRepeatEvents.begin(), sortedRepeatEvents.end(),
+              [](pugi::xml_node a, pugi::xml_node b) -> bool {
+                int time_a = IvsEncoder::getTime(&a);
+                int time_b = IvsEncoder::getTime(&b);
+                return time_a != time_b ? time_a < time_b
+                                        : IvsEncoder::getDuration(&a) > IvsEncoder::getDuration(&b);
+              });
 
     auto repeatTree = RepeatNode{nullptr, {}, {}};
     for (pugi::xml_node &repeatEvent : sortedRepeatEvents) {

@@ -113,10 +113,14 @@ private:
         }
       }
 
-      auto it = std::lower_bound(myEffects.begin(), myEffects.end(), myEffect,
-                                 [](const types::Effect &a, const types::Effect &b) -> bool {
-                                   return a.getPosition() <= b.getPosition();
-                                 });
+      auto it = myEffects.end();
+      auto it_effects = myEffects.begin();
+      int effectPosition = myEffect.getPosition();
+      for (; it_effects < myEffects.end(); it_effects++) {
+        if (it_effects->getPosition() < effectPosition) {
+          it = it_effects;
+        }
+      }
       myEffects.insert(it, myEffect);
       return true;
     }
