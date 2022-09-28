@@ -64,7 +64,6 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   } else if (out.getTracksSize() != numChannels) {
     return EXIT_FAILURE;
   }
-
   Band myBand;
   std::vector<double> signal;
   std::vector<double> filteredSignal;
@@ -109,14 +108,11 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     myTrack.setFrequencySampling(wavParser.getSamplerate());
     myTrack.setSampleCount(
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
-
     // wavelet processing
     if (config.wavelet_enabled &&
         (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
          out.getPerceptionModality() == types::PerceptionModality::Other)) {
-
       signal_wavelet = wavParser.getSamplesChannel(channelIndex);
-
       if (config.curveFrequencyLimit > 0) {
         switch (myBand.getCurveType()) {
         case CurveType::Linear:
@@ -137,14 +133,12 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         default:
           interpolationSignal = haptics::tools::cubicInterpolation(points);
           break;
-        } // supposing only one effect with initial value 0
-
+        }
         std::vector<double> differenceSignal;
         for (size_t i = 0; i < filteredSignal.size(); i++) {
           double difference = filteredSignal[i] - interpolationSignal[i];
           differenceSignal.push_back(difference);
         }
-
         Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
         signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
 
@@ -152,7 +146,6 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
           signal_wavelet[i] += differenceSignal[i];
         }
       }
-
       waveletBand = Band();
       if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
                                   config.curveFrequencyLimit, waveletBand)) {
@@ -162,10 +155,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       myTrack.setSampleCount(
           static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     }
-
     out.replaceTrackAt((int)channelIndex, myTrack);
   }
-
   return EXIT_SUCCESS;
 }
 
