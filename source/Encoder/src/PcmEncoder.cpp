@@ -68,7 +68,6 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   std::vector<double> signal;
   std::vector<double> filteredSignal;
   std::vector<std::pair<int, double>> points;
-  std::vector<double> interpolationSignal;
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   // init of wavelet encoding
   Band waveletBand;
@@ -78,15 +77,19 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   for (uint32_t channelIndex = 0; channelIndex < numChannels; channelIndex++) {
     myTrack = out.getTrackAt((int)channelIndex);
     signal = wavParser.getSamplesChannel(channelIndex);
-
+    std::vector<double> low_frequency_signal(signal.size(), 0.0);
+    std::vector<double> high_frequency_signal(signal.size(), 0.0);
+    if (config.curveFrequencyLimit > 0) {
+      low_frequency_signal = filterbank.LP(signal, config.curveFrequencyLimit);
+      std::transform(signal.begin(), signal.end(), low_frequency_signal.begin(),
+                     high_frequency_signal.begin(), std::minus<>());
+    }
     // CURVE BAND
     if (config.vectorial_enabled && (config.curveFrequencyLimit > 0 || !config.wavelet_enabled)) {
-      if (out.getPerceptionModality() == types::PerceptionModality::VibrotactileTexture ||
-          out.getPerceptionModality() == types::PerceptionModality::Stiffness ||
-          (!config.wavelet_enabled && config.curveFrequencyLimit == 0)) {
+      if (!config.wavelet_enabled && config.curveFrequencyLimit == 0) {
         filteredSignal = signal;
       } else {
-        filteredSignal = filterbank.LP(signal, config.curveFrequencyLimit);
+        filteredSignal = low_frequency_signal;
       }
 
       points = PcmEncoder::localExtrema(filteredSignal, true);
@@ -109,11 +112,14 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     myTrack.setSampleCount(
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     // wavelet processing
-    if (config.wavelet_enabled &&
-        (out.getPerceptionModality() == types::PerceptionModality::Vibrotactile ||
-         out.getPerceptionModality() == types::PerceptionModality::Other)) {
-      signal_wavelet = wavParser.getSamplesChannel(channelIndex);
+    if (config.wavelet_enabled) {
       if (config.curveFrequencyLimit > 0) {
+        signal_wavelet = high_frequency_signal;
+      } else {
+        signal_wavelet = signal;
+      }
+      std::vector<double> interpolationSignal(signal.size(), 0.0);
+      if (config.curveFrequencyLimit > 0 && config.vectorial_enabled) {
         switch (myBand.getCurveType()) {
         case CurveType::Linear:
           interpolationSignal = haptics::tools::linearInterpolation2(points);
@@ -134,16 +140,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
           interpolationSignal = haptics::tools::cubicInterpolation(points);
           break;
         }
-        std::vector<double> differenceSignal;
-        for (size_t i = 0; i < filteredSignal.size(); i++) {
-          double difference = filteredSignal[i] - interpolationSignal[i];
-          differenceSignal.push_back(difference);
-        }
-        Filterbank filterbank2(static_cast<double>(wavParser.getSamplerate()));
-        signal_wavelet = filterbank2.HP(signal_wavelet, config.curveFrequencyLimit);
-
         for (size_t i = 0; i < signal_wavelet.size(); i++) {
-          signal_wavelet[i] += differenceSignal[i];
+          signal_wavelet[i] -= interpolationSignal[i];
         }
       }
       waveletBand = Band();

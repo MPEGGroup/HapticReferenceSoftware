@@ -52,7 +52,7 @@ static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
 static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72.5;
-static constexpr int DEFAULT_WINDOW_LENGTH = 512;
+static constexpr int DEFAULT_WINDOW_LENGTH = 1024;
 static constexpr int DEFAULT_BIT_BUDGET = 16;
 static constexpr double PARAM_A = -6.506;
 static constexpr double PARAM_B = 3.433;
@@ -85,22 +85,18 @@ struct EncodingConfig {
                           enable_wavelet, enable_vectorial);
   }
 
-  auto static generateConfigBudget(int budget, bool enable_wavelet, bool enable_vectorial)
+  auto static generateConfigBudget(int budget, double curveFrequencyLimit, bool enable_wavelet,
+                                   bool enable_vectorial,
+                                   int wavelet_windowLength = DEFAULT_WINDOW_LENGTH)
       -> EncodingConfig {
-
-    int wavelet_windowLength = DEFAULT_WINDOW_LENGTH;
-    float curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
-    int wavelet_bitbudget = budget;
-
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget,
-                          enable_wavelet, enable_vectorial);
+    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, budget, enable_wavelet,
+                          enable_vectorial);
   }
 
-  auto static generateConfigParam(int bitrate, bool enable_wavelet, bool enable_vectorial)
+  auto static generateConfigParam(int bitrate, double curveFrequencyLimit, bool enable_wavelet,
+                                  bool enable_vectorial,
+                                  int wavelet_windowLength = DEFAULT_WINDOW_LENGTH)
       -> EncodingConfig {
-
-    int wavelet_windowLength = DEFAULT_WINDOW_LENGTH;
-    double curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
 
     auto temp = (double)bitrate;
     auto wavelet_bitbudget =

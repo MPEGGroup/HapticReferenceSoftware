@@ -274,9 +274,9 @@ def main():
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         encoding_command = f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} -cf {cutoff} --binary --refactor"
                         if(disable_wavelet):
-                            encoding_command += "--disable-wavelet"
+                            encoding_command += " --disable-wavelet"
                         elif(disable_vectorial):
-                            encoding_command += "--disable-vectorial"
+                            encoding_command += " --disable-vectorial"
                         print(encoding_command)
                         subprocess.run(encoding_command, stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     DEFAULT_OUTPUT = "./out"
     DEFAULT_BITRATES = [2, 8, 16, 64]
     DEFAULT_PAD = 1
-    DEFAULT_CUTOFF_FREQUENCY = 1
+    DEFAULT_CUTOFF_FREQUENCY = 72.5
     DEFAULT_DISABLE_WAVELET = False
     DEFAULT_DISABLE_VECTORIAL = False
     DEFAULT_BJONTEGAARD = False
@@ -370,7 +370,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file", type=str, help="input config file in JSON format")
     parser.add_argument("CRM_version", type=str, help="version of the CRM format")
-    parser.add_argument("--cutoff", type=check_positive, default=DEFAULT_CUTOFF_FREQUENCY, help="Cutoff frequency. Default is 72.5")
+    parser.add_argument("--cutoff", type=float, default=DEFAULT_CUTOFF_FREQUENCY, help="Cutoff frequency. Default is 72.5")
     parser.add_argument("-o", "--output", type=str, default=DEFAULT_OUTPUT, help=f"output folder (default is `{DEFAULT_OUTPUT}`)")
     parser.add_argument("-b", "--bitrates", type=check_positive, nargs='+', default=DEFAULT_BITRATES, help=f"bitrates used for the encoding (default is `[2, 16, 64]`)")
     parser.add_argument("--padding", type=check_positive, default=DEFAULT_PAD, help=f"pad in seconds used for the syntheziser")
