@@ -133,9 +133,9 @@ auto main(int argc, char *argv[]) -> int {
     blocklength = std::stoi(inputParser.getCmdOption("-bl"));
   }
 
-  std::optional<int> cutoff = std::nullopt;
+  std::optional<double> cutoff = std::nullopt;
   if (inputParser.cmdOptionExists("-cf")) {
-    cutoff = std::stoi(inputParser.getCmdOption("-cf"));
+    cutoff = std::stod(inputParser.getCmdOption("-cf"));
   } else {
     cutoff = haptics::encoder::DEFAULT_CUTOFF_FREQUENCY;
   }

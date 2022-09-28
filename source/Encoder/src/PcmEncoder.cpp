@@ -64,17 +64,16 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   } else if (out.getTracksSize() != numChannels) {
     return EXIT_FAILURE;
   }
-  Band myBand;
-  std::vector<double> signal;
-  std::vector<double> filteredSignal;
-  std::vector<std::pair<int, double>> points;
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   // init of wavelet encoding
   Band waveletBand;
   WaveletEncoder waveletEnc(config.wavelet_windowLength,
                             static_cast<int>(wavParser.getSamplerate()));
-  std::vector<double> signal_wavelet;
   for (uint32_t channelIndex = 0; channelIndex < numChannels; channelIndex++) {
+    Band myBand;
+    std::vector<double> filteredSignal;
+    std::vector<std::pair<int, double>> points;
+    std::vector<double> signal;
     myTrack = out.getTrackAt((int)channelIndex);
     signal = wavParser.getSamplesChannel(channelIndex);
     std::vector<double> low_frequency_signal(signal.size(), 0.0);
@@ -91,11 +90,12 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       } else {
         filteredSignal = low_frequency_signal;
       }
-
       points = PcmEncoder::localExtrema(filteredSignal, true);
       myBand = Band();
       if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
-                                         config.curveFrequencyLimit, &myBand)) {
+                                         config.curveFrequencyLimit > 0 ? config.curveFrequencyLimit
+                                                                        : wavParser.getSamplerate(),
+                                         &myBand)) {
         if (out.getPerceptionModality() == types::PerceptionModality::Force ||
             out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
           myBand.setCurveType(CurveType::Linear);
@@ -113,35 +113,16 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     // wavelet processing
     if (config.wavelet_enabled) {
+      std::vector<double> signal_wavelet = signal;
       if (config.curveFrequencyLimit > 0) {
-        signal_wavelet = high_frequency_signal;
-      } else {
-        signal_wavelet = signal;
-      }
-      std::vector<double> interpolationSignal(signal.size(), 0.0);
-      if (config.curveFrequencyLimit > 0 && config.vectorial_enabled) {
-        switch (myBand.getCurveType()) {
-        case CurveType::Linear:
-          interpolationSignal = haptics::tools::linearInterpolation2(points);
-          break;
-        case CurveType::Cubic:
-          interpolationSignal = haptics::tools::cubicInterpolation(points);
-          break;
-        case CurveType::Akima:
-          interpolationSignal = haptics::tools::akimaInterpolation(points);
-          break;
-        case CurveType::Bezier:
-          interpolationSignal = haptics::tools::bezierInterpolation(points);
-          break;
-        case CurveType::Bspline:
-          interpolationSignal = haptics::tools::bsplineInterpolation(points);
-          break;
-        default:
-          interpolationSignal = haptics::tools::cubicInterpolation(points);
-          break;
-        }
-        for (size_t i = 0; i < signal_wavelet.size(); i++) {
-          signal_wavelet[i] -= interpolationSignal[i];
+        if (config.vectorial_enabled) {
+          auto interpolationSignal =
+              myBand.EvaluationBand(signal.size(), static_cast<int>(wavParser.getSamplerate()), 0);
+          for (size_t i = 0; i < signal_wavelet.size(); i++) {
+            signal_wavelet[i] -= interpolationSignal[i];
+          }
+        } else {
+          signal_wavelet = high_frequency_signal;
         }
       }
       waveletBand = Band();
@@ -173,9 +154,17 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   out->setLowerFrequencyLimit(0);
   out->setUpperFrequencyLimit((int)curveFrequencyLimit);
   Effect myEffect(0, 0, BaseSignal::Sine, EffectType::Basis);
+  int lastPosition = -1;
   for (std::pair<int, double> p : points) {
     std::optional<int> f;
-    myEffect.addKeyframe(static_cast<int>(S_2_MS * p.first / samplerate), p.second, f);
+    auto position = static_cast<int>(S_2_MS * p.first / samplerate);
+    if (position > lastPosition) {
+      myEffect.addKeyframe(position, p.second, f);
+    } else if (position == lastPosition) {
+      Keyframe newKeyframe(position, p.second, f);
+      myEffect.replaceKeyframeAt(static_cast<int>(myEffect.getKeyframesSize() - 1), newKeyframe);
+    }
+    lastPosition = position;
   }
   out->addEffect(myEffect);
 
