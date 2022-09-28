@@ -33,6 +33,7 @@
 
 #include <Encoder/include/IvsEncoder.h>
 #include <Tools/include/Tools.h>
+#include <algorithm>
 #include <fstream>
 #include <limits>
 
@@ -50,7 +51,6 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
   }
 
   std::string date = IvsEncoder::getLastModified(&doc);
-
   int trackId = 0;
   for (const pugi::xml_node timeline : IvsEncoder::getTimelineEffects(&doc)) {
     haptics::types::Track myTrack;
@@ -61,64 +61,77 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out) -> 
     };
     myTrack = out.getTrackAt(trackId);
 
+    pugi::xml_object_range<pugi::xml_named_node_iterator> repeatEvents =
+        IvsEncoder::getRepeatEvents(&timeline);
+    std::vector<pugi::xml_node> sortedRepeatEvents;
+    for (pugi::xml_node &repeatEvent : repeatEvents) {
+      sortedRepeatEvents.push_back(repeatEvent);
+    }
+    std::sort(sortedRepeatEvents.begin(), sortedRepeatEvents.end(),
+              [](pugi::xml_node a, pugi::xml_node b) -> bool {
+                int time_a = IvsEncoder::getTime(&a);
+                int time_b = IvsEncoder::getTime(&b);
+                return time_a != time_b ? time_a < time_b
+                                        : IvsEncoder::getDuration(&a) > IvsEncoder::getDuration(&b);
+              });
+
+    auto repeatTree = RepeatNode{nullptr, {}, {}};
+    for (pugi::xml_node &repeatEvent : sortedRepeatEvents) {
+      auto currentNode = RepeatNode{&repeatEvent, {}, {}};
+      RepeatNode &researchNode = repeatTree;
+      bool continue_search = false;
+      do {
+        if (researchNode.children.empty()) {
+          break;
+        }
+
+        auto lastChild = researchNode.children.back();
+        continue_search = isRepeatNested(lastChild.value, currentNode.value);
+        if (continue_search) {
+          researchNode = lastChild;
+        }
+      } while (continue_search);
+      researchNode.children.push_back(currentNode);
+    }
+
+    pugi::xml_node basisEffect = {};
+    std::vector<haptics::types::Effect> myEffects;
     pugi::xml_object_range<pugi::xml_named_node_iterator> basisEffects =
         IvsEncoder::getBasisEffects(&doc);
-    pugi::xml_node basisEffect = {};
-    haptics::types::Effect myEffect;
     for (pugi::xml_node launchEvent : IvsEncoder::getLaunchEvents(&timeline)) {
       if (!IvsEncoder::getLaunchedEffect(&basisEffects, &launchEvent, basisEffect)) {
         continue;
       }
 
-      myEffect = haptics::types::Effect();
+      haptics::types::Effect myEffect{};
       if (IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &myEffect)) {
-        IvsEncoder::injectIntoBands(myEffect, myTrack);
+        repeatTree.pushEffect(myEffect);
       }
     }
 
-    int time = -1;
-    int count = 0;
-    int duration = -1;
-    int effectIndex = 0;
-    std::vector<haptics::types::Effect> effectToRepeat = {};
-    types::Band myBand;
-    for (pugi::xml_node repeatEvent : IvsEncoder::getRepeatEvents(&timeline)) {
-      count = IvsEncoder::getCount(&repeatEvent);
-      if (count == 0) {
-        continue;
-      }
+    std::vector<types::Effect> repeatedEffectsSet;
+    int delay = 0;
+    repeatTree.linearize(repeatedEffectsSet, delay);
 
-      effectToRepeat = {};
-      for (uint32_t bandIndex = 0; bandIndex < myTrack.getBandsSize(); bandIndex++) {
-        time = IvsEncoder::getTime(&repeatEvent);
-        duration = IvsEncoder::getDuration(&repeatEvent);
-        myBand = myTrack.getBandAt((int)bandIndex);
-
-        for (effectIndex = 0; effectIndex < (int)myBand.getEffectsSize(); effectIndex++) {
-          myEffect = myBand.getEffectAt(effectIndex);
-          if (time <= myEffect.getPosition() && myEffect.getPosition() < time + duration) {
-            effectToRepeat.push_back(myEffect);
-          } else if (time + duration <= myEffect.getPosition()) {
-            myEffect.setPosition(myEffect.getPosition() + count * duration);
-            myBand.replaceEffectAt(effectIndex, myEffect);
-          }
-        }
-      }
-
-      for (haptics::types::Effect &e : effectToRepeat) {
-        for (effectIndex = 1; effectIndex <= count; effectIndex++) {
-          myEffect = haptics::types::Effect(e);
-          myEffect.setPosition(myEffect.getPosition() + duration * (int)effectIndex);
-          IvsEncoder::injectIntoBands(myEffect, myTrack);
-        }
-      }
+    for (haptics::types::Effect &myEffect : repeatedEffectsSet) {
+      IvsEncoder::injectIntoBands(myEffect, myTrack);
     }
-
     out.replaceTrackAt(trackId, myTrack);
     trackId++;
   }
 
   return EXIT_SUCCESS;
+}
+
+auto IvsEncoder::isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool {
+  auto parent_start = IvsEncoder::getTime(parent);
+  auto parent_end = parent_start + IvsEncoder::getDuration(parent);
+  auto child_start = IvsEncoder::getTime(child);
+  return IvsEncoder::isRepeatNested(parent_start, parent_end, child_start);
+}
+
+auto IvsEncoder::isRepeatNested(int parent_start, int parent_end, int child_start) -> bool {
+  return parent_start <= child_start && child_start < parent_end;
 }
 
 auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> void {
@@ -394,5 +407,4 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Track &track) -> 
 
   return f;
 }
-
 } // namespace haptics::encoder
