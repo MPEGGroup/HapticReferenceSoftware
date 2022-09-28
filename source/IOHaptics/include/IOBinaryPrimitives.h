@@ -40,6 +40,8 @@
 #include <cstring>
 #include <fstream>
 #include <string>
+#include<vector>
+#include<bitset>
 
 namespace haptics::io {
 constexpr float MAX_FLOAT = 10000;
@@ -62,6 +64,7 @@ public:
     }
     return value;
   }
+
   template <class T, size_t bytesCount>
   static auto readFloatNBytes(std::ifstream &file, float minValue, float maxValue) -> float {
     auto intValue = readNBytes<T, bytesCount>(file);
@@ -82,6 +85,7 @@ public:
     }
     file.write(bytes.data(), bytesCount);
   }
+
   template <class T, size_t bytesCount>
   static auto writeFloatNBytes(float value, std::ofstream &file, float minValue, float maxValue)
       -> void {
@@ -91,6 +95,74 @@ public:
     auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
     writeNBytes<T, bytesCount>(intValue, file);
   }
+
+  template <class T, size_t bitCount>
+  static auto writeNBits(T value, std::vector<bool> &output) -> void {
+    for (size_t i = 0; i < bitCount; i++) {
+      output.push_back((value >> (bitCount - i - 1)) & 1U);
+    }
+  }
+
+  static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, int length, float minValue, float maxValue)
+      -> float {
+    auto intValue = readInt(bitstream, startIdx, length);
+    auto maxIntValue = static_cast<uint64_t>(std::pow(2, length) - 1);
+    auto normalizedValue = intValue / static_cast<float>(maxIntValue);
+    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+    auto value = normalizedValue * (maxValue - minValue) + minValue;
+    return value;
+  }
+
+
+  template <class T, size_t bitCount>
+  static auto writeFloatNBits(float value, std::vector<bool> &output, float minValue,
+                              float maxValue) -> void {
+    auto normalizedValue = (value - minValue) / (maxValue - minValue);
+    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+    auto maxIntValue = static_cast<T>(std::pow(2, bitCount) - 1);
+    auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
+    writeNBits<T, bitCount>(intValue, output);
+  }
+
+  static auto writeStrBits(std::string bits, std::vector<bool> &bitstream) -> void {
+    //std::reverse(bits.begin(), bits.end());
+    for (char c : bits) {
+      bitstream.push_back(c == '1');
+    }
+  }
+  static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
+    std::string tsBits;
+    for (int i = startIdx; i < startIdx + length; i++) {
+      if ((bitstream[i])) {
+        tsBits += "1";
+      } else {
+        tsBits += "0";
+      }
+    }
+    startIdx += length;
+    return std::stoi(tsBits, nullptr, 2);
+  }
+
+  static auto readString(std::vector<bool> bitstream, int &startIdx, int length) -> std::string {
+    std::string res;
+    for (int i = startIdx; i < BYTE_SIZE * length; i + BYTE_SIZE) {
+      std::string bitsStr;
+      for (auto b : std::vector<bool>(bitstream.begin() + startIdx,
+                                      bitstream.begin() + startIdx + BYTE_SIZE)) {
+        if (b) {
+          bitsStr += "1";
+        } else {
+          bitsStr += "0";
+        }
+      }
+      std::bitset<BYTE_SIZE> cBits(bitsStr);
+      res += static_cast<char>((cBits).to_ulong());
+    }
+    startIdx += length * BYTE_SIZE;
+    return res;
+  }
 };
+
+
 } // namespace haptics::io
 #endif // IOBINARYPRIMITIVES_H
