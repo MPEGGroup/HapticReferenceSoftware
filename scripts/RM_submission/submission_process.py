@@ -54,6 +54,7 @@ TEST_EFFECT_KEYS = [
     "kinesthetic_effects"
 ]
 TYPE_KEY = "type"
+MODALITY_KEY = "modality"
 EXTENSION_KEY = "extension"
 NAME_KEY = "name"
 HAPTIC_FILE_PATH_KEY = "haptic_file_path"
@@ -257,7 +258,7 @@ def main():
                         continue
                     csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}", f"{my_effect[EXTENSION_KEY]}"]
                     for current_bitrate in bitrates:
-                        formatted_output_name = f"{my_effect[TYPE_KEY]}1_{testId}fvt_{CRM_version}_{current_bitrate}_{my_effect[NAME_KEY]}"
+                        formatted_output_name = f"{my_effect[TYPE_KEY]}1-{testId}fvt_{CRM_version}_{my_effect[MODALITY_KEY]}_{current_bitrate}_{my_effect[NAME_KEY]}"
                         input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
                         reference_file_path = my_effect[REFERENCE_FILE]
                         if MAIN_FOLDER_KEY in config[REFERENCE_FILES_KEY]:
