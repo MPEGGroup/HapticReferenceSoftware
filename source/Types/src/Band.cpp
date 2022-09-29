@@ -138,8 +138,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   }
 }
 
-auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequencyLimit,
-                          int highFrequencyLimit) -> std::vector<double> {
+auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
   std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
   case BandType::Curve:
@@ -200,7 +199,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
         if (it->getPosition() <= position) {
-          bandAmp[ti] += EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
+          bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit);
         }
         if (it == effects.begin()) {
           break;
