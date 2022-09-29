@@ -34,13 +34,13 @@
 #ifndef IVSENCODER_H
 #define IVSENCODER_H
 
-#include <Types/include/Perception.h>
 #include <iostream>
 #include <pugixml.hpp>
 #include <vector>
 
 #include <Types/include/Effect.h>
 #include <Types/include/Keyframe.h>
+#include <Types/include/Perception.h>
 #include <Types/include/Track.h>
 
 namespace haptics::encoder {
@@ -84,12 +84,97 @@ public:
   [[nodiscard]] auto static floatToInt(int f) -> int;
 
 private:
+  auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool;
+  auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
   auto static injectIntoBands(types::Effect &effect, types::Track &track) -> void;
   static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
   static const int MIN_FREQUENCY = 0;
   static const int MAX_FREQUENCY = 1000;
   static const int MAGSWEEP_FREQUENCY = 170;
-};
 
+  struct RepeatNode {
+    pugi::xml_node *value;
+    std::vector<types::Effect> myEffects;
+    std::vector<RepeatNode> children;
+
+    auto pushEffect(types::Effect &myEffect) -> bool {
+      if (value != nullptr) {
+        int start = IvsEncoder::getTime(value);
+        int end = start + IvsEncoder::getDuration(value);
+        int position = myEffect.getPosition();
+        if (start > position || position >= end) {
+          return false;
+        }
+      }
+
+      for (auto it = children.begin(); it < children.end(); it++) {
+        if (it->pushEffect(myEffect)) {
+          return true;
+        }
+      }
+
+      auto it = myEffects.end();
+      auto it_effects = myEffects.begin();
+      int effectPosition = myEffect.getPosition();
+      for (; it_effects < myEffects.end(); it_effects++) {
+        if (it_effects->getPosition() < effectPosition) {
+          it = it_effects;
+        }
+      }
+      myEffects.insert(it, myEffect);
+      return true;
+    }
+
+    auto linearize(std::vector<types::Effect> &effectLibrary, int &delay) -> int {
+      int count = 0;
+      int duration = 0;
+      if (value != nullptr) {
+        count = IvsEncoder::getCount(value);
+        duration = IvsEncoder::getDuration(value);
+      }
+      auto myEffects_it = myEffects.begin();
+      auto children_it = children.begin();
+      int delay_tmp = 0;
+      std::vector<types::Effect> linearized_effects;
+      for (; myEffects_it < myEffects.end() && children_it < children.end();) {
+        int repeat_position =
+            children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value);
+
+        if (myEffects_it->getPosition() < repeat_position) {
+          types::Effect e = *myEffects_it;
+          int position = e.getPosition();
+          e.setPosition(delay + position);
+          linearized_effects.push_back(e);
+          myEffects_it++;
+        } else {
+          delay_tmp = children_it->linearize(linearized_effects, delay);
+          duration += delay_tmp;
+          delay += delay_tmp;
+          children_it++;
+        }
+      }
+      for (; myEffects_it < myEffects.end(); myEffects_it++) {
+        types::Effect e = *myEffects_it;
+        int position = e.getPosition();
+        e.setPosition(delay + position);
+        linearized_effects.push_back(e);
+      }
+      for (; children_it < children.end(); children_it++) {
+        delay_tmp = children_it->linearize(linearized_effects, delay);
+        duration += delay_tmp;
+        delay += delay_tmp;
+      }
+
+      for (int i = 0; i <= count; i++) {
+        for (types::Effect e : linearized_effects) {
+          e.setPosition(e.getPosition() + i * duration);
+          effectLibrary.push_back(e);
+        }
+      }
+
+      return count * duration;
+    }
+  };
+};
 } // namespace haptics::encoder
 #endif // IVSENCODER_H
