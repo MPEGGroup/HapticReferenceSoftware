@@ -88,6 +88,7 @@ static constexpr int MDTRACK_DESC_LENGTH = 16;
 static constexpr int MDTRACK_GAIN = 32;
 static constexpr int MDTRACK_MIXING_WEIGHT = 32;
 static constexpr int MDTRACK_BODY_PART_MASK = 32;
+static constexpr int MDTRACK_SAMPLING_FREQUENCY = 32;
 static constexpr int MDTRACK_VERT_COUNT = 16;
 static constexpr int MDTRACK_VERT = 32;
 static constexpr int MDTRACK_BANDS_COUNT = 16;
@@ -95,12 +96,12 @@ static constexpr int MDTRACK_DIRECTION_MASK = 1;
 static constexpr int MDTRACK_DIRECTION_AXIS = 8;
 static constexpr int MDTRACK_SAMPLE_COUNT = 32;
 
-static constexpr int MDBAND_ID = 8;
+static constexpr int MDBAND_ID = 16;
 static constexpr int MDBAND_BAND_TYPE = 2;
 static constexpr int MDBAND_CURVE_TYPE = 3;
 static constexpr int MDBAND_WIN_LEN = 32;
-static constexpr int MDBAND_LOW_FREQ = 32;
-static constexpr int MDBAND_UP_FREQ = 32;
+static constexpr int MDBAND_LOW_FREQ = 16;
+static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_FX_COUNT = 16;
 
 static constexpr int DB_AU_TYPE = 1;
@@ -144,7 +145,17 @@ static int BANDID = 0;
 
 class IOStream {
 public:
-  static int getTs() { return ts; };
+  struct BandStream {
+    int id = -1;
+    types::Band band = types::Band();
+  };
+
+  struct Buffer {
+    std::vector<types::Perception> perceptionsBuffer;
+    std::vector<types::Track> tracksBuffer;
+    std::vector<BandStream> bandStreamsBuffer;
+    std::vector<BandStream> bandStreamsHaptic;
+  };
 
   static auto writePacket(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writePacket(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream)
@@ -152,29 +163,17 @@ public:
   static auto readPacket(types::Haptics &haptic, std::ifstream &file) -> bool;
 
   static auto readPacket(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
-  struct BandStream {
-    int id = -1;
-    types::Band band = types::Band();
-  };
+
+  static auto writeNALu(NALuType naluType, types::Haptics &haptic, int level,
+                        std::vector<std::vector<bool>> &bitstream) -> bool;
+  static auto readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer &buffer) -> bool;
+  static auto initializeBuffer(types::Haptics &haptic) -> Buffer;
 
 private:
   struct StartTimeIdx {
     int time = 0;
     int idx = 0;
   };
-
- struct Buffer {
-    std::vector<types::Perception> perceptionsBuffer;
-    std::vector<types::Track> tracksBuffer;
-    std::vector<BandStream> bandStreamsBuffer;
-    std::vector<BandStream> bandStreamsHaptic;
-  };
-
-  static int ts;
-  static auto setTs(int newTs) { ts = newTs; };
-
-  static auto writeNALu(NALuType naluType, types::Haptics &haptic, int level,
-                        std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writeNALuHeader(NALuType naluType, int level, int payloadSize,
                               std::vector<bool> &bitstream) -> bool;
   static auto writeNALuPayload(NALuType naluType, types::Haptics &haptic,
@@ -223,9 +222,7 @@ private:
 
   static auto readPacketTS(std::vector<bool> bitstream) -> int;
 
-  static auto IOStream::readStream(types::Haptics &haptic) -> Buffer;
-
-  static auto readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer &buffer) -> bool;
+  
 
   static auto readNALuType(std::vector<bool> &packet) -> NALuType;
   static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;

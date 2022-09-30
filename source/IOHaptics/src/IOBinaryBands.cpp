@@ -290,7 +290,7 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::ofstream &f
 
   float phase = effect.getPhase();
   IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, -MAX_PHASE, MAX_PHASE);
-  auto baseSignal = static_cast<uint8_t>(effect.getBaseSignal());
+  auto baseSignal= static_cast<uint8_t>(effect.getBaseSignal());
   IOBinaryPrimitives::writeNBytes<uint8_t, 1>(baseSignal, file);
   auto keyframeCount = static_cast<uint16_t>(effect.getKeyframesSize());
   IOBinaryPrimitives::writeNBytes<uint16_t, 2>(keyframeCount, file);

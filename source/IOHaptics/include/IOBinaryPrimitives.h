@@ -113,7 +113,6 @@ public:
     return value;
   }
 
-
   template <class T, size_t bitCount>
   static auto writeFloatNBits(float value, std::vector<bool> &output, float minValue,
                               float maxValue) -> void {
@@ -140,15 +139,17 @@ public:
       }
     }
     startIdx += length;
-    return std::stoi(tsBits, nullptr, 2);
+    auto inv = std::stoul(tsBits, nullptr, 2);
+    int res = inv;
+    return res;
   }
 
   static auto readString(std::vector<bool> bitstream, int &startIdx, int length) -> std::string {
     std::string res;
-    for (int i = startIdx; i < BYTE_SIZE * length; i + BYTE_SIZE) {
+    for (int i = startIdx; i < startIdx + (BYTE_SIZE * length); i += BYTE_SIZE) {
       std::string bitsStr;
-      for (auto b : std::vector<bool>(bitstream.begin() + startIdx,
-                                      bitstream.begin() + startIdx + BYTE_SIZE)) {
+      for (auto b : std::vector<bool>(bitstream.begin() + i,
+                                      bitstream.begin() + i + BYTE_SIZE)) {
         if (b) {
           bitsStr += "1";
         } else {

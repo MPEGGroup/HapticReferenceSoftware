@@ -132,7 +132,6 @@ auto IOBinary::readAvatars(types::Haptics &haptic, std::ifstream &file) -> bool 
 
     haptic.addAvatar(myAvatar);
   }
-
   return true;
 }
 
