@@ -118,7 +118,7 @@ private:
       int effectPosition = myEffect.getPosition();
       for (; it_effects < myEffects.end(); it_effects++) {
         if (it_effects->getPosition() < effectPosition) {
-          it = it_effects;
+          it = it_effects + 1;
         }
       }
       myEffects.insert(it, myEffect);
