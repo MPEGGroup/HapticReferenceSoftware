@@ -200,9 +200,6 @@ private:
   static auto createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                   std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
                                   bool &rau, std::vector<std::vector<bool>> &bitstream) -> bool;
-  static auto createPayloadPacket2(types::Band &band, StartTimeIdx &startTI,
-                                  std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
-                                  bool &rau, std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writePayloadPacket(StartTimeIdx point, StartTimeIdx percetrackID,
                                  std::vector<types::Effect> &vecEffect, int bandID,
                                  std::vector<int> kfCount,
@@ -246,8 +243,6 @@ private:
   static auto readMetadataTrack(types::Track &track, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataBand(BandStream &bandStream, std::vector<bool> &bitstream) -> bool;
   static auto readData(types::Haptics &haptic, Buffer &buffer,
-                       std::vector<bool> &bitstream) -> bool;
-  static auto readData2(types::Haptics &haptic, Buffer &buffer,
                        std::vector<bool> &bitstream) -> bool;
   static auto readEffect(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
   static auto readTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)

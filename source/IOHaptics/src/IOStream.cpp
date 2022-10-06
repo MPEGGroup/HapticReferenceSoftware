@@ -973,50 +973,6 @@ auto IOStream::packetizeBand(int perceID, int trackID, types::Band &band, int ba
 
   return true;
 }
-auto IOStream::createPayloadPacket2(types::Band &band, StartTimeIdx &startTI,
-                                    std::vector<types::Effect> &vecEffect,
-                                    std::vector<int> &kfCount, bool &rau,
-                                    std::vector<std::vector<bool>> &bitstream) -> bool {
-  // Exit this function only when 1 packet is full or last keyframes of the band is reached
-  for (int i = 0; i < band.getEffectsSize(); i++) {
-    types::Effect &effect = band.getEffectAt(i);
-    if (effect.getId() == -1) {
-      int nextId = 0;
-      if (effectsId.size() > 0) {
-        nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
-      }
-      effect.setId(nextId);
-      effectsId.push_back(nextId);
-    }
-    if (effect.getPosition() >= startTI.time &&
-        effect.getPosition() <= startTI.time + PACKET_DURATION) {
-      vecEffect.push_back(effect);
-      std::vector<bool> bufEffect = std::vector<bool>();
-      if (effect.getEffectType() == types::EffectType::Basis) {
-        int bufKFCount = 0;
-        if (writeEffectBasis(effect, band.getBandType(), startTI, bufKFCount, rau, bufEffect)) {
-          bitstream.push_back(bufEffect);
-          kfCount.push_back(bufKFCount);
-          return true;
-        }
-        kfCount.push_back(bufKFCount);
-        return false;
-      } else if (effect.getEffectType() == types::EffectType::Reference) {
-        std::bitset<FX_REF_ID> referenceIDBits(effect.getId());
-        IOBinaryPrimitives::writeStrBits(referenceIDBits.to_string(), bufEffect);
-        bitstream.push_back(bufEffect);
-      } else if (effect.getEffectType() == types::EffectType::Timeline) {
-        // writeTimeline()
-      } else {
-        return false;
-      }
-      bitstream.push_back(bufEffect);
-    } else if (effect.getPosition() > startTI.time + PACKET_DURATION) {
-      return false;
-    }
-  }
-  return true;
-}
 
 auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                    std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
