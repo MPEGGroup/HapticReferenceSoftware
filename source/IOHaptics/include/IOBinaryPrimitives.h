@@ -36,12 +36,12 @@
 
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <cmath>
 #include <cstring>
 #include <fstream>
 #include <string>
-#include<vector>
-#include<bitset>
+#include <vector>
 
 namespace haptics::io {
 constexpr float MAX_FLOAT = 10000;
@@ -103,13 +103,23 @@ public:
     }
   }
 
-  static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, int length, float minValue, float maxValue)
-      -> float {
-    auto intValue = readInt(bitstream, startIdx, length);
+  template<size_t length>
+  static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx,
+                             float minValue, float maxValue) -> float {
+    std::string str = "";
+    for (int i = startIdx; i < startIdx + length; i++) {
+      if (bitstream[i]) {
+        str += "1";
+      } else {
+        str += "0";
+      }
+    }
+    auto intValue = std::bitset<length>(str).to_ulong();
     auto maxIntValue = static_cast<uint64_t>(std::pow(2, length) - 1);
     auto normalizedValue = intValue / static_cast<float>(maxIntValue);
     normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
     auto value = normalizedValue * (maxValue - minValue) + minValue;
+    startIdx += static_cast<int>(length);
     return value;
   }
 
@@ -124,7 +134,7 @@ public:
   }
 
   static auto writeStrBits(std::string bits, std::vector<bool> &bitstream) -> void {
-    //std::reverse(bits.begin(), bits.end());
+    // std::reverse(bits.begin(), bits.end());
     for (char c : bits) {
       bitstream.push_back(c == '1');
     }
@@ -148,8 +158,7 @@ public:
     std::string res;
     for (int i = startIdx; i < startIdx + (BYTE_SIZE * length); i += BYTE_SIZE) {
       std::string bitsStr;
-      for (auto b : std::vector<bool>(bitstream.begin() + i,
-                                      bitstream.begin() + i + BYTE_SIZE)) {
+      for (auto b : std::vector<bool>(bitstream.begin() + i, bitstream.begin() + i + BYTE_SIZE)) {
         if (b) {
           bitsStr += "1";
         } else {
@@ -163,7 +172,6 @@ public:
     return res;
   }
 };
-
 
 } // namespace haptics::io
 #endif // IOBINARYPRIMITIVES_H

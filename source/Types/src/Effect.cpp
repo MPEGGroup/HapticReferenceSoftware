@@ -71,6 +71,15 @@ auto Effect::replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool 
   return true;
 }
 
+auto Effect::removeKeyframeAt(int index) -> bool {
+  if (index < 0 || index >= static_cast<int>(keyframes.size())) {
+    return false;
+  }
+
+  this->keyframes.erase(this->keyframes.begin() + index);
+  return true;
+}
+
 auto Effect::addKeyframe(haptics::types::Keyframe &newKeyframe) -> void {
   keyframes.push_back(newKeyframe);
 }

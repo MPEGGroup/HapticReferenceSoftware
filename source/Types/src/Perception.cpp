@@ -94,6 +94,14 @@ auto Perception::replaceTrackAt(int index, haptics::types::Track &newTrack) -> b
   return true;
 }
 
+auto Perception::removeTrackAt(int index) -> bool {
+  if (index < 0 || index >= (int)tracks.size()) {
+    return false;
+  }
+  tracks.erase(tracks.begin() +index);
+  return true;
+}
+
 auto Perception::addTrack(haptics::types::Track &newTrack) -> void { tracks.push_back(newTrack); }
 
 auto Perception::getReferenceDevicesSize() -> size_t { return referenceDevices.size(); }

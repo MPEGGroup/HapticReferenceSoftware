@@ -82,6 +82,14 @@ auto Track::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   return true;
 }
 
+auto Track::removeBandAt(int index) -> bool {
+  if (index < 0 || index >= (int)this->getBandsSize()) {
+    return false;
+  }
+  this->bands.erase(this->bands.begin() + index);
+  return true;
+}
+
 auto Track::generateBand() -> haptics::types::Band * {
   Band newBand;
   this->bands.push_back(newBand);

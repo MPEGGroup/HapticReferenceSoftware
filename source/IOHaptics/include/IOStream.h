@@ -148,6 +148,7 @@ public:
   struct BandStream {
     int id = -1;
     types::Band band = types::Band();
+    int index = -1;
   };
 
   struct Buffer {
@@ -167,13 +168,15 @@ public:
   static auto writeNALu(NALuType naluType, types::Haptics &haptic, int level,
                         std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer &buffer) -> bool;
-  static auto initializeBuffer(types::Haptics &haptic) -> Buffer;
+  static auto initializeStream(types::Haptics &haptic) -> Buffer;
 
 private:
   struct StartTimeIdx {
     int time = 0;
     int idx = 0;
   };
+  static std::vector<int> effectsId;
+
   static auto writeNALuHeader(NALuType naluType, int level, int payloadSize,
                               std::vector<bool> &bitstream) -> bool;
   static auto writeNALuPayload(NALuType naluType, types::Haptics &haptic,
@@ -189,15 +192,19 @@ private:
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice,
                                                      std::vector<bool> &informationMask) -> bool;
   static auto writeMetadataTrack(types::Track &track, std::vector<bool> &bitstream) -> bool;
-  static auto writeMetadataBand(types::Band &band, std::vector<bool> &bitstream) -> bool;
+  static auto writeMetadataBand(types::Band &band, std::vector<bool> &bitstream, int id)
+      -> bool;
   static auto writeData(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto packetizeBand(int perceID, int trackID, types::Band &band, int bandID,
                             std::vector<std::vector<bool>> &bitstreams) -> bool;
   static auto createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                   std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
                                   bool &rau, std::vector<std::vector<bool>> &bitstream) -> bool;
+  static auto createPayloadPacket2(types::Band &band, StartTimeIdx &startTI,
+                                  std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
+                                  bool &rau, std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writePayloadPacket(StartTimeIdx point, StartTimeIdx percetrackID,
-                                 std::vector<types::Effect> vecEffect, int bandID,
+                                 std::vector<types::Effect> &vecEffect, int bandID,
                                  std::vector<int> kfCount,
                                  std::vector<std::vector<bool>> bufPacketBitstream)
       -> std::vector<bool>;
@@ -240,31 +247,35 @@ private:
   static auto readMetadataBand(BandStream &bandStream, std::vector<bool> &bitstream) -> bool;
   static auto readData(types::Haptics &haptic, Buffer &buffer,
                        std::vector<bool> &bitstream) -> bool;
+  static auto readData2(types::Haptics &haptic, Buffer &buffer,
+                       std::vector<bool> &bitstream) -> bool;
   static auto readEffect(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
   static auto readTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
       -> bool;
   static auto readCRC(std::vector<bool> &crc, std::vector<bool> &bitstream) -> bool;
+
+  static auto getEffectsId(types::Haptics &haptic) -> bool;
 
   static auto readListObject(std::vector<bool> &bitstream, int avatarCount,
                              std::vector<types::Avatar> &avatarList) -> bool;
   static auto readListObject(std::vector<bool> &bitstream, int refDevCount,
                              std::vector<types::ReferenceDevice> &refDevList) -> bool;
 
-  static auto addEffectToHaptic(BandStream &bandStream, std::vector<types::Effect> &effects,
-                                bool auType) -> bool;
-  static auto updateEffect(types::Effect &oldEffect, types::Effect &newEffect) -> bool;
+  static auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex,
+                                          int trackIndex, int bandIndex,
+                                          std::vector<types::Effect> &effects, bool auType) -> bool;
   template <class T>
   static auto searchInList(std::vector<T> &list, T &item, int id) -> bool;
   static auto searchInList(std::vector<BandStream> &list, BandStream &item, int id)
       -> bool;
-  static auto searchPerceptionInHaptic(types::Haptics &haptic, types::Perception &perception, int id)
-      -> bool;
-  static auto searchTrackInHaptic(types::Haptics &haptic, types::Track &track,
-                                       int id) -> bool;
-  static auto searchBandInHaptic(Buffer &buffer, BandStream &bandStream, int id) -> bool;
+  static auto searchPerceptionInHaptic(types::Haptics &haptic, int id)
+      -> int;
+  static auto searchTrackInHaptic(types::Haptics &haptic,
+                                       int id) -> int;
+  static auto searchBandInHaptic(Buffer &buffer, int id) -> int;
 
   static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::BandType &bandType,
-                             std::vector<types::Effect> &fxList) -> bool;
+                             std::vector<types::Effect> &fxList, int &length) -> bool;
 
   static auto readEffect(std::vector<bool> &bitstream, types::Effect &effect,
                          types::BandType &bandType, int &length) -> bool;
@@ -273,7 +284,7 @@ private:
                               types::BandType &bandType, int &idx) -> bool;
 
   static auto readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,
-                             std::vector<types::Keyframe> &kfList) -> bool;
+                             std::vector<types::Keyframe> &kfList, int &length) -> bool;
 
   static auto readKeyframe(std::vector<bool> &bitstream, types::Keyframe &keyframe,
                            types::BandType &bandType, int &idx) -> bool;
@@ -283,6 +294,8 @@ private:
   static auto readCurve(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &idx) -> bool;
   static auto readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &idx)
       -> bool;
+
+  static auto checkHapticComponent(types::Haptics &haptic) -> void;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H
