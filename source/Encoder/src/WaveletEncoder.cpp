@@ -86,7 +86,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
-    pos_effect += (int) band.getBlockLength();
+    pos_effect += (int)band.getBlockLength();
     add_start += bl;
     add_end += bl;
   }
