@@ -95,6 +95,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
   case NALuType::MetadataHaptics: {
     std::vector<bool> naluPayload = std::vector<bool>();
     writeMetadataHaptics(haptic, naluPayload);
+    int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+    for (int i = 0; i < byte_stuffing; i++) {
+      naluPayload.push_back(0);
+    }
     writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
     bitstream.push_back(naluHeader);
@@ -104,6 +108,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
     std::vector<bool> naluPayload = std::vector<bool>();
     for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
       writeMetadataPerception(haptic.getPerceptionAt(i), naluPayload);
+      int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+      for (int i = 0; i < byte_stuffing; i++) {
+        naluPayload.push_back(0);
+      }
       writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
       naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
       bitstream.push_back(naluHeader);
@@ -118,6 +126,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
     for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
       for (int j = 0; j < haptic.getPerceptionAt(i).getTracksSize(); j++) {
         writeMetadataTrack(haptic.getPerceptionAt(i).getTrackAt(j), naluPayload);
+        int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+        for (int i = 0; i < byte_stuffing; i++) {
+          naluPayload.push_back(0);
+        }
         writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
         naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
         bitstream.push_back(naluHeader);
@@ -136,6 +148,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
         for (int k = 0; k < haptic.getPerceptionAt(i).getTrackAt(j).getBandsSize(); k++) {
           writeMetadataBand(haptic.getPerceptionAt(i).getTrackAt(j).getBandAt(k), naluPayload,
                             bandId++);
+          int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+          for (int i = 0; i < byte_stuffing; i++) {
+            naluPayload.push_back(0);
+          }
           writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
           naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
           bitstream.push_back(naluHeader);
@@ -150,6 +166,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
     std::vector<std::vector<bool>> naluPayload = std::vector<std::vector<bool>>();
     writeData(haptic, naluPayload);
     for (auto data : naluPayload) {
+      int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+      for (int i = 0; i < byte_stuffing; i++) {
+        data.push_back(0);
+      }
       writeNALuHeader(naluType, level, static_cast<int>(data.size()), naluHeader);
       naluHeader.insert(naluHeader.end(), data.begin(), data.end());
       bitstream.push_back(naluHeader);
@@ -160,6 +180,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
   case NALuType::CRC: {
     std::vector<bool> naluPayload = std::vector<bool>();
     // writeCRC(bitstream);
+    int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+    for (int i = 0; i < byte_stuffing; i++) {
+      naluPayload.push_back(0);
+    }
     writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
     bitstream.push_back(naluHeader);
@@ -167,6 +191,10 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
   }
   case NALuType::ByteStuffing: {
     std::vector<bool> naluPayload = std::vector<bool>();
+    int byte_stuffing = static_cast<int>(naluPayload.size()) % BYTE_SIZE;
+    for (int i = 0; i < byte_stuffing; i++) {
+      naluPayload.push_back(0);
+    }
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
     bitstream.push_back(naluHeader);
     return true;
@@ -217,8 +245,8 @@ auto IOStream::writeNALuHeader(NALuType naluType, int level, int payloadSize,
   const int residual = H_NBITS - (H_NALU_TYPE + H_LEVEL + H_PAYLOAD_LENGTH);
   std::bitset<residual> resBits(0);
   IOBinaryPrimitives::writeStrBits(resBits.to_string(), bitstream);
-
-  std::bitset<H_PAYLOAD_LENGTH> payloadSizeBits(payloadSize);
+  int payloadSizeByte = payloadSize / BYTE_SIZE;
+  std::bitset<H_PAYLOAD_LENGTH> payloadSizeBits(payloadSizeByte);
   IOBinaryPrimitives::writeStrBits(payloadSizeBits.to_string(), bitstream);
 
   return true;
@@ -229,7 +257,7 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
   int index = H_NALU_TYPE;
   int level = IOBinaryPrimitives::readInt(packet, index, H_LEVEL);
   index = H_NBITS - H_PAYLOAD_LENGTH;
-  int packetLength = IOBinaryPrimitives::readInt(packet, index, H_PAYLOAD_LENGTH);
+  int packetLength = IOBinaryPrimitives::readInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
   switch (naluType) {
   case (NALuType::MetadataHaptics): {
@@ -451,10 +479,6 @@ auto IOStream::readMetadataPerception(types::Perception &perception, std::vector
   perception.setAvatarId(avatarId);
 
   int fxCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_FXLIB_COUNT);
-  // for (int i = 0; i < fxCount; i++) {
-  //   types::Effect bufEffect = types::Effect();
-  //   perception.addBasisEffect(bufEffect);
-  // }
 
   int unitExp = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_UNIT_EXP);
   perception.setUnitExponent(unitExp);
@@ -474,10 +498,7 @@ auto IOStream::readMetadataPerception(types::Perception &perception, std::vector
   }
   idx = static_cast<int>(bitstream.size()) - MDPERCE_TRACK_COUNT;
   int trackCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_TRACK_COUNT);
-  // for (int i = 0; i < trackCount; i++) {
-  //   types::Track bufTrack = types::Track();
-  //   perception.addTrack(bufTrack);
-  // }
+
   return true;
 }
 
@@ -662,48 +683,39 @@ auto IOStream::readReferenceDevice(std::vector<bool> &bitstream, types::Referenc
     refDevice.setBodyPartMask(static_cast<uint32_t>(bodyPartMask));
   }
   if (mask[maskIdx++]) {
-    value = IOBinaryPrimitives::readFloatNBits< REFDEV_MAX_FREQ>(bitstream, idx, 0,
-                                                                          MAX_FREQUENCY);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_FREQ>(bitstream, idx, 0, MAX_FREQUENCY);
     refDevice.setMaximumFrequency(value);
   }
   if (mask[maskIdx++]) {
-    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MIN_FREQ>(bitstream, idx, 0,
-                                                                          MAX_FREQUENCY);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MIN_FREQ>(bitstream, idx, 0, MAX_FREQUENCY);
     refDevice.setMinimumFrequency(value);
   }
   if (mask[maskIdx++]) {
-    value = IOBinaryPrimitives::readFloatNBits<REFDEV_RES_FREQ>(bitstream, idx, 0,
-                                                                          MAX_FREQUENCY);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_RES_FREQ>(bitstream, idx, 0, MAX_FREQUENCY);
     refDevice.setResonanceFrequency(value);
   }
   if (mask[maskIdx++]) {
-    value =
-        IOBinaryPrimitives::readFloatNBits< REFDEV_MAX_AMP>(bitstream, idx, 0, MAX_FLOAT);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_AMP>(bitstream, idx, 0, MAX_FLOAT);
     refDevice.setMaximumAmplitude(value);
   }
   if (mask[maskIdx++]) {
-    value = IOBinaryPrimitives::readFloatNBits< REFDEV_IMPEDANCE>(bitstream, idx, 0,
-                                                                           MAX_FLOAT);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_IMPEDANCE>(bitstream, idx, 0, MAX_FLOAT);
     refDevice.setImpedance(value);
   }
   if (mask[maskIdx++]) {
-    value =
-        IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_VOLT>(bitstream, idx, 0, MAX_FLOAT);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_VOLT>(bitstream, idx, 0, MAX_FLOAT);
     refDevice.setMaximumVoltage(value);
   }
   if (mask[maskIdx++]) {
-    value =
-        IOBinaryPrimitives::readFloatNBits< REFDEV_MAX_CURR>(bitstream, idx, 0, MAX_FLOAT);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_CURR>(bitstream, idx, 0, MAX_FLOAT);
     refDevice.setMaximumCurrent(value);
   }
   if (mask[maskIdx++]) {
-    value =
-        IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_DISP>(bitstream, idx, 0, MAX_FLOAT);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_MAX_DISP>(bitstream, idx, 0, MAX_FLOAT);
     refDevice.setMaximumDisplacement(value);
   }
   if (mask[maskIdx++]) {
-    value =
-        IOBinaryPrimitives::readFloatNBits<REFDEV_WEIGHT>(bitstream, idx, 0, MAX_FLOAT);
+    value = IOBinaryPrimitives::readFloatNBits<REFDEV_WEIGHT>(bitstream, idx, 0, MAX_FLOAT);
     refDevice.setWeight(value);
   }
   if (mask[maskIdx++]) {
@@ -711,8 +723,8 @@ auto IOStream::readReferenceDevice(std::vector<bool> &bitstream, types::Referenc
     refDevice.setSize(value);
   }
   if (mask[maskIdx++]) {
-    value = IOBinaryPrimitives::readFloatNBits<REFDEV_CUSTOM>(bitstream, idx, -MAX_FLOAT,
-                                                                        MAX_FLOAT);
+    value =
+        IOBinaryPrimitives::readFloatNBits<REFDEV_CUSTOM>(bitstream, idx, -MAX_FLOAT, MAX_FLOAT);
     refDevice.setCustom(value);
   }
   if (mask[maskIdx++]) {
@@ -802,12 +814,12 @@ auto IOStream::readMetadataTrack(types::Track &track, std::vector<bool> &bitstre
   if (deviceId > -1) {
     track.setReferenceDeviceId(deviceId);
   }
-  float gain = IOBinaryPrimitives::readFloatNBits<MDTRACK_GAIN>(bitstream, idx,
-                                                                          -MAX_FLOAT, MAX_FLOAT);
+  float gain =
+      IOBinaryPrimitives::readFloatNBits<MDTRACK_GAIN>(bitstream, idx, -MAX_FLOAT, MAX_FLOAT);
   track.setGain(gain);
 
-  float mixingWeight = IOBinaryPrimitives::readFloatNBits<MDTRACK_MIXING_WEIGHT>(
-      bitstream, idx, 0, MAX_FLOAT);
+  float mixingWeight =
+      IOBinaryPrimitives::readFloatNBits<MDTRACK_MIXING_WEIGHT>(bitstream, idx, 0, MAX_FLOAT);
   track.setMixingWeight(mixingWeight);
 
   uint32_t bodyPartMask = IOBinaryPrimitives::readInt(bitstream, idx, MDTRACK_BODY_PART_MASK);
@@ -1188,73 +1200,6 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   }
   return true;
 }
-
-// auto IOStream::readData2(types::Haptics &haptic, Buffer &buffer, std::vector<bool> &bitstream)
-//     -> bool {
-//   int idx = 0;
-//   bool auType = IOBinaryPrimitives::readInt(bitstream, idx, DB_AU_TYPE) == 1;
-//   int timestamp = IOBinaryPrimitives::readInt(bitstream, idx, DB_TIMESTAMP);
-//
-//   int perceptionId = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_ID);
-//   types::Perception *perception_ptr = nullptr;
-//   types::Perception perception;
-//   bool addPerception = false;
-//   if (!searchPerceptionInHaptic(haptic, perception_ptr, perceptionId)) {
-//     if (!searchInList<types::Perception>(buffer.perceptionsBuffer, perception, perceptionId)) {
-//       return false;
-//     }
-//     addPerception = true;
-//     perception_ptr = &perception;
-//   }
-//
-//   int trackId = IOBinaryPrimitives::readInt(bitstream, idx, MDTRACK_ID);
-//   types::Track* track_ptr = nullptr;
-//   types::Track track;
-//   bool addTrack = false;
-//   if (!searchTrackInHaptic(haptic, track_ptr, trackId)) {
-//     if (!searchInList<types::Track>(buffer.tracksBuffer, track, trackId)) {
-//       return false;
-//     }
-//     addTrack = true;
-//     track_ptr = &track;
-//   }
-//
-//   int bandId = IOBinaryPrimitives::readInt(bitstream, idx, MDBAND_ID);
-//   BandStream *bandStream_ptr = nullptr;
-//   BandStream bandStream;
-//   bool addBand = false;
-//   if (!searchBandInHaptic(buffer, bandStream_ptr, bandId)) {
-//     if (!searchInList(buffer.bandStreamsBuffer, bandStream, bandId)) {
-//       return false;
-//     }
-//     addBand = true;
-//     bandStream_ptr = &bandStream;
-//   }
-//
-//   types::BandType bandType = bandStream_ptr->band.getBandType();
-//   int fxCount = IOBinaryPrimitives::readInt(bitstream, idx, DB_FX_COUNT);
-//   std::vector<types::Effect> effects;
-//   std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
-//   if (!readListObject(effectsBitsList, fxCount, bandType, effects)) {
-//     return false;
-//   }
-//
-//   if (!addEffectToHaptic(*bandStream_ptr, effects, auType)) {
-//     return false;
-//   }
-//   if (addBand) {
-//
-//     track_ptr->addBand(bandStream_ptr->band);
-//     buffer.bandStreamsHaptic.push_back(*bandStream_ptr);
-//   }
-//   if (addTrack) {
-//     perception_ptr->addTrack(*track_ptr);
-//   }
-//   if (addPerception) {
-//     haptic.addPerception(*perception_ptr);
-//   }
-//   return true;
-// }
 
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect,
                           types::BandType &bandType, int &length) -> bool {
