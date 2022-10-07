@@ -44,8 +44,8 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file) -> boo
     auto curveType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
-    band.setWindowLength(static_cast<int>(windowLength));
+    auto blockLength = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    band.setBlockLength(static_cast<int>(blockLength));
   }
 
   auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -72,8 +72,8 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ostream &file) -> bo
     auto curveType = static_cast<uint8_t>(band.getCurveType());
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(curveType, file);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength = static_cast<uint16_t>(band.getWindowLength());
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(windowLength, file);
+    auto blockLength = static_cast<uint16_t>(band.getBlockLength());
+    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(blockLength, file);
   }
 
   auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
@@ -97,7 +97,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file) -> bool 
     auto position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * band.getWindowLength();
+      position = effectIndex * (int)band.getBlockLength();
     } else {
       position = static_cast<int>(IOBinaryPrimitives::readNBytes<uint32_t, 4>(file));
     }
@@ -326,7 +326,7 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::ostream &fi
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file)
     -> bool {
   spiht::Spiht_Dec dec;
-  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
+  auto blocklength = (int)(band.getBlockLength() * (double)band.getUpperFrequencyLimit()) / S2MS;
   auto size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
   std::vector<unsigned char> instream;

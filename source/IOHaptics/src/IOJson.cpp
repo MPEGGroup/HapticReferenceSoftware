@@ -305,8 +305,8 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -
       std::cerr << "Missing or invalid curve type" << std::endl;
       continue;
     }
-    if (!jsonBand.HasMember("window_length") || !jsonBand["window_length"].IsInt()) {
-      std::cerr << "Missing or invalid window length" << std::endl;
+    if (!jsonBand.HasMember("block_length") || !jsonBand["block_length"].IsDouble()) {
+      std::cerr << "Missing or invalid block length" << std::endl;
       continue;
     }
     if (!jsonBand.HasMember("lower_frequency_limit") ||
@@ -326,11 +326,11 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -
 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
     types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
-    int windowLength = jsonBand["window_length"].GetInt();
+    double blockLength = jsonBand["block_length"].GetDouble();
     int lowerLimit = jsonBand["lower_frequency_limit"].GetInt();
     int upperLimit = jsonBand["upper_frequency_limit"].GetInt();
 
-    types::Band band(bandType, curveType, windowLength, lowerLimit, upperLimit);
+    types::Band band(bandType, curveType, blockLength, lowerLimit, upperLimit);
     loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
     track.addBand(band);
@@ -727,7 +727,7 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &json
                          rapidjson::Value(types::curveTypeToString.at(band.getCurveType()).c_str(),
                                           jsonTree.GetAllocator()),
                          jsonTree.GetAllocator());
-      jsonBand.AddMember("window_length", band.getWindowLength(), jsonTree.GetAllocator());
+      jsonBand.AddMember("block_length", band.getBlockLength(), jsonTree.GetAllocator());
       jsonBand.AddMember("lower_frequency_limit", band.getLowerFrequencyLimit(),
                          jsonTree.GetAllocator());
       jsonBand.AddMember("upper_frequency_limit", band.getUpperFrequencyLimit(),
