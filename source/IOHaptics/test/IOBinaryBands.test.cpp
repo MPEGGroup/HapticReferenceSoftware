@@ -199,9 +199,9 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
 TEST_CASE("write/read BandHeader on wavelet wave") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::WaveletWave;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Unknown;
-  const double testingBlockLength = 42;
+  const double testingBlockLength = 128;
   const int testingLowerFrequencyLimit = 65;
-  const int testingUpperFrequencyLimit = 300;
+  const int testingUpperFrequencyLimit = 8000;
   haptics::types::Band testingBand(testingBandType, testingCurveType, testingBlockLength,
                                    testingLowerFrequencyLimit, testingUpperFrequencyLimit);
   const int expectedEffectCount = 42;
