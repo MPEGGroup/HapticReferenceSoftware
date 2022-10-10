@@ -45,7 +45,8 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file) -> boo
     auto curveType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    blockLength_samp = (double)IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    auto blockLength_code = (double)IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    blockLength_samp = std::pow(2,blockLength_code + 4);
   }
 
   auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -78,8 +79,12 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ostream &file) -> bo
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(curveType, file);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
     auto bl_ms = band.getBlockLength();
-    auto blockLength_samples = (int)(bl_ms / S_2_MS_WAVELET * band.getUpperFrequencyLimit());
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(blockLength_samples, file);
+    auto blockLength_samples = bl_ms / S_2_MS_WAVELET * band.getUpperFrequencyLimit();
+    auto blockLength_code = (int)std::log2(blockLength_samples) - 4;
+    if(blockLength_code < 0) {
+      std::cerr << "wavelet blocklength too small" << std::endl;
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(blockLength_code, file);
   }
 
   auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
