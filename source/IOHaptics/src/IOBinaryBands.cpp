@@ -40,12 +40,12 @@ namespace haptics::io {
 auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file) -> bool {
   auto bandType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   band.setBandType(static_cast<types::BandType>(bandType));
+  double blockLength_samp = 0;
   if (band.getBandType() == types::BandType::Curve) {
     auto curveType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto blockLength = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
-    band.setBlockLength(static_cast<int>(blockLength));
+    blockLength_samp = (double)IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   }
 
   auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -53,6 +53,11 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file) -> boo
 
   auto upperFrequencyLimit = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
+
+  if (band.getBandType() == types::BandType::WaveletWave) {
+    double blockLength_ms = blockLength_samp / (double)upperFrequencyLimit * S_2_MS_WAVELET;
+    band.setBlockLength(blockLength_ms);
+  }
 
   auto effectCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   for (unsigned int i = 0; i < effectCount; i++) {
@@ -72,8 +77,9 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ostream &file) -> bo
     auto curveType = static_cast<uint8_t>(band.getCurveType());
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(curveType, file);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto blockLength = static_cast<uint16_t>(band.getBlockLength());
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(blockLength, file);
+    auto bl_ms = band.getBlockLength();
+    auto blockLength_samples = (int)(bl_ms/S_2_MS_WAVELET * band.getUpperFrequencyLimit());
+    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(blockLength_samples, file);
   }
 
   auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
