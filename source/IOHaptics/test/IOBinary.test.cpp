@@ -412,7 +412,7 @@ TEST_CASE("write/read file header for track testing") {
   for (size_t i = 0; i < testingBandsCount_track2; i++) {
     testingTrack2.generateBand();
   }
-  testingTrack2.setTrackResolution(testingTrackResolution_track2);
+  testingTrack2.setActuatorResolution(testingTrackResolution_track2);
   testingTrack2.setActuatorTarget(testingActuatorTarget_track2);
   testingTrack2.setBodyPartTarget(testingBodyPartTarget_track2);
 
@@ -470,7 +470,7 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandsSize() == testingBandsCount_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getTrackResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorResolution().has_value());
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getBodyPartTarget().has_value());
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorTarget().has_value());
 
@@ -483,7 +483,7 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getTrackResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorResolution().has_value());
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getBodyPartTarget().has_value());
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorTarget().has_value());
 
@@ -507,8 +507,8 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
     CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartMask() == 0);
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getTrackResolution().has_value());
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getTrackResolution().value() ==
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().value() ==
           testingTrackResolution_track2);
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().has_value());
     REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value().size() ==

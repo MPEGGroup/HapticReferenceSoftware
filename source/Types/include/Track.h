@@ -102,8 +102,8 @@ public:
   auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
   [[nodiscard]] auto getDirection() const -> std::optional<Vector>;
   auto setDirection(std::optional<Vector> newDirection) -> void;
-  [[nodiscard]] auto getTrackResolution() const -> std::optional<Vector>;
-  auto setTrackResolution(std::optional<Vector> newTrackResolution) -> void;
+  [[nodiscard]] auto getActuatorResolution() const -> std::optional<Vector>;
+  auto setActuatorResolution(std::optional<Vector> newTrackResolution) -> void;
   [[nodiscard]] auto getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>>;
   auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
   [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
@@ -121,7 +121,7 @@ private:
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;
   std::optional<Vector> direction = std::nullopt;
-  std::optional<Vector> trackResolution = std::nullopt;
+  std::optional<Vector> actuatorResolution = std::nullopt;
   std::optional<std::vector<BodyPartTarget>> bodyPartTarget = std::nullopt;
   std::optional<std::vector<Vector>> actuatorTarget = std::nullopt;
 };

@@ -591,7 +591,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
 
     types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
     if (bodypartTargetting.has_value()) {
-      t.setTrackResolution(std::get<0>(bodypartTargetting.value()));
+      t.setActuatorResolution(std::get<0>(bodypartTargetting.value()));
       t.setBodyPartTarget(std::get<1>(bodypartTargetting.value()));
       t.setActuatorTarget(std::get<2>(bodypartTargetting.value()));
     }
@@ -650,7 +650,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
     IOBinaryPrimitives::writeFloatNBytes<uint32_t, 4>(trackMixingWeight, file, 0, MAX_FLOAT);
 
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
-    if (myTrack.getTrackResolution().has_value()) {
+    if (myTrack.getActuatorResolution().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0010;
     } else {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
@@ -660,8 +660,8 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
     }
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalMetadataMask, file);
 
-    if (myTrack.getTrackResolution().has_value()) {
-      types::Vector trackResolution = myTrack.getTrackResolution().value();
+    if (myTrack.getActuatorResolution().has_value()) {
+      types::Vector trackResolution = myTrack.getActuatorResolution().value();
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.X, file);
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.Y, file);
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.Z, file);

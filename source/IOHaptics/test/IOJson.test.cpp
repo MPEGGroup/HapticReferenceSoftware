@@ -394,7 +394,7 @@ TEST_CASE("write/read hjif haptic file for body targetting testing") {
       haptics::types::Vector{0, 0, 0},
       haptics::types::Vector{15, 42, 1},
   };
-  testingTrack0.setTrackResolution(testingTrackResolution_track0);
+  testingTrack0.setActuatorResolution(testingTrackResolution_track0);
   testingTrack0.setActuatorTarget(testingActuatorTarget_track0);
 
   const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_track1{
@@ -423,15 +423,15 @@ TEST_CASE("write/read hjif haptic file for body targetting testing") {
     haptics::types::Track res_track0 = res.getPerceptionAt(0).getTrackAt(0);
     haptics::types::Track res_track1 = res.getPerceptionAt(0).getTrackAt(1);
 
-    REQUIRE(res_track0.getTrackResolution().has_value());
-    CHECK(res_track0.getTrackResolution().value() == testingTrackResolution_track0);
+    REQUIRE(res_track0.getActuatorResolution().has_value());
+    CHECK(res_track0.getActuatorResolution().value() == testingTrackResolution_track0);
     REQUIRE(res_track0.getActuatorTarget().has_value());
     REQUIRE(res_track0.getActuatorTarget().value().size() == testingActuatorTarget_track0.size());
     for (size_t i = 0; i < testingActuatorTarget_track0.size(); i++) {
       CHECK(res_track0.getActuatorTarget().value()[i] == testingActuatorTarget_track0[i]);
     }
     CHECK_FALSE(res_track0.getBodyPartTarget().has_value());
-    CHECK_FALSE(res_track1.getTrackResolution().has_value());
+    CHECK_FALSE(res_track1.getActuatorResolution().has_value());
     CHECK_FALSE(res_track1.getActuatorTarget().has_value());
     REQUIRE(res_track1.getBodyPartTarget().has_value());
     REQUIRE(res_track1.getBodyPartTarget().value().size() == testingBodyPartTarget_track1.size());

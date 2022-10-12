@@ -244,24 +244,24 @@ TEST_CASE("haptics::types::Track testing direction") {
   }
 }
 
-TEST_CASE("haptics::types::Track testing track resolution") {
+TEST_CASE("haptics::types::Track testing actuator resolution") {
   using haptics::types::Track;
   using haptics::types::Vector;
   Track track(1, "I'm a placeholder", 0, 0, 1);
 
   SECTION("checking track resolution") {
     const Vector testing_trackResolution(0, -127, 42);
-    track.setTrackResolution(testing_trackResolution);
+    track.setActuatorResolution(testing_trackResolution);
 
-    REQUIRE(track.getTrackResolution().has_value());
-    CHECK(track.getTrackResolution().value().X == testing_trackResolution.X);
-    CHECK(track.getTrackResolution().value().Y == testing_trackResolution.Y);
-    CHECK(track.getTrackResolution().value().Z == testing_trackResolution.Z);
+    REQUIRE(track.getActuatorResolution().has_value());
+    CHECK(track.getActuatorResolution().value().X == testing_trackResolution.X);
+    CHECK(track.getActuatorResolution().value().Y == testing_trackResolution.Y);
+    CHECK(track.getActuatorResolution().value().Z == testing_trackResolution.Z);
   }
 
   SECTION("checking null track resolution") {
-    track.setTrackResolution(std::nullopt);
-    CHECK_FALSE(track.getTrackResolution().has_value());
+    track.setActuatorResolution(std::nullopt);
+    CHECK_FALSE(track.getActuatorResolution().has_value());
   }
 }
 

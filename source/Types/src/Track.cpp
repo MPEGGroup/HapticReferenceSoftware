@@ -174,12 +174,12 @@ auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
 
 auto Track::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
 
-[[nodiscard]] auto Track::getTrackResolution() const -> std::optional<Vector> {
-  return trackResolution;
+[[nodiscard]] auto Track::getActuatorResolution() const -> std::optional<Vector> {
+  return actuatorResolution;
 }
 
-auto Track::setTrackResolution(std::optional<Vector> newTrackResolution) -> void {
-  trackResolution = newTrackResolution;
+auto Track::setActuatorResolution(std::optional<Vector> newTrackResolution) -> void {
+  actuatorResolution = newTrackResolution;
 }
 
 [[nodiscard]] auto Track::getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>> {

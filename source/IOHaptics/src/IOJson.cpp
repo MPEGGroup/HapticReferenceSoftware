@@ -254,10 +254,10 @@ auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &p
       track.setDirection(direction);
     }
 
-    types::Vector trackResolution{};
-    if (jsonTrack.HasMember("track_resolution") &&
-        loadVector(jsonTrack["track_resolution"], trackResolution)) {
-      track.setTrackResolution(trackResolution);
+    types::Vector actuatorResolution{};
+    if (jsonTrack.HasMember("actuator_resolution") &&
+        loadVector(jsonTrack["actuator_resolution"], actuatorResolution)) {
+      track.setActuatorResolution(actuatorResolution);
     }
     if (jsonTrack.HasMember("body_part_target") && jsonTrack["body_part_target"].IsArray()) {
       std::vector<types::BodyPartTarget> bodyPartTarget;
@@ -734,11 +734,11 @@ auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &json
       extractVector(direction, jsonDirection, jsonTree);
       jsonTrack.AddMember("direction", jsonDirection, jsonTree.GetAllocator());
     }
-    if (track.getTrackResolution().has_value()) {
-      types::Vector trackResolution = track.getTrackResolution().value();
-      auto jsonTrackResolution = rapidjson::Value(rapidjson::kObjectType);
-      extractVector(trackResolution, jsonTrackResolution, jsonTree);
-      jsonTrack.AddMember("track_resolution", jsonTrackResolution, jsonTree.GetAllocator());
+    if (track.getActuatorResolution().has_value()) {
+      types::Vector actuatorResolution = track.getActuatorResolution().value();
+      auto jsonActuatorResolution = rapidjson::Value(rapidjson::kObjectType);
+      extractVector(actuatorResolution, jsonActuatorResolution, jsonTree);
+      jsonTrack.AddMember("actuator_resolution", jsonActuatorResolution, jsonTree.GetAllocator());
     }
     if (track.getBodyPartTarget().has_value()) {
       auto jsonBodyPartTarget = rapidjson::Value(rapidjson::kArrayType);
