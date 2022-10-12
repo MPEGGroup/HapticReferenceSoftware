@@ -68,7 +68,7 @@ static constexpr int MDPERCE_FXLIB_COUNT = 16;
 
 static constexpr int REFDEV_ID = 32;
 static constexpr int REFDEV_NAME_LENGTH = 16;
-static constexpr int REFDEV_OPT_FIELDS = 13;
+static constexpr int REFDEV_OPT_FIELDS = 12;
 static constexpr int REFDEV_BODY_PART_MASK = 32;
 static constexpr int REFDEV_MAX_FREQ = 32;
 static constexpr int REFDEV_MIN_FREQ = 32;
@@ -113,7 +113,7 @@ static constexpr int FX_TYPE = 2;
 static constexpr int FX_POSITION = 32;
 static constexpr int FX_REF_ID = 32;
 static constexpr int FX_PHASE = 16;
-static constexpr int FX_BASE = 8;
+static constexpr int FX_BASE = 3;
 static constexpr int FX_KF_COUNT = 32;
 
 static constexpr int KF_AMPLITUDE = 8;
@@ -195,13 +195,13 @@ private:
   static auto writeMetadataBand(types::Band &band, std::vector<bool> &bitstream, int id)
       -> bool;
   static auto writeData(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream) -> bool;
-  static auto packetizeBand(int perceID, int trackID, types::Band &band, int bandID,
+  static auto packetizeBand(int perceID, int trackID, BandStream &bandStream,
                             std::vector<std::vector<bool>> &bitstreams) -> bool;
   static auto createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                   std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
                                   bool &rau, std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writePayloadPacket(StartTimeIdx point, StartTimeIdx percetrackID,
-                                 std::vector<types::Effect> &vecEffect, int bandID,
+                                 std::vector<types::Effect> &vecEffect, BandStream &bandStream,
                                  std::vector<int> kfCount,
                                  std::vector<std::vector<bool>> bufPacketBitstream)
       -> std::vector<bool>;
@@ -291,6 +291,8 @@ private:
       -> bool;
 
   static auto checkHapticComponent(types::Haptics &haptic) -> void;
+
+  static auto padToByteBoundary(std::vector<bool> &bitstream)->void;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H
