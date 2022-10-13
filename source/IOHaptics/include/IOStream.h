@@ -35,6 +35,8 @@
 #define IOSTREAM_H
 #include <IOHaptics/include/IOBinary.h>
 #include <Types/include/Haptics.h>
+#include <Spiht/include/Spiht_Dec.h>
+#include <Spiht/include/Spiht_Enc.h>
 #include <bitset>
 #include <string>
 #include <vector>
@@ -62,6 +64,7 @@ static constexpr int MDPERCE_DESC_SIZE = 16;
 static constexpr int MDPERCE_MODALITY = 4;
 static constexpr int MDPERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_PERCE_UNIT_EXP = 8;
+static constexpr int MDPERCE_LIBRARY_COUNT = 32;
 static constexpr int MDPERCE_REFDEVICE_COUNT = 16;
 static constexpr int MDPERCE_TRACK_COUNT = 16;
 static constexpr int MDPERCE_FXLIB_COUNT = 16;
@@ -115,11 +118,17 @@ static constexpr int FX_REF_ID = 32;
 static constexpr int FX_PHASE = 16;
 static constexpr int FX_BASE = 3;
 static constexpr int FX_KF_COUNT = 32;
+static constexpr int EFFECT_WAVELET_SIZE = 16;
+
+
+
+static constexpr int FXLIB_TIMELINESIZE = 16;
 
 static constexpr int KF_AMPLITUDE = 8;
 static constexpr int KF_POSITION = 16;
 static constexpr int KF_FREQUENCY = 16;
 static constexpr int KF_INFORMATION_MASK = 2;
+static constexpr int KF_MASK = 3;
 
 static constexpr int PACKET_DURATION = 50;
 static constexpr int PACKET_HEADER_SIZE = 32;
@@ -185,8 +194,11 @@ private:
   static auto writeAvatar(types::Avatar &avatar, std::vector<bool> &bitstream) -> bool;
   static auto writeMetadataPerception(types::Perception &perception, std::vector<bool> &bitstream)
       -> bool;
-  static auto writeEffectLibrary(std::vector<types::Effect> &effects, std::vector<bool> &bitstream)
+
+  static auto writeLibrary(types::Perception &perception, std::vector<bool> &bitstream) -> bool;
+  static auto writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &bitstream)
       -> bool;
+
   static auto writeReferenceDevice(types::ReferenceDevice &refDevice, std::vector<bool> &bitstream)
       -> bool;
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice,
@@ -202,20 +214,19 @@ private:
                                   bool &rau, std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writePayloadPacket(StartTimeIdx point, StartTimeIdx percetrackID,
                                  std::vector<types::Effect> &vecEffect, BandStream &bandStream,
-                                 std::vector<int> kfCount,
+                                 std::vector<int> kfCount, bool &rau,
                                  std::vector<std::vector<bool>> bufPacketBitstream)
       -> std::vector<bool>;
   static auto writeEffectBasis(types::Effect effect, types::BandType bandType,
                                StartTimeIdx &startTI, int &kfcount, bool &rau,
                                std::vector<bool> &bitstream) -> bool;
   static auto writeEffectTimeline(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
-  static auto writeEffectWavelet(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
+  static auto writeEffectWavelet(types::Effect &effect, StartTimeIdx startTI, std::vector<bool> &bitstream) -> bool;
   static auto writeKeyframe(types::BandType bandType, types::Keyframe &keyframe,
                             std::vector<bool> &bitstream) -> bool;
   static auto writeTransient(types::Keyframe &keyframe, std::vector<bool> &bitstream) -> bool;
   static auto writeCurve(types::Keyframe &keyframe, std::vector<bool> &bitstream) -> bool;
   static auto writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bitstream) -> bool;
-  static auto writeWavelet(std::vector<bool> &bitstream) -> bool;
   static auto writeTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
       -> bool;
   /*static auto writeCRC(std::vector<bool> &bitstream) -> bool;
@@ -231,22 +242,21 @@ private:
   static auto readNALuType(std::vector<bool> &packet) -> NALuType;
   static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
-
   static auto readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, int &length) -> bool;
   static auto readMetadataPerception(types::Perception &perception, std::vector<bool> &bitstream)
       -> bool;
-
+  static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect> &effects) -> bool;
   static auto readReferenceDevice(std::vector<bool> &bitstream, types::ReferenceDevice &refDevice,
                                   int &length) -> bool;
-  static auto readEffectLibrary(types::Perception &perception, std::vector<bool> &bitstream)
+  static auto readLibrary(types::Perception &perception, std::vector<bool> &bitstream)
+      -> bool;
+  static auto readLibraryEffect(types::Effect &libraryEffect, int &idx, std::vector<bool> &bitstream)
       -> bool;
   static auto readMetadataTrack(types::Track &track, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataBand(BandStream &bandStream, std::vector<bool> &bitstream) -> bool;
   static auto readData(types::Haptics &haptic, Buffer &buffer,
                        std::vector<bool> &bitstream) -> bool;
   static auto readEffect(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
-  static auto readTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
-      -> bool;
   static auto readCRC(std::vector<bool> &crc, std::vector<bool> &bitstream) -> bool;
 
   static auto getEffectsId(types::Haptics &haptic) -> bool;
@@ -256,7 +266,7 @@ private:
   static auto readListObject(std::vector<bool> &bitstream, int refDevCount,
                              std::vector<types::ReferenceDevice> &refDevList) -> bool;
 
-  static auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex,
+  static auto addEffectToHaptic(types::Haptics &haptic, int perceptionIndex,
                                           int trackIndex, int bandIndex,
                                           std::vector<types::Effect> &effects, bool auType) -> bool;
   template <class T>
@@ -269,14 +279,14 @@ private:
                                        int id) -> int;
   static auto searchBandInHaptic(Buffer &buffer, int id) -> int;
 
-  static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::BandType &bandType,
+  static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
                              std::vector<types::Effect> &fxList, int &length) -> bool;
 
   static auto readEffect(std::vector<bool> &bitstream, types::Effect &effect,
-                         types::BandType &bandType, int &length) -> bool;
+                         types::Band &band, int &length) -> bool;
 
   static auto readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
-                              types::BandType &bandType, int &idx) -> bool;
+                              types::BandType bandType, int &idx) -> bool;
 
   static auto readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,
                              std::vector<types::Keyframe> &kfList, int &length) -> bool;
@@ -290,6 +300,8 @@ private:
   static auto readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &idx)
       -> bool;
 
+  static auto readTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
+      -> bool;
   static auto checkHapticComponent(types::Haptics &haptic) -> void;
 
   static auto padToByteBoundary(std::vector<bool> &bitstream)->void;

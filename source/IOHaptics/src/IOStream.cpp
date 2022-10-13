@@ -31,6 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOBinaryBands.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <IOHaptics/include/IOStream.h>
 
@@ -105,6 +106,20 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
     std::vector<bool> naluPayload = std::vector<bool>();
     for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
       writeMetadataPerception(haptic.getPerceptionAt(i), naluPayload);
+      padToByteBoundary(naluPayload);
+      writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+      naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+      bitstream.push_back(naluHeader);
+      naluPayload.clear();
+      naluHeader.clear();
+    }
+
+    return true;
+  }
+  case NALuType::EffectLibrary: {
+    std::vector<bool> naluPayload = std::vector<bool>();
+    for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
+      writeLibrary(haptic.getPerceptionAt(i), naluPayload);
       padToByteBoundary(naluPayload);
       writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
       naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
@@ -195,7 +210,8 @@ auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
         types::Band &band = track.getBandAt(k);
         for (int l = 0; l < band.getEffectsSize(); l++) {
           types::Effect &effect = band.getEffectAt(l);
-          if (effect.getEffectType() == types::EffectType::Basis &&
+          if (band.getBandType() != types::BandType::WaveletWave &&
+              effect.getEffectType() == types::EffectType::Basis &&
               effect.getKeyframesSize() == 0) {
             band.removeEffectAt(l);
           }
@@ -243,6 +259,14 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
     return readMetadataHaptics(haptic, payload);
   }
   case (NALuType::MetadataPerception): {
+    types::Perception perception = types::Perception();
+    if (!readMetadataPerception(perception, payload)) {
+      return false;
+    }
+    buffer.perceptionsBuffer.push_back(perception);
+    return true;
+  }
+  case (NALuType::EffectLibrary): {
     types::Perception perception = types::Perception();
     if (!readMetadataPerception(perception, payload)) {
       return false;
@@ -424,7 +448,8 @@ auto IOStream::writeMetadataPerception(types::Perception &perception, std::vecto
   std::bitset<MDPERCE_UNIT_EXP> unitExpBits(perception.getUnitExponentOrDefault());
   IOBinaryPrimitives::writeStrBits(unitExpBits.to_string(), bitstream);
 
-  std::bitset<MDPERCE_PERCE_UNIT_EXP> perceUnitExpBits(perception.getPerceptionUnitExponentOrDefault());
+  std::bitset<MDPERCE_PERCE_UNIT_EXP> perceUnitExpBits(
+      perception.getPerceptionUnitExponentOrDefault());
   IOBinaryPrimitives::writeStrBits(perceUnitExpBits.to_string(), bitstream);
 
   std::bitset<MDPERCE_REFDEVICE_COUNT> refDeviceCountBits(perception.getReferenceDevicesSize());
@@ -477,6 +502,139 @@ auto IOStream::readMetadataPerception(types::Perception &perception, std::vector
   idx = static_cast<int>(bitstream.size()) - MDPERCE_TRACK_COUNT;
   int trackCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_TRACK_COUNT);
 
+  return true;
+}
+
+auto IOStream::writeLibrary(types::Perception &perception, std::vector<bool> &bitstream) -> bool {
+  std::bitset<MDPERCE_FXLIB_COUNT> fxCountBits(perception.getEffectLibrarySize());
+  IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), bitstream);
+
+  types::Effect libraryEffect;
+  bool success = true;
+  for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
+    libraryEffect = perception.getBasisEffectAt(i);
+    success &= writeLibraryEffect(libraryEffect, bitstream);
+  }
+
+  return success;
+}
+auto IOStream::readLibrary(types::Perception &perception, std::vector<bool> &bitstream) -> bool {
+  int idx = 0;
+  auto effectCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_LIBRARY_COUNT);
+  bool success = true;
+
+  for (int i = 0; i < effectCount; i++) {
+    types::Effect libraryEffect;
+    success &= readLibraryEffect(libraryEffect, idx, bitstream);
+    perception.addBasisEffect(libraryEffect);
+  }
+  return success;
+}
+auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
+                                 std::vector<bool> &bitstream) -> bool {
+  int id = IOBinaryPrimitives::readInt(bitstream, idx, FX_ID);
+  libraryEffect.setId(id);
+
+  int position = IOBinaryPrimitives::readInt(bitstream, idx, FX_POSITION);
+  libraryEffect.setPosition(position);
+
+  float phase = IOBinaryPrimitives::readFloatNBits<FX_PHASE>(bitstream, idx, -MAX_PHASE, MAX_PHASE);
+  libraryEffect.setPhase(phase);
+
+  int effectType = IOBinaryPrimitives::readInt(bitstream, idx, FX_TYPE);
+  libraryEffect.setEffectType(static_cast<types::EffectType>(effectType));
+
+  int kfCount = IOBinaryPrimitives::readInt(bitstream, idx, FX_KF_COUNT);
+  for (int i = 0; i < kfCount; i++) {
+    auto mask = (uint8_t)IOBinaryPrimitives::readInt(bitstream, idx, KF_MASK);
+    std::optional<int> position = std::nullopt;
+    std::optional<float> amplitude = std::nullopt;
+    std::optional<int> frequency = std::nullopt;
+    if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
+      position = IOBinaryPrimitives::readInt(bitstream, idx, KF_POSITION);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
+      amplitude = IOBinaryPrimitives::readFloatNBits<KF_AMPLITUDE>(bitstream, idx, -MAX_AMPLITUDE,
+                                                                   MAX_AMPLITUDE);
+    }
+
+    if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
+      frequency = IOBinaryPrimitives::readInt(bitstream, idx, KF_FREQUENCY);
+    }
+    types::Keyframe myKeyframe(position, amplitude, frequency);
+    libraryEffect.addKeyframe(myKeyframe);
+  }
+  bool success = true;
+  auto timelineEffectCount = IOBinaryPrimitives::readInt(bitstream, idx, FXLIB_TIMELINESIZE);
+  for (unsigned short i = 0; i < timelineEffectCount; i++) {
+    types::Effect timelineEffect;
+    success &= readLibraryEffect(timelineEffect, idx, bitstream);
+    libraryEffect.addTimelineEffect(timelineEffect);
+  }
+
+  return true;
+}
+
+auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &bitstream)
+    -> bool {
+  std::bitset<FX_ID> idBits(libraryEffect.getId());
+  IOBinaryPrimitives::writeStrBits(idBits.to_string(), bitstream);
+
+  std::bitset<FX_POSITION> posBits(libraryEffect.getPosition());
+  IOBinaryPrimitives::writeStrBits(posBits.to_string(), bitstream);
+
+  IOBinaryPrimitives::writeFloatNBits<uint32_t, FX_PHASE>(libraryEffect.getPhase(), bitstream,
+                                                          -MAX_PHASE, MAX_PHASE);
+
+  std::bitset<FX_BASE> baseBits(static_cast<int>(libraryEffect.getBaseSignal()));
+  IOBinaryPrimitives::writeStrBits(baseBits.to_string(), bitstream);
+
+  std::bitset<FX_TYPE> typeBits(static_cast<int>(libraryEffect.getEffectType()));
+  IOBinaryPrimitives::writeStrBits(typeBits.to_string(), bitstream);
+
+  int kfCount = libraryEffect.getKeyframesSize();
+  std::bitset<FX_KF_COUNT> kfCountBits(kfCount);
+  IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), bitstream);
+
+  types::Keyframe keyframe;
+  for (int i = 0; i < kfCount; i++) {
+    keyframe = libraryEffect.getKeyframeAt(i);
+    auto mask = (uint8_t)KeyframeMask::NOTHING;
+    if (keyframe.getRelativePosition().has_value()) {
+      mask |= (uint8_t)KeyframeMask::RELATIVE_POSITION;
+    }
+    if (keyframe.getAmplitudeModulation().has_value()) {
+      mask |= (uint8_t)KeyframeMask::AMPLITUDE_MODULATION;
+    }
+    if (keyframe.getFrequencyModulation().has_value()) {
+      mask |= (uint8_t)KeyframeMask::FREQUENCY_MODULATION;
+    }
+    std::bitset<KF_MASK> maskBits(mask);
+    IOBinaryPrimitives::writeStrBits(maskBits.to_string(), bitstream);
+
+    if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
+      std::bitset<KF_POSITION> posBits(keyframe.getRelativePosition().value());
+      IOBinaryPrimitives::writeStrBits(posBits.to_string(), bitstream);
+    }
+    if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
+      std::bitset<KF_POSITION> ampBits(keyframe.getAmplitudeModulation().value());
+      IOBinaryPrimitives::writeStrBits(ampBits.to_string(), bitstream);
+    }
+    if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
+      std::bitset<KF_POSITION> freqBits(keyframe.getFrequencyModulation().value());
+      IOBinaryPrimitives::writeStrBits(freqBits.to_string(), bitstream);
+    }
+  }
+  auto timelineEffectCount = static_cast<uint16_t>(libraryEffect.getTimelineSize());
+  std::bitset<FXLIB_TIMELINESIZE> timelineSizeBits(timelineEffectCount);
+  IOBinaryPrimitives::writeStrBits(timelineSizeBits.to_string(), bitstream);
+
+  types::Effect timelineEffect;
+  for (int i = 0; i < timelineEffectCount; i++) {
+    timelineEffect = libraryEffect.getTimelineEffectAt(i);
+    writeLibraryEffect(timelineEffect, bitstream);
+  }
   return true;
 }
 
@@ -939,7 +1097,7 @@ auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
     // write packet as vector<bool>
     if (!bufPacketBitstream.empty()) {
 
-      packetBits = writePayloadPacket(point, percetrackID, vecEffect, bandStream, kfCount,
+      packetBits = writePayloadPacket(point, percetrackID, vecEffect, bandStream, kfCount, rau,
                                       bufPacketBitstream);
 
       bitstreams.push_back(packetBits);
@@ -948,12 +1106,11 @@ auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
     bufPacketBitstream.clear();
     packetBits.clear();
     kfCount.clear();
-    rau = true;
     point.time += PACKET_DURATION;
   }
   if (!bufPacketBitstream.empty()) {
     packetBits =
-        writePayloadPacket(point, percetrackID, vecEffect, bandStream, kfCount, bufPacketBitstream);
+        writePayloadPacket(point, percetrackID, vecEffect, bandStream, kfCount, rau, bufPacketBitstream);
     bitstreams.push_back(packetBits);
   }
 
@@ -978,12 +1135,11 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
     }
 
     std::vector<bool> bufEffect = std::vector<bool>();
-    if (effect.getEffectType() == types::EffectType::Basis) {
+    if (effect.getEffectType() == types::EffectType::Basis &&
+        band.getBandType() != types::BandType::WaveletWave) {
       int bufKFCount = 0;
       bool isRAU = true;
       bool endPacket = false;
-      // if (startTI.time <= effect.getPosition() && startTI.time + PACKET_DURATION >
-      // effect.getPosition()) {
       if (writeEffectBasis(effect, band.getBandType(), startTI, bufKFCount, isRAU, bufEffect)) {
         endEffect = true;
       } else {
@@ -994,22 +1150,34 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
         bitstream.push_back(bufEffect);
         vecEffect.push_back(effect);
       }
-      rau &= isRAU;
+      rau = isRAU;
       if (endEffect && i == band.getEffectsSize() - 1) {
         return true;
       }
       if (endPacket) {
         return false;
       }
-      //} else if (effect.getPosition() > startTI.time + PACKET_DURATION) {
-      //  return false;
-      //}
+    } else if (effect.getEffectType() == types::EffectType::Basis &&
+               band.getBandType() == types::BandType::WaveletWave) {
+      writeEffectWavelet(effect, startTI, bufEffect);
+      rau = true;
+      // Create a new waveletEffect for each packet, need to force the creation of a new id
+      int nextId = 0;
+      if (effectsId.size() > 0) {
+        nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
+      }
+      effect.setId(nextId);
+      effectsId.push_back(nextId);
+      vecEffect.push_back(effect);
+      bitstream.push_back(bufEffect);
     } else if (effect.getEffectType() == types::EffectType::Reference) {
       if (effect.getPosition() >= startTI.time &&
           effect.getPosition() <= startTI.time + PACKET_DURATION) {
         std::bitset<FX_REF_ID> referenceIDBits(effect.getId());
         IOBinaryPrimitives::writeStrBits(referenceIDBits.to_string(), bufEffect);
         bitstream.push_back(bufEffect);
+        vecEffect.push_back(effect);
+        rau = true;
       } else if (effect.getPosition() > startTI.time + PACKET_DURATION) {
         return false;
       }
@@ -1023,17 +1191,16 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
       return true;
     }
   }
-
   return true;
 }
 
 auto IOStream::writePayloadPacket(StartTimeIdx point, StartTimeIdx percetrackID,
                                   std::vector<types::Effect> &vecEffect, BandStream &bandStream,
-                                  std::vector<int> kfCount,
+                                  std::vector<int> kfCount, bool &rau,
                                   std::vector<std::vector<bool>> bufPacketBitstream)
     -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
-  packetBits.push_back(true);
+  packetBits.push_back(rau);
   // packetBits.push_back(rau); // PUSH END ACCESS UNIT
   std::bitset<DB_TIMESTAMP> tsBits(point.time);
   IOBinaryPrimitives::writeStrBits(tsBits.to_string(), packetBits);
@@ -1057,10 +1224,11 @@ auto IOStream::writePayloadPacket(StartTimeIdx point, StartTimeIdx percetrackID,
     std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(vecEffect[l].getEffectType()));
     IOBinaryPrimitives::writeStrBits(effectTypeBits.to_string(), packetBits);
 
-    std::bitset<FX_POSITION> effectPosBits(static_cast<int>(vecEffect[l].getPosition()));
+    std::bitset<FX_POSITION> effectPosBits(static_cast<int>(vecEffect[l].getPosition()) - point.time);
     IOBinaryPrimitives::writeStrBits(effectPosBits.to_string(), packetBits);
 
-    if (vecEffect[l].getEffectType() == types::EffectType::Basis) {
+    if (vecEffect[l].getEffectType() == types::EffectType::Basis &&
+        bandStream.band.getBandType() != types::BandType::WaveletWave) {
       std::bitset<FX_KF_COUNT> kfCountBits(kfCount[l]);
       IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), packetBits);
       if (bandStream.band.getBandType() == types::BandType::VectorialWave) {
@@ -1170,11 +1338,10 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   types::Band band =
       haptic.getPerceptionAt(perceptionIndex).getTrackAt(trackIndex).getBandAt(bandIndex);
 
-  types::BandType bandType = band.getBandType();
   int fxCount = IOBinaryPrimitives::readInt(bitstream, idx, DB_FX_COUNT);
   std::vector<types::Effect> effects;
   std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
-  if (!readListObject(effectsBitsList, fxCount, bandType, effects, idx)) {
+  if (!readListObject(effectsBitsList, fxCount, band, effects, idx)) {
     return false;
   }
 
@@ -1184,8 +1351,8 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   return true;
 }
 
-auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect,
-                          types::BandType &bandType, int &length) -> bool {
+auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
+                          int &length) -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readInt(bitstream, idx, FX_ID);
   effect.setId(id);
@@ -1197,14 +1364,19 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect,
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, FX_POSITION);
   effect.setPosition(effectPos);
 
-  if (effectType == types::EffectType::Basis) {
-    if (!readEffectBasis(bitstream, effect, bandType, idx)) {
+  if (effectType == types::EffectType::Basis &&
+      band.getBandType() != types::BandType::WaveletWave) {
+    if (!readEffectBasis(bitstream, effect, band.getBandType(), idx)) {
       return false;
     }
+  } else if (effectType == types::EffectType::Basis &&
+             band.getBandType() != types::BandType::WaveletWave) {
+    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
   }
   length += idx;
   return true;
 }
+
 auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int trackIndex,
                                  int bandIndex, std::vector<types::Effect> &effects, bool auType)
     -> bool {
@@ -1236,18 +1408,25 @@ auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, in
 auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
                                 StartTimeIdx &startTI, int &kfCount, bool &rau,
                                 std::vector<bool> &bitstream) -> bool {
+  bool firstKf = true;
   int tsFX = effect.getPosition();
   for (int j = 0; j < effect.getKeyframesSize(); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
     if (currentTime <= startTI.time + PACKET_DURATION && currentTime >= startTI.time) {
+      if (firstKf) {
+        firstKf = false;
+        if (j != 0) {
+          rau = false;
+        }
+      }
+      kf.setRelativePosition(currentTime - (startTI.time + tsFX));
       writeKeyframe(bandType, kf, bitstream);
       kfCount++;
       if (j == effect.getKeyframesSize() - 1) {
         return true;
       }
     } else if (currentTime > startTI.time + PACKET_DURATION) {
-      rau = false;
       return false;
     }
   }
@@ -1255,7 +1434,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
 }
 
 auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
-                               types::BandType &bandType, int &idx) -> bool {
+                               types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readInt(bitstream, idx, FX_KF_COUNT);
   if (bandType == types::BandType::VectorialWave) {
     float phase =
@@ -1276,10 +1455,26 @@ auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effe
   return true;
 }
 
+auto IOStream::writeEffectWavelet(types::Effect &effect, StartTimeIdx startTI,
+                                  std::vector<bool> &bitstream) -> bool {
+  int tsFX = effect.getPosition();
+  types::Effect packetEffect = effect;
+  packetEffect.setPosition(0); // position relative to the AU timestamp
+
+  for (int j = effect.getKeyframesSize() - 1; j >= 0; j--) {
+    types::Keyframe kf = effect.getKeyframeAt(j);
+    int currentTime = kf.getRelativePosition().value() + tsFX;
+    if (currentTime < startTI.time || currentTime > startTI.time + PACKET_DURATION) {
+      packetEffect.removeKeyframeAt(j);
+    }
+  }
+  IOBinaryBands::writeWaveletEffect(packetEffect, bitstream);
+  return true;
+}
+
 // auto writeEffectTimeline(types::Effect &effect, std::vector<bool> &bitstream) -> bool {
 //   return true;
 // }
-
 auto IOStream::writeKeyframe(types::BandType bandType, types::Keyframe &keyframe,
                              std::vector<bool> &bitstream) -> bool {
   switch (bandType) {
@@ -1401,11 +1596,7 @@ auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyf
   return true;
 }
 
-// auto IOStream::writeWavelet(std::vector<bool> &bitstream) -> bool { return false; }
-
 // auto IOStream::writeCRC(std::vector<bool> &bitstream) -> bool { return false; }
-// auto IOStream::writeByteStuffing(int bits, std::vector<bool> &bitstream) -> bool { return false;
-// }
 
 auto IOStream::searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int {
   for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
@@ -1471,13 +1662,13 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
   }
   return true;
 }
-auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::BandType &bandType,
+auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
                               std::vector<types::Effect> &fxList, int &length) -> bool {
   int idx = 0;
   for (int i = 0; i < fxCount; i++) {
     std::vector<bool> fxBits(bitstream.begin() + idx, bitstream.end());
     types::Effect effect;
-    if (!readEffect(fxBits, effect, bandType, idx)) {
+    if (!readEffect(fxBits, effect, band, idx)) {
       return false;
     }
     fxList.push_back(effect);
@@ -1500,10 +1691,10 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int kfCount, types::
   return true;
 }
 
-auto padToByteBoundary(std::vector<bool>& bitstream) -> void {
+auto IOStream::padToByteBoundary(std::vector<bool> &bitstream) -> void {
   int byte_stuffing = (static_cast<int>(bitstream.size()) % BYTE_SIZE) - BYTE_SIZE;
   for (int i = 0; i < byte_stuffing; i++) {
     bitstream.push_back(0);
   }
- }
+}
 } // namespace haptics::io

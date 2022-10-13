@@ -34,6 +34,7 @@
 #ifndef IOBINARYBANDS_H
 #define IOBINARYBANDS_H
 
+//#include <IOHaptics>
 #include <Spiht/include/Spiht_Dec.h>
 #include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Band.h>
@@ -50,6 +51,9 @@ public:
 
   static auto writeBandHeader(types::Band &band, std::ofstream &file) -> bool;
   static auto writeBandBody(types::Band &band, std::ofstream &file) -> bool;
+  static auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
+                                               std::vector<bool> &bitstream, int &idx) -> bool;
+  static auto writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
 
 private:
   static auto readTransientEffect(types::Effect &effect, std::ifstream &file) -> bool;

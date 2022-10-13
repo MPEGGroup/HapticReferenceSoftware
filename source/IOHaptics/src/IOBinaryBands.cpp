@@ -33,6 +33,7 @@
 
 #include <IOHaptics/include/IOBinaryBands.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
+#include <IOHaptics/include/IOStream.h>
 #include <limits>
 
 namespace haptics::io {
@@ -338,6 +339,23 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
   return true;
 }
 
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::vector<bool> &bitstream,
+                                      int &idx) -> bool {
+  spiht::Spiht_Dec dec;
+  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
+  auto size = IOBinaryPrimitives::readInt(bitstream,idx, EFFECT_WAVELET_SIZE);
+
+  std::vector<unsigned char> instream;
+  instream.resize(size);
+  for (auto &b : instream) {
+    b = IOBinaryPrimitives::readInt(bitstream, idx, BYTE_SIZE);
+  }
+  dec.decodeEffect(instream, effect, (int)blocklength);
+
+  return true;
+}
+
+
 auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::ofstream &file) -> bool {
   spiht::Spiht_Enc enc;
   std::vector<unsigned char> outstream;
@@ -349,6 +367,19 @@ auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::ofstream &fil
 
   return true;
 }
+
+auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
+  spiht::Spiht_Enc enc;
+  std::vector<unsigned char> outstream;
+  enc.encodeEffect(effect, outstream);
+  IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_WAVELET_SIZE>((uint16_t)outstream.size(), output);
+  for (auto &b : outstream) {
+    IOBinaryPrimitives::writeNBits<unsigned char, BYTE_SIZE>(b, output);
+  }
+
+  return true;
+}
+
 
 auto IOBinaryBands::readReferenceEffect(types::Effect &effect, std::ifstream &file) -> bool {
   auto id = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
