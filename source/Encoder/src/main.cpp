@@ -35,6 +35,7 @@
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOStream.h>
 #include <IOHaptics/include/IOJson.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
@@ -47,6 +48,7 @@ using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
 using haptics::io::IOBinary;
+using haptics::io::IOStream;
 using haptics::io::IOJson;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
@@ -65,6 +67,8 @@ auto help() -> void {
       << "optional arguments:" << std::endl
       << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
       << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
+         "the encoder will output a file in a human-readable format"
+      << "\t-s, --streaming\t\t\tthe file will be encoded into its binary streaming format. If not provided "
          "the encoder will output a file in a human-readable format"
       << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
          "be placed in the library and replaced by a referennce"
@@ -215,6 +219,8 @@ auto main(int argc, char *argv[]) -> int {
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
     IOBinary::writeFile(hapticFile, output);
+  } else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
+    IOStream::writeFile(hapticFile, output);
   } else {
     IOJson::writeFile(hapticFile, output);
   }

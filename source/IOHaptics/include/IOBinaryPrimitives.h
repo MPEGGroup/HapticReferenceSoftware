@@ -103,9 +103,9 @@ public:
     }
   }
 
-  template<size_t length>
-  static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx,
-                             float minValue, float maxValue) -> float {
+  template <size_t length>
+  static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, float minValue,
+                             float maxValue) -> float {
     std::string str = "";
     for (int i = startIdx; i < startIdx + length; i++) {
       if (bitstream[i]) {
@@ -170,6 +170,30 @@ public:
     }
     startIdx += length * BYTE_SIZE;
     return res;
+  }
+
+  static auto writeBitset(const std::vector<bool> &bitset, std::ostream &file) -> void {
+    auto bitsetSize = bitset.size();
+    for (unsigned int i = 0; i < bitset.size(); i += BYTE_SIZE) {
+      char byte = 0;
+      for (uint8_t j = 0; j < BYTE_SIZE; j++) {
+        if ((i + j < bitsetSize) && bitset[i + j]) {
+          byte = static_cast<char>(byte | (1U << (BYTE_SIZE - 1 - j)));
+        }
+      }
+      file.write(&byte, 1);
+    }
+  }
+
+  static auto readNBytes(std::istream &file, int nbBytes, std::vector<bool> &bitstream) -> bool {
+    std::vector<char> bytes(nbBytes);
+    file.read(bytes.data(), nbBytes);
+    for (auto byte : bytes) {
+      for (uint8_t i = 0; i < BYTE_SIZE; i++) {
+        bitstream.push_back(((byte >> (BYTE_SIZE - i - 1)) & 1U) == 1);
+      }
+    }
+    return true;
   }
 };
 

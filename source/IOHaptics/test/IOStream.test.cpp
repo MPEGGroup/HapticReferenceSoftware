@@ -628,7 +628,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
     haptics::types::Band readBand1 = readHaptic.getPerceptionAt(0).getTrackAt(0).getBandAt(0);
     CHECK(readBand1.getBandType() == testingBand1.getBandType());
-    //CHECK(readBand2.getCurveType() == testingBand2.getCurveType());
+    // CHECK(readBand2.getCurveType() == testingBand2.getCurveType());
     CHECK(readBand1.getLowerFrequencyLimit() == testingBand1.getLowerFrequencyLimit());
     CHECK(readBand1.getUpperFrequencyLimit() == testingBand1.getUpperFrequencyLimit());
     CHECK(readBand1.getEffectsSize() == testingBand1.getEffectsSize());
@@ -653,6 +653,22 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     REQUIRE(succeed);
 
     CHECK(readHaptic.getPerceptionsSize() == testingHaptic.getPerceptionsSize());
+  }
+
+  SECTION("Save/Read binary streaming file") {
+    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
+    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
+    std::string filepath = "test.impg";
+    IOStream::writeFile(testingHaptic, filepath);
+
+    std::vector<std::vector<bool>> readBitstream = std::vector<std::vector<bool>>();
+    IOStream::loadFile(filepath, readBitstream);
+
+    haptics::types::Haptics readHaptic;
+    IOStream::readFile(filepath, readHaptic);
+
+    REQUIRE(succeed);
+    CHECK(bitstream == readBitstream);
   }
   // SECTION("Read packets") {}
 };

@@ -48,6 +48,8 @@ static constexpr int H_NBITS = 32;
 static constexpr int H_NALU_TYPE = 4;
 static constexpr int H_LEVEL = 2;
 static constexpr int H_PAYLOAD_LENGTH = 16;
+static constexpr int H_PAYLOAD_BYTES_LENGTH = 16;
+static constexpr int H_BYTES_LENGTH = 4;
 
 static constexpr int MDEXP_VERSION = 16;
 static constexpr int MDEXP_DATE = 16;
@@ -165,13 +167,13 @@ public:
     std::vector<BandStream> bandStreamsBuffer;
     std::vector<BandStream> bandStreamsHaptic;
   };
+  static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
+  static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
+  static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> bool;
 
   static auto writePacket(types::Haptics &haptic, std::ofstream &file) -> bool;
   static auto writePacket(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream)
       -> bool;
-  static auto readPacket(types::Haptics &haptic, std::ifstream &file) -> bool;
-
-  static auto readPacket(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
 
   static auto writeNALu(NALuType naluType, types::Haptics &haptic, int level,
                         std::vector<std::vector<bool>> &bitstream) -> bool;
@@ -240,6 +242,8 @@ private:
                          std::vector<std::vector<bool>> &output) -> bool;
 
   static auto readPacketTS(std::vector<bool> bitstream) -> int;
+
+  static auto readPacketLength(std::vector<bool> &bitstream) -> int;
 
   static auto readNALuType(std::vector<bool> &packet) -> NALuType;
   static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;

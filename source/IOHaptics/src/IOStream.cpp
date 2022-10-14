@@ -37,6 +37,74 @@
 
 namespace haptics::io {
 
+auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath) -> bool {
+  std::ofstream file(filePath, std::ios::out | std::ios::binary);
+  if (!file) {
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
+    return false;
+  }
+
+  std::vector<std::vector<bool>> packetsBytes = std::vector<std::vector<bool>>();
+  bool success = IOStream::writePacket(haptic, packetsBytes);
+  std::vector<bool> binary = std::vector<bool>();
+  if (success) {
+    for (auto &packet : packetsBytes) {
+      binary.insert(binary.end(), packet.begin(), packet.end());
+    }
+    IOBinaryPrimitives::writeBitset(binary, file);
+  }
+
+  file.close();
+  return success;
+}
+auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> bool {
+  std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
+  loadFile(filePath, bitstream);
+  Buffer buffer = initializeStream(haptic);
+  for (auto &packet : bitstream) {
+    if (!readNALu(haptic, packet, buffer)) {
+      return EXIT_FAILURE;
+    }
+  }
+  return true;
+}
+
+auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset)
+    -> bool {
+  std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
+  if (!file) {
+    std::cerr << filePath << ": Cannot open file!" << std::endl;
+    file.close();
+    return false;
+  }
+
+  file.seekg(0, std::ios::end);
+  unsigned int length = static_cast<unsigned int>(file.tellg());
+  file.seekg(0, std::ios::beg);
+
+  if (length == 0) { // avoid undefined behavior
+    file.close();
+    return false;
+  }
+
+  std::vector<std::vector<bool>> packetBits = std::vector<std::vector<bool>>();
+  unsigned int byteCount = 0;
+  while (byteCount < length) {
+    std::vector<bool> bufPacket = std::vector<bool>();
+    // read packet header
+    IOBinaryPrimitives::readNBytes(file, H_BYTES_LENGTH, bufPacket);
+    byteCount += H_BYTES_LENGTH;
+    // read packet payload length
+    int bytesToRead = readPacketLength(bufPacket);
+    // read paylaod
+    IOBinaryPrimitives::readNBytes(file, bytesToRead, bufPacket);
+    byteCount += bytesToRead;
+    bitset.push_back(bufPacket);
+  }
+  file.close();
+  return true;
+}
+
 auto IOStream::writePacket(types::Haptics &haptic, std::ofstream &file) -> bool {
   std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
   writeNALu(NALuType::MetadataHaptics, haptic, 0, bitstream);
@@ -79,10 +147,6 @@ auto IOStream::initializeStream(types::Haptics &haptic) -> Buffer {
   buffer.bandStreamsHaptic = std::vector<BandStream>();
 
   return buffer;
-}
-auto IOStream::readPacket(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool {
-  Buffer buffer = initializeStream(haptic);
-  return readNALu(haptic, bitstream, buffer);
 }
 
 auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
@@ -299,6 +363,7 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
   }
   return false;
 }
+
 auto IOStream::readPacketTS(std::vector<bool> bitstream) -> int {
   std::string tsBits;
   for (int i = DB_AU_TYPE; i < DB_AU_TYPE + DB_TIMESTAMP; i++) {
@@ -315,6 +380,20 @@ auto IOStream::readNALuType(std::vector<bool> &packet) -> NALuType {
   int typeInt = IOBinaryPrimitives::readInt(packet, idx, H_NALU_TYPE);
 
   return static_cast<NALuType>(typeInt);
+}
+auto IOStream::readPacketLength(std::vector<bool> &bitstream) -> int {
+  int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
+  std::vector<bool> packetLength = std::vector<bool>(
+      bitstream.begin() + beginIdx, bitstream.begin() + beginIdx + haptics::io::H_PAYLOAD_LENGTH);
+  std::string packetLengthStr = "";
+  for (auto c : packetLength) {
+    if (c) {
+      packetLengthStr += "1";
+    } else {
+      packetLengthStr += "0";
+    }
+  }
+  return static_cast<int>(std::bitset<H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
 }
 
 auto IOStream::writeMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool {
@@ -366,10 +445,6 @@ auto IOStream::readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bi
   haptic.setDescription(description);
 
   int perceCount = IOBinaryPrimitives::readInt(bitstream, index, MDEXP_PERC_COUNT);
-  // for (int i = 0; i < perceCount; i++) {
-  //   types::Perception bufPerce = types::Perception();
-  //   haptic.addPerception(bufPerce);
-  // }
 
   int avatarCount = IOBinaryPrimitives::readInt(bitstream, index, MDEXP_AVATAR_COUNT);
   std::vector<types::Avatar> avatarList = std::vector<types::Avatar>();
@@ -982,10 +1057,6 @@ auto IOStream::readMetadataTrack(types::Track &track, std::vector<bool> &bitstre
   }
 
   int bandsCount = IOBinaryPrimitives::readInt(bitstream, idx, MDTRACK_BANDS_COUNT);
-  // for (int i = 0; i < bandsCount; i++) {
-  //   types::Band bufBand = types::Band();
-  //   track.addBand(bufBand);
-  // }
 
   return true;
 }
@@ -1130,11 +1201,12 @@ auto IOStream::setNextEffectId(std::vector<int> &effectsId, types::Effect &effec
 }
 
 auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
-    std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount, bool &rau,
-    std::vector<std::vector<bool>> &bitstream, std::vector<int> &effectsId) -> bool {
+                                   std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
+                                   bool &rau, std::vector<std::vector<bool>> &bitstream,
+                                   std::vector<int> &effectsId) -> bool {
 
   // Exit this function only when 1 packet is full or last keyframes of the band is reached
-  
+
   for (int i = 0; i < band.getEffectsSize(); i++) {
     bool endEffect = false;
     types::Effect &effect = band.getEffectAt(i);
@@ -1365,7 +1437,7 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   return true;
 }
 
-auto IOStream::addTimestampEffect(std::vector<types::Effect>& effects, int timestamp) -> bool {
+auto IOStream::addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool {
   for (auto &e : effects) {
     int relativeTime = e.getPosition();
     e.setPosition(relativeTime + timestamp);
