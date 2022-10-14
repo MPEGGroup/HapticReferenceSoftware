@@ -1358,9 +1358,17 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   if (!readListObject(effectsBitsList, fxCount, band, effects, idx)) {
     return false;
   }
-
+  addTimestampEffect(effects, timestamp);
   if (!addEffectToHaptic(haptic, perceptionIndex, trackIndex, bandIndex, effects)) {
     return false;
+  }
+  return true;
+}
+
+auto IOStream::addTimestampEffect(std::vector<types::Effect>& effects, int timestamp) -> bool {
+  for (auto &e : effects) {
+    int relativeTime = e.getPosition();
+    e.setPosition(relativeTime + timestamp);
   }
   return true;
 }
@@ -1433,7 +1441,6 @@ auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
           rau = false;
         }
       }
-      kf.setRelativePosition(currentTime - (startTI.time + tsFX));
       writeKeyframe(bandType, kf, bitstream);
       kfCount++;
       if (j == effect.getKeyframesSize() - 1) {

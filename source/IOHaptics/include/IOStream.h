@@ -305,6 +305,9 @@ private:
   static auto padToByteBoundary(std::vector<bool> &bitstream) -> void;
 
   static auto setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool;
+
+  static auto IOStream::addTimestampEffect(std::vector<types::Effect> &effects, int timestamp)
+      -> bool;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H
