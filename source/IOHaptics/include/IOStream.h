@@ -131,7 +131,7 @@ static constexpr int KF_FREQUENCY = 16;
 static constexpr int KF_INFORMATION_MASK = 2;
 static constexpr int KF_MASK = 3;
 
-static constexpr int PACKET_DURATION = 128;
+static constexpr int PACKET_DURATION = 64;
 static constexpr int PACKET_HEADER_SIZE = 32;
 
 enum class NALuType {
@@ -212,6 +212,8 @@ private:
   static auto packetizeBand(int perceID, int trackID, BandStream &bandStream,
                             std::vector<std::vector<bool>> &bitstreams, std::vector<int> &effectsId)
       -> bool;
+  static auto createWaveletPayload(types::Band &band, std::vector<std::vector<bool>> &bitstream)
+      -> bool;
   static auto createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                   std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
                                   bool &rau, std::vector<std::vector<bool>> &bitstream,
@@ -220,7 +222,12 @@ private:
                                  std::vector<int> kfCount,
                                  std::vector<std::vector<bool>> bufPacketBitstream,
                                  std::vector<bool> &packetBits, int time) -> std::vector<bool>;
-  static auto writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool &rau,
+  static auto writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
+                                        std::vector<bool> &packetBits, int time,
+                                        std::vector<int> &effectsId) -> std::vector<bool>;
+  static auto readWaveletEffect(std::vector<bool> &bitstream, int fxCount, types::Band &band,
+                                types::Effect &effect, int &length) -> bool;
+  static auto writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool rau,
                                 BandStream &bandStream) -> std::vector<bool>;
   static auto writeEffectBasis(types::Effect effect, types::BandType bandType,
                                StartTimeIdx &startTI, int &kfcount, bool &rau,
@@ -309,9 +316,8 @@ private:
   static auto padToByteBoundary(std::vector<bool> &bitstream) -> void;
 
   static auto setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool;
-
-  static auto IOStream::addTimestampEffect(std::vector<types::Effect> &effects, int timestamp)
-      -> bool;
+  static auto getNextEffectId(std::vector<int> &effectsId) -> int;
+  static auto addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H

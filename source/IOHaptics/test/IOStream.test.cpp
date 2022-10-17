@@ -99,7 +99,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
            std::nullopt, std::nullopt}};
   testingPerception0.addReferenceDevice(testingReferenceDeviceValue_perception0);
 
-  const int testingId_perception1 = 423;
+  const int testingId_perception1 = 255;
   const int testingAvatarId_perception1 = 3;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
@@ -209,7 +209,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   testingBand2.addEffect(effect_in);
 
   testingBand0.addEffect(testingEffect0);
-  testingBand2.addEffect(testingEffect2);
+  //testingBand2.addEffect(testingEffect2);
   testingTrack0.addBand(testingBand0);
   testingTrack1.addBand(testingBand1);
   testingTrack2.addBand(testingBand2);

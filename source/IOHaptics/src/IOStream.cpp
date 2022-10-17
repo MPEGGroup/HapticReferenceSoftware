@@ -1164,32 +1164,41 @@ auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
   bool rau = true;
   std::vector<types::Effect> vecEffect = std::vector<types::Effect>();
   std::vector<int> kfCount = std::vector<int>();
+  if (bandStream.band.getBandType() == types::BandType::WaveletWave) {
+    createWaveletPayload(bandStream.band, bufPacketBitstream);
+    for (auto &packet : bufPacketBitstream) {
+      packetBits = writeEffectHeader(point, percetrackID, true, bandStream);
+      packetBits = writeWaveletPayloadPacket(packet, packetBits, point.time, effectsId);
+      point.time += PACKET_DURATION;
+      bitstreams.push_back(packetBits);
+    }
+  } else {
+    while (!createPayloadPacket(bandStream.band, point, vecEffect, kfCount, rau, bufPacketBitstream,
+                                effectsId)) {
+      // write packet as vector<bool>
+      if (!bufPacketBitstream.empty()) {
+        packetBits = writeEffectHeader(point, percetrackID, rau, bandStream);
+        packetBits = writePayloadPacket(vecEffect, bandStream, kfCount, bufPacketBitstream,
+                                        packetBits, point.time);
 
-  while (!createPayloadPacket(bandStream.band, point, vecEffect, kfCount, rau, bufPacketBitstream,
-                              effectsId)) {
-    // write packet as vector<bool>
+        bitstreams.push_back(packetBits);
+      }
+      vecEffect.clear();
+      bufPacketBitstream.clear();
+      packetBits.clear();
+      kfCount.clear();
+      point.time += PACKET_DURATION;
+    }
     if (!bufPacketBitstream.empty()) {
       packetBits = writeEffectHeader(point, percetrackID, rau, bandStream);
       packetBits = writePayloadPacket(vecEffect, bandStream, kfCount, bufPacketBitstream,
-                                      packetBits, point.time);
-
+                                      packetBits, (point.time - PACKET_DURATION));
       bitstreams.push_back(packetBits);
     }
-    vecEffect.clear();
-    bufPacketBitstream.clear();
-    packetBits.clear();
-    kfCount.clear();
-    point.time += PACKET_DURATION;
   }
-  if (!bufPacketBitstream.empty()) {
-    packetBits = writeEffectHeader(point, percetrackID, rau, bandStream);
-    packetBits = writePayloadPacket(vecEffect, bandStream, kfCount, bufPacketBitstream, packetBits,
-                                    (point.time - PACKET_DURATION));
-    bitstreams.push_back(packetBits);
-  }
-
   return true;
 }
+
 auto IOStream::setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool {
   int nextId = 0;
   if (!effectsId.empty()) {
@@ -1199,7 +1208,28 @@ auto IOStream::setNextEffectId(std::vector<int> &effectsId, types::Effect &effec
   effectsId.push_back(nextId);
   return true;
 }
+auto IOStream::getNextEffectId(std::vector<int> &effectsId) -> int {
+  int nextId = 0;
+  if (!effectsId.empty()) {
+    nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
+  }
+  effectsId.push_back(nextId);
+  return nextId;
+}
 
+auto IOStream::createWaveletPayload(types::Band &band, std::vector<std::vector<bool>> &bitstream)
+    -> bool {
+  for (int i = 0; i < band.getEffectsSize(); i++) {
+    std::vector<bool> bufbitstream = std::vector<bool>();
+    types::Effect bufEffect = band.getEffectAt(i);
+    if (bufEffect.getKeyframesSize() > 1) {
+      IOBinaryBands::writeWaveletEffect(bufEffect, bufbitstream);
+      bitstream.push_back(bufbitstream);
+    }
+  }
+
+  return true;
+}
 auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                    std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
                                    bool &rau, std::vector<std::vector<bool>> &bitstream,
@@ -1242,18 +1272,6 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
       if (endPacket) {
         return false;
       }
-    } else if (effect.getEffectType() == types::EffectType::Basis &&
-               band.getBandType() == types::BandType::WaveletWave) {
-      bool endEffect = false;
-      if (writeEffectWavelet(effect, startTI, bufEffect)) {
-        endEffect = true;
-      }
-      rau = true;
-      // Create a new waveletEffect for each packet, need to force the creation of a new id
-      setNextEffectId(effectsId, effect);
-      vecEffect.push_back(effect);
-      bitstream.push_back(bufEffect);
-      return endEffect;
     } else if (effect.getEffectType() == types::EffectType::Reference) {
       if (effect.getPosition() >= startTI.time &&
           effect.getPosition() <= startTI.time + PACKET_DURATION) {
@@ -1278,7 +1296,7 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
   return true;
 }
 
-auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool &rau,
+auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool rau,
                                  BandStream &bandStream) -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
   packetBits.push_back(rau);
@@ -1296,6 +1314,42 @@ auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, 
   IOBinaryPrimitives::writeStrBits(bandIdBits.to_string(), packetBits);
 
   return packetBits;
+}
+auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
+                                         std::vector<bool> &packetBits, int time,
+                                         std::vector<int> &effectsId) -> std::vector<bool> {
+  std::bitset<DB_FX_COUNT> fxCountBits(1);
+  IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), packetBits);
+
+  int id = getNextEffectId(effectsId);
+  std::bitset<FX_ID> effectIDBits(static_cast<int>(id));
+  IOBinaryPrimitives::writeStrBits(effectIDBits.to_string(), packetBits);
+
+  std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(types::EffectType::Basis));
+  IOBinaryPrimitives::writeStrBits(effectTypeBits.to_string(), packetBits);
+
+  std::bitset<FX_POSITION> effectPosBits(static_cast<int>(time));
+  IOBinaryPrimitives::writeStrBits(effectPosBits.to_string(), packetBits);
+
+  packetBits.insert(packetBits.end(), bufPacketBitstream.begin(), bufPacketBitstream.end());
+
+  return packetBits;
+}
+
+auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, int fxCount, types::Band &band,
+                                 types::Effect &effect, int &length) -> bool {
+  int idx = 0;
+  int id = IOBinaryPrimitives::readInt(bitstream, idx, FX_ID);
+  effect.setId(id);
+
+  types::EffectType effectType =
+      static_cast<types::EffectType>(IOBinaryPrimitives::readInt(bitstream, idx, FX_TYPE));
+  effect.setEffectType(effectType);
+
+  int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, FX_POSITION);
+  effect.setPosition(effectPos);
+  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+  return true;
 }
 
 auto IOStream::writePayloadPacket(std::vector<types::Effect> &vecEffect, BandStream &bandStream,
@@ -1321,7 +1375,7 @@ auto IOStream::writePayloadPacket(std::vector<types::Effect> &vecEffect, BandStr
       IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), packetBits);
       if (bandStream.band.getBandType() == types::BandType::VectorialWave) {
         IOBinaryPrimitives::writeFloatNBits<uint16_t, FX_PHASE>(vecEffect[l].getPhase(), packetBits,
-                                                                -MAX_PHASE, MAX_PHASE);
+                                                                0, MAX_PHASE);
         std::bitset<FX_BASE> fxBaseBits(static_cast<int>(vecEffect[l].getBaseSignal()));
         IOBinaryPrimitives::writeStrBits(fxBaseBits.to_string(), packetBits);
       }
@@ -1351,7 +1405,6 @@ auto IOStream::writeData(types::Haptics &haptic, std::vector<std::vector<bool>> 
         BandStream bandStream;
         bandStream.id = bandId++;
         bandStream.band = track.getBandAt(k);
-
         packetizeBand(perceptionID, trackID, bandStream, bandBitstream, effectsId);
         expBitstream.push_back(bandBitstream);
         bandBitstream.clear();
@@ -1431,8 +1484,14 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   int fxCount = IOBinaryPrimitives::readInt(bitstream, idx, DB_FX_COUNT);
   std::vector<types::Effect> effects;
   std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
-  if (!readListObject(effectsBitsList, fxCount, band, effects, idx)) {
-    return false;
+  if (band.getBandType() != types::BandType::WaveletWave) {
+    if (!readListObject(effectsBitsList, fxCount, band, effects, idx)) {
+      return false;
+    }
+  } else {
+    types::Effect effect;
+    readWaveletEffect(effectsBitsList, fxCount, band, effect, idx);
+    effects.push_back(effect);
   }
   addTimestampEffect(effects, timestamp);
   if (!addEffectToHaptic(haptic, perceptionIndex, trackIndex, bandIndex, effects)) {
@@ -1533,8 +1592,7 @@ auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effe
                                types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readInt(bitstream, idx, FX_KF_COUNT);
   if (bandType == types::BandType::VectorialWave) {
-    float phase =
-        IOBinaryPrimitives::readFloatNBits<FX_PHASE>(bitstream, idx, -MAX_PHASE, MAX_PHASE);
+    float phase = IOBinaryPrimitives::readFloatNBits<FX_PHASE>(bitstream, idx, 0, MAX_PHASE);
     effect.setPhase(phase);
     int baseSignal = IOBinaryPrimitives::readInt(bitstream, idx, FX_BASE);
     effect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
@@ -1551,26 +1609,26 @@ auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effe
   return true;
 }
 
-auto IOStream::writeEffectWavelet(types::Effect &effect, StartTimeIdx startTI,
-                                  std::vector<bool> &bitstream) -> bool {
-  int tsFX = effect.getPosition();
-  types::Effect packetEffect = effect;
-  packetEffect.setPosition(0); // position relative to the AU timestamp
-  bool lastEffect = true;
-
-  for (int j = static_cast<int>(effect.getKeyframesSize()) - 1; j >= 0; j--) {
-    types::Keyframe kf = effect.getKeyframeAt(j);
-    int currentTime = kf.getRelativePosition().value() + tsFX;
-    if (currentTime < startTI.time || currentTime > startTI.time + PACKET_DURATION) {
-      packetEffect.removeKeyframeAt(j);
-      if (j == static_cast<int>(effect.getKeyframesSize()-1)) {
-        lastEffect = false;
-      }
-    }
-  }
-  IOBinaryBands::writeWaveletEffect(packetEffect, bitstream);
-  return lastEffect;
-}
+// auto IOStream::writeEffectWavelet(types::Effect &effect, StartTimeIdx startTI,
+//                                   std::vector<bool> &bitstream) -> bool {
+//   int tsFX = effect.getPosition();
+//   types::Effect packetEffect = effect;
+//   packetEffect.setPosition(0); // position relative to the AU timestamp
+//   bool lastEffect = true;
+//
+//   for (int j = static_cast<int>(effect.getKeyframesSize()) - 1; j >= 0; j--) {
+//     types::Keyframe kf = effect.getKeyframeAt(j);
+//     int currentTime = kf.getRelativePosition().value() + tsFX;
+//     if (currentTime < startTI.time || currentTime > startTI.time + PACKET_DURATION) {
+//       packetEffect.removeKeyframeAt(j);
+//       if (j == static_cast<int>(effect.getKeyframesSize() - 1)) {
+//         lastEffect = false;
+//       }
+//     }
+//   }
+//   IOBinaryBands::writeWaveletEffect(packetEffect, bitstream);
+//   return lastEffect;
+// }
 
 // auto writeEffectTimeline(types::Effect &effect, std::vector<bool> &bitstream) -> bool {
 //   return true;
