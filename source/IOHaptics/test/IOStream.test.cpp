@@ -42,10 +42,20 @@ using haptics::io::IOStream;
 const std::string filename = "testing_IOStream.bin";
 constexpr float floatPrecision = 0.01;
 constexpr int CONST_8 = 8;
+constexpr size_t bl = 512;
+constexpr size_t level = 7;
+constexpr int BITS_EFFECT = 15;
+constexpr int MOD_VAL = 256;
+constexpr float scalar = 1.5;
 
 //  NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 //  NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("Write/Read Haptic databand as streamable packet") {
+  using haptics::spiht::ArithEnc;
+  using haptics::spiht::Spiht_Dec;
+  using haptics::spiht::Spiht_Enc;
+  using haptics::types::Effect;
+
   const std::string testingVersion = "RM1";
   const std::string testingDate = "Today";
   const std::string testingDescription = "I'm a testing value";
@@ -150,9 +160,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
                                     testingWindowLength_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
-  const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
+  const auto testingBandType_band2 = haptics::types::BandType::WaveletWave;
   const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band2 = 0;
+  const int testingWindowLength_band2 = 128;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
   haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
@@ -187,6 +197,16 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   haptics::types::Effect testingEffect2(testingPosition_effect2, testingPhase_effect2,
                                         testingBaseSignal_effect2,
                                         haptics::types::EffectType::Basis);
+  Effect effect_in;
+  for (size_t i = 0; i < bl; i++) {
+    Keyframe keyframe(i, (float)(i % MOD_VAL) / MOD_VAL, 0);
+    effect_in.addKeyframe(keyframe);
+  }
+  Keyframe keyframe(bl, scalar, 0);
+  effect_in.addKeyframe(keyframe);
+  Keyframe keyframeBits(bl + 1, (float)BITS_EFFECT, 0);
+  effect_in.addKeyframe(keyframeBits);
+  testingBand2.addEffect(effect_in);
 
   testingBand0.addEffect(testingEffect0);
   testingBand2.addEffect(testingEffect2);

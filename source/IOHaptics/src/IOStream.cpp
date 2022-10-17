@@ -1244,12 +1244,16 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
       }
     } else if (effect.getEffectType() == types::EffectType::Basis &&
                band.getBandType() == types::BandType::WaveletWave) {
-      writeEffectWavelet(effect, startTI, bufEffect);
+      bool endEffect = false;
+      if (writeEffectWavelet(effect, startTI, bufEffect)) {
+        endEffect = true;
+      }
       rau = true;
       // Create a new waveletEffect for each packet, need to force the creation of a new id
       setNextEffectId(effectsId, effect);
       vecEffect.push_back(effect);
       bitstream.push_back(bufEffect);
+      return endEffect;
     } else if (effect.getEffectType() == types::EffectType::Reference) {
       if (effect.getPosition() >= startTI.time &&
           effect.getPosition() <= startTI.time + PACKET_DURATION) {
@@ -1464,7 +1468,7 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
       return false;
     }
   } else if (effectType == types::EffectType::Basis &&
-             band.getBandType() != types::BandType::WaveletWave) {
+             band.getBandType() == types::BandType::WaveletWave) {
     IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
   }
   length += idx;
@@ -1552,16 +1556,20 @@ auto IOStream::writeEffectWavelet(types::Effect &effect, StartTimeIdx startTI,
   int tsFX = effect.getPosition();
   types::Effect packetEffect = effect;
   packetEffect.setPosition(0); // position relative to the AU timestamp
+  bool lastEffect = true;
 
   for (int j = static_cast<int>(effect.getKeyframesSize()) - 1; j >= 0; j--) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
     if (currentTime < startTI.time || currentTime > startTI.time + PACKET_DURATION) {
       packetEffect.removeKeyframeAt(j);
+      if (j == static_cast<int>(effect.getKeyframesSize()-1)) {
+        lastEffect = false;
+      }
     }
   }
   IOBinaryBands::writeWaveletEffect(packetEffect, bitstream);
-  return true;
+  return lastEffect;
 }
 
 // auto writeEffectTimeline(types::Effect &effect, std::vector<bool> &bitstream) -> bool {

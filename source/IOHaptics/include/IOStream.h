@@ -54,22 +54,22 @@ static constexpr int H_BYTES_LENGTH = 4;
 static constexpr int MDEXP_VERSION = 16;
 static constexpr int MDEXP_DATE = 16;
 static constexpr int MDEXP_DESC_SIZE = 16;
-static constexpr int MDEXP_PERC_COUNT = 16;
-static constexpr int MDEXP_AVATAR_COUNT = 16;
+static constexpr int MDEXP_PERC_COUNT = 8;
+static constexpr int MDEXP_AVATAR_COUNT = 8;
 
-static constexpr int AVATAR_ID = 32;
-static constexpr int AVATAR_LOD = 32;
-static constexpr int AVATAR_TYPE = 2;
+static constexpr int AVATAR_ID = 8;
+static constexpr int AVATAR_LOD = 8;
+static constexpr int AVATAR_TYPE = 3;
 static constexpr int AVATAR_MESH_COUNT = 16;
 
-static constexpr int MDPERCE_ID = 32;
+static constexpr int MDPERCE_ID = 8;
 static constexpr int MDPERCE_DESC_SIZE = 16;
 static constexpr int MDPERCE_MODALITY = 4;
 static constexpr int MDPERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_PERCE_UNIT_EXP = 8;
-static constexpr int MDPERCE_LIBRARY_COUNT = 32;
-static constexpr int MDPERCE_REFDEVICE_COUNT = 16;
-static constexpr int MDPERCE_TRACK_COUNT = 16;
+static constexpr int MDPERCE_LIBRARY_COUNT = 16;
+static constexpr int MDPERCE_REFDEVICE_COUNT = 8;
+static constexpr int MDPERCE_TRACK_COUNT = 8;
 static constexpr int MDPERCE_FXLIB_COUNT = 16;
 
 static constexpr int REFDEV_ID = 32;
@@ -89,7 +89,7 @@ static constexpr int REFDEV_SIZE = 32;
 static constexpr int REFDEV_CUSTOM = 32;
 static constexpr int REFDEV_TYPE = 3;
 
-static constexpr int MDTRACK_ID = 32;
+static constexpr int MDTRACK_ID = 8;
 static constexpr int MDTRACK_DESC_LENGTH = 16;
 static constexpr int MDTRACK_GAIN = 32;
 static constexpr int MDTRACK_MIXING_WEIGHT = 32;
@@ -102,10 +102,10 @@ static constexpr int MDTRACK_DIRECTION_MASK = 1;
 static constexpr int MDTRACK_DIRECTION_AXIS = 8;
 static constexpr int MDTRACK_SAMPLE_COUNT = 32;
 
-static constexpr int MDBAND_ID = 16;
+static constexpr int MDBAND_ID = 8;
 static constexpr int MDBAND_BAND_TYPE = 2;
 static constexpr int MDBAND_CURVE_TYPE = 3;
-static constexpr int MDBAND_WIN_LEN = 32;
+static constexpr int MDBAND_WIN_LEN = 16;
 static constexpr int MDBAND_LOW_FREQ = 16;
 static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_FX_COUNT = 16;
@@ -116,11 +116,11 @@ static constexpr int DB_FX_COUNT = 16;
 
 static constexpr int FX_ID = 16;
 static constexpr int FX_TYPE = 2;
-static constexpr int FX_POSITION = 32;
+static constexpr int FX_POSITION = 24;
 static constexpr int FX_REF_ID = 32;
 static constexpr int FX_PHASE = 16;
-static constexpr int FX_BASE = 3;
-static constexpr int FX_KF_COUNT = 32;
+static constexpr int FX_BASE = 4;
+static constexpr int FX_KF_COUNT = 16;
 static constexpr int EFFECT_WAVELET_SIZE = 16;
 
 static constexpr int FXLIB_TIMELINESIZE = 16;
@@ -131,7 +131,7 @@ static constexpr int KF_FREQUENCY = 16;
 static constexpr int KF_INFORMATION_MASK = 2;
 static constexpr int KF_MASK = 3;
 
-static constexpr int PACKET_DURATION = 50;
+static constexpr int PACKET_DURATION = 128;
 static constexpr int PACKET_HEADER_SIZE = 32;
 
 enum class NALuType {
