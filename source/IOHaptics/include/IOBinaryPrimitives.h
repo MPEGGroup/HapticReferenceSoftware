@@ -39,7 +39,7 @@
 #include <bitset>
 #include <cmath>
 #include <cstring>
-#include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -47,13 +47,13 @@ namespace haptics::io {
 constexpr float MAX_FLOAT = 10000;
 constexpr float MAX_FREQUENCY = 10000;
 constexpr float MAX_AMPLITUDE = 1;
-constexpr float MAX_PHASE = 3.14159;
+constexpr float MAX_PHASE = 6.28318;
 constexpr int BYTE_SIZE = 8;
 class IOBinaryPrimitives {
 public:
-  static auto readString(std::ifstream &file) -> std::string;
+  static auto readString(std::istream &file) -> std::string;
 
-  template <class T, size_t bytesCount> static auto readNBytes(std::ifstream &file) -> T {
+  template <class T, size_t bytesCount> static auto readNBytes(std::istream &file) -> T {
     std::array<char, bytesCount> bytes{};
     file.read(bytes.data(), bytesCount);
     T value = 0;
@@ -66,7 +66,7 @@ public:
   }
 
   template <class T, size_t bytesCount>
-  static auto readFloatNBytes(std::ifstream &file, float minValue, float maxValue) -> float {
+  static auto readFloatNBytes(std::istream &file, float minValue, float maxValue) -> float {
     auto intValue = readNBytes<T, bytesCount>(file);
     auto maxIntValue = static_cast<uint64_t>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
     auto normalizedValue = intValue / static_cast<float>(maxIntValue);
@@ -75,9 +75,9 @@ public:
     return value;
   }
 
-  static auto writeString(const std::string &text, std::ofstream &file) -> void;
+  static auto writeString(const std::string &text, std::ostream &file) -> void;
   template <class T, size_t bytesCount>
-  static auto writeNBytes(T value, std::ofstream &file) -> void {
+  static auto writeNBytes(T value, std::ostream &file) -> void {
     std::array<char, bytesCount> bytes{};
     for (size_t i = 0; i < bytes.size(); i++) {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
@@ -87,7 +87,7 @@ public:
   }
 
   template <class T, size_t bytesCount>
-  static auto writeFloatNBytes(float value, std::ofstream &file, float minValue, float maxValue)
+  static auto writeFloatNBytes(float value, std::ostream &file, float minValue, float maxValue)
       -> void {
     auto normalizedValue = (value - minValue) / (maxValue - minValue);
     normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
