@@ -110,7 +110,7 @@ static constexpr int MDBAND_LOW_FREQ = 16;
 static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_FX_COUNT = 16;
 
-static constexpr int DB_AU_TYPE = 1;
+static constexpr int DB_AU_TYPE = 2;
 static constexpr int DB_TIMESTAMP = 32;
 static constexpr int DB_FX_COUNT = 16;
 
@@ -143,6 +143,12 @@ enum class NALuType {
   Data,
   CRC,
   ByteStuffing
+};
+
+enum class AUType {
+  RAU,
+  DAU,
+  Sync
 };
 
 enum class PacketType {

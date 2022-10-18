@@ -209,7 +209,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   testingBand2.addEffect(effect_in);
 
   testingBand0.addEffect(testingEffect0);
-  //testingBand2.addEffect(testingEffect2);
+  // testingBand2.addEffect(testingEffect2);
   testingTrack0.addBand(testingBand0);
   testingTrack1.addBand(testingBand1);
   testingTrack2.addBand(testingBand2);
@@ -225,7 +225,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
 
     REQUIRE(succeed);
-    CHECK(bitstream.size() == 12);
+    CHECK(bitstream.size() == 16);
     const uintmax_t sizeAvatar1 = haptics::io::AVATAR_ID + haptics::io::AVATAR_LOD +
                                   haptics::io::AVATAR_TYPE + haptics::io::AVATAR_MESH_COUNT +
                                   (avatar1.getMesh().value().size() * haptics::io::BYTE_SIZE);
@@ -299,7 +299,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed =
         IOStream::writeNALu(haptics::io::NALuType::MetadataPerception, testingHaptic, 0, bitstream);
     REQUIRE(succeed);
-    CHECK(bitstream.size() == 1);
+    CHECK(bitstream.size() == 2);
     const uintmax_t sizeMetaRefDev0 =
         haptics::io::REFDEV_ID + haptics::io::REFDEV_NAME_LENGTH +
         (haptics::io::BYTE_SIZE * testingPerception0.getReferenceDeviceAt(0).getName().size()) +
@@ -448,7 +448,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed =
         IOStream::writeNALu(haptics::io::NALuType::MetadataTrack, testingHaptic, 0, bitstream);
     REQUIRE(succeed);
-    CHECK(bitstream.size() == 2);
+    CHECK(bitstream.size() == 3);
     const uintmax_t sizeMetaTrack0 =
         haptics::io::MDTRACK_ID + haptics::io::MDTRACK_DESC_LENGTH +
         (haptics::io::BYTE_SIZE * testingTrack0.getDescription().size()) + haptics::io::REFDEV_ID +
@@ -520,11 +520,12 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
     REQUIRE(succeed);
     // Check Haptic Perception information
-    haptics::types::Track readTrack0 = readHaptic.getPerceptionAt(0).getTrackAt(1);
+    haptics::types::Track readTrack0 = readHaptic.getPerceptionAt(0).getTrackAt(0);
     CHECK(readTrack0.getId() == testingTrack0.getId());
     CHECK(readTrack0.getDescription() == testingTrack0.getDescription());
-    if (readTrack0.getReferenceDeviceId().has_value()) {
-      CHECK(readTrack0.getReferenceDeviceId() == testingTrack0.getReferenceDeviceId());
+    if (readTrack0.getReferenceDeviceId().has_value() && testingTrack0.getReferenceDeviceId().has_value()) {
+      CHECK(readTrack0.getReferenceDeviceId().value() ==
+            testingTrack0.getReferenceDeviceId().value());
     }
     CHECK(readTrack0.getGain() - testingTrack0.getGain() < floatPrecision);
     CHECK(readTrack0.getMixingWeight() - testingTrack0.getMixingWeight() < floatPrecision);
@@ -546,29 +547,30 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
       }
     }
 
-    haptics::types::Track readTrack1 = readHaptic.getPerceptionAt(0).getTrackAt(0);
-    CHECK(readTrack1.getId() == testingTrack1.getId());
-    CHECK(readTrack1.getDescription() == testingTrack1.getDescription());
+    haptics::types::Track readTrack1 = readHaptic.getPerceptionAt(1).getTrackAt(0);
+    CHECK(readTrack1.getId() == testingTrack2.getId());
+    CHECK(readTrack1.getDescription() == testingTrack2.getDescription());
     if (readTrack1.getReferenceDeviceId().has_value()) {
-      CHECK(readTrack1.getReferenceDeviceId() == testingTrack1.getReferenceDeviceId());
+      CHECK(readTrack1.getReferenceDeviceId().value() ==
+            testingTrack1.getReferenceDeviceId().value());
     }
-    CHECK(readTrack1.getGain() - testingTrack1.getGain() < floatPrecision);
-    CHECK(readTrack1.getMixingWeight() - testingTrack1.getMixingWeight() < floatPrecision);
-    CHECK(readTrack1.getBodyPartMask() == testingTrack1.getBodyPartMask());
-    CHECK(readTrack1.getFrequencySampling() == testingTrack1.getFrequencySampling());
+    CHECK(readTrack1.getGain() - testingTrack2.getGain() < floatPrecision);
+    CHECK(readTrack1.getMixingWeight() - testingTrack2.getMixingWeight() < floatPrecision);
+    CHECK(readTrack1.getBodyPartMask() == testingTrack2.getBodyPartMask());
+    CHECK(readTrack1.getFrequencySampling() == testingTrack2.getFrequencySampling());
     if (readTrack1.getFrequencySampling() > 0) {
-      CHECK(readTrack1.getSampleCount() == testingTrack1.getSampleCount());
+      CHECK(readTrack1.getSampleCount() == testingTrack2.getSampleCount());
     }
-    CHECK(readTrack1.getDirection().has_value() == testingTrack1.getDirection().has_value());
+    CHECK(readTrack1.getDirection().has_value() == testingTrack2.getDirection().has_value());
     if (readTrack1.getDirection().has_value()) {
-      CHECK(readTrack1.getDirection().value().X == testingTrack1.getDirection().value().X);
-      CHECK(readTrack1.getDirection().value().Y == testingTrack1.getDirection().value().Y);
-      CHECK(readTrack1.getDirection().value().Z == testingTrack1.getDirection().value().Z);
+      CHECK(readTrack1.getDirection().value().X == testingTrack2.getDirection().value().X);
+      CHECK(readTrack1.getDirection().value().Y == testingTrack2.getDirection().value().Y);
+      CHECK(readTrack1.getDirection().value().Z == testingTrack2.getDirection().value().Z);
     }
-    CHECK(readTrack1.getVerticesSize() == testingTrack1.getVerticesSize());
+    CHECK(readTrack1.getVerticesSize() == testingTrack2.getVerticesSize());
     if (readTrack1.getVerticesSize() > 0) {
       for (int i = 0; i < readTrack1.getVerticesSize(); i++) {
-        CHECK(readTrack1.getVertexAt(i) - testingTrack1.getVertexAt(i) < floatPrecision);
+        CHECK(readTrack1.getVertexAt(i) - testingTrack2.getVertexAt(i) < floatPrecision);
       }
     }
   }

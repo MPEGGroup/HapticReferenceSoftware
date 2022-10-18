@@ -614,6 +614,9 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
   float phase = IOBinaryPrimitives::readFloatNBits<FX_PHASE>(bitstream, idx, -MAX_PHASE, MAX_PHASE);
   libraryEffect.setPhase(phase);
 
+  int baseSignal = IOBinaryPrimitives::readInt(bitstream, idx, FX_BASE);
+  libraryEffect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
+
   int effectType = IOBinaryPrimitives::readInt(bitstream, idx, FX_TYPE);
   libraryEffect.setEffectType(static_cast<types::EffectType>(effectType));
 
@@ -639,6 +642,7 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
     libraryEffect.addKeyframe(myKeyframe);
   }
   bool success = true;
+
   auto timelineEffectCount = IOBinaryPrimitives::readInt(bitstream, idx, FXLIB_TIMELINESIZE);
   for (int i = 0; i < timelineEffectCount; i++) {
     types::Effect timelineEffect;
@@ -1198,24 +1202,6 @@ auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
   return true;
 }
 
-auto IOStream::setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool {
-  int nextId = 0;
-  if (!effectsId.empty()) {
-    nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
-  }
-  effect.setId(nextId);
-  effectsId.push_back(nextId);
-  return true;
-}
-auto IOStream::getNextEffectId(std::vector<int> &effectsId) -> int {
-  int nextId = 0;
-  if (!effectsId.empty()) {
-    nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
-  }
-  effectsId.push_back(nextId);
-  return nextId;
-}
-
 auto IOStream::createWaveletPayload(types::Band &band, std::vector<std::vector<bool>> &bitstream)
     -> bool {
   for (int i = 0; i < band.getEffectsSize(); i++) {
@@ -1298,7 +1284,9 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
 auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool rau,
                                  BandStream &bandStream) -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
-  packetBits.push_back(rau);
+  int autype = rau == true ? 1 : 0;
+  std::bitset<DB_AU_TYPE> auBits(autype);
+  IOBinaryPrimitives::writeStrBits(auBits.to_string(), packetBits);
   // packetBits.push_back(rau); // PUSH END ACCESS UNIT
   std::bitset<DB_TIMESTAMP> tsBits(point.time);
   IOBinaryPrimitives::writeStrBits(tsBits.to_string(), packetBits);
@@ -1344,8 +1332,8 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, int fxCount, type
 
   int effectPos = band.getWindowLength() * band.getEffectsSize();
   effect.setPosition(effectPos);
-  
-    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+
+  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
   length += idx;
   return true;
 }
@@ -1413,30 +1401,11 @@ auto IOStream::writeData(types::Haptics &haptic, std::vector<std::vector<bool>> 
   return true;
   // Function to order all packet depending on time
 }
-
-auto IOStream::getEffectsId(types::Haptics &haptic) -> std::vector<int> {
-  std::vector<int> effectsId = std::vector<int>();
-  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    types::Perception perception = haptic.getPerceptionAt(i);
-    for (int j = 0; j < perception.getTracksSize(); j++) {
-      types::Track track = perception.getTrackAt(j);
-      for (int k = 0; k < track.getBandsSize(); k++) {
-        types::Band band = track.getBandAt(k);
-        for (int l = 0; l < band.getEffectsSize(); l++) {
-          types::Effect effect = band.getEffectAt(l);
-          if (effect.getId() != -1) {
-            effectsId.push_back(effect.getId());
-          }
-        }
-      }
-    }
-  }
-  return effectsId;
-}
 auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool> &bitstream)
     -> bool {
   int idx = 0;
-  bool auType = IOBinaryPrimitives::readInt(bitstream, idx, DB_AU_TYPE) == 1;
+  AUType auType = static_cast<AUType>(IOBinaryPrimitives::readInt(bitstream, idx, DB_AU_TYPE));
+
   int timestamp = IOBinaryPrimitives::readInt(bitstream, idx, DB_TIMESTAMP);
 
   int perceptionId = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_ID);
@@ -1499,14 +1468,6 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   return true;
 }
 
-auto IOStream::addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool {
-  for (auto &e : effects) {
-    int relativeTime = e.getPosition();
-    e.setPosition(relativeTime + timestamp);
-  }
-  return true;
-}
-
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
                           int &length) -> bool {
   int idx = 0;
@@ -1530,33 +1491,6 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
     IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
   }
   length += idx;
-  return true;
-}
-
-auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int trackIndex,
-                                 int bandIndex, std::vector<types::Effect> &effects) -> bool {
-  for (auto &effect : effects) {
-    bool effectExist = false;
-    types::Band &band =
-        haptic.getPerceptionAt(perceptionIndex).getTrackAt(trackIndex).getBandAt(bandIndex);
-    for (int i = 0; i < band.getEffectsSize(); i++) {
-      types::Effect &hapticEffect = haptic.getPerceptionAt(perceptionIndex)
-                                        .getTrackAt(trackIndex)
-                                        .getBandAt(bandIndex)
-                                        .getEffectAt(i);
-
-      if (effect.getId() == hapticEffect.getId()) {
-        for (int j = 0; j < effect.getKeyframesSize(); j++) {
-          hapticEffect.addKeyframe(effect.getKeyframeAt(j));
-        }
-        effectExist = true;
-        break;
-      }
-    }
-    if (!effectExist) {
-      band.addEffect(effect);
-    }
-  }
   return true;
 }
 
@@ -1824,6 +1758,77 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int kfCount, types::
   }
   length += idx;
   return true;
+}
+
+auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int trackIndex,
+                                 int bandIndex, std::vector<types::Effect> &effects) -> bool {
+  for (auto &effect : effects) {
+    bool effectExist = false;
+    types::Band &band =
+        haptic.getPerceptionAt(perceptionIndex).getTrackAt(trackIndex).getBandAt(bandIndex);
+    for (int i = 0; i < band.getEffectsSize(); i++) {
+      types::Effect &hapticEffect = haptic.getPerceptionAt(perceptionIndex)
+                                        .getTrackAt(trackIndex)
+                                        .getBandAt(bandIndex)
+                                        .getEffectAt(i);
+
+      if (effect.getId() == hapticEffect.getId()) {
+        for (int j = 0; j < effect.getKeyframesSize(); j++) {
+          hapticEffect.addKeyframe(effect.getKeyframeAt(j));
+        }
+        effectExist = true;
+        break;
+      }
+    }
+    if (!effectExist) {
+      band.addEffect(effect);
+    }
+  }
+  return true;
+}
+auto IOStream::addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool {
+  for (auto &e : effects) {
+    int relativeTime = e.getPosition();
+    e.setPosition(relativeTime + timestamp);
+  }
+  return true;
+}
+
+auto IOStream::getEffectsId(types::Haptics &haptic) -> std::vector<int> {
+  std::vector<int> effectsId = std::vector<int>();
+  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
+    types::Perception perception = haptic.getPerceptionAt(i);
+    for (int j = 0; j < perception.getTracksSize(); j++) {
+      types::Track track = perception.getTrackAt(j);
+      for (int k = 0; k < track.getBandsSize(); k++) {
+        types::Band band = track.getBandAt(k);
+        for (int l = 0; l < band.getEffectsSize(); l++) {
+          types::Effect effect = band.getEffectAt(l);
+          if (effect.getId() != -1) {
+            effectsId.push_back(effect.getId());
+          }
+        }
+      }
+    }
+  }
+  return effectsId;
+}
+auto IOStream::setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool {
+  int nextId = 0;
+  if (!effectsId.empty()) {
+    nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
+  }
+  effect.setId(nextId);
+  effectsId.push_back(nextId);
+  return true;
+}
+auto IOStream::getNextEffectId(std::vector<int> &effectsId) -> int {
+  int nextId = 0;
+  if (!effectsId.empty()) {
+    nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
+  }
+  effectsId.push_back(nextId);
+  return nextId;
 }
 
 auto IOStream::padToByteBoundary(std::vector<bool> &bitstream) -> void {
