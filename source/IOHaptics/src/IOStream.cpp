@@ -1191,7 +1191,7 @@ auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
     if (!bufPacketBitstream.empty()) {
       packetBits = writeEffectHeader(point, percetrackID, rau, bandStream);
       packetBits = writePayloadPacket(vecEffect, bandStream, kfCount, bufPacketBitstream,
-                                      packetBits, (point.time - PACKET_DURATION));
+                                      packetBits, (point.time));
       bitstreams.push_back(packetBits);
     }
   }
