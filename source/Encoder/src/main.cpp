@@ -69,8 +69,11 @@ auto help() -> void {
       << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
       << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
          "the encoder will output a file in a human-readable format"
-      << "\t-s, --streaming\t\t\tthe file will be encoded into its binary streaming format. If not provided "
+      << std::endl
+      << "\t-s, --streaming\t\t\tthe file will be encoded into its binary streaming format. If not "
+         "provided "
          "the encoder will output a file in a human-readable format"
+      << std::endl
       << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
          "be placed in the library and replaced by a referennce"
       << "\t-l, --linearize\t\t\tthe file will be linearized. Every referenced effect from the "

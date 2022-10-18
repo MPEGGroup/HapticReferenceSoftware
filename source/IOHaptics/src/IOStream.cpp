@@ -556,7 +556,7 @@ auto IOStream::readMetadataPerception(types::Perception &perception, std::vector
   int avatarId = IOBinaryPrimitives::readInt(bitstream, idx, AVATAR_ID);
   perception.setAvatarId(avatarId);
 
-  int fxCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_FXLIB_COUNT);
+  int fxLibraryCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_FXLIB_COUNT);
 
   int unitExp = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_UNIT_EXP);
   perception.setUnitExponent(unitExp);
@@ -566,15 +566,13 @@ auto IOStream::readMetadataPerception(types::Perception &perception, std::vector
 
   int refDevCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_REFDEVICE_COUNT);
   std::vector<types::ReferenceDevice> referenceDeviceList = std::vector<types::ReferenceDevice>();
-  std::vector<bool> refDeviceListBits(bitstream.begin() + idx,
-                                      bitstream.end() - MDPERCE_TRACK_COUNT);
-  if (!readListObject(refDeviceListBits, refDevCount, referenceDeviceList)) {
+  std::vector<bool> refDeviceListBits(bitstream.begin() + idx, bitstream.end());
+  if (!readListObject(refDeviceListBits, refDevCount, referenceDeviceList, idx)) {
     return false;
   }
   for (auto refDev : referenceDeviceList) {
     perception.addReferenceDevice(refDev);
   }
-  idx = static_cast<int>(bitstream.size()) - MDPERCE_TRACK_COUNT;
   int trackCount = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_TRACK_COUNT);
 
   return true;
@@ -971,8 +969,8 @@ auto IOStream::writeMetadataTrack(types::Track &track, std::vector<bool> &bitstr
   std::bitset<MDTRACK_SAMPLING_FREQUENCY> maxFreqBits(freqSampling);
   IOBinaryPrimitives::writeStrBits(maxFreqBits.to_string(), bitstream);
 
-  if (track.getFrequencySampling().value_or(0) > 0) {
-    std::bitset<REFDEV_MAX_FREQ> sampleCountBits(track.getSampleCount().value_or(0));
+  if (freqSampling > 0) {
+    std::bitset<MDTRACK_SAMPLE_COUNT> sampleCountBits(track.getSampleCount().value_or(0));
     IOBinaryPrimitives::writeStrBits(sampleCountBits.to_string(), bitstream);
   }
 
@@ -1035,6 +1033,7 @@ auto IOStream::readMetadataTrack(types::Track &track, std::vector<bool> &bitstre
   }
   if (frequencySampling > 0) {
     uint32_t sampleCount = IOBinaryPrimitives::readInt(bitstream, idx, MDTRACK_SAMPLE_COUNT);
+    track.setSampleCount(sampleCount);
   }
 
   bool directionMask =
@@ -1166,9 +1165,9 @@ auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
   std::vector<int> kfCount = std::vector<int>();
   if (bandStream.band.getBandType() == types::BandType::WaveletWave) {
     createWaveletPayload(bandStream.band, bufPacketBitstream);
-    for (auto &packet : bufPacketBitstream) {
+    for (auto &bufpacket : bufPacketBitstream) {
       packetBits = writeEffectHeader(point, percetrackID, true, bandStream);
-      packetBits = writeWaveletPayloadPacket(packet, packetBits, point.time, effectsId);
+      packetBits = writeWaveletPayloadPacket(bufpacket, packetBits, effectsId);
       point.time += PACKET_DURATION;
       bitstreams.push_back(packetBits);
     }
@@ -1316,8 +1315,8 @@ auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, 
   return packetBits;
 }
 auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
-                                         std::vector<bool> &packetBits, int time,
-                                         std::vector<int> &effectsId) -> std::vector<bool> {
+                                         std::vector<bool> &packetBits, std::vector<int> &effectsId)
+    -> std::vector<bool> {
   std::bitset<DB_FX_COUNT> fxCountBits(1);
   IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), packetBits);
 
@@ -1327,9 +1326,6 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
 
   std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(types::EffectType::Basis));
   IOBinaryPrimitives::writeStrBits(effectTypeBits.to_string(), packetBits);
-
-  std::bitset<FX_POSITION> effectPosBits(static_cast<int>(time));
-  IOBinaryPrimitives::writeStrBits(effectPosBits.to_string(), packetBits);
 
   packetBits.insert(packetBits.end(), bufPacketBitstream.begin(), bufPacketBitstream.end());
 
@@ -1346,9 +1342,11 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, int fxCount, type
       static_cast<types::EffectType>(IOBinaryPrimitives::readInt(bitstream, idx, FX_TYPE));
   effect.setEffectType(effectType);
 
-  int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, FX_POSITION);
+  int effectPos = band.getWindowLength() * band.getEffectsSize();
   effect.setPosition(effectPos);
-  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+  
+    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+  length += idx;
   return true;
 }
 
@@ -1488,12 +1486,13 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
     if (!readListObject(effectsBitsList, fxCount, band, effects, idx)) {
       return false;
     }
+    addTimestampEffect(effects, timestamp);
   } else {
     types::Effect effect;
     readWaveletEffect(effectsBitsList, fxCount, band, effect, idx);
     effects.push_back(effect);
   }
-  addTimestampEffect(effects, timestamp);
+
   if (!addEffectToHaptic(haptic, perceptionIndex, trackIndex, bandIndex, effects)) {
     return false;
   }
@@ -1569,7 +1568,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
   for (int j = 0; j < effect.getKeyframesSize(); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
-    if (currentTime <= startTI.time + PACKET_DURATION && currentTime >= startTI.time) {
+    if (currentTime < startTI.time + PACKET_DURATION && currentTime >= startTI.time) {
       if (firstKf) {
         firstKf = false;
         if (j != 0) {
@@ -1581,7 +1580,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
       if (j == effect.getKeyframesSize() - 1) {
         return true;
       }
-    } else if (currentTime > startTI.time + PACKET_DURATION) {
+    } else if (currentTime >= startTI.time + PACKET_DURATION) {
       return false;
     }
   }
@@ -1609,30 +1608,6 @@ auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effe
   return true;
 }
 
-// auto IOStream::writeEffectWavelet(types::Effect &effect, StartTimeIdx startTI,
-//                                   std::vector<bool> &bitstream) -> bool {
-//   int tsFX = effect.getPosition();
-//   types::Effect packetEffect = effect;
-//   packetEffect.setPosition(0); // position relative to the AU timestamp
-//   bool lastEffect = true;
-//
-//   for (int j = static_cast<int>(effect.getKeyframesSize()) - 1; j >= 0; j--) {
-//     types::Keyframe kf = effect.getKeyframeAt(j);
-//     int currentTime = kf.getRelativePosition().value() + tsFX;
-//     if (currentTime < startTI.time || currentTime > startTI.time + PACKET_DURATION) {
-//       packetEffect.removeKeyframeAt(j);
-//       if (j == static_cast<int>(effect.getKeyframesSize() - 1)) {
-//         lastEffect = false;
-//       }
-//     }
-//   }
-//   IOBinaryBands::writeWaveletEffect(packetEffect, bitstream);
-//   return lastEffect;
-// }
-
-// auto writeEffectTimeline(types::Effect &effect, std::vector<bool> &bitstream) -> bool {
-//   return true;
-// }
 auto IOStream::writeKeyframe(types::BandType bandType, types::Keyframe &keyframe,
                              std::vector<bool> &bitstream) -> bool {
   switch (bandType) {
@@ -1808,7 +1783,8 @@ auto IOStream::searchInList(std::vector<BandStream> &list, BandStream &item, int
 }
 
 auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
-                              std::vector<types::ReferenceDevice> &refDevList) -> bool {
+                              std::vector<types::ReferenceDevice> &refDevList, int &length)
+    -> bool {
   int idx = 0;
   for (int i = 0; i < refDevCount; i++) {
     std::vector<bool> refDevBits(bitstream.begin() + idx, bitstream.end());
@@ -1818,6 +1794,7 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
     }
     refDevList.push_back(refDev);
   }
+  length += idx;
   return true;
 }
 auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,

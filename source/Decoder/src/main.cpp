@@ -90,6 +90,7 @@ auto main(int argc, char *argv[]) -> int {
 
   Haptics hapticFile;
   if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
+
     if (!IOStream::readFile(filename, hapticFile)) {
       return EXIT_FAILURE;
     }

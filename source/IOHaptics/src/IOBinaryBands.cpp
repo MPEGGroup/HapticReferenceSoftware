@@ -349,7 +349,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
   std::vector<unsigned char> instream;
   instream.resize(size);
   for (auto &b : instream) {
-    b = IOBinaryPrimitives::readInt(bitstream, idx, BYTE_SIZE);
+    b = static_cast<unsigned char>(IOBinaryPrimitives::readInt(bitstream, idx, BYTE_SIZE));
   }
   dec.decodeEffect(instream, effect, (int)blocklength);
 

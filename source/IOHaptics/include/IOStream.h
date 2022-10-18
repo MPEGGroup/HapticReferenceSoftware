@@ -72,7 +72,7 @@ static constexpr int MDPERCE_REFDEVICE_COUNT = 8;
 static constexpr int MDPERCE_TRACK_COUNT = 8;
 static constexpr int MDPERCE_FXLIB_COUNT = 16;
 
-static constexpr int REFDEV_ID = 32;
+static constexpr int REFDEV_ID = 8;
 static constexpr int REFDEV_NAME_LENGTH = 16;
 static constexpr int REFDEV_OPT_FIELDS = 12;
 static constexpr int REFDEV_BODY_PART_MASK = 32;
@@ -131,7 +131,7 @@ static constexpr int KF_FREQUENCY = 16;
 static constexpr int KF_INFORMATION_MASK = 2;
 static constexpr int KF_MASK = 3;
 
-static constexpr int PACKET_DURATION = 64;
+static constexpr int PACKET_DURATION = 128;
 static constexpr int PACKET_HEADER_SIZE = 32;
 
 enum class NALuType {
@@ -223,8 +223,8 @@ private:
                                  std::vector<std::vector<bool>> bufPacketBitstream,
                                  std::vector<bool> &packetBits, int time) -> std::vector<bool>;
   static auto writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
-                                        std::vector<bool> &packetBits, int time,
-                                        std::vector<int> &effectsId) -> std::vector<bool>;
+                                        std::vector<bool> &packetBits, std::vector<int> &effectsId)
+      -> std::vector<bool>;
   static auto readWaveletEffect(std::vector<bool> &bitstream, int fxCount, types::Band &band,
                                 types::Effect &effect, int &length) -> bool;
   static auto writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool rau,
@@ -277,7 +277,7 @@ private:
   static auto readListObject(std::vector<bool> &bitstream, int avatarCount,
                              std::vector<types::Avatar> &avatarList) -> bool;
   static auto readListObject(std::vector<bool> &bitstream, int refDevCount,
-                             std::vector<types::ReferenceDevice> &refDevList) -> bool;
+                             std::vector<types::ReferenceDevice> &refDevList, int &length) -> bool;
 
   static auto addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int trackIndex,
                                 int bandIndex, std::vector<types::Effect> &effects) -> bool;
