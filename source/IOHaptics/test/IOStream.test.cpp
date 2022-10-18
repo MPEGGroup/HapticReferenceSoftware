@@ -455,7 +455,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         haptics::io::MDTRACK_GAIN + haptics::io::MDTRACK_MIXING_WEIGHT +
         haptics::io::MDTRACK_BODY_PART_MASK + haptics::io::MDTRACK_SAMPLING_FREQUENCY +
         haptics::io::MDTRACK_DIRECTION_MASK + haptics::io::MDTRACK_VERT_COUNT +
-        (testingTrack0.getVerticesSize() * haptics::io::MDTRACK_VERT) + haptics::io::MDBAND_ID;
+        (testingTrack0.getVerticesSize() * haptics::io::MDTRACK_VERT) +
+        haptics::io::MDTRACK_BANDS_COUNT;
 
     uintmax_t sizeMetaTrack0Bytes =
         ((CONST_8 - (sizeMetaTrack0 % CONST_8)) + sizeMetaTrack0) / CONST_8;
@@ -466,7 +467,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         haptics::io::MDTRACK_GAIN + haptics::io::MDTRACK_MIXING_WEIGHT +
         haptics::io::MDTRACK_BODY_PART_MASK + haptics::io::MDTRACK_SAMPLING_FREQUENCY +
         haptics::io::MDTRACK_DIRECTION_MASK + haptics::io::MDTRACK_VERT_COUNT +
-        haptics::io::MDBAND_ID;
+        haptics::io::MDTRACK_BANDS_COUNT;
 
     uintmax_t sizeMetaTrack1Bytes =
         ((CONST_8 - (sizeMetaTrack1 % CONST_8)) + sizeMetaTrack1) / CONST_8;
@@ -514,7 +515,6 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::Buffer buffer = IOStream::initializeStream(readHaptic);
 
     for (auto &packetBits : bitstream) {
-
       succeed &= IOStream::readNALu(readHaptic, packetBits, buffer);
     }
 
@@ -580,7 +580,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed =
         IOStream::writeNALu(haptics::io::NALuType::MetadataBand, testingHaptic, 0, bitstream);
     REQUIRE(succeed);
-    CHECK(bitstream.size() == 2);
+    CHECK(bitstream.size() == 3);
     const uintmax_t sizeMetaBand0 = haptics::io::MDBAND_ID + haptics::io::MDBAND_BAND_TYPE +
                                     haptics::io::MDBAND_CURVE_TYPE + haptics::io::MDBAND_LOW_FREQ +
                                     haptics::io::MDBAND_UP_FREQ + haptics::io::MDBAND_FX_COUNT;
@@ -642,18 +642,18 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     REQUIRE(succeed);
     // Check Haptic Band information
     haptics::types::Band readBand0 = readHaptic.getPerceptionAt(0).getTrackAt(1).getBandAt(0);
-    CHECK(readBand0.getBandType() == testingBand0.getBandType());
-    CHECK(readBand0.getCurveType() == testingBand0.getCurveType());
-    CHECK(readBand0.getLowerFrequencyLimit() == testingBand0.getLowerFrequencyLimit());
-    CHECK(readBand0.getUpperFrequencyLimit() == testingBand0.getUpperFrequencyLimit());
-    CHECK(readBand0.getEffectsSize() == testingBand0.getEffectsSize());
+    CHECK(readBand0.getBandType() == testingBand1.getBandType());
+    CHECK(readBand0.getCurveType() == testingBand1.getCurveType());
+    CHECK(readBand0.getLowerFrequencyLimit() == testingBand1.getLowerFrequencyLimit());
+    CHECK(readBand0.getUpperFrequencyLimit() == testingBand1.getUpperFrequencyLimit());
+    CHECK(readBand0.getEffectsSize() == testingBand1.getEffectsSize());
 
     haptics::types::Band readBand1 = readHaptic.getPerceptionAt(0).getTrackAt(0).getBandAt(0);
-    CHECK(readBand1.getBandType() == testingBand1.getBandType());
+    CHECK(readBand1.getBandType() == testingBand0.getBandType());
     // CHECK(readBand2.getCurveType() == testingBand2.getCurveType());
-    CHECK(readBand1.getLowerFrequencyLimit() == testingBand1.getLowerFrequencyLimit());
-    CHECK(readBand1.getUpperFrequencyLimit() == testingBand1.getUpperFrequencyLimit());
-    CHECK(readBand1.getEffectsSize() == testingBand1.getEffectsSize());
+    CHECK(readBand1.getLowerFrequencyLimit() == testingBand0.getLowerFrequencyLimit());
+    CHECK(readBand1.getUpperFrequencyLimit() == testingBand0.getUpperFrequencyLimit());
+    CHECK(readBand1.getEffectsSize() == testingBand0.getEffectsSize());
   }
 
   SECTION("Write/Read Databand packets") {
@@ -661,7 +661,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
 
     REQUIRE(succeed);
-    CHECK(bitstream.size() == 12);
+    CHECK(bitstream.size() == 16);
 
     // CHECK metadata experience length is correct
     haptics::types::Haptics readHaptic;

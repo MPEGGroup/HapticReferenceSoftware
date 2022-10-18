@@ -1016,7 +1016,7 @@ auto IOStream::readMetadataTrack(types::Track &track, std::vector<bool> &bitstre
   track.setDescription(desc);
 
   int deviceId = IOBinaryPrimitives::readInt(bitstream, idx, REFDEV_ID);
-  if (deviceId > -1) {
+  if (deviceId < 255) {
     track.setReferenceDeviceId(deviceId);
   }
   float gain =
