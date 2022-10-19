@@ -60,11 +60,19 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath) ->
 auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> bool {
   std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
   loadFile(filePath, bitstream);
-  Buffer buffer = initializeStream(haptic);
+  StreamReader sreader = initializeStream(haptic);
+  CRC crc;
+  int index = 0;
   for (auto &packet : bitstream) {
-    if (!readNALu(haptic, packet, buffer)) {
+    if (!readNALu(haptic, packet, sreader, crc)) {
       return EXIT_FAILURE;
     }
+    if (crc.nbPackets != 0) {
+      if (!checkCRC(bitstream, crc, index)) {
+        sreader.waitSync = true;
+      }
+    }
+    index++;
   }
   return true;
 }
@@ -138,15 +146,15 @@ auto IOStream::writePacket(types::Haptics &haptic, std::vector<std::vector<bool>
   return true;
 }
 
-auto IOStream::initializeStream(types::Haptics &haptic) -> Buffer {
+auto IOStream::initializeStream(types::Haptics &haptic) -> StreamReader {
   haptic = types::Haptics();
-  Buffer buffer;
-  buffer.perceptionsBuffer = std::vector<types::Perception>();
-  buffer.tracksBuffer = std::vector<types::Track>();
-  buffer.bandStreamsBuffer = std::vector<BandStream>();
-  buffer.bandStreamsHaptic = std::vector<BandStream>();
+  StreamReader sreader;
+  sreader.perceptionsBuffer = std::vector<types::Perception>();
+  sreader.tracksBuffer = std::vector<types::Track>();
+  sreader.bandStreamsBuffer = std::vector<BandStream>();
+  sreader.bandStreamsHaptic = std::vector<BandStream>();
 
-  return buffer;
+  return sreader;
 }
 
 auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
@@ -222,19 +230,19 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
     }
     return true;
   }
-  case NALuType::CRC: {
+  case NALuType::CRC16:
+  case NALuType::GlobalCRC16:
+  case NALuType::CRC32:
+  case NALuType::GlobalCRC32: {
     std::vector<bool> naluPayload = std::vector<bool>();
-    // writeCRC(bitstream);
-    padToByteBoundary(naluPayload);
+    int crcLevel = 0;
+    if (naluType == NALuType::CRC32 || naluType == NALuType::GlobalCRC32) {
+      crcLevel = 1;
+    }
+    writeCRC(bitstream, naluPayload, level);
     writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-    bitstream.push_back(naluHeader);
-    return true;
-  }
-  case NALuType::ByteStuffing: {
-    std::vector<bool> naluPayload = std::vector<bool>();
-    padToByteBoundary(naluPayload);
-    naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+    bitstream.clear();
     bitstream.push_back(naluHeader);
     return true;
   }
@@ -313,7 +321,8 @@ auto IOStream::writeNALuHeader(NALuType naluType, int level, int payloadSize,
 
   return true;
 }
-auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer &buffer) -> bool {
+auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, StreamReader &sreader, CRC &crc)
+    -> bool {
 
   NALuType naluType = readNALuType(packet);
   int index = H_NALU_TYPE;
@@ -330,7 +339,7 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
     if (!readMetadataPerception(perception, payload)) {
       return false;
     }
-    buffer.perceptionsBuffer.push_back(perception);
+    sreader.perceptionsBuffer.push_back(perception);
     return true;
   }
   case (NALuType::EffectLibrary): {
@@ -338,7 +347,7 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
     if (!readMetadataPerception(perception, payload)) {
       return false;
     }
-    buffer.perceptionsBuffer.push_back(perception);
+    sreader.perceptionsBuffer.push_back(perception);
     return true;
   }
   case (NALuType::MetadataTrack): {
@@ -346,7 +355,7 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
     if (!readMetadataTrack(track, payload)) {
       return false;
     }
-    buffer.tracksBuffer.push_back(track);
+    sreader.tracksBuffer.push_back(track);
     return true;
   }
   case (NALuType::MetadataBand): {
@@ -354,11 +363,17 @@ auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer
     if (!readMetadataBand(bandStream, payload)) {
       return false;
     }
-    buffer.bandStreamsBuffer.push_back(bandStream);
+    sreader.bandStreamsBuffer.push_back(bandStream);
     return true;
   }
   case (NALuType::Data): {
-    return readData(haptic, buffer, payload);
+    return readData(haptic, sreader, payload);
+  }
+  case (NALuType::CRC16):
+  case (NALuType::CRC32):
+  case (NALuType::GlobalCRC16):
+  case (NALuType::GlobalCRC32): {
+    return readCRC(payload, crc, naluType);
   }
   }
   return false;
@@ -1212,9 +1227,9 @@ auto IOStream::createWaveletPayload(types::Band &band, std::vector<std::vector<b
       bitstream.push_back(bufbitstream);
     }
   }
-
   return true;
 }
+
 auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
                                    std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
                                    bool &rau, std::vector<std::vector<bool>> &bitstream,
@@ -1284,7 +1299,7 @@ auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
 auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool rau,
                                  BandStream &bandStream) -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
-  int autype = rau == true ? 1 : 0;
+  int autype = rau == true ? 0 : 1;
   std::bitset<DB_AU_TYPE> auBits(autype);
   IOBinaryPrimitives::writeStrBits(auBits.to_string(), packetBits);
   // packetBits.push_back(rau); // PUSH END ACCESS UNIT
@@ -1401,18 +1416,23 @@ auto IOStream::writeData(types::Haptics &haptic, std::vector<std::vector<bool>> 
   return true;
   // Function to order all packet depending on time
 }
-auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool> &bitstream)
+auto IOStream::readData(types::Haptics &haptic, StreamReader &sreader, std::vector<bool> &bitstream)
     -> bool {
   int idx = 0;
-  AUType auType = static_cast<AUType>(IOBinaryPrimitives::readInt(bitstream, idx, DB_AU_TYPE));
+  sreader.autype = static_cast<AUType>(IOBinaryPrimitives::readInt(bitstream, idx, DB_AU_TYPE));
 
+  if (sreader.waitSync && sreader.autype == AUType::DAU) {
+    return false;
+  } else if (sreader.waitSync) {
+    sreader.waitSync = false;
+  }
   int timestamp = IOBinaryPrimitives::readInt(bitstream, idx, DB_TIMESTAMP);
 
   int perceptionId = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_ID);
   types::Perception perception;
   auto perceptionIndex = searchPerceptionInHaptic(haptic, perceptionId);
   if (perceptionIndex == -1) {
-    if (!searchInList<types::Perception>(buffer.perceptionsBuffer, perception, perceptionId)) {
+    if (!searchInList<types::Perception>(sreader.perceptionsBuffer, perception, perceptionId)) {
       return false;
     }
     haptic.addPerception(perception);
@@ -1423,7 +1443,7 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
   types::Track track;
   auto trackIndex = searchTrackInHaptic(haptic, trackId);
   if (trackIndex == -1) {
-    if (!searchInList<types::Track>(buffer.tracksBuffer, track, trackId)) {
+    if (!searchInList<types::Track>(sreader.tracksBuffer, track, trackId)) {
       return false;
     }
     haptic.getPerceptionAt(perceptionIndex).addTrack(track);
@@ -1432,9 +1452,9 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
 
   int bandId = IOBinaryPrimitives::readInt(bitstream, idx, MDBAND_ID);
   BandStream bandStream;
-  auto bandIndex = searchBandInHaptic(buffer, bandId);
+  auto bandIndex = searchBandInHaptic(sreader, bandId);
   if (bandIndex == -1) {
-    if (!searchInList(buffer.bandStreamsBuffer, bandStream, bandId)) {
+    if (!searchInList(sreader.bandStreamsBuffer, bandStream, bandId)) {
       return false;
     }
     haptic.getPerceptionAt(perceptionIndex).getTrackAt(trackIndex).addBand(bandStream.band);
@@ -1442,7 +1462,7 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
                     haptic.getPerceptionAt(perceptionIndex).getTrackAt(trackIndex).getBandsSize()) -
                 1;
     bandStream.index = bandIndex;
-    buffer.bandStreamsHaptic.push_back(bandStream);
+    sreader.bandStreamsHaptic.push_back(bandStream);
   }
 
   types::Band band =
@@ -1464,6 +1484,137 @@ auto IOStream::readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool
 
   if (!addEffectToHaptic(haptic, perceptionIndex, trackIndex, bandIndex, effects)) {
     return false;
+  }
+  return true;
+}
+
+auto IOStream::writeTimelineEffect(types::Effect &effect, types::Band &band,
+                                   std::vector<bool> &bitstream) -> bool {
+
+  return true;
+}
+
+auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<bool> &packetCRC,
+                        int crcLevel) -> bool {
+  std::vector<bool> polynomial = std::vector<bool>();
+  if (crcLevel == 0) {
+    std::bitset<CRC16_NB_BITS> polynomialBits(CRC16_POLYNOMIAL);
+    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+  } else if (crcLevel == 1) {
+    std::bitset<CRC32_NB_BITS> polynomialBits(CRC32_POLYNOMIAL);
+    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+  } else {
+    return false;
+  }
+  if (polynomial.size() == 0) {
+    return false;
+  }
+
+  std::vector<bool> quotient = std::vector<bool>();
+  int nbPackets = 0;
+  if (bitstream.size() == 1) {
+    quotient = bitstream[0];
+    nbPackets++;
+  } else if (bitstream.size() > 1) {
+    for (auto &packet : bitstream) {
+      quotient.insert(quotient.end(), packet.begin(), packet.end());
+      nbPackets++;
+    }
+  } else {
+    return false;
+  }
+  if (quotient.size() == 0) {
+    return false;
+  }
+  if (nbPackets > 1) {
+    std::bitset<GCRC_NB_PACKET> nbPacketsBits(nbPackets);
+    IOBinaryPrimitives::writeStrBits(nbPacketsBits.to_string(), packetCRC);
+  }
+  computeCRC(quotient, polynomial);
+  packetCRC.insert(packetCRC.end(), quotient.begin(), quotient.end());
+  return true;
+}
+auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType) -> bool {
+  int idx = 0;
+  if (naluType == NALuType::CRC16) {
+    crc.nbPackets = 1;
+    crc.value16 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
+    crc.value32 = 0;
+    return true;
+  } else if (naluType == NALuType::CRC16) {
+    crc.nbPackets = 1;
+    IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
+    crc.value32 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
+    crc.value16 = 0;
+    return true;
+  } else if (naluType == NALuType::GlobalCRC16) {
+    crc.nbPackets = IOBinaryPrimitives::readInt(bitstream, idx, GCRC_NB_PACKET);
+    crc.value16 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
+    crc.value32 = 0;
+    return true;
+  } else if (naluType == NALuType::GlobalCRC32) {
+    crc.nbPackets = IOBinaryPrimitives::readInt(bitstream, idx, GCRC_NB_PACKET);
+    crc.value32 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
+    crc.value16 = 0;
+    return true;
+  }
+  return false;
+}
+
+auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc, int index) -> bool {
+  std::vector<bool> protectedPackets = std::vector<bool>();
+  if (bitstream.size() < crc.nbPackets) {
+    return false;
+  }
+  int index = 0;
+  while (crc.nbPackets-- > 0) {
+    protectedPackets.insert(protectedPackets.begin(), bitstream[index].begin(),
+                            bitstream[index].end());
+    index++;
+  }
+  if (crc.value16 > 0) {
+    std::bitset<CRC16_NB_BITS> polynomialBits(crc.polynomial16);
+    std::vector<bool> polynomial = std::vector<bool>();
+    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+    computeCRC(protectedPackets, polynomial);
+    index = 0;
+    int protectedPacketInt = IOBinaryPrimitives::readInt(protectedPackets, index, CRC16_NB_BITS);
+    if (crc.value16 == protectedPacketInt) {
+      crc.value16 = 0;
+      return true;
+    } else {
+      return false;
+    }
+  } else if (crc.value32 > 0) {
+    std::bitset<CRC32_NB_BITS> polynomialBits(crc.polynomial32);
+    std::vector<bool> polynomial = std::vector<bool>();
+    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+    computeCRC(protectedPackets, polynomial);
+    index = 0;
+    int protectedPacketInt = IOBinaryPrimitives::readInt(protectedPackets, index, CRC32_NB_BITS);
+    if (crc.value32 == protectedPacketInt) {
+      crc.value32 = 0;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  return false;
+}
+
+auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polynomial) -> bool {
+  for (int i = 0; i < polynomial.size(); i++) {
+    bitstream.push_back(false);
+  }
+  while (bitstream.size() > polynomial.size()) {
+    bool msb = bitstream[0];
+    bitstream = std::vector<bool>(bitstream.begin() + 1, bitstream.end());
+    if (msb) {
+      for (int i = 0; i < polynomial.size(); i++) {
+        bitstream[i] = bitstream[i] != polynomial[i];
+      }
+    }
   }
   return true;
 }
@@ -1685,8 +1836,8 @@ auto IOStream::searchTrackInHaptic(types::Haptics &haptic, int id) -> int {
   return -1;
 }
 
-auto IOStream::searchBandInHaptic(Buffer &buffer, int id) -> int {
-  for (auto &bandBuf : buffer.bandStreamsHaptic) {
+auto IOStream::searchBandInHaptic(StreamReader &sreader, int id) -> int {
+  for (auto &bandBuf : sreader.bandStreamsHaptic) {
     if (bandBuf.id == id) {
       return bandBuf.index;
     }

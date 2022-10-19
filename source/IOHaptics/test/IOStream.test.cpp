@@ -264,11 +264,11 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
     haptics::types::Haptics readHaptic;
-    IOStream::Buffer buffer = IOStream::initializeStream(readHaptic);
-
+    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
 
-      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer);
+      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer, crc);
     }
     REQUIRE(succeed);
     // Check Haptic Experience information
@@ -352,10 +352,11 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
     haptics::types::Haptics readHaptic;
-    IOStream::Buffer buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::CRC crc;
 
     for (auto &packetBits : bitstream) {
-      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer);
+      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer, crc);
     }
 
     REQUIRE(succeed);
@@ -512,10 +513,10 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
 
     haptics::types::Haptics readHaptic;
-    IOStream::Buffer buffer = IOStream::initializeStream(readHaptic);
-
+    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
-      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer);
+      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer, crc);
     }
 
     REQUIRE(succeed);
@@ -523,7 +524,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     haptics::types::Track readTrack0 = readHaptic.getPerceptionAt(0).getTrackAt(0);
     CHECK(readTrack0.getId() == testingTrack0.getId());
     CHECK(readTrack0.getDescription() == testingTrack0.getDescription());
-    if (readTrack0.getReferenceDeviceId().has_value() && testingTrack0.getReferenceDeviceId().has_value()) {
+    if (readTrack0.getReferenceDeviceId().has_value() &&
+        testingTrack0.getReferenceDeviceId().has_value()) {
       CHECK(readTrack0.getReferenceDeviceId().value() ==
             testingTrack0.getReferenceDeviceId().value());
     }
@@ -633,11 +635,11 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
     haptics::types::Haptics readHaptic;
-    IOStream::Buffer buffer = IOStream::initializeStream(readHaptic);
-
+    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
 
-      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer);
+      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer, crc);
     }
     REQUIRE(succeed);
     // Check Haptic Band information
@@ -665,11 +667,12 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
     // CHECK metadata experience length is correct
     haptics::types::Haptics readHaptic;
-    IOStream::Buffer buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::CRC crc;
 
     for (auto &packetBits : bitstream) {
 
-      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer);
+      succeed &= IOStream::readNALu(readHaptic, packetBits, buffer, crc);
     }
 
     REQUIRE(succeed);
@@ -692,5 +695,11 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     REQUIRE(succeed);
     CHECK(bitstream == readBitstream);
   }
-  // SECTION("Read packets") {}
+  SECTION("Test CRC") {
+    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
+    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
+    std::vector<std::vector<bool>> protectedPackets(bitstream.begin(), bitstream.begin() + 1);
+    succeed &=
+        IOStream::writeNALu(haptics::io::NALuType::CRC16, testingHaptic, 0, protectedPackets);
+  }
 };

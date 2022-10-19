@@ -131,8 +131,14 @@ static constexpr int KF_FREQUENCY = 16;
 static constexpr int KF_INFORMATION_MASK = 2;
 static constexpr int KF_MASK = 3;
 
+static constexpr int GCRC_NB_PACKET = 8;
+
 static constexpr int PACKET_DURATION = 128;
 static constexpr int PACKET_HEADER_SIZE = 32;
+static constexpr uint32_t CRC32_POLYNOMIAL = 2187366103;
+static constexpr int CRC32_NB_BITS = 32;
+static constexpr uint16_t CRC16_POLYNOMIAL = 49185;
+static constexpr int CRC16_NB_BITS = 16;
 
 enum class NALuType {
   MetadataHaptics = 1,
@@ -141,15 +147,13 @@ enum class NALuType {
   MetadataBand,
   EffectLibrary,
   Data,
-  CRC,
-  ByteStuffing
+  CRC32,
+  CRC16,
+  GlobalCRC16,
+  GlobalCRC32
 };
 
-enum class AUType {
-  RAU,
-  DAU,
-  Sync
-};
+enum class AUType { RAU, DAU, Sync };
 
 enum class PacketType {
   Metadata = 1,
@@ -167,11 +171,21 @@ public:
     int index = -1;
   };
 
-  struct Buffer {
+  struct CRC {
+    uint16_t polynomial16 = CRC16_POLYNOMIAL;
+    uint32_t polynomial32 = CRC32_POLYNOMIAL;
+    uint8_t nbPackets = 0;
+    uint16_t value16 = 0;
+    uint32_t value32 = 0;
+  };
+
+  struct StreamReader {
     std::vector<types::Perception> perceptionsBuffer;
     std::vector<types::Track> tracksBuffer;
     std::vector<BandStream> bandStreamsBuffer;
     std::vector<BandStream> bandStreamsHaptic;
+    AUType autype;
+    bool waitSync = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
@@ -186,8 +200,9 @@ public:
   static auto writeAllBands(types::Haptics &haptic, NALuType naluType, int level,
                             std::vector<bool> &naluHeader,
                             std::vector<std::vector<bool>> &bitstream) -> bool;
-  static auto readNALu(types::Haptics &haptic, std::vector<bool> packet, Buffer &buffer) -> bool;
-  static auto initializeStream(types::Haptics &haptic) -> Buffer;
+  static auto readNALu(types::Haptics &haptic, std::vector<bool> packet, StreamReader &buffer, CRC &crc)
+      -> bool;
+  static auto initializeStream(types::Haptics &haptic) -> StreamReader;
 
 private:
   struct StartTimeIdx {
@@ -246,10 +261,13 @@ private:
   static auto writeTransient(types::Keyframe &keyframe, std::vector<bool> &bitstream) -> bool;
   static auto writeCurve(types::Keyframe &keyframe, std::vector<bool> &bitstream) -> bool;
   static auto writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bitstream) -> bool;
-  static auto writeTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
-      -> bool;
-  /*static auto writeCRC(std::vector<bool> &bitstream) -> bool;
-  static auto writeByteStuffing(int bits, std::vector<bool> &bitstream) -> bool;*/
+  static auto writeTimelineEffect(types::Effect &effect, types::Band &band,
+                                  std::vector<bool> &bitstream) -> bool;
+  static auto writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<bool> &packetCRC,
+                       int crcLevel) -> bool;
+
+  static auto computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polynomial) -> bool;
+  // static auto writeByteStuffing(int bits, std::vector<bool> &bitstream) -> bool;
 
   static auto sortPacket(std::vector<std::vector<std::vector<bool>>> &bandPacket,
                          std::vector<std::vector<bool>> &output) -> bool;
@@ -273,10 +291,10 @@ private:
                                 std::vector<bool> &bitstream) -> bool;
   static auto readMetadataTrack(types::Track &track, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataBand(BandStream &bandStream, std::vector<bool> &bitstream) -> bool;
-  static auto readData(types::Haptics &haptic, Buffer &buffer, std::vector<bool> &bitstream)
+  static auto readData(types::Haptics &haptic, StreamReader &buffer, std::vector<bool> &bitstream)
       -> bool;
   static auto readEffect(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
-  static auto readCRC(std::vector<bool> &crc, std::vector<bool> &bitstream) -> bool;
+  static auto readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType) -> bool;
 
   static auto getEffectsId(types::Haptics &haptic) -> std::vector<int>;
 
@@ -291,7 +309,7 @@ private:
   static auto searchInList(std::vector<BandStream> &list, BandStream &item, int id) -> bool;
   static auto searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int;
   static auto searchTrackInHaptic(types::Haptics &haptic, int id) -> int;
-  static auto searchBandInHaptic(Buffer &buffer, int id) -> int;
+  static auto searchBandInHaptic(StreamReader &buffer, int id) -> int;
 
   static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
                              std::vector<types::Effect> &fxList, int &length) -> bool;
@@ -315,12 +333,13 @@ private:
   static auto readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
       -> bool;
 
-  static auto readTimeline(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
+  static auto readTimelineEffect(std::vector<types::Effect> &timeline, std::vector<bool> &bitstream)
       -> bool;
+
+  static auto checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc, int index) -> bool;
   static auto checkHapticComponent(types::Haptics &haptic) -> void;
 
   static auto padToByteBoundary(std::vector<bool> &bitstream) -> void;
-
   static auto setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool;
   static auto getNextEffectId(std::vector<int> &effectsId) -> int;
   static auto addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool;
