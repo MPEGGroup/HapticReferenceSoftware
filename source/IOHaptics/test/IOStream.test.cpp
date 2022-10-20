@@ -255,8 +255,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         packetLengthStr += "0";
       }
     }
-    int metaExpLen =
-        static_cast<int>(std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
+    uintmax_t metaExpLen = static_cast<uintmax_t>(
+        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
     CHECK(metaExpLen == sizeMetaExpBytes);
   }
 
@@ -279,8 +279,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readHaptic.getAvatarsSize() == testingHaptic.getAvatarsSize());
 
     // Check Avatar information
-    for (int i = 0; i < readHaptic.getAvatarsSize(); i++) {
-      for (int j = 0; j < testingHaptic.getAvatarsSize(); j++) {
+    for (auto i = 0; i < readHaptic.getAvatarsSize(); i++) {
+      for (auto j = 0; j < testingHaptic.getAvatarsSize(); j++) {
         if (readHaptic.getAvatarAt(i).getId() == testingHaptic.getAvatarAt(j).getId()) {
           CHECK(readHaptic.getAvatarAt(i).getLod() == testingHaptic.getAvatarAt(j).getLod());
           CHECK(readHaptic.getAvatarAt(i).getType() == testingHaptic.getAvatarAt(j).getType());
@@ -343,8 +343,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         packetLengthStr += "0";
       }
     }
-    int metaPerception0Len =
-        static_cast<int>(std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
+    uintmax_t metaPerception0Len = static_cast<uintmax_t>(
+        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
     CHECK(metaPerception0Len == sizeMetaPerceBytes);
   }
 
@@ -374,9 +374,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readPerception0.getReferenceDevicesSize() ==
           testingPerception0.getReferenceDevicesSize());
     if (readPerception0.getReferenceDevicesSize() > 0) {
-      for (int i = 0; i < readPerception0.getReferenceDevicesSize(); i++) {
+      for (auto i = 0; i < readPerception0.getReferenceDevicesSize(); i++) {
         haptics::types::ReferenceDevice readRefDev = readPerception0.getReferenceDeviceAt(i);
-        for (int j = 0; j < testingPerception0.getReferenceDevicesSize(); j++) {
+        for (auto j = 0; j < testingPerception0.getReferenceDevicesSize(); j++) {
           haptics::types::ReferenceDevice testingRefDev =
               testingPerception0.getReferenceDeviceAt(j);
           if (readRefDev.getId() == testingRefDev.getId()) {
@@ -486,8 +486,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         packetLengthStr += "0";
       }
     }
-    int metaTrack0Len =
-        static_cast<int>(std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
+    uintmax_t metaTrack0Len = static_cast<uintmax_t>(
+        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
     CHECK(metaTrack0Len == sizeMetaTrack0Bytes);
 
     std::vector<bool> metaTrack1Packet = bitstream[1];
@@ -503,8 +503,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         packetLengthStr += "0";
       }
     }
-    int metaTrack1Len =
-        static_cast<int>(std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
+    uintmax_t metaTrack1Len = static_cast<uintmax_t>(
+        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
     CHECK(metaTrack1Len == sizeMetaTrack1Bytes);
   }
 
@@ -544,7 +544,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     }
     CHECK(readTrack0.getVerticesSize() == testingTrack0.getVerticesSize());
     if (readTrack0.getVerticesSize() > 0) {
-      for (int i = 0; i < readTrack0.getVerticesSize(); i++) {
+      for (auto i = 0; i < readTrack0.getVerticesSize(); i++) {
         CHECK(readTrack0.getVertexAt(i) - testingTrack0.getVertexAt(i) < floatPrecision);
       }
     }
@@ -571,7 +571,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     }
     CHECK(readTrack1.getVerticesSize() == testingTrack2.getVerticesSize());
     if (readTrack1.getVerticesSize() > 0) {
-      for (int i = 0; i < readTrack1.getVerticesSize(); i++) {
+      for (auto i = 0; i < readTrack1.getVerticesSize(); i++) {
         CHECK(readTrack1.getVertexAt(i) - testingTrack2.getVertexAt(i) < floatPrecision);
       }
     }
@@ -609,8 +609,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         packetLengthStr += "0";
       }
     }
-    int metaBand0Len =
-        static_cast<int>(std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
+    uintmax_t metaBand0Len = static_cast<uintmax_t>(
+        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
     CHECK(metaBand0Len == sizeMetaBand0Bytes);
 
     std::vector<bool> metaBand1Packet = bitstream[1];
@@ -626,8 +626,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
         packetLengthStr += "0";
       }
     }
-    int metaBand1Len =
-        static_cast<int>(std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
+    uintmax_t metaBand1Len = static_cast<uintmax_t>(
+        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
     CHECK(metaBand1Len == sizeMetaBand2Bytes);
   }
 
@@ -702,4 +702,4 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     succeed &=
         IOStream::writeNALu(haptics::io::NALuType::CRC16, testingHaptic, 0, protectedPackets);
   }
-};
+}

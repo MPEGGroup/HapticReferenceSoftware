@@ -107,7 +107,7 @@ public:
   static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, float minValue,
                              float maxValue) -> float {
     std::string str = "";
-    for (int i = startIdx; i < startIdx + length; i++) {
+    for (auto i = startIdx; i < startIdx + length; i++) {
       if (bitstream[i]) {
         str += "1";
       } else {

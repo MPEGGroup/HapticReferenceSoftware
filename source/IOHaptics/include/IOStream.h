@@ -162,7 +162,6 @@ enum class PacketType {
   ProtectedMetadata,
   ProtectedData,
 };
-static int BANDID = 0;
 
 class IOStream {
 public:
@@ -197,6 +196,8 @@ public:
     std::vector<BandStream> bandStreamsBuffer;
     std::vector<BandStream> bandStreamsHaptic;
     AUType autype;
+    int level;
+    int packetLength;
     bool waitSync = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
