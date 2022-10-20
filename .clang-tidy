@@ -28,7 +28,7 @@ CheckOptions:
   - key:    readability-function-size.VariableThreshold
     value:  32
   - key:    readability-function-cognitive-complexity.Threshold
-    value:  47
+    value:  60
   - key:    bugprone-easily-swappable-parameters.MinimumLength
     value:  3
   - key:    bugprone-easily-swappable-parameters.ModelImplicitConversions
