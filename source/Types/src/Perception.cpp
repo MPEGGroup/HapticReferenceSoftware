@@ -98,7 +98,7 @@ auto Perception::removeTrackAt(int index) -> bool {
   if (index < 0 || index >= (int)tracks.size()) {
     return false;
   }
-  tracks.erase(tracks.begin() +index);
+  tracks.erase(tracks.begin() + index);
   return true;
 }
 
