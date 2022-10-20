@@ -52,7 +52,7 @@ public:
   static auto writeBandHeader(types::Band &band, std::ostream &file) -> bool;
   static auto writeBandBody(types::Band &band, std::ostream &file) -> bool;
   static auto readWaveletEffect(types::Effect &effect, types::Band &band,
-                                               std::vector<bool> &bitstream, int &idx) -> bool;
+                                std::vector<bool> &bitstream, int &idx) -> bool;
   static auto writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
 
 private:

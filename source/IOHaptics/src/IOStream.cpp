@@ -68,7 +68,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
       return EXIT_FAILURE;
     }
     if (crc.nbPackets != 0) {
-      if (!checkCRC(bitstream, crc, index)) {
+      if (!checkCRC(bitstream, crc)) {
         sreader.waitSync = true;
       }
     }
@@ -321,8 +321,8 @@ auto IOStream::writeNALuHeader(NALuType naluType, int level, int payloadSize,
 
   return true;
 }
-auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, StreamReader &sreader, CRC &crc)
-    -> bool {
+auto IOStream::readNALu(types::Haptics &haptic, std::vector<bool> packet, StreamReader &sreader,
+                        CRC &crc) -> bool {
 
   NALuType naluType = readNALuType(packet);
   int index = H_NALU_TYPE;
@@ -400,7 +400,7 @@ auto IOStream::readPacketLength(std::vector<bool> &bitstream) -> int {
   int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
   std::vector<bool> packetLength = std::vector<bool>(
       bitstream.begin() + beginIdx, bitstream.begin() + beginIdx + haptics::io::H_PAYLOAD_LENGTH);
-  std::string packetLengthStr = "";
+  std::string packetLengthStr;
   for (auto c : packetLength) {
     if (c) {
       packetLengthStr += "1";
@@ -1031,7 +1031,7 @@ auto IOStream::readMetadataTrack(types::Track &track, std::vector<bool> &bitstre
   track.setDescription(desc);
 
   int deviceId = IOBinaryPrimitives::readInt(bitstream, idx, REFDEV_ID);
-  if (deviceId < 255) {
+  if (deviceId < REFDEV_MAX_ID) {
     track.setReferenceDeviceId(deviceId);
   }
   float gain =
@@ -1168,49 +1168,73 @@ auto IOStream::sortPacket(std::vector<std::vector<std::vector<bool>>> &bandPacke
   }
   return true;
 }
-auto IOStream::packetizeBand(int perceID, int trackID, BandStream &bandStream,
-                             std::vector<std::vector<bool>> &bitstreams,
-                             std::vector<int> &effectsId) -> bool {
+
+auto IOStream::linearizeTimeline(types::Band &band) -> void {
+  std::vector<types::Effect> effects = std::vector<types::Effect>();
+  for (int i = 0; i < band.getEffectsSize(); i++) {
+    auto effect = band.getEffectAt(i);
+    if (effect.getEffectType() == types::EffectType::Timeline) {
+      linearizeTimelineEffect(effect, effects);
+    } else {
+      effects.push_back(effect);
+    }
+  }
+  for (int i = static_cast<int>(band.getEffectsSize())-1; i > -1 ; i--) {
+    band.removeEffectAt(i);
+  }
+  for (auto &e : effects) {
+    band.addEffect(e);
+  }
+}
+
+auto IOStream::linearizeTimelineEffect(types::Effect &effect, std::vector<types::Effect> &effects)
+    -> void {
+  for (int j = 0; j < effect.getTimelineSize(); j++) {
+    auto effectTimeline = effect.getTimelineEffectAt(j);
+    if (effectTimeline.getEffectType() == types::EffectType::Timeline) {
+      linearizeTimelineEffect(effectTimeline, effects);
+    } else {
+      effects.push_back(effectTimeline);
+    }
+  }
+}
+
+auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstreams)
+    -> bool {
   // Exit this function when all the band is packetised
-  StartTimeIdx point;
-  StartTimeIdx percetrackID;
-  percetrackID.time = perceID;
-  percetrackID.idx = trackID;
 
   std::vector<std::vector<bool>> bufPacketBitstream = std::vector<std::vector<bool>>();
   std::vector<bool> packetBits = std::vector<bool>();
   bool rau = true;
-  std::vector<types::Effect> vecEffect = std::vector<types::Effect>();
-  std::vector<int> kfCount = std::vector<int>();
-  if (bandStream.band.getBandType() == types::BandType::WaveletWave) {
-    createWaveletPayload(bandStream.band, bufPacketBitstream);
+  swriter.effects = std::vector<types::Effect>();
+  swriter.keyframesCount = std::vector<int>();
+  swriter.time = 0;
+  if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
+    createWaveletPayload(swriter.bandStream.band, bufPacketBitstream);
     for (auto &bufpacket : bufPacketBitstream) {
-      packetBits = writeEffectHeader(point, percetrackID, true, bandStream);
-      packetBits = writeWaveletPayloadPacket(bufpacket, packetBits, effectsId);
-      point.time += PACKET_DURATION;
+      packetBits = writeEffectHeader(swriter);
+      packetBits = writeWaveletPayloadPacket(bufpacket, packetBits, swriter.effectsId);
+      swriter.time += PACKET_DURATION;
       bitstreams.push_back(packetBits);
     }
   } else {
-    while (!createPayloadPacket(bandStream.band, point, vecEffect, kfCount, rau, bufPacketBitstream,
-                                effectsId)) {
+    while (!createPayloadPacket(swriter, bufPacketBitstream)) {
       // write packet as vector<bool>
       if (!bufPacketBitstream.empty()) {
-        packetBits = writeEffectHeader(point, percetrackID, rau, bandStream);
-        packetBits = writePayloadPacket(vecEffect, bandStream, kfCount, bufPacketBitstream,
-                                        packetBits, point.time);
+        packetBits = writeEffectHeader(swriter);
+        packetBits = writePayloadPacket(swriter, bufPacketBitstream, packetBits);
 
         bitstreams.push_back(packetBits);
       }
-      vecEffect.clear();
+      swriter.effects.clear();
       bufPacketBitstream.clear();
       packetBits.clear();
-      kfCount.clear();
-      point.time += PACKET_DURATION;
+      swriter.keyframesCount.clear();
+      swriter.time += PACKET_DURATION;
     }
     if (!bufPacketBitstream.empty()) {
-      packetBits = writeEffectHeader(point, percetrackID, rau, bandStream);
-      packetBits = writePayloadPacket(vecEffect, bandStream, kfCount, bufPacketBitstream,
-                                      packetBits, (point.time));
+      packetBits = writeEffectHeader(swriter);
+      packetBits = writePayloadPacket(swriter, bufPacketBitstream, packetBits);
       bitstreams.push_back(packetBits);
     }
   }
@@ -1230,89 +1254,81 @@ auto IOStream::createWaveletPayload(types::Band &band, std::vector<std::vector<b
   return true;
 }
 
-auto IOStream::createPayloadPacket(types::Band &band, StartTimeIdx &startTI,
-                                   std::vector<types::Effect> &vecEffect, std::vector<int> &kfCount,
-                                   bool &rau, std::vector<std::vector<bool>> &bitstream,
-                                   std::vector<int> &effectsId) -> bool {
+auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream)
+    -> bool {
 
   // Exit this function only when 1 packet is full or last keyframes of the band is reached
 
-  for (int i = 0; i < band.getEffectsSize(); i++) {
+  for (int i = 0; i < swriter.bandStream.band.getEffectsSize(); i++) {
     bool endEffect = false;
-    types::Effect &effect = band.getEffectAt(i);
+    types::Effect &effect = swriter.bandStream.band.getEffectAt(i);
     if (effect.getId() == -1) {
       int nextId = 0;
-      if (!effectsId.empty()) {
-        nextId = *max_element(effectsId.begin(), effectsId.end()) + 1;
+      if (!swriter.effectsId.empty()) {
+        nextId = *max_element(swriter.effectsId.begin(), swriter.effectsId.end()) + 1;
       }
       effect.setId(nextId);
-      effectsId.push_back(nextId);
+      swriter.effectsId.push_back(nextId);
     }
 
     std::vector<bool> bufEffect = std::vector<bool>();
-    if (effect.getEffectType() == types::EffectType::Basis &&
-        band.getBandType() != types::BandType::WaveletWave) {
+    if (effect.getEffectType() == types::EffectType::Basis) {
       int bufKFCount = 0;
       bool isRAU = true;
       bool endPacket = false;
-      if (writeEffectBasis(effect, band.getBandType(), startTI, bufKFCount, isRAU, bufEffect)) {
+      if (writeEffectBasis(effect, swriter.bandStream.band.getBandType(), swriter.time, bufKFCount,
+                           isRAU, bufEffect)) {
         endEffect = true;
       } else {
         endPacket = true;
       }
       if (bufKFCount > 0) {
-        kfCount.push_back(bufKFCount);
+        swriter.keyframesCount.push_back(bufKFCount);
         bitstream.push_back(bufEffect);
-        vecEffect.push_back(effect);
+        swriter.effects.push_back(effect);
       }
-      rau = isRAU;
-      if (endEffect && i == band.getEffectsSize() - 1) {
+      swriter.auType = isRAU ? AUType::RAU : AUType::DAU;
+      if (endEffect && i == swriter.bandStream.band.getEffectsSize() - 1) {
         return true;
       }
       if (endPacket) {
         return false;
       }
     } else if (effect.getEffectType() == types::EffectType::Reference) {
-      if (effect.getPosition() >= startTI.time &&
-          effect.getPosition() <= startTI.time + PACKET_DURATION) {
+      if (effect.getPosition() >= swriter.time &&
+          effect.getPosition() < swriter.time + PACKET_DURATION) {
         std::bitset<FX_REF_ID> referenceIDBits(effect.getId());
         IOBinaryPrimitives::writeStrBits(referenceIDBits.to_string(), bufEffect);
         bitstream.push_back(bufEffect);
-        vecEffect.push_back(effect);
-        rau = true;
-      } else if (effect.getPosition() > startTI.time + PACKET_DURATION) {
+        swriter.effects.push_back(effect);
+        swriter.auType = AUType::RAU;
+      } else if (effect.getPosition() > swriter.time + PACKET_DURATION) {
         return false;
       }
-      if (i == band.getEffectsSize() - 1) {
+      if (i == swriter.bandStream.band.getEffectsSize() - 1) {
         return true;
       }
-      //} else if (effect.getEffectType() == types::EffectType::Timeline) {
-      //  // writeTimeline()
-      //  return true;
-    } else {
-      return true;
     }
   }
   return true;
 }
 
-auto IOStream::writeEffectHeader(StartTimeIdx point, StartTimeIdx percetrackID, bool rau,
-                                 BandStream &bandStream) -> std::vector<bool> {
+auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
-  int autype = rau == true ? 0 : 1;
+  int autype = static_cast<int>(swriter.auType);
   std::bitset<DB_AU_TYPE> auBits(autype);
   IOBinaryPrimitives::writeStrBits(auBits.to_string(), packetBits);
   // packetBits.push_back(rau); // PUSH END ACCESS UNIT
-  std::bitset<DB_TIMESTAMP> tsBits(point.time);
+  std::bitset<DB_TIMESTAMP> tsBits(swriter.time);
   IOBinaryPrimitives::writeStrBits(tsBits.to_string(), packetBits);
 
-  std::bitset<MDPERCE_ID> perceIdBits(percetrackID.time);
+  std::bitset<MDPERCE_ID> perceIdBits(swriter.perception.getId());
   IOBinaryPrimitives::writeStrBits(perceIdBits.to_string(), packetBits);
 
-  std::bitset<MDTRACK_ID> trackIdBits(percetrackID.idx);
+  std::bitset<MDTRACK_ID> trackIdBits(swriter.track.getId());
   IOBinaryPrimitives::writeStrBits(trackIdBits.to_string(), packetBits);
 
-  std::bitset<MDBAND_ID> bandIdBits(bandStream.id);
+  std::bitset<MDBAND_ID> bandIdBits(swriter.bandStream.id);
   IOBinaryPrimitives::writeStrBits(bandIdBits.to_string(), packetBits);
 
   return packetBits;
@@ -1335,7 +1351,7 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
   return packetBits;
 }
 
-auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, int fxCount, types::Band &band,
+auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
                                  types::Effect &effect, int &length) -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readInt(bitstream, idx, FX_ID);
@@ -1345,7 +1361,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, int fxCount, type
       static_cast<types::EffectType>(IOBinaryPrimitives::readInt(bitstream, idx, FX_TYPE));
   effect.setEffectType(effectType);
 
-  int effectPos = band.getWindowLength() * band.getEffectsSize();
+  int effectPos = static_cast<int>(band.getWindowLength() * band.getEffectsSize());
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
@@ -1353,31 +1369,31 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, int fxCount, type
   return true;
 }
 
-auto IOStream::writePayloadPacket(std::vector<types::Effect> &vecEffect, BandStream &bandStream,
-                                  std::vector<int> kfCount,
+auto IOStream::writePayloadPacket(StreamWriter &swriter,
                                   std::vector<std::vector<bool>> bufPacketBitstream,
-                                  std::vector<bool> &packetBits, int time) -> std::vector<bool> {
-  std::bitset<DB_FX_COUNT> fxCountBits(vecEffect.size());
+                                  std::vector<bool> &packetBits) -> std::vector<bool> {
+  std::bitset<DB_FX_COUNT> fxCountBits(swriter.effects.size());
   IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), packetBits);
 
-  for (int l = 0; l < vecEffect.size(); l++) {
-    std::bitset<FX_ID> effectIDBits(static_cast<int>(vecEffect[l].getId()));
+  for (int l = 0; l < swriter.effects.size(); l++) {
+    std::bitset<FX_ID> effectIDBits(static_cast<int>(swriter.effects[l].getId()));
     IOBinaryPrimitives::writeStrBits(effectIDBits.to_string(), packetBits);
 
-    std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(vecEffect[l].getEffectType()));
+    std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(swriter.effects[l].getEffectType()));
     IOBinaryPrimitives::writeStrBits(effectTypeBits.to_string(), packetBits);
 
-    std::bitset<FX_POSITION> effectPosBits(static_cast<int>(vecEffect[l].getPosition()) - time);
+    std::bitset<FX_POSITION> effectPosBits(static_cast<int>(swriter.effects[l].getPosition()) -
+                                           swriter.time);
     IOBinaryPrimitives::writeStrBits(effectPosBits.to_string(), packetBits);
 
-    if (vecEffect[l].getEffectType() == types::EffectType::Basis &&
-        bandStream.band.getBandType() != types::BandType::WaveletWave) {
-      std::bitset<FX_KF_COUNT> kfCountBits(kfCount[l]);
+    if (swriter.effects[l].getEffectType() == types::EffectType::Basis &&
+        swriter.bandStream.band.getBandType() != types::BandType::WaveletWave) {
+      std::bitset<FX_KF_COUNT> kfCountBits(swriter.keyframesCount[l]);
       IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), packetBits);
-      if (bandStream.band.getBandType() == types::BandType::VectorialWave) {
-        IOBinaryPrimitives::writeFloatNBits<uint16_t, FX_PHASE>(vecEffect[l].getPhase(), packetBits,
-                                                                0, MAX_PHASE);
-        std::bitset<FX_BASE> fxBaseBits(static_cast<int>(vecEffect[l].getBaseSignal()));
+      if (swriter.bandStream.band.getBandType() == types::BandType::VectorialWave) {
+        IOBinaryPrimitives::writeFloatNBits<uint16_t, FX_PHASE>(swriter.effects[l].getPhase(),
+                                                                packetBits, 0, MAX_PHASE);
+        std::bitset<FX_BASE> fxBaseBits(static_cast<int>(swriter.effects[l].getBaseSignal()));
         IOBinaryPrimitives::writeStrBits(fxBaseBits.to_string(), packetBits);
       }
     }
@@ -1389,24 +1405,28 @@ auto IOStream::writePayloadPacket(std::vector<types::Effect> &vecEffect, BandStr
 
 auto IOStream::writeData(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream)
     -> bool {
-  std::vector<int> effectsId = getEffectsId(haptic);
+
+  StreamWriter swriter;
+  swriter.effectsId = getEffectsId(haptic);
   std::vector<std::vector<std::vector<bool>>> expBitstream =
       std::vector<std::vector<std::vector<bool>>>();
   std::vector<std::vector<bool>> bandBitstream = std::vector<std::vector<bool>>();
   int bandId = 0;
   for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    types::Perception perception = haptic.getPerceptionAt(i);
-    int perceptionID = perception.getId();
+    swriter.perception = haptic.getPerceptionAt(i);
+    int perceptionID = swriter.perception.getId();
     std::bitset<MDPERCE_ID> perceptionIDBits(perceptionID);
-    for (int j = 0; j < perception.getTracksSize(); j++) {
-      types::Track track = perception.getTrackAt(j);
-      int trackID = track.getId();
+    for (int j = 0; j < swriter.perception.getTracksSize(); j++) {
+      swriter.track = swriter.perception.getTrackAt(j);
+      int trackID = swriter.track.getId();
       std::bitset<MDTRACK_ID> trackIDBits(trackID);
-      for (int k = 0; k < track.getBandsSize(); k++) {
+      for (int k = 0; k < swriter.track.getBandsSize(); k++) {
         BandStream bandStream;
         bandStream.id = bandId++;
-        bandStream.band = track.getBandAt(k);
-        packetizeBand(perceptionID, trackID, bandStream, bandBitstream, effectsId);
+        bandStream.band = swriter.track.getBandAt(k);
+        swriter.bandStream = bandStream;
+        linearizeTimeline(swriter.bandStream.band);
+        packetizeBand(swriter, bandBitstream);
         expBitstream.push_back(bandBitstream);
         bandBitstream.clear();
       }
@@ -1423,7 +1443,8 @@ auto IOStream::readData(types::Haptics &haptic, StreamReader &sreader, std::vect
 
   if (sreader.waitSync && sreader.autype == AUType::DAU) {
     return false;
-  } else if (sreader.waitSync) {
+  } 
+  if (sreader.waitSync) {
     sreader.waitSync = false;
   }
   int timestamp = IOBinaryPrimitives::readInt(bitstream, idx, DB_TIMESTAMP);
@@ -1478,20 +1499,11 @@ auto IOStream::readData(types::Haptics &haptic, StreamReader &sreader, std::vect
     addTimestampEffect(effects, timestamp);
   } else {
     types::Effect effect;
-    readWaveletEffect(effectsBitsList, fxCount, band, effect, idx);
+    readWaveletEffect(effectsBitsList, band, effect, idx);
     effects.push_back(effect);
   }
 
-  if (!addEffectToHaptic(haptic, perceptionIndex, trackIndex, bandIndex, effects)) {
-    return false;
-  }
-  return true;
-}
-
-auto IOStream::writeTimelineEffect(types::Effect &effect, types::Band &band,
-                                   std::vector<bool> &bitstream) -> bool {
-
-  return true;
+  return addEffectToHaptic(haptic, perceptionIndex, trackIndex, bandIndex, effects);
 }
 
 auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<bool> &packetCRC,
@@ -1506,13 +1518,13 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   } else {
     return false;
   }
-  if (polynomial.size() == 0) {
+  if (polynomial.empty()) {
     return false;
   }
 
   std::vector<bool> quotient = std::vector<bool>();
   int nbPackets = 0;
-  if (bitstream.size() == 1) {
+  if (bitstream.empty()) {
     quotient = bitstream[0];
     nbPackets++;
   } else if (bitstream.size() > 1) {
@@ -1523,7 +1535,7 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   } else {
     return false;
   }
-  if (quotient.size() == 0) {
+  if (quotient.empty()) {
     return false;
   }
   if (nbPackets > 1) {
@@ -1541,18 +1553,21 @@ auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType
     crc.value16 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
-  } else if (naluType == NALuType::CRC16) {
+  } 
+  if (naluType == NALuType::CRC16) {
     crc.nbPackets = 1;
     IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value16 = 0;
     return true;
-  } else if (naluType == NALuType::GlobalCRC16) {
+  } 
+  if (naluType == NALuType::GlobalCRC16) {
     crc.nbPackets = IOBinaryPrimitives::readInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value16 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
-  } else if (naluType == NALuType::GlobalCRC32) {
+  } 
+  if (naluType == NALuType::GlobalCRC32) {
     crc.nbPackets = IOBinaryPrimitives::readInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value32 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value16 = 0;
@@ -1561,7 +1576,7 @@ auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType
   return false;
 }
 
-auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc, int index) -> bool {
+auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc) -> bool {
   std::vector<bool> protectedPackets = std::vector<bool>();
   if (bitstream.size() < crc.nbPackets) {
     return false;
@@ -1572,6 +1587,7 @@ auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc, int
                             bitstream[index].end());
     index++;
   }
+  bool res = false;
   if (crc.value16 > 0) {
     std::bitset<CRC16_NB_BITS> polynomialBits(crc.polynomial16);
     std::vector<bool> polynomial = std::vector<bool>();
@@ -1581,9 +1597,10 @@ auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc, int
     int protectedPacketInt = IOBinaryPrimitives::readInt(protectedPackets, index, CRC16_NB_BITS);
     if (crc.value16 == protectedPacketInt) {
       crc.value16 = 0;
-      return true;
+      res = true;
     } else {
-      return false;
+      crc.value16 = 0;
+      res = false;
     }
   } else if (crc.value32 > 0) {
     std::bitset<CRC32_NB_BITS> polynomialBits(crc.polynomial32);
@@ -1594,13 +1611,13 @@ auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc, int
     int protectedPacketInt = IOBinaryPrimitives::readInt(protectedPackets, index, CRC32_NB_BITS);
     if (crc.value32 == protectedPacketInt) {
       crc.value32 = 0;
-      return true;
+      res = true;
     } else {
-      return false;
+      crc.value32 = 0;
+      res = false;
     }
   }
-
-  return false;
+  return res;
 }
 
 auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polynomial) -> bool {
@@ -1645,15 +1662,14 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
   return true;
 }
 
-auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
-                                StartTimeIdx &startTI, int &kfCount, bool &rau,
-                                std::vector<bool> &bitstream) -> bool {
+auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType, int time,
+                                int &kfCount, bool &rau, std::vector<bool> &bitstream) -> bool {
   bool firstKf = true;
   int tsFX = effect.getPosition();
   for (int j = 0; j < effect.getKeyframesSize(); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
-    if (currentTime < startTI.time + PACKET_DURATION && currentTime >= startTI.time) {
+    if (currentTime < time + PACKET_DURATION && currentTime >= time) {
       if (firstKf) {
         firstKf = false;
         if (j != 0) {
@@ -1665,7 +1681,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, types::BandType bandType,
       if (j == effect.getKeyframesSize() - 1) {
         return true;
       }
-    } else if (currentTime >= startTI.time + PACKET_DURATION) {
+    } else if (currentTime >= time + PACKET_DURATION) {
       return false;
     }
   }
