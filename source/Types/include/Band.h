@@ -44,7 +44,7 @@ namespace haptics::types {
 class Band {
 public:
   explicit Band() = default;
-  explicit Band( BandType newBandType, CurveType newCurveType, int newWindowLength,
+  explicit Band(BandType newBandType, CurveType newCurveType, int newWindowLength,
                 int newLowerFrequencyLimit, int newUpperFrequencyLimit)
       : bandType(newBandType)
       , curveType(newCurveType)

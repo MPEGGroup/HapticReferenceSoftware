@@ -1179,7 +1179,7 @@ auto IOStream::linearizeTimeline(types::Band &band) -> void {
       effects.push_back(effect);
     }
   }
-  for (int i = static_cast<int>(band.getEffectsSize())-1; i > -1 ; i--) {
+  for (int i = static_cast<int>(band.getEffectsSize()) - 1; i > -1; i--) {
     band.removeEffectAt(i);
   }
   for (auto &e : effects) {
@@ -1443,7 +1443,7 @@ auto IOStream::readData(types::Haptics &haptic, StreamReader &sreader, std::vect
 
   if (sreader.waitSync && sreader.autype == AUType::DAU) {
     return false;
-  } 
+  }
   if (sreader.waitSync) {
     sreader.waitSync = false;
   }
@@ -1553,20 +1553,20 @@ auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType
     crc.value16 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
-  } 
+  }
   if (naluType == NALuType::CRC16) {
     crc.nbPackets = 1;
     IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value16 = 0;
     return true;
-  } 
+  }
   if (naluType == NALuType::GlobalCRC16) {
     crc.nbPackets = IOBinaryPrimitives::readInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value16 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
-  } 
+  }
   if (naluType == NALuType::GlobalCRC32) {
     crc.nbPackets = IOBinaryPrimitives::readInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value32 = IOBinaryPrimitives::readInt(bitstream, idx, CRC16_NB_BITS);
