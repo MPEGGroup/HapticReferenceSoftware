@@ -260,7 +260,8 @@ auto IOStream::writeAllBands(types::Haptics &haptic, NALuType naluType, int leve
   int bandId = 0;
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
     for (auto j = 0; j < static_cast<int>(haptic.getPerceptionAt(i).getTracksSize()); j++) {
-      for (auto k = 0; k < static_cast<int>(haptic.getPerceptionAt(i).getTrackAt(j).getBandsSize()); k++) {
+      for (auto k = 0; k < static_cast<int>(haptic.getPerceptionAt(i).getTrackAt(j).getBandsSize());
+           k++) {
         writeMetadataBand(haptic.getPerceptionAt(i).getTrackAt(j).getBandAt(k), naluPayload,
                           bandId++);
         padToByteBoundary(naluPayload);
