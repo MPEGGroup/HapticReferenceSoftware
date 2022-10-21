@@ -106,7 +106,7 @@ public:
   template <size_t length>
   static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, float minValue,
                              float maxValue) -> float {
-    std::string str = "";
+    std::string str;
     for (auto i = startIdx; i < startIdx + length; i++) {
       if (bitstream[i]) {
         str += "1";
@@ -133,7 +133,7 @@ public:
     writeNBits<T, bitCount>(intValue, output);
   }
 
-  static auto writeStrBits(std::string bits, std::vector<bool> &bitstream) -> void {
+  static auto writeStrBits(std::string &bits, std::vector<bool> &bitstream) -> void {
     // std::reverse(bits.begin(), bits.end());
     for (char c : bits) {
       bitstream.push_back(c == '1');
@@ -150,8 +150,7 @@ public:
     }
     startIdx += length;
     auto inv = std::stoul(tsBits, nullptr, 2);
-    int res = inv;
-    return res;
+    return static_cast<int>(inv);
   }
 
   static auto readString(std::vector<bool> bitstream, int &startIdx, int length) -> std::string {

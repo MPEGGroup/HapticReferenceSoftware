@@ -187,7 +187,7 @@ public:
     std::vector<types::Effect> effects;
     std::vector<int> keyframesCount;
     std::vector<int> effectsId;
-    AUType auType;
+    AUType auType = AUType::RAU;
   };
 
   struct StreamReader {
@@ -195,9 +195,9 @@ public:
     std::vector<types::Track> tracksBuffer;
     std::vector<BandStream> bandStreamsBuffer;
     std::vector<BandStream> bandStreamsHaptic;
-    AUType autype;
-    int level;
-    int packetLength;
+    AUType auType = AUType::RAU;
+    int level = -1;
+    int packetLength = 0;
     bool waitSync = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
