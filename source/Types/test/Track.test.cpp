@@ -66,7 +66,7 @@ TEST_CASE("Track::generateBand with parameters", "[generateBand][withParameters]
   const int bandcount = 19;
   const haptics::types::BandType testingBandType = haptics::types::BandType::Curve;
   const haptics::types::CurveType testingCurveType = haptics::types::CurveType::Linear;
-  const int testingWindowLength = 32;
+  const double testingBlockLength = 32;
   const int testingMinF = 65;
   const int testingMaxF = 300;
 
@@ -79,14 +79,14 @@ TEST_CASE("Track::generateBand with parameters", "[generateBand][withParameters]
 
   REQUIRE(t.getBandsSize() == static_cast<size_t>(bandcount));
 
-  haptics::types::Band *res = t.generateBand(testingBandType, testingCurveType, testingWindowLength,
+  haptics::types::Band *res = t.generateBand(testingBandType, testingCurveType, testingBlockLength,
                                              testingMinF, testingMaxF);
 
   CHECK(t.getBandsSize() == static_cast<size_t>(bandcount) + 1);
   CHECK_FALSE(res == nullptr);
   CHECK(res->getBandType() == testingBandType);
   CHECK(res->getCurveType() == testingCurveType);
-  CHECK(res->getWindowLength() == testingWindowLength);
+  CHECK(res->getBlockLength() == testingBlockLength);
   CHECK(res->getLowerFrequencyLimit() == testingMinF);
   CHECK(res->getUpperFrequencyLimit() == testingMaxF);
   CHECK(res->getEffectsSize() == 0);
@@ -163,7 +163,7 @@ TEST_CASE("Track::findWaveBandAvailable empty band available", "[findWaveBandAva
   CHECK(res == &t.getBandAt(0));
   CHECK(res->getBandType() == haptics::types::BandType::VectorialWave);
   CHECK(res->getCurveType() == haptics::types::CurveType::Linear);
-  CHECK(res->getWindowLength() == 0);
+  CHECK(res->getBlockLength() == 0);
   CHECK(res->getLowerFrequencyLimit() == lowF);
   CHECK(res->getUpperFrequencyLimit() == highF);
   CHECK(res->getEffectsSize() == 0);

@@ -88,10 +88,10 @@ auto Track::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Track::generateBand(BandType bandType, CurveType curveType, int windowLength,
+auto Track::generateBand(BandType bandType, CurveType curveType, double blockLength,
                          int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, windowLength, lowerFrequencyLimit, upperFrequencyLimit);
+  Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
