@@ -107,7 +107,7 @@ public:
   static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, float minValue,
                              float maxValue) -> float {
     std::string str;
-    for (auto i = startIdx; i < startIdx + length; i++) {
+    for (auto i = startIdx; i < static_cast<int>(startIdx + length); i++) {
       if (bitstream[i]) {
         str += "1";
       } else {
@@ -133,11 +133,12 @@ public:
     writeNBits<T, bitCount>(intValue, output);
   }
 
-  static auto writeStrBits(std::string bits, std::vector<bool> &bitstream) -> void {
+  static auto writeStrBits(const std::string &bits, std::vector<bool> &bitstream) -> void {
     // std::reverse(bits.begin(), bits.end());
     for (char c : bits) {
       bitstream.push_back(c == '1');
     }
+    bits = "";
   }
   static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
     std::string tsBits;

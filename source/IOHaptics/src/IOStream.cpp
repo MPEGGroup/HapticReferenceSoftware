@@ -317,16 +317,20 @@ auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
 auto IOStream::writeNALuHeader(NALuType naluType, int level, int payloadSize,
                                std::vector<bool> &bitstream) -> bool {
   std::bitset<H_NALU_TYPE> naluTypeBits(static_cast<int>(naluType));
-  IOBinaryPrimitives::writeStrBits(naluTypeBits.to_string(), bitstream);
+  const std::string naluTypeStr = naluTypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(naluTypeStr, bitstream);
 
   std::bitset<H_LEVEL> lvlBits(level);
-  IOBinaryPrimitives::writeStrBits(lvlBits.to_string(), bitstream);
+  const std::string lvlStr = lvlBits.to_string();
+  IOBinaryPrimitives::writeStrBits(lvlStr, bitstream);
   const int residual = H_NBITS - (H_NALU_TYPE + H_LEVEL + H_PAYLOAD_LENGTH);
   std::bitset<residual> resBits(0);
-  IOBinaryPrimitives::writeStrBits(resBits.to_string(), bitstream);
+  const std::string resStr = resBits.to_string();
+  IOBinaryPrimitives::writeStrBits(resStr, bitstream);
   int payloadSizeByte = payloadSize / BYTE_SIZE;
   std::bitset<H_PAYLOAD_LENGTH> payloadSizeBits(payloadSizeByte);
-  IOBinaryPrimitives::writeStrBits(payloadSizeBits.to_string(), bitstream);
+  const std::string payloadSizeStr = payloadSizeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(payloadSizeStr, bitstream);
 
   return true;
 }
@@ -441,31 +445,39 @@ auto IOStream::readPacketLength(std::vector<bool> &bitstream) -> int {
 
 auto IOStream::writeMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool {
   std::bitset<MDEXP_VERSION> versionCountBits(haptic.getVersion().size());
-  IOBinaryPrimitives::writeStrBits(versionCountBits.to_string(), bitstream);
+  const std::string versionCountStr = versionCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(versionCountStr, bitstream);
   for (auto c : haptic.getVersion()) {
     std::bitset<BYTE_SIZE> cBits(c);
-    IOBinaryPrimitives::writeStrBits(cBits.to_string(), bitstream);
+    const std::string cStr = cBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
 
   std::bitset<MDEXP_DATE> dateCountBits(haptic.getDate().size());
-  IOBinaryPrimitives::writeStrBits(dateCountBits.to_string(), bitstream);
+  std::string dateCountStr = dateCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(dateCountStr, bitstream);
   for (auto c : haptic.getDate()) {
     std::bitset<BYTE_SIZE> cBits(c);
-    IOBinaryPrimitives::writeStrBits(cBits.to_string(), bitstream);
+    const std::string cStr = cBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
   std::bitset<MDEXP_DESC_SIZE> descSizeBits(haptic.getDescription().length());
-  IOBinaryPrimitives::writeStrBits(descSizeBits.to_string(), bitstream);
+  const std::string descSizeStr = descSizeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(descSizeStr, bitstream);
 
   for (char &c : haptic.getDescription()) {
     std::bitset<BYTE_SIZE> descBits(c);
-    IOBinaryPrimitives::writeStrBits(descBits.to_string(), bitstream);
+    const std::string cStr = descBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
 
   std::bitset<MDEXP_PERC_COUNT> perceCountBits(haptic.getPerceptionsSize());
-  IOBinaryPrimitives::writeStrBits(perceCountBits.to_string(), bitstream);
+  std::string perceCountStr = perceCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceCountStr, bitstream);
 
   std::bitset<MDEXP_AVATAR_COUNT> avatarCountBits(haptic.getAvatarsSize());
-  IOBinaryPrimitives::writeStrBits(avatarCountBits.to_string(), bitstream);
+  std::string avatarCountStr = avatarCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(avatarCountStr, bitstream);
 
   for (auto i = 0; i < static_cast<int>(haptic.getAvatarsSize()); i++) {
     writeAvatar(haptic.getAvatarAt(i), bitstream);
@@ -504,22 +516,27 @@ auto IOStream::readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bi
 
 auto IOStream::writeAvatar(types::Avatar &avatar, std::vector<bool> &bitstream) -> bool {
   std::bitset<AVATAR_ID> avatarIDBits(avatar.getId());
-  IOBinaryPrimitives::writeStrBits(avatarIDBits.to_string(), bitstream);
+  std::string avatarIDStr = avatarIDBits.to_string();
+  IOBinaryPrimitives::writeStrBits(avatarIDStr, bitstream);
 
   std::bitset<AVATAR_LOD> avatarLODBits(avatar.getLod());
-  IOBinaryPrimitives::writeStrBits(avatarLODBits.to_string(), bitstream);
+  std::string avatarLODStr = avatarLODBits.to_string();
+  IOBinaryPrimitives::writeStrBits(avatarLODStr, bitstream);
 
   std::bitset<AVATAR_TYPE> avatarTypeBits(static_cast<int>(avatar.getType()));
-  IOBinaryPrimitives::writeStrBits(avatarTypeBits.to_string(), bitstream);
+  std::string avatarTypeStr = avatarTypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(avatarTypeStr, bitstream);
 
   if (static_cast<int>(avatar.getType()) == 0) {
     std::string mesh = avatar.getMesh().value();
     std::bitset<AVATAR_MESH_COUNT> avatarMeshCountBits(mesh.size());
-    IOBinaryPrimitives::writeStrBits(avatarMeshCountBits.to_string(), bitstream);
+    std::string avatarMeshCountStr = avatarMeshCountBits.to_string();
+    IOBinaryPrimitives::writeStrBits(avatarMeshCountStr, bitstream);
 
     for (char &c : mesh) {
       std::bitset<BYTE_SIZE> descBits(c);
-      IOBinaryPrimitives::writeStrBits(descBits.to_string(), bitstream);
+      std::string cStr = descBits.to_string();
+      IOBinaryPrimitives::writeStrBits(cStr, bitstream);
     }
   }
   return true;
@@ -545,43 +562,53 @@ auto IOStream::readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, i
 auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> &bitstream)
     -> bool {
   std::bitset<MDPERCE_ID> perceIDBits(swriter.perception.getId());
-  IOBinaryPrimitives::writeStrBits(perceIDBits.to_string(), bitstream);
+  std::string perceIdStr = perceIDBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceIdStr, bitstream);
 
   std::bitset<MDPERCE_DESC_SIZE> descSizeBits(swriter.perception.getDescription().size());
-  IOBinaryPrimitives::writeStrBits(descSizeBits.to_string(), bitstream);
+  std::string descSizeStr = descSizeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(descSizeStr, bitstream);
 
   for (char &c : swriter.perception.getDescription()) {
     std::bitset<BYTE_SIZE> descBits(c);
-    IOBinaryPrimitives::writeStrBits(descBits.to_string(), bitstream);
+    std::string cStr = descBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
 
   std::bitset<MDPERCE_MODALITY> modalityBits(
       static_cast<int>(swriter.perception.getPerceptionModality()));
-  IOBinaryPrimitives::writeStrBits(modalityBits.to_string(), bitstream);
+  std::string modalityStr = modalityBits.to_string();
+  IOBinaryPrimitives::writeStrBits(modalityStr, bitstream);
 
   std::bitset<AVATAR_ID> avatarIDBits(swriter.perception.getAvatarId());
-  IOBinaryPrimitives::writeStrBits(avatarIDBits.to_string(), bitstream);
+  std::string avatarIDStr = avatarIDBits.to_string();
+  IOBinaryPrimitives::writeStrBits(avatarIDStr, bitstream);
 
   std::bitset<MDPERCE_FXLIB_COUNT> fxLibCountBits(swriter.perception.getEffectLibrarySize());
-  IOBinaryPrimitives::writeStrBits(fxLibCountBits.to_string(), bitstream);
+  std::string fxLibCountStr = fxLibCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(fxLibCountStr, bitstream);
 
   std::bitset<MDPERCE_UNIT_EXP> unitExpBits(swriter.perception.getUnitExponentOrDefault());
-  IOBinaryPrimitives::writeStrBits(unitExpBits.to_string(), bitstream);
+  std::string unitExpStr =
+      unitExpBits.to_string() IOBinaryPrimitives::writeStrBits(unitExpStr, bitstream);
 
   std::bitset<MDPERCE_PERCE_UNIT_EXP> perceUnitExpBits(
       swriter.perception.getPerceptionUnitExponentOrDefault());
-  IOBinaryPrimitives::writeStrBits(perceUnitExpBits.to_string(), bitstream);
+  std::string perceUnitExpStr = perceUnitExpBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceUnitExpStr, bitstream);
 
   std::bitset<MDPERCE_REFDEVICE_COUNT> refDeviceCountBits(
       swriter.perception.getReferenceDevicesSize());
-  IOBinaryPrimitives::writeStrBits(refDeviceCountBits.to_string(), bitstream);
+  std::string refDeviceCountStr = refDeviceCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(refDeviceCountStr, bitstream);
 
   for (auto i = 0; i < static_cast<int>(swriter.perception.getReferenceDevicesSize()); i++) {
     writeReferenceDevice(swriter.perception.getReferenceDeviceAt(i), bitstream);
   }
 
   std::bitset<MDPERCE_TRACK_COUNT> trackCountBits(swriter.perception.getTracksSize());
-  IOBinaryPrimitives::writeStrBits(trackCountBits.to_string(), bitstream);
+  std::string trackCountStr = trackCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(trackCountStr, bitstream);
   return true;
 }
 auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
@@ -629,9 +656,11 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
 
 auto IOStream::writeLibrary(types::Perception &perception, std::vector<bool> &bitstream) -> bool {
   std::bitset<MDPERCE_ID> perceIdBits(perception.getId());
-  IOBinaryPrimitives::writeStrBits(perceIdBits.to_string(), bitstream);
+  std::string perceIdStr = perceIdBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceIdStr, bitstream);
   std::bitset<MDPERCE_FXLIB_COUNT> fxCountBits(perception.getEffectLibrarySize());
-  IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), bitstream);
+  std::string fxCountStr = fxCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(fxCountStr, bitstream);
 
   types::Effect libraryEffect;
   bool success = true;
@@ -713,23 +742,28 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
 auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &bitstream)
     -> bool {
   std::bitset<FX_ID> idBits(libraryEffect.getId());
-  IOBinaryPrimitives::writeStrBits(idBits.to_string(), bitstream);
+  std::string idStr = idBits.to_string();
+  IOBinaryPrimitives::writeStrBits(idStr, bitstream);
 
   std::bitset<FX_POSITION> posBits(libraryEffect.getPosition());
-  IOBinaryPrimitives::writeStrBits(posBits.to_string(), bitstream);
+  std::string posStr = posBits.to_string();
+  IOBinaryPrimitives::writeStrBits(posStr, bitstream);
 
   IOBinaryPrimitives::writeFloatNBits<uint32_t, FX_PHASE>(libraryEffect.getPhase(), bitstream,
                                                           -MAX_PHASE, MAX_PHASE);
 
   std::bitset<FX_BASE> baseBits(static_cast<int>(libraryEffect.getBaseSignal()));
-  IOBinaryPrimitives::writeStrBits(baseBits.to_string(), bitstream);
+  std::string baseStr = baseBits.to_string();
+  IOBinaryPrimitives::writeStrBits(baseStr, bitstream);
 
   std::bitset<FX_TYPE> typeBits(static_cast<int>(libraryEffect.getEffectType()));
-  IOBinaryPrimitives::writeStrBits(typeBits.to_string(), bitstream);
+  std::string typeStr = typeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(typeStr, bitstream);
 
   auto kfCount = libraryEffect.getKeyframesSize();
   std::bitset<FX_KF_COUNT> kfCountBits(kfCount);
-  IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), bitstream);
+  std::string kfCountStr = kfCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(kfCountStr, bitstream);
 
   types::Keyframe keyframe;
   for (size_t i = 0; i < kfCount; i++) {
@@ -745,11 +779,13 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
       mask |= (uint8_t)KeyframeMask::FREQUENCY_MODULATION;
     }
     std::bitset<KF_MASK> maskBits(mask);
-    IOBinaryPrimitives::writeStrBits(maskBits.to_string(), bitstream);
+    std::string maskStr = maskBits.to_string();
+    IOBinaryPrimitives::writeStrBits(maskStr, bitstream);
 
     if ((mask & (uint8_t)KeyframeMask::RELATIVE_POSITION) != 0) {
       std::bitset<KF_POSITION> posBits(keyframe.getRelativePosition().value());
-      IOBinaryPrimitives::writeStrBits(posBits.to_string(), bitstream);
+      std::string posStr = posBits.to_string();
+      IOBinaryPrimitives::writeStrBits(posStr, bitstream);
     }
     if ((mask & (uint8_t)KeyframeMask::AMPLITUDE_MODULATION) != 0) {
       IOBinaryPrimitives::writeFloatNBits<uint8_t, KF_AMPLITUDE>(
@@ -757,12 +793,14 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
     }
     if ((mask & (uint8_t)KeyframeMask::FREQUENCY_MODULATION) != 0) {
       std::bitset<KF_POSITION> freqBits(keyframe.getFrequencyModulation().value());
-      IOBinaryPrimitives::writeStrBits(freqBits.to_string(), bitstream);
+      std::string freqStr = freqBits.to_string();
+      IOBinaryPrimitives::writeStrBits(freqStr, bitstream);
     }
   }
   auto timelineEffectCount = static_cast<uint16_t>(libraryEffect.getTimelineSize());
   std::bitset<FXLIB_TIMELINESIZE> timelineSizeBits(timelineEffectCount);
-  IOBinaryPrimitives::writeStrBits(timelineSizeBits.to_string(), bitstream);
+  std::string timelineSizeStr = timelineSizeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(timelineSizeStr, bitstream);
 
   types::Effect timelineEffect;
   for (int i = 0; i < timelineEffectCount; i++) {
@@ -776,18 +814,22 @@ auto IOStream::writeReferenceDevice(types::ReferenceDevice &refDevice, std::vect
     -> bool {
   std::vector<bool> vecBuf = std::vector<bool>();
   std::bitset<REFDEV_ID> idBits(refDevice.getId());
-  IOBinaryPrimitives::writeStrBits(idBits.to_string(), bitstream);
+  std::string idStr = idBits.to_string();
+  IOBinaryPrimitives::writeStrBits(idStr, bitstream);
 
-  std::bitset<REFDEV_NAME_LENGTH> nameLengthsBits(refDevice.getName().size());
-  IOBinaryPrimitives::writeStrBits(nameLengthsBits.to_string(), bitstream);
+  std::bitset<REFDEV_NAME_LENGTH> nameLengthBits(refDevice.getName().size());
+  std::string nameLengthStr = nameLengthBits.to_string();
+  IOBinaryPrimitives::writeStrBits(nameLengthStr, bitstream);
 
   for (char &c : refDevice.getName()) {
     std::bitset<BYTE_SIZE> descBits(c);
-    IOBinaryPrimitives::writeStrBits(descBits.to_string(), bitstream);
+    std::string cStr = descBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
 
   std::bitset<REFDEV_BODY_PART_MASK> bodyPartMaskBits(refDevice.getBodyPartMask().value_or(0));
-  IOBinaryPrimitives::writeStrBits(bodyPartMaskBits.to_string(), bitstream);
+  std::string bodypartMaskStr = bodyPartMaskBits.to_string();
+  IOBinaryPrimitives::writeStrBits(bodypartMaskStr, bitstream);
 
   generateReferenceDeviceInformationMask(refDevice, vecBuf);
   bitstream.insert(bitstream.end(), vecBuf.begin(), vecBuf.end());
@@ -860,7 +902,8 @@ auto IOStream::writeReferenceDevice(types::ReferenceDevice &refDevice, std::vect
   }
   if (refDevice.getType().has_value()) {
     std::bitset<REFDEV_TYPE> typeBits(static_cast<int>(refDevice.getType().value()));
-    IOBinaryPrimitives::writeStrBits(typeBits.to_string(), bitstream);
+    std::string typeStr = typeBits.to_string();
+    IOBinaryPrimitives::writeStrBits(typeStr, bitstream);
   }
   return true;
 }
@@ -999,21 +1042,26 @@ auto IOStream::readReferenceDevice(std::vector<bool> &bitstream, types::Referenc
 
 auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
   std::bitset<MDTRACK_ID> idBits(swriter.track.getId());
-  IOBinaryPrimitives::writeStrBits(idBits.to_string(), bitstream);
+  std::string idStr = idBits.to_string();
+  IOBinaryPrimitives::writeStrBits(idStr, bitstream);
 
   std::bitset<MDPERCE_ID> perceidBits(swriter.perception.getId());
-  IOBinaryPrimitives::writeStrBits(perceidBits.to_string(), bitstream);
+  std::string perceidStr = perceidBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceidStr, bitstream);
 
   std::bitset<MDPERCE_DESC_SIZE> descSizeBits(swriter.track.getDescription().size());
-  IOBinaryPrimitives::writeStrBits(descSizeBits.to_string(), bitstream);
+  std::string descSizestr = descSizeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(descSizestr, bitstream);
 
   for (char &c : swriter.track.getDescription()) {
     std::bitset<BYTE_SIZE> descBits(c);
-    IOBinaryPrimitives::writeStrBits(descBits.to_string(), bitstream);
+    std::string cStr = descBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
 
   std::bitset<REFDEV_ID> refDevID(swriter.track.getReferenceDeviceId().value_or(-1));
-  IOBinaryPrimitives::writeStrBits(refDevID.to_string(), bitstream);
+  std::string refdevStr = refDevID.to_string();
+  IOBinaryPrimitives::writeStrBits(refdevStr, bitstream);
 
   std::vector<bool> bufBits = std::vector<bool>();
   IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_GAIN>(swriter.track.getGain(), bufBits,
@@ -1027,42 +1075,53 @@ auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bits
   bufBits.clear();
 
   std::bitset<MDTRACK_BODY_PART_MASK> bodyPartMaskBits(swriter.track.getBodyPartMask());
-  IOBinaryPrimitives::writeStrBits(bodyPartMaskBits.to_string(), bitstream);
+  std::string bodyPartMaskStr = bodyPartMaskBits.to_string();
+  IOBinaryPrimitives::writeStrBits(bodyPartMaskStr, bitstream);
 
   int freqSampling = static_cast<int>(swriter.track.getFrequencySampling().value_or(0));
   std::bitset<MDTRACK_SAMPLING_FREQUENCY> maxFreqBits(freqSampling);
-  IOBinaryPrimitives::writeStrBits(maxFreqBits.to_string(), bitstream);
+  std::string maxFreqStr = maxFreqBits.to_string();
+  IOBinaryPrimitives::writeStrBits(maxFreqStr, bitstream);
 
   if (freqSampling > 0) {
     std::bitset<MDTRACK_SAMPLE_COUNT> sampleCountBits(swriter.track.getSampleCount().value_or(0));
-    IOBinaryPrimitives::writeStrBits(sampleCountBits.to_string(), bitstream);
+    std::string samplecountStr = sampleCountBits.to_string();
+    IOBinaryPrimitives::writeStrBits(samplecountStr, bitstream);
   }
 
   if (swriter.track.getDirection().has_value()) {
     types::Direction dir = swriter.track.getDirection().value();
     std::bitset<1> flagBit(1);
-    IOBinaryPrimitives::writeStrBits(flagBit.to_string(), bitstream);
+    std::string flagStr = flagBit.to_string();
+    IOBinaryPrimitives::writeStrBits(flagStr, bitstream);
     std::bitset<MDTRACK_DIRECTION_AXIS> axisValue(dir.X);
-    IOBinaryPrimitives::writeStrBits(axisValue.to_string(), bitstream);
+    std::string axisValueStr = axisValue.to_string();
+    IOBinaryPrimitives::writeStrBits(axisValueStr, bitstream);
     axisValue = std::bitset<MDTRACK_DIRECTION_AXIS>(dir.Y);
-    IOBinaryPrimitives::writeStrBits(axisValue.to_string(), bitstream);
+    axisValueStr = axisValue.to_string();
+    IOBinaryPrimitives::writeStrBits(axisValueStr, bitstream);
     axisValue = std::bitset<MDTRACK_DIRECTION_AXIS>(dir.Z);
-    IOBinaryPrimitives::writeStrBits(axisValue.to_string(), bitstream);
+    axisValueStr = axisValue.to_string();
+    IOBinaryPrimitives::writeStrBits(axisValueStr, bitstream);
   } else {
     std::bitset<1> flagBit(0);
-    IOBinaryPrimitives::writeStrBits(flagBit.to_string(), bitstream);
+    std::string flagStr = flagBit.to_string();
+    IOBinaryPrimitives::writeStrBits(flagStr, bitstream);
   }
 
   std::bitset<MDTRACK_VERT_COUNT> vertCountBits(swriter.track.getVerticesSize());
-  IOBinaryPrimitives::writeStrBits(vertCountBits.to_string(), bitstream);
+  std::string vertCountStr = vertCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(vertCountStr, bitstream);
 
   for (auto i = 0; i < static_cast<int>(swriter.track.getVerticesSize()); i++) {
     std::bitset<MDTRACK_VERT> vertBits(swriter.track.getVertexAt(i));
-    IOBinaryPrimitives::writeStrBits(vertBits.to_string(), bitstream);
+    std::string vertStr = vertBits.to_string();
+    IOBinaryPrimitives::writeStrBits(vertStr, bitstream);
   }
 
   std::bitset<MDTRACK_BANDS_COUNT> bandsCountBits(swriter.track.getBandsSize());
-  IOBinaryPrimitives::writeStrBits(bandsCountBits.to_string(), bitstream);
+  std::string bandsCountStr = bandsCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(bandsCountStr, bitstream);
 
   return true;
 }
@@ -1136,31 +1195,40 @@ auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitst
 
 auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
   std::bitset<MDBAND_ID> idBits(swriter.bandStream.id);
-  IOBinaryPrimitives::writeStrBits(idBits.to_string(), bitstream);
+  std::string idStr = idBits.to_string();
+  IOBinaryPrimitives::writeStrBits(idStr, bitstream);
   std::bitset<MDPERCE_ID> perceidBits(swriter.perception.getId());
-  IOBinaryPrimitives::writeStrBits(perceidBits.to_string(), bitstream);
+  std::string perceidStr = perceidBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceidStr, bitstream);
   std::bitset<MDTRACK_ID> trackidBits(swriter.track.getId());
-  IOBinaryPrimitives::writeStrBits(trackidBits.to_string(), bitstream);
+  std::string trackidStr = trackidBits.to_string();
+  IOBinaryPrimitives::writeStrBits(trackidStr, bitstream);
 
   std::bitset<MDBAND_BAND_TYPE> bandTypeBits(
       static_cast<int>(swriter.bandStream.band.getBandType()));
-  IOBinaryPrimitives::writeStrBits(bandTypeBits.to_string(), bitstream);
+  std::string bandTypeStr = bandTypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(bandTypeStr, bitstream);
   if (swriter.bandStream.band.getBandType() == types::BandType::Curve) {
     std::bitset<MDBAND_CURVE_TYPE> curveTypeBits(
         static_cast<int>(swriter.bandStream.band.getCurveType()));
-    IOBinaryPrimitives::writeStrBits(curveTypeBits.to_string(), bitstream);
+    std::string curveTypeStr = curveTypeBits.to_string();
+    IOBinaryPrimitives::writeStrBits(curveTypeStr, bitstream);
   } else if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
     std::bitset<MDBAND_WIN_LEN> winLengthBits((swriter.bandStream.band.getWindowLength()));
-    IOBinaryPrimitives::writeStrBits(winLengthBits.to_string(), bitstream);
+    std::string winLengthStr = winLengthBits.to_string();
+    IOBinaryPrimitives::writeStrBits(winLengthStr, bitstream);
   }
   std::bitset<MDBAND_LOW_FREQ> lowFreqBits((swriter.bandStream.band.getLowerFrequencyLimit()));
-  IOBinaryPrimitives::writeStrBits(lowFreqBits.to_string(), bitstream);
+  std::string lowFreqStr = lowFreqBits.to_string();
+  IOBinaryPrimitives::writeStrBits(lowFreqStr, bitstream);
 
   std::bitset<MDBAND_UP_FREQ> upFreqBits((swriter.bandStream.band.getUpperFrequencyLimit()));
-  IOBinaryPrimitives::writeStrBits(upFreqBits.to_string(), bitstream);
+  std::string upFreqStr = upFreqBits.to_string();
+  IOBinaryPrimitives::writeStrBits(upFreqStr, bitstream);
 
   std::bitset<MDBAND_FX_COUNT> effectCountBits(swriter.bandStream.band.getEffectsSize());
-  IOBinaryPrimitives::writeStrBits(effectCountBits.to_string(), bitstream);
+  std::string effectCountStr = effectCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(effectCountStr, bitstream);
 
   return true;
 }
@@ -1373,7 +1441,8 @@ auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vecto
       if (effect.getPosition() >= swriter.time &&
           effect.getPosition() < swriter.time + PACKET_DURATION) {
         std::bitset<FX_REF_ID> referenceIDBits(effect.getId());
-        IOBinaryPrimitives::writeStrBits(referenceIDBits.to_string(), bufEffect);
+        std::string referenceIDStr = referenceIDBits.to_string();
+        IOBinaryPrimitives::writeStrBits(referenceIDStr, bufEffect);
         bitstream.push_back(bufEffect);
         swriter.effects.push_back(effect);
         swriter.auType = AUType::RAU;
@@ -1392,17 +1461,22 @@ auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
   int autype = static_cast<int>(swriter.auType);
   std::bitset<DB_AU_TYPE> auBits(autype);
-  IOBinaryPrimitives::writeStrBits(auBits.to_string(), packetBits);
+  std::string = auStr = auBits.to_string();
+  IOBinaryPrimitives::writeStrBits(auStr, packetBits);
   // packetBits.push_back(rau); // PUSH END ACCESS UNIT
   std::bitset<DB_TIMESTAMP> tsBits(swriter.time);
-  IOBinaryPrimitives::writeStrBits(tsBits.to_string(), packetBits);
+  std::string tsStr = tsBits.to_string();
+  IOBinaryPrimitives::writeStrBits(tsStr, packetBits);
   std::bitset<MDPERCE_ID> perceIdBits(swriter.perception.getId());
-  IOBinaryPrimitives::writeStrBits(perceIdBits.to_string(), packetBits);
+  std::string perceIdStr = perceIdBits.to_string();
+  IOBinaryPrimitives::writeStrBits(perceIdStr, packetBits);
   std::bitset<MDTRACK_ID> trackIdBits(swriter.track.getId());
-  IOBinaryPrimitives::writeStrBits(trackIdBits.to_string(), packetBits);
+  std::string trackIdStr = trackIdBits.to_string();
+  IOBinaryPrimitives::writeStrBits(trackIdStr, packetBits);
 
   std::bitset<MDBAND_ID> bandIdBits(swriter.bandStream.id);
-  IOBinaryPrimitives::writeStrBits(bandIdBits.to_string(), packetBits);
+  std::string bandIdStr = bandIdBits.to_string();
+  IOBinaryPrimitives::writeStrBits(bandIdStr, packetBits);
 
   return packetBits;
 }
@@ -1410,14 +1484,17 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
                                          std::vector<bool> &packetBits, std::vector<int> &effectsId)
     -> std::vector<bool> {
   std::bitset<DB_FX_COUNT> fxCountBits(1);
-  IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), packetBits);
+  std::string fxCountStr = fxCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(fxCountStr, packetBits);
 
   int id = getNextEffectId(effectsId);
   std::bitset<FX_ID> effectIDBits(static_cast<int>(id));
-  IOBinaryPrimitives::writeStrBits(effectIDBits.to_string(), packetBits);
+  std::string effectIDStr = effectIDBits.to_string();
+  IOBinaryPrimitives::writeStrBits(effectIDStr, packetBits);
 
   std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(types::EffectType::Basis));
-  IOBinaryPrimitives::writeStrBits(effectTypeBits.to_string(), packetBits);
+  std::string effectTypeStr = effectTypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(effectTypeStr, packetBits);
 
   packetBits.insert(packetBits.end(), bufPacketBitstream.begin(), bufPacketBitstream.end());
 
@@ -1446,28 +1523,34 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
                                   std::vector<std::vector<bool>> bufPacketBitstream,
                                   std::vector<bool> &packetBits) -> std::vector<bool> {
   std::bitset<DB_FX_COUNT> fxCountBits(swriter.effects.size());
-  IOBinaryPrimitives::writeStrBits(fxCountBits.to_string(), packetBits);
+  std::string fxCountStr = fxCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(fxCountStr, packetBits);
 
   for (auto l = 0; l < static_cast<int>(swriter.effects.size()); l++) {
     std::bitset<FX_ID> effectIDBits(static_cast<int>(swriter.effects[l].getId()));
-    IOBinaryPrimitives::writeStrBits(effectIDBits.to_string(), packetBits);
+    std::string effectIDStr = effectIDBits.to_string();
+    IOBinaryPrimitives::writeStrBits(effectIDStr, packetBits);
 
     std::bitset<FX_TYPE> effectTypeBits(static_cast<int>(swriter.effects[l].getEffectType()));
-    IOBinaryPrimitives::writeStrBits(effectTypeBits.to_string(), packetBits);
+    std::string effectTypeStr = effectTypeBits.to_string();
+    IOBinaryPrimitives::writeStrBits(effectTypeStr, packetBits);
 
     std::bitset<FX_POSITION> effectPosBits(static_cast<int>(swriter.effects[l].getPosition()) -
                                            swriter.time);
-    IOBinaryPrimitives::writeStrBits(effectPosBits.to_string(), packetBits);
+    std::string effectPosStr = effectPosBits.to_string();
+    IOBinaryPrimitives::writeStrBits(effectPosStr, packetBits);
 
     if (swriter.effects[l].getEffectType() == types::EffectType::Basis &&
         swriter.bandStream.band.getBandType() != types::BandType::WaveletWave) {
       std::bitset<FX_KF_COUNT> kfCountBits(swriter.keyframesCount[l]);
-      IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), packetBits);
+      std::string kfCountStr = kfCountBits.to_string();
+      IOBinaryPrimitives::writeStrBits(kfCountStr, packetBits);
       if (swriter.bandStream.band.getBandType() == types::BandType::VectorialWave) {
         IOBinaryPrimitives::writeFloatNBits<uint16_t, FX_PHASE>(swriter.effects[l].getPhase(),
                                                                 packetBits, 0, MAX_PHASE);
         std::bitset<FX_BASE> fxBaseBits(static_cast<int>(swriter.effects[l].getBaseSignal()));
-        IOBinaryPrimitives::writeStrBits(fxBaseBits.to_string(), packetBits);
+        std::string fxBaseStr = fxBaseBits.to_string();
+        IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }
     }
 
@@ -1560,10 +1643,12 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   std::vector<bool> polynomial = std::vector<bool>();
   if (crcLevel == 0) {
     std::bitset<CRC16_NB_BITS> polynomialBits(CRC16_POLYNOMIAL);
-    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+    std::string polynomialStr = polynomialBits.to_string();
+    IOBinaryPrimitives::writeStrBits(polynomialStr, polynomial);
   } else if (crcLevel == 1) {
     std::bitset<CRC32_NB_BITS> polynomialBits(CRC32_POLYNOMIAL);
-    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+    std::string polynomialStr = polynomialBits.to_string();
+    IOBinaryPrimitives::writeStrBits(polynomialStr, polynomial);
   } else {
     return false;
   }
@@ -1589,6 +1674,7 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   }
   if (nbPackets > 1) {
     std::bitset<GCRC_NB_PACKET> nbPacketsBits(nbPackets);
+    std::string nbPacketsStr = nbPacketsBits.to_string();
     IOBinaryPrimitives::writeStrBits(nbPacketsBits.to_string(), packetCRC);
   }
   computeCRC(quotient, polynomial);
@@ -1640,7 +1726,8 @@ auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc) -> 
   if (crc.value16 > 0) {
     std::bitset<CRC16_NB_BITS> polynomialBits(crc.polynomial16);
     std::vector<bool> polynomial = std::vector<bool>();
-    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+    std::string polynomialStr = polynomialBits.to_string();
+    IOBinaryPrimitives::writeStrBits(polynomialStr, polynomial);
     computeCRC(protectedPackets, polynomial);
     index = 0;
     int protectedPacketInt = IOBinaryPrimitives::readInt(protectedPackets, index, CRC16_NB_BITS);
@@ -1654,7 +1741,8 @@ auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc) -> 
   } else if (crc.value32 > 0) {
     std::bitset<CRC32_NB_BITS> polynomialBits(crc.polynomial32);
     std::vector<bool> polynomial = std::vector<bool>();
-    IOBinaryPrimitives::writeStrBits(polynomialBits.to_string(), polynomial);
+    std::string polynomialStr = polynomialBits.to_string();
+    IOBinaryPrimitives::writeStrBits(polynomialStr, polynomial);
     computeCRC(protectedPackets, polynomial);
     index = 0;
     int protectedPacketInt = IOBinaryPrimitives::readInt(protectedPackets, index, CRC32_NB_BITS);
@@ -1796,10 +1884,12 @@ auto IOStream::writeTransient(types::Keyframe &keyframe, std::vector<bool> &bits
   bitstream.insert(bitstream.end(), bufBits.begin(), bufBits.end());
 
   std::bitset<KF_POSITION> posBits(keyframe.getRelativePosition().value());
-  IOBinaryPrimitives::writeStrBits(posBits.to_string(), bitstream);
+  std::string posStr = posBits.to_string();
+  IOBinaryPrimitives::writeStrBits(posStr, bitstream);
 
   std::bitset<KF_FREQUENCY> freqBits(keyframe.getFrequencyModulation().value());
-  IOBinaryPrimitives::writeStrBits(freqBits.to_string(), bitstream);
+  std::string freqStr = freqBits.to_string();
+  IOBinaryPrimitives::writeStrBits(freqStr, bitstream);
   return true;
 }
 auto IOStream::readTransient(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
@@ -1822,7 +1912,8 @@ auto IOStream::writeCurve(types::Keyframe &keyframe, std::vector<bool> &bitstrea
       keyframe.getAmplitudeModulation().value(), bufBits, -MAX_AMPLITUDE, MAX_AMPLITUDE);
   bitstream.insert(bitstream.end(), bufBits.begin(), bufBits.end());
   std::bitset<KF_POSITION> posBits(keyframe.getRelativePosition().value());
-  IOBinaryPrimitives::writeStrBits(posBits.to_string(), bitstream);
+  std::string posStr = posBits.to_string();
+  IOBinaryPrimitives::writeStrBits(posStr, bitstream);
   return true;
 }
 auto IOStream::readCurve(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
@@ -1848,14 +1939,17 @@ auto IOStream::writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bits
     informationMask |= 0b01;
   }
   std::bitset<KF_POSITION> posBits(keyframe.getRelativePosition().value());
-  IOBinaryPrimitives::writeStrBits(posBits.to_string(), bufbitstream);
+  std::string posStr = posBits.to_string();
+  IOBinaryPrimitives::writeStrBits(posStr, bufbitstream);
 
   if (keyframe.getFrequencyModulation().has_value()) {
     std::bitset<KF_FREQUENCY> freqBits(keyframe.getFrequencyModulation().value());
-    IOBinaryPrimitives::writeStrBits(freqBits.to_string(), bufbitstream);
+    std::string freqStr = freqBits.to_string();
+    IOBinaryPrimitives::writeStrBits(freqStr, bufbitstream);
     informationMask |= 0b10;
   }
-  IOBinaryPrimitives::writeStrBits(informationMask.to_string(), bitstream);
+  std::string informationMaskStr = informationMask.to_string();
+  IOBinaryPrimitives::writeStrBits(informationMaskStr, bitstream);
   bitstream.insert(bitstream.end(), bufbitstream.begin(), bufbitstream.end());
   return true;
 }
