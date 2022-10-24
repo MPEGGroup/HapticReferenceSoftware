@@ -60,7 +60,7 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath) ->
 auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> bool {
   std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
   loadFile(filePath, bitstream);
-  StreamReader sreader = initializeStream(haptic);
+  StreamReader sreader = initializeStream();
   CRC crc;
   int index = 0;
   for (auto &packet : bitstream) {
@@ -147,7 +147,7 @@ auto IOStream::writePacket(types::Haptics &haptic, std::vector<std::vector<bool>
   return true;
 }
 
-auto IOStream::initializeStream(types::Haptics &haptic) -> StreamReader {
+auto IOStream::initializeStream() -> StreamReader {
   StreamReader sreader;
   sreader.haptic = types::Haptics();
   sreader.bandStreamsHaptic = std::vector<BandStream>();
@@ -163,6 +163,11 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
   swriter.haptic = haptic;
   std::vector<bool> naluHeader = std::vector<bool>();
   switch (naluType) {
+  case NALuType::Sync: {
+    writeNALuHeader(naluType, level, static_cast<int>(naluHeader.size()), naluHeader);
+    bitstream.push_back(naluHeader);
+    return true;
+  }
   case NALuType::MetadataHaptics: {
     std::vector<bool> naluPayload = std::vector<bool>();
     writeMetadataHaptics(haptic, naluPayload);
@@ -252,8 +257,6 @@ auto IOStream::writeNALu(NALuType naluType, types::Haptics &haptic, int level,
   default:
     return false;
   }
-
-  return false;
 }
 
 auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType, int level,
@@ -335,6 +338,10 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
   sreader.packetLength = IOBinaryPrimitives::readInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
   switch (naluType) {
+  case (NALuType::Sync): {
+    sreader.waitSync = true;
+    return true;
+  }
   case (NALuType::MetadataHaptics): {
     return readMetadataHaptics(sreader.haptic, payload);
   }
@@ -351,10 +358,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     return true;
   }
   case (NALuType::EffectLibrary): {
-    if (!readLibrary(sreader.haptic, payload)) {
-      return false;
-    }
-    return true;
+    return readLibrary(sreader.haptic, payload);
   }
   case (NALuType::MetadataTrack): {
     if (!readMetadataTrack(sreader, payload)) {
@@ -728,7 +732,7 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
   IOBinaryPrimitives::writeStrBits(kfCountBits.to_string(), bitstream);
 
   types::Keyframe keyframe;
-  for (auto i = 0; i < kfCount; i++) {
+  for (size_t i = 0; i < kfCount; i++) {
     keyframe = libraryEffect.getKeyframeAt(i);
     auto mask = (uint8_t)KeyframeMask::NOTHING;
     if (keyframe.getRelativePosition().has_value()) {

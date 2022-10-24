@@ -133,7 +133,7 @@ public:
     writeNBits<T, bitCount>(intValue, output);
   }
 
-  static auto writeStrBits(std::string &bits, std::vector<bool> &bitstream) -> void {
+  static auto writeStrBits(std::string bits, std::vector<bool> &bitstream) -> void {
     // std::reverse(bits.begin(), bits.end());
     for (char c : bits) {
       bitstream.push_back(c == '1');

@@ -264,7 +264,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
     haptics::types::Haptics readHaptic;
-    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
 
@@ -280,8 +280,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readHaptic.getAvatarsSize() == testingHaptic.getAvatarsSize());
 
     // Check Avatar information
-    for (auto i = 0; i < readHaptic.getAvatarsSize(); i++) {
-      for (auto j = 0; j < testingHaptic.getAvatarsSize(); j++) {
+    for (size_t i = 0; i < readHaptic.getAvatarsSize(); i++) {
+      for (size_t j = 0; j < testingHaptic.getAvatarsSize(); j++) {
         if (readHaptic.getAvatarAt(i).getId() == testingHaptic.getAvatarAt(j).getId()) {
           CHECK(readHaptic.getAvatarAt(i).getLod() == testingHaptic.getAvatarAt(j).getLod());
           CHECK(readHaptic.getAvatarAt(i).getType() == testingHaptic.getAvatarAt(j).getType());
@@ -353,7 +353,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
     haptics::types::Haptics readHaptic;
-    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
 
     for (auto &packetBits : bitstream) {
@@ -377,9 +377,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readPerception0.getReferenceDevicesSize() ==
           testingPerception0.getReferenceDevicesSize());
     if (readPerception0.getReferenceDevicesSize() > 0) {
-      for (auto i = 0; i < readPerception0.getReferenceDevicesSize(); i++) {
+      for (size_t i = 0; i < readPerception0.getReferenceDevicesSize(); i++) {
         haptics::types::ReferenceDevice readRefDev = readPerception0.getReferenceDeviceAt(i);
-        for (auto j = 0; j < testingPerception0.getReferenceDevicesSize(); j++) {
+        for (size_t j = 0; j < testingPerception0.getReferenceDevicesSize(); j++) {
           haptics::types::ReferenceDevice testingRefDev =
               testingPerception0.getReferenceDeviceAt(j);
           if (readRefDev.getId() == testingRefDev.getId()) {
@@ -516,7 +516,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
 
     haptics::types::Haptics readHaptic;
-    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
       succeed &= IOStream::readNALu(packetBits, buffer, crc);
@@ -549,7 +549,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     }
     CHECK(readTrack0.getVerticesSize() == testingTrack0.getVerticesSize());
     if (readTrack0.getVerticesSize() > 0) {
-      for (auto i = 0; i < readTrack0.getVerticesSize(); i++) {
+      for (size_t i = 0; i < readTrack0.getVerticesSize(); i++) {
         CHECK(readTrack0.getVertexAt(i) - testingTrack0.getVertexAt(i) < floatPrecision);
       }
     }
@@ -576,7 +576,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     }
     CHECK(readTrack1.getVerticesSize() == testingTrack2.getVerticesSize());
     if (readTrack1.getVerticesSize() > 0) {
-      for (auto i = 0; i < readTrack1.getVerticesSize(); i++) {
+      for (size_t i = 0; i < readTrack1.getVerticesSize(); i++) {
         CHECK(readTrack1.getVertexAt(i) - testingTrack2.getVertexAt(i) < floatPrecision);
       }
     }
@@ -642,7 +642,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writePacket(testingHaptic, bitstream);
     haptics::types::Haptics readHaptic;
-    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
 
@@ -676,7 +676,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
     // CHECK metadata experience length is correct
     haptics::types::Haptics readHaptic;
-    IOStream::StreamReader buffer = IOStream::initializeStream(readHaptic);
+    IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
 
     for (auto &packetBits : bitstream) {

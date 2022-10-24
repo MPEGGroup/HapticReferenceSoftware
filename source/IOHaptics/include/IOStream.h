@@ -218,7 +218,7 @@ public:
                             std::vector<bool> &naluHeader,
                             std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool;
-  static auto initializeStream(types::Haptics &haptic) -> StreamReader;
+  static auto initializeStream() -> StreamReader;
 
 private:
   struct StartTimeIdx {
