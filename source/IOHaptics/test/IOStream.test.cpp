@@ -43,7 +43,6 @@ const std::string filename = "testing_IOStream.bin";
 constexpr float floatPrecision = 0.01;
 constexpr int CONST_8 = 8;
 constexpr size_t bl = 512;
-constexpr size_t level = 7;
 constexpr int BITS_EFFECT = 15;
 constexpr int MOD_VAL = 256;
 constexpr float scalar = 1.5;
@@ -280,8 +279,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readHaptic.getAvatarsSize() == testingHaptic.getAvatarsSize());
 
     // Check Avatar information
-    for (size_t i = 0; i < readHaptic.getAvatarsSize(); i++) {
-      for (size_t j = 0; j < testingHaptic.getAvatarsSize(); j++) {
+    for (auto i = 0; i < static_cast<int>(readHaptic.getAvatarsSize()); i++) {
+      for (auto j = 0; j < static_cast<int>(testingHaptic.getAvatarsSize()); j++) {
         if (readHaptic.getAvatarAt(i).getId() == testingHaptic.getAvatarAt(j).getId()) {
           CHECK(readHaptic.getAvatarAt(i).getLod() == testingHaptic.getAvatarAt(j).getLod());
           CHECK(readHaptic.getAvatarAt(i).getType() == testingHaptic.getAvatarAt(j).getType());
@@ -377,9 +376,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readPerception0.getReferenceDevicesSize() ==
           testingPerception0.getReferenceDevicesSize());
     if (readPerception0.getReferenceDevicesSize() > 0) {
-      for (size_t i = 0; i < readPerception0.getReferenceDevicesSize(); i++) {
+      for (auto i = 0; i < static_cast<int>(readPerception0.getReferenceDevicesSize()); i++) {
         haptics::types::ReferenceDevice readRefDev = readPerception0.getReferenceDeviceAt(i);
-        for (size_t j = 0; j < testingPerception0.getReferenceDevicesSize(); j++) {
+        for (auto j = 0; j < static_cast<int>(testingPerception0.getReferenceDevicesSize()); j++) {
           haptics::types::ReferenceDevice testingRefDev =
               testingPerception0.getReferenceDeviceAt(j);
           if (readRefDev.getId() == testingRefDev.getId()) {
