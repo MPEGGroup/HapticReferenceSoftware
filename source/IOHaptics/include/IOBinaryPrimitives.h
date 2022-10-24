@@ -138,7 +138,6 @@ public:
     for (char c : bits) {
       bitstream.push_back(c == '1');
     }
-    bits = "";
   }
   static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
     std::string tsBits;

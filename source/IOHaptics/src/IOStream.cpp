@@ -589,8 +589,8 @@ auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> 
   IOBinaryPrimitives::writeStrBits(fxLibCountStr, bitstream);
 
   std::bitset<MDPERCE_UNIT_EXP> unitExpBits(swriter.perception.getUnitExponentOrDefault());
-  std::string unitExpStr =
-      unitExpBits.to_string() IOBinaryPrimitives::writeStrBits(unitExpStr, bitstream);
+  std::string unitExpStr = unitExpBits.to_string();
+  IOBinaryPrimitives::writeStrBits(unitExpStr, bitstream);
 
   std::bitset<MDPERCE_PERCE_UNIT_EXP> perceUnitExpBits(
       swriter.perception.getPerceptionUnitExponentOrDefault());
@@ -1461,7 +1461,7 @@ auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
   std::vector<bool> packetBits = std::vector<bool>();
   int autype = static_cast<int>(swriter.auType);
   std::bitset<DB_AU_TYPE> auBits(autype);
-  std::string = auStr = auBits.to_string();
+  std::string auStr = auBits.to_string();
   IOBinaryPrimitives::writeStrBits(auStr, packetBits);
   // packetBits.push_back(rau); // PUSH END ACCESS UNIT
   std::bitset<DB_TIMESTAMP> tsBits(swriter.time);
