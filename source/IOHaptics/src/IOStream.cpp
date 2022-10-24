@@ -1758,14 +1758,14 @@ auto IOStream::checkCRC(std::vector<std::vector<bool>> &bitstream, CRC &crc) -> 
 }
 
 auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polynomial) -> bool {
-  for (auto i = 0; i < polynomial.size(); i++) {
+  for (size_t i = 0; i < polynomial.size(); i++) {
     bitstream.push_back(false);
   }
   while (bitstream.size() > polynomial.size()) {
     bool msb = bitstream[0];
     bitstream = std::vector<bool>(bitstream.begin() + 1, bitstream.end());
     if (msb) {
-      for (auto i = 0; i < polynomial.size(); i++) {
+      for (size_t i = 0; i < polynomial.size(); i++) {
         bitstream[i] = bitstream[i] != polynomial[i];
       }
     }
@@ -2083,7 +2083,7 @@ auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, in
                                         .getEffectAt(i);
 
       if (effect.getId() == hapticEffect.getId()) {
-        for (int j = 0; j < effect.getKeyframesSize(); j++) {
+        for (size_t j = 0; j < effect.getKeyframesSize(); j++) {
           hapticEffect.addKeyframe(effect.getKeyframeAt(j));
         }
         effectExist = true;
