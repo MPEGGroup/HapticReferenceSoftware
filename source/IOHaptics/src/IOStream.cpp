@@ -74,6 +74,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
     }
     index++;
   }
+  haptic = sreader.haptic;
   return true;
 }
 
