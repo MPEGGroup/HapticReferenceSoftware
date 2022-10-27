@@ -55,13 +55,13 @@ static constexpr int MDEXP_AVATAR_COUNT = 8;
 
 static constexpr int AVATAR_ID = 8;
 static constexpr int AVATAR_LOD = 8;
-static constexpr int AVATAR_TYPE = 3;
+static constexpr int AVATAR_TYPE = 4;
 // static constexpr int AVATAR_MESH_COUNT = 8;
 // static constexpr int AVATAR_MESH = 32;
 
 static constexpr int MDPERCE_ID = 8;
 // static constexpr int MDPERCE_DESC_SIZE = 8;
-static constexpr int MDPERCE_MODALITY = 4;
+static constexpr int MDPERCE_MODALITY = 8;
 static constexpr int MDPERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_PERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_LIBRARY_COUNT = 16;
@@ -83,7 +83,7 @@ static constexpr int REFDEV_MAX_DISP = 32;
 static constexpr int REFDEV_WEIGHT = 32;
 static constexpr int REFDEV_SIZE = 32;
 static constexpr int REFDEV_CUSTOM = 32;
-static constexpr int REFDEV_TYPE = 3;
+static constexpr int REFDEV_TYPE = 4;
 
 static constexpr int MDTRACK_ID = 8;
 static constexpr int MDTRACK_DEVICE_ID = 8;
@@ -99,9 +99,9 @@ static constexpr int MDTRACK_VERT = 32;
 static constexpr int MDTRACK_BANDS_COUNT = 16;
 
 // static constexpr int MDBAND_ID = 8;
-static constexpr int MDBAND_BAND_TYPE = 2;
-static constexpr int MDBAND_CURVE_TYPE = 3;
-static constexpr int MDBAND_WIN_LEN = 16;
+static constexpr int MDBAND_BAND_TYPE = 3;
+static constexpr int MDBAND_CURVE_TYPE = 4;
+static constexpr int MDBAND_WIN_LEN = 8;
 static constexpr int MDBAND_LOW_FREQ = 16;
 static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_EFFECT_COUNT = 16;
