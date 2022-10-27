@@ -239,7 +239,7 @@ TEST_CASE("write/read BandHeader on wavelet wave") {
     IOBinaryPrimitives::writeBitset(output, file);
     file.close();
 
-    CHECK(std::filesystem::file_size(filename) == 9);
+    CHECK(std::filesystem::file_size(filename) == 8);
   }
 
   SECTION("read band header") {
