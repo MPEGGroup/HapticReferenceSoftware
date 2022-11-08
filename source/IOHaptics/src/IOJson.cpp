@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <IOHaptics/include/IOJsonPrimitives.h>
 #include <IOHaptics/include/IOJson.h>
+#include <IOHaptics/include/IOJsonPrimitives.h>
 #include <iostream>
 
 #if defined(_MSC_VER)
