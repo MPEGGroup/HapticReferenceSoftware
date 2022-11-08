@@ -554,18 +554,16 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
       auto bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
       std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
                                                         types::BodyPartTarget::Unknown);
-      for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-        auto target =
+      for (auto &target : bodyPartTarget) {
+        target =
             static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
-        bodyPartTarget.push_back(target);
       }
       t.setBodyPartTarget(bodyPartTarget);
 
       auto actuatorTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
       std::vector<types::Vector> actuatorTarget(actuatorTargetCount);
-      for (uint8_t i = 0; i < actuatorTargetCount; i++) {
-        types::Vector target = IOBinaryPrimitives::readVector(file);
-        actuatorTarget.push_back(target);
+      for (auto &target : actuatorTarget) {
+        target = IOBinaryPrimitives::readVector(file);
       }
       t.setActuatorTarget(actuatorTarget);
     }
@@ -624,7 +622,8 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
     if (myTrack.getActuatorResolution().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0010;
-    } else {
+    }
+    if (myTrack.getActuatorResolution().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
     }
     if (myTrack.getDirection().has_value()) {
@@ -632,7 +631,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
     }
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalMetadataMask, file);
 
-    if (myTrack.getActuatorResolution().has_value()) {
+    if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
       types::Vector trackResolution = myTrack.getActuatorResolution().value();
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.X, file);
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.Y, file);
@@ -656,7 +655,8 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Y, file);
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Z, file);
       }
-    } else {
+    }
+    if ((optionalMetadataMask & (uint8_t)0b0000'0001) != 0) {
       uint32_t bodyPartMask = myTrack.getBodyPartMask();
       IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
     }
