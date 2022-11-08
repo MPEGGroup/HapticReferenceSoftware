@@ -75,9 +75,9 @@ public:
   [[nodiscard]] static auto
   getIntArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
               const char *valueKey, std::vector<int> &output) -> bool;
-  [[nodiscard]] static auto getVectorArray(
-      const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey,
-      std::vector<haptics::types::Vector> &output) -> bool;
+  [[nodiscard]] static auto
+  getVectorArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                 const char *valueKey, std::vector<haptics::types::Vector> &output) -> bool;
 };
 } // namespace haptics::io
 #endif // IOJSONPRIMITIVES_H
