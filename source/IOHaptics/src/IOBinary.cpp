@@ -545,10 +545,7 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
     auto optionalMetadataMask = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     if ((optionalMetadataMask & 0b0000'0001) != 0) {
       t.setBodyPartMask(IOBinaryPrimitives::readNBytes<uint32_t, 4>(file));
-    } else {
-      t.setBodyPartMask(0);
-    }
-    if ((optionalMetadataMask & 0b0000'0010) != 0) {
+    } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
       t.setActuatorResolution(IOBinaryPrimitives::readVector(file));
 
       auto bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
@@ -622,8 +619,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
     if (myTrack.getActuatorResolution().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0010;
-    }
-    if (myTrack.getActuatorResolution().has_value()) {
+    } else {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
     }
     if (myTrack.getDirection().has_value()) {
@@ -631,7 +627,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
     }
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(optionalMetadataMask, file);
 
-    if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
+    if ((optionalMetadataMask & 0b0000'0010) != 0) {
       types::Vector trackResolution = myTrack.getActuatorResolution().value();
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.X, file);
       IOBinaryPrimitives::writeNBytes<int8_t, 1>(trackResolution.Y, file);
@@ -655,8 +651,7 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::ostream &fi
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Y, file);
         IOBinaryPrimitives::writeNBytes<int8_t, 1>(target.Z, file);
       }
-    }
-    if ((optionalMetadataMask & (uint8_t)0b0000'0001) != 0) {
+    } else if ((optionalMetadataMask & 0b0000'0001) != 0) {
       uint32_t bodyPartMask = myTrack.getBodyPartMask();
       IOBinaryPrimitives::writeNBytes<uint32_t, 4>(bodyPartMask, file);
     }

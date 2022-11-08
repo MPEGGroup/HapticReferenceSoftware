@@ -70,6 +70,8 @@ public:
                              rapidjson::Document &jsonTree) -> void;
   static auto extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
                             rapidjson::Document &jsonTree) -> void;
+  static auto extractBands(types::Track &track, rapidjson::Value &jsonBands,
+                           rapidjson::Document &jsonTree) -> void;
   static auto extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
                              rapidjson::Document &jsonTree) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
