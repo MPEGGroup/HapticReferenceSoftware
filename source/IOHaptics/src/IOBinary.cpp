@@ -552,7 +552,8 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
       t.setActuatorResolution(IOBinaryPrimitives::readVector(file));
 
       auto bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
-      std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount, types::BodyPartTarget::Unknown);
+      std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
+                                                        types::BodyPartTarget::Unknown);
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
         auto target =
             static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
