@@ -92,7 +92,7 @@ IOJsonPrimitives::getIntArray(const rapidjson::GenericObject<true, rapidjson::Va
 
 [[nodiscard]] auto
 IOJsonPrimitives::getStringArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
-                              const char *valueKey, std::vector<std::string> &output) -> bool {
+                                 const char *valueKey, std::vector<std::string> &output) -> bool {
   if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
     return false;
   }
