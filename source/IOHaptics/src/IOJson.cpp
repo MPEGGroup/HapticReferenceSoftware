@@ -33,6 +33,7 @@
 
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOJsonPrimitives.h>
+#include <algorithm>
 #include <iostream>
 
 #if defined(_MSC_VER)
@@ -259,47 +260,40 @@ auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &p
         loadVector(jsonTrack["actuator_resolution"], actuatorResolution)) {
       track.setActuatorResolution(actuatorResolution);
     }
-    if (!IOJsonPrimitives::hasArray(jsonTrack, "body_part_target")) {
+
+    std::vector<std::string> bodyPartTargetString;
+    if (IOJsonPrimitives::getStringArray(jsonTrack, "body_part_target", bodyPartTargetString)) {
       std::vector<types::BodyPartTarget> bodyPartTarget;
-      for (const auto &itv : jsonTrack["body_part_target"].GetArray()) {
-        if (itv.IsString()) {
-          bodyPartTarget.push_back(types::stringToBodyPartTarget.at(itv.GetString()));
-        }
-      }
+      std::transform(bodyPartTargetString.begin(), bodyPartTargetString.end(),
+                     std::back_inserter(bodyPartTarget),
+                     [](const std::string &str) { return types::stringToBodyPartTarget.at(str); });
       track.setBodyPartTarget(bodyPartTarget);
     }
-    if (!IOJsonPrimitives::hasArray(jsonTrack, "actuator_target")) {
-      std::vector<types::Vector> actuatorTarget;
-      for (const auto &itv : jsonTrack["actuator_target"].GetArray()) {
-        types::Vector target{};
-        if (itv.IsObject() && loadVector(itv.GetObject(), target)) {
-          actuatorTarget.push_back(target);
-        }
-      }
+
+    std::vector<types::Vector> actuatorTarget;
+    if (IOJsonPrimitives::getVectorArray(jsonTrack, "actuator_target", actuatorTarget)) {
       track.setActuatorTarget(actuatorTarget);
     }
 
-    if (!IOJsonPrimitives::hasUint(jsonTrack, "frequency_sampling")) {
+    if (IOJsonPrimitives::hasUint(jsonTrack, "frequency_sampling")) {
       auto frequencySampling = jsonTrack["frequency_sampling"].GetUint();
       track.setFrequencySampling(frequencySampling);
     }
 
-    if (!IOJsonPrimitives::hasUint(jsonTrack, "sample_count")) {
+    if (IOJsonPrimitives::hasUint(jsonTrack, "sample_count")) {
       auto frequencySampling = jsonTrack["sample_count"].GetUint();
       track.setSampleCount(frequencySampling);
     }
 
-    if (!IOJsonPrimitives::hasInt(jsonTrack, "reference_device_id")) {
+    if (IOJsonPrimitives::hasInt(jsonTrack, "reference_device_id")) {
       auto device_id = jsonTrack["reference_device_id"].GetInt();
       track.setReferenceDeviceId(device_id);
     }
-    if (!IOJsonPrimitives::hasArray(jsonTrack, "vertices")) {
-      auto jsonVertices = jsonTrack["vertices"].GetArray();
-      for (const auto &jvv : jsonVertices) {
-        if (jvv.IsInt()) {
-          auto vertex = jvv.GetInt();
-          track.addVertex(vertex);
-        }
+
+    std::vector<int> vertices;
+    if (IOJsonPrimitives::getIntArray(jsonTrack, "vertices", vertices)) {
+      for (int &vertex : vertices) {
+        track.addVertex(vertex);
       }
     }
     loadingSuccess = loadingSuccess && loadBands(jsonTrack["bands"], track);

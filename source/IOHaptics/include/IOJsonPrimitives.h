@@ -34,7 +34,9 @@
 #ifndef IOJSONPRIMITIVES_H
 #define IOJSONPRIMITIVES_H
 
+#include <Types/include/Track.h>
 #include <string>
+#include <vector>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -64,6 +66,16 @@ public:
   [[nodiscard]] static auto
   hasArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey)
       -> bool;
+
+  [[nodiscard]] static auto
+  getStringArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                 const char *valueKey, std::vector<std::string> &output) -> bool;
+  [[nodiscard]] static auto
+  getIntArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+              const char *valueKey, std::vector<int> &output) -> bool;
+  [[nodiscard]] static auto IOJsonPrimitives::getVectorArray(
+      const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey,
+      std::vector<haptics::types::Vector> &output) -> bool;
 };
 } // namespace haptics::io
 #endif // IOJSONPRIMITIVES_H
