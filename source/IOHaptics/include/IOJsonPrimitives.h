@@ -31,29 +31,53 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <IOHaptics/include/IOBinaryPrimitives.h>
+#ifndef IOJSONPRIMITIVES_H
+#define IOJSONPRIMITIVES_H
+
+#include <Types/include/Track.h>
+#include <string>
+#include <vector>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996 26451 26495 26812 33010)
+#endif
+#include <rapidjson/document.h>
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 namespace haptics::io {
 
-auto IOBinaryPrimitives::readVector(std::istream &file) -> haptics::types::Vector {
-  auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
-  auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
-  auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
-  return haptics::types::Vector(X, Y, Z);
-}
+class IOJsonPrimitives {
+public:
+  [[nodiscard]] static auto
+  hasInt(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey)
+      -> bool;
+  [[nodiscard]] static auto
+  hasUint(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey)
+      -> bool;
+  [[nodiscard]] static auto
+  hasString(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+            const char *valueKey) -> bool;
+  [[nodiscard]] static auto
+  hasNumber(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+            const char *valueKey) -> bool;
+  [[nodiscard]] static auto
+  hasArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey)
+      -> bool;
 
-auto IOBinaryPrimitives::writeString(const std::string &text, std::ostream &file) -> void {
-  std::string str = text;
-  str.append(1, '\x00');
-  file.write(str.c_str(), static_cast<int>(str.size()));
-}
-
-auto IOBinaryPrimitives::readString(std::istream &file) -> std::string {
-  char c = 0;
-  std::string str;
-  while (file.get(c), c != '\0') {
-    str += c;
-  }
-  return str;
-}
+  [[nodiscard]] static auto getVector(const rapidjson::Value &jsonValue,
+                                      haptics::types::Vector &output) -> bool;
+  [[nodiscard]] static auto
+  getStringArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                 const char *valueKey, std::vector<std::string> &output) -> bool;
+  [[nodiscard]] static auto
+  getIntArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+              const char *valueKey, std::vector<int> &output) -> bool;
+  [[nodiscard]] static auto
+  getVectorArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                 const char *valueKey, std::vector<haptics::types::Vector> &output) -> bool;
+};
 } // namespace haptics::io
+#endif // IOJSONPRIMITIVES_H
