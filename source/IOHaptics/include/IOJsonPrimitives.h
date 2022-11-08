@@ -67,6 +67,8 @@ public:
   hasArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey)
       -> bool;
 
+  [[nodiscard]] static auto getVector(const rapidjson::Value &jsonValue,
+                                      haptics::types::Vector &output) -> bool;
   [[nodiscard]] static auto
   getStringArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
                  const char *valueKey, std::vector<std::string> &output) -> bool;
