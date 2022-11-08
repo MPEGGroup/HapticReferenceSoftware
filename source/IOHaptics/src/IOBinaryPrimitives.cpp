@@ -35,6 +35,13 @@
 
 namespace haptics::io {
 
+auto IOBinaryPrimitives::readVector(std::istream& file) -> haptics::types::Vector {
+  auto X = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+  auto Y = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+  auto Z = IOBinaryPrimitives::readNBytes<int8_t, 1>(file);
+  return haptics::types::Vector(X, Y, Z);
+}
+
 auto IOBinaryPrimitives::writeString(const std::string &text, std::ostream &file) -> void {
   std::string str = text;
   str.append(1, '\x00');

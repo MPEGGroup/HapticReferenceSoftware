@@ -34,6 +34,7 @@
 #ifndef IOBINARYPRIMITIVES_H
 #define IOBINARYPRIMITIVES_H
 
+#include <Types/include/Track.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -49,6 +50,7 @@ constexpr float MAX_PHASE = 3.14159;
 constexpr int BYTE_SIZE = 8;
 class IOBinaryPrimitives {
 public:
+  static auto readVector(std::istream &file) -> haptics::types::Vector;
   static auto readString(std::istream &file) -> std::string;
 
   template <class T, size_t bytesCount> static auto readNBytes(std::istream &file) -> T {
