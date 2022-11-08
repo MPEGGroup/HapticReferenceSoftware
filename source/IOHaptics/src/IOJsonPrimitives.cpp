@@ -112,7 +112,7 @@ IOJsonPrimitives::getStringArray(const rapidjson::GenericObject<true, rapidjson:
   }
   for (const auto &value : jsonObject[valueKey].GetArray()) {
     if (value.IsString()) {
-      output.push_back(value.GetString());
+      output.emplace_back(value.GetString());
     }
   }
   return true;

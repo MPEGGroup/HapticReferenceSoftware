@@ -75,7 +75,7 @@ public:
   [[nodiscard]] static auto
   getIntArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
               const char *valueKey, std::vector<int> &output) -> bool;
-  [[nodiscard]] static auto IOJsonPrimitives::getVectorArray(
+  [[nodiscard]] static auto getVectorArray(
       const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject, const char *valueKey,
       std::vector<haptics::types::Vector> &output) -> bool;
 };
