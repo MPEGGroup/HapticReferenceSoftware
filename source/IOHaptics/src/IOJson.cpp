@@ -31,6 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOJsonPrimitives.h>
 #include <IOHaptics/include/IOJson.h>
 #include <iostream>
 
@@ -215,27 +216,27 @@ auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &p
     }
     auto jsonTrack = jtv.GetObject();
 
-    if (!jsonTrack.HasMember("id") || !jsonTrack["id"].IsInt()) {
+    if (!IOJsonPrimitives::hasInt(jsonTrack, "id")) {
       std::cerr << "Missing or invalid track id" << std::endl;
       continue;
     }
-    if (!jsonTrack.HasMember("description") || !jsonTrack["description"].IsString()) {
+    if (!IOJsonPrimitives::hasString(jsonTrack, "description")) {
       std::cerr << "Missing or invalid track description" << std::endl;
       continue;
     }
-    if (!jsonTrack.HasMember("gain") || !jsonTrack["gain"].IsNumber()) {
+    if (!IOJsonPrimitives::hasNumber(jsonTrack, "gain")) {
       std::cerr << "Missing or invalid track gain" << std::endl;
       continue;
     }
-    if (!jsonTrack.HasMember("mixing_weight") || !jsonTrack["mixing_weight"].IsNumber()) {
+    if (!IOJsonPrimitives::hasNumber(jsonTrack, "mixing_weight")) {
       std::cerr << "Missing or invalid track mixing weight" << std::endl;
       continue;
     }
-    if (!jsonTrack.HasMember("body_part_mask") || !jsonTrack["body_part_mask"].IsUint()) {
+    if (!IOJsonPrimitives::hasUint(jsonTrack, "body_part_mask")) {
       std::cerr << "Missing or invalid track body part mask" << std::endl;
       continue;
     }
-    if (!jsonTrack.HasMember("bands") || !jsonTrack["bands"].IsArray()) {
+    if (!IOJsonPrimitives::hasArray(jsonTrack, "bands")) {
       std::cerr << "Missing or invalid bands" << std::endl;
       continue;
     }
@@ -258,7 +259,7 @@ auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &p
         loadVector(jsonTrack["actuator_resolution"], actuatorResolution)) {
       track.setActuatorResolution(actuatorResolution);
     }
-    if (jsonTrack.HasMember("body_part_target") && jsonTrack["body_part_target"].IsArray()) {
+    if (!IOJsonPrimitives::hasArray(jsonTrack, "body_part_target")) {
       std::vector<types::BodyPartTarget> bodyPartTarget;
       for (const auto &itv : jsonTrack["body_part_target"].GetArray()) {
         if (itv.IsString()) {
@@ -267,7 +268,7 @@ auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &p
       }
       track.setBodyPartTarget(bodyPartTarget);
     }
-    if (jsonTrack.HasMember("actuator_target") && jsonTrack["actuator_target"].IsArray()) {
+    if (!IOJsonPrimitives::hasArray(jsonTrack, "actuator_target")) {
       std::vector<types::Vector> actuatorTarget;
       for (const auto &itv : jsonTrack["actuator_target"].GetArray()) {
         types::Vector target{};
@@ -278,21 +279,21 @@ auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &p
       track.setActuatorTarget(actuatorTarget);
     }
 
-    if (jsonTrack.HasMember("frequency_sampling") && jsonTrack["frequency_sampling"].IsUint()) {
+    if (!IOJsonPrimitives::hasUint(jsonTrack, "frequency_sampling")) {
       auto frequencySampling = jsonTrack["frequency_sampling"].GetUint();
       track.setFrequencySampling(frequencySampling);
     }
 
-    if (jsonTrack.HasMember("sample_count") && jsonTrack["sample_count"].IsUint()) {
+    if (!IOJsonPrimitives::hasUint(jsonTrack, "sample_count")) {
       auto frequencySampling = jsonTrack["sample_count"].GetUint();
       track.setSampleCount(frequencySampling);
     }
 
-    if (jsonTrack.HasMember("reference_device_id") && jsonTrack["reference_device_id"].IsInt()) {
+    if (!IOJsonPrimitives::hasInt(jsonTrack, "reference_device_id")) {
       auto device_id = jsonTrack["reference_device_id"].GetInt();
       track.setReferenceDeviceId(device_id);
     }
-    if (jsonTrack.HasMember("vertices") && jsonTrack["vertices"].IsArray()) {
+    if (!IOJsonPrimitives::hasArray(jsonTrack, "vertices")) {
       auto jsonVertices = jsonTrack["vertices"].GetArray();
       for (const auto &jvv : jsonVertices) {
         if (jvv.IsInt()) {
