@@ -554,18 +554,16 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
       auto bodyPartTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
       std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
                                                         types::BodyPartTarget::Unknown);
-      for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-        auto target =
+      for (auto &target : bodyPartTarget) {
+        target =
             static_cast<types::BodyPartTarget>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
-        bodyPartTarget.push_back(target);
       }
       t.setBodyPartTarget(bodyPartTarget);
 
       auto actuatorTargetCount = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
       std::vector<types::Vector> actuatorTarget(actuatorTargetCount);
-      for (uint8_t i = 0; i < actuatorTargetCount; i++) {
-        types::Vector target = IOBinaryPrimitives::readVector(file);
-        actuatorTarget.push_back(target);
+      for (auto &target : actuatorTarget) {
+        target = IOBinaryPrimitives::readVector(file);
       }
       t.setActuatorTarget(actuatorTarget);
     }
