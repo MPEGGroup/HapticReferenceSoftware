@@ -206,7 +206,6 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
   return loadingSuccess;
 }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (const auto &jtv : jsonTracks.GetArray()) {
@@ -703,7 +702,6 @@ auto IOJson::extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatar
   }
 }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
                            rapidjson::Document &jsonTree) -> void {
   auto numTracks = perception.getTracksSize();

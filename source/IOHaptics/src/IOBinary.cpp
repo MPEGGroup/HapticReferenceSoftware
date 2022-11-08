@@ -531,7 +531,6 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::ostream
   return true;
 }
 
-// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &file) -> bool {
   auto trackCount = IOBinaryPrimitives::readNBytes<unsigned short, 2>(file);
   // for each track
