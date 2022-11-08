@@ -61,25 +61,25 @@ namespace haptics::tools {
 
 [[nodiscard]] auto is_eq(double a, double b) -> bool;
 
-[[nodiscard]] auto linearInterpolation2(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto linearInterpolation2(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double>;
 
-[[nodiscard]] auto cubicInterpolation2(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto cubicInterpolation2(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double>;
 
-[[nodiscard]] auto cubicInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto cubicInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double>;
 
-[[nodiscard]] auto akimaInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto akimaInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double>;
 
-[[nodiscard]] auto bezierInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto bezierInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double>;
 
-[[nodiscard]] auto bsplineInterpolation(std::vector<std::pair<int, double>> points)
+[[nodiscard]] auto bsplineInterpolation(const std::vector<std::pair<int, double>> &points)
     -> std::vector<double>;
 
-[[nodiscard]] auto interpolationCodec(std::vector<std::pair<int, double>> points,
+[[nodiscard]] auto interpolationCodec(const std::vector<std::pair<int, double>> &points,
                                       types::CurveType curveType) -> std::vector<double>;
 
 } // namespace haptics::tools

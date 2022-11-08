@@ -55,18 +55,18 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   rapidjson::IStreamWrapper isw(ifs);
   rapidjson::Document jsonTree;
   if (jsonTree.ParseStream(isw).HasParseError()) {
-    std::cerr << "Invalid GMPG input file: JSON parsing error" << std::endl;
+    std::cerr << "Invalid HJIF input file: JSON parsing error" << std::endl;
     return false;
   }
   if (!jsonTree.IsObject()) {
-    std::cerr << "Invalid GMPG input file: not a JSON object" << std::endl;
+    std::cerr << "Invalid HJIF input file: not a JSON object" << std::endl;
     return false;
   }
   if (!(jsonTree.HasMember("version") && jsonTree.HasMember("date") &&
         jsonTree.HasMember("description") && jsonTree.HasMember("perceptions") &&
         jsonTree["perceptions"].IsArray() && jsonTree.HasMember("avatars") &&
         jsonTree["avatars"].IsArray())) {
-    std::cerr << "Invalid GMPG input file: missing required field" << std::endl;
+    std::cerr << "Invalid HJIF input file: missing required field" << std::endl;
     return false;
   }
   auto version = std::string(jsonTree["version"].GetString());
@@ -135,6 +135,7 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
     }
 
     loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
+
     loadingSuccess = loadingSuccess && loadTracks(jsonPerception["tracks"], perception);
     if (jsonPerception.HasMember("reference_devices") &&
         jsonPerception["reference_devices"].IsArray()) {
@@ -319,8 +320,8 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -
       std::cerr << "Missing or invalid curve type" << std::endl;
       continue;
     }
-    if (!jsonBand.HasMember("window_length") || !jsonBand["window_length"].IsInt()) {
-      std::cerr << "Missing or invalid window length" << std::endl;
+    if (!jsonBand.HasMember("block_length") || !jsonBand["block_length"].IsDouble()) {
+      std::cerr << "Missing or invalid block length" << std::endl;
       continue;
     }
     if (!jsonBand.HasMember("lower_frequency_limit") ||
@@ -340,11 +341,11 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -
 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
     types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
-    int windowLength = jsonBand["window_length"].GetInt();
+    double blockLength = jsonBand["block_length"].GetDouble();
     int lowerLimit = jsonBand["lower_frequency_limit"].GetInt();
     int upperLimit = jsonBand["upper_frequency_limit"].GetInt();
 
-    types::Band band(bandType, curveType, windowLength, lowerLimit, upperLimit);
+    types::Band band(bandType, curveType, blockLength, lowerLimit, upperLimit);
     loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
     track.addBand(band);
@@ -784,7 +785,7 @@ auto IOJson::extractBands(types::Track &track, rapidjson::Value &jsonBands,
                        rapidjson::Value(types::curveTypeToString.at(band.getCurveType()).c_str(),
                                         jsonTree.GetAllocator()),
                        jsonTree.GetAllocator());
-    jsonBand.AddMember("window_length", band.getWindowLength(), jsonTree.GetAllocator());
+    jsonBand.AddMember("block_length", band.getBlockLength(), jsonTree.GetAllocator());
     jsonBand.AddMember("lower_frequency_limit", band.getLowerFrequencyLimit(),
                        jsonTree.GetAllocator());
     jsonBand.AddMember("upper_frequency_limit", band.getUpperFrequencyLimit(),

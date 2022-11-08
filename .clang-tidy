@@ -17,6 +17,12 @@ WarningsAsErrors: '*'
 FormatStyle: file
 
 CheckOptions:
+  - key:    readability-identifier-length.MinimumVariableNameLength
+    value:  1
+  - key:    readability-identifier-length.MinimumParameterNameLength
+    value:  1
+  - key:    readability-identifier-length.MinimumLoopCounterNameLength
+    value:  1
   - key:    readability-function-size.LineThreshold
     value:  116
   - key:    readability-function-size.StatementThreshold
@@ -28,7 +34,7 @@ CheckOptions:
   - key:    readability-function-size.VariableThreshold
     value:  32
   - key:    readability-function-cognitive-complexity.Threshold
-    value:  47
+    value:  60
   - key:    bugprone-easily-swappable-parameters.MinimumLength
     value:  3
   - key:    bugprone-easily-swappable-parameters.ModelImplicitConversions

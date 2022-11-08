@@ -54,10 +54,13 @@ TEST_EFFECT_KEYS = [
     "kinesthetic_effects"
 ]
 TYPE_KEY = "type"
+MODALITY_KEY = "modality"
+EXTENSION_KEY = "extension"
 NAME_KEY = "name"
 HAPTIC_FILE_PATH_KEY = "haptic_file_path"
 REFERENCE_FILE = "reference_file"
 MAIN_FOLDER_KEY = "main_folder"
+COMPARISON_DATA_KEY = "comparison_data"
 REFERENCE_BITRATEPSNR_KEY = "reference_bitratePSNR"
 
 # implements PSNR metric (verified)
@@ -177,8 +180,8 @@ def generateOutputFolderTree(folder: str):
         for testId in range(1, 4):
             test_directory = os.path.join(folder, rf"{testType}1_{testId}")
             os.mkdir(test_directory)
-            os.mkdir(os.path.join(test_directory, rf"MPG"))
-            os.mkdir(os.path.join(test_directory, rf"GMPG"))
+            os.mkdir(os.path.join(test_directory, rf"HMPG"))
+            os.mkdir(os.path.join(test_directory, rf"HJIF"))
             os.mkdir(os.path.join(test_directory, rf"WAV_nopad"))
             os.mkdir(os.path.join(test_directory, rf"WAV_pad"))
 
@@ -239,7 +242,7 @@ def main():
     with open("logs.txt", 'w') as log_file:
         with open('bitratePSNR.csv', 'w', newline='') as csvFile:
             writer = csv.writer(csvFile)
-            firstRow = ["File", "Test set"]
+            firstRow = ["File", "Test set", "Type"]
             for current_bitrate in bitrates:
                 firstRow.append(str(current_bitrate)+"kbps bitrate")
                 firstRow.append(str(current_bitrate)+"kbps psnr")
@@ -253,9 +256,9 @@ def main():
                         continue
                     if filter_by_type and filter_by_type != my_effect[TYPE_KEY]:
                         continue
-                    csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}"]
+                    csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}", f"{my_effect[EXTENSION_KEY]}"]
                     for current_bitrate in bitrates:
-                        formatted_output_name = f"{my_effect[TYPE_KEY]}1_{testId}rv_CRM{CRM_version}_{current_bitrate}_{my_effect[NAME_KEY]}"
+                        formatted_output_name = f"{my_effect[TYPE_KEY]}1-{testId}fvt_{CRM_version}_{my_effect[MODALITY_KEY]}_{current_bitrate}_{my_effect[NAME_KEY]}"
                         input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
                         reference_file_path = my_effect[REFERENCE_FILE]
                         if MAIN_FOLDER_KEY in config[REFERENCE_FILES_KEY]:
@@ -264,28 +267,33 @@ def main():
                         if(not os.path.exists(input_file_path)):
                             print(f"FILE NOT FOUND: {input_file_path}")
                             continue
-                        mpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/MPG/{formatted_output_name}.mpg")
-                        gmpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/GMPG/{formatted_output_name}.gmpg")
+                        hmpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HMPG/{formatted_output_name}.hmpg")
+                        hjif_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HJIF/{formatted_output_name}.hjif")
                         nopad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_nopad/{formatted_output_name}_nopad.wav")
                         pad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_pad/{formatted_output_name}_pad.wav")
 
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {mpg_file_path} -kb {current_bitrate} --binary --refactor", stdout=log_file)
+                        encoding_command = f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} -cf {cutoff} --binary --refactor"
+                        if(disable_wavelet):
+                            encoding_command += " --disable-wavelet"
+                        elif(disable_vectorial):
+                            encoding_command += " --disable-vectorial"
+                        subprocess.run(encoding_command, stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {mpg_file_path} -o {gmpg_file_path}", stdout=log_file)
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {gmpg_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
                         if padding:
                             print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                             addPadding(nopad_file_path, pad_file_path, padding)
-                        bitrate = compute_bitrate(reference_file_path, mpg_file_path)
+                        bitrate = compute_bitrate(reference_file_path, hmpg_file_path)
                         psnr = psnr_two_files(nopad_file_path, reference_file_path, True)
                         csvRow.append(bitrate)
                         csvRow.append(psnr)
                     writer.writerow(csvRow)
 
     
-    if bjontegaard:
+    if compute_bjontegaard:
         try:
             os.makedirs('Bjontegaard/Plots')
         except FileExistsError:
@@ -351,28 +359,38 @@ def main():
 
 if __name__ == "__main__":
     DEFAULT_OUTPUT = "./out"
-    DEFAULT_BITRATES = [2, 16, 64]
+    DEFAULT_BITRATES = [2, 8, 16, 64]
     DEFAULT_PAD = 1
+    DEFAULT_CUTOFF_FREQUENCY = 72.5
+    DEFAULT_DISABLE_WAVELET = False
+    DEFAULT_DISABLE_VECTORIAL = False
     DEFAULT_BJONTEGAARD = False
     DEFAULT_FILTER_BY_TYPE = ""
 
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file", type=str, help="input config file in JSON format")
-    parser.add_argument("CRM_version", type=check_positive, help="version of the CRM format")
+    parser.add_argument("CRM_version", type=str, help="version of the CRM format")
+    parser.add_argument("--cutoff", type=float, default=DEFAULT_CUTOFF_FREQUENCY, help="Cutoff frequency. Default is 72.5")
     parser.add_argument("-o", "--output", type=str, default=DEFAULT_OUTPUT, help=f"output folder (default is `{DEFAULT_OUTPUT}`)")
     parser.add_argument("-b", "--bitrates", type=check_positive, nargs='+', default=DEFAULT_BITRATES, help=f"bitrates used for the encoding (default is `[2, 16, 64]`)")
-    parser.add_argument("--padding", type=check_positive, default=DEFAULT_PAD, help=f"pad in ms used for the syntheziser")
+    parser.add_argument("--padding", type=check_positive, default=DEFAULT_PAD, help=f"pad in seconds used for the syntheziser")
     parser.add_argument("--filter_by_type", type=str, help=f"Process input files matching with this type (if not set every file will be proceed)")
+    parser.add_argument("--disable_wavelet", type=bool, default=DEFAULT_DISABLE_WAVELET, help=f"Desables wavelet encoding")
+    parser.add_argument("--disable_vectorial", type=bool, default=DEFAULT_DISABLE_VECTORIAL, help=f"Desables wavelet encoding")
     parser.add_argument("--bjontegaard", type=bool, default=DEFAULT_BJONTEGAARD, help=f"Calculates Bjontegaard's metrics and visualy display the difference")
     args = parser.parse_args()
 
     config_file = args.config_file
     CRM_version = args.CRM_version
+    cutoff = args.cutoff
+    disable_wavelet = args.disable_wavelet
+    disable_vectorial = args.disable_vectorial
     output_folder = args.output if args.output and not args.output.isspace() else DEFAULT_OUTPUT
     output_folder = os.path.abspath(output_folder)
     bitrates = args.bitrates if args.bitrates else DEFAULT_BITRATES
     padding = args.padding
     filter_by_type = args.filter_by_type
+    compute_bjontegaard = args.bjontegaard
 
     assert not config_file.isspace(), "config_file should be provided"
     assert os.path.isfile(config_file), "config_file should be a file"

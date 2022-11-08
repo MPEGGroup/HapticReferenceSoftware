@@ -35,13 +35,6 @@
 #include <Types/include/Band.h>
 #include <algorithm>
 
-using haptics::tools::akimaInterpolation;
-using haptics::tools::bezierInterpolation;
-using haptics::tools::bsplineInterpolation;
-using haptics::tools::cubicInterpolation;
-using haptics::tools::cubicInterpolation2;
-using haptics::tools::linearInterpolation2;
-
 namespace haptics::types {
 
 [[nodiscard]] auto Band::getBandType() const -> BandType { return bandType; }
@@ -52,9 +45,9 @@ auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
-[[nodiscard]] auto Band::getWindowLength() const -> int { return windowLength; }
+[[nodiscard]] auto Band::getBlockLength() const -> double { return blockLength; }
 
-auto Band::setWindowLength(int newWindowLength) -> void { windowLength = newWindowLength; }
+auto Band::setBlockLength(double newBlockLength) -> void { blockLength = newBlockLength; }
 
 [[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int { return upperFrequencyLimit; }
 
@@ -130,7 +123,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
   case BandType::WaveletWave:
-    return effect->EvaluateWavelet(position, this->getWindowLength());
+    return effect->EvaluateWavelet(position, this->getBlockLength());
   case BandType::Transient: {
     double res = 0;
     if (effect->getPosition() <= position &&
@@ -145,8 +138,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   }
 }
 
-auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequencyLimit,
-                          int highFrequencyLimit) -> std::vector<double> {
+auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
   std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
   case BandType::Curve:
@@ -162,26 +154,26 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
       }
       std::vector<double> effectAmp(keyframes.back().first - keyframes[0].first + 1, 0);
       if (keyframes.size() == 2) {
-        effectAmp = linearInterpolation2(keyframes);
+        effectAmp = haptics::tools::linearInterpolation2(keyframes);
       } else {
         switch (this->curveType) {
         case CurveType::Linear:
-          effectAmp = linearInterpolation2(keyframes);
+          effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;
         case CurveType::Cubic:
-          // effectAmp = cubicInterpolation(keyframes);
-          effectAmp = cubicInterpolation2(keyframes);
+          effectAmp = haptics::tools::cubicInterpolation(keyframes);
           break;
         case CurveType::Akima:
-          effectAmp = akimaInterpolation(keyframes);
+          effectAmp = haptics::tools::akimaInterpolation(keyframes);
           break;
         case CurveType::Bezier:
-          effectAmp = bezierInterpolation(keyframes);
+          effectAmp = haptics::tools::bezierInterpolation(keyframes);
           break;
         case CurveType::Bspline:
-          effectAmp = bsplineInterpolation(keyframes);
+          effectAmp = haptics::tools::bsplineInterpolation(keyframes);
           break;
         default:
+          effectAmp = haptics::tools::cubicInterpolation(keyframes);
           break;
         }
 
@@ -207,7 +199,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, int lowFrequenc
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
         if (it->getPosition() <= position) {
-          bandAmp[ti] += EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
+          bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit);
         }
         if (it == effects.begin()) {
           break;

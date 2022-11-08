@@ -40,12 +40,13 @@ namespace haptics::io {
 auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file) -> bool {
   auto bandType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   band.setBandType(static_cast<types::BandType>(bandType));
+  double blockLength_samp = 0;
   if (band.getBandType() == types::BandType::Curve) {
     auto curveType = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
-    band.setWindowLength(static_cast<int>(windowLength));
+    auto blockLength_code = (double)IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
+    blockLength_samp = pow(2, blockLength_code + 4);
   }
 
   auto lowerFrequencyLimit = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
@@ -53,6 +54,11 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file) -> boo
 
   auto upperFrequencyLimit = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
+
+  if (band.getBandType() == types::BandType::WaveletWave) {
+    double blockLength_ms = blockLength_samp / (double)upperFrequencyLimit * S_2_MS_WAVELET;
+    band.setBlockLength(blockLength_ms);
+  }
 
   auto effectCount = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
   for (unsigned int i = 0; i < effectCount; i++) {
@@ -72,8 +78,13 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::ostream &file) -> bo
     auto curveType = static_cast<uint8_t>(band.getCurveType());
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(curveType, file);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength = static_cast<uint16_t>(band.getWindowLength());
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(windowLength, file);
+    auto bl_ms = band.getBlockLength();
+    auto blockLength_samples = bl_ms / S_2_MS_WAVELET * band.getUpperFrequencyLimit();
+    auto blockLength_code = (int)log2(blockLength_samples) - 4;
+    if (blockLength_code < 0) {
+      std::cerr << "wavelet blocklength too small" << std::endl;
+    }
+    IOBinaryPrimitives::writeNBytes<uint8_t, 1>(blockLength_code, file);
   }
 
   auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
@@ -97,9 +108,9 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file) -> bool 
     auto position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * band.getWindowLength();
+      position = effectIndex * (int)band.getBlockLength();
     } else {
-      position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+      position = static_cast<int>(IOBinaryPrimitives::readNBytes<uint32_t, 4>(file));
     }
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
@@ -144,8 +155,8 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::ostream &file) -> bool
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(effectType, file);
     if ((myEffect.getEffectType() != types::EffectType::Basis ||
          band.getBandType() != types::BandType::WaveletWave)) {
-      auto position = static_cast<uint16_t>(myEffect.getPosition());
-      IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
+      auto position = static_cast<uint32_t>(myEffect.getPosition());
+      IOBinaryPrimitives::writeNBytes<uint32_t, 4>(position, file);
     }
     if (myEffect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(myEffect, file);
@@ -261,7 +272,8 @@ auto IOBinaryBands::writeCurveEffect(types::Effect &effect, std::ostream &file) 
 }
 
 auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::istream &file) -> bool {
-  float phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, -MAX_PHASE, MAX_PHASE);
+  float phase = IOBinaryPrimitives::readFloatNBytes<uint16_t, 2>(file, 0, MAX_PHASE);
+
   effect.setPhase(phase);
   auto baseSignal = IOBinaryPrimitives::readNBytes<uint8_t, 1>(file);
   effect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
@@ -289,7 +301,7 @@ auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::istream &fil
 auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::ostream &file) -> bool {
 
   float phase = effect.getPhase();
-  IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, -MAX_PHASE, MAX_PHASE);
+  IOBinaryPrimitives::writeFloatNBytes<uint16_t, 2>(phase, file, 0, MAX_PHASE);
   auto baseSignal = static_cast<uint8_t>(effect.getBaseSignal());
   IOBinaryPrimitives::writeNBytes<uint8_t, 1>(baseSignal, file);
   auto keyframeCount = static_cast<uint16_t>(effect.getKeyframesSize());
@@ -325,7 +337,7 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::ostream &fi
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file)
     -> bool {
   spiht::Spiht_Dec dec;
-  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
+  auto blocklength = (int)(band.getBlockLength() * (double)band.getUpperFrequencyLimit()) / S2MS;
   auto size = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
 
   std::vector<unsigned char> instream;
@@ -369,7 +381,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     auto effectType =
         static_cast<types::EffectType>(IOBinaryPrimitives::readNBytes<uint8_t, 1>(file));
     myEffect.setEffectType(effectType);
-    auto position = IOBinaryPrimitives::readNBytes<uint16_t, 2>(file);
+    auto position = static_cast<int>(IOBinaryPrimitives::readNBytes<uint32_t, 4>(file));
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file);
@@ -407,8 +419,8 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
     auto timelineEffect = effect.getTimelineEffectAt(i);
     auto effectType = static_cast<uint8_t>(timelineEffect.getEffectType());
     IOBinaryPrimitives::writeNBytes<uint8_t, 1>(effectType, file);
-    auto position = static_cast<uint16_t>(timelineEffect.getPosition());
-    IOBinaryPrimitives::writeNBytes<uint16_t, 2>(position, file);
+    auto position = static_cast<uint32_t>(timelineEffect.getPosition());
+    IOBinaryPrimitives::writeNBytes<uint32_t, 4>(position, file);
 
     if (effect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(effect, file);

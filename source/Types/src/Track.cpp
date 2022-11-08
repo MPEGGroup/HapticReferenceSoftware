@@ -88,10 +88,10 @@ auto Track::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Track::generateBand(BandType bandType, CurveType curveType, int windowLength,
+auto Track::generateBand(BandType bandType, CurveType curveType, double blockLength,
                          int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, windowLength, lowerFrequencyLimit, upperFrequencyLimit);
+  Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
@@ -141,8 +141,7 @@ auto Track::Evaluate(double position) -> double {
 auto Track::EvaluateTrack(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
   std::vector<double> trackAmp(sampleCount, 0); // intialiser � 0?
   for (haptics::types::Band &b : bands) {
-    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, b.getLowerFrequencyLimit(),
-                                                   b.getUpperFrequencyLimit());
+    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad);
     for (uint32_t i = 0; i < bandAmp.size(); i++) {
       trackAmp[i] += bandAmp[i];
       if (trackAmp[i] < -1) {

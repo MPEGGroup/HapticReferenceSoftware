@@ -48,21 +48,12 @@
 
 namespace haptics::encoder {
 
-static constexpr int BITBUDGET_2KBS = 3;
-static constexpr int BITBUDGET_16KBS = 16;
-static constexpr int BITBUDGET_64KBS = 66;
 static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
-static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_2 = 20;
-static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_16 = 72.5;
-static constexpr float KINESTHETIC_CUTOFF_FREQUENCY_64 = 72.5;
-static constexpr float CUTOFF_FREQUENCY_2 = 0;
-static constexpr float CUTOFF_FREQUENCY_16 = 72.5;
-static constexpr float CUTOFF_FREQUENCY_64 = 72.5;
-static constexpr int WINDOW_LENGTH_2 = 1024;
-static constexpr int WINDOW_LENGTH_16 = 512;
-static constexpr int WINDOW_LENGTH_64 = 512;
+static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72.5;
+static constexpr int DEFAULT_BLOCK_LENGTH_SMP = 1024; // in samples
+static constexpr int DEFAULT_BIT_BUDGET = 16;
 static constexpr double PARAM_A = -6.506;
 static constexpr double PARAM_B = 3.433;
 static constexpr double PARAM_C = -0.04421;
@@ -70,100 +61,54 @@ static constexpr double PARAM_D = 0.0002573;
 
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
-  int wavelet_windowLength = 0;
+  int wavelet_blockLength = 0;
   int wavelet_bitbudget = 0;
+  bool wavelet_enabled = true;
+  bool vectorial_enabled = true;
 
   explicit EncodingConfig() = default;
-  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_windowLength,
-                          int _wavelet_bitbudget)
+  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_blockLength,
+                          int _wavelet_bitbudget, bool _wavelet_enabled, bool _vectorial_enabled)
       : curveFrequencyLimit(_curveFrequencyLimit)
-      , wavelet_windowLength(_wavelet_windowLength)
-      , wavelet_bitbudget(_wavelet_bitbudget){};
+      , wavelet_blockLength(_wavelet_blockLength)
+      , wavelet_bitbudget(_wavelet_bitbudget)
+      , wavelet_enabled(_wavelet_enabled)
+      , vectorial_enabled(_vectorial_enabled){};
 
-  auto static generateConfig(int bitrate = 2, bool kinestheticData = false) -> EncodingConfig {
+  auto static generateDefaultConfig(bool enable_wavelet, bool enable_vectorial) -> EncodingConfig {
 
-    int wavelet_windowLength = 0;
-    double curveFrequencyLimit = 0;
-    int wavelet_bitbudget = 0;
-    switch (bitrate) {
-    case BITR_2:
-      wavelet_bitbudget = BITBUDGET_2KBS;
-      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_2 : CUTOFF_FREQUENCY_2;
-      wavelet_windowLength = WINDOW_LENGTH_2;
-      break;
-    case BITR_16:
-      wavelet_bitbudget = BITBUDGET_16KBS;
-      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_16 : CUTOFF_FREQUENCY_16;
-      wavelet_windowLength = WINDOW_LENGTH_16;
-      break;
-    case BITR_64:
-      wavelet_bitbudget = BITBUDGET_64KBS;
-      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_64 : CUTOFF_FREQUENCY_64;
-      wavelet_windowLength = WINDOW_LENGTH_16;
-      break;
-    default:
-      std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
-      wavelet_bitbudget = BITBUDGET_2KBS;
-      break;
-    }
+    int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP;
+    double curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
+    int wavelet_bitbudget = DEFAULT_BIT_BUDGET;
 
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
+                          enable_wavelet, enable_vectorial);
   }
 
-  auto static generateConfigBudget(int bitrate = 2, int budget = 3, bool kinestheticData = false)
+  auto static generateConfigBudget(int budget, double curveFrequencyLimit, bool enable_wavelet,
+                                   bool enable_vectorial,
+                                   int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
+      -> EncodingConfig {
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, budget, enable_wavelet,
+                          enable_vectorial);
+  }
+
+  auto static generateConfigParam(int bitrate, double curveFrequencyLimit, bool enable_wavelet,
+                                  bool enable_vectorial,
+                                  int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
       -> EncodingConfig {
 
-    int wavelet_windowLength = 0;
-    double curveFrequencyLimit = 0;
-    int wavelet_bitbudget = 0;
-    switch (bitrate) {
-    case BITR_2:
-      wavelet_bitbudget = budget;
-      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_2 : CUTOFF_FREQUENCY_2;
-      wavelet_windowLength = WINDOW_LENGTH_2;
-      break;
-    case BITR_16:
-      wavelet_bitbudget = budget;
-      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_16 : CUTOFF_FREQUENCY_16;
-      wavelet_windowLength = WINDOW_LENGTH_16;
-      break;
-    case BITR_64:
-      wavelet_bitbudget = budget;
-      curveFrequencyLimit = kinestheticData ? KINESTHETIC_CUTOFF_FREQUENCY_64 : CUTOFF_FREQUENCY_64;
-      wavelet_windowLength = WINDOW_LENGTH_16;
-      break;
-    default:
-      std::cout << "bitrate not supported, switching to 2 kb/s" << std::endl;
-      wavelet_bitbudget = BITBUDGET_2KBS;
-      break;
-    }
-
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
-  }
-
-  auto static generateConfigParam(int bitrate = 2, bool kinestheticData = false) -> EncodingConfig {
-
-    int wavelet_windowLength = WINDOW_LENGTH_2;
-    double curveFrequencyLimit = 0;
-    if (kinestheticData) {
-      if (bitrate <= BITR_2) {
-        curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_2;
-      } else if (bitrate <= BITR_16) {
-        curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_16;
-      } else {
-        curveFrequencyLimit = KINESTHETIC_CUTOFF_FREQUENCY_64;
-      }
-    }
     auto temp = (double)bitrate;
     auto wavelet_bitbudget =
         (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
-    auto max_bitbudget = (int)(log2(wavelet_windowLength) - 1) * MAXBITS;
+    auto max_bitbudget = (int)(log2(wavelet_blockLength) - 1) * MAXBITS;
     if (wavelet_bitbudget > max_bitbudget) {
       wavelet_bitbudget = max_bitbudget;
     } else if (wavelet_bitbudget < 1) {
       wavelet_bitbudget = 1;
     }
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget);
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
+                          enable_wavelet, enable_vectorial);
   }
 };
 
