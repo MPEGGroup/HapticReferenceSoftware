@@ -217,8 +217,8 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
 
 auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool {
   int index = 0;
-  int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
-  MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
+  IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
+  // MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
   int syncInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_SYNC);
   bool sync = syncInt == 1;
   if (sreader.waitSync && sync) {
@@ -270,7 +270,7 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::string durationStr = durationBits.to_string();
   IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
 
-  int length = (listPackets.size() + 1) * static_cast<int>(H_NBITS / BYTE_SIZE);
+  int length = static_cast<int>((listPackets.size() + 1) * (H_NBITS / BYTE_SIZE));
   std::vector<bool> packetFusion = std::vector<bool>();
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
@@ -305,7 +305,7 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
     length += static_cast<int>(H_NBITS / BYTE_SIZE) + readPacketLength(bufPacket);
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
-  std::bitset<UNIT_SYNC> syncBits(sync);
+  std::bitset<UNIT_SYNC> syncBits(static_cast<int>(sync));
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
   int duration = 0;
@@ -335,7 +335,8 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
     length += static_cast<int>(H_NBITS / BYTE_SIZE) + readPacketLength(bufPacket);
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
-  bool sync = true;
+  swriter.auType = AUType::RAU;
+  bool sync = (swriter.auType == AUType::RAU);
   std::bitset<UNIT_SYNC> syncBits(sync);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);

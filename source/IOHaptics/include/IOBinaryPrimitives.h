@@ -155,15 +155,14 @@ public:
 
   static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
 
-    if (bitstream.size() == 0) {
+    if (bitstream.empty()) {
       return EXIT_FAILURE;
     }
     if (bitstream[startIdx]) {
       bitstream.flip();
       return -(readUInt(bitstream, startIdx, length) + 1);
-    } else {
-      return readUInt(bitstream, startIdx, length);
     }
+    return readUInt(bitstream, startIdx, length);
   }
 
   static auto readString(std::vector<bool> bitstream, int &startIdx, int length) -> std::string {

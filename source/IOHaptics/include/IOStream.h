@@ -45,6 +45,7 @@
 namespace haptics::io {
 
 static constexpr int TIME_TO_MS = 1000;
+static constexpr int DEFAULT_PACKET_DURATION = 128;
 
 static constexpr uint32_t CRC32_POLYNOMIAL = 2187366103;
 static constexpr uint16_t CRC16_POLYNOMIAL = 49185;
@@ -92,8 +93,8 @@ public:
 
   struct StreamWriter {
     int time = 0;
-    int timescale = 1000;
-    int packetDuration = 128;
+    int timescale = TIME_TO_MS;
+    int packetDuration = DEFAULT_PACKET_DURATION;
     types::Haptics haptic;
     types::Perception perception;
     types::Track track;

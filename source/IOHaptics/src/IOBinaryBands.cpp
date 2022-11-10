@@ -389,7 +389,7 @@ auto IOBinaryBands::readVectorialEffect(types::Effect &effect, int &idx,
   auto baseSignal = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_BASE_SIGNAL);
   effect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
   auto keyframeCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
-  for (unsigned short keyframeIndex = 0; keyframeIndex < keyframeCount; keyframeIndex++) {
+  for (int keyframeIndex = 0; keyframeIndex < keyframeCount; keyframeIndex++) {
     auto amplitudeFrequencyMask = IOBinaryPrimitives::readUInt(bitstream, idx, KEYFRAME_MASK);
     auto myKeyframe = types::Keyframe(std::nullopt, std::nullopt, std::nullopt);
     if ((amplitudeFrequencyMask & 0b0000'0001) != 0) {
