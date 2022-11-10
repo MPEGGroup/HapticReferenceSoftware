@@ -180,7 +180,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   std::vector<std::vector<bool>> bufUnit = std::vector<std::vector<bool>>();
   swriter.time = 0;
   for (auto &packet : dataPackets) {
-    if (bufUnit.size() == 0) {
+    if (bufUnit.empty()) {
       bufUnit.push_back(packet);
     } else {
       std::vector<bool> lastDataPacketPayload = std::vector<bool>(
@@ -305,7 +305,8 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
     length += static_cast<int>(H_NBITS / BYTE_SIZE) + readPacketLength(bufPacket);
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
-  std::bitset<UNIT_SYNC> syncBits(static_cast<int>(sync));
+  int syncInt = (sync == true) ? 0 : 1;
+  std::bitset<UNIT_SYNC> syncBits(syncInt);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
   int duration = 0;
@@ -336,7 +337,7 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
   swriter.auType = AUType::RAU;
-  bool sync = (swriter.auType == AUType::RAU);
+  int sync = swriter.auType == AUType::RAU ? 0 : 1;
   std::bitset<UNIT_SYNC> syncBits(sync);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
@@ -355,8 +356,7 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
   if (listPackets.size() != 2) {
     return false;
   }
-  bool sync = false;
-  std::bitset<UNIT_SYNC> syncBits(sync);
+  std::bitset<UNIT_SYNC> syncBits(0);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
   int start = swriter.time;
@@ -1763,7 +1763,7 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
 
     int effectPos = static_cast<int>(swriter.effects[l].getPosition()) - swriter.time;
     // const int FX_POSITION_SIGNED = FX_POSITION -1;
-    bool carry = true;
+    // bool carry = true;
     std::bitset<EFFECT_POSITION> effectPosBits(effectPos);
     std::string effectPosStr = effectPosBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectPosStr, packetBits);
@@ -1892,9 +1892,8 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
     }
     return addEffectToHaptic(sreader.haptic, perceptionIndex, trackIndex, sreader.bandStream.index,
                              effects);
-  } else {
-    return true;
   }
+  return true;
 }
 
 auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<bool> &packetCRC,
