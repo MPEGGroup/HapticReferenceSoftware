@@ -224,12 +224,12 @@ TEST_CASE("Track::findWaveBandAvailable with correct return",
 }
 
 TEST_CASE("haptics::types::Track testing direction") {
-  using haptics::types::Direction;
   using haptics::types::Track;
+  using haptics::types::Vector;
   Track track(1, "I'm a placeholder", 0, 0, 1);
 
   SECTION("checking direction") {
-    const Direction testing_direction(0, -127, 42);
+    const Vector testing_direction(0, -127, 42);
     track.setDirection(testing_direction);
 
     REQUIRE(track.getDirection().has_value());
@@ -241,5 +241,72 @@ TEST_CASE("haptics::types::Track testing direction") {
   SECTION("checking null direction") {
     track.setDirection(std::nullopt);
     CHECK_FALSE(track.getDirection().has_value());
+  }
+}
+
+TEST_CASE("haptics::types::Track testing actuator resolution") {
+  using haptics::types::Track;
+  using haptics::types::Vector;
+  Track track(1, "I'm a placeholder", 0, 0, 1);
+
+  SECTION("checking track resolution") {
+    const Vector testing_trackResolution(0, -127, 42);
+    track.setActuatorResolution(testing_trackResolution);
+
+    REQUIRE(track.getActuatorResolution().has_value());
+    CHECK(track.getActuatorResolution().value().X == testing_trackResolution.X);
+    CHECK(track.getActuatorResolution().value().Y == testing_trackResolution.Y);
+    CHECK(track.getActuatorResolution().value().Z == testing_trackResolution.Z);
+  }
+
+  SECTION("checking null track resolution") {
+    track.setActuatorResolution(std::nullopt);
+    CHECK_FALSE(track.getActuatorResolution().has_value());
+  }
+}
+
+TEST_CASE("haptics::types::Track testing bodypart target") {
+  using haptics::types::BodyPartTarget;
+  using haptics::types::Track;
+  Track track(1, "I'm a placeholder", 0, 0, 1);
+
+  SECTION("checking track bodypart target") {
+    const std::vector<BodyPartTarget> testing_bodyPartTarget = {BodyPartTarget::Unknown};
+    track.setBodyPartTarget(testing_bodyPartTarget);
+
+    REQUIRE(track.getBodyPartTarget().value_or(std::vector<BodyPartTarget>{}).size() == 1);
+    CHECK(track.getBodyPartTarget().value()[0] == testing_bodyPartTarget[0]);
+  }
+
+  SECTION("checking null track bodypart target") {
+    track.setBodyPartTarget(std::nullopt);
+    CHECK_FALSE(track.getBodyPartTarget().has_value());
+  }
+}
+
+TEST_CASE("haptics::types::Track testing actuator target") {
+  using haptics::types::Track;
+  using haptics::types::Vector;
+  Track track(1, "I'm a placeholder", 0, 0, 1);
+
+  SECTION("checking track actuator target") {
+    const std::vector<Vector> testing_actuatorTarget = {Vector{0, -127, 42}, Vector{43, -1, 4},
+                                                        Vector{-35, 120, 9}};
+    track.setActuatorTarget(testing_actuatorTarget);
+
+    REQUIRE(track.getActuatorTarget().value_or(std::vector<Vector>{}).size() ==
+            testing_actuatorTarget.size());
+    std::vector<Vector> actuatorTargetList = track.getActuatorTarget().value();
+    auto testing_it = testing_actuatorTarget.begin();
+    for (auto it = actuatorTargetList.begin();
+         it < actuatorTargetList.end() && testing_it < testing_actuatorTarget.end();
+         it++, testing_it++) {
+      CHECK(*it == *testing_it);
+    }
+  }
+
+  SECTION("checking null track actuator target") {
+    track.setActuatorTarget(std::nullopt);
+    CHECK_FALSE(track.getActuatorTarget().has_value());
   }
 }

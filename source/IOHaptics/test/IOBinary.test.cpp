@@ -359,7 +359,7 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
-  const haptics::types::Direction testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
+  const haptics::types::Vector testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
                                       testingBodyPartMask_track0);
@@ -391,6 +391,18 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track2 = 0;
   const std::vector<int> testingVertices_track2 = {0, 6};
   const size_t testingBandsCount_track2 = 1;
+  const haptics::types::Vector testingTrackResolution_track2(32, 110, 3);
+  const std::vector<haptics::types::Vector> testingActuatorTarget_track2{
+      haptics::types::Vector{31, 109, 2},
+      haptics::types::Vector{0, 0, 0},
+      haptics::types::Vector{15, 42, 1},
+  };
+  const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_track2{
+      haptics::types::BodyPartTarget::Left,         haptics::types::BodyPartTarget::Index,
+      haptics::types::BodyPartTarget::ThirdPhalanx, haptics::types::BodyPartTarget::Plus,
+      haptics::types::BodyPartTarget::Right,        haptics::types::BodyPartTarget::Leg,
+      haptics::types::BodyPartTarget::Minus,        haptics::types::BodyPartTarget::Hallux,
+  };
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
                                       testingBodyPartMask_track2);
@@ -400,6 +412,9 @@ TEST_CASE("write/read file header for track testing") {
   for (size_t i = 0; i < testingBandsCount_track2; i++) {
     testingTrack2.generateBand();
   }
+  testingTrack2.setActuatorResolution(testingTrackResolution_track2);
+  testingTrack2.setActuatorTarget(testingActuatorTarget_track2);
+  testingTrack2.setBodyPartTarget(testingBodyPartTarget_track2);
 
   testingPerception0.addTrack(testingTrack0);
   testingPerception0.addTrack(testingTrack1);
@@ -419,7 +434,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 146;
+        testingVertices_track2.size() + 164;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -455,6 +470,9 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandsSize() == testingBandsCount_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getBodyPartTarget().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorTarget().has_value());
 
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
@@ -465,6 +483,9 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getBodyPartTarget().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorTarget().has_value());
 
     REQUIRE(res.getPerceptionAt(1).getTracksSize() == 1);
     CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
@@ -485,6 +506,24 @@ TEST_CASE("write/read file header for track testing") {
     }
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
     CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartMask() == 0);
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().value() ==
+          testingTrackResolution_track2);
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().has_value());
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value().size() ==
+            testingBodyPartTarget_track2.size());
+    for (size_t i = 0; i < testingBodyPartTarget_track2.size(); i++) {
+      CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value()[i] ==
+            testingBodyPartTarget_track2[i]);
+    }
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().has_value());
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().value().size() ==
+            testingActuatorTarget_track2.size());
+    for (size_t i = 0; i < testingActuatorTarget_track2.size(); i++) {
+      CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().value()[i] ==
+            testingActuatorTarget_track2[i]);
+    }
 
     std::filesystem::remove(filename);
     CHECK(!std::filesystem::is_regular_file(filename));
