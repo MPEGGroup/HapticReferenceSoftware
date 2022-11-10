@@ -72,8 +72,9 @@ public:
   auto EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
   auto getBandTimeLength() -> double;
 
-private:
   static constexpr double TRANSIENT_DURATION_MS = 22;
+
+private:
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit) -> double;
 

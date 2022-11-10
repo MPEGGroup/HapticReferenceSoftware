@@ -74,8 +74,12 @@ auto help() -> void {
          "provided "
          "the encoder will output a file in a human-readable format"
       << std::endl
+      << "--packet_duration\t\t\t The duration of the packets for the streaming format. Uint > 0, "
+         "should be a power of 2. If the streaming format is choosen and this value is not "
+         "provided, the default value is 128ms."
+      << std::endl
       << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
-         "be placed in the library and replaced by a referennce"
+         "be placed in the library and replaced by a reference"
       << "\t-l, --linearize\t\t\tthe file will be linearized. Every referenced effect from the "
          "library will be copied into the main timeline."
       << std::endl
@@ -277,7 +281,11 @@ auto main(int argc, char *argv[]) -> int {
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
     IOBinary::writeFile(hapticFile, output);
   } else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
-    IOStream::writeFile(hapticFile, output);
+    int packetDuration = 128;
+    if (inputParser.cmdOptionExists("--packet_duration")) {
+      packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
+    }
+    IOStream::writeFile(hapticFile, output, packetDuration);
   } else {
     IOJson::writeFile(hapticFile, output);
   }

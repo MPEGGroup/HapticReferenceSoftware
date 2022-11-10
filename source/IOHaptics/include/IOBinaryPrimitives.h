@@ -139,7 +139,7 @@ public:
       bitstream.push_back(c == '1');
     }
   }
-  static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
+  static auto readUInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
     std::string tsBits;
     for (int i = startIdx; i < startIdx + length; i++) {
       if ((bitstream[i])) {
@@ -151,6 +151,19 @@ public:
     startIdx += length;
     auto inv = std::stoul(tsBits, nullptr, 2);
     return static_cast<int>(inv);
+  }
+
+  static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
+
+    if (bitstream.size() == 0) {
+      return EXIT_FAILURE;
+    }
+    if (bitstream[startIdx]) {
+      bitstream.flip();
+      return -(readUInt(bitstream, startIdx, length) + 1);
+    } else {
+      return readUInt(bitstream, startIdx, length);
+    }
   }
 
   static auto readString(std::vector<bool> bitstream, int &startIdx, int length) -> std::string {

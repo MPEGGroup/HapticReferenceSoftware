@@ -45,6 +45,7 @@ constexpr int CONST_8 = 8;
 constexpr size_t bl = 512;
 constexpr int BITS_EFFECT = 15;
 constexpr int MOD_VAL = 256;
+constexpr int PACKET_NUMBER = 8;
 constexpr float scalar = 1.5;
 
 //  NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
@@ -181,7 +182,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   }
 
   const std::vector<std::tuple<int, float, int>> testingKeyframes_effect1 = {
-      {0, 0, 90}, {176, .2143543, 90}, {177, 1, 65}, {52345, .453, 300}};
+      {0, 0, 90}, {176, .2143543, 90}, {1024, 1, 65}, {52345, .453, 300}};
   for (auto value : testingKeyframes_effect1) {
     haptics::types::Effect testingEffect(std::get<0>(value), 0, haptics::types::BaseSignal::Sine,
                                          haptics::types::EffectType::Basis);
@@ -219,55 +220,17 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   testingHaptic.addPerception(testingPerception1);
   testingHaptic.addAvatar(avatar1);
   testingHaptic.addAvatar(avatar2);
-  SECTION("Write metadataExperience") {
+
+  SECTION("MetadataExperience") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
-
-    REQUIRE(succeed);
-    CHECK(bitstream.size() == 16);
-    const uintmax_t sizeAvatar1 = haptics::io::AVATAR_ID + haptics::io::AVATAR_LOD +
-                                  haptics::io::AVATAR_TYPE + haptics::io::AVATAR_MESH_COUNT +
-                                  (avatar1.getMesh().value().size() * haptics::io::BYTE_SIZE);
-
-    const uintmax_t sizeAvatar2 =
-        haptics::io::AVATAR_ID + haptics::io::AVATAR_LOD + haptics::io::AVATAR_TYPE;
-
-    const uintmax_t sizeMetaExperience =
-        haptics::io::MDEXP_VERSION + (haptics::io::BYTE_SIZE * testingHaptic.getVersion().size()) +
-        haptics::io::MDEXP_DATE + (haptics::io::BYTE_SIZE * testingHaptic.getDate().size()) +
-        haptics::io::MDEXP_DESC_SIZE +
-        (haptics::io::BYTE_SIZE * testingHaptic.getDescription().size()) +
-        haptics::io::MDEXP_PERC_COUNT + haptics::io::MDEXP_AVATAR_COUNT + sizeAvatar1 + sizeAvatar2;
-    uintmax_t sizeMetaExpBytes =
-        (CONST_8 - (sizeMetaExperience % CONST_8) + sizeMetaExperience) / CONST_8;
-
-    std::vector<bool> metaExpPacket = bitstream[0];
-    int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
-    std::vector<bool> packetLength(metaExpPacket.begin() + beginIdx,
-                                   metaExpPacket.begin() + beginIdx +
-                                       haptics::io::H_PAYLOAD_LENGTH);
-    std::string packetLengthStr;
-    for (auto c : packetLength) {
-      if (c) {
-        packetLengthStr += "1";
-      } else {
-        packetLengthStr += "0";
-      }
-    }
-    uintmax_t metaExpLen = static_cast<uintmax_t>(
-        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
-    CHECK(metaExpLen == sizeMetaExpBytes);
-  }
-
-  SECTION("Read metadataExperience") {
-    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
+    int packetDuration = 128;
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
-
-      succeed &= IOStream::readNALu(packetBits, buffer, crc);
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
+      // buffer.time += buffer.packetDuration;
     }
     REQUIRE(succeed);
     readHaptic = buffer.haptic;
@@ -293,70 +256,15 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
       }
     }
   }
-
-  SECTION("Write metadataPerception") {
+  SECTION("RMetadataPerception") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed =
-        IOStream::writeNALu(haptics::io::NALuType::MetadataPerception, testingHaptic, 0, bitstream);
-    REQUIRE(succeed);
-    CHECK(bitstream.size() == 2);
-    const uintmax_t sizeMetaRefDev0 =
-        haptics::io::REFDEV_ID + haptics::io::REFDEV_NAME_LENGTH +
-        (haptics::io::BYTE_SIZE * testingPerception0.getReferenceDeviceAt(0).getName().size()) +
-        haptics::io::REFDEV_BODY_PART_MASK + haptics::io::REFDEV_OPT_FIELDS +
-        haptics::io::REFDEV_MAX_FREQ + haptics::io::REFDEV_MIN_FREQ + haptics::io::REFDEV_MAX_AMP +
-        haptics::io::REFDEV_CUSTOM + haptics::io::REFDEV_TYPE;
-
-    const uintmax_t sizeMetaRefDev1 =
-        haptics::io::REFDEV_ID + haptics::io::REFDEV_NAME_LENGTH +
-        (haptics::io::BYTE_SIZE * testingPerception0.getReferenceDeviceAt(1).getName().size()) +
-        haptics::io::REFDEV_BODY_PART_MASK + haptics::io::REFDEV_OPT_FIELDS +
-        haptics::io::REFDEV_MAX_FREQ + haptics::io::REFDEV_MIN_FREQ + haptics::io::REFDEV_RES_FREQ +
-        haptics::io::REFDEV_MAX_AMP + haptics::io::REFDEV_IMPEDANCE + haptics::io::REFDEV_MAX_VOLT +
-        haptics::io::REFDEV_MAX_CURR + haptics::io::REFDEV_MAX_DISP + haptics::io::REFDEV_WEIGHT +
-        haptics::io::REFDEV_SIZE + haptics::io::REFDEV_CUSTOM + haptics::io::REFDEV_TYPE;
-
-    const uintmax_t sizeMetaRefDev2 =
-        haptics::io::REFDEV_ID + haptics::io::REFDEV_NAME_LENGTH +
-        (haptics::io::BYTE_SIZE * testingPerception0.getReferenceDeviceAt(2).getName().size()) +
-        haptics::io::REFDEV_BODY_PART_MASK + haptics::io::REFDEV_OPT_FIELDS;
-
-    const uintmax_t sizeMetaPerception0 =
-        haptics::io::MDPERCE_ID + haptics::io::MDPERCE_DESC_SIZE +
-        (haptics::io::BYTE_SIZE * testingPerception0.getDescription().size()) +
-        haptics::io::MDPERCE_MODALITY + haptics::io::AVATAR_ID + haptics::io::MDPERCE_FXLIB_COUNT +
-        haptics::io::MDPERCE_UNIT_EXP + haptics::io::MDPERCE_PERCE_UNIT_EXP +
-        haptics::io::MDPERCE_REFDEVICE_COUNT + haptics::io::MDPERCE_TRACK_COUNT + sizeMetaRefDev0 +
-        sizeMetaRefDev1 + sizeMetaRefDev2;
-    uintmax_t sizeMetaPerceBytes =
-        ((CONST_8 - (sizeMetaPerception0 % CONST_8)) + sizeMetaPerception0) / CONST_8;
-    std::vector<bool> metaPerception0Packet = bitstream[0];
-    int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
-    std::vector<bool> packetLength(metaPerception0Packet.begin() + beginIdx,
-                                   metaPerception0Packet.begin() + beginIdx +
-                                       haptics::io::H_PAYLOAD_LENGTH);
-    std::string packetLengthStr;
-    for (auto c : packetLength) {
-      if (c) {
-        packetLengthStr += "1";
-      } else {
-        packetLengthStr += "0";
-      }
-    }
-    uintmax_t metaPerception0Len = static_cast<uintmax_t>(
-        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
-    CHECK(metaPerception0Len == sizeMetaPerceBytes);
-  }
-
-  SECTION("Read metadataPerception") {
-    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
+    int packetDuration = 128;
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
-
     for (auto &packetBits : bitstream) {
-      succeed &= IOStream::readNALu(packetBits, buffer, crc);
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
     }
 
     REQUIRE(succeed);
@@ -445,80 +353,15 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
       }
     }
   }
-
-  SECTION("Write metadataTrack") {
+  SECTION("MetadataTrack") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed =
-        IOStream::writeNALu(haptics::io::NALuType::MetadataTrack, testingHaptic, 0, bitstream);
-    REQUIRE(succeed);
-    CHECK(bitstream.size() == 3);
-    const uintmax_t sizeMetaTrack0 =
-        haptics::io::MDTRACK_ID + haptics::io::MDPERCE_ID + haptics::io::MDTRACK_DESC_LENGTH +
-        (haptics::io::BYTE_SIZE * testingTrack0.getDescription().size()) + haptics::io::REFDEV_ID +
-        haptics::io::MDTRACK_GAIN + haptics::io::MDTRACK_MIXING_WEIGHT +
-        haptics::io::MDTRACK_BODY_PART_MASK + haptics::io::MDTRACK_SAMPLING_FREQUENCY +
-        haptics::io::MDTRACK_DIRECTION_MASK + haptics::io::MDTRACK_VERT_COUNT +
-        (testingTrack0.getVerticesSize() * haptics::io::MDTRACK_VERT) +
-        haptics::io::MDTRACK_BANDS_COUNT;
-
-    uintmax_t sizeMetaTrack0Bytes =
-        ((CONST_8 - (sizeMetaTrack0 % CONST_8)) + sizeMetaTrack0) / CONST_8;
-
-    const uintmax_t sizeMetaTrack1 =
-        haptics::io::MDTRACK_ID + haptics::io::MDPERCE_ID + haptics::io::MDTRACK_DESC_LENGTH +
-        (haptics::io::BYTE_SIZE * testingTrack1.getDescription().size()) + haptics::io::REFDEV_ID +
-        haptics::io::MDTRACK_GAIN + haptics::io::MDTRACK_MIXING_WEIGHT +
-        haptics::io::MDTRACK_BODY_PART_MASK + haptics::io::MDTRACK_SAMPLING_FREQUENCY +
-        haptics::io::MDTRACK_DIRECTION_MASK + haptics::io::MDTRACK_VERT_COUNT +
-        haptics::io::MDTRACK_BANDS_COUNT;
-
-    uintmax_t sizeMetaTrack1Bytes =
-        ((CONST_8 - (sizeMetaTrack1 % CONST_8)) + sizeMetaTrack1) / CONST_8;
-
-    std::vector<bool> metaTrack0Packet = bitstream[0];
-    int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
-    std::vector<bool> packetLength(metaTrack0Packet.begin() + beginIdx,
-                                   metaTrack0Packet.begin() + beginIdx +
-                                       haptics::io::H_PAYLOAD_LENGTH);
-    std::string packetLengthStr;
-    for (auto c : packetLength) {
-      if (c) {
-        packetLengthStr += "1";
-      } else {
-        packetLengthStr += "0";
-      }
-    }
-    uintmax_t metaTrack0Len = static_cast<uintmax_t>(
-        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
-    CHECK(metaTrack0Len == sizeMetaTrack0Bytes);
-
-    std::vector<bool> metaTrack1Packet = bitstream[1];
-    beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
-    packetLength =
-        std::vector<bool>(metaTrack1Packet.begin() + beginIdx,
-                          metaTrack1Packet.begin() + beginIdx + haptics::io::H_PAYLOAD_LENGTH);
-    packetLengthStr.clear();
-    for (auto c : packetLength) {
-      if (c) {
-        packetLengthStr += "1";
-      } else {
-        packetLengthStr += "0";
-      }
-    }
-    uintmax_t metaTrack1Len = static_cast<uintmax_t>(
-        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
-    CHECK(metaTrack1Len == sizeMetaTrack1Bytes);
-  }
-
-  SECTION("Read metadataTrack") {
-    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
-
+    int packetDuration = 128;
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
-      succeed &= IOStream::readNALu(packetBits, buffer, crc);
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
     }
 
     REQUIRE(succeed);
@@ -581,71 +424,15 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     }
   }
 
-  SECTION("Write metadataBand") {
+   SECTION("MetadataBand") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed =
-        IOStream::writeNALu(haptics::io::NALuType::MetadataBand, testingHaptic, 0, bitstream);
-    REQUIRE(succeed);
-    CHECK(bitstream.size() == 3);
-    const uintmax_t sizeMetaBand0 = haptics::io::MDBAND_ID + haptics::io::MDPERCE_ID +
-                                    haptics::io::MDTRACK_ID + haptics::io::MDBAND_BAND_TYPE +
-                                    haptics::io::MDBAND_CURVE_TYPE + haptics::io::MDBAND_LOW_FREQ +
-                                    haptics::io::MDBAND_UP_FREQ + haptics::io::MDBAND_FX_COUNT;
-
-    const uintmax_t sizeMetaBand2 = haptics::io::MDBAND_ID + haptics::io::MDPERCE_ID +
-                                    haptics::io::MDTRACK_ID + haptics::io::MDBAND_BAND_TYPE +
-                                    haptics::io::MDBAND_LOW_FREQ + haptics::io::MDBAND_UP_FREQ +
-                                    haptics::io::MDBAND_FX_COUNT;
-
-    uintmax_t sizeMetaBand0Bytes =
-        ((CONST_8 - (sizeMetaBand0 % CONST_8)) + sizeMetaBand0) / CONST_8;
-    uintmax_t sizeMetaBand2Bytes =
-        ((CONST_8 - (sizeMetaBand2 % CONST_8)) + sizeMetaBand2) / CONST_8;
-
-    std::vector<bool> metaBand0Packet = bitstream[0];
-    int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
-    std::vector<bool> packetLength(metaBand0Packet.begin() + beginIdx,
-                                   metaBand0Packet.begin() + beginIdx +
-                                       haptics::io::H_PAYLOAD_LENGTH);
-    std::string packetLengthStr;
-    for (auto c : packetLength) {
-      if (c) {
-        packetLengthStr += "1";
-      } else {
-        packetLengthStr += "0";
-      }
-    }
-    uintmax_t metaBand0Len = static_cast<uintmax_t>(
-        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
-    CHECK(metaBand0Len == sizeMetaBand0Bytes);
-
-    std::vector<bool> metaBand1Packet = bitstream[1];
-    beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
-    packetLength =
-        std::vector<bool>(metaBand1Packet.begin() + beginIdx,
-                          metaBand1Packet.begin() + beginIdx + haptics::io::H_PAYLOAD_LENGTH);
-    packetLengthStr.clear();
-    for (auto c : packetLength) {
-      if (c) {
-        packetLengthStr += "1";
-      } else {
-        packetLengthStr += "0";
-      }
-    }
-    uintmax_t metaBand1Len = static_cast<uintmax_t>(
-        std::bitset<haptics::io::H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
-    CHECK(metaBand1Len == sizeMetaBand2Bytes);
-  }
-
-  SECTION("Read metadataBand") {
-    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
+    int packetDuration = 128;
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
     for (auto &packetBits : bitstream) {
-
-      succeed &= IOStream::readNALu(packetBits, buffer, crc);
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
     }
     REQUIRE(succeed);
 
@@ -666,23 +453,20 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readBand1.getEffectsSize() == testingBand0.getEffectsSize());
   }
 
-  SECTION("Write/Read Databand packets") {
+  SECTION("Databand packets") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
-
-    REQUIRE(succeed);
-    CHECK(bitstream.size() == 16);
-
-    // CHECK metadata experience length is correct
+    int packetDuration = 128;
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
-
     for (auto &packetBits : bitstream) {
-
-      succeed &= IOStream::readNALu(packetBits, buffer, crc);
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
     }
+    REQUIRE(succeed);
+    CHECK(bitstream.size() == PACKET_NUMBER);
 
+    // CHECK metadata experience length is correct
     REQUIRE(succeed);
     readHaptic = buffer.haptic;
 
@@ -691,9 +475,10 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("Save/Read binary streaming file") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
+    int packetDuration = 128;
+    bool succeed = IOStream::writePacket(testingHaptic, bitstream, packetDuration);
     std::string filepath = "test.impg";
-    IOStream::writeFile(testingHaptic, filepath);
+    IOStream::writeFile(testingHaptic, filepath, packetDuration);
 
     std::vector<std::vector<bool>> readBitstream = std::vector<std::vector<bool>>();
     IOStream::loadFile(filepath, readBitstream);
@@ -702,13 +487,5 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::readFile(filepath, readHaptic);
 
     REQUIRE(succeed);
-    CHECK(bitstream == readBitstream);
-  }
-  SECTION("Test CRC") {
-    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream);
-    std::vector<std::vector<bool>> protectedPackets(bitstream.begin(), bitstream.begin() + 1);
-    succeed &=
-        IOStream::writeNALu(haptics::io::NALuType::CRC16, testingHaptic, 0, protectedPackets);
   }
 }
