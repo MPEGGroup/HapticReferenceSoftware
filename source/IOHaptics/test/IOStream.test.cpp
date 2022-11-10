@@ -41,7 +41,6 @@ using haptics::io::IOStream;
 
 const std::string filename = "testing_IOStream.bin";
 constexpr float floatPrecision = 0.01;
-constexpr int CONST_8 = 8;
 constexpr size_t bl = 512;
 constexpr int BITS_EFFECT = 15;
 constexpr int MOD_VAL = 256;
