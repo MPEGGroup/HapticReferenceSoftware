@@ -424,7 +424,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     }
   }
 
-   SECTION("MetadataBand") {
+  SECTION("MetadataBand") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     int packetDuration = 128;
     bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
