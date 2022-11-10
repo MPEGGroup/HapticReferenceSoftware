@@ -47,6 +47,7 @@ constexpr int BITS_EFFECT = 15;
 constexpr int MOD_VAL = 256;
 constexpr int PACKET_NUMBER = 8;
 constexpr float scalar = 1.5;
+constexpr int PACKET_DURATION = 128;
 
 //  NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 //  NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
@@ -223,8 +224,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("MetadataExperience") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    int packetDuration = 128;
-    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
@@ -258,8 +258,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   }
   SECTION("RMetadataPerception") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    int packetDuration = 128;
-    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
@@ -355,8 +354,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   }
   SECTION("MetadataTrack") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    int packetDuration = 128;
-    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
@@ -426,8 +424,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("MetadataBand") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    int packetDuration = 128;
-    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
@@ -455,8 +452,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("Databand packets") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    int packetDuration = 128;
-    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, packetDuration);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     haptics::types::Haptics readHaptic;
     IOStream::StreamReader buffer = IOStream::initializeStream();
     IOStream::CRC crc;
@@ -475,10 +471,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("Save/Read binary streaming file") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    int packetDuration = 128;
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream, packetDuration);
+    bool succeed = IOStream::writePacket(testingHaptic, bitstream, PACKET_DURATION);
     std::string filepath = "test.impg";
-    IOStream::writeFile(testingHaptic, filepath, packetDuration);
+    IOStream::writeFile(testingHaptic, filepath, PACKET_DURATION);
 
     std::vector<std::vector<bool>> readBitstream = std::vector<std::vector<bool>>();
     IOStream::loadFile(filepath, readBitstream);
