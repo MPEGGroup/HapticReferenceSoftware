@@ -281,7 +281,7 @@ auto main(int argc, char *argv[]) -> int {
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
     IOBinary::writeFile(hapticFile, output);
   } else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
-    int packetDuration = 128;
+    int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
     }
