@@ -298,7 +298,7 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
     if (mihsPacketType == NALuType::Data) {
       bufPacket.erase(bufPacket.begin() + H_NBITS, bufPacket.begin() + H_NBITS + DB_DURATION);
       nbPacketData++;
-      sync &= !packet[H_NBITS];
+      sync &= !bufPacket[H_NBITS];
       int packetStartTime = readPacketTS(std::vector<bool>(packet.begin() + H_NBITS, packet.end()));
       swriter.time = packetStartTime;
     }
@@ -306,10 +306,10 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
 
-  int syncInt = !sync ? 0 : 1;
+  int syncInt = sync ? 0 : 1;
   std::bitset<UNIT_SYNC> syncBits(syncInt);
   std::string syncStr = syncBits.to_string();
-  IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+  = IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
   int duration = 0;
   if (nbPacketData > 0) {
     duration = swriter.packetDuration;
