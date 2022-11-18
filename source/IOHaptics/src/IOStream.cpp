@@ -1678,8 +1678,8 @@ auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vecto
         swriter.keyframesCount.push_back(bufKFCount);
         bitstream.push_back(bufEffect);
         swriter.effects.push_back(effect);
+        swriter.auType = isRAU ? AUType::RAU : AUType::DAU;
       }
-      swriter.auType = isRAU ? AUType::RAU : AUType::DAU;
       if (endEffect && i == static_cast<int>(swriter.bandStream.band.getEffectsSize()) - 1) {
         return true;
       }
