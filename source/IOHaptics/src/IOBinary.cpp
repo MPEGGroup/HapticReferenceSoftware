@@ -575,45 +575,50 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
       IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_TRACK_COUNT>(file, unusedBits);
   // for each track
   for (unsigned short i = 0; i < trackCount; i++) {
-    auto trackId = IOBinaryPrimitives::readNBits<short, MDTRACK_ID>(file, unusedBits);
+    types::Track t;
+    t.setId(IOBinaryPrimitives::readNBits<short, MDTRACK_ID>(file, unusedBits));
     std::string trackDescription = IOBinaryPrimitives::readString(file, unusedBits);
-    auto deviceId = IOBinaryPrimitives::readNBits<short, MDTRACK_DEVICE_ID>(file, unusedBits);
-    auto trackGain = IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_GAIN>(
-        file, -MAX_FLOAT, MAX_FLOAT, unusedBits);
-    auto trackMixingWeight = IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(
-        file, 0, MAX_FLOAT, unusedBits);
-    auto bodyPartMask =
-        IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_BODY_PART_MASK>(file, unusedBits);
-    auto optionalMetadataMask =
-        IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_OPT_FIELDS>(file, unusedBits);
+    t.setDescription(trackDescription);
+    t.setReferenceDeviceId(IOBinaryPrimitives::readNBits<short, MDTRACK_DEVICE_ID>(file, unusedBits));
+    t.setGain(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_GAIN>(
+        file, -MAX_FLOAT, MAX_FLOAT, unusedBits));
+    t.setMixingWeight(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(
+        file, 0, MAX_FLOAT, unusedBits));
+    auto optionalMetadataMask = IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_OPT_FIELDS>(file, unusedBits);
+    if ((optionalMetadataMask & 0b0000'0001) != 0) {
+      t.setBodyPartMask(IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_BODY_PART_MASK>(file, unusedBits));
+    } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
+      t.setActuatorResolution(IOBinaryPrimitives::readVector(file, unusedBits));
+
+      auto bodyPartTargetCount = IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(file, unusedBits);
+      std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
+                                                        types::BodyPartTarget::Unknown);
+      for (auto &target : bodyPartTarget) {
+        target = static_cast<types::BodyPartTarget>(
+            IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(file, unusedBits));
+      }
+      t.setBodyPartTarget(bodyPartTarget);
+
+      auto actuatorTargetCount =
+          IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(file, unusedBits);
+      std::vector<types::Vector> actuatorTarget(actuatorTargetCount);
+      for (auto &target : actuatorTarget) {
+        target = IOBinaryPrimitives::readVector(file, unusedBits);
+      }
+      t.setActuatorTarget(actuatorTarget);
+    }
+
     auto frequencySampling =
         IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_FREQ_SAMPLING>(file, unusedBits);
-    std::optional<uint32_t> sampleCount = std::nullopt;
-    if (frequencySampling != 0) {
-      sampleCount = IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_SAMPLE_COUNT>(file, unusedBits);
-    }
-    std::optional<types::Direction> direction = std::nullopt;
-    if ((optionalMetadataMask & 0b0000'0001) != 0) {
-      auto X = IOBinaryPrimitives::readNBits<int8_t, MDTRACK_DIRECTION_AXIS>(file, unusedBits);
-      auto Y = IOBinaryPrimitives::readNBits<int8_t, MDTRACK_DIRECTION_AXIS>(file, unusedBits);
-      auto Z = IOBinaryPrimitives::readNBits<int8_t, MDTRACK_DIRECTION_AXIS>(file, unusedBits);
-      direction = types::Direction(X, Y, Z);
-    }
-    auto verticesCount = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT_COUNT>(file, unusedBits);
-
-    types::Track t(trackId, trackDescription, trackGain, trackMixingWeight, bodyPartMask);
     if (frequencySampling != 0) {
       t.setFrequencySampling(frequencySampling);
+      t.setSampleCount(
+          IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_SAMPLE_COUNT>(file, unusedBits));
     }
-    if (sampleCount.has_value()) {
-      t.setSampleCount(sampleCount);
+    if ((optionalMetadataMask & 0b0000'0100) != 0) {
+      t.setDirection(IOBinaryPrimitives::readVector(file, unusedBits));
     }
-    if (direction.has_value()) {
-      t.setDirection(direction);
-    }
-    if (deviceId >= 0) {
-      t.setReferenceDeviceId(deviceId);
-    }
+    auto verticesCount = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT_COUNT>(file, unusedBits);
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
       vertex = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT>(file, unusedBits);
@@ -658,14 +663,41 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool
     IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(trackMixingWeight, output,
                                                                          0, MAX_FLOAT);
 
-    uint32_t bodyPartMask = myTrack.getBodyPartMask();
-    IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_BODY_PART_MASK>(bodyPartMask, output);
-
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
-    if (myTrack.getDirection().has_value()) {
+    if (myTrack.getActuatorResolution().has_value()) {
+      optionalMetadataMask |= (uint8_t)0b0000'0010;
+    } else {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
     }
+    if (myTrack.getDirection().has_value()) {
+      optionalMetadataMask |= (uint8_t)0b0000'0100;
+    }
     IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_OPT_FIELDS>(optionalMetadataMask, output);
+
+    if ((optionalMetadataMask & 0b0000'0010) != 0) {
+      types::Vector trackResolution = myTrack.getActuatorResolution().value();
+      IOBinaryPrimitives::writeVector(trackResolution, output);
+
+      std::vector<types::BodyPartTarget> bodyPartTarget =
+          myTrack.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
+      auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
+      IOBinaryPrimitives::writeNBits<uint8_t,MDTRACK_BODY_PART_TARGET_COUNT>(bodyPartTargetCount, output);
+      for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
+        IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(static_cast<uint8_t>(bodyPartTarget[i]), output);
+      }
+
+      std::vector<types::Vector> actuatorTarget =
+          myTrack.getActuatorTarget().value_or(std::vector<types::Vector>{});
+      auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
+      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(actuatorTargetCount, output);
+      for (uint8_t i = 0; i < actuatorTargetCount; i++) {
+        types::Vector target = actuatorTarget[i];
+        IOBinaryPrimitives::writeVector(target, output);
+      }
+    } else if ((optionalMetadataMask & 0b0000'0001) != 0) {
+        uint32_t bodyPartMask = myTrack.getBodyPartMask();
+        IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_BODY_PART_MASK>(bodyPartMask, output);
+    }
 
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
     IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_FREQ_SAMPLING>(frequencySampling, output);
@@ -676,10 +708,8 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool
     }
 
     if (myTrack.getDirection().has_value()) {
-      types::Direction direction = myTrack.getDirection().value();
-      IOBinaryPrimitives::writeNBits<int8_t, MDTRACK_DIRECTION_AXIS>(direction.X, output);
-      IOBinaryPrimitives::writeNBits<int8_t, MDTRACK_DIRECTION_AXIS>(direction.Y, output);
-      IOBinaryPrimitives::writeNBits<int8_t, MDTRACK_DIRECTION_AXIS>(direction.Z, output);
+      types::Vector direction = myTrack.getDirection().value();
+      IOBinaryPrimitives::writeVector(direction, output);
     }
 
     auto verticesCount = static_cast<int>(myTrack.getVerticesSize());

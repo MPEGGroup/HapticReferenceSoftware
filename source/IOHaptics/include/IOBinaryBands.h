@@ -38,6 +38,8 @@
 #include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Band.h>
 
+#include <cmath>
+
 namespace haptics::io {
 
 constexpr int WAVELET_BL_FACTOR = 32;

@@ -52,7 +52,7 @@ static constexpr int BITR_2 = 2;
 static constexpr int BITR_16 = 16;
 static constexpr int BITR_64 = 64;
 static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72.5;
-static constexpr int DEFAULT_WINDOW_LENGTH = 1024;
+static constexpr int DEFAULT_BLOCK_LENGTH_SMP = 1024; // in samples
 static constexpr int DEFAULT_BIT_BUDGET = 16;
 static constexpr double PARAM_A = -6.506;
 static constexpr double PARAM_B = 3.433;
@@ -61,53 +61,53 @@ static constexpr double PARAM_D = 0.0002573;
 
 struct EncodingConfig {
   double curveFrequencyLimit = 0;
-  int wavelet_windowLength = 0;
+  int wavelet_blockLength = 0;
   int wavelet_bitbudget = 0;
   bool wavelet_enabled = true;
   bool vectorial_enabled = true;
 
   explicit EncodingConfig() = default;
-  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_windowLength,
+  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_blockLength,
                           int _wavelet_bitbudget, bool _wavelet_enabled, bool _vectorial_enabled)
       : curveFrequencyLimit(_curveFrequencyLimit)
-      , wavelet_windowLength(_wavelet_windowLength)
+      , wavelet_blockLength(_wavelet_blockLength)
       , wavelet_bitbudget(_wavelet_bitbudget)
       , wavelet_enabled(_wavelet_enabled)
       , vectorial_enabled(_vectorial_enabled){};
 
   auto static generateDefaultConfig(bool enable_wavelet, bool enable_vectorial) -> EncodingConfig {
 
-    int wavelet_windowLength = DEFAULT_WINDOW_LENGTH;
+    int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP;
     double curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
     int wavelet_bitbudget = DEFAULT_BIT_BUDGET;
 
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget,
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
                           enable_wavelet, enable_vectorial);
   }
 
   auto static generateConfigBudget(int budget, double curveFrequencyLimit, bool enable_wavelet,
                                    bool enable_vectorial,
-                                   int wavelet_windowLength = DEFAULT_WINDOW_LENGTH)
+                                   int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
       -> EncodingConfig {
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, budget, enable_wavelet,
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, budget, enable_wavelet,
                           enable_vectorial);
   }
 
   auto static generateConfigParam(int bitrate, double curveFrequencyLimit, bool enable_wavelet,
                                   bool enable_vectorial,
-                                  int wavelet_windowLength = DEFAULT_WINDOW_LENGTH)
+                                  int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
       -> EncodingConfig {
 
     auto temp = (double)bitrate;
     auto wavelet_bitbudget =
         (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
-    auto max_bitbudget = (int)(log2(wavelet_windowLength) - 1) * MAXBITS;
+    auto max_bitbudget = (int)(log2(wavelet_blockLength) - 1) * MAXBITS;
     if (wavelet_bitbudget > max_bitbudget) {
       wavelet_bitbudget = max_bitbudget;
     } else if (wavelet_bitbudget < 1) {
       wavelet_bitbudget = 1;
     }
-    return EncodingConfig(curveFrequencyLimit, wavelet_windowLength, wavelet_bitbudget,
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
                           enable_wavelet, enable_vectorial);
   }
 };

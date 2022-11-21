@@ -42,12 +42,13 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
                                    std::vector<bool> &unusedBits) -> bool {
   auto bandType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BAND_TYPE>(file, unusedBits);
   band.setBandType(static_cast<types::BandType>(bandType));
+  double blockLength_samp = 0;
   if (band.getBandType() == types::BandType::Curve) {
     auto curveType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_CURVE_TYPE>(file, unusedBits);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_WIN_LEN>(file, unusedBits);
-    band.setWindowLength(static_cast<int>(windowLength));
+    auto blockLength_code = (double)IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
+    blockLength_samp = pow(2, blockLength_code + 4);
   }
 
   auto lowerFrequencyLimit =
@@ -58,6 +59,10 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
       IOBinaryPrimitives::readNBits<uint16_t, MDBAND_UP_FREQ>(file, unusedBits);
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
 
+  if (band.getBandType() == types::BandType::WaveletWave) {
+    double blockLength_ms = blockLength_samp / (double)upperFrequencyLimit * S_2_MS_WAVELET;
+    band.setBlockLength(blockLength_ms);
+  }
   auto effectCount = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_EFFECT_COUNT>(file, unusedBits);
   for (unsigned int i = 0; i < effectCount; i++) {
     types::Effect e;
@@ -76,8 +81,13 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::vector<bool> &output
     auto curveType = static_cast<uint8_t>(band.getCurveType());
     IOBinaryPrimitives::writeNBits<uint8_t, MDBAND_CURVE_TYPE>(curveType, output);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto windowLength = static_cast<uint16_t>(band.getWindowLength());
-    IOBinaryPrimitives::writeNBits<uint16_t, MDBAND_WIN_LEN>(windowLength, output);
+    auto bl_ms = band.getBlockLength();
+    auto blockLength_samples = bl_ms / S_2_MS_WAVELET * band.getUpperFrequencyLimit();
+    auto blockLength_code = (int)log2(blockLength_samples) - 4;
+    if (blockLength_code < 0) {
+      std::cerr << "wavelet blocklength too small" << std::endl;
+    }
+    IOBinaryPrimitives::writeNBits<uint8_t, MDBAND_BLK_LEN>(blockLength_code, output);
   }
 
   auto lowerFrequencyLimit = static_cast<unsigned int>(band.getLowerFrequencyLimit());
@@ -102,7 +112,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     auto position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * band.getWindowLength();
+      position = effectIndex * (int)band.getBlockLength();
     } else {
       position = static_cast<int>(
           IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
@@ -341,7 +351,7 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                       std::vector<bool> &unusedBits) -> bool {
   spiht::Spiht_Dec dec;
-  auto blocklength = band.getWindowLength() * band.getUpperFrequencyLimit() / S2MS;
+  auto blocklength = (int)(band.getBlockLength() * (double)band.getUpperFrequencyLimit()) / S2MS;
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
   std::vector<unsigned char> instream;

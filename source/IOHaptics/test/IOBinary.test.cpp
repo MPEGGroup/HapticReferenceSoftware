@@ -389,7 +389,7 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
-  const haptics::types::Direction testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
+  const haptics::types::Vector testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
                                       testingBodyPartMask_track0);
@@ -421,6 +421,18 @@ TEST_CASE("write/read file header for track testing") {
   const uint32_t testingBodyPartMask_track2 = 0;
   const std::vector<int> testingVertices_track2 = {0, 6};
   const size_t testingBandsCount_track2 = 1;
+  const haptics::types::Vector testingTrackResolution_track2(32, 110, 3);
+  const std::vector<haptics::types::Vector> testingActuatorTarget_track2{
+      haptics::types::Vector{31, 109, 2},
+      haptics::types::Vector{0, 0, 0},
+      haptics::types::Vector{15, 42, 1},
+  };
+  const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_track2{
+      haptics::types::BodyPartTarget::Left,         haptics::types::BodyPartTarget::Index,
+      haptics::types::BodyPartTarget::ThirdPhalanx, haptics::types::BodyPartTarget::Plus,
+      haptics::types::BodyPartTarget::Right,        haptics::types::BodyPartTarget::Leg,
+      haptics::types::BodyPartTarget::Minus,        haptics::types::BodyPartTarget::Hallux,
+  };
   haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
                                       testingGain_track2, testingMixingWeight_track2,
                                       testingBodyPartMask_track2);
@@ -430,6 +442,9 @@ TEST_CASE("write/read file header for track testing") {
   for (size_t i = 0; i < testingBandsCount_track2; i++) {
     testingTrack2.generateBand();
   }
+  testingTrack2.setActuatorResolution(testingTrackResolution_track2);
+  testingTrack2.setActuatorTarget(testingActuatorTarget_track2);
+  testingTrack2.setBodyPartTarget(testingBodyPartTarget_track2);
 
   testingPerception0.addTrack(testingTrack0);
   testingPerception0.addTrack(testingTrack1);
@@ -451,7 +466,7 @@ TEST_CASE("write/read file header for track testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_track0.size() + testingDescription_track1.size() +
         testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 117;
+        testingVertices_track2.size() + 135;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -488,6 +503,9 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandsSize() == testingBandsCount_track0);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getBodyPartTarget().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorTarget().has_value());
 
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
@@ -498,6 +516,9 @@ TEST_CASE("write/read file header for track testing") {
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
     CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getBodyPartTarget().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorTarget().has_value());
 
     REQUIRE(res.getPerceptionAt(1).getTracksSize() == 1);
     CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
@@ -518,6 +539,24 @@ TEST_CASE("write/read file header for track testing") {
     }
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
     CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartMask() == 0);
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().has_value());
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().value() ==
+          testingTrackResolution_track2);
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().has_value());
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value().size() ==
+            testingBodyPartTarget_track2.size());
+    for (size_t i = 0; i < testingBodyPartTarget_track2.size(); i++) {
+      CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value()[i] ==
+            testingBodyPartTarget_track2[i]);
+    }
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().has_value());
+    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().value().size() ==
+            testingActuatorTarget_track2.size());
+    for (size_t i = 0; i < testingActuatorTarget_track2.size(); i++) {
+      CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().value()[i] ==
+            testingActuatorTarget_track2[i]);
+    }
 
     std::filesystem::remove(filename);
     CHECK(!std::filesystem::is_regular_file(filename));
@@ -614,29 +653,29 @@ TEST_CASE("write/read file for body testing") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const int testingWindowLength_band0 = 0;
+  const int testingBlockLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingWindowLength_band0, testingLowerFrequencyLimit_band0,
+                                    testingBlockLength_band0, testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
   const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band1 = 0;
+  const int testingBlockLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
   haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingWindowLength_band1, testingLowerFrequencyLimit_band1,
+                                    testingBlockLength_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
   const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
   const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band2 = 0;
+  const int testingBlockLength_band2 = 0;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
   haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingWindowLength_band2, testingLowerFrequencyLimit_band2,
+                                    testingBlockLength_band2, testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
@@ -749,8 +788,8 @@ TEST_CASE("write/read file for body testing") {
           testingLowerFrequencyLimit_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getWindowLength() ==
-          testingWindowLength_band0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getBlockLength() ==
+          testingBlockLength_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
 
     // CHECK effect
@@ -793,8 +832,8 @@ TEST_CASE("write/read file for body testing") {
           testingLowerFrequencyLimit_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getWindowLength() ==
-          testingWindowLength_band1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getBlockLength() ==
+          testingBlockLength_band1);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEffectsSize() ==
             testingKeyframes_effect1.size());
 
@@ -846,8 +885,8 @@ TEST_CASE("write/read file for body testing") {
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getWindowLength() ==
-          testingWindowLength_band2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getBlockLength() ==
+          testingBlockLength_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() == 0);
 

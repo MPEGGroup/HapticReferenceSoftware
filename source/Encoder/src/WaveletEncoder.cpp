@@ -58,7 +58,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   band.setBandType(BandType::WaveletWave);
   band.setLowerFrequencyLimit((int)f_cutoff);
   band.setUpperFrequencyLimit((int)fs);
-  band.setWindowLength((int)((double)bl / fs * S_2_MS_WAVELET));
+  band.setBlockLength((double)bl / fs * S_2_MS_WAVELET);
   int pos_effect = 0;
   long add_start = 0;
   unsigned int add_end = bl;
@@ -86,7 +86,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
     effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
-    pos_effect += band.getWindowLength();
+    pos_effect += (int)band.getBlockLength();
     add_start += bl;
     add_end += bl;
   }

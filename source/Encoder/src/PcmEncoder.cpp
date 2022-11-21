@@ -67,7 +67,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
   // init of wavelet encoding
   Band waveletBand;
-  WaveletEncoder waveletEnc(config.wavelet_windowLength,
+  WaveletEncoder waveletEnc(config.wavelet_blockLength,
                             static_cast<int>(wavParser.getSamplerate()));
   for (uint32_t channelIndex = 0; channelIndex < numChannels; channelIndex++) {
     Band myBand;
@@ -150,7 +150,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   out->setBandType(BandType::Curve);
   out->setCurveType(CurveType::Cubic);
   // out->setEncodingModality(EncodingModality::Wavelet);
-  out->setWindowLength(0);
+  out->setBlockLength(0);
   out->setLowerFrequencyLimit(0);
   out->setUpperFrequencyLimit((int)curveFrequencyLimit);
   Effect myEffect(0, 0, BaseSignal::Sine, EffectType::Basis);
