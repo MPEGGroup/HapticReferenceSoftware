@@ -43,22 +43,21 @@ auto IOBinaryPrimitives::readVector(std::istream &file, std::vector<bool> &unuse
   return haptics::types::Vector(X, Y, Z);
 }
 
-auto IOBinaryPrimitives::writeVector(const haptics::types::Vector &vector, std::vector<bool> &output)
-    -> void {
+auto IOBinaryPrimitives::writeVector(const haptics::types::Vector &vector,
+                                     std::vector<bool> &output) -> void {
   IOBinaryPrimitives::writeNBits<int8_t, VECTOR_AXIS_SIZE>(vector.X, output);
   IOBinaryPrimitives::writeNBits<int8_t, VECTOR_AXIS_SIZE>(vector.Y, output);
   IOBinaryPrimitives::writeNBits<int8_t, VECTOR_AXIS_SIZE>(vector.Z, output);
-
 }
 
-auto IOBinaryPrimitives::writeString(const std::string& text, std::vector<bool>& output) -> void {
+auto IOBinaryPrimitives::writeString(const std::string &text, std::vector<bool> &output) -> void {
 
-    writeNBits<uint8_t, BYTE_SIZE>(static_cast<uint8_t>(text.size()), output);
-    for (auto byte : text) {
-        for (uint8_t j = 0; j < BYTE_SIZE; j++) {
-            output.push_back(((byte >> (BYTE_SIZE - j - 1)) & 1U) == 1);
-        }
+  writeNBits<uint8_t, BYTE_SIZE>(static_cast<uint8_t>(text.size()), output);
+  for (auto byte : text) {
+    for (uint8_t j = 0; j < BYTE_SIZE; j++) {
+      output.push_back(((byte >> (BYTE_SIZE - j - 1)) & 1U) == 1);
     }
+  }
 }
 
 auto IOBinaryPrimitives::readString(std::istream &file, std::vector<bool> &unusedBits)

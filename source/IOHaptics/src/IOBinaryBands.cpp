@@ -47,7 +47,8 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
     auto curveType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_CURVE_TYPE>(file, unusedBits);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto blockLength_code = (double)IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
+    auto blockLength_code =
+        (double)IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
     blockLength_samp = pow(2, blockLength_code + 4);
   }
 

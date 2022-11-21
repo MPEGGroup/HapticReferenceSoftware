@@ -55,7 +55,7 @@ public:
   static auto readVector(std::istream &file, std::vector<bool> &unusedBits)
       -> haptics::types::Vector;
   static auto writeVector(const haptics::types::Vector &vector, std::vector<bool> &output) -> void;
-  static auto readString(std::istream& file, std::vector<bool>& unusedBits)->std::string;
+  static auto readString(std::istream &file, std::vector<bool> &unusedBits) -> std::string;
 
   template <class T, size_t bitCount>
   static auto readNBits(std::istream &file, std::vector<bool> &unusedBits) -> T {
