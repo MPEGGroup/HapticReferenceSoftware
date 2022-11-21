@@ -218,20 +218,20 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
 
 auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void {
   // Check Silent Unit sync flag to match next temporal unit sync flag
-  for (int i = 0; i < bitstream.size(); i++) {
+  for (int i = 0; i < static_cast<int>(bitstream.size()); i++) {
     int index = 0;
     std::vector<bool> mihsunit =
         std::vector<bool>(bitstream[i].begin() + index, bitstream[i].end());
     int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
     MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
     if (unitType == MIHSUnitType::Silent) {
-      if (i < bitstream.size() - 1) {
-        for (int j = i + 1; j < bitstream.size(); j++) {
+      if (i < static_cast<int>(bitstream.size()) - 1) {
+        for (int j = i + 1; j < static_cast<int>(bitstream.size()); j++) {
           int bufindex = 0;
           std::vector<bool> bufunit =
               std::vector<bool>(bitstream[j].begin() + bufindex, bitstream[j].end());
           int bufunitTypeInt = IOBinaryPrimitives::readUInt(bufunit, bufindex, UNIT_TYPE);
-          MIHSUnitType bufunitType = static_cast<MIHSUnitType>(bufunitTypeInt);
+          auto bufunitType = static_cast<MIHSUnitType>(bufunitTypeInt);
           if (bufunitType == MIHSUnitType::Temporal ||
               bufunitType == MIHSUnitType::Initialization) {
             std::copy(bitstream[j].begin() + bufindex, bitstream[j].begin() + bufindex + UNIT_SYNC,
@@ -248,7 +248,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
   // MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
   int syncInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_SYNC);
-  bool sync = syncInt == 0 ? true : false;
+  bool sync = syncInt == 0;
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
