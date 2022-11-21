@@ -292,6 +292,7 @@ private:
   static auto setNextEffectId(std::vector<int> &effectsId, types::Effect &effect) -> bool;
   static auto getNextEffectId(std::vector<int> &effectsId) -> int;
   static auto addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool;
+  static auto silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H

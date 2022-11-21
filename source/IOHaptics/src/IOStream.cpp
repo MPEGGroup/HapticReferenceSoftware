@@ -212,7 +212,35 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     bitstream.push_back(temporalUnit);
     bufUnit.clear();
   }
+  silentUnitSyncFlag(bitstream);
   return true;
+}
+
+auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void {
+  // Check Silent Unit sync flag to match next temporal unit sync flag
+  for (int i = 0; i < bitstream.size(); i++) {
+    int index = 0;
+    std::vector<bool> mihsunit =
+        std::vector<bool>(bitstream[i].begin() + index, bitstream[i].end());
+    int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
+    MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
+    if (unitType == MIHSUnitType::Silent) {
+      if (i < bitstream.size() - 1) {
+        for (int j = i + 1; j < bitstream.size(); j++) {
+          int bufindex = 0;
+          std::vector<bool> bufunit =
+              std::vector<bool>(bitstream[j].begin() + bufindex, bitstream[j].end());
+          int bufunitTypeInt = IOBinaryPrimitives::readUInt(bufunit, bufindex, UNIT_TYPE);
+          MIHSUnitType bufunitType = static_cast<MIHSUnitType>(bufunitTypeInt);
+          if (bufunitType == MIHSUnitType::Temporal ||
+              bufunitType == MIHSUnitType::Initialization) {
+            std::copy(bitstream[j].begin() + bufindex, bitstream[j].begin() + bufindex + UNIT_SYNC,
+                      bitstream[i].begin() + index);
+          }
+        }
+      }
+    }
+  }
 }
 
 auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool {
@@ -220,7 +248,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
   // MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
   int syncInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_SYNC);
-  bool sync = syncInt == 1;
+  bool sync = syncInt == 0 ? true : false;
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
@@ -263,7 +291,7 @@ auto IOStream::writeMIHSUnit(MIHSUnitType unitType, std::vector<std::vector<bool
 auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listPackets,
                                            std::vector<bool> &mihsunit, StreamWriter &swriter)
     -> bool {
-  std::bitset<UNIT_SYNC> syncBits(1);
+  std::bitset<UNIT_SYNC> syncBits(0);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
   std::bitset<UNIT_DURATION> durationBits(0);
@@ -306,7 +334,7 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
 
-  int syncInt = !sync ? 0 : 1;
+  int syncInt = sync ? 0 : 1;
   std::bitset<UNIT_SYNC> syncBits(syncInt);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
