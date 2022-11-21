@@ -579,18 +579,22 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
     t.setId(IOBinaryPrimitives::readNBits<short, MDTRACK_ID>(file, unusedBits));
     std::string trackDescription = IOBinaryPrimitives::readString(file, unusedBits);
     t.setDescription(trackDescription);
-    t.setReferenceDeviceId(IOBinaryPrimitives::readNBits<short, MDTRACK_DEVICE_ID>(file, unusedBits));
-    t.setGain(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_GAIN>(
-        file, -MAX_FLOAT, MAX_FLOAT, unusedBits));
+    t.setReferenceDeviceId(
+        IOBinaryPrimitives::readNBits<short, MDTRACK_DEVICE_ID>(file, unusedBits));
+    t.setGain(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_GAIN>(file, -MAX_FLOAT,
+                                                                         MAX_FLOAT, unusedBits));
     t.setMixingWeight(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(
         file, 0, MAX_FLOAT, unusedBits));
-    auto optionalMetadataMask = IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_OPT_FIELDS>(file, unusedBits);
+    auto optionalMetadataMask =
+        IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_OPT_FIELDS>(file, unusedBits);
     if ((optionalMetadataMask & 0b0000'0001) != 0) {
-      t.setBodyPartMask(IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_BODY_PART_MASK>(file, unusedBits));
+      t.setBodyPartMask(
+          IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_BODY_PART_MASK>(file, unusedBits));
     } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
       t.setActuatorResolution(IOBinaryPrimitives::readVector(file, unusedBits));
 
-      auto bodyPartTargetCount = IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(file, unusedBits);
+      auto bodyPartTargetCount =
+          IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(file, unusedBits);
       std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
                                                         types::BodyPartTarget::Unknown);
       for (auto &target : bodyPartTarget) {
@@ -681,22 +685,25 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool
       std::vector<types::BodyPartTarget> bodyPartTarget =
           myTrack.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
       auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
-      IOBinaryPrimitives::writeNBits<uint8_t,MDTRACK_BODY_PART_TARGET_COUNT>(bodyPartTargetCount, output);
+      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
+                                                                              output);
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-        IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(static_cast<uint8_t>(bodyPartTarget[i]), output);
+        IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(
+            static_cast<uint8_t>(bodyPartTarget[i]), output);
       }
 
       std::vector<types::Vector> actuatorTarget =
           myTrack.getActuatorTarget().value_or(std::vector<types::Vector>{});
       auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
-      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(actuatorTargetCount, output);
+      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
+                                                                             output);
       for (uint8_t i = 0; i < actuatorTargetCount; i++) {
         types::Vector target = actuatorTarget[i];
         IOBinaryPrimitives::writeVector(target, output);
       }
     } else if ((optionalMetadataMask & 0b0000'0001) != 0) {
-        uint32_t bodyPartMask = myTrack.getBodyPartMask();
-        IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_BODY_PART_MASK>(bodyPartMask, output);
+      uint32_t bodyPartMask = myTrack.getBodyPartMask();
+      IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_BODY_PART_MASK>(bodyPartMask, output);
     }
 
     uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
