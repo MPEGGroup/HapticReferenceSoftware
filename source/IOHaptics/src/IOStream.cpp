@@ -236,6 +236,7 @@ auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> 
               bufunitType == MIHSUnitType::Initialization) {
             std::copy(bitstream[j].begin() + bufindex, bitstream[j].begin() + bufindex + UNIT_SYNC,
                       bitstream[i].begin() + index);
+            break;
           }
         }
       }
