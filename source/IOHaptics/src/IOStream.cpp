@@ -223,7 +223,7 @@ auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> 
     std::vector<bool> mihsunit =
         std::vector<bool>(bitstream[i].begin() + index, bitstream[i].end());
     int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
-    MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
+    auto unitType = static_cast<MIHSUnitType>(unitTypeInt);
     if (unitType == MIHSUnitType::Silent) {
       if (i < static_cast<int>(bitstream.size()) - 1) {
         for (int j = i + 1; j < static_cast<int>(bitstream.size()); j++) {
