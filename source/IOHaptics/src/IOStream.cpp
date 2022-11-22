@@ -179,8 +179,19 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   writeNALu(NALuType::Data, swriter, 0, dataPackets);
   std::vector<std::vector<bool>> bufUnit = std::vector<std::vector<bool>>();
   swriter.time = 0;
+  bool first = true;
   for (auto &packet : dataPackets) {
+    if (first) {
+      std::vector<std::vector<bool>> firstPacket = std::vector<std::vector<bool>>{packet};
+      std::vector<bool> silentUnit = std::vector<bool>();
+      writeMIHSUnit(MIHSUnitType::Silent, firstPacket, silentUnit, swriter);
+      if (!silentUnit.empty()) {
+        bitstream.push_back(silentUnit);
+      }
+      first = false;
+    }
     if (bufUnit.empty()) {
+
       bufUnit.push_back(packet);
     } else {
       std::vector<bool> lastDataPacketPayload = std::vector<bool>(
@@ -383,26 +394,45 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
 }
 auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
                                    std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool {
-  if (listPackets.size() != 2) {
-    return false;
+  if (listPackets.size() == 1) {
+    int tFirst =
+        readPacketTS(std::vector<bool>(listPackets[0].begin() + H_NBITS, listPackets[0].end()));
+    if (tFirst > swriter.packetDuration) {
+      int duration = tFirst;
+      if (duration % swriter.packetDuration != 0) {
+        duration = duration - (duration % swriter.packetDuration);
+      }
+      std::bitset<UNIT_DURATION> durationBits(duration);
+      std::string durationStr = durationBits.to_string();
+      IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
+      std::bitset<UNIT_LENGTH> lengthBits(0);
+      std::string lengthStr = lengthBits.to_string();
+      IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+      swriter.time += duration;
+    }
+    return true;
+  } else if (listPackets.size() == 2) {
+
+    std::bitset<UNIT_SYNC> syncBits(0);
+    std::string syncStr = syncBits.to_string();
+    IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+    int start = swriter.time;
+    int end =
+        readPacketTS(std::vector<bool>(listPackets[1].begin() + H_NBITS, listPackets[1].end()));
+    int duration = end - start;
+    if (duration % swriter.packetDuration != 0) {
+      duration = duration - (duration % swriter.packetDuration);
+    }
+    std::bitset<UNIT_DURATION> durationBits(duration);
+    std::string durationStr = durationBits.to_string();
+    IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
+    std::bitset<UNIT_LENGTH> lengthBits(0);
+    std::string lengthStr = lengthBits.to_string();
+    IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+    swriter.time += duration;
+    return true;
   }
-  std::bitset<UNIT_SYNC> syncBits(0);
-  std::string syncStr = syncBits.to_string();
-  IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
-  int start = swriter.time;
-  int end = readPacketTS(std::vector<bool>(listPackets[1].begin() + H_NBITS, listPackets[1].end()));
-  int duration = end - start;
-  if (duration % swriter.packetDuration != 0) {
-    duration = duration - (duration % swriter.packetDuration);
-  }
-  std::bitset<UNIT_DURATION> durationBits(duration);
-  std::string durationStr = durationBits.to_string();
-  IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
-  std::bitset<UNIT_LENGTH> lengthBits(0);
-  std::string lengthStr = lengthBits.to_string();
-  IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
-  swriter.time += duration;
-  return true;
+  return false;
 }
 auto IOStream::initializeStream() -> StreamReader {
   StreamReader sreader;
