@@ -185,13 +185,12 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
       std::vector<std::vector<bool>> firstPacket = std::vector<std::vector<bool>>{packet};
       std::vector<bool> silentUnit = std::vector<bool>();
       writeMIHSUnit(MIHSUnitType::Silent, firstPacket, silentUnit, swriter);
-      if (!silentUnit.empty()) {
+      if (silentUnit.size() > 6) {
         bitstream.push_back(silentUnit);
       }
       first = false;
     }
     if (bufUnit.empty()) {
-
       bufUnit.push_back(packet);
     } else {
       std::vector<bool> lastDataPacketPayload = std::vector<bool>(
@@ -278,6 +277,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   sreader.time += (sreader.packetDuration * TIME_TO_MS) / sreader.timescale;
   return true;
 }
+
 auto IOStream::writeMIHSUnit(MIHSUnitType unitType, std::vector<std::vector<bool>> &listPackets,
                              std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool {
   std::bitset<UNIT_TYPE> unitTypeBits(static_cast<int>(unitType));
@@ -397,7 +397,10 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
   if (listPackets.size() == 1) {
     int tFirst =
         readPacketTS(std::vector<bool>(listPackets[0].begin() + H_NBITS, listPackets[0].end()));
-    if (tFirst > swriter.packetDuration) {
+    if (tFirst >= swriter.packetDuration) {
+      std::bitset<UNIT_SYNC> syncBits(0);
+      std::string syncStr = syncBits.to_string();
+      IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
       int duration = tFirst;
       if (duration % swriter.packetDuration != 0) {
         duration = duration - (duration % swriter.packetDuration);
