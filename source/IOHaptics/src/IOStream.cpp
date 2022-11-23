@@ -185,7 +185,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
       std::vector<std::vector<bool>> firstPacket = std::vector<std::vector<bool>>{packet};
       std::vector<bool> silentUnit = std::vector<bool>();
       writeMIHSUnit(MIHSUnitType::Silent, firstPacket, silentUnit, swriter);
-      if (silentUnit.size() > 6) {
+      if (silentUnit.size() > UNIT_TYPE) {
         bitstream.push_back(silentUnit);
       }
       first = false;
@@ -414,7 +414,8 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
       swriter.time += duration;
     }
     return true;
-  } else if (listPackets.size() == 2) {
+  }
+  if (listPackets.size() == 2) {
 
     std::bitset<UNIT_SYNC> syncBits(0);
     std::string syncStr = syncBits.to_string();
