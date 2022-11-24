@@ -1665,6 +1665,7 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
   if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
     createWaveletPayload(swriter, bufPacketBitstream);
     for (auto &bufpacket : bufPacketBitstream) {
+      swriter.auType = AUType::RAU;
       packetBits = writeEffectHeader(swriter);
       packetBits = writeWaveletPayloadPacket(bufpacket, packetBits, swriter.effectsId);
       bitstreams.push_back(packetBits);
@@ -1713,7 +1714,6 @@ auto IOStream::createWaveletPayload(StreamWriter &swriter,
 }
 auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream)
     -> bool {
-
   // Exit this function only when 1 packet is full or last keyframes of the band is reached
   for (auto i = 0; i < static_cast<int>(swriter.bandStream.band.getEffectsSize()); i++) {
     bool endEffect = false;
@@ -1789,6 +1789,7 @@ auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
 
   return packetBits;
 }
+
 auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
                                          std::vector<bool> &packetBits, std::vector<int> &effectsId)
     -> std::vector<bool> {
