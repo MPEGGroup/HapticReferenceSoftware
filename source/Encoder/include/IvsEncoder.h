@@ -38,10 +38,10 @@
 #include <pugixml.hpp>
 #include <vector>
 
+#include <Types/include/Channel.h>
 #include <Types/include/Effect.h>
 #include <Types/include/Keyframe.h>
 #include <Types/include/Perception.h>
-#include <Types/include/Track.h>
 
 namespace haptics::encoder {
 
@@ -86,7 +86,7 @@ public:
 private:
   auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool;
   auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
-  auto static injectIntoBands(types::Effect &effect, types::Track &track) -> void;
+  auto static injectIntoBands(types::Effect &effect, types::Channel &channel) -> void;
   static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
   static const int MIN_FREQUENCY = 0;
   static const int MAX_FREQUENCY = 1000;

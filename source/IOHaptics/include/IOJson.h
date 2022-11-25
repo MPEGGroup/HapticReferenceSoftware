@@ -54,12 +54,13 @@ public:
   static auto loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
       -> bool;
   static auto loadAvatars(const rapidjson::Value &jsonAvatars, types::Haptics &haptic) -> bool;
-  static auto loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool;
+  static auto loadChannels(const rapidjson::Value &jsonChannels, types::Perception &perception)
+      -> bool;
   static auto loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
       -> bool;
   static auto loadReferenceDevices(const rapidjson::Value &jsonReferenceDevices,
                                    types::Perception &perception) -> bool;
-  static auto loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool;
+  static auto loadBands(const rapidjson::Value &jsonBands, types::Channel &channel) -> bool;
   static auto loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool;
   static auto loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool;
   static auto loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool;
@@ -68,9 +69,9 @@ public:
                                  rapidjson::Document &jsonTree) -> void;
   static auto extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatars,
                              rapidjson::Document &jsonTree) -> void;
-  static auto extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
-                            rapidjson::Document &jsonTree) -> void;
-  static auto extractBands(types::Track &track, rapidjson::Value &jsonBands,
+  static auto extractChannels(types::Perception &perception, rapidjson::Value &jsonChannels,
+                              rapidjson::Document &jsonTree) -> void;
+  static auto extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
                            rapidjson::Document &jsonTree) -> void;
   static auto extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
                              rapidjson::Document &jsonTree) -> void;

@@ -83,20 +83,20 @@ TEST_CASE("haptics::types::Perception checking setters") {
   }
 }
 
-TEST_CASE("haptics::types::Perception testing tracks") {
+TEST_CASE("haptics::types::Perception testing channels") {
   using haptics::types::Perception;
   using haptics::types::PerceptionModality;
   Perception perception(0, 0, "Some perception test content", PerceptionModality::Temperature);
-  haptics::types::Track track(0, "Test track", 1, 1, 0);
-  SECTION("Checking addTrack", "[addTrack]") {
-    perception.addTrack(track);
-    CHECK(perception.getTracksSize() == 1);
-    haptics::types::Track addedTrack = perception.getTrackAt(0);
-    CHECK(track.getId() == addedTrack.getId());
-    CHECK(track.getDescription() == addedTrack.getDescription());
-    CHECK(track.getGain() == Approx(addedTrack.getGain()));
-    CHECK(track.getMixingWeight() == Approx(addedTrack.getMixingWeight()));
-    CHECK(track.getBodyPartMask() == addedTrack.getBodyPartMask());
+  haptics::types::Channel channel(0, "Test channel", 1, 1, 0);
+  SECTION("Checking addChannel", "[addChannel]") {
+    perception.addChannel(channel);
+    CHECK(perception.getChannelsSize() == 1);
+    haptics::types::Channel addedChannel = perception.getChannelAt(0);
+    CHECK(channel.getId() == addedChannel.getId());
+    CHECK(channel.getDescription() == addedChannel.getDescription());
+    CHECK(channel.getGain() == Approx(addedChannel.getGain()));
+    CHECK(channel.getMixingWeight() == Approx(addedChannel.getMixingWeight()));
+    CHECK(channel.getBodyPartMask() == addedChannel.getBodyPartMask());
   }
 }
 

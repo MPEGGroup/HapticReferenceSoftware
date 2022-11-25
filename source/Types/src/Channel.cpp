@@ -31,50 +31,50 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Types/include/Track.h>
+#include <Types/include/Channel.h>
 
 namespace haptics::types {
 
-[[nodiscard]] auto Track::getId() const -> int { return id; }
+[[nodiscard]] auto Channel::getId() const -> int { return id; }
 
-auto Track::setId(int newId) -> void { id = newId; }
+auto Channel::setId(int newId) -> void { id = newId; }
 
-[[nodiscard]] auto Track::getDescription() const -> std::string { return description; }
+[[nodiscard]] auto Channel::getDescription() const -> std::string { return description; }
 
-auto Track::setDescription(std::string &newDescription) -> void { description = newDescription; }
+auto Channel::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
-[[nodiscard]] auto Track::getGain() const -> float { return gain; }
+[[nodiscard]] auto Channel::getGain() const -> float { return gain; }
 
-auto Track::setGain(float newGain) -> void { gain = newGain; }
+auto Channel::setGain(float newGain) -> void { gain = newGain; }
 
-[[nodiscard]] auto Track::getMixingWeight() const -> float { return mixingWeight; }
+[[nodiscard]] auto Channel::getMixingWeight() const -> float { return mixingWeight; }
 
-auto Track::setMixingWeight(float newMixingWeight) -> void { mixingWeight = newMixingWeight; }
+auto Channel::setMixingWeight(float newMixingWeight) -> void { mixingWeight = newMixingWeight; }
 
-[[nodiscard]] auto Track::getBodyPartMask() const -> uint32_t { return bodyPartMask; }
+[[nodiscard]] auto Channel::getBodyPartMask() const -> uint32_t { return bodyPartMask; }
 
-auto Track::setBodyPartMask(uint32_t newBodyPartMask) -> void { bodyPartMask = newBodyPartMask; }
+auto Channel::setBodyPartMask(uint32_t newBodyPartMask) -> void { bodyPartMask = newBodyPartMask; }
 
-[[nodiscard]] auto Track::getReferenceDeviceId() const -> std::optional<int> {
+[[nodiscard]] auto Channel::getReferenceDeviceId() const -> std::optional<int> {
   return referenceDeviceId;
 }
-auto Track::setReferenceDeviceId(int newReferenceDeviceId) -> void {
+auto Channel::setReferenceDeviceId(int newReferenceDeviceId) -> void {
   referenceDeviceId = newReferenceDeviceId;
 }
 
-auto Track::getVerticesSize() -> size_t { return vertices.size(); }
+auto Channel::getVerticesSize() -> size_t { return vertices.size(); }
 
-auto Track::getVertexAt(int index) -> int & { return vertices.at(index); }
+auto Channel::getVertexAt(int index) -> int & { return vertices.at(index); }
 
-auto Track::addVertex(int &newVertice) -> void { vertices.push_back(newVertice); }
+auto Channel::addVertex(int &newVertice) -> void { vertices.push_back(newVertice); }
 
-auto Track::getBandsSize() -> size_t { return bands.size(); }
+auto Channel::getBandsSize() -> size_t { return bands.size(); }
 
-auto Track::getBandAt(int index) -> haptics::types::Band & { return bands.at(index); }
+auto Channel::getBandAt(int index) -> haptics::types::Band & { return bands.at(index); }
 
-auto Track::addBand(haptics::types::Band &newBand) -> void { bands.push_back(newBand); }
+auto Channel::addBand(haptics::types::Band &newBand) -> void { bands.push_back(newBand); }
 
-auto Track::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
+auto Channel::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   if (index < 0 || index >= (int)this->getBandsSize()) {
     return false;
   }
@@ -82,22 +82,22 @@ auto Track::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   return true;
 }
 
-auto Track::generateBand() -> haptics::types::Band * {
+auto Channel::generateBand() -> haptics::types::Band * {
   Band newBand;
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
 
-auto Track::generateBand(BandType bandType, CurveType curveType, double blockLength,
-                         int lowerFrequencyLimit, int upperFrequencyLimit)
+auto Channel::generateBand(BandType bandType, CurveType curveType, double blockLength,
+                           int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
   Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
 
-auto Track::findBandAvailable(const int position, const int duration,
-                              const types::BandType bandType) -> haptics::types::Band * {
+auto Channel::findBandAvailable(const int position, const int duration,
+                                const types::BandType bandType) -> haptics::types::Band * {
   haptics::types::Effect e;
   bool bandIsAvailable = true;
   for (haptics::types::Band &b : bands) {
@@ -121,7 +121,7 @@ auto Track::findBandAvailable(const int position, const int duration,
   return nullptr;
 }
 
-auto Track::Evaluate(double position) -> double {
+auto Channel::Evaluate(double position) -> double {
 
   double res = 0;
 
@@ -138,63 +138,66 @@ auto Track::Evaluate(double position) -> double {
   return res;
 }
 
-auto Track::EvaluateTrack(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
-  std::vector<double> trackAmp(sampleCount, 0); // intialiser � 0?
+auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
+  std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
   for (haptics::types::Band &b : bands) {
     std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad);
     for (uint32_t i = 0; i < bandAmp.size(); i++) {
-      trackAmp[i] += bandAmp[i];
-      if (trackAmp[i] < -1) {
-        trackAmp[i] = -1;
+      channelAmp[i] += bandAmp[i];
+      if (channelAmp[i] < -1) {
+        channelAmp[i] = -1;
       }
-      if (trackAmp[i] > 1) {
-        trackAmp[i] = 1;
+      if (channelAmp[i] > 1) {
+        channelAmp[i] = 1;
       }
     }
   }
-  return trackAmp;
+  return channelAmp;
 }
 
-[[nodiscard]] auto Track::getFrequencySampling() const -> std::optional<uint32_t> {
+[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint32_t> {
   return frequencySampling;
 }
 
-auto Track::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
+auto Channel::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
   frequencySampling = newFrequencySampling;
 }
 
-[[nodiscard]] auto Track::getSampleCount() const -> std::optional<uint32_t> { return sampleCount; }
+[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint32_t> {
+  return sampleCount;
+}
 
-auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
+auto Channel::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
   sampleCount = newSampleCount;
 }
 
-[[nodiscard]] auto Track::getDirection() const -> std::optional<Vector> { return direction; }
+[[nodiscard]] auto Channel::getDirection() const -> std::optional<Vector> { return direction; }
 
-auto Track::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
+auto Channel::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
 
-[[nodiscard]] auto Track::getActuatorResolution() const -> std::optional<Vector> {
+[[nodiscard]] auto Channel::getActuatorResolution() const -> std::optional<Vector> {
   return actuatorResolution;
 }
 
-auto Track::setActuatorResolution(std::optional<Vector> newTrackResolution) -> void {
-  actuatorResolution = newTrackResolution;
+auto Channel::setActuatorResolution(std::optional<Vector> newChannelResolution) -> void {
+  actuatorResolution = newChannelResolution;
 }
 
-[[nodiscard]] auto Track::getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>> {
+[[nodiscard]] auto Channel::getBodyPartTarget() const
+    -> std::optional<std::vector<BodyPartTarget>> {
   return bodyPartTarget;
 }
 
-auto Track::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget)
+auto Channel::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget)
     -> void {
   bodyPartTarget = std::move(newBodyPartTarget);
 }
 
-[[nodiscard]] auto Track::getActuatorTarget() const -> std::optional<std::vector<Vector>> {
+[[nodiscard]] auto Channel::getActuatorTarget() const -> std::optional<std::vector<Vector>> {
   return actuatorTarget;
 }
 
-auto Track::setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void {
+auto Channel::setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void {
   actuatorTarget = std::move(newActuatorTarget);
 }
 

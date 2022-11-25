@@ -41,12 +41,12 @@ using haptics::tools::WavParser;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::BaseSignal;
+using haptics::types::Channel;
 using haptics::types::CurveType;
 using haptics::types::Effect;
 using haptics::types::EffectType;
 using haptics::types::Keyframe;
 using haptics::types::Perception;
-using haptics::types::Track;
 
 namespace haptics::encoder {
 
@@ -54,14 +54,14 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   WavParser wavParser;
   wavParser.loadFile(filename);
   size_t numChannels = wavParser.getNumChannels();
-  Track myTrack;
-  auto tracksSize = out.getTracksSize();
-  if (tracksSize < numChannels) {
-    for (uint32_t channelIndex = tracksSize; channelIndex < numChannels; channelIndex++) {
-      myTrack = Track((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0));
-      out.addTrack(myTrack);
+  Channel myChannel;
+  auto channelsSize = out.getChannelsSize();
+  if (channelsSize < numChannels) {
+    for (uint32_t channelIndex = channelsSize; channelIndex < numChannels; channelIndex++) {
+      myChannel = Channel((int)channelIndex, "I'm a placeholder", 1, 1, ~uint32_t(0));
+      out.addChannel(myChannel);
     }
-  } else if (out.getTracksSize() != numChannels) {
+  } else if (out.getChannelsSize() != numChannels) {
     return EXIT_FAILURE;
   }
   Filterbank filterbank(static_cast<double>(wavParser.getSamplerate()));
@@ -74,7 +74,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
     std::vector<double> filteredSignal;
     std::vector<std::pair<int, double>> points;
     std::vector<double> signal;
-    myTrack = out.getTrackAt((int)channelIndex);
+    myChannel = out.getChannelAt((int)channelIndex);
     signal = wavParser.getSamplesChannel(channelIndex);
     std::vector<double> low_frequency_signal(signal.size(), 0.0);
     std::vector<double> high_frequency_signal(signal.size(), 0.0);
@@ -105,11 +105,11 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
         } else {
           myBand.setCurveType(CurveType::Unknown);
         }
-        myTrack.addBand(myBand);
+        myChannel.addBand(myBand);
       }
     }
-    myTrack.setFrequencySampling(wavParser.getSamplerate());
-    myTrack.setSampleCount(
+    myChannel.setFrequencySampling(wavParser.getSamplerate());
+    myChannel.setSampleCount(
         static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     // wavelet processing
     if (config.wavelet_enabled) {
@@ -128,13 +128,13 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       waveletBand = Band();
       if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
                                   config.curveFrequencyLimit, waveletBand)) {
-        myTrack.addBand(waveletBand);
+        myChannel.addBand(waveletBand);
       }
-      myTrack.setFrequencySampling(wavParser.getSamplerate());
-      myTrack.setSampleCount(
+      myChannel.setFrequencySampling(wavParser.getSamplerate());
+      myChannel.setSampleCount(
           static_cast<uint32_t>(wavParser.getNumSamples() / wavParser.getNumChannels()));
     }
-    out.replaceTrackAt((int)channelIndex, myTrack);
+    out.replaceChannelAt((int)channelIndex, myChannel);
   }
   return EXIT_SUCCESS;
 }

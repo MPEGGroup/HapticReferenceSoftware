@@ -92,8 +92,8 @@ private:
   static auto readLibrary(types::Perception &perception, std::istream &file,
                           std::vector<bool> &unusedBits) -> bool;
   static auto readLibraryEffect(std::istream &file, std::vector<bool> &unusedBits) -> types::Effect;
-  static auto readTracksHeader(types::Perception &perception, std::istream &file,
-                               std::vector<bool> &unusedBits) -> bool;
+  static auto readChannelsHeader(types::Perception &perception, std::istream &file,
+                                 std::vector<bool> &unusedBits) -> bool;
 
   static auto writeFileBody(types::Haptics &haptic, std::vector<bool> &output) -> bool;
   static auto writeAvatars(types::Haptics &haptic, std::vector<bool> &output) -> bool;
@@ -102,7 +102,7 @@ private:
   static auto writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &output) -> bool;
   static auto writeReferenceDevices(types::Perception &perception, std::vector<bool> &output)
       -> bool;
-  static auto writeTracksHeader(types::Perception &perception, std::vector<bool> &output) -> bool;
+  static auto writeChannelsHeader(types::Perception &perception, std::vector<bool> &output) -> bool;
 
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice)
       -> uint16_t;

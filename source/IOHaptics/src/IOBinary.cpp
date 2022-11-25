@@ -204,7 +204,7 @@ auto IOBinary::readPerceptionsHeader(types::Haptics &haptic, std::istream &file,
     if (!IOBinary::readReferenceDevices(myPerception, file, unusedBits)) {
       return false;
     }
-    if (!IOBinary::readTracksHeader(myPerception, file, unusedBits)) {
+    if (!IOBinary::readChannelsHeader(myPerception, file, unusedBits)) {
       return false;
     }
     haptic.addPerception(myPerception);
@@ -246,7 +246,7 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> 
       return false;
     }
 
-    if (!IOBinary::writeTracksHeader(myPerception, output)) {
+    if (!IOBinary::writeChannelsHeader(myPerception, output)) {
       return false;
     }
   }
@@ -569,42 +569,42 @@ auto IOBinary::writeReferenceDevices(types::Perception &perception, std::vector<
   return true;
 }
 
-auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &file,
-                                std::vector<bool> &unusedBits) -> bool {
-  auto trackCount =
-      IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_TRACK_COUNT>(file, unusedBits);
-  // for each track
-  for (unsigned short i = 0; i < trackCount; i++) {
-    types::Track t;
-    t.setId(IOBinaryPrimitives::readNBits<short, MDTRACK_ID>(file, unusedBits));
-    std::string trackDescription = IOBinaryPrimitives::readString(file, unusedBits);
-    t.setDescription(trackDescription);
+auto IOBinary::readChannelsHeader(types::Perception &perception, std::istream &file,
+                                  std::vector<bool> &unusedBits) -> bool {
+  auto channelCount =
+      IOBinaryPrimitives::readNBits<unsigned short, MDPERCE_CHANNEL_COUNT>(file, unusedBits);
+  // for each channel
+  for (unsigned short i = 0; i < channelCount; i++) {
+    types::Channel t;
+    t.setId(IOBinaryPrimitives::readNBits<short, MDCHANNEL_ID>(file, unusedBits));
+    std::string channelDescription = IOBinaryPrimitives::readString(file, unusedBits);
+    t.setDescription(channelDescription);
     t.setReferenceDeviceId(
-        IOBinaryPrimitives::readNBits<short, MDTRACK_DEVICE_ID>(file, unusedBits));
-    t.setGain(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_GAIN>(file, -MAX_FLOAT,
+        IOBinaryPrimitives::readNBits<short, MDCHANNEL_DEVICE_ID>(file, unusedBits));
+    t.setGain(IOBinaryPrimitives::readFloatNBits<uint32_t, MDCHANNEL_GAIN>(file, -MAX_FLOAT,
                                                                          MAX_FLOAT, unusedBits));
-    t.setMixingWeight(IOBinaryPrimitives::readFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(
+    t.setMixingWeight(IOBinaryPrimitives::readFloatNBits<uint32_t, MDCHANNEL_MIXING_WEIGHT>(
         file, 0, MAX_FLOAT, unusedBits));
     auto optionalMetadataMask =
-        IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_OPT_FIELDS>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<uint8_t, MDCHANNEL_OPT_FIELDS>(file, unusedBits);
     if ((optionalMetadataMask & 0b0000'0001) != 0) {
       t.setBodyPartMask(
-          IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_BODY_PART_MASK>(file, unusedBits));
+          IOBinaryPrimitives::readNBits<uint32_t, MDCHANNEL_BODY_PART_MASK>(file, unusedBits));
     } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
       t.setActuatorResolution(IOBinaryPrimitives::readVector(file, unusedBits));
 
       auto bodyPartTargetCount =
-          IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(file, unusedBits);
+          IOBinaryPrimitives::readNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(file, unusedBits);
       std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
                                                         types::BodyPartTarget::Unknown);
       for (auto &target : bodyPartTarget) {
         target = static_cast<types::BodyPartTarget>(
-            IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(file, unusedBits));
+            IOBinaryPrimitives::readNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET>(file, unusedBits));
       }
       t.setBodyPartTarget(bodyPartTarget);
 
       auto actuatorTargetCount =
-          IOBinaryPrimitives::readNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(file, unusedBits);
+          IOBinaryPrimitives::readNBits<uint8_t, MDCHANNEL_ACTUATOR_TARGET_COUNT>(file, unusedBits);
       std::vector<types::Vector> actuatorTarget(actuatorTargetCount);
       for (auto &target : actuatorTarget) {
         target = IOBinaryPrimitives::readVector(file, unusedBits);
@@ -613,123 +613,124 @@ auto IOBinary::readTracksHeader(types::Perception &perception, std::istream &fil
     }
 
     auto frequencySampling =
-        IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_FREQ_SAMPLING>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<uint32_t, MDCHANNEL_FREQ_SAMPLING>(file, unusedBits);
     if (frequencySampling != 0) {
       t.setFrequencySampling(frequencySampling);
       t.setSampleCount(
-          IOBinaryPrimitives::readNBits<uint32_t, MDTRACK_SAMPLE_COUNT>(file, unusedBits));
+          IOBinaryPrimitives::readNBits<uint32_t, MDCHANNEL_SAMPLE_COUNT>(file, unusedBits));
     }
     if ((optionalMetadataMask & 0b0000'0100) != 0) {
       t.setDirection(IOBinaryPrimitives::readVector(file, unusedBits));
     }
-    auto verticesCount = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT_COUNT>(file, unusedBits);
+    auto verticesCount = IOBinaryPrimitives::readNBits<int, MDCHANNEL_VERT_COUNT>(file, unusedBits);
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
-      vertex = IOBinaryPrimitives::readNBits<int, MDTRACK_VERT>(file, unusedBits);
+      vertex = IOBinaryPrimitives::readNBits<int, MDCHANNEL_VERT>(file, unusedBits);
       t.addVertex(vertex);
     }
 
     auto bandCount =
-        IOBinaryPrimitives::readNBits<unsigned short, MDTRACK_BANDS_COUNT>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<unsigned short, MDCHANNEL_BANDS_COUNT>(file, unusedBits);
     for (unsigned short j = 0; j < bandCount; j++) {
       types::Band emptyBand;
       t.addBand(emptyBand);
     }
 
-    perception.addTrack(t);
+    perception.addChannel(t);
   }
 
   return true;
 }
 
-auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool> &output) -> bool {
-  auto trackCount = static_cast<unsigned short>(perception.getTracksSize());
-  IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_TRACK_COUNT>(trackCount, output);
-  // for each track
-  types::Track myTrack;
-  for (unsigned short i = 0; i < trackCount; i++) {
-    myTrack = perception.getTrackAt(i);
+auto IOBinary::writeChannelsHeader(types::Perception &perception, std::vector<bool> &output)
+    -> bool {
+  auto channelCount = static_cast<unsigned short>(perception.getChannelsSize());
+  IOBinaryPrimitives::writeNBits<unsigned short, MDPERCE_CHANNEL_COUNT>(channelCount, output);
+  // for each channel
+  types::Channel myChannel;
+  for (unsigned short i = 0; i < channelCount; i++) {
+    myChannel = perception.getChannelAt(i);
 
-    auto trackId = static_cast<short>(myTrack.getId());
-    IOBinaryPrimitives::writeNBits<short, MDTRACK_ID>(trackId, output);
+    auto channelId = static_cast<short>(myChannel.getId());
+    IOBinaryPrimitives::writeNBits<short, MDCHANNEL_ID>(channelId, output);
 
-    std::string trackDescription = myTrack.getDescription();
-    IOBinaryPrimitives::writeString(trackDescription, output);
+    std::string channelDescription = myChannel.getDescription();
+    IOBinaryPrimitives::writeString(channelDescription, output);
 
-    short deviceId = static_cast<short>(myTrack.getReferenceDeviceId().value_or(-1));
-    IOBinaryPrimitives::writeNBits<short, MDTRACK_DEVICE_ID>(deviceId, output);
+    short deviceId = static_cast<short>(myChannel.getReferenceDeviceId().value_or(-1));
+    IOBinaryPrimitives::writeNBits<short, MDCHANNEL_DEVICE_ID>(deviceId, output);
 
-    float trackGain = myTrack.getGain();
-    IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_GAIN>(trackGain, output, -MAX_FLOAT,
+    float channelGain = myChannel.getGain();
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_GAIN>(channelGain, output, -MAX_FLOAT,
                                                                 MAX_FLOAT);
 
-    float trackMixingWeight = myTrack.getMixingWeight();
-    IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(trackMixingWeight, output,
-                                                                         0, MAX_FLOAT);
+    float channelMixingWeight = myChannel.getMixingWeight();
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_MIXING_WEIGHT>(channelMixingWeight,
+                                                                         output, 0, MAX_FLOAT);
 
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
-    if (myTrack.getActuatorResolution().has_value()) {
+    if (myChannel.getActuatorResolution().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0010;
     } else {
       optionalMetadataMask |= (uint8_t)0b0000'0001;
     }
-    if (myTrack.getDirection().has_value()) {
+    if (myChannel.getDirection().has_value()) {
       optionalMetadataMask |= (uint8_t)0b0000'0100;
     }
-    IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_OPT_FIELDS>(optionalMetadataMask, output);
+    IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_OPT_FIELDS>(optionalMetadataMask, output);
 
     if ((optionalMetadataMask & 0b0000'0010) != 0) {
-      types::Vector trackResolution = myTrack.getActuatorResolution().value();
-      IOBinaryPrimitives::writeVector(trackResolution, output);
+      types::Vector channelResolution = myChannel.getActuatorResolution().value();
+      IOBinaryPrimitives::writeVector(channelResolution, output);
 
       std::vector<types::BodyPartTarget> bodyPartTarget =
-          myTrack.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
+          myChannel.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
       auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
-      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
+      IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
                                                                               output);
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-        IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(
+        IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET>(
             static_cast<uint8_t>(bodyPartTarget[i]), output);
       }
 
       std::vector<types::Vector> actuatorTarget =
-          myTrack.getActuatorTarget().value_or(std::vector<types::Vector>{});
+          myChannel.getActuatorTarget().value_or(std::vector<types::Vector>{});
       auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
-      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
+      IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
                                                                              output);
       for (uint8_t i = 0; i < actuatorTargetCount; i++) {
         types::Vector target = actuatorTarget[i];
         IOBinaryPrimitives::writeVector(target, output);
       }
     } else if ((optionalMetadataMask & 0b0000'0001) != 0) {
-      uint32_t bodyPartMask = myTrack.getBodyPartMask();
-      IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_BODY_PART_MASK>(bodyPartMask, output);
+      uint32_t bodyPartMask = myChannel.getBodyPartMask();
+      IOBinaryPrimitives::writeNBits<uint32_t, MDCHANNEL_BODY_PART_MASK>(bodyPartMask, output);
     }
 
-    uint32_t frequencySampling = myTrack.getFrequencySampling().value_or(0);
-    IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_FREQ_SAMPLING>(frequencySampling, output);
+    uint32_t frequencySampling = myChannel.getFrequencySampling().value_or(0);
+    IOBinaryPrimitives::writeNBits<uint32_t, MDCHANNEL_FREQ_SAMPLING>(frequencySampling, output);
 
     if (frequencySampling != 0) {
-      uint32_t sampleCount = myTrack.getSampleCount().value_or(0);
-      IOBinaryPrimitives::writeNBits<uint32_t, MDTRACK_SAMPLE_COUNT>(sampleCount, output);
+      uint32_t sampleCount = myChannel.getSampleCount().value_or(0);
+      IOBinaryPrimitives::writeNBits<uint32_t, MDCHANNEL_SAMPLE_COUNT>(sampleCount, output);
     }
 
-    if (myTrack.getDirection().has_value()) {
-      types::Vector direction = myTrack.getDirection().value();
+    if (myChannel.getDirection().has_value()) {
+      types::Vector direction = myChannel.getDirection().value();
       IOBinaryPrimitives::writeVector(direction, output);
     }
 
-    auto verticesCount = static_cast<int>(myTrack.getVerticesSize());
-    IOBinaryPrimitives::writeNBits<int, MDTRACK_VERT_COUNT>(verticesCount, output);
+    auto verticesCount = static_cast<int>(myChannel.getVerticesSize());
+    IOBinaryPrimitives::writeNBits<int, MDCHANNEL_VERT_COUNT>(verticesCount, output);
 
     int vertex = 0;
     for (int j = 0; j < verticesCount; j++) {
-      vertex = myTrack.getVertexAt(j);
-      IOBinaryPrimitives::writeNBits<int, MDTRACK_VERT>(vertex, output);
+      vertex = myChannel.getVertexAt(j);
+      IOBinaryPrimitives::writeNBits<int, MDCHANNEL_VERT>(vertex, output);
     }
 
-    auto bandCount = static_cast<unsigned short>(myTrack.getBandsSize());
-    IOBinaryPrimitives::writeNBits<unsigned short, MDTRACK_BANDS_COUNT>(bandCount, output);
+    auto bandCount = static_cast<unsigned short>(myChannel.getBandsSize());
+    IOBinaryPrimitives::writeNBits<unsigned short, MDCHANNEL_BANDS_COUNT>(bandCount, output);
   }
 
   return true;
@@ -738,19 +739,19 @@ auto IOBinary::writeTracksHeader(types::Perception &perception, std::vector<bool
 auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file,
                             std::vector<bool> &unusedBits) -> bool {
   types::Perception myPerception;
-  types::Track myTrack;
+  types::Channel myChannel;
   types::Band myBand;
 
   for (int perceptionIndex = 0; perceptionIndex < static_cast<int>(haptic.getPerceptionsSize());
        perceptionIndex++) {
     myPerception = haptic.getPerceptionAt(perceptionIndex);
 
-    for (int trackIndex = 0; trackIndex < static_cast<int>(myPerception.getTracksSize());
-         trackIndex++) {
-      myTrack = myPerception.getTrackAt(trackIndex);
+    for (int channelIndex = 0; channelIndex < static_cast<int>(myPerception.getChannelsSize());
+         channelIndex++) {
+      myChannel = myPerception.getChannelAt(channelIndex);
 
-      for (int bandIndex = 0; bandIndex < static_cast<int>(myTrack.getBandsSize()); bandIndex++) {
-        myBand = myTrack.getBandAt(bandIndex);
+      for (int bandIndex = 0; bandIndex < static_cast<int>(myChannel.getBandsSize()); bandIndex++) {
+        myBand = myChannel.getBandAt(bandIndex);
         if (!IOBinaryBands::readBandHeader(myBand, file, unusedBits)) {
           continue;
         }
@@ -759,9 +760,9 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file,
           return false;
         }
 
-        myTrack.replaceBandAt(bandIndex, myBand);
+        myChannel.replaceBandAt(bandIndex, myBand);
       }
-      myPerception.replaceTrackAt(trackIndex, myTrack);
+      myPerception.replaceChannelAt(channelIndex, myChannel);
     }
     haptic.replacePerceptionAt(perceptionIndex, myPerception);
   }
@@ -771,20 +772,21 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file,
 
 auto IOBinary::writeFileBody(types::Haptics &haptic, std::vector<bool> &output) -> bool {
   types::Perception myPerception;
-  types::Track myTrack;
+  types::Channel myChannel;
   types::Band myBand;
   for (unsigned short perceptionIndex = 0;
        perceptionIndex < static_cast<unsigned short>(haptic.getPerceptionsSize());
        perceptionIndex++) {
     myPerception = haptic.getPerceptionAt(perceptionIndex);
 
-    for (unsigned short trackIndex = 0;
-         trackIndex < static_cast<unsigned short>(myPerception.getTracksSize()); trackIndex++) {
-      myTrack = myPerception.getTrackAt(trackIndex);
+    for (unsigned short channelIndex = 0;
+         channelIndex < static_cast<unsigned short>(myPerception.getChannelsSize());
+         channelIndex++) {
+      myChannel = myPerception.getChannelAt(channelIndex);
 
       for (unsigned short bandIndex = 0;
-           bandIndex < static_cast<unsigned short>(myTrack.getBandsSize()); bandIndex++) {
-        myBand = myTrack.getBandAt(bandIndex);
+           bandIndex < static_cast<unsigned short>(myChannel.getBandsSize()); bandIndex++) {
+        myBand = myChannel.getBandAt(bandIndex);
         if (!IOBinaryBands::writeBandHeader(myBand, output)) {
           continue;
         }

@@ -34,7 +34,7 @@
 #ifndef IOBINARYPRIMITIVES_H
 #define IOBINARYPRIMITIVES_H
 
-#include <Types/include/Track.h>
+#include <Types/include/Channel.h>
 #include <algorithm>
 #include <array>
 #include <cmath>

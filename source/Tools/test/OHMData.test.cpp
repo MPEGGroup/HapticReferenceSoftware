@@ -83,8 +83,8 @@ TEST_CASE("haptics::tools::OHMData", "[loadFile][writeFile]") {
     auto hapticElement = ohmLoadedData.getHapticElementMetadataAt(0);
     CHECK(hapticElement.elementFilename == elementFilename);
     CHECK(hapticElement.elementDescription == elementDescription);
-    bool validNbTracks = ohmLoadedData.getHapticElementMetadataAt(0).numHapticChannels == 1;
-    REQUIRE(validNbTracks);
+    bool validNbChannels = ohmLoadedData.getHapticElementMetadataAt(0).numHapticChannels == 1;
+    REQUIRE(validNbChannels);
     auto hapticChannel = hapticElement.channelsMetadata[0];
     CHECK(hapticChannel.channelDescription == channelDescription);
     CHECK(hapticChannel.gain == channelGain);

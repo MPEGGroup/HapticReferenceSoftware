@@ -103,10 +103,10 @@ TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
     REQUIRE(h.getPerceptionsSize() == 1);
     auto perception = h.getPerceptionAt(0);
     CHECK(perception.getDescription() == elementDescription);
-    REQUIRE(perception.getTracksSize() == 1);
-    auto track = perception.getTrackAt(0);
-    CHECK(track.getDescription() == channelDescription);
-    CHECK(track.getGain() == channelGain);
-    CHECK(track.getBodyPartMask() == static_cast<uint32_t>(bodyPartMask));
+    REQUIRE(perception.getChannelsSize() == 1);
+    auto channel = perception.getChannelAt(0);
+    CHECK(channel.getDescription() == channelDescription);
+    CHECK(channel.getGain() == channelGain);
+    CHECK(channel.getBodyPartMask() == static_cast<uint32_t>(bodyPartMask));
   }
 }

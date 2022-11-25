@@ -34,8 +34,8 @@
 #ifndef PERCEPTION_H
 #define PERCEPTION_H
 
+#include <Types/include/Channel.h>
 #include <Types/include/ReferenceDevice.h>
-#include <Types/include/Track.h>
 #include <fstream>
 #include <map>
 #include <string>
@@ -103,7 +103,7 @@ public:
       , avatarId(newAvatarId)
       , description(std::move(newDescription))
       , perceptionModality(newPerceptionModality)
-      , tracks({})
+      , channels({})
       , unitExponent(std::nullopt)
       , perceptionUnitExponent(std::nullopt){};
 
@@ -121,12 +121,12 @@ public:
   [[nodiscard]] auto getPerceptionUnitExponent() const -> std::optional<int8_t>;
   [[nodiscard]] auto getPerceptionUnitExponentOrDefault() const -> int8_t;
   auto setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent) -> void;
-  auto getTracksSize() -> size_t;
-  auto getTrackAt(int index) -> Track &;
-  auto addTrack(haptics::types::Track &newTrack) -> void;
+  auto getChannelsSize() -> size_t;
+  auto getChannelAt(int index) -> Channel &;
+  auto addChannel(haptics::types::Channel &newChannel) -> void;
   auto getReferenceDevicesSize() -> size_t;
   auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
-  auto replaceTrackAt(int index, Track &newTrack) -> bool;
+  auto replaceChannelAt(int index, Channel &newChannel) -> bool;
   auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
   auto addReferenceDevice(
       const std::vector<std::tuple<
@@ -140,7 +140,7 @@ public:
   auto getBasisEffectAt(int index) -> haptics::types::Effect &;
   auto addBasisEffect(haptics::types::Effect &newEffect) -> void;
   auto refactorEffects() -> void;
-  auto searchForEquivalentEffects(Effect &effect, int startingTrack)
+  auto searchForEquivalentEffects(Effect &effect, int startingChannel)
       -> std::vector<std::tuple<int, int, int>>;
   auto linearizeLibrary() -> void;
   auto getEffectById(int id) -> std::optional<Effect>;
@@ -153,7 +153,7 @@ private:
   int avatarId = -1;
   std::string description;
   PerceptionModality perceptionModality = PerceptionModality::Other;
-  std::vector<Track> tracks = {};
+  std::vector<Channel> channels = {};
   std::vector<ReferenceDevice> referenceDevices;
   std::optional<int8_t> unitExponent = std::nullopt;
   std::optional<int8_t> perceptionUnitExponent = std::nullopt;

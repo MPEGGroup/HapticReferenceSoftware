@@ -38,10 +38,10 @@
 #include <FilterBank/include/Filterbank.h>
 #include <Tools/include/WavParser.h>
 #include <Types/include/Band.h>
+#include <Types/include/Channel.h>
 #include <Types/include/Effect.h>
 #include <Types/include/Keyframe.h>
 #include <Types/include/Perception.h>
-#include <Types/include/Track.h>
 #include <iostream>
 #include <utility>
 #include <vector>

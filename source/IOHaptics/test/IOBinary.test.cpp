@@ -241,7 +241,7 @@ TEST_CASE("write/read file header for reference device testing") {
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     REQUIRE(res.getPerceptionsSize() == 1);
-    CHECK(res.getPerceptionAt(0).getTracksSize() == 0);
+    CHECK(res.getPerceptionAt(0).getChannelsSize() == 0);
     REQUIRE(res.getPerceptionAt(0).getReferenceDevicesSize() ==
             testingReferenceDeviceValue_perception0.size());
 
@@ -359,7 +359,7 @@ TEST_CASE("write/read file header for reference device testing") {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read file header for track testing") {
+TEST_CASE("write/read file header for channel testing") {
   const std::string testingVersion;
   const std::string testingDate;
   const std::string testingDescription;
@@ -382,77 +382,77 @@ TEST_CASE("write/read file header for track testing") {
                                                 testingDescription_perception1,
                                                 testingPerceptionModality_perception1);
 
-  const int testingId_track0 = 0;
-  const std::string testingDescription_track0 = "testingDescription_track0";
-  const float testingGain_track0 = .34;
-  const float testingMixingWeight_track0 = 1;
-  const uint32_t testingBodyPartMask_track0 = 32;
-  const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
-  const size_t testingBandsCount_track0 = 45;
-  const haptics::types::Vector testingDirection_track0((int8_t)0, (int8_t)128, (int8_t)-42);
-  haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
-                                      testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0);
-  testingTrack0.setDirection(testingDirection_track0);
-  for (auto vertex : testingVertices_track0) {
-    testingTrack0.addVertex(vertex);
+  const int testingId_channel0 = 0;
+  const std::string testingDescription_channel0 = "testingDescription_channel0";
+  const float testingGain_channel0 = .34;
+  const float testingMixingWeight_channel0 = 1;
+  const uint32_t testingBodyPartMask_channel0 = 32;
+  const std::vector<int> testingVertices_channel0 = {0, 453, -3, 7657};
+  const size_t testingBandsCount_channel0 = 45;
+  const haptics::types::Vector testingDirection_channel0((int8_t)0, (int8_t)128, (int8_t)-42);
+  haptics::types::Channel testingChannel0(testingId_channel0, testingDescription_channel0,
+                                          testingGain_channel0, testingMixingWeight_channel0,
+                                          testingBodyPartMask_channel0);
+  testingChannel0.setDirection(testingDirection_channel0);
+  for (auto vertex : testingVertices_channel0) {
+    testingChannel0.addVertex(vertex);
   }
-  for (size_t i = 0; i < testingBandsCount_track0; i++) {
-    testingTrack0.generateBand();
-  }
-
-  const int testingId_track1 = 132;
-  const std::string testingDescription_track1 = "again another string";
-  const float testingGain_track1 = 0;
-  const float testingMixingWeight_track1 = .333;
-  const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
-  const size_t testingBandsCount_track1 = 0;
-  haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
-                                      testingGain_track1, testingMixingWeight_track1,
-                                      testingBodyPartMask_track1);
-  for (size_t i = 0; i < testingBandsCount_track1; i++) {
-    testingTrack1.generateBand();
+  for (size_t i = 0; i < testingBandsCount_channel0; i++) {
+    testingChannel0.generateBand();
   }
 
-  const int testingId_track2 = 4;
-  const std::string testingDescription_track2 = "I'm inside a test";
-  const float testingGain_track2 = 2.7652;
-  const float testingMixingWeight_track2 = .6666;
-  const uint32_t testingBodyPartMask_track2 = 0;
-  const std::vector<int> testingVertices_track2 = {0, 6};
-  const size_t testingBandsCount_track2 = 1;
-  const haptics::types::Vector testingTrackResolution_track2(32, 110, 3);
-  const std::vector<haptics::types::Vector> testingActuatorTarget_track2{
+  const int testingId_channel1 = 132;
+  const std::string testingDescription_channel1 = "again another string";
+  const float testingGain_channel1 = 0;
+  const float testingMixingWeight_channel1 = .333;
+  const uint32_t testingBodyPartMask_channel1 = ~(uint32_t)(0);
+  const size_t testingBandsCount_channel1 = 0;
+  haptics::types::Channel testingChannel1(testingId_channel1, testingDescription_channel1,
+                                          testingGain_channel1, testingMixingWeight_channel1,
+                                          testingBodyPartMask_channel1);
+  for (size_t i = 0; i < testingBandsCount_channel1; i++) {
+    testingChannel1.generateBand();
+  }
+
+  const int testingId_channel2 = 4;
+  const std::string testingDescription_channel2 = "I'm inside a test";
+  const float testingGain_channel2 = 2.7652;
+  const float testingMixingWeight_channel2 = .6666;
+  const uint32_t testingBodyPartMask_channel2 = 0;
+  const std::vector<int> testingVertices_channel2 = {0, 6};
+  const size_t testingBandsCount_channel2 = 1;
+  const haptics::types::Vector testingChannelResolution_channel2(32, 110, 3);
+  const std::vector<haptics::types::Vector> testingActuatorTarget_channel2{
       haptics::types::Vector{31, 109, 2},
       haptics::types::Vector{0, 0, 0},
       haptics::types::Vector{15, 42, 1},
   };
-  const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_track2{
+  const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_channel2{
       haptics::types::BodyPartTarget::Left,         haptics::types::BodyPartTarget::Index,
       haptics::types::BodyPartTarget::ThirdPhalanx, haptics::types::BodyPartTarget::Plus,
       haptics::types::BodyPartTarget::Right,        haptics::types::BodyPartTarget::Leg,
       haptics::types::BodyPartTarget::Minus,        haptics::types::BodyPartTarget::Hallux,
   };
-  haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
-                                      testingGain_track2, testingMixingWeight_track2,
-                                      testingBodyPartMask_track2);
-  for (auto vertex : testingVertices_track2) {
-    testingTrack2.addVertex(vertex);
+  haptics::types::Channel testingChannel2(testingId_channel2, testingDescription_channel2,
+                                          testingGain_channel2, testingMixingWeight_channel2,
+                                          testingBodyPartMask_channel2);
+  for (auto vertex : testingVertices_channel2) {
+    testingChannel2.addVertex(vertex);
   }
-  for (size_t i = 0; i < testingBandsCount_track2; i++) {
-    testingTrack2.generateBand();
+  for (size_t i = 0; i < testingBandsCount_channel2; i++) {
+    testingChannel2.generateBand();
   }
-  testingTrack2.setActuatorResolution(testingTrackResolution_track2);
-  testingTrack2.setActuatorTarget(testingActuatorTarget_track2);
-  testingTrack2.setBodyPartTarget(testingBodyPartTarget_track2);
+  testingChannel2.setActuatorResolution(testingChannelResolution_channel2);
+  testingChannel2.setActuatorTarget(testingActuatorTarget_channel2);
+  testingChannel2.setBodyPartTarget(testingBodyPartTarget_channel2);
 
-  testingPerception0.addTrack(testingTrack0);
-  testingPerception0.addTrack(testingTrack1);
-  testingPerception1.addTrack(testingTrack2);
+  testingPerception0.addChannel(testingChannel0);
+  testingPerception0.addChannel(testingChannel1);
+  testingPerception1.addChannel(testingChannel2);
   testingHaptic.addPerception(testingPerception0);
   testingHaptic.addPerception(testingPerception1);
 
-  SECTION("write tracks header") {
+  SECTION("write channels header") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     REQUIRE(file);
     std::vector<bool> output;
@@ -464,13 +464,13 @@ TEST_CASE("write/read file header for track testing") {
     REQUIRE(succeed);
     const uintmax_t expectedFileSize =
         testingDescription_perception0.size() + testingDescription_perception1.size() +
-        testingDescription_track0.size() + testingDescription_track1.size() +
-        testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 135;
+        testingDescription_channel0.size() + testingDescription_channel1.size() +
+        testingDescription_channel2.size() + testingVertices_channel0.size() +
+        testingVertices_channel2.size() + 135;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
-  SECTION("read track header") {
+  SECTION("read channel header") {
     const uintmax_t startedFileSize = std::filesystem::file_size(filename);
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     REQUIRE(file);
@@ -483,79 +483,82 @@ TEST_CASE("write/read file header for track testing") {
     REQUIRE(succeed);
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     REQUIRE(res.getPerceptionsSize() == 2);
-    REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
+    REQUIRE(res.getPerceptionAt(0).getChannelsSize() == 2);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
     CHECK(res.getPerceptionAt(0).getAvatarId() == testingAvatarId_perception0);
     CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);
     CHECK(res.getPerceptionAt(0).getPerceptionModality() == testingPerceptionModality_perception0);
 
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getGain() - testingGain_track0) <
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getId() == testingId_channel0);
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getDescription() == testingDescription_channel0);
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(0).getGain() - testingGain_channel0) <
           floatPrecision);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() -
-                    testingMixingWeight_track0));
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
-            testingVertices_track0.size());
-    for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
-      REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVertexAt(i) == testingVertices_track0.at(i));
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(0).getMixingWeight() -
+                    testingMixingWeight_channel0));
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getVerticesSize() ==
+            testingVertices_channel0.size());
+    for (int i = 0; i < static_cast<int>(testingVertices_channel0.size()); i++) {
+      REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getVertexAt(i) ==
+              testingVertices_channel0.at(i));
     }
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandsSize() == testingBandsCount_track0);
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getDirection().has_value());
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDirection().value() == testingDirection_track0);
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorResolution().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getBodyPartTarget().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(0).getActuatorTarget().has_value());
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandsSize() == testingBandsCount_channel0);
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getDirection().value() ==
+          testingDirection_channel0);
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(0).getActuatorResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(0).getBodyPartTarget().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(0).getActuatorTarget().has_value());
 
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getGain() - testingGain_track1) <
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getId() == testingId_channel1);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getDescription() == testingDescription_channel1);
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(1).getGain() - testingGain_channel1) <
           floatPrecision);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() -
-                    testingMixingWeight_track1) < floatPrecision);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == testingBandsCount_track1);
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getDirection().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorResolution().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getBodyPartTarget().has_value());
-    CHECK_FALSE(res.getPerceptionAt(0).getTrackAt(1).getActuatorTarget().has_value());
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(1).getMixingWeight() -
+                    testingMixingWeight_channel1) < floatPrecision);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getVerticesSize() == 0);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandsSize() == testingBandsCount_channel1);
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(1).getDirection().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(1).getActuatorResolution().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(1).getBodyPartTarget().has_value());
+    CHECK_FALSE(res.getPerceptionAt(0).getChannelAt(1).getActuatorTarget().has_value());
 
-    REQUIRE(res.getPerceptionAt(1).getTracksSize() == 1);
+    REQUIRE(res.getPerceptionAt(1).getChannelsSize() == 1);
     CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
     CHECK(res.getPerceptionAt(1).getAvatarId() == testingAvatarId_perception1);
     CHECK(res.getPerceptionAt(1).getDescription() == testingDescription_perception1);
     CHECK(res.getPerceptionAt(1).getPerceptionModality() == testingPerceptionModality_perception1);
 
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
-    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getGain() - testingGain_track2) <
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getId() == testingId_channel2);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getDescription() == testingDescription_channel2);
+    CHECK(std::fabs(res.getPerceptionAt(1).getChannelAt(0).getGain() - testingGain_channel2) <
           floatPrecision);
-    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() -
-                    testingMixingWeight_track2) < floatPrecision);
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
-            testingVertices_track2.size());
-    for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
-      REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVertexAt(i) == testingVertices_track2.at(i));
+    CHECK(std::fabs(res.getPerceptionAt(1).getChannelAt(0).getMixingWeight() -
+                    testingMixingWeight_channel2) < floatPrecision);
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getVerticesSize() ==
+            testingVertices_channel2.size());
+    for (int i = 0; i < static_cast<int>(testingVertices_channel2.size()); i++) {
+      REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getVertexAt(i) ==
+              testingVertices_channel2.at(i));
     }
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == testingBandsCount_track2);
-    CHECK_FALSE(res.getPerceptionAt(1).getTrackAt(0).getDirection().has_value());
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartMask() == 0);
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().has_value());
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorResolution().value() ==
-          testingTrackResolution_track2);
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().has_value());
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value().size() ==
-            testingBodyPartTarget_track2.size());
-    for (size_t i = 0; i < testingBodyPartTarget_track2.size(); i++) {
-      CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartTarget().value()[i] ==
-            testingBodyPartTarget_track2[i]);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandsSize() == testingBandsCount_channel2);
+    CHECK_FALSE(res.getPerceptionAt(1).getChannelAt(0).getDirection().has_value());
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBodyPartMask() == 0);
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getActuatorResolution().has_value());
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getActuatorResolution().value() ==
+          testingChannelResolution_channel2);
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getBodyPartTarget().has_value());
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getBodyPartTarget().value().size() ==
+            testingBodyPartTarget_channel2.size());
+    for (size_t i = 0; i < testingBodyPartTarget_channel2.size(); i++) {
+      CHECK(res.getPerceptionAt(1).getChannelAt(0).getBodyPartTarget().value()[i] ==
+            testingBodyPartTarget_channel2[i]);
     }
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().has_value());
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().value().size() ==
-            testingActuatorTarget_track2.size());
-    for (size_t i = 0; i < testingActuatorTarget_track2.size(); i++) {
-      CHECK(res.getPerceptionAt(1).getTrackAt(0).getActuatorTarget().value()[i] ==
-            testingActuatorTarget_track2[i]);
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getActuatorTarget().has_value());
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getActuatorTarget().value().size() ==
+            testingActuatorTarget_channel2.size());
+    for (size_t i = 0; i < testingActuatorTarget_channel2.size(); i++) {
+      CHECK(res.getPerceptionAt(1).getChannelAt(0).getActuatorTarget().value()[i] ==
+            testingActuatorTarget_channel2[i]);
     }
 
     std::filesystem::remove(filename);
@@ -616,39 +619,39 @@ TEST_CASE("write/read file for body testing") {
                                                 testingDescription_perception1,
                                                 testingPerceptionModality_perception1);
 
-  const int testingId_track0 = 0;
-  const std::string testingDescription_track0 = "testingDescription_track0";
-  const float testingGain_track0 = .34;
-  const float testingMixingWeight_track0 = 1;
-  const uint32_t testingBodyPartMask_track0 = 32;
-  const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
-  haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
-                                      testingGain_track0, testingMixingWeight_track0,
-                                      testingBodyPartMask_track0);
-  for (auto vertex : testingVertices_track0) {
-    testingTrack0.addVertex(vertex);
+  const int testingId_channel0 = 0;
+  const std::string testingDescription_channel0 = "testingDescription_channel0";
+  const float testingGain_channel0 = .34;
+  const float testingMixingWeight_channel0 = 1;
+  const uint32_t testingBodyPartMask_channel0 = 32;
+  const std::vector<int> testingVertices_channel0 = {0, 453, -3, 7657};
+  haptics::types::Channel testingChannel0(testingId_channel0, testingDescription_channel0,
+                                          testingGain_channel0, testingMixingWeight_channel0,
+                                          testingBodyPartMask_channel0);
+  for (auto vertex : testingVertices_channel0) {
+    testingChannel0.addVertex(vertex);
   }
 
-  const int testingId_track1 = 132;
-  const std::string testingDescription_track1 = "again another string";
-  const float testingGain_track1 = 0;
-  const float testingMixingWeight_track1 = .333;
-  const uint32_t testingBodyPartMask_track1 = ~(uint32_t)(0);
-  haptics::types::Track testingTrack1(testingId_track1, testingDescription_track1,
-                                      testingGain_track1, testingMixingWeight_track1,
-                                      testingBodyPartMask_track1);
+  const int testingId_channel1 = 132;
+  const std::string testingDescription_channel1 = "again another string";
+  const float testingGain_channel1 = 0;
+  const float testingMixingWeight_channel1 = .333;
+  const uint32_t testingBodyPartMask_channel1 = ~(uint32_t)(0);
+  haptics::types::Channel testingChannel1(testingId_channel1, testingDescription_channel1,
+                                          testingGain_channel1, testingMixingWeight_channel1,
+                                          testingBodyPartMask_channel1);
 
-  const int testingId_track2 = 4;
-  const std::string testingDescription_track2 = "I'm inside a test";
-  const float testingGain_track2 = 2.7652;
-  const float testingMixingWeight_track2 = .6666;
-  const uint32_t testingBodyPartMask_track2 = 0;
-  const std::vector<int> testingVertices_track2 = {0, 6};
-  haptics::types::Track testingTrack2(testingId_track2, testingDescription_track2,
-                                      testingGain_track2, testingMixingWeight_track2,
-                                      testingBodyPartMask_track2);
-  for (auto vertex : testingVertices_track2) {
-    testingTrack2.addVertex(vertex);
+  const int testingId_channel2 = 4;
+  const std::string testingDescription_channel2 = "I'm inside a test";
+  const float testingGain_channel2 = 2.7652;
+  const float testingMixingWeight_channel2 = .6666;
+  const uint32_t testingBodyPartMask_channel2 = 0;
+  const std::vector<int> testingVertices_channel2 = {0, 6};
+  haptics::types::Channel testingChannel2(testingId_channel2, testingDescription_channel2,
+                                          testingGain_channel2, testingMixingWeight_channel2,
+                                          testingBodyPartMask_channel2);
+  for (auto vertex : testingVertices_channel2) {
+    testingChannel2.addVertex(vertex);
   }
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
@@ -709,12 +712,12 @@ TEST_CASE("write/read file for body testing") {
 
   testingBand0.addEffect(testingEffect0);
   testingBand2.addEffect(testingEffect2);
-  testingTrack0.addBand(testingBand0);
-  testingTrack1.addBand(testingBand1);
-  testingTrack2.addBand(testingBand2);
-  testingPerception0.addTrack(testingTrack0);
-  testingPerception0.addTrack(testingTrack1);
-  testingPerception1.addTrack(testingTrack2);
+  testingChannel0.addBand(testingBand0);
+  testingChannel1.addBand(testingBand1);
+  testingChannel2.addBand(testingBand2);
+  testingPerception0.addChannel(testingChannel0);
+  testingPerception0.addChannel(testingChannel1);
+  testingPerception1.addChannel(testingChannel2);
   testingHaptic.addPerception(testingPerception0);
   testingHaptic.addPerception(testingPerception1);
   testingHaptic.addAvatar(avatar1);
@@ -728,9 +731,9 @@ TEST_CASE("write/read file for body testing") {
         testingVersion.size() + testingDate.size() + testingDescription.size() +
         testingMesh_avatar1.size() + testingMesh_avatar2.size() +
         testingDescription_perception0.size() + testingDescription_perception1.size() +
-        testingDescription_track0.size() + testingDescription_track1.size() +
-        testingDescription_track2.size() + testingVertices_track0.size() +
-        testingVertices_track2.size() + 305;
+        testingDescription_channel0.size() + testingDescription_channel1.size() +
+        testingDescription_channel2.size() + testingVertices_channel0.size() +
+        testingVertices_channel2.size() + 305;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -763,47 +766,49 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(0).getDescription() == testingDescription_perception0);
     CHECK(res.getPerceptionAt(0).getId() == testingId_perception0);
     CHECK(res.getPerceptionAt(0).getPerceptionModality() == testingPerceptionModality_perception0);
-    REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
+    REQUIRE(res.getPerceptionAt(0).getChannelsSize() == 2);
 
-    // CHECK track 0
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBodyPartMask() == testingBodyPartMask_track0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getDescription() == testingDescription_track0);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getGain() - testingGain_track0) <
+    // CHECK channel 0
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBodyPartMask() == testingBodyPartMask_channel0);
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getDescription() == testingDescription_channel0);
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(0).getGain() - testingGain_channel0) <
           floatPrecision);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getId() == testingId_track0);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getMixingWeight() -
-                    testingMixingWeight_track0) < floatPrecision);
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getVerticesSize() ==
-            testingVertices_track0.size());
-    for (int i = 0; i < static_cast<int>(testingVertices_track0.size()); i++) {
-      CHECK(res.getPerceptionAt(0).getTrackAt(0).getVertexAt(i) == testingVertices_track0.at(i));
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getId() == testingId_channel0);
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(0).getMixingWeight() -
+                    testingMixingWeight_channel0) < floatPrecision);
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getVerticesSize() ==
+            testingVertices_channel0.size());
+    for (int i = 0; i < static_cast<int>(testingVertices_channel0.size()); i++) {
+      CHECK(res.getPerceptionAt(0).getChannelAt(0).getVertexAt(i) ==
+            testingVertices_channel0.at(i));
     }
 
     // CHECK band
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getBandsSize() == 1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getBandType() == testingBandType_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getCurveType() ==
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getBandsSize() == 1);
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getBandType() ==
+          testingBandType_band0);
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getCurveType() ==
           testingCurveType_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getLowerFrequencyLimit() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getBlockLength() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getBlockLength() ==
           testingBlockLength_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectsSize() == 1);
 
     // CHECK effect
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getPosition() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPosition() ==
           testingPosition_effect0);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getPhase() -
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPhase() -
                     testingPhase_effect0) < floatPrecision);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getBaseSignal() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getBaseSignal() ==
           testingBaseSignal_effect0);
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
             testingKeyframes_effect0.size());
     for (int i = 0; i < static_cast<int>(testingKeyframes_effect0.size()); i++) {
       haptics::types::Keyframe resKeyframe =
-          res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframeAt(i);
+          res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframeAt(i);
       REQUIRE(resKeyframe.getRelativePosition().has_value());
       REQUIRE(resKeyframe.getAmplitudeModulation().has_value());
       CHECK_FALSE(resKeyframe.getFrequencyModulation().has_value());
@@ -813,34 +818,35 @@ TEST_CASE("write/read file for body testing") {
                       std::get<1>(testingKeyframes_effect0.at(i))) < floatPrecision);
     }
 
-    // CHECK track 1
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBodyPartMask() == testingBodyPartMask_track1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getDescription() == testingDescription_track1);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getGain() - testingGain_track1) <
+    // CHECK channel 1
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBodyPartMask() == testingBodyPartMask_channel1);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getDescription() == testingDescription_channel1);
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(1).getGain() - testingGain_channel1) <
           floatPrecision);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getId() == testingId_track1);
-    CHECK(std::fabs(res.getPerceptionAt(0).getTrackAt(1).getMixingWeight() -
-                    testingMixingWeight_track1) < floatPrecision);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getVerticesSize() == 0);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getId() == testingId_channel1);
+    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(1).getMixingWeight() -
+                    testingMixingWeight_channel1) < floatPrecision);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getVerticesSize() == 0);
 
     // CHECK band
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getBandsSize() == 1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getBandType() == testingBandType_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getCurveType() ==
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBandsSize() == 1);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getBandType() ==
+          testingBandType_band1);
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getCurveType() ==
           testingCurveType_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getLowerFrequencyLimit() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getUpperFrequencyLimit() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getBlockLength() ==
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getBlockLength() ==
           testingBlockLength_band1);
-    REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEffectsSize() ==
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getEffectsSize() ==
             testingKeyframes_effect1.size());
 
     // CHECK effects
     for (int i = 0; i < static_cast<int>(testingKeyframes_effect1.size()); i++) {
       haptics::types::Effect resEffect =
-          res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEffectAt(i);
+          res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getEffectAt(i);
       CHECK(resEffect.getPosition() == std::get<0>(testingKeyframes_effect1.at(i)));
       CHECK(std::fabs(resEffect.getPhase() - 0) < floatPrecision);
       REQUIRE(resEffect.getKeyframesSize() == 1);
@@ -860,35 +866,38 @@ TEST_CASE("write/read file for body testing") {
     CHECK(res.getPerceptionAt(1).getId() == testingId_perception1);
     CHECK(res.getPerceptionAt(1).getPerceptionModality() == testingPerceptionModality_perception1);
     CHECK(res.getPerceptionAt(1).getReferenceDevicesSize() == 0);
-    REQUIRE(res.getPerceptionAt(1).getTracksSize() == 1);
+    REQUIRE(res.getPerceptionAt(1).getChannelsSize() == 1);
 
-    // CHECK track
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBodyPartMask() == testingBodyPartMask_track2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getDescription() == testingDescription_track2);
-    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getGain() - testingGain_track2) <
+    // CHECK channel
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBodyPartMask() == testingBodyPartMask_channel2);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getDescription() == testingDescription_channel2);
+    CHECK(std::fabs(res.getPerceptionAt(1).getChannelAt(0).getGain() - testingGain_channel2) <
           floatPrecision);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getId() == testingId_track2);
-    CHECK(std::fabs(res.getPerceptionAt(1).getTrackAt(0).getMixingWeight() -
-                    testingMixingWeight_track2) < floatPrecision);
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getVerticesSize() ==
-            testingVertices_track2.size());
-    for (int i = 0; i < static_cast<int>(testingVertices_track2.size()); i++) {
-      CHECK(res.getPerceptionAt(1).getTrackAt(0).getVertexAt(i) == testingVertices_track2.at(i));
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getId() == testingId_channel2);
+    CHECK(std::fabs(res.getPerceptionAt(1).getChannelAt(0).getMixingWeight() -
+                    testingMixingWeight_channel2) < floatPrecision);
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getVerticesSize() ==
+            testingVertices_channel2.size());
+    for (int i = 0; i < static_cast<int>(testingVertices_channel2.size()); i++) {
+      CHECK(res.getPerceptionAt(1).getChannelAt(0).getVertexAt(i) ==
+            testingVertices_channel2.at(i));
     }
 
     // CHECK band
-    REQUIRE(res.getPerceptionAt(1).getTrackAt(0).getBandsSize() == 1);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getBandType() == testingBandType_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getCurveType() ==
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getBandsSize() == 1);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getBandType() ==
+          testingBandType_band2);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getCurveType() ==
           testingCurveType_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getLowerFrequencyLimit() ==
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getBlockLength() ==
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getBlockLength() ==
           testingBlockLength_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() == 0);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getEffectsSize() == 1);
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
+          0);
 
     std::filesystem::remove(filename);
     CHECK(!std::filesystem::is_regular_file(filename));
