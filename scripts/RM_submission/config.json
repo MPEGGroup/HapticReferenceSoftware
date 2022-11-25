@@ -5,7 +5,7 @@
   "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "reference_files": {
-    "main_folder": "..\\..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
+    "main_folder": "..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
     "reference_bitratePSNR": "reference_bitratePSNR.csv",
     "short_effects": [
       {
