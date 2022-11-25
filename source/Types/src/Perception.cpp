@@ -94,7 +94,9 @@ auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel
   return true;
 }
 
-auto Perception::addChannel(haptics::types::Channel &newChannel) -> void { channels.push_back(newChannel); }
+auto Perception::addChannel(haptics::types::Channel &newChannel) -> void {
+  channels.push_back(newChannel);
+}
 
 auto Perception::getReferenceDevicesSize() -> size_t { return referenceDevices.size(); }
 

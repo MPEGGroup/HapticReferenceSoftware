@@ -582,7 +582,7 @@ auto IOBinary::readChannelsHeader(types::Perception &perception, std::istream &f
     t.setReferenceDeviceId(
         IOBinaryPrimitives::readNBits<short, MDCHANNEL_DEVICE_ID>(file, unusedBits));
     t.setGain(IOBinaryPrimitives::readFloatNBits<uint32_t, MDCHANNEL_GAIN>(file, -MAX_FLOAT,
-                                                                         MAX_FLOAT, unusedBits));
+                                                                           MAX_FLOAT, unusedBits));
     t.setMixingWeight(IOBinaryPrimitives::readFloatNBits<uint32_t, MDCHANNEL_MIXING_WEIGHT>(
         file, 0, MAX_FLOAT, unusedBits));
     auto optionalMetadataMask =
@@ -594,7 +594,8 @@ auto IOBinary::readChannelsHeader(types::Perception &perception, std::istream &f
       t.setActuatorResolution(IOBinaryPrimitives::readVector(file, unusedBits));
 
       auto bodyPartTargetCount =
-          IOBinaryPrimitives::readNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(file, unusedBits);
+          IOBinaryPrimitives::readNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(file,
+                                                                                   unusedBits);
       std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
                                                         types::BodyPartTarget::Unknown);
       for (auto &target : bodyPartTarget) {
@@ -662,11 +663,11 @@ auto IOBinary::writeChannelsHeader(types::Perception &perception, std::vector<bo
 
     float channelGain = myChannel.getGain();
     IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_GAIN>(channelGain, output, -MAX_FLOAT,
-                                                                MAX_FLOAT);
+                                                                  MAX_FLOAT);
 
     float channelMixingWeight = myChannel.getMixingWeight();
     IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_MIXING_WEIGHT>(channelMixingWeight,
-                                                                         output, 0, MAX_FLOAT);
+                                                                           output, 0, MAX_FLOAT);
 
     auto optionalMetadataMask = (uint8_t)0b0000'0000;
     if (myChannel.getActuatorResolution().has_value()) {
@@ -687,7 +688,7 @@ auto IOBinary::writeChannelsHeader(types::Perception &perception, std::vector<bo
           myChannel.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
       auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
       IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
-                                                                              output);
+                                                                                output);
       for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
         IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET>(
             static_cast<uint8_t>(bodyPartTarget[i]), output);
@@ -697,7 +698,7 @@ auto IOBinary::writeChannelsHeader(types::Perception &perception, std::vector<bo
           myChannel.getActuatorTarget().value_or(std::vector<types::Vector>{});
       auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
       IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
-                                                                             output);
+                                                                               output);
       for (uint8_t i = 0; i < actuatorTargetCount; i++) {
         types::Vector target = actuatorTarget[i];
         IOBinaryPrimitives::writeVector(target, output);
