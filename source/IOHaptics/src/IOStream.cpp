@@ -1387,9 +1387,46 @@ auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bits
   bitstream.insert(bitstream.end(), bufBits.begin(), bufBits.end());
   bufBits.clear();
 
-  std::bitset<MDTRACK_BODY_PART_MASK> bodyPartMaskBits(swriter.track.getBodyPartMask());
-  valueStr = bodyPartMaskBits.to_string();
+  auto optionalMetadataMask = (uint8_t)0b0000'0000;
+  if (swriter.track.getActuatorResolution().has_value()) {
+    optionalMetadataMask |= (uint8_t)0b0000'0010;
+  } else {
+    optionalMetadataMask |= (uint8_t)0b0000'0001;
+  }
+  if (swriter.track.getDirection().has_value()) {
+    optionalMetadataMask |= (uint8_t)0b0000'0100;
+  }
+  std::bitset<MDTRACK_OPT_FIELDS> optionalMetadataMaskBits(optionalMetadataMask);
+  valueStr = optionalMetadataMaskBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
+  if ((optionalMetadataMask & (uint8_t)0b0000'0001) != 0) {
+    std::bitset<MDTRACK_BODY_PART_MASK> bodyPartMaskBits(swriter.track.getBodyPartMask());
+    valueStr = bodyPartMaskBits.to_string();
+    IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
+  } else if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
+    types::Vector trackResolution = swriter.track.getActuatorResolution().value();
+    IOBinaryPrimitives::writeVector(trackResolution, bitstream);
+
+    std::vector<types::BodyPartTarget> bodyPartTarget =
+        swriter.track.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
+    auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
+    IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
+                                                                            bitstream);
+    for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
+      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(
+          static_cast<uint8_t>(bodyPartTarget[i]), bitstream);
+    }
+
+    std::vector<types::Vector> actuatorTarget =
+        swriter.track.getActuatorTarget().value_or(std::vector<types::Vector>{});
+    auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
+    IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
+                                                                           bitstream);
+    for (uint8_t i = 0; i < actuatorTargetCount; i++) {
+      types::Vector target = actuatorTarget[i];
+      IOBinaryPrimitives::writeVector(target, bitstream);
+    }
+  }
 
   int freqSampling = static_cast<int>(swriter.track.getFrequencySampling().value_or(0));
   std::bitset<MDTRACK_FREQ_SAMPLING> maxFreqBits(freqSampling);
@@ -1404,9 +1441,6 @@ auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bits
 
   if (swriter.track.getDirection().has_value()) {
     types::Vector dir = swriter.track.getDirection().value();
-    std::bitset<1> flagBit(1);
-    valueStr = flagBit.to_string();
-    IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
     std::bitset<MDTRACK_DIRECTION_AXIS> axisValue(dir.X);
     valueStr = axisValue.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
@@ -1415,10 +1449,6 @@ auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bits
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
     axisValue = std::bitset<MDTRACK_DIRECTION_AXIS>(dir.Z);
     valueStr = axisValue.to_string();
-    IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
-  } else {
-    std::bitset<1> flagBit(0);
-    valueStr = flagBit.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
 
@@ -1466,11 +1496,38 @@ auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitst
 
   float mixingWeight =
       IOBinaryPrimitives::readFloatNBits<MDTRACK_MIXING_WEIGHT>(bitstream, idx, 0, MAX_FLOAT);
+
   sreader.track.setMixingWeight(mixingWeight);
+  uint8_t optionalMetadataMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_OPT_FIELDS);
+  if ((optionalMetadataMask & 0b0000'0001) != 0) {
+    uint32_t bodyPartMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_MASK);
+    sreader.track.setBodyPartMask(bodyPartMask);
+  } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
+    auto X = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
+    auto Y = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
+    auto Z = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
+    sreader.track.setActuatorResolution(haptics::types::Vector(X, Y, Z));
+    auto bodyPartTargetCount = static_cast<uint8_t>(
+        IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_TARGET_COUNT));
+    std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
+                                                      types::BodyPartTarget::Unknown);
+    for (auto &target : bodyPartTarget) {
+      target = static_cast<types::BodyPartTarget>(
+          IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_TARGET));
+    }
+    sreader.track.setBodyPartTarget(bodyPartTarget);
 
-  uint32_t bodyPartMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_MASK);
-  sreader.track.setBodyPartMask(bodyPartMask);
-
+    auto actuatorTargetCount =
+        IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_ACTUATOR_TARGET_COUNT);
+    std::vector<types::Vector> actuatorTarget(actuatorTargetCount);
+    for (auto &target : actuatorTarget) {
+      auto X = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
+      auto Y = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
+      auto Z = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
+      target = haptics::types::Vector(X, Y, Z);
+    }
+    sreader.track.setActuatorTarget(actuatorTarget);
+  }
   uint32_t frequencySampling = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_FREQ_SAMPLING);
   if (frequencySampling > 0) {
     sreader.track.setFrequencySampling(frequencySampling);
@@ -1480,17 +1537,15 @@ auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitst
     sreader.track.setSampleCount(sampleCount);
   }
 
-  bool directionMask =
-      static_cast<bool>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_MASK));
-  if (directionMask) {
+  if ((optionalMetadataMask & 0b0000'0100) != 0) {
     types::Vector vector = types::Vector();
-    vector.X =
+    auto X =
         static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
-    vector.Y =
+    auto Y =
         static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
-    vector.Z =
+    auto Z =
         static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
-    sreader.track.setDirection(vector);
+    sreader.track.setDirection(haptics::types::Vector(X, Y, Z));
   }
 
   int verticesCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_VERT_COUNT);
