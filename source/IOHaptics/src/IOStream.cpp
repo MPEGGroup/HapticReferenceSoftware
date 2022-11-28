@@ -1538,7 +1538,6 @@ auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitst
   }
 
   if ((optionalMetadataMask & 0b0000'0100) != 0) {
-    types::Vector vector = types::Vector();
     auto X =
         static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
     auto Y =
@@ -1581,7 +1580,8 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
     std::string curveTypeStr = curveTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(curveTypeStr, bitstream);
   } else if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
-    std::bitset<MDBAND_WIN_LEN> winLengthBits((swriter.bandStream.band.getBlockLength()));
+    std::bitset<MDBAND_WIN_LEN> winLengthBits(
+        static_cast<uint8_t>(swriter.bandStream.band.getBlockLength()));
     std::string winLengthStr = winLengthBits.to_string();
     IOBinaryPrimitives::writeStrBits(winLengthStr, bitstream);
   }
@@ -1724,7 +1724,7 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
       packetBits = writeEffectHeader(swriter);
       packetBits = writeWaveletPayloadPacket(bufpacket, packetBits, swriter.effectsId);
       bitstreams.push_back(packetBits);
-      swriter.time += swriter.bandStream.band.getBlockLength();
+      swriter.time += static_cast<int>(swriter.bandStream.band.getBlockLength());
     }
   } else {
     while (!createPayloadPacket(swriter, bufPacketBitstream)) {
@@ -1751,7 +1751,8 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
 
 auto IOStream::createWaveletPayload(StreamWriter &swriter,
                                     std::vector<std::vector<bool>> &bitstream) -> bool {
-  int nbWaveBlock = swriter.packetDuration / swriter.bandStream.band.getBlockLength();
+  int nbWaveBlock =
+      swriter.packetDuration / static_cast<int>(swriter.bandStream.band.getBlockLength());
   for (auto i = 0; i < static_cast<int>(swriter.bandStream.band.getEffectsSize());
        i += nbWaveBlock) {
     std::vector<bool> bufbitstream = std::vector<bool>();
@@ -2160,7 +2161,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
 
-  int effectPos = static_cast<int>(band.getBlockLength() * band.getEffectsSize());
+  int effectPos = static_cast<int>(band.getBlockLength()) * static_cast<int>(band.getEffectsSize());
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
