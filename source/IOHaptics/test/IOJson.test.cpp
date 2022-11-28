@@ -246,7 +246,7 @@ TEST_CASE("write/read hjif haptic file for track testing") {
   const uint32_t testingBodyPartMask_track0 = 32;
   const std::vector<int> testingVertices_track0 = {0, 453, -3, 7657};
   const size_t testingBandsCount_track0 = 45;
-  const haptics::types::Direction testingDirection_track0((int8_t)128, (int8_t)-54, (int8_t)0);
+  const haptics::types::Vector testingDirection_track0((int8_t)128, (int8_t)-54, (int8_t)0);
   haptics::types::Track testingTrack0(testingId_track0, testingDescription_track0,
                                       testingGain_track0, testingMixingWeight_track0,
                                       testingBodyPartMask_track0);
@@ -364,6 +364,87 @@ TEST_CASE("write/read hjif haptic file for track testing") {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
+TEST_CASE("write/read hjif haptic file for body targetting testing") {
+  const std::string testingVersion = "1";
+  const std::string testingDate = "Thursday, September 15, 2022";
+  const std::string testingDescription = "Test Description";
+  haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
+
+  const int testingId_perception = 0;
+  const int testingAvatarId_perception = 0;
+  const std::string testingDescription_perception = "I'm just a random string to fill the place";
+  const auto testingPerceptionModality_perception =
+      haptics::types::PerceptionModality::Vibrotactile;
+  const int testingId_track = 0;
+  const std::string testingDescription_track = "testingDescription_track0";
+  const float testingGain_track = .34;
+  const float testingMixingWeight_track = 1;
+  const uint32_t testingBodyPartMask_track = 32;
+  haptics::types::Perception testingPerception(testingId_perception, testingAvatarId_perception,
+                                               testingDescription_perception,
+                                               testingPerceptionModality_perception);
+  haptics::types::Track testingTrack0(testingId_track, testingDescription_track, testingGain_track,
+                                      testingMixingWeight_track, testingBodyPartMask_track);
+  haptics::types::Track testingTrack1(testingId_track, testingDescription_track, testingGain_track,
+                                      testingMixingWeight_track, testingBodyPartMask_track);
+
+  const haptics::types::Vector testingTrackResolution_track0(32, 110, 3);
+  const std::vector<haptics::types::Vector> testingActuatorTarget_track0{
+      haptics::types::Vector{31, 109, 2},
+      haptics::types::Vector{0, 0, 0},
+      haptics::types::Vector{15, 42, 1},
+  };
+  testingTrack0.setActuatorResolution(testingTrackResolution_track0);
+  testingTrack0.setActuatorTarget(testingActuatorTarget_track0);
+
+  const std::vector<haptics::types::BodyPartTarget> testingBodyPartTarget_track1{
+      haptics::types::BodyPartTarget::Left,         haptics::types::BodyPartTarget::Index,
+      haptics::types::BodyPartTarget::ThirdPhalanx, haptics::types::BodyPartTarget::Plus,
+      haptics::types::BodyPartTarget::Right,        haptics::types::BodyPartTarget::Leg,
+      haptics::types::BodyPartTarget::Minus,        haptics::types::BodyPartTarget::Hallux,
+  };
+  testingTrack1.setBodyPartTarget(testingBodyPartTarget_track1);
+
+  testingPerception.addTrack(testingTrack0);
+  testingPerception.addTrack(testingTrack1);
+  testingHaptic.addPerception(testingPerception);
+
+  SECTION("write haptic file") {
+    IOJson::writeFile(testingHaptic, filename);
+    CHECK(std::filesystem::is_regular_file(filename));
+  }
+
+  SECTION("read haptic file") {
+    haptics::types::Haptics res;
+    bool succeed = IOJson::loadFile(filename, res);
+    REQUIRE(succeed);
+    REQUIRE(res.getPerceptionsSize() == 1);
+    REQUIRE(res.getPerceptionAt(0).getTracksSize() == 2);
+    haptics::types::Track res_track0 = res.getPerceptionAt(0).getTrackAt(0);
+    haptics::types::Track res_track1 = res.getPerceptionAt(0).getTrackAt(1);
+
+    REQUIRE(res_track0.getActuatorResolution().has_value());
+    CHECK(res_track0.getActuatorResolution().value() == testingTrackResolution_track0);
+    REQUIRE(res_track0.getActuatorTarget().has_value());
+    REQUIRE(res_track0.getActuatorTarget().value().size() == testingActuatorTarget_track0.size());
+    for (size_t i = 0; i < testingActuatorTarget_track0.size(); i++) {
+      CHECK(res_track0.getActuatorTarget().value()[i] == testingActuatorTarget_track0[i]);
+    }
+    CHECK_FALSE(res_track0.getBodyPartTarget().has_value());
+    CHECK_FALSE(res_track1.getActuatorResolution().has_value());
+    CHECK_FALSE(res_track1.getActuatorTarget().has_value());
+    REQUIRE(res_track1.getBodyPartTarget().has_value());
+    REQUIRE(res_track1.getBodyPartTarget().value().size() == testingBodyPartTarget_track1.size());
+    for (size_t i = 0; i < testingBodyPartTarget_track1.size(); i++) {
+      CHECK(res_track1.getBodyPartTarget().value()[i] == testingBodyPartTarget_track1[i]);
+    }
+
+    std::filesystem::remove(filename);
+    CHECK(!std::filesystem::is_regular_file(filename));
+  }
+}
+
+// NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for signal testing") {
   const std::string testingVersion = "1";
   const std::string testingDate = "Monday, February 14, 2022";
@@ -453,29 +534,29 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const int testingWindowLength_band0 = 0;
+  const int testingBlockLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingWindowLength_band0, testingLowerFrequencyLimit_band0,
+                                    testingBlockLength_band0, testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
   const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band1 = 0;
+  const int testingBlockLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
   haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingWindowLength_band1, testingLowerFrequencyLimit_band1,
+                                    testingBlockLength_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
   const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
   const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band2 = 0;
+  const int testingBlockLength_band2 = 0;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
   haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingWindowLength_band2, testingLowerFrequencyLimit_band2,
+                                    testingBlockLength_band2, testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
@@ -574,8 +655,8 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
           testingLowerFrequencyLimit_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band0);
-    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getWindowLength() ==
-          testingWindowLength_band0);
+    CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getBlockLength() ==
+          testingBlockLength_band0);
     CHECK(res.getPerceptionAt(0).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
 
     // CHECK effect
@@ -617,8 +698,8 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
           testingLowerFrequencyLimit_band1);
     CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band1);
-    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getWindowLength() ==
-          testingWindowLength_band1);
+    CHECK(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getBlockLength() ==
+          testingBlockLength_band1);
     REQUIRE(res.getPerceptionAt(0).getTrackAt(1).getBandAt(0).getEffectsSize() ==
             testingKeyframes_effect1.size());
 
@@ -669,8 +750,8 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getWindowLength() ==
-          testingWindowLength_band2);
+    CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getBlockLength() ==
+          testingBlockLength_band2);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getTrackAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() == 0);
 

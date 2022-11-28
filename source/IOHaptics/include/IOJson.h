@@ -62,6 +62,7 @@ public:
   static auto loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool;
   static auto loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool;
   static auto loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool;
+  static auto loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool;
 
   static auto extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPerceptions,
                                  rapidjson::Document &jsonTree) -> void;
@@ -69,11 +70,15 @@ public:
                              rapidjson::Document &jsonTree) -> void;
   static auto extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
                             rapidjson::Document &jsonTree) -> void;
+  static auto extractBands(types::Track &track, rapidjson::Value &jsonBands,
+                           rapidjson::Document &jsonTree) -> void;
   static auto extractLibrary(types::Perception &perception, rapidjson::Value &jsonLibrary,
                              rapidjson::Document &jsonTree) -> void;
   static auto extractReferenceDevices(types::Perception &perception,
                                       rapidjson::Value &jsonReferenceDevices,
                                       rapidjson::Document &jsonTree) -> void;
+  static auto extractVector(types::Vector &vector, rapidjson::Value &jsonVector,
+                            rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };

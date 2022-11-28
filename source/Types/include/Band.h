@@ -44,11 +44,11 @@ namespace haptics::types {
 class Band {
 public:
   explicit Band() = default;
-  explicit Band(BandType newBandType, CurveType newCurveType, int newWindowLength,
+  explicit Band(BandType newBandType, CurveType newCurveType, double newBlockLength,
                 int newLowerFrequencyLimit, int newUpperFrequencyLimit)
       : bandType(newBandType)
       , curveType(newCurveType)
-      , windowLength(newWindowLength)
+      , blockLength(newBlockLength)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
       , effects({}){};
@@ -56,8 +56,8 @@ public:
   auto setBandType(BandType newBandType) -> void;
   [[nodiscard]] auto getCurveType() const -> CurveType;
   auto setCurveType(CurveType newCurveType) -> void;
-  [[nodiscard]] auto getWindowLength() const -> int;
-  auto setWindowLength(int newWindowLength) -> void;
+  [[nodiscard]] auto getBlockLength() const -> double;
+  auto setBlockLength(double newBlockLength) -> void;
   [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
   auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
   [[nodiscard]] auto getLowerFrequencyLimit() const -> int;
@@ -80,7 +80,7 @@ private:
 
   BandType bandType = BandType::VectorialWave;
   CurveType curveType = CurveType::Unknown;
-  int windowLength = 0;
+  double blockLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};

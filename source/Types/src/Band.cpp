@@ -45,9 +45,9 @@ auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
-[[nodiscard]] auto Band::getWindowLength() const -> int { return windowLength; }
+[[nodiscard]] auto Band::getBlockLength() const -> double { return blockLength; }
 
-auto Band::setWindowLength(int newWindowLength) -> void { windowLength = newWindowLength; }
+auto Band::setBlockLength(double newBlockLength) -> void { blockLength = newBlockLength; }
 
 [[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int { return upperFrequencyLimit; }
 
@@ -131,7 +131,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
   case BandType::WaveletWave:
-    return effect->EvaluateWavelet(position, this->getWindowLength());
+    return effect->EvaluateWavelet(position, this->getBlockLength());
   case BandType::Transient: {
     double res = 0;
     if (effect->getPosition() <= position &&

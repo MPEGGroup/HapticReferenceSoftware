@@ -34,6 +34,7 @@
 #ifndef IOBINARYPRIMITIVES_H
 #define IOBINARYPRIMITIVES_H
 
+#include <Types/include/Track.h>
 #include <algorithm>
 #include <array>
 #include <bitset>
@@ -48,58 +49,92 @@ constexpr float MAX_FLOAT = 10000;
 constexpr float MAX_FREQUENCY = 10000;
 constexpr float MAX_AMPLITUDE = 1;
 constexpr float MAX_PHASE = 6.28318;
+constexpr int VECTOR_AXIS_SIZE = 8;
 constexpr int BYTE_SIZE = 8;
 class IOBinaryPrimitives {
 public:
-  static auto readString(std::istream &file) -> std::string;
+  static auto readVector(std::istream &file, std::vector<bool> &unusedBits)
+      -> haptics::types::Vector;
+  static auto writeVector(const haptics::types::Vector &vector, std::vector<bool> &output) -> void;
+  static auto readString(std::istream &file, std::vector<bool> &unusedBits) -> std::string;
 
-  template <class T, size_t bytesCount> static auto readNBytes(std::istream &file) -> T {
-    std::array<char, bytesCount> bytes{};
-    file.read(bytes.data(), bytesCount);
+  template <class T, size_t bitCount>
+  static auto readNBits(std::istream &file, std::vector<bool> &unusedBits) -> T {
+    std::vector<bool> bitset = unusedBits;
+    if (bitCount > unusedBits.size()) {
+      auto nbBitsToRead = bitCount - unusedBits.size();
+      auto const nbBytesToRead = static_cast<std::streamsize>(nbBitsToRead % BYTE_SIZE == 0
+                                                                  ? nbBitsToRead / BYTE_SIZE
+                                                                  : (nbBitsToRead / BYTE_SIZE) + 1);
+      std::vector<char> bytes(nbBytesToRead);
+      file.read(bytes.data(), nbBytesToRead);
+      for (auto byte : bytes) {
+        for (uint8_t i = 0; i < BYTE_SIZE; i++) {
+          bitset.push_back(((byte >> (BYTE_SIZE - i - 1)) & 1U) == 1);
+        }
+      }
+    }
+    unusedBits.clear();
     T value = 0;
-    for (size_t i = 0; i < bytes.size(); i++) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-      auto byteVal = static_cast<uint8_t>(bytes[i]);
-      value |= static_cast<T>(byteVal) << BYTE_SIZE * i;
+    for (size_t i = 0; i < bitset.size(); i++) {
+      if (i < bitCount) {
+        if (bitset[i]) {
+          value |= 1U << (bitCount - i - 1);
+        }
+      } else {
+        unusedBits.push_back(bitset[i]);
+      }
     }
     return value;
   }
 
-  template <class T, size_t bytesCount>
-  static auto readFloatNBytes(std::istream &file, float minValue, float maxValue) -> float {
-    auto intValue = readNBytes<T, bytesCount>(file);
-    auto maxIntValue = static_cast<uint64_t>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
+  template <class T, size_t bitCount>
+  static auto readFloatNBits(std::istream &file, float minValue, float maxValue,
+                             std::vector<bool> &unusedBits) -> float {
+    auto intValue = readNBits<T, bitCount>(file, unusedBits);
+    auto maxIntValue = static_cast<uint64_t>(std::pow(2, bitCount) - 1);
     auto normalizedValue = intValue / static_cast<float>(maxIntValue);
     normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
     auto value = normalizedValue * (maxValue - minValue) + minValue;
     return value;
   }
 
-  static auto writeString(const std::string &text, std::ostream &file) -> void;
-  template <class T, size_t bytesCount>
-  static auto writeNBytes(T value, std::ostream &file) -> void {
-    std::array<char, bytesCount> bytes{};
-    for (size_t i = 0; i < bytes.size(); i++) {
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-      bytes[i] = static_cast<uint8_t>(value >> i * BYTE_SIZE);
-    }
-    file.write(bytes.data(), bytesCount);
-  }
-
-  template <class T, size_t bytesCount>
-  static auto writeFloatNBytes(float value, std::ostream &file, float minValue, float maxValue)
-      -> void {
-    auto normalizedValue = (value - minValue) / (maxValue - minValue);
-    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
-    auto maxIntValue = static_cast<T>(std::pow(2, bytesCount * BYTE_SIZE) - 1);
-    auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
-    writeNBytes<T, bytesCount>(intValue, file);
-  }
+  static auto writeString(const std::string &text, std::vector<bool> &output) -> void;
 
   template <class T, size_t bitCount>
   static auto writeNBits(T value, std::vector<bool> &output) -> void {
     for (size_t i = 0; i < bitCount; i++) {
       output.push_back((value >> (bitCount - i - 1)) & 1U);
+    }
+  }
+
+  template <class T, size_t bitCount>
+  static auto writeFloatNBits(float value, std::vector<bool> &output, float minValue,
+                              float maxValue) -> void {
+    auto normalizedValue = (value - minValue) / (maxValue - minValue);
+    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+    auto maxIntValue = static_cast<T>(std::pow(2, bitCount) - 1);
+    auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
+    writeNBits<T, bitCount>(intValue, output);
+  }
+
+  static auto fillBitset(std::vector<bool> &bitset) -> void {
+    auto fillCount = (BYTE_SIZE - (bitset.size() % BYTE_SIZE)) % BYTE_SIZE;
+    for (unsigned int i = 0; i < fillCount; i++) {
+      bitset.push_back(false);
+    }
+  }
+
+  static auto writeBitset(const std::vector<bool> &bitset, std::ostream &file) -> void {
+    auto bitsetSize = bitset.size();
+    for (unsigned int i = 0; i < bitset.size(); i += BYTE_SIZE) {
+      char byte = 0;
+      for (uint8_t j = 0; j < BYTE_SIZE; j++) {
+        if ((i + j < bitsetSize) && bitset[i + j]) {
+          byte = static_cast<char>(byte | (1U << (BYTE_SIZE - 1 - j)));
+        }
+      }
+      file.write(&byte, 1);
     }
   }
 
@@ -121,16 +156,6 @@ public:
     auto value = normalizedValue * (maxValue - minValue) + minValue;
     startIdx += static_cast<int>(length);
     return value;
-  }
-
-  template <class T, size_t bitCount>
-  static auto writeFloatNBits(float value, std::vector<bool> &output, float minValue,
-                              float maxValue) -> void {
-    auto normalizedValue = (value - minValue) / (maxValue - minValue);
-    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
-    auto maxIntValue = static_cast<T>(std::pow(2, bitCount) - 1);
-    auto intValue = static_cast<T>((double)(normalizedValue)*maxIntValue);
-    writeNBits<T, bitCount>(intValue, output);
   }
 
   static auto writeStrBits(const std::string &bits, std::vector<bool> &bitstream) -> void {
@@ -181,19 +206,6 @@ public:
     }
     startIdx += length * BYTE_SIZE;
     return res;
-  }
-
-  static auto writeBitset(const std::vector<bool> &bitset, std::ostream &file) -> void {
-    auto bitsetSize = bitset.size();
-    for (unsigned int i = 0; i < bitset.size(); i += BYTE_SIZE) {
-      char byte = 0;
-      for (uint8_t j = 0; j < BYTE_SIZE; j++) {
-        if ((i + j < bitsetSize) && bitset[i + j]) {
-          byte = static_cast<char>(byte | (1U << (BYTE_SIZE - 1 - j)));
-        }
-      }
-      file.write(&byte, 1);
-    }
   }
 
   static auto readNBytes(std::istream &file, int nbBytes, std::vector<bool> &bitstream) -> bool {

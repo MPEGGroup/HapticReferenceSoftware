@@ -96,10 +96,10 @@ auto Track::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Track::generateBand(BandType bandType, CurveType curveType, int windowLength,
+auto Track::generateBand(BandType bandType, CurveType curveType, double blockLength,
                          int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, windowLength, lowerFrequencyLimit, upperFrequencyLimit);
+  Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
@@ -177,10 +177,33 @@ auto Track::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
   sampleCount = newSampleCount;
 }
 
-[[nodiscard]] auto Track::getDirection() const -> std::optional<Direction> { return direction; }
+[[nodiscard]] auto Track::getDirection() const -> std::optional<Vector> { return direction; }
 
-auto Track::setDirection(std::optional<Direction> newDirection) -> void {
-  direction = newDirection;
+auto Track::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
+
+[[nodiscard]] auto Track::getActuatorResolution() const -> std::optional<Vector> {
+  return actuatorResolution;
+}
+
+auto Track::setActuatorResolution(std::optional<Vector> newTrackResolution) -> void {
+  actuatorResolution = newTrackResolution;
+}
+
+[[nodiscard]] auto Track::getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>> {
+  return bodyPartTarget;
+}
+
+auto Track::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget)
+    -> void {
+  bodyPartTarget = std::move(newBodyPartTarget);
+}
+
+[[nodiscard]] auto Track::getActuatorTarget() const -> std::optional<std::vector<Vector>> {
+  return actuatorTarget;
+}
+
+auto Track::setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void {
+  actuatorTarget = std::move(newActuatorTarget);
 }
 
 } // namespace haptics::types

@@ -58,16 +58,19 @@ static constexpr int TIMING_TIMESCALE = 32;
 static constexpr int MDEXP_VERSION = 8;
 static constexpr int MDEXP_DATE = 8;
 static constexpr int MDEXP_DESC_SIZE = 8;
+
 static constexpr int MDEXP_PERC_COUNT = 8;
 static constexpr int MDEXP_AVATAR_COUNT = 8;
 
 static constexpr int AVATAR_ID = 8;
 static constexpr int AVATAR_LOD = 8;
 static constexpr int AVATAR_TYPE = 4;
+
 static constexpr int AVATAR_MESH_COUNT = 8;
 
 static constexpr int MDPERCE_ID = 8;
 static constexpr int MDPERCE_DESC_SIZE = 8;
+
 static constexpr int MDPERCE_MODALITY = 8;
 static constexpr int MDPERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_PERCE_UNIT_EXP = 8;
@@ -76,7 +79,9 @@ static constexpr int MDPERCE_REFDEVICE_COUNT = 8;
 static constexpr int MDPERCE_TRACK_COUNT = 8;
 
 static constexpr int REFDEV_ID = 8;
+
 static constexpr int REFDEV_NAME_LENGTH = 8;
+
 static constexpr int REFDEV_BODY_PART_MASK = 32;
 static constexpr int REFDEV_OPT_FIELDS = 12;
 static constexpr int REFDEV_MAX_FREQ = 32;
@@ -91,10 +96,12 @@ static constexpr int REFDEV_WEIGHT = 32;
 static constexpr int REFDEV_SIZE = 32;
 static constexpr int REFDEV_CUSTOM = 32;
 static constexpr int REFDEV_TYPE = 4;
+
 static constexpr int REFDEV_MAX_ID = 255;
 
 static constexpr int MDTRACK_ID = 8;
 static constexpr int MDTRACK_DESC_LENGTH = 8;
+
 static constexpr int MDTRACK_DEVICE_ID = 8;
 static constexpr int MDTRACK_GAIN = 32;
 static constexpr int MDTRACK_MIXING_WEIGHT = 32;
@@ -102,16 +109,21 @@ static constexpr int MDTRACK_BODY_PART_MASK = 32;
 static constexpr int MDTRACK_OPT_FIELDS = 3;
 static constexpr int MDTRACK_FREQ_SAMPLING = 32;
 static constexpr int MDTRACK_SAMPLE_COUNT = 32;
+
 static constexpr int MDTRACK_DIRECTION_MASK = 1;
 static constexpr int MDTRACK_DIRECTION_AXIS = 8;
 static constexpr int MDTRACK_VERT_COUNT = 16;
 static constexpr int MDTRACK_VERT = 32;
 static constexpr int MDTRACK_BANDS_COUNT = 16;
+static constexpr int MDTRACK_BODY_PART_TARGET_COUNT = 8;
+static constexpr int MDTRACK_ACTUATOR_TARGET_COUNT = 8;
+static constexpr int MDTRACK_BODY_PART_TARGET = 8;
 
 static constexpr int MDBAND_ID = 16;
 static constexpr int MDBAND_BAND_TYPE = 3;
 static constexpr int MDBAND_CURVE_TYPE = 4;
 static constexpr int MDBAND_WIN_LEN = 8;
+static constexpr int MDBAND_BLK_LEN = 8;
 static constexpr int MDBAND_LOW_FREQ = 16;
 static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_EFFECT_COUNT = 16;
@@ -127,7 +139,9 @@ static constexpr int EFFECT_TIMELINE_COUNT = 16;
 static constexpr int EFFECT_WAVELET_SIZE = 16;
 
 static constexpr int KEYFRAME_MASK = 3;
+
 static constexpr int KEYFRAME_VECTORIAL_MASK = 2;
+
 static constexpr int KEYFRAME_POSITION = 16;
 static constexpr int KEYFRAME_AMPLITUDE = 8;
 static constexpr int KEYFRAME_FREQUENCY = 16;

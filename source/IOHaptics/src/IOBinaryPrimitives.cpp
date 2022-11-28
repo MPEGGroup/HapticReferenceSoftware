@@ -32,20 +32,45 @@
  */
 
 #include <IOHaptics/include/IOBinaryPrimitives.h>
+#include <cstdint>
 
 namespace haptics::io {
 
-auto IOBinaryPrimitives::writeString(const std::string &text, std::ostream &file) -> void {
-  std::string str = text;
-  str.append(1, '\x00');
-  file.write(str.c_str(), static_cast<int>(str.size()));
+auto IOBinaryPrimitives::readVector(std::istream &file, std::vector<bool> &unusedBits)
+    -> haptics::types::Vector {
+  auto X = IOBinaryPrimitives::readNBits<int8_t, VECTOR_AXIS_SIZE>(file, unusedBits);
+  auto Y = IOBinaryPrimitives::readNBits<int8_t, VECTOR_AXIS_SIZE>(file, unusedBits);
+  auto Z = IOBinaryPrimitives::readNBits<int8_t, VECTOR_AXIS_SIZE>(file, unusedBits);
+  return haptics::types::Vector(X, Y, Z);
 }
 
-auto IOBinaryPrimitives::readString(std::istream &file) -> std::string {
+auto IOBinaryPrimitives::writeVector(const haptics::types::Vector &vector,
+                                     std::vector<bool> &output) -> void {
+  IOBinaryPrimitives::writeNBits<int8_t, VECTOR_AXIS_SIZE>(vector.X, output);
+  IOBinaryPrimitives::writeNBits<int8_t, VECTOR_AXIS_SIZE>(vector.Y, output);
+  IOBinaryPrimitives::writeNBits<int8_t, VECTOR_AXIS_SIZE>(vector.Z, output);
+}
+
+auto IOBinaryPrimitives::writeString(const std::string &text, std::vector<bool> &output) -> void {
+  auto stringSize = static_cast<uint8_t>(text.size() > UINT8_MAX ? UINT8_MAX : text.size());
+  writeNBits<uint8_t, BYTE_SIZE>(stringSize, output);
+  for (auto byte : text) {
+    for (uint8_t j = 0; j < BYTE_SIZE; j++) {
+      output.push_back(((byte >> (BYTE_SIZE - j - 1)) & 1U) == 1);
+    }
+  }
+}
+
+auto IOBinaryPrimitives::readString(std::istream &file, std::vector<bool> &unusedBits)
+    -> std::string {
+  auto size = IOBinaryPrimitives::readNBits<uint8_t, BYTE_SIZE>(file, unusedBits);
   char c = 0;
   std::string str;
-  while (file.get(c), c != '\0') {
+  uint8_t i = 0;
+  while (i < size) {
+    c = IOBinaryPrimitives::readNBits<char, BYTE_SIZE>(file, unusedBits);
     str += c;
+    i++;
   }
   return str;
 }
