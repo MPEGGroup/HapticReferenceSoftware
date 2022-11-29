@@ -44,7 +44,7 @@ This piece of software converts MPEG Haptics binary encoded HMPG files into thei
 
 positional arguments:
         -f,--file <FILE>                                      file to convert
-        -o,--output <OUTPUT_FILE>\                            output file
+        -o,--output <OUTPUT_FILE>                             output file
 
 optional arguments:
         -h,--help                                             show this help message and exit
