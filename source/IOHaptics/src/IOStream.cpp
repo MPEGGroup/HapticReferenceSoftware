@@ -106,7 +106,7 @@ auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<boo
     // read packet header
     int unitNBits = UNIT_TYPE + UNIT_SYNC + UNIT_DURATION + UNIT_LENGTH;
     IOBinaryPrimitives::readNBytes(file, static_cast<int>(unitNBits / BYTE_SIZE), bufPacket);
-    byteCount += static_cast<int>(H_NBITS / BYTE_SIZE);
+    byteCount += static_cast<int>(unitNBits / BYTE_SIZE);
     // read packet payload length
     int lengthIdx = unitNBits - UNIT_LENGTH;
     int bytesToRead = IOBinaryPrimitives::readUInt(bufPacket, lengthIdx, UNIT_LENGTH);
