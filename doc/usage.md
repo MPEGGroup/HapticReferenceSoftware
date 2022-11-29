@@ -37,6 +37,7 @@ Examples:
 ```
 
 ### Decoder
+```shell
 usages: Decoder [-h] -f <FILE> -o <OUTPUT_FILE>
 
 This piece of software converts MPEG Haptics binary encoded HMPG files into their human-readable format
@@ -47,7 +48,7 @@ positional arguments:
 
 optional arguments:
         -h,--help                                             show this help message and exit
-
+```
 Example:
 ```shell
  ./Decoder -f IDCC-vib-Paper-8kHz-16-pad.hmpg -o IDCC-vib-Paper-8kHz-16-pad.hjif
