@@ -58,7 +58,7 @@ Example:
 ```shell
 usages: Synthesizer [-h] -f <FILE> -o <OUTPUT_FILE> [-fs <FREQUENCY_SAMPLING>] [--pad <PADDING>] [--generate_ohm]
 
-This piece of software ingest an MPEG Haptics binary encoded RM1 files (into its human-readable format) and evaluate it to output a PCM file corresponding to the synthezised input"
+This piece of software ingest an MPEG Haptics binary encoded RM1 files (into its human-readable format) and evaluate it to output a PCM file corresponding to the synthezised input
 
 positional arguments:
          -f,--file <FILE>                                     file to ingest
@@ -66,7 +66,7 @@ positional arguments:
 
 optional arguments:
          -h,--help                                            show this help message and exit
-         -fs,--sampling_frequency <FREQUENCY_SAMPLING>        the frequency sampling used to synthezised the output (default value is DEFAULT_FS << Hz)
+         -fs,--sampling_frequency <FREQUENCY_SAMPLING>        the frequency sampling used to synthezised the output (default value is DEFAULT_FS Hz)
          --pad <PADDING>                                      add a padding on the resulting file. The padding provided should be in milliseconds
          --generate_ohm                                       generate an output ohm files corresponding to the file metadata
 
