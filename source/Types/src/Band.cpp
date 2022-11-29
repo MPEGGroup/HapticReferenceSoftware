@@ -161,7 +161,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
           effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;
         case CurveType::Cubic:
-          effectAmp = haptics::tools::cubicInterpolation(keyframes);
+          effectAmp = haptics::tools::cubicInterpolation2(keyframes);
           break;
         case CurveType::Akima:
           effectAmp = haptics::tools::akimaInterpolation(keyframes);
@@ -173,7 +173,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
           effectAmp = haptics::tools::bsplineInterpolation(keyframes);
           break;
         default:
-          effectAmp = haptics::tools::cubicInterpolation(keyframes);
+          effectAmp = haptics::tools::cubicInterpolation2(keyframes);
           break;
         }
 
