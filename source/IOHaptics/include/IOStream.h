@@ -68,13 +68,6 @@ enum class NALuType {
 
 enum class AUType { RAU, DAU };
 
-enum class PacketType {
-  Metadata = 1,
-  Data,
-  ProtectedMetadata,
-  ProtectedData,
-};
-
 class IOStream {
 public:
   struct BandStream {

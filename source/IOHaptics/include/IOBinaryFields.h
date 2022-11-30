@@ -106,7 +106,7 @@ static constexpr int MDTRACK_DEVICE_ID = 8;
 static constexpr int MDTRACK_GAIN = 32;
 static constexpr int MDTRACK_MIXING_WEIGHT = 32;
 static constexpr int MDTRACK_BODY_PART_MASK = 32;
-static constexpr int MDTRACK_OPT_FIELDS = 3;
+static constexpr int MDTRACK_OPT_FIELDS = 8;
 static constexpr int MDTRACK_FREQ_SAMPLING = 32;
 static constexpr int MDTRACK_SAMPLE_COUNT = 32;
 

@@ -2537,9 +2537,12 @@ auto IOStream::getNextEffectId(std::vector<int> &effectsId) -> int {
 }
 
 auto IOStream::padToByteBoundary(std::vector<bool> &bitstream) -> void {
-  int byte_stuffing = BYTE_SIZE - (static_cast<int>(bitstream.size()) % BYTE_SIZE);
-  for (int i = 0; i < byte_stuffing; i++) {
-    bitstream.push_back(false);
+  int missing = static_cast<int>(bitstream.size()) % BYTE_SIZE;
+  if (missing != 0) {
+    int byte_stuffing = BYTE_SIZE - missing;
+    for (int i = 0; i < byte_stuffing; i++) {
+      bitstream.push_back(false);
+    }
   }
 }
 } // namespace haptics::io
