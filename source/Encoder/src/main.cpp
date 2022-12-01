@@ -82,7 +82,7 @@ auto help() -> void {
          "band for low frequencies. This argument will only affect PCM input content."
       << std::endl
       << "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
-         "band for high frequencies. This argument will only affect PCM input content."
+         "band for the whole frequency spectrum. This argument will only affect PCM input content."
       << std::endl
       << std::endl;
 }
