@@ -34,6 +34,7 @@
 #include <IOHaptics/include/IOBinaryBands.h>
 #include <IOHaptics/include/IOBinaryFields.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
+#include <IOHaptics/include/IOStream.h>
 #include <limits>
 
 namespace haptics::io {
@@ -364,6 +365,21 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
 
   return true;
 }
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
+                                      std::vector<bool> &bitstream, int &idx) -> bool {
+  spiht::Spiht_Dec dec;
+  auto blocklength = band.getBlockLength() * band.getUpperFrequencyLimit() / S2MS;
+  auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
+
+  std::vector<unsigned char> instream;
+  instream.resize(size);
+  for (auto &b : instream) {
+    b = static_cast<unsigned char>(IOBinaryPrimitives::readUInt(bitstream, idx, BYTE_SIZE));
+  }
+  dec.decodeEffect(instream, effect, (int)blocklength);
+
+  return true;
+}
 
 auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
   spiht::Spiht_Enc enc;
@@ -383,16 +399,24 @@ auto IOBinaryBands::readReferenceEffect(types::Effect &effect, std::istream &fil
   effect.setId(id);
   return true;
 }
+auto IOBinaryBands::readReferenceEffect(types::Effect &effect, int &idx,
+                                        std::vector<bool> &bitstream) -> bool {
+  auto id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
+  effect.setId(id);
+  return true;
+}
 
 auto IOBinaryBands::writeReferenceEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
   int id = effect.getId();
   IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_ID>(id, output);
   return true;
 }
+
 auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                        std::vector<bool> &unusedBits) -> bool {
   auto timelineEffectCount =
       IOBinaryPrimitives::readNBits<uint16_t, EFFECT_TIMELINE_COUNT>(file, unusedBits);
+
   for (unsigned short i = 0; i < timelineEffectCount; i++) {
     types::Effect myEffect;
     auto effectType = static_cast<types::EffectType>(
@@ -465,5 +489,4 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
   }
   return true;
 }
-
 } // namespace haptics::io

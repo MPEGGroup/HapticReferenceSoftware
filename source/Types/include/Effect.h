@@ -97,6 +97,7 @@ public:
   auto getKeyframesSize() -> size_t;
   auto getKeyframeAt(int index) -> Keyframe &;
   auto replaceKeyframeAt(int index, types::Keyframe &newKeyframe) -> bool;
+  auto removeKeyframeAt(int index) -> bool;
   auto addKeyframe(Keyframe &newKeyframe) -> void;
   auto addKeyframe(std::optional<int> position, std::optional<double> amplitudeModulation,
                    std::optional<int> frequencyModulation) -> void;

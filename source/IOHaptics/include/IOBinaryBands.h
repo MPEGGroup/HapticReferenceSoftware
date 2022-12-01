@@ -34,6 +34,7 @@
 #ifndef IOBINARYBANDS_H
 #define IOBINARYBANDS_H
 
+//#include <IOHaptics>
 #include <Spiht/include/Spiht_Dec.h>
 #include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Band.h>
@@ -47,35 +48,44 @@ constexpr int S2MS = 1000;
 
 class IOBinaryBands {
 public:
+  static auto writeBandHeader(types::Band &band, std::vector<bool> &output) -> bool;
+  static auto writeBandBody(types::Band &band, std::vector<bool> &output) -> bool;
+  static auto writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
+
   static auto readBandHeader(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
       -> bool;
   static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
       -> bool;
-
-  static auto writeBandHeader(types::Band &band, std::vector<bool> &output) -> bool;
-  static auto writeBandBody(types::Band &band, std::vector<bool> &output) -> bool;
+  static auto readBandBodyBool(types::Band &band, std::vector<bool> &bitstream) -> bool;
+  static auto readWaveletEffect(types::Effect &effect, types::Band &band,
+                                std::vector<bool> &bitstream, int &idx) -> bool;
 
 private:
+  static auto writeTransientEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
+  static auto writeCurveEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
+  static auto writeVectorialEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
+  static auto writeReferenceEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
+  static auto writeTimelineEffect(types::Effect &effect, types::Band &band,
+                                  std::vector<bool> &output) -> bool;
+
   static auto readTransientEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
   static auto readCurveEffect(types::Effect &effect, std::istream &file,
                               std::vector<bool> &unusedBits) -> bool;
   static auto readVectorialEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
+  static auto readVectorialEffect(types::Effect &effect, int &idx, std::vector<bool> &bitstream)
+      -> bool;
   static auto readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                 std::vector<bool> &unusedBits) -> bool;
   static auto readReferenceEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
+  static auto readReferenceEffect(types::Effect &effect, int &idx, std::vector<bool> &bitstream)
+      -> bool;
   static auto readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                  std::vector<bool> &unusedBits) -> bool;
-
-  static auto writeTransientEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
-  static auto writeCurveEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
-  static auto writeVectorialEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
-  static auto writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
-  static auto writeReferenceEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
-  static auto writeTimelineEffect(types::Effect &effect, types::Band &band,
-                                  std::vector<bool> &output) -> bool;
+  static auto readTimelineEffect(types::Effect &effect, types::Band &band, int &idx,
+                                 std::vector<bool> &bitstream) -> bool;
 };
 } // namespace haptics::io
 #endif // IOBINARYBANDS_H

@@ -81,6 +81,14 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
   return true;
 }
 
+auto Band::removeEffectAt(int index) -> bool {
+  if (index < 0 || index >= (int)this->getEffectsSize()) {
+    return false;
+  }
+  this->effects.erase(this->effects.begin() + index);
+  return true;
+}
+
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
                                        const int stop) -> bool {
   const int position = effect.getPosition();

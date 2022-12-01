@@ -88,6 +88,7 @@ public:
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
+  auto removeBandAt(int index) -> bool;
   auto addBand(haptics::types::Band &newBand) -> void;
   auto generateBand() -> haptics::types::Band *;
   auto generateBand(BandType bandType, CurveType curveType, double blockLength,
