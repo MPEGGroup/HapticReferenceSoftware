@@ -52,7 +52,6 @@ public:
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
       , effects({}){};
-
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
   [[nodiscard]] auto getCurveType() const -> CurveType;
@@ -67,13 +66,15 @@ public:
   auto getEffectAt(int index) -> haptics::types::Effect &;
   auto addEffect(haptics::types::Effect &newEffect) -> void;
   auto replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool;
+  auto removeEffectAt(int index) -> bool;
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
   auto getBandTimeLength() -> double;
 
-private:
   static constexpr double TRANSIENT_DURATION_MS = 22;
+
+private:
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit) -> double;
 
