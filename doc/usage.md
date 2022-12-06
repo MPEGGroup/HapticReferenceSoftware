@@ -23,7 +23,7 @@ optional arguments:
         -bl,                                                  wavelet block length, if custom setting needed
         -cf,                                                  cutoff frequency used to split pcm signals in high and low frequencies. Default value is 72 Hz. If the value is set to zero, the signal will not be split.
         --disable-wavelet,                                    the encoder will encode the data using a single vectorial band for low frequencies. This argument will only affect PCM input content.
-        --disable-vectorial,                                  the encoder will encode the data using a single wavelet band for high frequencies. This argument will only affect PCM input content.
+        --disable-vectorial,                                  the encoder will encode the data using a single wavelet band for the whole frequency spectrum. This argument will only affect PCM input content.
 
 ```
 
