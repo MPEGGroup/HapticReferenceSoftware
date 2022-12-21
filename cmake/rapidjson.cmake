@@ -11,7 +11,7 @@ else()
         GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
         GIT_PROGRESS TRUE
         GIT_SHALLOW TRUE
-        GIT_TAG 80b6d1c83402a5785c486603c5611923159d0894
+        GIT_TAG "master"
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND "")
 endif()
