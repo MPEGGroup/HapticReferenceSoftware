@@ -81,6 +81,14 @@ auto Band::replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool
   return true;
 }
 
+auto Band::removeEffectAt(int index) -> bool {
+  if (index < 0 || index >= (int)this->getEffectsSize()) {
+    return false;
+  }
+  this->effects.erase(this->effects.begin() + index);
+  return true;
+}
+
 [[nodiscard]] auto Band::isOverlapping(haptics::types::Effect &effect, const int start,
                                        const int stop) -> bool {
   const int position = effect.getPosition();
@@ -161,7 +169,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
           effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;
         case CurveType::Cubic:
-          effectAmp = haptics::tools::cubicInterpolation(keyframes);
+          effectAmp = haptics::tools::cubicInterpolation2(keyframes);
           break;
         case CurveType::Akima:
           effectAmp = haptics::tools::akimaInterpolation(keyframes);
@@ -173,7 +181,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
           effectAmp = haptics::tools::bsplineInterpolation(keyframes);
           break;
         default:
-          effectAmp = haptics::tools::cubicInterpolation(keyframes);
+          effectAmp = haptics::tools::cubicInterpolation2(keyframes);
           break;
         }
 

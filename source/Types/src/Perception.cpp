@@ -94,6 +94,14 @@ auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel
   return true;
 }
 
+auto Perception::removeChannelAt(int index) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
+    return false;
+  }
+  channels.erase(channels.begin() + index);
+  return true;
+}
+
 auto Perception::addChannel(haptics::types::Channel &newChannel) -> void {
   channels.push_back(newChannel);
 }

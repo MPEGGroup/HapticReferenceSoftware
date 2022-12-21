@@ -60,6 +60,15 @@ auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool 
   return true;
 }
 
+auto Haptics::removePerceptionAt(int index) -> bool {
+  if (index < 0 || index >= (int)perceptions.size()) {
+    return false;
+  }
+
+  perceptions.erase(perceptions.begin() + index);
+  return true;
+}
+
 auto Haptics::addPerception(Perception &newPerception) -> void {
   perceptions.push_back(newPerception);
 }

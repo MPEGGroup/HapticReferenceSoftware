@@ -37,6 +37,7 @@
 #include <Types/include/Channel.h>
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -136,6 +137,88 @@ public:
       file.write(&byte, 1);
     }
   }
+
+  template <size_t length>
+  static auto readFloatNBits(std::vector<bool> &bitstream, int &startIdx, float minValue,
+                             float maxValue) -> float {
+    std::string str;
+    for (auto i = startIdx; i < static_cast<int>(startIdx + length); i++) {
+      if (bitstream[i]) {
+        str += "1";
+      } else {
+        str += "0";
+      }
+    }
+    auto intValue = std::bitset<length>(str).to_ulong();
+    auto maxIntValue = static_cast<uint64_t>(std::pow(2, length) - 1);
+    auto normalizedValue = intValue / static_cast<float>(maxIntValue);
+    normalizedValue = std::clamp<float>(normalizedValue, 0, 1);
+    auto value = normalizedValue * (maxValue - minValue) + minValue;
+    startIdx += static_cast<int>(length);
+    return value;
+  }
+
+  static auto writeStrBits(const std::string &bits, std::vector<bool> &bitstream) -> void {
+    // std::reverse(bits.begin(), bits.end());
+    for (char c : bits) {
+      bitstream.push_back(c == '1');
+    }
+  }
+  static auto readUInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
+    std::string tsBits;
+    for (int i = startIdx; i < startIdx + length; i++) {
+      if ((bitstream[i])) {
+        tsBits += "1";
+      } else {
+        tsBits += "0";
+      }
+    }
+    startIdx += length;
+    auto inv = std::stoul(tsBits, nullptr, 2);
+    return static_cast<int>(inv);
+  }
+
+  static auto readInt(std::vector<bool> bitstream, int &startIdx, int length) -> int {
+
+    if (bitstream.empty()) {
+      return EXIT_FAILURE;
+    }
+    if (bitstream[startIdx]) {
+      bitstream.flip();
+      return -(readUInt(bitstream, startIdx, length) + 1);
+    }
+    return readUInt(bitstream, startIdx, length);
+  }
+
+  static auto readString(std::vector<bool> bitstream, int &startIdx, int length) -> std::string {
+    std::string res;
+    for (int i = startIdx; i < startIdx + (BYTE_SIZE * length); i += BYTE_SIZE) {
+      std::string bitsStr;
+      for (auto b : std::vector<bool>(bitstream.begin() + i, bitstream.begin() + i + BYTE_SIZE)) {
+        if (b) {
+          bitsStr += "1";
+        } else {
+          bitsStr += "0";
+        }
+      }
+      std::bitset<BYTE_SIZE> cBits(bitsStr);
+      res += static_cast<char>((cBits).to_ulong());
+    }
+    startIdx += length * BYTE_SIZE;
+    return res;
+  }
+
+  static auto readNBytes(std::istream &file, int nbBytes, std::vector<bool> &bitstream) -> bool {
+    std::vector<char> bytes(nbBytes);
+    file.read(bytes.data(), nbBytes);
+    for (auto byte : bytes) {
+      for (uint8_t i = 0; i < BYTE_SIZE; i++) {
+        bitstream.push_back(((byte >> (BYTE_SIZE - i - 1)) & 1U) == 1);
+      }
+    }
+    return true;
+  }
 };
+
 } // namespace haptics::io
 #endif // IOBINARYPRIMITIVES_H

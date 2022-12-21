@@ -127,6 +127,8 @@ public:
   auto getReferenceDevicesSize() -> size_t;
   auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
   auto replaceChannelAt(int index, Channel &newChannel) -> bool;
+  auto removeChannelAt(int index) -> bool;
+
   auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
   auto addReferenceDevice(
       const std::vector<std::tuple<

@@ -61,6 +61,7 @@ public:
   auto getPerceptionsSize() -> size_t;
   auto getPerceptionAt(int index) -> Perception &;
   auto replacePerceptionAt(int index, Perception &newPerception) -> bool;
+  auto removePerceptionAt(int index) -> bool;
   auto addPerception(Perception &newPerception) -> void;
   auto getAvatarsSize() -> size_t;
   auto getAvatarAt(int index) -> Avatar &;

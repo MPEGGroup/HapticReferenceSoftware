@@ -36,6 +36,7 @@
 #include <Encoder/include/PcmEncoder.h>
 #include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOJson.h>
+#include <IOHaptics/include/IOStream.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
@@ -49,6 +50,7 @@ using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
 using haptics::io::IOBinary;
 using haptics::io::IOJson;
+using haptics::io::IOStream;
 using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
@@ -67,8 +69,17 @@ auto help() -> void {
       << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
       << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
          "the encoder will output a file in a human-readable format"
+      << std::endl
+      << "\t-s, --streaming\t\t\tthe file will be encoded into its binary streaming format. If not "
+         "provided "
+         "the encoder will output a file in a human-readable format"
+      << std::endl
+      << "--packet_duration\t\t\t The duration of the packets for the streaming format. Uint > 0, "
+         "should be a power of 2. If the streaming format is choosen and this value is not "
+         "provided, the default value is 128ms."
+      << std::endl
       << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
-         "be placed in the library and replaced by a referennce"
+         "be placed in the library and replaced by a reference"
       << "\t-l, --linearize\t\t\tthe file will be linearized. Every referenced effect from the "
          "library will be copied into the main timeline."
       << std::endl
@@ -82,7 +93,7 @@ auto help() -> void {
          "band for low frequencies. This argument will only affect PCM input content."
       << std::endl
       << "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
-         "band for high frequencies. This argument will only affect PCM input content."
+         "band for the whole frequency spectrum. This argument will only affect PCM input content."
       << std::endl
       << std::endl;
 }
@@ -269,6 +280,12 @@ auto main(int argc, char *argv[]) -> int {
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
     IOBinary::writeFile(hapticFile, output);
+  } else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
+    int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
+    if (inputParser.cmdOptionExists("--packet_duration")) {
+      packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
+    }
+    IOStream::writeFile(hapticFile, output, packetDuration);
   } else {
     IOJson::writeFile(hapticFile, output);
   }

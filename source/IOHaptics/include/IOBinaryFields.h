@@ -42,25 +42,35 @@
 
 namespace haptics::io {
 
-// static constexpr int H_NBITS = 16;
-// static constexpr int H_NALU_TYPE = 3;
-// static constexpr int H_LEVEL = 2;
-// static constexpr int H_PAYLOAD_LENGTH = 8;
+static constexpr int UNIT_TYPE = 6;
+static constexpr int UNIT_SYNC = 2;
+static constexpr int UNIT_DURATION = 24;
+static constexpr int UNIT_LENGTH = 32;
 
-// static constexpr int MDEXP_VERSION = 8;
-// static constexpr int MDEXP_DATE = 8;
-// static constexpr int MDEXP_DESC_SIZE = 8;
+static constexpr int H_NBITS = 32;
+static constexpr int H_NALU_TYPE = 6;
+static constexpr int H_LEVEL = 4;
+static constexpr int H_PAYLOAD_LENGTH = 17;
+
+static constexpr int TIMING_TIME = 32;
+static constexpr int TIMING_TIMESCALE = 32;
+
+static constexpr int MDEXP_VERSION = 8;
+static constexpr int MDEXP_DATE = 8;
+static constexpr int MDEXP_DESC_SIZE = 8;
+
 static constexpr int MDEXP_PERC_COUNT = 8;
 static constexpr int MDEXP_AVATAR_COUNT = 8;
 
 static constexpr int AVATAR_ID = 8;
 static constexpr int AVATAR_LOD = 8;
 static constexpr int AVATAR_TYPE = 4;
-// static constexpr int AVATAR_MESH_COUNT = 8;
-// static constexpr int AVATAR_MESH = 32;
+
+static constexpr int AVATAR_MESH_COUNT = 8;
 
 static constexpr int MDPERCE_ID = 8;
-// static constexpr int MDPERCE_DESC_SIZE = 8;
+static constexpr int MDPERCE_DESC_SIZE = 8;
+
 static constexpr int MDPERCE_MODALITY = 8;
 static constexpr int MDPERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_PERCE_UNIT_EXP = 8;
@@ -69,7 +79,9 @@ static constexpr int MDPERCE_REFDEVICE_COUNT = 8;
 static constexpr int MDPERCE_CHANNEL_COUNT = 8;
 
 static constexpr int REFDEV_ID = 8;
-// static constexpr int REFDEV_NAME_LENGTH = 16;
+
+static constexpr int REFDEV_NAME_LENGTH = 8;
+
 static constexpr int REFDEV_BODY_PART_MASK = 32;
 static constexpr int REFDEV_OPT_FIELDS = 12;
 static constexpr int REFDEV_MAX_FREQ = 32;
@@ -84,15 +96,19 @@ static constexpr int REFDEV_WEIGHT = 32;
 static constexpr int REFDEV_SIZE = 32;
 static constexpr int REFDEV_CUSTOM = 32;
 static constexpr int REFDEV_TYPE = 4;
+static constexpr int REFDEV_MAX_ID = 255;
 
 static constexpr int MDCHANNEL_ID = 8;
+static constexpr int MDCHANNEL_DESC_LENGTH = 8;
 static constexpr int MDCHANNEL_DEVICE_ID = 8;
 static constexpr int MDCHANNEL_GAIN = 32;
 static constexpr int MDCHANNEL_MIXING_WEIGHT = 32;
 static constexpr int MDCHANNEL_BODY_PART_MASK = 32;
-static constexpr int MDCHANNEL_OPT_FIELDS = 3;
+static constexpr int MDCHANNEL_OPT_FIELDS = 8;
 static constexpr int MDCHANNEL_FREQ_SAMPLING = 32;
 static constexpr int MDCHANNEL_SAMPLE_COUNT = 32;
+static constexpr int MDCHANNEL_DIRECTION_MASK = 1;
+static constexpr int MDCHANNEL_DIRECTION_AXIS = 8;
 static constexpr int MDCHANNEL_VERT_COUNT = 16;
 static constexpr int MDCHANNEL_VERT = 32;
 static constexpr int MDCHANNEL_BANDS_COUNT = 16;
@@ -100,9 +116,11 @@ static constexpr int MDCHANNEL_BODY_PART_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_ACTUATOR_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_BODY_PART_TARGET = 8;
 
-// static constexpr int MDBAND_ID = 8;
+
+static constexpr int MDBAND_ID = 16;
 static constexpr int MDBAND_BAND_TYPE = 3;
 static constexpr int MDBAND_CURVE_TYPE = 4;
+static constexpr int MDBAND_WIN_LEN = 8;
 static constexpr int MDBAND_BLK_LEN = 8;
 static constexpr int MDBAND_LOW_FREQ = 16;
 static constexpr int MDBAND_UP_FREQ = 16;
@@ -110,6 +128,7 @@ static constexpr int MDBAND_EFFECT_COUNT = 16;
 
 static constexpr int EFFECT_ID = 16;
 static constexpr int EFFECT_POSITION = 24;
+static constexpr int EFFECT_POSITION_STREAMING = 25;
 static constexpr int EFFECT_PHASE = 16;
 static constexpr int EFFECT_BASE_SIGNAL = 4;
 static constexpr int EFFECT_TYPE = 2;
@@ -118,14 +137,20 @@ static constexpr int EFFECT_TIMELINE_COUNT = 16;
 static constexpr int EFFECT_WAVELET_SIZE = 16;
 
 static constexpr int KEYFRAME_MASK = 3;
+
+static constexpr int KEYFRAME_VECTORIAL_MASK = 2;
+
 static constexpr int KEYFRAME_POSITION = 16;
 static constexpr int KEYFRAME_AMPLITUDE = 8;
 static constexpr int KEYFRAME_FREQUENCY = 16;
 
-// static constexpr int DB_AU_TYPE = 1;
-// static constexpr int DB_TIMESTAMP = 32;
-// static constexpr int DB_FX_COUNT = 16;
-// static constexpr int FX_ID = 16;
+static constexpr int DB_AU_TYPE = 1;
+static constexpr int DB_DURATION = 32;
+static constexpr int DB_EFFECT_COUNT = 16;
+
+static constexpr int CRC32_NB_BITS = 32;
+static constexpr int CRC16_NB_BITS = 16;
+static constexpr int GCRC_NB_PACKET = 8;
 
 } // namespace haptics::io
 #endif // IOBINARYFIELDS_H
