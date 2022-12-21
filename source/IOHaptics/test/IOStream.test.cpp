@@ -114,8 +114,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   const uint32_t testingBodyPartMask_channel0 = 32;
   const std::vector<int> testingVertices_channel0 = {0, 453, -3, 7657};
   haptics::types::Channel testingChannel0(testingId_channel0, testingDescription_channel0,
-                                      testingGain_channel0, testingMixingWeight_channel0,
-                                      testingBodyPartMask_channel0);
+                                          testingGain_channel0, testingMixingWeight_channel0,
+                                          testingBodyPartMask_channel0);
   for (auto vertex : testingVertices_channel0) {
     testingChannel0.addVertex(vertex);
   }
@@ -126,8 +126,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   const float testingMixingWeight_channel1 = .333;
   const uint32_t testingBodyPartMask_channel1 = ~(uint32_t)(0);
   haptics::types::Channel testingChannel1(testingId_channel1, testingDescription_channel1,
-                                      testingGain_channel1, testingMixingWeight_channel1,
-                                      testingBodyPartMask_channel1);
+                                          testingGain_channel1, testingMixingWeight_channel1,
+                                          testingBodyPartMask_channel1);
 
   const int testingId_channel2 = 4;
   const std::string testingDescription_channel2 = "I'm inside a test";
@@ -136,8 +136,8 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   const uint32_t testingBodyPartMask_channel2 = 0;
   const std::vector<int> testingVertices_channel2 = {0, 6};
   haptics::types::Channel testingChannel2(testingId_channel2, testingDescription_channel2,
-                                      testingGain_channel2, testingMixingWeight_channel2,
-                                      testingBodyPartMask_channel2);
+                                          testingGain_channel2, testingMixingWeight_channel2,
+                                          testingBodyPartMask_channel2);
   for (auto vertex : testingVertices_channel2) {
     testingChannel2.addVertex(vertex);
   }

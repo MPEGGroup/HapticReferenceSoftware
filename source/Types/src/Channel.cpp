@@ -82,7 +82,6 @@ auto Channel::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   return true;
 }
 
-
 auto Channel::removeBandAt(int index) -> bool {
   if (index < 0 || index >= (int)this->getBandsSize()) {
     return false;

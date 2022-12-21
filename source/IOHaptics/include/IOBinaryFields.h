@@ -116,7 +116,6 @@ static constexpr int MDCHANNEL_BODY_PART_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_ACTUATOR_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_BODY_PART_TARGET = 8;
 
-
 static constexpr int MDBAND_ID = 16;
 static constexpr int MDBAND_BAND_TYPE = 3;
 static constexpr int MDBAND_CURVE_TYPE = 4;

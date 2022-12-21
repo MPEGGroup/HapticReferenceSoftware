@@ -688,10 +688,10 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
           .addBand(sreader.bandStream.band);
-      sreader.bandStream.index =
-          static_cast<int>(
-              sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize()) -
-          1;
+      sreader.bandStream.index = static_cast<int>(sreader.haptic.getPerceptionAt(perceIndex)
+                                                      .getChannelAt(channelIndex)
+                                                      .getBandsSize()) -
+                                 1;
       sreader.bandStreamsHaptic.push_back(sreader.bandStream);
     } else {
       sreader.haptic.getPerceptionAt(perceIndex)
@@ -1378,7 +1378,7 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
 
   std::vector<bool> bufBits = std::vector<bool>();
   IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_GAIN>(swriter.channel.getGain(), bufBits,
-                                                              -MAX_FLOAT, MAX_FLOAT);
+                                                                -MAX_FLOAT, MAX_FLOAT);
   bitstream.insert(bitstream.end(), bufBits.begin(), bufBits.end());
   bufBits.clear();
 
@@ -1411,7 +1411,7 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
         swriter.channel.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
     auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
     IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
-                                                                            bitstream);
+                                                                              bitstream);
     for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
       IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET>(
           static_cast<uint8_t>(bodyPartTarget[i]), bitstream);
@@ -1421,7 +1421,7 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
         swriter.channel.getActuatorTarget().value_or(std::vector<types::Vector>{});
     auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
     IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
-                                                                           bitstream);
+                                                                             bitstream);
     for (uint8_t i = 0; i < actuatorTargetCount; i++) {
       types::Vector target = actuatorTarget[i];
       IOBinaryPrimitives::writeVector(target, bitstream);
@@ -1434,7 +1434,8 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
   if (freqSampling > 0) {
-    std::bitset<MDCHANNEL_SAMPLE_COUNT> sampleCountBits(swriter.channel.getSampleCount().value_or(0));
+    std::bitset<MDCHANNEL_SAMPLE_COUNT> sampleCountBits(
+        swriter.channel.getSampleCount().value_or(0));
     valueStr = sampleCountBits.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
@@ -1528,7 +1529,8 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
     }
     sreader.channel.setActuatorTarget(actuatorTarget);
   }
-  uint32_t frequencySampling = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_FREQ_SAMPLING);
+  uint32_t frequencySampling =
+      IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_FREQ_SAMPLING);
   if (frequencySampling > 0) {
     sreader.channel.setFrequencySampling(frequencySampling);
   }
@@ -2011,8 +2013,8 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
       effects.push_back(effect);
     }
-    return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex, sreader.bandStream.index,
-                             effects);
+    return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex,
+                             sreader.bandStream.index, effects);
   }
   return true;
 }
