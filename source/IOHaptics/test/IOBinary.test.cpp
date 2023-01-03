@@ -466,7 +466,7 @@ TEST_CASE("write/read file header for channel testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
-        testingVertices_channel2.size() + 135;
+        testingVertices_channel2.size() + 136;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -733,7 +733,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
-        testingVertices_channel2.size() + 305;
+        testingVertices_channel2.size() + 307;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
