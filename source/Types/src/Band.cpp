@@ -194,7 +194,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
           count = -position;
           position = 0;
         }
-        for (int i = position; (i < sampleCount) && (count <= keyframes.back().first); i++) {
+        for (int i = position;
+             (i < static_cast<int>(sampleCount)) && (count <= keyframes.back().first); i++) {
           bandAmp[i] += effectAmp[count];
           count++;
         }
