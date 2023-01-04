@@ -55,7 +55,7 @@ if __name__ == "__main__":
     ftp_info_file = open(args.ftp_info)
     ftp_info = json.load(ftp_info_file)
 
-    wget = ['wget', '-m', '-np', '-nH','--no-passive-ftp', '--cut-dir=2',
+    wget = ['wget', '-m', '-np', '-nH','--no-passive-ftp', '--verbose', '--cut-dir=2',
             '-P'+ args.data_dir,
             '--user='+ftp_info['user'],
             '--password='+ftp_info['password'],
