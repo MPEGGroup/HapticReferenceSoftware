@@ -54,11 +54,11 @@ if __name__ == "__main__":
 
     ftp_info_file = open(args.ftp_info)
     ftp_info = json.load(ftp_info_file)
+    ftp_address = ftp_info['ftp']
+    https_address = ftp_address.replace("ftp", "https")
 
-    wget = ['wget', '-m', '-np', '-nH', '--no-passive-ftp', '--cut-dir=2',
+    wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
             '-P'+ args.data_dir,
-            '--ftp-user='+ftp_info['user'],
-            '--ftp-password='+ftp_info['password'],
-            ftp_info['ftp']]
+            https_address]
 
     subprocess.run(wget)
