@@ -46,6 +46,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Computing PSNRs')
     parser.add_argument("--data_dir", help="local data directory", required=True)
     parser.add_argument("--ftp_info", help="JSON file with MPEG FTP info", required=True)
+    parser.add_argument("--mpeg_user", help="MPEG login", required=True)
+    parser.add_argument("--mpeg_pwd", help="MPEG password", required=True)
+    
     args = parser.parse_args()
     if not os.path.exists(args.data_dir):
         pathlib.Path(args.data_dir).mkdir(parents=True, exist_ok=True)
@@ -59,8 +62,8 @@ if __name__ == "__main__":
 
     wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
             '-P'+ args.data_dir,
-            "--http-user="+ftp_info['user'],
-            "--http-user="+ftp_info['password'],
+            "--http-user="+args.mpeg_user,
+            "--http-user="+args.mpeg_pwd,
             https_address]
 
     subprocess.run(wget)
