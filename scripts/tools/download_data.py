@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
     wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
             '-P'+ args.data_dir,
-            "--https-user="+ftp_info['user'],
-            "--https-user="+ftp_info['password'],
+            "--http-user="+ftp_info['user'],
+            "--http-user="+ftp_info['password'],
             https_address]
 
     subprocess.run(wget)
