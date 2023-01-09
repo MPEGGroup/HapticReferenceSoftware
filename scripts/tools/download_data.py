@@ -59,7 +59,7 @@ if __name__ == "__main__":
     ftp_info = json.load(ftp_info_file)
     ftp_address = ftp_info['ftp']
     #https_address = ftp_address.replace("ftp", "https")
-    https_address = "https://mpegfs.int-evry.fr/mpegcontent/ws-mpegcontent/MPEG-I/Part40-HapticSupport"
+    https_address = "https://mpegfs.int-evry.fr/mpegcontent/ws-mpegcontent/"
 
     wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
             '-P'+ args.data_dir,
