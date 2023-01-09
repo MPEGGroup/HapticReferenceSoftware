@@ -66,5 +66,4 @@ if __name__ == "__main__":
             "--http-user="+args.mpeg_user,
             "--http-password="+args.mpeg_pwd,
             https_address]
-    print(wget)
     subprocess.run(wget)
