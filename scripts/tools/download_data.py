@@ -58,13 +58,12 @@ if __name__ == "__main__":
     ftp_info_file = open(args.ftp_info)
     ftp_info = json.load(ftp_info_file)
     ftp_address = ftp_info['ftp']
-    #https_address = ftp_address.replace("ftp", "https")
-    https_address = "https://content.mpeg.expert"
+    https_address = ftp_address.replace("ftp", "https")
 
     wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
             '-P'+ args.data_dir,
             "--http-user="+args.mpeg_user,
-            "--http-user="+args.mpeg_pwd,
+            "--http-password="+args.mpeg_pwd,
             https_address]
 
     subprocess.run(wget)
