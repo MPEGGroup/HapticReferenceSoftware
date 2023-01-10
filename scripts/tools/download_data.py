@@ -52,12 +52,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if not os.path.exists(args.data_dir):
         pathlib.Path(args.data_dir).mkdir(parents=True, exist_ok=True)
-    if not os.path.exists(args.mpeg_server):
-        sys.exit("Server address information missing.")
-    if not os.path.exists(args.mpeg_user):
-        sys.exit("User login information missing.")
-    if not os.path.exists(args.mpeg_pwd):
-        sys.exit("User password information missing.")
+
     https_address = args.mpeg_server
 
     wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
