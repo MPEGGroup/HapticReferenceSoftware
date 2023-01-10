@@ -55,9 +55,12 @@ if __name__ == "__main__":
 
     https_address = args.mpeg_server
 
-    wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
+    wget = ['wget', '-m', '-np', '-nH', '--cut-dir=3', '-R "index.html*"'
             '-P'+ args.data_dir,
             "--http-user="+args.mpeg_user,
             "--http-password="+args.mpeg_pwd,
             https_address]
     subprocess.run(wget)
+    
+    subprocess.run(['ls', args.data_dir])
+    subprocess.run(['pwd'])
