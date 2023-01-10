@@ -45,21 +45,20 @@ import sys
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Computing PSNRs')
     parser.add_argument("--data_dir", help="local data directory", required=True)
-    parser.add_argument("--ftp_info", help="JSON file with MPEG FTP info", required=True)
+    parser.add_argument("--mpeg_server", help="MPEG server address", required=True)
     parser.add_argument("--mpeg_user", help="MPEG login", required=True)
     parser.add_argument("--mpeg_pwd", help="MPEG password", required=True)
     
     args = parser.parse_args()
     if not os.path.exists(args.data_dir):
         pathlib.Path(args.data_dir).mkdir(parents=True, exist_ok=True)
-    if not os.path.exists(args.ftp_info):
-        sys.exit("FTP information missing.")
-
-    ftp_info_file = open(args.ftp_info)
-    ftp_info = json.load(ftp_info_file)
-    ftp_address = ftp_info['ftp']
-    #https_address = ftp_address.replace("ftp", "https")
-    https_address = "https://mpegfs.int-evry.fr/"
+    if not os.path.exists(args.mpeg_server):
+        sys.exit("Server address information missing.")
+    if not os.path.exists(args.mpeg_user):
+        sys.exit("User login information missing.")
+    if not os.path.exists(args.mpeg_pwd):
+        sys.exit("User password information missing.")
+    https_address = args.mpeg_server
 
     wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2',
             '-P'+ args.data_dir,
