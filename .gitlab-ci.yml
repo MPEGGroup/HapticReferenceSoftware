@@ -28,14 +28,14 @@ include:
         - "**/*.hpp"
         - "scripts/test/*.py"
 
-#clang-format:
-#  <<: *trigger_launch
+clang-format:
+  <<: *trigger_launch
 
-#Clang 12 Debug:
-#  <<: *trigger_launch
+Clang 12 Debug:
+  <<: *trigger_launch
 
-#GCC 10 Release:
-#  <<: *trigger_launch
+GCC 10 Release:
+  <<: *trigger_launch
 
 Metrics:
   <<: *trigger_launch
