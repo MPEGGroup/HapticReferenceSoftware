@@ -62,5 +62,5 @@ if __name__ == "__main__":
             https_address]
     subprocess.run(wget)
     
-    subprocess.run(['ls', args.data_dir])
+    subprocess.run(['pwd', args.data_dir])
     subprocess.run(['pwd'])
