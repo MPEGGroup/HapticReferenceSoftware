@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     https_address = args.mpeg_server
 
-    wget = ['wget', '-m', '-np', '-nH', '--cut-dir=2', '-R "index.html*"'
+    wget = ['wget', '-m', '-np', '-nH', '--cut-dir=1', '-R "index.html*"'
             '-P'+ args.data_dir,
             "--http-user="+args.mpeg_user,
             "--http-password="+args.mpeg_pwd,
