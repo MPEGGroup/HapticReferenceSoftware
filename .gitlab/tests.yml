@@ -13,7 +13,7 @@ Metrics:
     - cd ..
     - mkdir reports
     - mkdir files
-    - python3 ./scripts/tools/download_data.py --data_dir ~/data --mpeg_server "$MPEG_server" --mpeg_user "$MPEG_login" --mpeg_pwd "$MPEG_pwd"
+    - python3 ./scripts/tools/download_data.py --data_dir /root/data --mpeg_server "$MPEG_server" --mpeg_user "$MPEG_login" --mpeg_pwd "$MPEG_pwd"
     - python3 ./scripts/tools/check_data.py --data_dir ~/data --md5 ./test/list_files.md5
     - >
       pytest-3 ./scripts/test/integration_tests.py --autopad 
