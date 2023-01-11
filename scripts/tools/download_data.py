@@ -63,4 +63,4 @@ if __name__ == "__main__":
     subprocess.run(wget)
     
     subprocess.run(['pwd', args.data_dir])
-    subprocess.run(['pwd'])
+    subprocess.run(['pwd', '~'])
