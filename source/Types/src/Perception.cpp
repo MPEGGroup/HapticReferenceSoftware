@@ -82,27 +82,29 @@ auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUn
   this->perceptionUnitExponent = newPerceptionUnitExponent;
 }
 
-auto Perception::getTracksSize() -> size_t { return tracks.size(); }
+auto Perception::getChannelsSize() -> size_t { return channels.size(); }
 
-auto Perception::getTrackAt(int index) -> haptics::types::Track & { return tracks.at(index); }
+auto Perception::getChannelAt(int index) -> haptics::types::Channel & { return channels.at(index); }
 
-auto Perception::replaceTrackAt(int index, haptics::types::Track &newTrack) -> bool {
-  if (index < 0 || index >= (int)tracks.size()) {
+auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
     return false;
   }
-  tracks[index] = newTrack;
+  channels[index] = newChannel;
   return true;
 }
 
-auto Perception::removeTrackAt(int index) -> bool {
-  if (index < 0 || index >= (int)tracks.size()) {
+auto Perception::removeChannelAt(int index) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
     return false;
   }
-  tracks.erase(tracks.begin() + index);
+  channels.erase(channels.begin() + index);
   return true;
 }
 
-auto Perception::addTrack(haptics::types::Track &newTrack) -> void { tracks.push_back(newTrack); }
+auto Perception::addChannel(haptics::types::Channel &newChannel) -> void {
+  channels.push_back(newChannel);
+}
 
 auto Perception::getReferenceDevicesSize() -> size_t { return referenceDevices.size(); }
 
@@ -251,11 +253,11 @@ auto Perception::getEffectById(int id) -> std::optional<Effect> {
 }
 
 auto Perception::linearizeLibrary() -> void {
-  for (int i = 0; i < static_cast<int>(getTracksSize()); i++) {
-    auto track = getTrackAt(i);
-    auto numBands = static_cast<int>(track.getBandsSize());
+  for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
+    auto channel = getChannelAt(i);
+    auto numBands = static_cast<int>(channel.getBandsSize());
     for (int j = 0; j < numBands; j++) {
-      auto band = track.getBandAt(j);
+      auto band = channel.getBandAt(j);
       auto numEffects = static_cast<int>(band.getEffectsSize());
       for (int k = 0; k < numEffects; k++) {
         auto effect = band.getEffectAt(k);
@@ -265,7 +267,7 @@ auto Perception::linearizeLibrary() -> void {
             Effect basisEffect(refEffect.value());
             basisEffect.setPosition(effect.getPosition());
             basisEffect.setId(-1);
-            getTrackAt(i).getBandAt(j).replaceEffectAt(k, basisEffect);
+            getChannelAt(i).getBandAt(j).replaceEffectAt(k, basisEffect);
           }
         }
       }
@@ -275,11 +277,11 @@ auto Perception::linearizeLibrary() -> void {
 }
 
 auto Perception::refactorEffects() -> void {
-  for (int i = 0; i < static_cast<int>(getTracksSize()); i++) {
-    auto track = getTrackAt(i);
-    auto numBands = static_cast<int>(track.getBandsSize());
+  for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
+    auto channel = getChannelAt(i);
+    auto numBands = static_cast<int>(channel.getBandsSize());
     for (int j = 0; j < numBands; j++) {
-      auto band = track.getBandAt(j);
+      auto band = channel.getBandAt(j);
       if (band.getBandType() == BandType::WaveletWave) {
         continue;
       }
@@ -297,9 +299,9 @@ auto Perception::refactorEffects() -> void {
             // if (i != l || j != m || k != n) {
             Effect libEffect;
             libEffect.setId(newId);
-            libEffect.setPosition(getTrackAt(l).getBandAt(m).getEffectAt(n).getPosition());
+            libEffect.setPosition(getChannelAt(l).getBandAt(m).getEffectAt(n).getPosition());
             libEffect.setEffectType(EffectType::Reference);
-            getTrackAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
+            getChannelAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
             //}
           }
           addBasisEffect(basisEffect);
@@ -309,14 +311,14 @@ auto Perception::refactorEffects() -> void {
   }
 }
 
-auto Perception::searchForEquivalentEffects(Effect &effect, int startingTrack)
+auto Perception::searchForEquivalentEffects(Effect &effect, int startingChannel)
     -> std::vector<std::tuple<int, int, int>> {
   std::vector<std::tuple<int, int, int>> sameEffects;
-  for (int l = startingTrack; l < static_cast<int>(getTracksSize()); l++) {
-    auto track2 = getTrackAt(l);
-    auto numBands2 = static_cast<int>(track2.getBandsSize());
+  for (int l = startingChannel; l < static_cast<int>(getChannelsSize()); l++) {
+    auto channel2 = getChannelAt(l);
+    auto numBands2 = static_cast<int>(channel2.getBandsSize());
     for (int m = 0; m < numBands2; m++) {
-      auto band2 = track2.getBandAt(m);
+      auto band2 = channel2.getBandAt(m);
       auto numEffects2 = static_cast<int>(band2.getEffectsSize());
       for (int n = 0; n < numEffects2; n++) {
         if (effect.isEquivalent(band2.getEffectAt(n))) {

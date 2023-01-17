@@ -31,8 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TRACK_H
-#define TRACK_H
+#ifndef CHANNEL_H
+#define CHANNEL_H
 
 #include <Types/include/Band.h>
 #include <Types/include/BodyPartTarget.h>
@@ -54,11 +54,11 @@ struct Vector {
   };
 };
 
-class Track {
+class Channel {
 public:
-  explicit Track() = default;
-  explicit Track(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                 uint32_t newBodyPartMask)
+  explicit Channel() = default;
+  explicit Channel(int newId, std::string newDescription, float newGain, float newMixingWeight,
+                   uint32_t newBodyPartMask)
       : id(newId)
       , description(std::move(newDescription))
       , gain(newGain)
@@ -96,7 +96,7 @@ public:
   auto findBandAvailable(int position, int duration, types::BandType bandType)
       -> haptics::types::Band *;
   auto Evaluate(double position) -> double;
-  auto EvaluateTrack(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
+  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
   [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
@@ -104,7 +104,7 @@ public:
   [[nodiscard]] auto getDirection() const -> std::optional<Vector>;
   auto setDirection(std::optional<Vector> newDirection) -> void;
   [[nodiscard]] auto getActuatorResolution() const -> std::optional<Vector>;
-  auto setActuatorResolution(std::optional<Vector> newTrackResolution) -> void;
+  auto setActuatorResolution(std::optional<Vector> newChannelResolution) -> void;
   [[nodiscard]] auto getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>>;
   auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
   [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
@@ -127,4 +127,4 @@ private:
   std::optional<std::vector<Vector>> actuatorTarget = std::nullopt;
 };
 } // namespace haptics::types
-#endif // TRACK_H
+#endif // CHANNEL_H

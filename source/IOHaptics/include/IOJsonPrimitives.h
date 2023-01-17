@@ -34,7 +34,7 @@
 #ifndef IOJSONPRIMITIVES_H
 #define IOJSONPRIMITIVES_H
 
-#include <Types/include/Track.h>
+#include <Types/include/Channel.h>
 #include <string>
 #include <vector>
 

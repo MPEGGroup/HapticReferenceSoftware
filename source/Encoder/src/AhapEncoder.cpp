@@ -65,7 +65,7 @@ namespace haptics::encoder {
 
 [[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out)
     -> int {
-  if (out.getTracksSize() > 1) {
+  if (out.getChannelsSize() > 1) {
     return EXIT_FAILURE;
   }
 
@@ -136,11 +136,11 @@ namespace haptics::encoder {
     }
   }
 
-  haptics::types::Track myTrack(0, "placeholder description", 1, 1, 0);
-  if (out.getTracksSize() == 0) {
-    out.addTrack(myTrack);
+  haptics::types::Channel myChannel(0, "placeholder description", 1, 1, 0);
+  if (out.getChannelsSize() == 0) {
+    out.addChannel(myChannel);
   }
-  myTrack = out.getTrackAt(0);
+  myChannel = out.getChannelAt(0);
 
   // TRANSIENTS
   types::Band myBand = types::Band(types::BandType::Transient, haptics::types::CurveType::Unknown,
@@ -156,25 +156,25 @@ namespace haptics::encoder {
   }
   myBand.addEffect(transientEffect);
   if (myBand.getEffectsSize() > 0) {
-    myTrack.addBand(myBand);
+    myChannel.addBand(myBand);
   }
 
   // CONTINUOUS
   types::Band *b = nullptr;
   for (types::Effect e : continuous) {
-    b = myTrack.findBandAvailable(
+    b = myChannel.findBandAvailable(
         e.getPosition(),
         e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1).getRelativePosition().value(),
         types::BandType::VectorialWave);
     if (b == nullptr) {
-      b = myTrack.generateBand(haptics::types::BandType::VectorialWave,
-                               haptics::types::CurveType::Unknown, 0, MIN_AHAP_FREQUENCY,
-                               MAX_AHAP_FREQUENCY);
+      b = myChannel.generateBand(haptics::types::BandType::VectorialWave,
+                                 haptics::types::CurveType::Unknown, 0, MIN_AHAP_FREQUENCY,
+                                 MAX_AHAP_FREQUENCY);
     }
     b->addEffect(e);
   }
 
-  out.replaceTrackAt(0, myTrack);
+  out.replaceChannelAt(0, myChannel);
   return EXIT_SUCCESS;
 }
 

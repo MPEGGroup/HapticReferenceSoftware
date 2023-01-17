@@ -92,10 +92,10 @@ auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
     Perception perception(i, 0, elemDescription, perceptionModality);
     short numChannels = element.numHapticChannels;
     for (int j = 0; j < numChannels; j++) {
-      auto channel = element.channelsMetadata[j];
-      Track track(j, channel.channelDescription, channel.gain, 1,
-                  static_cast<uint32_t>(channel.bodyPartMask));
-      perception.addTrack(track);
+      auto OHMChannel = element.channelsMetadata[j];
+      Channel channel(j, OHMChannel.channelDescription, OHMChannel.gain, 1,
+                      static_cast<uint32_t>(OHMChannel.bodyPartMask));
+      perception.addChannel(channel);
     }
     perceptions.push_back(perception);
   }
@@ -111,12 +111,12 @@ auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHM
   for (types::Perception p : perceptions) {
     element = tools::OHMData::HapticElementMetadata();
     element.elementDescription = p.getDescription();
-    element.numHapticChannels = static_cast<short>(p.getTracksSize());
+    element.numHapticChannels = static_cast<short>(p.getChannelsSize());
     element.elementFilename = filename;
     element.channelsMetadata = {};
     for (int i = 0; i < element.numHapticChannels; i++) {
       channel = tools::OHMData::HapticChannelMetadata();
-      types::Track t = p.getTrackAt(i);
+      types::Channel t = p.getChannelAt(i);
       channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMask();
       channel.channelDescription = t.getDescription();
       channel.gain = t.getGain();
