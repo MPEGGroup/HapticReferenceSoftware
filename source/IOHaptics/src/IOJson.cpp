@@ -107,8 +107,8 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
       std::cerr << "Missing or invalid perception modality" << std::endl;
       continue;
     }
-    if (!jsonPerception.HasMember("tracks") || !jsonPerception["tracks"].IsArray()) {
-      std::cerr << "Missing or invalid tracks" << std::endl;
+    if (!jsonPerception.HasMember("channels") || !jsonPerception["channels"].IsArray()) {
+      std::cerr << "Missing or invalid channels" << std::endl;
       continue;
     }
     if (!jsonPerception.HasMember("effect_library") ||
@@ -136,7 +136,7 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
 
     loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
 
-    loadingSuccess = loadingSuccess && loadTracks(jsonPerception["tracks"], perception);
+    loadingSuccess = loadingSuccess && loadChannels(jsonPerception["channels"], perception);
     if (jsonPerception.HasMember("reference_devices") &&
         jsonPerception["reference_devices"].IsArray()) {
       loadingSuccess =
@@ -209,101 +209,103 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
   return loadingSuccess;
 }
 
-auto IOJson::loadTracks(const rapidjson::Value &jsonTracks, types::Perception &perception) -> bool {
+auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perception &perception)
+    -> bool {
   bool loadingSuccess = true;
-  for (const auto &jtv : jsonTracks.GetArray()) {
+  for (const auto &jtv : jsonChannels.GetArray()) {
     if (!jtv.IsObject()) {
-      std::cerr << "Invalid track: not an object" << std::endl;
+      std::cerr << "Invalid channel: not an object" << std::endl;
       continue;
     }
-    auto jsonTrack = jtv.GetObject();
+    auto jsonChannel = jtv.GetObject();
 
-    if (!IOJsonPrimitives::hasInt(jsonTrack, "id")) {
-      std::cerr << "Missing or invalid track id" << std::endl;
+    if (!IOJsonPrimitives::hasInt(jsonChannel, "id")) {
+      std::cerr << "Missing or invalid channel id" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasString(jsonTrack, "description")) {
-      std::cerr << "Missing or invalid track description" << std::endl;
+    if (!IOJsonPrimitives::hasString(jsonChannel, "description")) {
+      std::cerr << "Missing or invalid channel description" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasNumber(jsonTrack, "gain")) {
-      std::cerr << "Missing or invalid track gain" << std::endl;
+    if (!IOJsonPrimitives::hasNumber(jsonChannel, "gain")) {
+      std::cerr << "Missing or invalid channel gain" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasNumber(jsonTrack, "mixing_weight")) {
-      std::cerr << "Missing or invalid track mixing weight" << std::endl;
+    if (!IOJsonPrimitives::hasNumber(jsonChannel, "mixing_weight")) {
+      std::cerr << "Missing or invalid channel mixing weight" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasNumber(jsonTrack, "body_part_mask")) {
-      std::cerr << "Missing or invalid track body part mask" << std::endl;
+    if (!IOJsonPrimitives::hasNumber(jsonChannel, "body_part_mask")) {
+      std::cerr << "Missing or invalid channel body part mask" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasArray(jsonTrack, "bands")) {
+    if (!IOJsonPrimitives::hasArray(jsonChannel, "bands")) {
       std::cerr << "Missing or invalid bands" << std::endl;
       continue;
     }
 
-    auto trackId = jsonTrack["id"].GetInt();
-    const auto *trackDescription = jsonTrack["description"].GetString();
-    auto trackGain = jsonTrack["gain"].GetFloat();
-    auto trackMixingWeight = jsonTrack["mixing_weight"].GetFloat();
-    auto trackBodyPart = jsonTrack["body_part_mask"].GetUint();
+    auto channelId = jsonChannel["id"].GetInt();
+    const auto *channelDescription = jsonChannel["description"].GetString();
+    auto channelGain = jsonChannel["gain"].GetFloat();
+    auto channelMixingWeight = jsonChannel["mixing_weight"].GetFloat();
+    auto channelBodyPart = jsonChannel["body_part_mask"].GetUint();
 
-    types::Track track(trackId, trackDescription, trackGain, trackMixingWeight, trackBodyPart);
+    types::Channel channel(channelId, channelDescription, channelGain, channelMixingWeight,
+                           channelBodyPart);
 
     types::Vector direction{};
-    if (jsonTrack.HasMember("direction") && loadVector(jsonTrack["direction"], direction)) {
-      track.setDirection(direction);
+    if (jsonChannel.HasMember("direction") && loadVector(jsonChannel["direction"], direction)) {
+      channel.setDirection(direction);
     }
 
     types::Vector actuatorResolution{};
-    if (jsonTrack.HasMember("actuator_resolution") &&
-        loadVector(jsonTrack["actuator_resolution"], actuatorResolution)) {
-      track.setActuatorResolution(actuatorResolution);
+    if (jsonChannel.HasMember("actuator_resolution") &&
+        loadVector(jsonChannel["actuator_resolution"], actuatorResolution)) {
+      channel.setActuatorResolution(actuatorResolution);
     }
 
     std::vector<std::string> bodyPartTargetString;
-    if (IOJsonPrimitives::getStringArray(jsonTrack, "body_part_target", bodyPartTargetString)) {
+    if (IOJsonPrimitives::getStringArray(jsonChannel, "body_part_target", bodyPartTargetString)) {
       std::vector<types::BodyPartTarget> bodyPartTarget;
       std::transform(bodyPartTargetString.begin(), bodyPartTargetString.end(),
                      std::back_inserter(bodyPartTarget),
                      [](const std::string &str) { return types::stringToBodyPartTarget.at(str); });
-      track.setBodyPartTarget(bodyPartTarget);
+      channel.setBodyPartTarget(bodyPartTarget);
     }
 
     std::vector<types::Vector> actuatorTarget;
-    if (IOJsonPrimitives::getVectorArray(jsonTrack, "actuator_target", actuatorTarget)) {
-      track.setActuatorTarget(actuatorTarget);
+    if (IOJsonPrimitives::getVectorArray(jsonChannel, "actuator_target", actuatorTarget)) {
+      channel.setActuatorTarget(actuatorTarget);
     }
 
-    if (IOJsonPrimitives::hasUint(jsonTrack, "frequency_sampling")) {
-      auto frequencySampling = jsonTrack["frequency_sampling"].GetUint();
-      track.setFrequencySampling(frequencySampling);
+    if (IOJsonPrimitives::hasUint(jsonChannel, "frequency_sampling")) {
+      auto frequencySampling = jsonChannel["frequency_sampling"].GetUint();
+      channel.setFrequencySampling(frequencySampling);
     }
 
-    if (IOJsonPrimitives::hasUint(jsonTrack, "sample_count")) {
-      auto frequencySampling = jsonTrack["sample_count"].GetUint();
-      track.setSampleCount(frequencySampling);
+    if (IOJsonPrimitives::hasUint(jsonChannel, "sample_count")) {
+      auto frequencySampling = jsonChannel["sample_count"].GetUint();
+      channel.setSampleCount(frequencySampling);
     }
 
-    if (IOJsonPrimitives::hasInt(jsonTrack, "reference_device_id")) {
-      auto device_id = jsonTrack["reference_device_id"].GetInt();
-      track.setReferenceDeviceId(device_id);
+    if (IOJsonPrimitives::hasInt(jsonChannel, "reference_device_id")) {
+      auto device_id = jsonChannel["reference_device_id"].GetInt();
+      channel.setReferenceDeviceId(device_id);
     }
 
     std::vector<int> vertices;
-    if (IOJsonPrimitives::getIntArray(jsonTrack, "vertices", vertices)) {
+    if (IOJsonPrimitives::getIntArray(jsonChannel, "vertices", vertices)) {
       for (auto &vertex : vertices) {
-        track.addVertex(vertex);
+        channel.addVertex(vertex);
       }
     }
-    loadingSuccess = loadingSuccess && loadBands(jsonTrack["bands"], track);
-    perception.addTrack(track);
+    loadingSuccess = loadingSuccess && loadBands(jsonChannel["bands"], channel);
+    perception.addChannel(channel);
   }
   return loadingSuccess;
 }
 
-auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -> bool {
+auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channel) -> bool {
   bool loadingSuccess = true;
   for (const auto &jbv : jsonBands.GetArray()) {
     if (!jbv.IsObject()) {
@@ -348,7 +350,7 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Track &track) -
     types::Band band(bandType, curveType, blockLength, lowerLimit, upperLimit);
     loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
-    track.addBand(band);
+    channel.addBand(band);
   }
   return loadingSuccess;
 }
@@ -625,9 +627,9 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPe
     auto jsonLibrary = rapidjson::Value(rapidjson::kArrayType);
     extractLibrary(perception, jsonLibrary, jsonTree);
     jsonPerception.AddMember("effect_library", jsonLibrary, jsonTree.GetAllocator());
-    auto jsonTracks = rapidjson::Value(rapidjson::kArrayType);
-    extractTracks(perception, jsonTracks, jsonTree);
-    jsonPerception.AddMember("tracks", jsonTracks, jsonTree.GetAllocator());
+    auto jsonChannels = rapidjson::Value(rapidjson::kArrayType);
+    extractChannels(perception, jsonChannels, jsonTree);
+    jsonPerception.AddMember("channels", jsonChannels, jsonTree.GetAllocator());
 
     jsonPerceptions.PushBack(jsonPerception, jsonTree.GetAllocator());
   }
@@ -698,84 +700,85 @@ auto IOJson::extractAvatars(types::Haptics &haptic, rapidjson::Value &jsonAvatar
   }
 }
 
-auto IOJson::extractTracks(types::Perception &perception, rapidjson::Value &jsonTracks,
-                           rapidjson::Document &jsonTree) -> void {
-  auto numTracks = perception.getTracksSize();
-  for (decltype(numTracks) tix = 0; tix < numTracks; tix++) {
-    haptics::types::Track track = perception.getTrackAt(static_cast<int>(tix));
-    auto jsonTrack = rapidjson::Value(rapidjson::kObjectType);
-    jsonTrack.AddMember("id", track.getId(), jsonTree.GetAllocator());
-    jsonTrack.AddMember("description",
-                        rapidjson::Value(track.getDescription().c_str(), jsonTree.GetAllocator()),
-                        jsonTree.GetAllocator());
-    jsonTrack.AddMember("gain", track.getGain(), jsonTree.GetAllocator());
-    jsonTrack.AddMember("mixing_weight", track.getMixingWeight(), jsonTree.GetAllocator());
-    jsonTrack.AddMember("body_part_mask", track.getBodyPartMask(), jsonTree.GetAllocator());
-    if (track.getReferenceDeviceId().has_value()) {
-      jsonTrack.AddMember("reference_device_id", track.getReferenceDeviceId().value(),
-                          jsonTree.GetAllocator());
+auto IOJson::extractChannels(types::Perception &perception, rapidjson::Value &jsonChannels,
+                             rapidjson::Document &jsonTree) -> void {
+  auto numChannels = perception.getChannelsSize();
+  for (decltype(numChannels) tix = 0; tix < numChannels; tix++) {
+    haptics::types::Channel channel = perception.getChannelAt(static_cast<int>(tix));
+    auto jsonChannel = rapidjson::Value(rapidjson::kObjectType);
+    jsonChannel.AddMember("id", channel.getId(), jsonTree.GetAllocator());
+    jsonChannel.AddMember(
+        "description", rapidjson::Value(channel.getDescription().c_str(), jsonTree.GetAllocator()),
+        jsonTree.GetAllocator());
+    jsonChannel.AddMember("gain", channel.getGain(), jsonTree.GetAllocator());
+    jsonChannel.AddMember("mixing_weight", channel.getMixingWeight(), jsonTree.GetAllocator());
+    jsonChannel.AddMember("body_part_mask", channel.getBodyPartMask(), jsonTree.GetAllocator());
+    if (channel.getReferenceDeviceId().has_value()) {
+      jsonChannel.AddMember("reference_device_id", channel.getReferenceDeviceId().value(),
+                            jsonTree.GetAllocator());
     }
-    if (track.getFrequencySampling().has_value()) {
-      jsonTrack.AddMember("frequency_sampling", track.getFrequencySampling().value(),
-                          jsonTree.GetAllocator());
+    if (channel.getFrequencySampling().has_value()) {
+      jsonChannel.AddMember("frequency_sampling", channel.getFrequencySampling().value(),
+                            jsonTree.GetAllocator());
     }
-    if (track.getSampleCount().has_value()) {
-      jsonTrack.AddMember("sample_count", track.getSampleCount().value(), jsonTree.GetAllocator());
+    if (channel.getSampleCount().has_value()) {
+      jsonChannel.AddMember("sample_count", channel.getSampleCount().value(),
+                            jsonTree.GetAllocator());
     }
-    if (track.getDirection().has_value()) {
-      types::Vector direction = track.getDirection().value();
+    if (channel.getDirection().has_value()) {
+      types::Vector direction = channel.getDirection().value();
       auto jsonDirection = rapidjson::Value(rapidjson::kObjectType);
       extractVector(direction, jsonDirection, jsonTree);
-      jsonTrack.AddMember("direction", jsonDirection, jsonTree.GetAllocator());
+      jsonChannel.AddMember("direction", jsonDirection, jsonTree.GetAllocator());
     }
-    if (track.getActuatorResolution().has_value()) {
-      types::Vector actuatorResolution = track.getActuatorResolution().value();
+    if (channel.getActuatorResolution().has_value()) {
+      types::Vector actuatorResolution = channel.getActuatorResolution().value();
       auto jsonActuatorResolution = rapidjson::Value(rapidjson::kObjectType);
       extractVector(actuatorResolution, jsonActuatorResolution, jsonTree);
-      jsonTrack.AddMember("actuator_resolution", jsonActuatorResolution, jsonTree.GetAllocator());
+      jsonChannel.AddMember("actuator_resolution", jsonActuatorResolution, jsonTree.GetAllocator());
     }
-    if (track.getBodyPartTarget().has_value()) {
+    if (channel.getBodyPartTarget().has_value()) {
       auto jsonBodyPartTarget = rapidjson::Value(rapidjson::kArrayType);
-      std::vector<types::BodyPartTarget> bodyPartTargetList = track.getBodyPartTarget().value();
+      std::vector<types::BodyPartTarget> bodyPartTargetList = channel.getBodyPartTarget().value();
       for (types::BodyPartTarget &bodyPartTarget : bodyPartTargetList) {
         auto bpt_value = rapidjson::Value(types::bodyPartTargetToString.at(bodyPartTarget).c_str(),
                                           jsonTree.GetAllocator());
         jsonBodyPartTarget.PushBack(bpt_value, jsonTree.GetAllocator());
       }
-      jsonTrack.AddMember("body_part_target", jsonBodyPartTarget, jsonTree.GetAllocator());
+      jsonChannel.AddMember("body_part_target", jsonBodyPartTarget, jsonTree.GetAllocator());
     }
-    if (track.getActuatorTarget().has_value()) {
+    if (channel.getActuatorTarget().has_value()) {
       auto jsonBodyPartTarget = rapidjson::Value(rapidjson::kArrayType);
-      std::vector<types::Vector> actuatorTargetList = track.getActuatorTarget().value();
+      std::vector<types::Vector> actuatorTargetList = channel.getActuatorTarget().value();
       for (types::Vector &actuatorTarget : actuatorTargetList) {
         auto jsonTarget = rapidjson::Value(rapidjson::kObjectType);
         extractVector(actuatorTarget, jsonTarget, jsonTree);
         jsonBodyPartTarget.PushBack(jsonTarget, jsonTree.GetAllocator());
       }
-      jsonTrack.AddMember("actuator_target", jsonBodyPartTarget, jsonTree.GetAllocator());
+      jsonChannel.AddMember("actuator_target", jsonBodyPartTarget, jsonTree.GetAllocator());
     }
 
-    auto numVertices = track.getVerticesSize();
+    auto numVertices = channel.getVerticesSize();
     if (numVertices > 0) {
       auto jsonVertices = rapidjson::Value(rapidjson::kArrayType);
       for (decltype(numVertices) vix = 0; vix < numVertices; vix++) {
-        jsonVertices.PushBack(track.getVertexAt(static_cast<int>(vix)), jsonTree.GetAllocator());
+        jsonVertices.PushBack(channel.getVertexAt(static_cast<int>(vix)), jsonTree.GetAllocator());
       }
-      jsonTrack.AddMember("vertices", jsonVertices, jsonTree.GetAllocator());
+      jsonChannel.AddMember("vertices", jsonVertices, jsonTree.GetAllocator());
     }
 
     auto jsonBands = rapidjson::Value(rapidjson::kArrayType);
-    IOJson::extractBands(track, jsonBands, jsonTree);
-    jsonTrack.AddMember("bands", jsonBands, jsonTree.GetAllocator());
-    jsonTracks.PushBack(jsonTrack, jsonTree.GetAllocator());
+    IOJson::extractBands(channel, jsonBands, jsonTree);
+    jsonChannel.AddMember("bands", jsonBands, jsonTree.GetAllocator());
+    jsonChannels.PushBack(jsonChannel, jsonTree.GetAllocator());
   }
 }
 
-auto IOJson::extractBands(types::Track &track, rapidjson::Value &jsonBands,
+auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
                           rapidjson::Document &jsonTree) -> void {
-  auto numBands = track.getBandsSize();
+  auto numBands = channel.getBandsSize();
   for (decltype(numBands) bix = 0; bix < numBands; bix++) {
-    auto band = track.getBandAt(static_cast<int>(bix));
+    auto band = channel.getBandAt(static_cast<int>(bix));
     auto jsonBand = rapidjson::Value(rapidjson::kObjectType);
     jsonBand.AddMember("band_type",
                        rapidjson::Value(types::bandTypeToString.at(band.getBandType()).c_str(),

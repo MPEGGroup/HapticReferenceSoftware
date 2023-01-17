@@ -56,7 +56,7 @@ enum class NALuType {
   Timing,
   MetadataHaptics,
   MetadataPerception,
-  MetadataTrack,
+  MetadataChannel,
   MetadataBand,
   Data,
   EffectLibrary,
@@ -90,7 +90,7 @@ public:
     int packetDuration = DEFAULT_PACKET_DURATION;
     types::Haptics haptic;
     types::Perception perception;
-    types::Track track;
+    types::Channel channel;
     BandStream bandStream;
     std::vector<types::Effect> effects;
     std::vector<int> keyframesCount;
@@ -101,7 +101,7 @@ public:
   struct StreamReader {
     types::Haptics haptic;
     types::Perception perception;
-    types::Track track;
+    types::Channel channel;
     types::Band band;
     BandStream bandStream;
     std::vector<BandStream> bandStreamsHaptic;
@@ -175,7 +175,7 @@ private:
       -> bool;
   static auto generateReferenceDeviceInformationMask(types::ReferenceDevice &referenceDevice,
                                                      std::vector<bool> &informationMask) -> bool;
-  static auto writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool;
+  static auto writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool;
   static auto writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool;
   static auto writeData(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writeSpatialData(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream)
@@ -229,7 +229,7 @@ private:
   static auto readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readLibraryEffect(types::Effect &libraryEffect, int &idx,
                                 std::vector<bool> &bitstream) -> bool;
-  static auto readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
+  static auto readMetadataChannel(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readSpatialData(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readData(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
@@ -243,12 +243,12 @@ private:
   static auto readListObject(std::vector<bool> &bitstream, int refDevCount,
                              std::vector<types::ReferenceDevice> &refDevList, int &length) -> bool;
 
-  static auto addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int trackIndex,
+  static auto addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int channelIndex,
                                 int bandIndex, std::vector<types::Effect> &effects) -> bool;
   template <class T> static auto searchInList(std::vector<T> &list, T &item, int id) -> bool;
   static auto searchInList(std::vector<BandStream> &list, BandStream &item, int id) -> bool;
   static auto searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int;
-  static auto searchTrackInHaptic(types::Haptics &haptic, int id) -> int;
+  static auto searchChannelInHaptic(types::Haptics &haptic, int id) -> int;
   static auto searchBandInHaptic(StreamReader &sreader, int id) -> int;
 
   static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,

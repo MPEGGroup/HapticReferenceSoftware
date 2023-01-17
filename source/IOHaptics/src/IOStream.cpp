@@ -127,7 +127,7 @@ auto IOStream::writePacket(types::Haptics &haptic, std::ofstream &file) -> bool 
   swriter.haptic = haptic;
   writeNALu(NALuType::MetadataHaptics, swriter, 0, bitstream);
   writeNALu(NALuType::MetadataPerception, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataTrack, swriter, 0, bitstream);
+  writeNALu(NALuType::MetadataChannel, swriter, 0, bitstream);
   writeNALu(NALuType::MetadataBand, swriter, 0, bitstream);
   writeNALu(NALuType::Data, swriter, 0, bitstream);
 
@@ -153,7 +153,7 @@ auto IOStream::writePacket(types::Haptics &haptic, std::vector<std::vector<bool>
   writeNALu(NALuType::MetadataHaptics, swriter, 0, bitstream);
   writeNALu(NALuType::MetadataPerception, swriter, 0, bitstream);
   writeNALu(NALuType::EffectLibrary, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataTrack, swriter, 0, bitstream);
+  writeNALu(NALuType::MetadataChannel, swriter, 0, bitstream);
   writeNALu(NALuType::MetadataBand, swriter, 0, bitstream);
   writeNALu(NALuType::Data, swriter, 0, bitstream);
 
@@ -169,7 +169,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   writeNALu(NALuType::MetadataHaptics, swriter, 0, initPackets);
   writeNALu(NALuType::MetadataPerception, swriter, 0, initPackets);
   writeNALu(NALuType::EffectLibrary, swriter, 0, initPackets);
-  writeNALu(NALuType::MetadataTrack, swriter, 0, initPackets);
+  writeNALu(NALuType::MetadataChannel, swriter, 0, initPackets);
   writeNALu(NALuType::MetadataBand, swriter, 0, initPackets);
   std::vector<bool> initUnit = std::vector<bool>();
   writeMIHSUnit(MIHSUnitType::Initialization, initPackets, initUnit, swriter);
@@ -500,14 +500,14 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
 
     return true;
   }
-  case NALuType::MetadataTrack: {
+  case NALuType::MetadataChannel: {
     std::vector<bool> naluPayload = std::vector<bool>();
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       swriter.perception = swriter.haptic.getPerceptionAt(i);
-      for (auto j = 0; j < static_cast<int>(swriter.haptic.getPerceptionAt(i).getTracksSize());
+      for (auto j = 0; j < static_cast<int>(swriter.haptic.getPerceptionAt(i).getChannelsSize());
            j++) {
-        swriter.track = swriter.perception.getTrackAt(j);
-        writeMetadataTrack(swriter, naluPayload);
+        swriter.channel = swriter.perception.getChannelAt(j);
+        writeMetadataChannel(swriter, naluPayload);
         padToByteBoundary(naluPayload);
         writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
         naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
@@ -561,10 +561,10 @@ auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType, int level
   int bandId = 0;
   for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
     swriter.perception = swriter.haptic.getPerceptionAt(i);
-    for (auto j = 0; j < static_cast<int>(swriter.perception.getTracksSize()); j++) {
-      swriter.track = swriter.perception.getTrackAt(j);
-      for (auto k = 0; k < static_cast<int>(swriter.track.getBandsSize()); k++) {
-        swriter.bandStream.band = swriter.track.getBandAt(k);
+    for (auto j = 0; j < static_cast<int>(swriter.perception.getChannelsSize()); j++) {
+      swriter.channel = swriter.perception.getChannelAt(j);
+      for (auto k = 0; k < static_cast<int>(swriter.channel.getBandsSize()); k++) {
+        swriter.bandStream.band = swriter.channel.getBandAt(k);
         swriter.bandStream.id = bandId++;
         writeMetadataBand(swriter, naluPayload);
         padToByteBoundary(naluPayload);
@@ -582,11 +582,11 @@ auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType, int level
 auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
     types::Perception &perception = haptic.getPerceptionAt(i);
-    for (auto j = 0; j < static_cast<int>(perception.getTracksSize()); j++) {
-      types::Track &track = perception.getTrackAt(j);
+    for (auto j = 0; j < static_cast<int>(perception.getChannelsSize()); j++) {
+      types::Channel &channel = perception.getChannelAt(j);
       std::vector<types::Band> bands = std::vector<types::Band>();
-      for (auto k = 0; k < static_cast<int>(track.getBandsSize()); k++) {
-        types::Band &band = track.getBandAt(k);
+      for (auto k = 0; k < static_cast<int>(channel.getBandsSize()); k++) {
+        types::Band &band = channel.getBandAt(k);
         for (auto l = 0; l < static_cast<int>(band.getEffectsSize()); l++) {
           types::Effect &effect = band.getEffectAt(l);
           if (band.getBandType() != types::BandType::WaveletWave &&
@@ -596,14 +596,14 @@ auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
           }
         }
         if (band.getEffectsSize() == 0) {
-          track.removeBandAt(k);
+          channel.removeBandAt(k);
         }
       }
-      if (track.getBandsSize() == 0) {
-        perception.removeTrackAt(j);
+      if (channel.getBandsSize() == 0) {
+        perception.removeChannelAt(j);
       }
     }
-    if (perception.getTracksSize() == 0) {
+    if (perception.getChannelsSize() == 0) {
       haptic.removePerceptionAt(i);
     }
   }
@@ -664,16 +664,16 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
   case (NALuType::EffectLibrary): {
     return readLibrary(sreader, payload);
   }
-  case (NALuType::MetadataTrack): {
-    if (!readMetadataTrack(sreader, payload)) {
+  case (NALuType::MetadataChannel): {
+    if (!readMetadataChannel(sreader, payload)) {
       return false;
     }
     int perceIndex = searchPerceptionInHaptic(sreader.haptic, sreader.perception.getId());
-    int trackIndex = searchTrackInHaptic(sreader.haptic, sreader.track.getId());
-    if (trackIndex == -1) {
-      sreader.haptic.getPerceptionAt(perceIndex).addTrack(sreader.track);
+    int channelIndex = searchChannelInHaptic(sreader.haptic, sreader.channel.getId());
+    if (channelIndex == -1) {
+      sreader.haptic.getPerceptionAt(perceIndex).addChannel(sreader.channel);
     } else {
-      sreader.haptic.getPerceptionAt(perceIndex).replaceTrackAt(trackIndex, sreader.track);
+      sreader.haptic.getPerceptionAt(perceIndex).replaceChannelAt(channelIndex, sreader.channel);
     }
     return true;
   }
@@ -682,20 +682,20 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
       return false;
     }
     int perceIndex = searchPerceptionInHaptic(sreader.haptic, sreader.perception.getId());
-    int trackIndex = searchTrackInHaptic(sreader.haptic, sreader.track.getId());
+    int channelIndex = searchChannelInHaptic(sreader.haptic, sreader.channel.getId());
     int bandIndex = searchBandInHaptic(sreader, sreader.bandStream.id);
     if (bandIndex == -1) {
       sreader.haptic.getPerceptionAt(perceIndex)
-          .getTrackAt(trackIndex)
+          .getChannelAt(channelIndex)
           .addBand(sreader.bandStream.band);
-      sreader.bandStream.index =
-          static_cast<int>(
-              sreader.haptic.getPerceptionAt(perceIndex).getTrackAt(trackIndex).getBandsSize()) -
-          1;
+      sreader.bandStream.index = static_cast<int>(sreader.haptic.getPerceptionAt(perceIndex)
+                                                      .getChannelAt(channelIndex)
+                                                      .getBandsSize()) -
+                                 1;
       sreader.bandStreamsHaptic.push_back(sreader.bandStream);
     } else {
       sreader.haptic.getPerceptionAt(perceIndex)
-          .getTrackAt(trackIndex)
+          .getChannelAt(channelIndex)
           .replaceBandAt(bandIndex, sreader.bandStream.band);
     }
     return true;
@@ -918,9 +918,9 @@ auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> 
     writeReferenceDevice(swriter.perception.getReferenceDeviceAt(i), bitstream);
   }
 
-  std::bitset<MDPERCE_TRACK_COUNT> trackCountBits(swriter.perception.getTracksSize());
-  std::string trackCountStr = trackCountBits.to_string();
-  IOBinaryPrimitives::writeStrBits(trackCountStr, bitstream);
+  std::bitset<MDPERCE_CHANNEL_COUNT> channelCountBits(swriter.perception.getChannelsSize());
+  std::string channelCountStr = channelCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(channelCountStr, bitstream);
   return true;
 }
 auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
@@ -960,8 +960,8 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
   for (auto refDev : referenceDeviceList) {
     sreader.perception.addReferenceDevice(refDev);
   }
-  // read track count, unused but could be used for check
-  IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_TRACK_COUNT);
+  // read channel count, unused but could be used for check
+  IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_CHANNEL_COUNT);
 
   return true;
 }
@@ -1353,8 +1353,8 @@ auto IOStream::readReferenceDevice(std::vector<bool> &bitstream, types::Referenc
   return true;
 }
 
-auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
-  std::bitset<MDTRACK_ID> idBits(swriter.track.getId());
+auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
+  std::bitset<MDCHANNEL_ID> idBits(swriter.channel.getId());
   std::string valueStr = idBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
@@ -1362,118 +1362,119 @@ auto IOStream::writeMetadataTrack(StreamWriter &swriter, std::vector<bool> &bits
   valueStr = perceidBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
-  std::bitset<MDPERCE_DESC_SIZE> descSizeBits(swriter.track.getDescription().size());
+  std::bitset<MDPERCE_DESC_SIZE> descSizeBits(swriter.channel.getDescription().size());
   valueStr = descSizeBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
-  for (char &c : swriter.track.getDescription()) {
+  for (char &c : swriter.channel.getDescription()) {
     std::bitset<BYTE_SIZE> descBits(c);
     valueStr = descBits.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
 
-  std::bitset<REFDEV_ID> refDevID(swriter.track.getReferenceDeviceId().value_or(-1));
+  std::bitset<REFDEV_ID> refDevID(swriter.channel.getReferenceDeviceId().value_or(-1));
   valueStr = refDevID.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
   std::vector<bool> bufBits = std::vector<bool>();
-  IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_GAIN>(swriter.track.getGain(), bufBits,
-                                                              -MAX_FLOAT, MAX_FLOAT);
+  IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_GAIN>(swriter.channel.getGain(), bufBits,
+                                                                -MAX_FLOAT, MAX_FLOAT);
   bitstream.insert(bitstream.end(), bufBits.begin(), bufBits.end());
   bufBits.clear();
 
-  IOBinaryPrimitives::writeFloatNBits<uint32_t, MDTRACK_MIXING_WEIGHT>(
-      swriter.track.getMixingWeight(), bufBits, 0, MAX_FLOAT);
+  IOBinaryPrimitives::writeFloatNBits<uint32_t, MDCHANNEL_MIXING_WEIGHT>(
+      swriter.channel.getMixingWeight(), bufBits, 0, MAX_FLOAT);
   bitstream.insert(bitstream.end(), bufBits.begin(), bufBits.end());
   bufBits.clear();
 
   auto optionalMetadataMask = (uint8_t)0b0000'0000;
-  if (swriter.track.getActuatorResolution().has_value()) {
+  if (swriter.channel.getActuatorResolution().has_value()) {
     optionalMetadataMask |= (uint8_t)0b0000'0010;
   } else {
     optionalMetadataMask |= (uint8_t)0b0000'0001;
   }
-  if (swriter.track.getDirection().has_value()) {
+  if (swriter.channel.getDirection().has_value()) {
     optionalMetadataMask |= (uint8_t)0b0000'0100;
   }
-  std::bitset<MDTRACK_OPT_FIELDS> optionalMetadataMaskBits(optionalMetadataMask);
+  std::bitset<MDCHANNEL_OPT_FIELDS> optionalMetadataMaskBits(optionalMetadataMask);
   valueStr = optionalMetadataMaskBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   if ((optionalMetadataMask & (uint8_t)0b0000'0001) != 0) {
-    std::bitset<MDTRACK_BODY_PART_MASK> bodyPartMaskBits(swriter.track.getBodyPartMask());
+    std::bitset<MDCHANNEL_BODY_PART_MASK> bodyPartMaskBits(swriter.channel.getBodyPartMask());
     valueStr = bodyPartMaskBits.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   } else if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
-    types::Vector trackResolution = swriter.track.getActuatorResolution().value();
-    IOBinaryPrimitives::writeVector(trackResolution, bitstream);
+    types::Vector channelResolution = swriter.channel.getActuatorResolution().value();
+    IOBinaryPrimitives::writeVector(channelResolution, bitstream);
 
     std::vector<types::BodyPartTarget> bodyPartTarget =
-        swriter.track.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
+        swriter.channel.getBodyPartTarget().value_or(std::vector<types::BodyPartTarget>{});
     auto bodyPartTargetCount = static_cast<uint8_t>(bodyPartTarget.size());
-    IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
-                                                                            bitstream);
+    IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET_COUNT>(bodyPartTargetCount,
+                                                                              bitstream);
     for (uint8_t i = 0; i < bodyPartTargetCount; i++) {
-      IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_BODY_PART_TARGET>(
+      IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_BODY_PART_TARGET>(
           static_cast<uint8_t>(bodyPartTarget[i]), bitstream);
     }
 
     std::vector<types::Vector> actuatorTarget =
-        swriter.track.getActuatorTarget().value_or(std::vector<types::Vector>{});
+        swriter.channel.getActuatorTarget().value_or(std::vector<types::Vector>{});
     auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
-    IOBinaryPrimitives::writeNBits<uint8_t, MDTRACK_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
-                                                                           bitstream);
+    IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
+                                                                             bitstream);
     for (uint8_t i = 0; i < actuatorTargetCount; i++) {
       types::Vector target = actuatorTarget[i];
       IOBinaryPrimitives::writeVector(target, bitstream);
     }
   }
 
-  int freqSampling = static_cast<int>(swriter.track.getFrequencySampling().value_or(0));
-  std::bitset<MDTRACK_FREQ_SAMPLING> maxFreqBits(freqSampling);
+  int freqSampling = static_cast<int>(swriter.channel.getFrequencySampling().value_or(0));
+  std::bitset<MDCHANNEL_FREQ_SAMPLING> maxFreqBits(freqSampling);
   valueStr = maxFreqBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
   if (freqSampling > 0) {
-    std::bitset<MDTRACK_SAMPLE_COUNT> sampleCountBits(swriter.track.getSampleCount().value_or(0));
+    std::bitset<MDCHANNEL_SAMPLE_COUNT> sampleCountBits(
+        swriter.channel.getSampleCount().value_or(0));
     valueStr = sampleCountBits.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
 
-  if (swriter.track.getDirection().has_value()) {
-    types::Vector dir = swriter.track.getDirection().value();
-    std::bitset<MDTRACK_DIRECTION_AXIS> axisValue(dir.X);
+  if (swriter.channel.getDirection().has_value()) {
+    types::Vector dir = swriter.channel.getDirection().value();
+    std::bitset<MDCHANNEL_DIRECTION_AXIS> axisValue(dir.X);
     valueStr = axisValue.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
-    axisValue = std::bitset<MDTRACK_DIRECTION_AXIS>(dir.Y);
+    axisValue = std::bitset<MDCHANNEL_DIRECTION_AXIS>(dir.Y);
     valueStr = axisValue.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
-    axisValue = std::bitset<MDTRACK_DIRECTION_AXIS>(dir.Z);
+    axisValue = std::bitset<MDCHANNEL_DIRECTION_AXIS>(dir.Z);
     valueStr = axisValue.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
 
-  std::bitset<MDTRACK_VERT_COUNT> vertCountBits(swriter.track.getVerticesSize());
+  std::bitset<MDCHANNEL_VERT_COUNT> vertCountBits(swriter.channel.getVerticesSize());
   valueStr = vertCountBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
-  for (auto i = 0; i < static_cast<int>(swriter.track.getVerticesSize()); i++) {
-    std::bitset<MDTRACK_VERT> vertBits(swriter.track.getVertexAt(i));
+  for (auto i = 0; i < static_cast<int>(swriter.channel.getVerticesSize()); i++) {
+    std::bitset<MDCHANNEL_VERT> vertBits(swriter.channel.getVertexAt(i));
     valueStr = vertBits.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
 
-  std::bitset<MDTRACK_BANDS_COUNT> bandsCountBits(swriter.track.getBandsSize());
+  std::bitset<MDCHANNEL_BANDS_COUNT> bandsCountBits(swriter.channel.getBandsSize());
   valueStr = bandsCountBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
   return true;
 }
-auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
 
-  sreader.track = types::Track();
+  sreader.channel = types::Channel();
   int idx = 0;
-  int id = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_ID);
-  sreader.track.setId(id);
+  int id = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ID);
+  sreader.channel.setId(id);
 
   int perceId = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
   int perceIndex = searchPerceptionInHaptic(sreader.haptic, perceId);
@@ -1482,43 +1483,43 @@ auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitst
   }
   sreader.perception = sreader.haptic.getPerceptionAt(perceIndex);
 
-  int descLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DESC_LENGTH);
+  int descLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_DESC_LENGTH);
   std::string desc = IOBinaryPrimitives::readString(bitstream, idx, descLength);
-  sreader.track.setDescription(desc);
+  sreader.channel.setDescription(desc);
 
   int deviceId = IOBinaryPrimitives::readUInt(bitstream, idx, REFDEV_ID);
   if (deviceId < REFDEV_MAX_ID) {
-    sreader.track.setReferenceDeviceId(deviceId);
+    sreader.channel.setReferenceDeviceId(deviceId);
   }
   float gain =
-      IOBinaryPrimitives::readFloatNBits<MDTRACK_GAIN>(bitstream, idx, -MAX_FLOAT, MAX_FLOAT);
-  sreader.track.setGain(gain);
+      IOBinaryPrimitives::readFloatNBits<MDCHANNEL_GAIN>(bitstream, idx, -MAX_FLOAT, MAX_FLOAT);
+  sreader.channel.setGain(gain);
 
   float mixingWeight =
-      IOBinaryPrimitives::readFloatNBits<MDTRACK_MIXING_WEIGHT>(bitstream, idx, 0, MAX_FLOAT);
+      IOBinaryPrimitives::readFloatNBits<MDCHANNEL_MIXING_WEIGHT>(bitstream, idx, 0, MAX_FLOAT);
 
-  sreader.track.setMixingWeight(mixingWeight);
-  uint8_t optionalMetadataMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_OPT_FIELDS);
+  sreader.channel.setMixingWeight(mixingWeight);
+  uint8_t optionalMetadataMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_OPT_FIELDS);
   if ((optionalMetadataMask & 0b0000'0001) != 0) {
-    uint32_t bodyPartMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_MASK);
-    sreader.track.setBodyPartMask(bodyPartMask);
+    uint32_t bodyPartMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BODY_PART_MASK);
+    sreader.channel.setBodyPartMask(bodyPartMask);
   } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
     auto X = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
     auto Y = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
     auto Z = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
-    sreader.track.setActuatorResolution(haptics::types::Vector(X, Y, Z));
+    sreader.channel.setActuatorResolution(haptics::types::Vector(X, Y, Z));
     auto bodyPartTargetCount = static_cast<uint8_t>(
-        IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_TARGET_COUNT));
+        IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BODY_PART_TARGET_COUNT));
     std::vector<types::BodyPartTarget> bodyPartTarget(bodyPartTargetCount,
                                                       types::BodyPartTarget::Unknown);
     for (auto &target : bodyPartTarget) {
       target = static_cast<types::BodyPartTarget>(
-          IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BODY_PART_TARGET));
+          IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BODY_PART_TARGET));
     }
-    sreader.track.setBodyPartTarget(bodyPartTarget);
+    sreader.channel.setBodyPartTarget(bodyPartTarget);
 
     auto actuatorTargetCount =
-        IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_ACTUATOR_TARGET_COUNT);
+        IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ACTUATOR_TARGET_COUNT);
     std::vector<types::Vector> actuatorTarget(actuatorTargetCount);
     for (auto &target : actuatorTarget) {
       auto X = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
@@ -1526,35 +1527,36 @@ auto IOStream::readMetadataTrack(StreamReader &sreader, std::vector<bool> &bitst
       auto Z = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
       target = haptics::types::Vector(X, Y, Z);
     }
-    sreader.track.setActuatorTarget(actuatorTarget);
+    sreader.channel.setActuatorTarget(actuatorTarget);
   }
-  uint32_t frequencySampling = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_FREQ_SAMPLING);
+  uint32_t frequencySampling =
+      IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_FREQ_SAMPLING);
   if (frequencySampling > 0) {
-    sreader.track.setFrequencySampling(frequencySampling);
+    sreader.channel.setFrequencySampling(frequencySampling);
   }
   if (frequencySampling > 0) {
-    uint32_t sampleCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_SAMPLE_COUNT);
-    sreader.track.setSampleCount(sampleCount);
+    uint32_t sampleCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_SAMPLE_COUNT);
+    sreader.channel.setSampleCount(sampleCount);
   }
 
   if ((optionalMetadataMask & 0b0000'0100) != 0) {
     auto X =
-        static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
+        static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_DIRECTION_AXIS));
     auto Y =
-        static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
+        static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_DIRECTION_AXIS));
     auto Z =
-        static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_DIRECTION_AXIS));
-    sreader.track.setDirection(haptics::types::Vector(X, Y, Z));
+        static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_DIRECTION_AXIS));
+    sreader.channel.setDirection(haptics::types::Vector(X, Y, Z));
   }
 
-  int verticesCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_VERT_COUNT);
+  int verticesCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_VERT_COUNT);
   for (int i = 0; i < verticesCount; i++) {
-    int vertex = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_VERT);
-    sreader.track.addVertex(vertex);
+    int vertex = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_VERT);
+    sreader.channel.addVertex(vertex);
   }
 
   // read band count, unused but could be used for check
-  IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_BANDS_COUNT);
+  IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
 
   return true;
 }
@@ -1566,9 +1568,9 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
   std::bitset<MDPERCE_ID> perceidBits(swriter.perception.getId());
   std::string perceidStr = perceidBits.to_string();
   IOBinaryPrimitives::writeStrBits(perceidStr, bitstream);
-  std::bitset<MDTRACK_ID> trackidBits(swriter.track.getId());
-  std::string trackidStr = trackidBits.to_string();
-  IOBinaryPrimitives::writeStrBits(trackidStr, bitstream);
+  std::bitset<MDCHANNEL_ID> channelidBits(swriter.channel.getId());
+  std::string channelidStr = channelidBits.to_string();
+  IOBinaryPrimitives::writeStrBits(channelidStr, bitstream);
 
   std::bitset<MDBAND_BAND_TYPE> bandTypeBits(
       static_cast<int>(swriter.bandStream.band.getBandType()));
@@ -1610,12 +1612,12 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
   }
   sreader.perception = sreader.haptic.getPerceptionAt(perceIndex);
 
-  int trackId = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_ID);
-  int trackIndex = searchTrackInHaptic(sreader.haptic, trackId);
-  if (trackIndex == -1) {
+  int channelId = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ID);
+  int channelIndex = searchChannelInHaptic(sreader.haptic, channelId);
+  if (channelIndex == -1) {
     return false;
   }
-  sreader.track = sreader.perception.getTrackAt(trackIndex);
+  sreader.channel = sreader.perception.getChannelAt(channelIndex);
 
   int bandType = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_BAND_TYPE);
   sreader.bandStream.band.setBandType(static_cast<types::BandType>(bandType));
@@ -1835,9 +1837,9 @@ auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
   std::bitset<MDPERCE_ID> perceIdBits(swriter.perception.getId());
   std::string perceIdStr = perceIdBits.to_string();
   IOBinaryPrimitives::writeStrBits(perceIdStr, packetBits);
-  std::bitset<MDTRACK_ID> trackIdBits(swriter.track.getId());
-  std::string trackIdStr = trackIdBits.to_string();
-  IOBinaryPrimitives::writeStrBits(trackIdStr, packetBits);
+  std::bitset<MDCHANNEL_ID> channelIdBits(swriter.channel.getId());
+  std::string channelIdStr = channelIdBits.to_string();
+  IOBinaryPrimitives::writeStrBits(channelIdStr, packetBits);
 
   std::bitset<MDBAND_ID> bandIdBits(swriter.bandStream.id);
   std::string bandIdStr = bandIdBits.to_string();
@@ -1940,12 +1942,12 @@ auto IOStream::writeData(StreamWriter &swriter, std::vector<std::vector<bool>> &
         modality == types::PerceptionModality::Friction) {
       spatial = true;
     }
-    for (auto j = 0; j < static_cast<int>(swriter.perception.getTracksSize()); j++) {
-      swriter.track = swriter.perception.getTrackAt(j);
-      for (auto k = 0; k < static_cast<int>(swriter.track.getBandsSize()); k++) {
+    for (auto j = 0; j < static_cast<int>(swriter.perception.getChannelsSize()); j++) {
+      swriter.channel = swriter.perception.getChannelAt(j);
+      for (auto k = 0; k < static_cast<int>(swriter.channel.getBandsSize()); k++) {
         BandStream bandStream;
         bandStream.id = bandId++;
-        bandStream.band = swriter.track.getBandAt(k);
+        bandStream.band = swriter.channel.getBandAt(k);
         swriter.bandStream = bandStream;
         if (spatial) {
           writeSpatialData(swriter, bandBitstream);
@@ -1982,12 +1984,12 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
   }
   sreader.perception = sreader.haptic.getPerceptionAt(perceptionIndex);
 
-  int trackId = IOBinaryPrimitives::readUInt(bitstream, idx, MDTRACK_ID);
-  auto trackIndex = searchTrackInHaptic(sreader.haptic, trackId);
-  if (trackIndex == -1) {
+  int channelId = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ID);
+  auto channelIndex = searchChannelInHaptic(sreader.haptic, channelId);
+  if (channelIndex == -1) {
     return false;
   }
-  sreader.track = sreader.perception.getTrackAt(trackIndex);
+  sreader.channel = sreader.perception.getChannelAt(channelIndex);
   sreader.bandStream.index = -1;
   sreader.bandStream.id = -1;
   sreader.bandStream.id = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_ID);
@@ -1995,7 +1997,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
   if (sreader.bandStream.index == -1) {
     return false;
   }
-  sreader.bandStream.band = sreader.track.getBandAt(sreader.bandStream.index);
+  sreader.bandStream.band = sreader.channel.getBandAt(sreader.bandStream.index);
 
   int fxCount = IOBinaryPrimitives::readUInt(bitstream, idx, DB_EFFECT_COUNT);
   if (fxCount > 0) {
@@ -2011,8 +2013,8 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
       effects.push_back(effect);
     }
-    return addEffectToHaptic(sreader.haptic, perceptionIndex, trackIndex, sreader.bandStream.index,
-                             effects);
+    return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex,
+                             sreader.bandStream.index, effects);
   }
   return true;
 }
@@ -2373,11 +2375,11 @@ auto IOStream::searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int {
   }
   return -1;
 }
-auto IOStream::searchTrackInHaptic(types::Haptics &haptic, int id) -> int {
+auto IOStream::searchChannelInHaptic(types::Haptics &haptic, int id) -> int {
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
     types::Perception perception = haptic.getPerceptionAt(i);
-    for (auto j = 0; j < static_cast<int>(perception.getTracksSize()); j++) {
-      if (id == perception.getTrackAt(j).getId()) {
+    for (auto j = 0; j < static_cast<int>(perception.getChannelsSize()); j++) {
+      if (id == perception.getChannelAt(j).getId()) {
         return j;
       }
     }
@@ -2460,16 +2462,16 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int kfCount, types::
   return true;
 }
 
-auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int trackIndex,
+auto IOStream::addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int channelIndex,
                                  int bandIndex, std::vector<types::Effect> &effects) -> bool {
   for (auto &effect : effects) {
     bool effectExist = false;
     types::Band &band =
-        haptic.getPerceptionAt(perceptionIndex).getTrackAt(trackIndex).getBandAt(bandIndex);
+        haptic.getPerceptionAt(perceptionIndex).getChannelAt(channelIndex).getBandAt(bandIndex);
     if (effect.getEffectType() == types::EffectType::Basis) {
       for (auto i = 0; i < static_cast<int>(band.getEffectsSize()); i++) {
         types::Effect &hapticEffect = haptic.getPerceptionAt(perceptionIndex)
-                                          .getTrackAt(trackIndex)
+                                          .getChannelAt(channelIndex)
                                           .getBandAt(bandIndex)
                                           .getEffectAt(i);
 
@@ -2503,10 +2505,10 @@ auto IOStream::getEffectsId(types::Haptics &haptic) -> std::vector<int> {
   std::vector<int> effectsId = std::vector<int>();
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
     types::Perception perception = haptic.getPerceptionAt(i);
-    for (auto j = 0; j < static_cast<int>(perception.getTracksSize()); j++) {
-      types::Track track = perception.getTrackAt(j);
-      for (auto k = 0; k < static_cast<int>(track.getBandsSize()); k++) {
-        types::Band band = track.getBandAt(k);
+    for (auto j = 0; j < static_cast<int>(perception.getChannelsSize()); j++) {
+      types::Channel channel = perception.getChannelAt(j);
+      for (auto k = 0; k < static_cast<int>(channel.getBandsSize()); k++) {
+        types::Band band = channel.getBandAt(k);
         for (int l = 0; l < static_cast<int>(band.getEffectsSize()); l++) {
           types::Effect effect = band.getEffectAt(l);
           if (effect.getId() != -1) {
