@@ -157,10 +157,13 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
         myKeyframe = e.getKeyframeAt(i);
         keyframes[i].first =
             static_cast<int>(myKeyframe.getRelativePosition().value() * fs * MS_2_S);
-        keyframes[i].first -= keyframes[0].first;
+        if (i > 0) {
+          keyframes[i].first -= keyframes[0].first;
+        }
         keyframes[i].second = myKeyframe.getAmplitudeModulation().value();
       }
-      std::vector<double> effectAmp(keyframes.back().first - keyframes[0].first + 1, 0);
+      keyframes[0].first = 0;
+      std::vector<double> effectAmp(static_cast<::std::size_t>(keyframes.back().first) + 1, 0);
       if (keyframes.size() == 2) {
         effectAmp = haptics::tools::linearInterpolation2(keyframes);
       } else {
@@ -186,8 +189,13 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
         }
 
         int count = 0;
-        int position = static_cast<int>((e.getPosition() + keyframes[0].first) * fs * MS_2_S);
-        for (int i = position; i < position + static_cast<int>(effectAmp.size()); i++) {
+        int position = static_cast<int>((e.getPosition() + pad) * fs * MS_2_S);
+        if (position < 0) {
+          count = -position;
+          position = 0;
+        }
+        for (int i = position;
+             (i < static_cast<int>(sampleCount)) && (count <= keyframes.back().first); i++) {
           bandAmp[i] += effectAmp[count];
           count++;
         }
