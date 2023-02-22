@@ -99,6 +99,7 @@ auto main(int argc, char *argv[]) -> int {
       return EXIT_FAILURE;
     }
   }
+
   IOJson::writeFile(hapticFile, output);
   return EXIT_SUCCESS;
 }

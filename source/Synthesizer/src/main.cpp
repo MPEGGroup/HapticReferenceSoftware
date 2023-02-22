@@ -32,6 +32,7 @@
  */
 
 #include <IOHaptics/include/IOJson.h>
+#include <IOHaptics/include/IOStream.h>
 #include <Synthesizer/include/Helper.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
@@ -39,6 +40,7 @@
 #include <filesystem>
 
 using haptics::io::IOJson;
+using haptics::io::IOStream;
 using haptics::synthesizer::Helper;
 using haptics::tools::InputParser;
 using haptics::types::Haptics;
@@ -47,7 +49,7 @@ const int DEFAULT_FS = 8000;
 
 void help() {
   std::cout
-      << "usages: Synthesizer [-h] -f <FILE> -o <OUTPUT_FILE> [-fs <FREQUENCY_SAMPLING>] "
+      << "usages: Synthesizer [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-fs <FREQUENCY_SAMPLING>] "
          "[--pad <PADDING>] [--generate_ohm]"
       << std::endl
       << std::endl
@@ -57,10 +59,12 @@ void help() {
       << std::endl
       << "positional arguments:" << std::endl
       << "\t-f, --file <FILE>\t\t\t\tfile to ingest" << std::endl
-      << "\t-o, --output <OUTPUT_FILE>\t\t\ttoutput file" << std::endl
+      << "\t-o, --output <OUTPUT_FILE>\t\t\toutput file" << std::endl
       << std::endl
       << "optional arguments:" << std::endl
       << "\t-h, --help\t\t\t\t\tshow this help message and exit" << std::endl
+      << "\t-b, --binary\t\t\t\t\tsynthesize using streaming-ready binary file as input"
+      << std::endl
       << "\t-fs, --sampling_frequency <FREQUENCY_SAMPLING>\tthe frequency sampling used to "
          "synthezised the output (default value is "
       << DEFAULT_FS << "Hz)" << std::endl
@@ -123,7 +127,15 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   Haptics hapticFile;
-  IOJson::loadFile(filename, hapticFile);
+  if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+
+    if (!IOStream::readFile(filename, hapticFile)) {
+      return EXIT_FAILURE;
+    }
+  } else {
+    IOJson::loadFile(filename, hapticFile);
+  }
+
   hapticFile.linearize();
   const double timeLength = Helper::getTimeLength(hapticFile);
 
