@@ -64,7 +64,7 @@ static constexpr int MDEXP_AVATAR_COUNT = 8;
 
 static constexpr int AVATAR_ID = 8;
 static constexpr int AVATAR_LOD = 8;
-static constexpr int AVATAR_TYPE = 4;
+static constexpr int AVATAR_TYPE = 8;
 
 static constexpr int AVATAR_MESH_COUNT = 8;
 
