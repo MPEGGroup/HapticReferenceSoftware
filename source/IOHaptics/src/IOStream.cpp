@@ -1010,14 +1010,16 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
   int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
   libraryEffect.setPosition(position);
 
-  float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
-  libraryEffect.setPhase(phase);
-
-  int baseSignal = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_BASE_SIGNAL);
-  libraryEffect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
-
   int effectType = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
   libraryEffect.setEffectType(static_cast<types::EffectType>(effectType));
+
+  if (effectType == 0) {
+    float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
+    libraryEffect.setPhase(phase);
+
+    int baseSignal = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_BASE_SIGNAL);
+    libraryEffect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
+  }
 
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
   for (int i = 0; i < kfCount; i++) {
@@ -1062,16 +1064,19 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
   std::string posStr = posBits.to_string();
   IOBinaryPrimitives::writeStrBits(posStr, bitstream);
 
-  IOBinaryPrimitives::writeFloatNBits<uint32_t, EFFECT_PHASE>(libraryEffect.getPhase(), bitstream,
-                                                              0, MAX_PHASE);
-
-  std::bitset<EFFECT_BASE_SIGNAL> baseBits(static_cast<int>(libraryEffect.getBaseSignal()));
-  std::string baseStr = baseBits.to_string();
-  IOBinaryPrimitives::writeStrBits(baseStr, bitstream);
-
   std::bitset<EFFECT_TYPE> typeBits(static_cast<int>(libraryEffect.getEffectType()));
   std::string typeStr = typeBits.to_string();
   IOBinaryPrimitives::writeStrBits(typeStr, bitstream);
+
+  if (libraryEffect.getEffectType() == types::EffectType::Basis) {
+
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, EFFECT_PHASE>(libraryEffect.getPhase(), bitstream,
+                                                                0, MAX_PHASE);
+
+    std::bitset<EFFECT_BASE_SIGNAL> baseBits(static_cast<int>(libraryEffect.getBaseSignal()));
+    std::string baseStr = baseBits.to_string();
+    IOBinaryPrimitives::writeStrBits(baseStr, bitstream);
+  }
 
   auto kfCount = libraryEffect.getKeyframesSize();
   std::bitset<EFFECT_KEYFRAME_COUNT> kfCountBits(kfCount);
