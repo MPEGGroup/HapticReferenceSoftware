@@ -254,17 +254,26 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> 
 
 auto IOBinary::readLibraryEffect(std::istream &file, std::vector<bool> &unusedBits)
     -> types::Effect {
+  types::Effect effect = types::Effect();
   auto id = IOBinaryPrimitives::readNBits<int, EFFECT_ID>(file, unusedBits);
   auto position = IOBinaryPrimitives::readNBits<int, EFFECT_POSITION>(file, unusedBits);
-  auto phase =
-      IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, 0, MAX_PHASE, unusedBits);
-  auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
+
   auto effectType = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_TYPE>(file, unusedBits);
+  if (effectType == 0) {
+    auto phase =
+        IOBinaryPrimitives::readFloatNBits<uint16_t, EFFECT_PHASE>(file, 0, MAX_PHASE, unusedBits);
+    auto baseSignal = IOBinaryPrimitives::readNBits<uint8_t, EFFECT_BASE_SIGNAL>(file, unusedBits);
+
+    effect =
+        types::Effect(static_cast<int>(position), phase, static_cast<types::BaseSignal>(baseSignal),
+                      static_cast<types::EffectType>(effectType));
+  } else {
+
+    effect.setPosition(static_cast<int>(position));
+    effect.setEffectType(static_cast<types::EffectType>(effectType));
+  }
   auto keyframeCount =
       IOBinaryPrimitives::readNBits<uint32_t, EFFECT_KEYFRAME_COUNT>(file, unusedBits);
-  types::Effect effect(static_cast<int>(position), phase,
-                       static_cast<types::BaseSignal>(baseSignal),
-                       static_cast<types::EffectType>(effectType));
   effect.setId(id);
   for (unsigned int i = 0; i < keyframeCount; i++) {
     auto mask = IOBinaryPrimitives::readNBits<uint8_t, KEYFRAME_MASK>(file, unusedBits);
@@ -300,13 +309,14 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
   IOBinaryPrimitives::writeNBits<int, EFFECT_ID>(id, output);
   int position = libraryEffect.getPosition();
   IOBinaryPrimitives::writeNBits<int, EFFECT_POSITION>(position, output);
-  float phase = libraryEffect.getPhase();
-  IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
-  auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
-  IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_TYPE>(effectType, output);
-
+  if (effectType == 0) {
+    float phase = libraryEffect.getPhase();
+    IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
+    auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
+    IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
+  }
   auto keyframeCount = static_cast<uint16_t>(libraryEffect.getKeyframesSize());
   IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_KEYFRAME_COUNT>(keyframeCount, output);
   types::Keyframe keyframe;

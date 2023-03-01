@@ -25,7 +25,6 @@ Clang 12 Debug:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
-
     paths:
       - coverage_html/
     expire_in: 1 week
