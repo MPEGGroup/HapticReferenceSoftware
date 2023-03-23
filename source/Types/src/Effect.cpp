@@ -280,9 +280,9 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
   return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
 }
 
-auto Effect::EvaluateWavelet(double position, double windowLength) -> double {
-  double relativePosition = position - this->getPosition();
-  int index = std::floor(relativePosition / windowLength * (double)this->getKeyframesSize());
+auto Effect::EvaluateWavelet(double position, int fs, int timescale) -> double {
+  double relativePosition = position - (this->getPosition() * (double)fs / (double)timescale); //relative position in samples
+  int index = std::floor(relativePosition);
 
   if (index >= (int)this->getKeyframesSize()) {
     return 0;

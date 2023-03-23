@@ -41,6 +41,8 @@
 
 namespace haptics::types {
 
+static constexpr int TIMESCALE = 1000;
+
 class Band {
 public:
   explicit Band() = default;
@@ -71,6 +73,7 @@ public:
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
   auto getBandTimeLength() -> double;
+  auto getTimescale() -> int;
 
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
@@ -84,6 +87,7 @@ private:
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};
+  int timescale = 1000;
 };
 } // namespace haptics::types
 

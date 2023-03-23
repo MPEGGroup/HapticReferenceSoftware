@@ -131,7 +131,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
   case BandType::WaveletWave:
-    return effect->EvaluateWavelet(position, this->getBlockLength());
+    return effect->EvaluateWavelet(position, this->getUpperFrequencyLimit(),this->timescale);
   case BandType::Transient: {
     double res = 0;
     if (effect->getPosition() <= position &&
@@ -151,12 +151,12 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
   switch (this->bandType) {
   case BandType::Curve:
     for (auto e : effects) {
-      std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
+      std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize()); //keyframes converted to position relative to fs
       for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
         types::Keyframe myKeyframe;
         myKeyframe = e.getKeyframeAt(i);
         keyframes[i].first =
-            static_cast<int>(myKeyframe.getRelativePosition().value() * fs * MS_2_S);
+            static_cast<int>(myKeyframe.getRelativePosition().value() * fs / this->timescale);
         if (i > 0) {
           keyframes[i].first -= keyframes[0].first;
         }
@@ -189,7 +189,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
         }
 
         int count = 0;
-        int position = static_cast<int>((e.getPosition() + pad) * fs * MS_2_S);
+        int position = static_cast<int>((e.getPosition() + pad) * fs * this->timescale);
         if (position < 0) {
           count = -position;
           position = 0;
@@ -204,7 +204,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
     break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double position = S_2_MS * static_cast<double>(ti) / static_cast<double>(fs) - pad;
+      double position = this->timescale * static_cast<double>(ti) / static_cast<double>(fs) - pad;
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
                            effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
@@ -234,4 +234,9 @@ auto Band::getBandTimeLength() -> double {
   return this->effects.back().getPosition() +
          this->effects.back().getEffectTimeLength(this->getBandType(), TRANSIENT_DURATION_MS);
 }
+
+auto Band::getTimescale() -> int {
+  return this->timescale;
+}
+
 } // namespace haptics::types
