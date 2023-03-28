@@ -138,7 +138,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
         position <=
             effect->getPosition() + effect->getEffectTimeLength(bandType, TRANSIENT_DURATION_MS)) {
       res = effect->EvaluateTransient(position, TRANSIENT_DURATION_MS);
-    }
+    } //TODO: transform condition above to ticks?
     return res;
   }
   default:
@@ -146,7 +146,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   }
 }
 
-auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
+auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double> { //TODO: check impact of pad (which is in ms)
   std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
   case BandType::Curve:
@@ -156,7 +156,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
         types::Keyframe myKeyframe;
         myKeyframe = e.getKeyframeAt(i);
         keyframes[i].first =
-            static_cast<int>(myKeyframe.getRelativePosition().value() * fs / this->timescale);
+            static_cast<int>(myKeyframe.getRelativePosition().value() * fs / this->timescale); //assuming position in ticks as input
         if (i > 0) {
           keyframes[i].first -= keyframes[0].first;
         }
@@ -189,7 +189,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
         }
 
         int count = 0;
-        int position = static_cast<int>((e.getPosition() + pad) * fs * this->timescale);
+        int position = static_cast<int>((e.getPosition() + pad) * fs * this->timescale); //position converted from ticks to samples rel. to fs
         if (position < 0) {
           count = -position;
           position = 0;
@@ -204,14 +204,14 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<
     break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double position = this->timescale * static_cast<double>(ti) / static_cast<double>(fs) - pad;
+      double position = this->timescale * (static_cast<double>(ti) / static_cast<double>(fs) - (pad * MS_2_S)); //position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
                            effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
             position < 0) &&
            (this->bandType != types::BandType::WaveletWave))) {
         bandAmp[ti] = 0;
-      }
+      } //TODO: TRANSIENT_DURATION_MS: should it be transformed to ticks?
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
         if (it->getPosition() <= position) {
