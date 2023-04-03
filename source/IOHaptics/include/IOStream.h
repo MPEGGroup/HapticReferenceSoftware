@@ -86,7 +86,7 @@ public:
 
   struct StreamWriter {
     int time = 0;
-    int timescale = TIME_TO_MS; //TODO: use this timescale
+    int timescale = TIME_TO_MS; // TODO: use this timescale
     int packetDuration = DEFAULT_PACKET_DURATION;
     types::Haptics haptic;
     types::Perception perception;

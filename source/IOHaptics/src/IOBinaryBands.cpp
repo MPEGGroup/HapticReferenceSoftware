@@ -114,10 +114,11 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     auto position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * (int)(band.getBlockLength() * (double)band.getTimescale() / (double)band.getUpperFrequencyLimit());
+      position = effectIndex * (int)(band.getBlockLength() * (double)band.getTimescale() /
+                                     (double)band.getUpperFrequencyLimit());
     } else {
-      position = static_cast<int>(
-          IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits)); //TODO: conversion to ms?
+      position = static_cast<int>(IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(
+          file, unusedBits)); // TODO: conversion to ms?
     }
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
@@ -162,7 +163,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::vector<bool> &output) 
     IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_TYPE>(effectType, output);
     if ((myEffect.getEffectType() != types::EffectType::Basis ||
          band.getBandType() != types::BandType::WaveletWave)) {
-      auto position = static_cast<uint32_t>(myEffect.getPosition()); //TODO: position in ticks
+      auto position = static_cast<uint32_t>(myEffect.getPosition()); // TODO: position in ticks
       IOBinaryPrimitives::writeNBits<uint32_t, EFFECT_POSITION>(position, output);
     }
     if (myEffect.getEffectType() == types::EffectType::Reference) {
@@ -232,7 +233,8 @@ auto IOBinaryBands::writeTransientEffect(types::Effect &effect, std::vector<bool
 
     uint16_t position = 0;
     if (myKeyframe.getRelativePosition().has_value()) {
-      position += static_cast<uint16_t>(myKeyframe.getRelativePosition().value()*1); //TODO:scale from MS to ticks
+      position += static_cast<uint16_t>(myKeyframe.getRelativePosition().value() *
+                                        1); // TODO:scale from MS to ticks
     }
     IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_POSITION>(position, output);
 
@@ -274,7 +276,8 @@ auto IOBinaryBands::writeCurveEffect(types::Effect &effect, std::vector<bool> &o
 
     uint16_t position = 0;
     if (myKeyframe.getRelativePosition().has_value()) {
-      position += static_cast<uint16_t>(myKeyframe.getRelativePosition().value()*1); //TODO: convert from MS to ticks
+      position += static_cast<uint16_t>(myKeyframe.getRelativePosition().value() *
+                                        1); // TODO: convert from MS to ticks
     }
     IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_POSITION>(static_cast<uint16_t>(position),
                                                                 output);
@@ -338,7 +341,8 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
       IOBinaryPrimitives::writeFloatNBits<uint8_t, KEYFRAME_AMPLITUDE>(
           amplitude, output, -MAX_AMPLITUDE, MAX_AMPLITUDE);
     }
-    auto position = static_cast<uint16_t>(myKeyframe.getRelativePosition().value()*1);//TODO: convert from MS to ticks
+    auto position = static_cast<uint16_t>(myKeyframe.getRelativePosition().value() *
+                                          1); // TODO: convert from MS to ticks
     IOBinaryPrimitives::writeNBits<uint16_t, KEYFRAME_POSITION>(position, output);
 
     if (myKeyframe.getFrequencyModulation().has_value()) {
