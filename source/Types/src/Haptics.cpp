@@ -47,6 +47,18 @@ auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
 
 auto Haptics::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
+[[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> unsigned int {
+  return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
+}
+
+[[nodiscard]] auto Haptics::getTimescale() const -> std::optional<unsigned int> {
+  return this->timescale;
+}
+
+auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
+  this->timescale = newTimescale;
+}
+
 auto Haptics::getPerceptionsSize() -> size_t { return perceptions.size(); }
 
 auto Haptics::getPerceptionAt(int index) -> Perception & { return perceptions.at(index); }

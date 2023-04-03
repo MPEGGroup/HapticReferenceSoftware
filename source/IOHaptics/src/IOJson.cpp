@@ -69,12 +69,16 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
     std::cerr << "Invalid HJIF input file: missing required field" << std::endl;
     return false;
   }
+
   auto version = std::string(jsonTree["version"].GetString());
   auto date = std::string(jsonTree["date"].GetString());
   auto description = std::string(jsonTree["description"].GetString());
   haptic.setVersion(version);
   haptic.setDate(date);
   haptic.setDescription(description);
+  if (jsonTree.HasMember("timescale") && jsonTree["timescale"].IsInt()) {
+    haptic.setTimescale(jsonTree["timescale"].GetInt());
+  }
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
   return loadingSuccess;
@@ -573,11 +577,13 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   jsonTree.AddMember("version",
                      rapidjson::Value(haptic.getVersion().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
+  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
   jsonTree.AddMember("description",
                      rapidjson::Value(haptic.getDescription().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
-  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
-                     jsonTree.GetAllocator());
+  jsonTree.AddMember("timescale", haptic.getTimescaleOrDefault(), jsonTree.GetAllocator());
+
   auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
   extractAvatars(haptic, jsonAvatars, jsonTree);
   jsonTree.AddMember("avatars", jsonAvatars, jsonTree.GetAllocator());
