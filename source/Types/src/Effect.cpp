@@ -281,7 +281,8 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 }
 
 auto Effect::EvaluateWavelet(double position, int fs, int timescale) -> double {
-  double relativePosition = position - (this->getPosition() * (double)fs / (double)timescale); //relative position in samples
+  double relativePosition = position - (this->getPosition() * (double)fs /
+                                        (double)timescale); // relative position in samples
   int index = std::floor(relativePosition);
 
   if (index >= (int)this->getKeyframesSize()) {
