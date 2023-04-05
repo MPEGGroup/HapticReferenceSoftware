@@ -62,7 +62,8 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
     std::cerr << "Invalid HJIF input file: not a JSON object" << std::endl;
     return false;
   }
-  if (!(jsonTree.HasMember("version") && jsonTree.HasMember("date") &&
+  if (!(jsonTree.HasMember("version") && jsonTree.HasMember("profile") &&
+        jsonTree.HasMember("level") && jsonTree.HasMember("date") &&
         jsonTree.HasMember("description") && jsonTree.HasMember("perceptions") &&
         jsonTree["perceptions"].IsArray() && jsonTree.HasMember("avatars") &&
         jsonTree["avatars"].IsArray())) {
@@ -70,9 +71,13 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
     return false;
   }
   auto version = std::string(jsonTree["version"].GetString());
+  auto profile = std::string(jsonTree["profile"].GetString());
+  auto level = static_cast<uint8_t>(jsonTree["level"].GetUint());
   auto date = std::string(jsonTree["date"].GetString());
   auto description = std::string(jsonTree["description"].GetString());
   haptic.setVersion(version);
+  haptic.setProfile(profile);
+  haptic.setLevel(level);
   haptic.setDate(date);
   haptic.setDescription(description);
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
@@ -573,6 +578,10 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
   jsonTree.AddMember("version",
                      rapidjson::Value(haptic.getVersion().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
+  jsonTree.AddMember("profile",
+                     rapidjson::Value(haptic.getProfile().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
+  jsonTree.AddMember("level", haptic.getLevel(), jsonTree.GetAllocator());
   jsonTree.AddMember("description",
                      rapidjson::Value(haptic.getDescription().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());

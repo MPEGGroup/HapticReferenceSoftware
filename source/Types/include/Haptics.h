@@ -54,6 +54,12 @@ public:
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
+
+  [[nodiscard]] auto getProfile() const -> std::string;
+  auto setProfile(std::string &newProfile) -> void;
+  [[nodiscard]] auto getLevel() const -> uint8_t;
+  auto setLevel(uint8_t newLevel) -> void;
+
   [[nodiscard]] auto getDate() const -> std::string;
   auto setDate(std::string &newDate) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
@@ -73,6 +79,8 @@ public:
 
 private:
   std::string version;
+  std::string profile = "Main";
+  uint8_t level = 1;
   std::string date;
   std::string description;
   std::vector<Perception> perceptions = {};
