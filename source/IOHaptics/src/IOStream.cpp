@@ -172,6 +172,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   writeNALu(NALuType::MetadataChannel, swriter, 0, initPackets);
   writeNALu(NALuType::MetadataBand, swriter, 0, initPackets);
   std::vector<bool> initUnit = std::vector<bool>();
+  std::vector<bool> initUnit = std::vector<bool>();
   writeMIHSUnit(MIHSUnitType::Initialization, initPackets, initUnit, swriter);
   bitstream.push_back(initUnit);
 
@@ -641,8 +642,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
   switch (naluType) {
   case (NALuType::Timing): {
-    sreader.time = IOBinaryPrimitives::readUInt(packet, index, TIMING_TIME);
-    sreader.timescale = IOBinaryPrimitives::readUInt(packet, index, TIMING_TIMESCALE);
+    readTiming(sreader, payload);
     sreader.time = (sreader.time * TIME_TO_MS) / sreader.timescale;
     return true;
   }
@@ -742,9 +742,10 @@ auto IOStream::readPacketLength(std::vector<bool> &bitstream) -> int {
     } else {
       packetLengthStr += "0";
     }
-  }
+  }   
   return static_cast<int>(std::bitset<H_PAYLOAD_LENGTH>(packetLengthStr).to_ulong());
 }
+
 auto IOStream::writeTiming(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
   std::bitset<TIMING_TIME> timestampBits = swriter.time;
   std::string timestampStr = timestampBits.to_string();
@@ -752,6 +753,19 @@ auto IOStream::writeTiming(StreamWriter &swriter, std::vector<bool> &bitstream) 
   std::bitset<TIMING_TIMESCALE> timescaleBits = swriter.timescale;
   std::string timescaleStr = timescaleBits.to_string();
   IOBinaryPrimitives::writeStrBits(timescaleStr, bitstream);
+  return true;
+}
+
+auto IOStream::readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  int index = 0;
+  int timestamp = IOBinaryPrimitives::readInt(bitstream, index, TIMING_TIME);
+  uint32_t timescale = IOBinaryPrimitives::readUInt(bitstream, index, TIMING_TIMESCALE);
+
+  types::Sync sync = types::Sync(timestamp, timescale);
+  sreader.time = timestamp;
+  sreader.timescale = timescale;
+  sreader.haptic.addSync(sync);
+
   return true;
 }
 

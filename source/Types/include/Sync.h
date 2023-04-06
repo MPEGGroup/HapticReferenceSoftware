@@ -31,62 +31,28 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HAPTICS_H
-#define HAPTICS_H
+#ifndef SYNC_H
+#define SYNC_H
 
-#include <Tools/include/OHMData.h>
-#include <Types/include/Avatar.h>
-#include <Types/include/Perception.h>
-#include <Types/include/Sync.h>
-#include <fstream>
 #include <optional>
-#include <vector>
 
 namespace haptics::types {
-
-class Haptics {
+class Sync {
 public:
-  explicit Haptics() = default;
-  explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
-      : version(std::move(newVersion))
-      , date(std::move(newDate))
-      , description(std::move(newDescription))
-      , perceptions({})
-      , avatars({})
-      , syncs({}){};
+  explicit Sync() = default;
+  explicit Sync(int newTimestamp) : timestamp(newTimestamp), timescale(1000){};
+  explicit Sync(int newTimestamp, std::optional<uint32_t> newTimescale)
+      : timestamp(newTimestamp), timescale(newTimescale){};
 
-  [[nodiscard]] auto getVersion() const -> std::string;
-  auto setVersion(std::string &newVersion) -> void;
-  [[nodiscard]] auto getDate() const -> std::string;
-  auto setDate(std::string &newDate) -> void;
-  [[nodiscard]] auto getDescription() const -> std::string;
-  auto setDescription(std::string &newDescription) -> void;
-  auto getPerceptionsSize() -> size_t;
-  auto getPerceptionAt(int index) -> Perception &;
-  auto replacePerceptionAt(int index, Perception &newPerception) -> bool;
-  auto removePerceptionAt(int index) -> bool;
-  auto addPerception(Perception &newPerception) -> void;
-  auto getAvatarsSize() -> size_t;
-  auto getAvatarAt(int index) -> Avatar &;
-  auto addAvatar(Avatar &newAvatar) -> void;
-  auto getTimescale() -> std::optional<int>;
-  auto setTimescale(std::optional<int> newTimescale) -> void;
-  auto getSyncsSize() -> size_t;
-  auto getSyncsAt(int index) -> Sync &;
-  auto addSync(Sync &newSync) -> void;
-  auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
-  auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
-  auto linearize() -> void;
-  auto refactor() -> void;
+  [[nodiscard]] auto getTimestamp() const -> int;
+  auto setTimestamp() -> void;
+  [[nodiscard]] auto getTimescale() const -> std::optional<uint32_t>;
+  auto setTimescale(uint32_t newTimescale) -> void;
 
 private:
-  std::string version;
-  std::string date;
-  std::string description;
-  std::vector<Perception> perceptions = {};
-  std::vector<Avatar> avatars = {};
-  std::optional<int> timescale = 1000;
-  std::vector<Sync> syncs = {};
+  int timestamp = -1;
+  std::optional<uint32_t> timescale = 1000;
 };
 } // namespace haptics::types
-#endif // HAPTICS_H
+
+#endif

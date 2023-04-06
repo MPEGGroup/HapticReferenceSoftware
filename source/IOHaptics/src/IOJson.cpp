@@ -63,20 +63,24 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
     return false;
   }
   if (!(jsonTree.HasMember("version") && jsonTree.HasMember("date") &&
-        jsonTree.HasMember("description") && jsonTree.HasMember("perceptions") &&
-        jsonTree["perceptions"].IsArray() && jsonTree.HasMember("avatars") &&
-        jsonTree["avatars"].IsArray())) {
+        jsonTree.HasMember("description") && jsonTree.HasMember("timescale") &&
+        jsonTree.HasMember("perceptions") && jsonTree["perceptions"].IsArray() &&
+        jsonTree.HasMember("avatars") && jsonTree["avatars"].IsArray() &&
+        jsonTree.HasMember("syncs") && jsonTree["syncs"].IsArray())) {
     std::cerr << "Invalid HJIF input file: missing required field" << std::endl;
     return false;
   }
   auto version = std::string(jsonTree["version"].GetString());
   auto date = std::string(jsonTree["date"].GetString());
   auto description = std::string(jsonTree["description"].GetString());
+  auto timescale = jsonTree["timescale"].GetUint();
   haptic.setVersion(version);
   haptic.setDate(date);
   haptic.setDescription(description);
+  haptic.setTimescale(timescale);
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
+  loadingSuccess = loadingSuccess && loadSyncs(jsonTree["syncs"], haptic);
   return loadingSuccess;
 }
 
@@ -143,6 +147,31 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
           loadingSuccess && loadReferenceDevices(jsonPerception["reference_devices"], perception);
     }
     haptic.addPerception(perception);
+  }
+  return loadingSuccess;
+}
+
+auto loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic) -> bool {
+  bool loadingSuccess = true;
+  for (const auto &jsv : jsonSyncs.GetArray()) {
+    if (!jsv.IsObject()) {
+      std::cerr << "Invalid sync: not an object" << std::endl;
+      continue;
+    }
+    auto jsonSync = jsv.GetObject();
+
+    if (!jsonSync.HasMember("timestamp") || !jsonSync["timestamp"].IsInt()) {
+      std::cerr << "Missing or invalid sync timescale" << std::endl;
+      continue;
+    }
+    auto timestamp = jsonSync["timestamp"].GetInt();
+    types::Sync sync(timestamp);
+
+    if (!jsonSync.HasMember("timescale") || !jsonSync["timescale"].IsUint()) {
+      auto timescale = jsonSync["timescale"].GetUint();
+      sync.setTimescale(timescale);
+    }
+    haptic.addSync(sync);
   }
   return loadingSuccess;
 }
@@ -578,13 +607,16 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
                      jsonTree.GetAllocator());
   jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
+  jsonTree.AddMember("timescale", haptic.getTimescale(), jsonTree.GetAllocator());
   auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
   extractAvatars(haptic, jsonAvatars, jsonTree);
   jsonTree.AddMember("avatars", jsonAvatars, jsonTree.GetAllocator());
   auto jsonPerceptions = rapidjson::Value(rapidjson::kArrayType);
   extractPerceptions(haptic, jsonPerceptions, jsonTree);
   jsonTree.AddMember("perceptions", jsonPerceptions, jsonTree.GetAllocator());
-
+  auto jsonSyncs = rapidjson::Value(rapidjson::kArrayType);
+  extractSyncs(haptic, jsonSyncs, jsonTree);
+  jsonTree.AddMember("syncs", jsonSyncs, jsonTree.GetAllocator());
   std::ofstream file(filePath);
   rapidjson::OStreamWrapper osw(file);
   rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
@@ -632,6 +664,18 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPe
     jsonPerception.AddMember("channels", jsonChannels, jsonTree.GetAllocator());
 
     jsonPerceptions.PushBack(jsonPerception, jsonTree.GetAllocator());
+  }
+}
+
+auto IOJson::extractSyncs(types::Haptics &haptic, rapidjson::Value &jsonSyncs,
+                          rapidjson::Document &jsonTree) -> void {
+  auto numSyncs = haptic.getSyncsSize();
+  for (decltype(numSyncs) i = 0; i < numSyncs; i++) {
+    auto sync = haptic.getSyncsAt(i);
+    auto jsonSync = rapidjson::Value(rapidjson::kObjectType);
+    jsonSync.AddMember("timestamp", sync.getTimestamp(), jsonTree.GetAllocator());
+    jsonSync.AddMember("timescale", sync.getTimescale().value(), jsonTree.GetAllocator());
+    jsonSyncs.PushBack(jsonSync, jsonTree.GetAllocator());
   }
 }
 

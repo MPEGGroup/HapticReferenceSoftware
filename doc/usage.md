@@ -15,7 +15,8 @@ positional arguments:
 
 optional arguments:
         -h, --help                                            show this help message and exit
-        -b, --binary                                          the file will be encoded into its binary format. If not provided the encoder will output a file in a human-readable format
+        -b, --binary                                          the file will be encoded into its binary packetized format. If not provided the encoder will output a file in a human-readable format
+        --packet_duration                                     The duration of the packets for the binary packetized format. If the streaming format is choosen and this value is not provided, the default value is 128ms.
         -r, --refactor                                        the file will be refactored. Every effect used multiple times will be placed in the library and replaced by a referennce
         -l, --linearize                                       the file will be linearized. Every referenced effect from the library will be copied into the main timeline.
         -kb, --bitrate                                        target bitrate of the encoded file
@@ -67,6 +68,7 @@ positional arguments:
 
 optional arguments:
          -h,--help                                            show this help message and exit
+         -b, --binary                                         synthesize using streaming-ready binary file as input
          -fs,--sampling_frequency <FREQUENCY_SAMPLING>        the frequency sampling used to synthezised the output (default value is DEFAULT_FS Hz)
          --pad <PADDING>                                      add a padding on the resulting file. The padding provided should be in milliseconds
          --generate_ohm                                       generate an output ohm files corresponding to the file metadata

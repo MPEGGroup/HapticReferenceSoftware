@@ -70,12 +70,13 @@ auto help() -> void {
       << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
          "the encoder will output a file in a human-readable format"
       << std::endl
-      << "\t-s, --streaming\t\t\tthe file will be encoded into its binary streaming format. If not "
-         "provided "
-         "the encoder will output a file in a human-readable format"
-      << std::endl
-      << "--packet_duration\t\t\t The duration of the packets for the streaming format. Uint > 0, "
-         "should be a power of 2. If the streaming format is choosen and this value is not "
+      //<< "\t-s, --streaming\t\t\tthe file will be encoded into its binary packetized format. If
+      //not "
+      //   "provided "
+      //   "the encoder will output a file in a human-readable format"
+      //<< std::endl
+      << "--packet_duration\t\t\t The duration of the packets for the binary packetized format."
+         "If the streaming format is choosen and this value is not "
          "provided, the default value is 128ms."
       << std::endl
       << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
@@ -279,8 +280,8 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
-    IOBinary::writeFile(hapticFile, output);
-  } else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
+    //  IOBinary::writeFile(hapticFile, output);
+    //} else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
     int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
