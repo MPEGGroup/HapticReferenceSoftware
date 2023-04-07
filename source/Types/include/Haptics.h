@@ -69,8 +69,9 @@ public:
   auto getAvatarsSize() -> size_t;
   auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
-  auto getTimescale() -> std::optional<int>;
-  auto setTimescale(std::optional<int> newTimescale) -> void;
+  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
+  auto getTimescale() -> std::optional<unsigned int>;
+  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
   auto getSyncsSize() -> size_t;
   auto getSyncsAt(int index) -> Sync &;
   auto addSync(Sync &newSync) -> void;
@@ -80,6 +81,8 @@ public:
   auto refactor() -> void;
 
 private:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
+
   std::string version;
   std::string date;
   std::string description;
