@@ -89,7 +89,6 @@ public:
   auto refactor() -> void;
 
 private:
-
   std::string version;
   std::string profile = "Main";
   uint8_t level = 1;

@@ -156,7 +156,7 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
   return loadingSuccess;
 }
 
-auto loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic) -> bool {
+auto IOJson::loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic) -> bool {
   bool loadingSuccess = true;
   for (const auto &jsv : jsonSyncs.GetArray()) {
     if (!jsv.IsObject()) {

@@ -2576,7 +2576,7 @@ auto IOStream::padToByteBoundary(std::vector<bool> &bitstream) -> void {
 }
 
 auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) -> bool {
-  if (idx >=  static_cast<int>(haptic.getSyncsSize())) {
+  if (idx >= static_cast<int>(haptic.getSyncsSize())) {
     idx = -1;
     return false;
   }
@@ -2584,10 +2584,9 @@ auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) 
     if (haptic.getSyncsSize() == 1) {
       idx = -1;
       return false;
-    } else {
-      sync = haptic.getSyncsAt(++idx);
-      return true;
     }
+    sync = haptic.getSyncsAt(++idx);
+    return true;
   }
   idx = -1;
   return false;
