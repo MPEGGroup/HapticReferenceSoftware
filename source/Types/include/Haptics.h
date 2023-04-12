@@ -70,7 +70,7 @@ public:
   auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
   [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
-  auto getTimescale() -> std::optional<unsigned int>;
+  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
   auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
   auto getSyncsSize() -> size_t;
   auto getSyncsAt(int index) -> Sync &;
@@ -88,7 +88,7 @@ private:
   std::string description;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
-  std::optional<int> timescale = 1000;
+  std::optional<unsigned int> timescale = 1000;
   std::vector<Sync> syncs = {};
 };
 } // namespace haptics::types
