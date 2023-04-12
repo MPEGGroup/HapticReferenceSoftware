@@ -96,7 +96,7 @@ private:
   std::string description;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
-  std::optional<unsigned int> timescale = 1000;
+  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
   std::vector<Sync> syncs = {};
 };
 } // namespace haptics::types
