@@ -87,7 +87,7 @@ private:
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};
-  int timescale = 1000;
+  int timescale = TIMESCALE;
 };
 } // namespace haptics::types
 
