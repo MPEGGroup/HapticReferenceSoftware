@@ -50,8 +50,9 @@ public:
   auto setTimescale(uint32_t newTimescale) -> void;
 
 private:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
   int timestamp = -1;
-  std::optional<uint32_t> timescale = 1000;
+  std::optional<uint32_t> timescale = DEFAULT_TIMESCALE;
 };
 } // namespace haptics::types
 
