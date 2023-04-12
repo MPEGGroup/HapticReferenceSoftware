@@ -2589,7 +2589,7 @@ auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) 
       return true;
     }
   }
-  idx =-1;
+  idx = -1;
   return false;
 }
 } // namespace haptics::io
