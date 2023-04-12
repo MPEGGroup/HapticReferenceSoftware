@@ -616,7 +616,9 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
                      jsonTree.GetAllocator());
   jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
-  jsonTree.AddMember("timescale", haptic.getTimescale(), jsonTree.GetAllocator());
+  if (haptic.getTimescale().has_value()) {
+    jsonTree.AddMember("timescale", haptic.getTimescale().value(), jsonTree.GetAllocator());
+  }
   auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
   extractAvatars(haptic, jsonAvatars, jsonTree);
   jsonTree.AddMember("avatars", jsonAvatars, jsonTree.GetAllocator());
@@ -680,7 +682,7 @@ auto IOJson::extractSyncs(types::Haptics &haptic, rapidjson::Value &jsonSyncs,
                           rapidjson::Document &jsonTree) -> void {
   auto numSyncs = haptic.getSyncsSize();
   for (decltype(numSyncs) i = 0; i < numSyncs; i++) {
-    auto sync = haptic.getSyncsAt(i);
+    auto sync = haptic.getSyncsAt(static_cast<int>(i));
     auto jsonSync = rapidjson::Value(rapidjson::kObjectType);
     jsonSync.AddMember("timestamp", sync.getTimestamp(), jsonTree.GetAllocator());
     jsonSync.AddMember("timescale", sync.getTimescale(), jsonTree.GetAllocator());

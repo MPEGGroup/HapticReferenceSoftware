@@ -288,7 +288,7 @@ private:
   static auto addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool;
   static auto silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void;
 
-  static auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idxs) -> bool;
+  static auto getNextSync(types::Haptics &haptic, types::Sync &sync, int &idxs) -> bool;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H
