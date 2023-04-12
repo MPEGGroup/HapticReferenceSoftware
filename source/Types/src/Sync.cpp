@@ -37,7 +37,7 @@ namespace haptics::types {
 [[nodiscard]] auto Sync::getTimestamp() const -> int { return timestamp; }
 auto Sync::setTimestamp(int newTimestamp) -> void { timestamp = newTimestamp; }
 
-[[nodiscard]] auto getTimescale() const -> std::optonal<uint32_t> { return timescale; }
-auto Sync::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
+[[nodiscard]] auto Sync::getTimescale() const -> uint32_t { return timescale; }
+auto Sync::setTimescale(uint32_t newTimescale) -> void { timescale = newTimescale; }
 
 } // namespace haptics::types

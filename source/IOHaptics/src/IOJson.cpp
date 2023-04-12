@@ -683,7 +683,7 @@ auto IOJson::extractSyncs(types::Haptics &haptic, rapidjson::Value &jsonSyncs,
     auto sync = haptic.getSyncsAt(i);
     auto jsonSync = rapidjson::Value(rapidjson::kObjectType);
     jsonSync.AddMember("timestamp", sync.getTimestamp(), jsonTree.GetAllocator());
-    jsonSync.AddMember("timescale", sync.getTimescale().value(), jsonTree.GetAllocator());
+    jsonSync.AddMember("timescale", sync.getTimescale(), jsonTree.GetAllocator());
     jsonSyncs.PushBack(jsonSync, jsonTree.GetAllocator());
   }
 }
