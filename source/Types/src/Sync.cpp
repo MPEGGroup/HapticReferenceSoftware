@@ -34,10 +34,20 @@
 #include <Types/include/Sync.h>
 
 namespace haptics::types {
+
 [[nodiscard]] auto Sync::getTimestamp() const -> int { return timestamp; }
 auto Sync::setTimestamp(int newTimestamp) -> void { timestamp = newTimestamp; }
 
-[[nodiscard]] auto Sync::getTimescale() const -> uint32_t { return timescale; }
-auto Sync::setTimescale(uint32_t newTimescale) -> void { timescale = newTimescale; }
+[[nodiscard]] auto Sync::getTimescaleOrDefault() const -> unsigned int {
+  return this->getTimescale().value_or(Sync::DEFAULT_TIMESCALE);
+}
+
+[[nodiscard]] auto Sync::getTimescale() const -> std::optional<unsigned int> {
+  return this->timescale;
+}
+
+auto Sync::setTimescale(std::optional<unsigned int> newTimescale) -> void {
+  this->timescale = newTimescale;
+}
 
 } // namespace haptics::types
