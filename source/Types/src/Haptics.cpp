@@ -83,10 +83,11 @@ auto Haptics::getTimescaleOrDefault() const -> unsigned int {
   return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
 }
 
-
 auto Haptics::getTimescale() -> std::optional<unsigned int> { return timescale; }
 
-auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void { timescale = newTimescale; }
+auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
+  timescale = newTimescale;
+}
 
 auto Haptics::getSyncsSize() -> size_t { return syncs.size(); }
 
