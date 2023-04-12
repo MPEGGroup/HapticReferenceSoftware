@@ -241,6 +241,8 @@ auto Band::getBandTimeLength() -> double {
          this->effects.back().getEffectTimeLength(this->getBandType(), TRANSIENT_DURATION_MS);
 }
 
-auto Band::getTimescale() -> int { return this->timescale; }
+[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
+
+auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
 
 } // namespace haptics::types

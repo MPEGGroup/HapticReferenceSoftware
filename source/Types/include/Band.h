@@ -73,7 +73,8 @@ public:
   auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
   auto EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
   auto getBandTimeLength() -> double;
-  auto getTimescale() -> int;
+  [[nodiscard]] auto getTimescale() const -> int;
+  auto setTimescale(int newTimescale) -> void;
 
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
