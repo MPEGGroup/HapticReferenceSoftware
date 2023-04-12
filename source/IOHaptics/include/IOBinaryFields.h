@@ -42,6 +42,8 @@
 
 namespace haptics::io {
 
+static constexpr int LEVEL = 8;
+
 static constexpr int UNIT_TYPE = 6;
 static constexpr int UNIT_SYNC = 2;
 static constexpr int UNIT_DURATION = 24;

@@ -49,9 +49,13 @@ constexpr float floatPrecision = 0.01;
 TEST_CASE("write/read file header without avatar and perceptions") {
   const std::string testingVersion = "42";
   const std::string testingDate = "Monday, February 14, 2022";
+  std::string testingProfile = "Simple Parametric";
+  const uint8_t testingLevel = 2;
   const std::string testingDescription =
       "I'm an awsome Haptic description placeholder and I wasn't writted by a developer";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
+  testingHaptic.setProfile(testingProfile);
+  testingHaptic.setLevel(testingLevel);
 
   SECTION("write haptic header") {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
@@ -64,10 +68,11 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     file.close();
 
     REQUIRE(succeed);
-    auto bitStreamSize =
-        (testingVersion.size() + testingDate.size() + testingDescription.size() + 3) *
-            haptics::io::BYTE_SIZE +
-        +haptics::io::MDEXP_AVATAR_COUNT + haptics::io::MDEXP_PERC_COUNT;
+    auto bitStreamSize = (testingVersion.size() + testingProfile.size() + testingDate.size() +
+                          testingDescription.size() + 4) *
+                             haptics::io::BYTE_SIZE +
+                         haptics::io::LEVEL + haptics::io::MDEXP_AVATAR_COUNT +
+                         haptics::io::MDEXP_PERC_COUNT;
     auto byteStreamSize = bitStreamSize % haptics::io::BYTE_SIZE == 0
                               ? bitStreamSize / haptics::io::BYTE_SIZE
                               : (bitStreamSize / haptics::io::BYTE_SIZE) + 1;
@@ -89,6 +94,8 @@ TEST_CASE("write/read file header without avatar and perceptions") {
     CHECK(std::filesystem::file_size(filename) == startedFileSize);
     CHECK(res.getVersion() == testingVersion);
     CHECK(res.getDate() == testingDate);
+    CHECK(res.getProfile() == testingProfile);
+    CHECK(res.getLevel() == testingLevel);
     CHECK(res.getDescription() == testingDescription);
     CHECK(res.getAvatarsSize() == 0);
     CHECK(res.getPerceptionsSize() == 0);
@@ -102,8 +109,12 @@ TEST_CASE("write/read file header without avatar and perceptions") {
 TEST_CASE("write/read file header for avatar testing") {
   const std::string testingVersion;
   const std::string testingDate;
+  std::string testingProfile = "Main";
+  const uint8_t testingLevel = 1;
   const std::string testingDescription;
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
+  testingHaptic.setProfile(testingProfile);
+  testingHaptic.setLevel(testingLevel);
 
   const int testingId_avatar1 = 42;
   const int testingLod_avatar1 = 3;
@@ -134,9 +145,10 @@ TEST_CASE("write/read file header for avatar testing") {
     REQUIRE(succeed);
 
     auto bitStreamSize =
-        static_cast<int>(testingVersion.size() + testingDate.size() + testingDescription.size() +
-                         3) *
+        static_cast<int>(testingVersion.size() + testingProfile.size() + testingDate.size() +
+                         testingDescription.size() + 4) *
             haptics::io::BYTE_SIZE +
+        haptics::io::LEVEL +
         2 * (haptics::io::AVATAR_ID + haptics::io::AVATAR_LOD + haptics::io::AVATAR_TYPE) +
         haptics::io::MDEXP_AVATAR_COUNT + haptics::io::MDEXP_PERC_COUNT +
         (testingMesh_avatar1.size() + 1) * haptics::io::BYTE_SIZE;
@@ -224,7 +236,7 @@ TEST_CASE("write/read file header for reference device testing") {
         testingDescription_perception0.size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 99;
+        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 105;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -466,7 +478,7 @@ TEST_CASE("write/read file header for channel testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
-        testingVertices_channel2.size() + 136;
+        testingVertices_channel2.size() + 142;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -733,7 +745,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
-        testingVertices_channel2.size() + 308;
+        testingVertices_channel2.size() + 314;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
