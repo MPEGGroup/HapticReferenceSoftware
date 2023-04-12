@@ -71,7 +71,7 @@ auto help() -> void {
          "the encoder will output a file in a human-readable format"
       << std::endl
       //<< "\t-s, --streaming\t\t\tthe file will be encoded into its binary packetized format. If
-      //not "
+      // not "
       //   "provided "
       //   "the encoder will output a file in a human-readable format"
       //<< std::endl
