@@ -67,6 +67,7 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
         jsonTree.HasMember("perceptions") && jsonTree["perceptions"].IsArray() &&
         jsonTree.HasMember("avatars") && jsonTree["avatars"].IsArray() &&
         jsonTree.HasMember("syncs") && jsonTree["syncs"].IsArray())) {
+
     std::cerr << "Invalid HJIF input file: missing required field" << std::endl;
     return false;
   }
