@@ -40,6 +40,14 @@ namespace haptics::types {
 
 auto Haptics::setVersion(std::string &newVersion) -> void { version = newVersion; }
 
+[[nodiscard]] auto Haptics::getProfile() const -> std::string { return profile; }
+
+auto Haptics::setProfile(std::string &newProfile) -> void { profile = newProfile; }
+
+[[nodiscard]] auto Haptics::getLevel() const -> uint8_t { return level; }
+
+auto Haptics::setLevel(uint8_t newLevel) -> void { level = newLevel; }
+
 [[nodiscard]] auto Haptics::getDate() const -> std::string { return date; }
 auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
 

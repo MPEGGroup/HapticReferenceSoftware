@@ -99,9 +99,13 @@ auto IOBinary::readFileHeader(types::Haptics &haptic, std::istream &file,
                               std::vector<bool> &unusedBits) -> bool {
 
   std::string version = IOBinaryPrimitives::readString(file, unusedBits);
+  std::string profile = IOBinaryPrimitives::readString(file, unusedBits);
+  auto level = IOBinaryPrimitives::readNBits<uint8_t, LEVEL>(file, unusedBits);
   std::string date = IOBinaryPrimitives::readString(file, unusedBits);
   std::string description = IOBinaryPrimitives::readString(file, unusedBits);
   haptic.setVersion(version);
+  haptic.setProfile(profile);
+  haptic.setLevel(level);
   haptic.setDate(date);
   haptic.setDescription(description);
 
@@ -116,10 +120,14 @@ auto IOBinary::readFileHeader(types::Haptics &haptic, std::istream &file,
 
 auto IOBinary::writeFileHeader(types::Haptics &haptic, std::vector<bool> &output) -> bool {
   const std::string version = haptic.getVersion();
+  const std::string profile = haptic.getProfile();
+  const uint8_t level = haptic.getLevel();
   const std::string date = haptic.getDate();
   const std::string description = haptic.getDescription();
 
   IOBinaryPrimitives::writeString(version, output);
+  IOBinaryPrimitives::writeString(profile, output);
+  IOBinaryPrimitives::writeNBits<uint8_t, LEVEL>(level, output);
   IOBinaryPrimitives::writeString(date, output);
   IOBinaryPrimitives::writeString(description, output);
 
