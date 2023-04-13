@@ -1781,8 +1781,8 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
 
 auto IOStream::createWaveletPayload(StreamWriter &swriter,
                                     std::vector<std::vector<bool>> &bitstream) -> bool {
-  int nbWaveBlock =
-      static_cast<int>(swriter.packetDuration) / static_cast<int>(swriter.bandStream.band.getBlockLength());
+  int nbWaveBlock = static_cast<int>(swriter.packetDuration) /
+                    static_cast<int>(swriter.bandStream.band.getBlockLength());
   for (auto i = 0; i < static_cast<int>(swriter.bandStream.band.getEffectsSize());
        i += nbWaveBlock) {
     std::vector<bool> bufbitstream = std::vector<bool>();
