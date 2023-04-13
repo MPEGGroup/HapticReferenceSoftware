@@ -284,7 +284,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     index += sreader.packetLength + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
-  sreader.time += (sreader.packetDuration * TIME_TO_MS) / sreader.timescale;
+  sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
   return true;
 }
 
@@ -362,7 +362,7 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
   int duration = 0;
   if (nbPacketData > 0) {
-    duration = swriter.packetDuration;
+    duration = static_cast<int>(swriter.packetDuration);
   }
   std::bitset<UNIT_DURATION> durationBits(duration);
   std::string durationStr = durationBits.to_string();
@@ -407,13 +407,13 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
   if (listPackets.size() == 1) {
     int tFirst =
         readPacketTS(std::vector<bool>(listPackets[0].begin() + H_NBITS, listPackets[0].end()));
-    if (tFirst >= swriter.packetDuration) {
+    if (tFirst >= static_cast<int>(swriter.packetDuration)) {
       std::bitset<UNIT_SYNC> syncBits(0);
       std::string syncStr = syncBits.to_string();
       IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
       int duration = tFirst;
       if (duration % swriter.packetDuration != 0) {
-        duration = duration - (duration % swriter.packetDuration);
+        duration = duration - (duration % static_cast<int>(swriter.packetDuration));
       }
       std::bitset<UNIT_DURATION> durationBits(duration);
       std::string durationStr = durationBits.to_string();
@@ -435,7 +435,7 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
         readPacketTS(std::vector<bool>(listPackets[1].begin() + H_NBITS, listPackets[1].end()));
     int duration = end - start;
     if (duration % swriter.packetDuration != 0) {
-      duration = duration - (duration % swriter.packetDuration);
+      duration = duration - (duration % static_cast<int>(swriter.packetDuration));
     }
     std::bitset<UNIT_DURATION> durationBits(duration);
     std::string durationStr = durationBits.to_string();
@@ -1768,7 +1768,7 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
       bufPacketBitstream.clear();
       packetBits.clear();
       swriter.keyframesCount.clear();
-      swriter.time += swriter.packetDuration;
+      swriter.time += static_cast<int>(swriter.packetDuration);
     }
     if (!bufPacketBitstream.empty()) {
       packetBits = writeEffectHeader(swriter);
@@ -1837,12 +1837,12 @@ auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vecto
       }
     } else if (effect.getEffectType() == types::EffectType::Reference) {
       if (effect.getPosition() >= swriter.time &&
-          effect.getPosition() < swriter.time + swriter.packetDuration) {
+          effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
         bitstream.push_back(bufEffect);
         swriter.effects.push_back(effect);
         swriter.auType = AUType::RAU;
         swriter.keyframesCount.push_back(0);
-      } else if (effect.getPosition() > swriter.time + swriter.packetDuration) {
+      } else if (effect.getPosition() > swriter.time + static_cast<int>(swriter.packetDuration)) {
         return false;
       }
       if (i == static_cast<int>(swriter.bandStream.band.getEffectsSize()) - 1) {
@@ -2035,7 +2035,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx)) {
         return false;
       }
-      addTimestampEffect(effects, sreader.time);
+      addTimestampEffect(effects, static_cast<int>(sreader.time));
     } else {
       types::Effect effect;
       IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
@@ -2231,7 +2231,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
-    if (currentTime < swriter.time + swriter.packetDuration && currentTime >= swriter.time) {
+    if (currentTime < swriter.time + static_cast<int>(swriter.packetDuration) && currentTime >= swriter.time) {
       if (firstKf) {
         firstKf = false;
         if (j != 0) {
@@ -2243,7 +2243,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
       if (j == static_cast<int>(effect.getKeyframesSize()) - 1) {
         return true;
       }
-    } else if (currentTime >= swriter.time + swriter.packetDuration) {
+    } else if (currentTime >= swriter.time + static_cast<int>(swriter.packetDuration)) {
       return false;
     }
   }
