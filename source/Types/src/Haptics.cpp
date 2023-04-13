@@ -87,13 +87,8 @@ auto Haptics::getAvatarAt(int index) -> Avatar & { return avatars.at(index); }
 
 auto Haptics::addAvatar(Avatar &newAvatar) -> void { avatars.push_back(newAvatar); }
 
-//<<<<<<< HEAD
-//auto Haptics::getTimescaleOrDefault() const -> unsigned int {
-//  return timescale.value_or(Haptics::DEFAULT_TIMESCALE);
-//=======
 [[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> unsigned int {
   return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
-//>>>>>>> 5e15ddbcb3fee1a69337963b16accd001c8c2855
 }
 
 [[nodiscard]] auto Haptics::getTimescale() const -> std::optional<unsigned int> {
