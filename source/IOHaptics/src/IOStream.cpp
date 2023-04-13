@@ -2231,7 +2231,8 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
-    if (currentTime < swriter.time + static_cast<int>(swriter.packetDuration) && currentTime >= swriter.time) {
+    if (currentTime < swriter.time + static_cast<int>(swriter.packetDuration) &&
+        currentTime >= swriter.time) {
       if (firstKf) {
         firstKf = false;
         if (j != 0) {
