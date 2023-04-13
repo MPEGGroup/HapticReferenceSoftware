@@ -46,6 +46,8 @@ namespace haptics::types {
 
 class Haptics {
 public:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
+
   explicit Haptics() = default;
   explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
       : version(std::move(newVersion))
@@ -57,6 +59,12 @@ public:
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
+
+  [[nodiscard]] auto getProfile() const -> std::string;
+  auto setProfile(std::string &newProfile) -> void;
+  [[nodiscard]] auto getLevel() const -> uint8_t;
+  auto setLevel(uint8_t newLevel) -> void;
+
   [[nodiscard]] auto getDate() const -> std::string;
   auto setDate(std::string &newDate) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
@@ -70,7 +78,7 @@ public:
   auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
   [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
-  auto getTimescale() -> std::optional<unsigned int>;
+  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
   auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
   auto getSyncsSize() -> size_t;
   auto getSyncsAt(int index) -> Sync &;
@@ -81,14 +89,14 @@ public:
   auto refactor() -> void;
 
 private:
-  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
-
   std::string version;
+  std::string profile = "Main";
+  uint8_t level = 1;
   std::string date;
   std::string description;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
-  std::optional<int> timescale = 1000;
+  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
   std::vector<Sync> syncs = {};
 };
 } // namespace haptics::types

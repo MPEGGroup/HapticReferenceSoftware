@@ -40,18 +40,20 @@ namespace haptics::types {
 class Sync {
 public:
   explicit Sync() = default;
-  explicit Sync(int newTimestamp) : timestamp(newTimestamp), timescale(1000){};
-  explicit Sync(int newTimestamp, std::optional<uint32_t> newTimescale)
+  explicit Sync(int newTimestamp) : timestamp(newTimestamp), timescale(DEFAULT_TIMESCALE){};
+  explicit Sync(int newTimestamp, std::optional<unsigned int> newTimescale)
       : timestamp(newTimestamp), timescale(newTimescale){};
 
   [[nodiscard]] auto getTimestamp() const -> int;
-  auto setTimestamp() -> void;
-  [[nodiscard]] auto getTimescale() const -> std::optional<uint32_t>;
-  auto setTimescale(uint32_t newTimescale) -> void;
+  auto setTimestamp(int newTimestamp) -> void;
+  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
+  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
+  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
 
 private:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
   int timestamp = -1;
-  std::optional<uint32_t> timescale = 1000;
+  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
 };
 } // namespace haptics::types
 

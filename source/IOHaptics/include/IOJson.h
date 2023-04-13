@@ -82,7 +82,7 @@ public:
   static auto extractVector(types::Vector &vector, rapidjson::Value &jsonVector,
                             rapidjson::Document &jsonTree) -> void;
   static auto extractSyncs(types::Haptics &haptic, rapidjson::Value &jsonSyncs,
-                          rapidjson::Document &jsonTree) -> void;
+                           rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
 };

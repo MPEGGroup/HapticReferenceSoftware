@@ -40,6 +40,14 @@ namespace haptics::types {
 
 auto Haptics::setVersion(std::string &newVersion) -> void { version = newVersion; }
 
+[[nodiscard]] auto Haptics::getProfile() const -> std::string { return profile; }
+
+auto Haptics::setProfile(std::string &newProfile) -> void { profile = newProfile; }
+
+[[nodiscard]] auto Haptics::getLevel() const -> uint8_t { return level; }
+
+auto Haptics::setLevel(uint8_t newLevel) -> void { level = newLevel; }
+
 [[nodiscard]] auto Haptics::getDate() const -> std::string { return date; }
 auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
 
@@ -79,14 +87,21 @@ auto Haptics::getAvatarAt(int index) -> Avatar & { return avatars.at(index); }
 
 auto Haptics::addAvatar(Avatar &newAvatar) -> void { avatars.push_back(newAvatar); }
 
-auto Haptics::getTimescaleOrDefault() const -> unsigned int {
-  return timescale.value_or(Haptics::DEFAULT_TIMESCALE);
+//<<<<<<< HEAD
+//auto Haptics::getTimescaleOrDefault() const -> unsigned int {
+//  return timescale.value_or(Haptics::DEFAULT_TIMESCALE);
+//=======
+[[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> unsigned int {
+  return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
+//>>>>>>> 5e15ddbcb3fee1a69337963b16accd001c8c2855
 }
 
-auto Haptics::getTimescale() -> std::optional<unsigned int> { return timescale; }
+[[nodiscard]] auto Haptics::getTimescale() const -> std::optional<unsigned int> {
+  return this->timescale;
+}
 
 auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
-  timescale = newTimescale;
+  this->timescale = newTimescale;
 }
 
 auto Haptics::getSyncsSize() -> size_t { return syncs.size(); }
