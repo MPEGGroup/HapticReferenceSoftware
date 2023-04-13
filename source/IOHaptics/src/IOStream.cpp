@@ -281,7 +281,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     if (!readNALu(packets, sreader, crc)) {
       return EXIT_FAILURE;
     }
-    index += sreader.packetLength + H_NBITS;
+    index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
   sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
@@ -1782,7 +1782,7 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
 auto IOStream::createWaveletPayload(StreamWriter &swriter,
                                     std::vector<std::vector<bool>> &bitstream) -> bool {
   int nbWaveBlock =
-      swriter.packetDuration / static_cast<int>(swriter.bandStream.band.getBlockLength());
+      static_cast<int>(swriter.packetDuration) / static_cast<int>(swriter.bandStream.band.getBlockLength());
   for (auto i = 0; i < static_cast<int>(swriter.bandStream.band.getEffectsSize());
        i += nbWaveBlock) {
     std::vector<bool> bufbitstream = std::vector<bool>();
