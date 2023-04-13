@@ -164,7 +164,8 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
                           int packetDuration) -> bool {
   StreamWriter swriter;
   swriter.haptic = haptic;
-  swriter.packetDuration = haptic.getTimescaleOrDefault();
+  swriter.packetDuration = packetDuration;
+  swriter.timescale = haptic.getTimescaleOrDefault();
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
   writeNALu(NALuType::MetadataHaptics, swriter, 0, initPackets);
   writeNALu(NALuType::MetadataPerception, swriter, 0, initPackets);
