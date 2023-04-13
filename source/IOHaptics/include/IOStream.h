@@ -107,8 +107,8 @@ public:
     std::vector<BandStream> bandStreamsHaptic;
     AUType auType = AUType::RAU;
     int level = -1;
-    int time = 0;
-    int packetLength = 0;
+    unsigned int time = 0;
+    unsigned int packetLength = 0;
     unsigned int packetDuration = 0;
     unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE;
     bool waitSync = false;
