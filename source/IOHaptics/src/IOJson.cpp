@@ -167,7 +167,7 @@ auto IOJson::loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic
     auto jsonSync = jsv.GetObject();
 
     if (!jsonSync.HasMember("timestamp") || !jsonSync["timestamp"].IsInt()) {
-      std::cerr << "Missing or invalid sync timescale" << std::endl;
+      std::cerr << "Missing or invalid sync timestamp" << std::endl;
       continue;
     }
     auto timestamp = jsonSync["timestamp"].GetInt();
