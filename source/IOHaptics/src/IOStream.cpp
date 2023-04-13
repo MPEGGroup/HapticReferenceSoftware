@@ -211,8 +211,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
         if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
           std::vector<bool> syncUnit = std::vector<bool>();
           std::vector<std::vector<bool>> packetList;
-          writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit,
-                        swriter);
+          writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit, swriter);
           getNextSync(haptic, nextSync, syncIdx);
         }
         if (swriter.time != packetTS) {
