@@ -173,9 +173,13 @@ auto IOJson::loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic
     auto timestamp = jsonSync["timestamp"].GetInt();
     types::Sync sync(timestamp);
 
-    if (!jsonSync.HasMember("timescale") || !jsonSync["timescale"].IsUint()) {
-      auto timescale = jsonSync["timescale"].GetUint();
-      sync.setTimescale(timescale);
+    if (jsonSync.HasMember("timescale")) {
+      if (jsonSync["timescale"].IsUint()) {
+        auto timescale = jsonSync["timescale"].GetUint();
+        sync.setTimescale(timescale);
+      } else {
+        std::cerr << "Invalid sync timescale" << std::endl;
+      }
     }
     haptic.addSync(sync);
   }
