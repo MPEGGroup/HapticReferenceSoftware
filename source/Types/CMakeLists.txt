@@ -1,6 +1,6 @@
 project(types)
 
-add_library(types src/Keyframe.cpp include/Keyframe.h src/Effect.cpp include/Effect.h src/Band.cpp include/Band.h include/BandType.h include/CurveType.h  src/Channel.cpp include/Channel.h src/Haptics.cpp include/Haptics.h src/Perception.cpp include/Perception.h src/Avatar.cpp include/Avatar.h src/ReferenceDevice.cpp include/ReferenceDevice.h include/BodyPartTarget.h)
+add_library(types src/Keyframe.cpp include/Keyframe.h src/Effect.cpp include/Effect.h src/Band.cpp include/Band.h include/BandType.h include/CurveType.h src/Channel.cpp include/Channel.h src/Haptics.cpp include/Haptics.h src/Perception.cpp include/Perception.h src/Avatar.cpp include/Avatar.h src/ReferenceDevice.cpp include/ReferenceDevice.h include/BodyPartTarget.h src/Sync.cpp include/Sync.h)
 target_link_libraries(types PRIVATE tools)
 
 if(BUILD_CATCH2)
