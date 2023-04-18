@@ -1030,7 +1030,7 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   libraryEffect.setId(id);
 
-  int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION);
+  int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
   libraryEffect.setPosition(position);
 
   int effectType = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
