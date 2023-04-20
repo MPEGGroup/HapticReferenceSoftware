@@ -78,7 +78,6 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   auto level = static_cast<uint8_t>(jsonTree["level"].GetUint());
   auto date = std::string(jsonTree["date"].GetString());
   auto description = std::string(jsonTree["description"].GetString());
-  auto timescale = jsonTree["timescale"].GetUint();
   haptic.setVersion(version);
   haptic.setProfile(profile);
   haptic.setLevel(level);
