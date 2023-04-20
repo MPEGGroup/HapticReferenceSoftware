@@ -37,23 +37,34 @@
 #include <Tools/include/OHMData.h>
 #include <Types/include/Avatar.h>
 #include <Types/include/Perception.h>
+#include <Types/include/Sync.h>
 #include <fstream>
+#include <optional>
 #include <vector>
 
 namespace haptics::types {
 
 class Haptics {
 public:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
+
   explicit Haptics() = default;
   explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
       : version(std::move(newVersion))
       , date(std::move(newDate))
       , description(std::move(newDescription))
       , perceptions({})
-      , avatars({}){};
+      , avatars({})
+      , syncs({}){};
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
+
+  [[nodiscard]] auto getProfile() const -> std::string;
+  auto setProfile(std::string &newProfile) -> void;
+  [[nodiscard]] auto getLevel() const -> uint8_t;
+  auto setLevel(uint8_t newLevel) -> void;
+
   [[nodiscard]] auto getDate() const -> std::string;
   auto setDate(std::string &newDate) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
@@ -69,6 +80,12 @@ public:
   auto getAvatarsSize() -> size_t;
   auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
+  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
+  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
+  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
+  auto getSyncsSize() -> size_t;
+  auto getSyncsAt(int index) -> Sync &;
+  auto addSync(Sync &newSync) -> void;
   auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
   auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
   auto linearize() -> void;
@@ -78,11 +95,15 @@ private:
   static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
 
   std::string version;
+  std::string profile = "Main";
+  uint8_t level = 1;
   std::string date;
   std::string description;
   std::optional<unsigned int> timescale;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
+  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
+  std::vector<Sync> syncs = {};
 };
 } // namespace haptics::types
 #endif // HAPTICS_H
