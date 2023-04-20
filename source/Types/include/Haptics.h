@@ -46,7 +46,6 @@ namespace haptics::types {
 
 class Haptics {
 public:
-  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
 
   explicit Haptics() = default;
   explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
@@ -69,9 +68,6 @@ public:
   auto setDate(std::string &newDate) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
-  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
-  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
-  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
   auto getPerceptionsSize() -> size_t;
   auto getPerceptionAt(int index) -> Perception &;
   auto replacePerceptionAt(int index, Perception &newPerception) -> bool;
@@ -99,7 +95,6 @@ private:
   uint8_t level = 1;
   std::string date;
   std::string description;
-  std::optional<unsigned int> timescale;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
   std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
