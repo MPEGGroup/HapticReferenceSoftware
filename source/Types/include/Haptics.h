@@ -46,6 +46,8 @@ namespace haptics::types {
 
 class Haptics {
 public:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
+
   explicit Haptics() = default;
   explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
       : version(std::move(newVersion))
@@ -87,8 +89,6 @@ public:
   auto refactor() -> void;
 
 private:
-  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
-
   std::string version;
   std::string profile = "Main";
   uint8_t level = 1;
