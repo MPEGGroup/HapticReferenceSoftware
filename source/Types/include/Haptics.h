@@ -46,7 +46,6 @@ namespace haptics::types {
 
 class Haptics {
 public:
-
   explicit Haptics() = default;
   explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
       : version(std::move(newVersion))
