@@ -72,11 +72,13 @@ static constexpr int AVATAR_MESH_COUNT = 8;
 
 static constexpr int MDPERCE_ID = 8;
 static constexpr int MDPERCE_DESC_SIZE = 8;
-
 static constexpr int MDPERCE_MODALITY = 8;
 static constexpr int MDPERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_PERCE_UNIT_EXP = 8;
 static constexpr int MDPERCE_LIBRARY_COUNT = 16;
+static constexpr int MDPERCE_FLAG_SEMANTIC = 1;
+static constexpr int MDPERCE_SCHEME_LENGTH = 8;
+static constexpr int MDPERCE_SCHEME_CHAR = 8;
 static constexpr int MDPERCE_REFDEVICE_COUNT = 8;
 static constexpr int MDPERCE_CHANNEL_COUNT = 8;
 
@@ -129,6 +131,9 @@ static constexpr int MDBAND_EFFECT_COUNT = 16;
 
 static constexpr int EFFECT_ID = 16;
 static constexpr int EFFECT_POSITION = 24;
+static constexpr int EFFECT_FLAG_SEMANTIC = 1;
+static constexpr int EFFECT_SEMANTIC_LAYER_1 = 4;
+static constexpr int EFFECT_SEMANTIC_LAYER_2 = 8;
 static constexpr int EFFECT_POSITION_STREAMING = 25;
 static constexpr int EFFECT_PHASE = 16;
 static constexpr int EFFECT_BASE_SIGNAL = 4;

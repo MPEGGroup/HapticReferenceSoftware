@@ -87,6 +87,8 @@ public:
   auto setId(int newId) -> void;
   [[nodiscard]] auto getPosition() const -> int;
   auto setPosition(int newPosition) -> void;
+  [[nodiscard]] auto getSemantic() const -> std::optional<std::string>;
+  auto setSemantic(std::string newSemantic) -> void;
   [[nodiscard]] auto getPhase() const -> float;
 
   auto setPhase(float newPhase) -> void;
@@ -122,6 +124,7 @@ private:
   int id = -1;
   int position = 0;
   float phase = 0;
+  std::optional<std::string> semantic;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
   BaseSignal baseSignal = BaseSignal::Sine;
   EffectType effectType = EffectType::Basis;

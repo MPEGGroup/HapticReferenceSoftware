@@ -130,7 +130,6 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
-
     if (jsonPerception.HasMember("unit_exponent") && jsonPerception["unit_exponent"].IsInt()) {
       perception.setUnitExponent(jsonPerception["unit_exponent"].GetInt());
     }
@@ -138,8 +137,11 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
         jsonPerception["perception_unit_exponent"].IsInt()) {
       perception.setPerceptionUnitExponent(jsonPerception["perception_unit_exponent"].GetInt());
     }
-
     loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
+    if (jsonPerception.HasMember("effect_semantic_scheme") &&
+        jsonPerception["effect_semantic_scheme"].IsString()) {
+      perception.setEffectSemantic(jsonPerception["effect_semantic"].GetString());
+    }
 
     loadingSuccess = loadingSuccess && loadChannels(jsonPerception["channels"], perception);
     if (jsonPerception.HasMember("reference_devices") &&
@@ -205,6 +207,9 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
 
     types::Effect effect(position, phase, baseSignal, effectType);
     effect.setId(effectId);
+    if (jsonEffect.HasMember("semantic") && jsonEffect["semantic"].IsString()) {
+      effect.setSemantic(jsonEffect["semantic"].GetString());
+    }
     if (jsonEffect.HasMember("keyframes")) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
@@ -412,6 +417,9 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
     types::Effect effect(position, phase, baseSignal, effectType);
     if (jsonEffect.HasMember("id") && jsonEffect["id"].IsInt()) {
       effect.setId(jsonEffect["id"].GetInt());
+    }
+    if (jsonEffect.HasMember("semantic") && jsonEffect["semantic"].IsString()) {
+      effect.setSemantic(jsonEffect["semantic"].GetString());
     }
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
@@ -636,6 +644,10 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPe
     auto jsonLibrary = rapidjson::Value(rapidjson::kArrayType);
     extractLibrary(perception, jsonLibrary, jsonTree);
     jsonPerception.AddMember("effect_library", jsonLibrary, jsonTree.GetAllocator());
+    if (perception.getEffectSemantic().has_value()) {
+      jsonPerception.AddMember("effect_semantic_scheme", perception.getEffectSemantic().value(),
+                               jsonTree.GetAllocator());
+    }
     auto jsonChannels = rapidjson::Value(rapidjson::kArrayType);
     extractChannels(perception, jsonChannels, jsonTree);
     jsonPerception.AddMember("channels", jsonChannels, jsonTree.GetAllocator());
@@ -663,7 +675,9 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jso
         rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
                          jsonTree.GetAllocator()),
         jsonTree.GetAllocator());
-
+    if (effect.getSemantic().has_value()) {
+      jsonEffect.AddMember("semantic", effect.getSemantic().value(), jsonTree.GetAllocator());
+    }
     auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
     auto numKeyframes = effect.getKeyframesSize();
     for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
@@ -815,6 +829,9 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
                            jsonTree.GetAllocator()),
           jsonTree.GetAllocator());
       jsonEffect.AddMember("position", effect.getPosition(), jsonTree.GetAllocator());
+      if (effect.getSemantic().has_value()) {
+        jsonEffect.AddMember("semantic", effect.getSemantic().value(), jsonTree.GetAllocator());
+      }
       if (effect.getEffectType() == types::EffectType::Reference) {
         jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());
       } else if (effect.getEffectType() == types::EffectType::Basis) {

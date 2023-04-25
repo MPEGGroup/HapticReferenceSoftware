@@ -109,6 +109,9 @@ public:
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
+  [[nodiscard]] auto getEffectSemanticOrDefault() const -> std::string;
+  [[nodiscard]] auto getEffectSemantic() const -> std::optional<std::string>;
+  auto setEffectSemantic(std::string newEffectSemantic) -> void;
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
@@ -150,10 +153,13 @@ public:
 private:
   static constexpr int8_t DEFAULT_UNIT_EXPONENT = -3;
   static constexpr int8_t DEFAULT_PERCEPTION_UNIT_EXPONENT = 0;
+  inline static const std::string DEFAULT_SEMANTIC_SCHEME =
+      "urn:mpeg:mpegi:haptics:effectsemantic:2023";
 
   int id = -1;
   int avatarId = -1;
   std::string description;
+  std::optional<std::string> effect_semantic = std::nullopt;
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Channel> channels = {};
   std::vector<ReferenceDevice> referenceDevices;

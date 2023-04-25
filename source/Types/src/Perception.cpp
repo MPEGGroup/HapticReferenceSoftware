@@ -43,6 +43,19 @@ auto Perception::setId(int newId) -> void { id = newId; }
 
 auto Perception::setAvatarId(int newAvatarId) -> void { avatarId = newAvatarId; }
 
+[[nodiscard]] auto Perception::getEffectSemanticOrDefault() const -> std::string {
+  if (effect_semantic.has_value())
+    return effect_semantic.value();
+  return DEFAULT_SEMANTIC_SCHEME;
+}
+
+[[nodiscard]] auto Perception::getEffectSemantic() const -> std::optional<std::string> {
+  return effect_semantic;
+}
+auto Perception::setEffectSemantic(std::string newEffectSemantic) -> void {
+  effect_semantic = newEffectSemantic;
+}
+
 [[nodiscard]] auto Perception::getDescription() const -> std::string { return description; }
 
 auto Perception::setDescription(std::string &newDescription) -> void {
