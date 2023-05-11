@@ -109,9 +109,9 @@ public:
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
-  [[nodiscard]] auto getEffectSemanticOrDefault() const -> std::string;
-  [[nodiscard]] auto getEffectSemantic() const -> std::optional<std::string>;
-  auto setEffectSemantic(std::string newEffectSemantic) -> void;
+  [[nodiscard]] auto getEffectSemanticSchemeOrDefault() const -> std::string;
+  [[nodiscard]] auto getEffectSemanticScheme() const -> std::optional<std::string>;
+  auto setEffectSemanticScheme(std::string newEffectSemantic) -> void;
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
@@ -159,7 +159,7 @@ private:
   int id = -1;
   int avatarId = -1;
   std::string description;
-  std::optional<std::string> effect_semantic = std::nullopt;
+  std::optional<std::string> effectSemanticScheme = std::nullopt;
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Channel> channels = {};
   std::vector<ReferenceDevice> referenceDevices;

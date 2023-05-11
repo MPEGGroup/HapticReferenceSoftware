@@ -36,6 +36,7 @@
 
 #include <Types/include/BandType.h>
 #include <Types/include/CurveType.h>
+#include <Types/include/EffectSemantic.h>
 #include <Types/include/Keyframe.h>
 #include <map>
 #include <string>

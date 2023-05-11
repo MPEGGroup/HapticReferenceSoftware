@@ -140,7 +140,7 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
     loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
     if (jsonPerception.HasMember("effect_semantic_scheme") &&
         jsonPerception["effect_semantic_scheme"].IsString()) {
-      perception.setEffectSemantic(jsonPerception["effect_semantic"].GetString());
+      perception.setEffectSemanticScheme(jsonPerception["effect_semantic_scheme"].GetString());
     }
 
     loadingSuccess = loadingSuccess && loadChannels(jsonPerception["channels"], perception);
@@ -644,9 +644,12 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPe
     auto jsonLibrary = rapidjson::Value(rapidjson::kArrayType);
     extractLibrary(perception, jsonLibrary, jsonTree);
     jsonPerception.AddMember("effect_library", jsonLibrary, jsonTree.GetAllocator());
-    if (perception.getEffectSemantic().has_value()) {
-      jsonPerception.AddMember("effect_semantic_scheme", perception.getEffectSemantic().value(),
-                               jsonTree.GetAllocator());
+    if (perception.getEffectSemanticScheme().has_value()) {
+      jsonPerception.AddMember(
+          "effect_semantic_scheme",
+          rapidjson::Value(perception.getEffectSemanticScheme().value().c_str(),
+                           jsonTree.GetAllocator()),
+          jsonTree.GetAllocator());
     }
     auto jsonChannels = rapidjson::Value(rapidjson::kArrayType);
     extractChannels(perception, jsonChannels, jsonTree);
@@ -676,7 +679,10 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jso
                          jsonTree.GetAllocator()),
         jsonTree.GetAllocator());
     if (effect.getSemantic().has_value()) {
-      jsonEffect.AddMember("semantic", effect.getSemantic().value(), jsonTree.GetAllocator());
+      jsonEffect.AddMember(
+          "semantic",
+          rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
+          jsonTree.GetAllocator());
     }
     auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
     auto numKeyframes = effect.getKeyframesSize();
@@ -830,7 +836,10 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
           jsonTree.GetAllocator());
       jsonEffect.AddMember("position", effect.getPosition(), jsonTree.GetAllocator());
       if (effect.getSemantic().has_value()) {
-        jsonEffect.AddMember("semantic", effect.getSemantic().value(), jsonTree.GetAllocator());
+        jsonEffect.AddMember(
+            "semantic",
+            rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
+            jsonTree.GetAllocator());
       }
       if (effect.getEffectType() == types::EffectType::Reference) {
         jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());

@@ -900,8 +900,8 @@ auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> 
   std::string fxLibCountStr = fxLibCountBits.to_string();
   IOBinaryPrimitives::writeStrBits(fxLibCountStr, bitstream);
 
-  if (swriter.perception.getEffectSemantic().has_value()) {
-    std::string schemeStr = swriter.perception.getEffectSemantic().value();
+  if (swriter.perception.getEffectSemanticScheme().has_value()) {
+    std::string schemeStr = swriter.perception.getEffectSemanticScheme().value();
     std::bitset<MDPERCE_FLAG_SEMANTIC> flagSemanticBits(1);
     std::string flagSemanticStr = flagSemanticBits.to_string();
     IOBinaryPrimitives::writeStrBits(flagSemanticStr, bitstream);
@@ -965,7 +965,7 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
   if (flagScheme == 1) {
     int schemeLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_SCHEME_LENGTH);
     std::string schemeStr = IOBinaryPrimitives::readString(bitstream, idx, schemeLength);
-    sreader.perception.setEffectSemantic(schemeStr);
+    sreader.perception.setEffectSemanticScheme(schemeStr);
   }
 
   // read effect library size, unused but could be used for check
@@ -1038,10 +1038,10 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
 
   int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
   if (hasSemantic == 1) {
-    int layer_1 = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_SEMANTIC_LAYER_1);
-    int layer_2 = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_SEMANTIC_LAYER_2);
-
-    // TO DO READ SEMANTIC EFFECT CORRESPONDING TO LAYER_1/LAYER_2;
+    int semanticCode = IOBinaryPrimitives::readUInt(
+        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+    libraryEffect.setSemantic(
+        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
   }
   int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
   libraryEffect.setPosition(position);
@@ -1102,7 +1102,12 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
     std::string flagSemanticStr = flagSemanticBits.to_string();
     IOBinaryPrimitives::writeStrBits(flagSemanticStr, bitstream);
 
-    // TO DO GET CODE OF SEMANTIC EFFECT IN BITS
+    types::EffectSemantic semantic =
+        types::stringToEffectSemantic.at(libraryEffect.getSemantic().value());
+    std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
+        static_cast<int>(semantic));
+    std::string semanticStr = semanticBits.to_string();
+    IOBinaryPrimitives::writeStrBits(semanticStr, bitstream);
   } else {
     std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
     std::string flagSemanticStr = flagSemanticBits.to_string();
@@ -1919,7 +1924,13 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
     std::string flagSemanticStr = flagSemanticBits.to_string();
     IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
 
-    // TO DO GET CODE OF SEMANTIC EFFECT IN BITS
+    types::EffectSemantic semantic =
+        types::stringToEffectSemantic.at(swriter.effects[0].getSemantic().value());
+    std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
+        static_cast<int>(semantic));
+    std::string semanticStr = semanticBits.to_string();
+    IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
+
   } else {
     std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
     std::string flagSemanticStr = flagSemanticBits.to_string();
@@ -1951,7 +1962,12 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
       std::string flagSemanticStr = flagSemanticBits.to_string();
       IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
 
-      // TO DO GET CODE OF SEMANTIC EFFECT IN BITS
+      types::EffectSemantic semantic =
+          types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
+      std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
+          static_cast<int>(semantic));
+      std::string semanticStr = semanticBits.to_string();
+      IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
     } else {
       std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
       std::string flagSemanticStr = flagSemanticBits.to_string();
@@ -2235,12 +2251,12 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
 
-    int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
+  int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
   if (hasSemantic == 1) {
-    int layer_1 = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_SEMANTIC_LAYER_1);
-    int layer_2 = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_SEMANTIC_LAYER_2);
-
-    // TO DO READ SEMANTIC EFFECT CORRESPONDING TO LAYER_1/LAYER_2;
+    int semanticCode = IOBinaryPrimitives::readUInt(
+        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+    effect.setSemantic(
+        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
   }
 
   int effectPos = static_cast<int>(band.getBlockLength()) * static_cast<int>(band.getEffectsSize());
@@ -2262,10 +2278,10 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
 
   int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
   if (hasSemantic == 1) {
-    int layer_1 = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_SEMANTIC_LAYER_1);
-    int layer_2 = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_SEMANTIC_LAYER_2);
-
-    // TO DO READ SEMANTIC EFFECT CORRESPONDING TO LAYER_1/LAYER_2;
+    int semanticCode = IOBinaryPrimitives::readUInt(
+        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+    effect.setSemantic(
+        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
   }
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
