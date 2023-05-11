@@ -192,7 +192,7 @@ private:
                                  std::vector<std::vector<bool>> bufPacketBitstream,
                                  std::vector<bool> &packetBits) -> std::vector<bool>;
   static auto writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
-                                        std::vector<bool> &packetBits, StreamWriter &effectsId)
+                                        std::vector<bool> &packetBits, StreamWriter &swriter)
       -> std::vector<bool>;
   static auto readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
                                 types::Effect &effect, int &length) -> bool;
