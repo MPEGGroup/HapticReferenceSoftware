@@ -1063,8 +1063,9 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
   if (hasSemantic == 1) {
     int semanticCode = IOBinaryPrimitives::readUInt(
         bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    libraryEffect.setSemantic(
+    auto semantic = std::string(
         types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+    libraryEffect.setSemantic(semantic);
   }
   int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
   libraryEffect.setPosition(position);
@@ -1942,13 +1943,13 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
   std::string effectTypeStr = effectTypeBits.to_string();
   IOBinaryPrimitives::writeStrBits(effectTypeStr, packetBits);
 
-  if (swriter.effects[0].getSemantic().has_value()) {
+  if (swriter.bandStream.band.getEffectAt(0).getSemantic().has_value()) {
     std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
     std::string flagSemanticStr = flagSemanticBits.to_string();
     IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
 
-    types::EffectSemantic semantic =
-        types::stringToEffectSemantic.at(swriter.effects[0].getSemantic().value());
+    types::EffectSemantic semantic = types::stringToEffectSemantic.at(
+        swriter.bandStream.band.getEffectAt(0).getSemantic().value());
     std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
         static_cast<int>(semantic));
     std::string semanticStr = semanticBits.to_string();
@@ -2278,8 +2279,9 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   if (hasSemantic == 1) {
     int semanticCode = IOBinaryPrimitives::readUInt(
         bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    effect.setSemantic(
+    auto semantic = std::string(
         types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+    effect.setSemantic(semantic);
   }
 
   int effectPos = static_cast<int>(band.getBlockLength()) * static_cast<int>(band.getEffectsSize());
@@ -2303,8 +2305,9 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
   if (hasSemantic == 1) {
     int semanticCode = IOBinaryPrimitives::readUInt(
         bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    effect.setSemantic(
+    auto semantic = std::string(
         types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+    effect.setSemantic(semantic);
   }
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);

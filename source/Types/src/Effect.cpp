@@ -48,7 +48,7 @@ auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
 
 [[nodiscard]] auto Effect::getSemantic() const -> std::optional<std::string> { return semantic; }
 
-auto Effect::setSemantic(std::string newSemantic) -> void { semantic = newSemantic; }
+auto Effect::setSemantic(std::string &newSemantic) -> void { semantic = newSemantic; }
 
 [[nodiscard]] auto Effect::getPhase() const -> float { return phase; }
 

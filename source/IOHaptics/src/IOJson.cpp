@@ -145,7 +145,8 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
     loadingSuccess = loadingSuccess && loadLibrary(jsonPerception["effect_library"], perception);
     if (jsonPerception.HasMember("effect_semantic_scheme") &&
         jsonPerception["effect_semantic_scheme"].IsString()) {
-      perception.setEffectSemanticScheme(jsonPerception["effect_semantic_scheme"].GetString());
+      auto effectSemanticScheme = std::string(jsonPerception["effect_semantic_scheme"].GetString());
+      perception.setEffectSemanticScheme(effectSemanticScheme);
     }
 
     loadingSuccess = loadingSuccess && loadChannels(jsonPerception["channels"], perception);
@@ -242,7 +243,8 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
     types::Effect effect(position, phase, baseSignal, effectType);
     effect.setId(effectId);
     if (jsonEffect.HasMember("semantic") && jsonEffect["semantic"].IsString()) {
-      effect.setSemantic(jsonEffect["semantic"].GetString());
+      auto semantic = std::string(jsonEffect["semantic"].GetString());
+      effect.setSemantic(semantic);
     }
     if (jsonEffect.HasMember("keyframes")) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
@@ -453,7 +455,8 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
       effect.setId(jsonEffect["id"].GetInt());
     }
     if (jsonEffect.HasMember("semantic") && jsonEffect["semantic"].IsString()) {
-      effect.setSemantic(jsonEffect["semantic"].GetString());
+      auto semantic = std::string(jsonEffect["semantic"].GetString());
+      effect.setSemantic(semantic);
     }
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);

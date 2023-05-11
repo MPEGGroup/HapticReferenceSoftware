@@ -89,7 +89,7 @@ public:
   [[nodiscard]] auto getPosition() const -> int;
   auto setPosition(int newPosition) -> void;
   [[nodiscard]] auto getSemantic() const -> std::optional<std::string>;
-  auto setSemantic(std::string newSemantic) -> void;
+  auto setSemantic(std::string &newSemantic) -> void;
   [[nodiscard]] auto getPhase() const -> float;
 
   auto setPhase(float newPhase) -> void;

@@ -111,7 +111,7 @@ public:
   auto setAvatarId(int newAvatarId) -> void;
   [[nodiscard]] auto getEffectSemanticSchemeOrDefault() const -> std::string;
   [[nodiscard]] auto getEffectSemanticScheme() const -> std::optional<std::string>;
-  auto setEffectSemanticScheme(std::string newEffectSemantic) -> void;
+  auto setEffectSemanticScheme(std::string &newEffectSemantic) -> void;
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
