@@ -86,8 +86,8 @@ public:
 
   struct StreamWriter {
     int time = 0;
-    int timescale = TIME_TO_MS;
-    int packetDuration = DEFAULT_PACKET_DURATION;
+    unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE;
+    unsigned int packetDuration = DEFAULT_PACKET_DURATION;
     types::Haptics haptic;
     types::Perception perception;
     types::Channel channel;
@@ -107,10 +107,10 @@ public:
     std::vector<BandStream> bandStreamsHaptic;
     AUType auType = AUType::RAU;
     int level = -1;
-    int time = 0;
-    int packetLength = 0;
-    int packetDuration = 0;
-    int timescale = 1;
+    unsigned int time = 0;
+    unsigned int packetLength = 0;
+    unsigned int packetDuration = 0;
+    unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE;
     bool waitSync = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
@@ -221,6 +221,7 @@ private:
   static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, int &length) -> bool;
+  static auto readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   // static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect>
   // &effects)
@@ -287,6 +288,8 @@ private:
   static auto getNextEffectId(std::vector<int> &effectsId) -> int;
   static auto addTimestampEffect(std::vector<types::Effect> &effects, int timestamp) -> bool;
   static auto silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void;
+
+  static auto getNextSync(types::Haptics &haptic, types::Sync &sync, int &idxs) -> bool;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H

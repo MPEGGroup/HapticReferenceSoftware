@@ -54,10 +54,10 @@ void help() {
             << "\t-o, --output <OUTPUT_FILE>\toutput file" << std::endl
             << std::endl
             << "optional arguments:" << std::endl
-            << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
-            << "\t-s, --streaming\t\t\t use the decoder for the binary streaming format. Output a "
-               "file in a human-readable format"
-            << std::endl;
+            << "\t-h, --help\t\t\tshow this help message and exit" << std::endl;
+  //<< "\t-s, --streaming\t\t\t use the decoder for the binary streaming format. Output a "
+  //   "file in a human-readable format"
+  //<< std::endl;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -89,16 +89,16 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   Haptics hapticFile;
-  if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
+  // if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
 
-    if (!IOStream::readFile(filename, hapticFile)) {
-      return EXIT_FAILURE;
-    }
-  } else {
-    if (!IOBinary::loadFile(filename, hapticFile)) {
-      return EXIT_FAILURE;
-    }
+  if (!IOStream::readFile(filename, hapticFile)) {
+    return EXIT_FAILURE;
   }
+  //} else {
+  //  if (!IOBinary::loadFile(filename, hapticFile)) {
+  //    return EXIT_FAILURE;
+  //  }
+  //}
 
   IOJson::writeFile(hapticFile, output);
   return EXIT_SUCCESS;
