@@ -50,7 +50,8 @@ using haptics::types::Perception;
 
 namespace haptics::encoder {
 
-auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perception &out) -> int {
+auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, const unsigned int timescale,
+                        Perception &out) -> int {
   WavParser wavParser;
   wavParser.loadFile(filename);
   size_t numChannels = wavParser.getNumChannels();
@@ -95,7 +96,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
       if (PcmEncoder::convertToCurveBand(points, wavParser.getSamplerate(),
                                          config.curveFrequencyLimit > 0 ? config.curveFrequencyLimit
                                                                         : wavParser.getSamplerate(),
-                                         &myBand)) {
+                                         timescale, &myBand)) {
         if (out.getPerceptionModality() == types::PerceptionModality::Force ||
             out.getPerceptionModality() == types::PerceptionModality::Stiffness) {
           myBand.setCurveType(CurveType::Linear);
@@ -141,8 +142,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
 
 [[nodiscard]] auto PcmEncoder::convertToCurveBand(std::vector<std::pair<int, double>> &points,
                                                   const double samplerate,
-                                                  const double curveFrequencyLimit, Band *out)
-    -> bool {
+                                                  const double curveFrequencyLimit,
+                                                  const unsigned int timescale, Band *out) -> bool {
   if (out == nullptr || curveFrequencyLimit <= 0) {
     return false;
   }
@@ -157,7 +158,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, Perceptio
   int lastPosition = -1;
   for (std::pair<int, double> p : points) {
     std::optional<int> f;
-    auto position = static_cast<int>(S_2_MS * p.first / samplerate);
+    auto position = static_cast<int>(timescale * p.first / samplerate); // to samples
     if (position > lastPosition) {
       myEffect.addKeyframe(position, p.second, f);
     } else if (position == lastPosition) {

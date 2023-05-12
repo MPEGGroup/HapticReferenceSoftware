@@ -34,7 +34,7 @@
 #ifndef IOBINARYBANDS_H
 #define IOBINARYBANDS_H
 
-//#include <IOHaptics>
+// #include <IOHaptics>
 #include <Spiht/include/Spiht_Dec.h>
 #include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Band.h>

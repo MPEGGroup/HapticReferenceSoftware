@@ -72,18 +72,20 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
     std::cerr << "Invalid HJIF input file: missing required field" << std::endl;
     return false;
   }
+
   auto version = std::string(jsonTree["version"].GetString());
   auto profile = std::string(jsonTree["profile"].GetString());
   auto level = static_cast<uint8_t>(jsonTree["level"].GetUint());
   auto date = std::string(jsonTree["date"].GetString());
   auto description = std::string(jsonTree["description"].GetString());
-  auto timescale = jsonTree["timescale"].GetUint();
   haptic.setVersion(version);
   haptic.setProfile(profile);
   haptic.setLevel(level);
   haptic.setDate(date);
   haptic.setDescription(description);
-  haptic.setTimescale(timescale);
+  if (jsonTree.HasMember("timescale") && jsonTree["timescale"].IsInt()) {
+    haptic.setTimescale(jsonTree["timescale"].GetInt());
+  }
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
   loadingSuccess = loadingSuccess && loadSyncs(jsonTree["syncs"], haptic);
@@ -627,14 +629,13 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
                      rapidjson::Value(haptic.getProfile().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
   jsonTree.AddMember("level", haptic.getLevel(), jsonTree.GetAllocator());
+  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
   jsonTree.AddMember("description",
                      rapidjson::Value(haptic.getDescription().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
-  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
-                     jsonTree.GetAllocator());
-  if (haptic.getTimescale().has_value()) {
-    jsonTree.AddMember("timescale", haptic.getTimescale().value(), jsonTree.GetAllocator());
-  }
+  jsonTree.AddMember("timescale", haptic.getTimescaleOrDefault(), jsonTree.GetAllocator());
+
   auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
   extractAvatars(haptic, jsonAvatars, jsonTree);
   jsonTree.AddMember("avatars", jsonAvatars, jsonTree.GetAllocator());

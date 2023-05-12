@@ -220,7 +220,8 @@ auto main(int argc, char *argv[]) -> int {
           config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
                                                                            enable_vectorial);
         }
-        codeExit = PcmEncoder::encode(filename, config, myPerception);
+        codeExit =
+            PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
       }
 
       if (codeExit == EXIT_SUCCESS) {
@@ -259,7 +260,8 @@ auto main(int argc, char *argv[]) -> int {
       config =
           haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
     }
-    codeExit = PcmEncoder::encode(filename, config, myPerception);
+    codeExit =
+        PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
     hapticFile.addPerception(myPerception);
   } else if (ext == "hjif") {
     std::cout << "The HJIF file to encode : " << filename << std::endl;

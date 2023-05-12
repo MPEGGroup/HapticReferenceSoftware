@@ -114,10 +114,12 @@ struct EncodingConfig {
 
 class PcmEncoder {
 public:
-  auto static encode(std::string &filename, EncodingConfig &config, types::Perception &out) -> int;
+  auto static encode(std::string &filename, EncodingConfig &config, unsigned int timescale,
+                     types::Perception &out) -> int;
   [[nodiscard]] auto static convertToCurveBand(std::vector<std::pair<int, double>> &points,
                                                double samplerate, double curveFrequencyLimit,
-                                               haptics::types::Band *out) -> bool;
+                                               unsigned int timescale, haptics::types::Band *out)
+      -> bool;
   [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
       -> std::vector<std::pair<int, double>>;
 };
