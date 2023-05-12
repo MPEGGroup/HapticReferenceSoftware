@@ -192,7 +192,7 @@ private:
                                  std::vector<std::vector<bool>> bufPacketBitstream,
                                  std::vector<bool> &packetBits) -> std::vector<bool>;
   static auto writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
-                                        std::vector<bool> &packetBits, std::vector<int> &effectsId)
+                                        std::vector<bool> &packetBits, StreamWriter &swriter)
       -> std::vector<bool>;
   static auto readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
                                 types::Effect &effect, int &length) -> bool;
@@ -223,8 +223,9 @@ private:
   static auto readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, int &length) -> bool;
   static auto readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
-  static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect> &effects)
-      -> bool;
+  // static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect>
+  // &effects)
+  //     -> bool;
   static auto readReferenceDevice(std::vector<bool> &bitstream, types::ReferenceDevice &refDevice,
                                   int &length) -> bool;
   static auto readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
