@@ -96,6 +96,8 @@ auto help() -> void {
       << "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
          "band for the whole frequency spectrum. This argument will only affect PCM input content."
       << std::endl
+      << "\t-ts, \t\t\tspecify the timescale"
+      << std::endl
       << std::endl;
 }
 
@@ -156,6 +158,9 @@ auto main(int argc, char *argv[]) -> int {
   bool enable_vectorial = !inputParser.cmdOptionExists("--disable-vectorial");
 
   Haptics hapticFile;
+  if (inputParser.cmdOptionExists("-ts")) {
+    hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
+  }
   Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
@@ -292,6 +297,6 @@ auto main(int argc, char *argv[]) -> int {
   } else {
     IOJson::writeFile(hapticFile, output);
   }
-
+  
   return codeExit;
 }
