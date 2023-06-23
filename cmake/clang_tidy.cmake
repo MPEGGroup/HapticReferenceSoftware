@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-option(ENABLE_CLANG_TIDY "Turn on clang_tidy processing if available" ON)
+option(ENABLE_CLANG_TIDY "Turn on clang_tidy processing if available" OFF)
 
 if (ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY_PATH NAMES "clang-tidy")

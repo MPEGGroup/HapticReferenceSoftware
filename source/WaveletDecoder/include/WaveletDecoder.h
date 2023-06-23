@@ -56,7 +56,7 @@ constexpr double MS_2_S_WAVELET = 0.001;
 class WaveletDecoder {
 public:
   auto static decodeBand(Band &band) -> std::vector<double>;
-  void static transformBand(Band &band);
+  void static transformBand(Band &band, unsigned int timescale);
   auto static decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl)
       -> std::vector<double>;
 

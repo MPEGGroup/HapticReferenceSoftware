@@ -129,12 +129,12 @@ auto Channel::findBandAvailable(const int position, const int duration,
   return nullptr;
 }
 
-auto Channel::Evaluate(double position) -> double {
+auto Channel::Evaluate(double position, unsigned int timescale) -> double {
 
   double res = 0;
 
   for (haptics::types::Band &b : bands) {
-    res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
+    res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit(), timescale);
   }
 
   if (res < -1) {
@@ -146,10 +146,10 @@ auto Channel::Evaluate(double position) -> double {
   return res;
 }
 
-auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
+auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale) -> std::vector<double> {
   std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
   for (haptics::types::Band &b : bands) {
-    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad);
+    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, timescale);
     for (uint32_t i = 0; i < bandAmp.size(); i++) {
       channelAmp[i] += bandAmp[i];
       if (channelAmp[i] < -1) {

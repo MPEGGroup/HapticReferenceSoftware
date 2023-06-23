@@ -54,7 +54,8 @@ public:
 
   static auto readBandHeader(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
       -> bool;
-  static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
+  static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits,
+                           unsigned int timescale)
       -> bool;
   static auto readBandBodyBool(types::Band &band, std::vector<bool> &bitstream) -> bool;
   static auto readWaveletEffect(types::Effect &effect, types::Band &band,

@@ -118,7 +118,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, const uns
       if (config.curveFrequencyLimit > 0) {
         if (config.vectorial_enabled) {
           auto interpolationSignal =
-              myBand.EvaluationBand(signal.size(), static_cast<int>(wavParser.getSamplerate()), 0);
+              myBand.EvaluationBand(signal.size(), static_cast<int>(wavParser.getSamplerate()), 0, timescale);
           for (size_t i = 0; i < signal_wavelet.size(); i++) {
             signal_wavelet[i] -= interpolationSignal[i];
           }

@@ -100,7 +100,7 @@ auto Band::removeEffectAt(int index) -> bool {
          (position <= start && position + length >= stop);
 }
 
-auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double {
+auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit, unsigned int timescale) -> double {
   // OUT OUF BOUND CHECK
   if (effects.empty() ||
       ((this->bandType != types::BandType::WaveletWave) &&
@@ -112,7 +112,7 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
 
   for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
     if (it->getPosition() <= position) {
-      return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit);
+      return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
     }
     if (it == effects.begin()) {
       break;
@@ -123,7 +123,7 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
 }
 
 auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
-                            int highFrequencyLimit) -> double {
+                            int highFrequencyLimit, unsigned int timescale) -> double {
 
   switch (this->bandType) {
   case BandType::Curve:
@@ -131,7 +131,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
   case BandType::WaveletWave:
-    return effect->EvaluateWavelet(position, this->getUpperFrequencyLimit(), this->timescale);
+    return effect->EvaluateWavelet(position, this->getUpperFrequencyLimit(), timescale);
   case BandType::Transient: {
     double res = 0;
     if (effect->getPosition() <= position &&
@@ -146,7 +146,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   }
 }
 
-auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad)
+auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
     -> std::vector<double> { // TODO: check impact of pad (which is in ms)
   std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
@@ -159,7 +159,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad)
         myKeyframe = e.getKeyframeAt(i);
         keyframes[i].first =
             static_cast<int>(myKeyframe.getRelativePosition().value() * fs /
-                             this->timescale); // assuming position in ticks as input
+                             timescale); // assuming position in ticks as input
         if (i > 0) {
           keyframes[i].first -= keyframes[0].first;
         }
@@ -194,7 +194,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad)
         int count = 0;
         int position = static_cast<int>(
             (e.getPosition() + pad) * fs *
-            this->timescale); // position converted from ticks to samples rel. to fs
+            timescale); // position converted from ticks to samples rel. to fs
         if (position < 0) {
           count = -position;
           position = 0;
@@ -209,7 +209,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad)
     break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double position = this->timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
+      double position = timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
                                            (pad * MS_2_S)); // position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
@@ -221,7 +221,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad)
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
         if (it->getPosition() <= position) {
-          bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit);
+          bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit, timescale);
         }
         if (it == effects.begin()) {
           break;
