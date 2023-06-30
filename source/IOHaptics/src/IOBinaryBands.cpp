@@ -117,8 +117,8 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
       position = effectIndex * (int)(band.getBlockLength() * (double)timescale /
                                      (double)band.getUpperFrequencyLimit());
     } else {
-      position = static_cast<int>(IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(
-          file, unusedBits));
+      position = static_cast<int>(
+          IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
     }
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);

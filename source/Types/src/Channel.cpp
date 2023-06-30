@@ -146,7 +146,8 @@ auto Channel::Evaluate(double position, unsigned int timescale) -> double {
   return res;
 }
 
-auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale) -> std::vector<double> {
+auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+    -> std::vector<double> {
   std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
   for (haptics::types::Band &b : bands) {
     std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, timescale);

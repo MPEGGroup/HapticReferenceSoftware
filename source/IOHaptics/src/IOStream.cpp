@@ -2123,7 +2123,8 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       addTimestampEffect(effects, static_cast<int>(sreader.time));
     } else {
       types::Effect effect;
-      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx, sreader.timescale);
+      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx,
+                                  sreader.timescale);
       effects.push_back(effect);
     }
     return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex,
@@ -2267,7 +2268,8 @@ auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polyn
 }
 
 auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                 types::Effect &effect, int &length, unsigned int timescale) -> bool {
+                                 types::Effect &effect, int &length, unsigned int timescale)
+    -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
@@ -2285,7 +2287,9 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
     effect.setSemantic(semantic);
   }
 
-  int effectPos = static_cast<int>((double)timescale * band.getBlockLength() * (double)band.getEffectsSize() / (double)band.getUpperFrequencyLimit());
+  int effectPos =
+      static_cast<int>((double)timescale * band.getBlockLength() * (double)band.getEffectsSize() /
+                       (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);

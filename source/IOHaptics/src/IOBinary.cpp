@@ -774,7 +774,8 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file,
           continue;
         }
 
-        if (!IOBinaryBands::readBandBody(myBand, file, unusedBits, haptic.getTimescaleOrDefault())) {
+        if (!IOBinaryBands::readBandBody(myBand, file, unusedBits,
+                                         haptic.getTimescaleOrDefault())) {
           return false;
         }
 

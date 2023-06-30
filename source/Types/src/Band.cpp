@@ -100,7 +100,8 @@ auto Band::removeEffectAt(int index) -> bool {
          (position <= start && position + length >= stop);
 }
 
-auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit, unsigned int timescale) -> double {
+auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                    unsigned int timescale) -> double {
   // OUT OUF BOUND CHECK
   if (effects.empty() ||
       ((this->bandType != types::BandType::WaveletWave) &&
@@ -157,9 +158,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
       for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
         types::Keyframe myKeyframe;
         myKeyframe = e.getKeyframeAt(i);
-        keyframes[i].first =
-            static_cast<int>(myKeyframe.getRelativePosition().value() * fs /
-                             timescale); // assuming position in ticks as input
+        keyframes[i].first = static_cast<int>(myKeyframe.getRelativePosition().value() * fs /
+                                              timescale); // assuming position in ticks as input
         if (i > 0) {
           keyframes[i].first -= keyframes[0].first;
         }
@@ -192,9 +192,9 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
         }
 
         int count = 0;
-        int position = static_cast<int>(
-            (e.getPosition() + pad) * fs *
-            timescale); // position converted from ticks to samples rel. to fs
+        int position =
+            static_cast<int>((e.getPosition() + pad) * fs *
+                             timescale); // position converted from ticks to samples rel. to fs
         if (position < 0) {
           count = -position;
           position = 0;
@@ -210,7 +210,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
       double position = timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
-                                           (pad * MS_2_S)); // position in ticks needed
+                                     (pad * MS_2_S)); // position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
                            effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
@@ -221,7 +221,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
 
       for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
         if (it->getPosition() <= position) {
-          bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit, timescale);
+          bandAmp[ti] +=
+              EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit, timescale);
         }
         if (it == effects.begin()) {
           break;
