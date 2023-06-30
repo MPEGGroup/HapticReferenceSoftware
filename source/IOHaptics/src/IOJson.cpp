@@ -49,6 +49,56 @@
 
 namespace haptics::io {
 
+auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjson::SizeType length)
+    -> const rapidjson::SchemaDocument * {
+  // Resolve the uri and returns a pointer to that schema.
+  rapidjson::Document sd;
+
+  printf("GetRemoteDocument %s %d \n", uri, length);
+  std::string path = std::string(JSON_SCHEMA_PATH) + "/" + std::string(uri, length);
+  std::ifstream ifs(path);
+  rapidjson::IStreamWrapper isw(ifs);
+  if (sd.ParseStream(isw).HasParseError()) {
+    std::cerr << "The following JSON schema is invalid: " << uri << std::endl;
+    if (sd.HasParseError()) {
+      std::cerr << sd.GetParseError() << std::endl;
+    }
+  }
+  rapidjson::SchemaDocument *m_s = new rapidjson::SchemaDocument(sd, 0, 0U, this);
+  return m_s;
+}
+
+
+auto IOJson::schemaConformanceCheck(const rapidjson::Document &hjifFile,
+                                    const std::string &filePath) -> bool {
+  MyRemoteSchemaDocumentProvider provider;
+  rapidjson::Document sd;
+  std::string path = std::string(JSON_SCHEMA_PATH) + "/MPEG_haptics.schema.json";
+  std::ifstream ifs(path);
+  rapidjson::IStreamWrapper isw(ifs);
+  if (sd.ParseStream(isw).HasParseError()) {
+    std::cerr << "The following JSON schema is invalid: " << path << std::endl;
+  }
+  rapidjson::SchemaDocument schema(sd); // Compile a Document to SchemaDocument
+
+  rapidjson::SchemaValidator validator(schema);
+
+  if (!hjifFile.Accept(validator)) {
+    std::cerr << "The following HJIF file does not match the MPEG specifications: " << filePath
+              << std::endl;
+    // Output diagnostic information
+    rapidjson::StringBuffer sb;
+    validator.GetInvalidSchemaPointer().StringifyUriFragment(sb);
+    std::cerr << "Invalid schema: " << sb.GetString() << std::endl;
+    std::cerr << "Invalid keyword: " << validator.GetInvalidSchemaKeyword() << std::endl;
+    sb.Clear();
+    validator.GetInvalidDocumentPointer().StringifyUriFragment(sb);
+    std::cerr << "Invalid document:" << sb.GetString() << std::endl;
+    return false;
+  }
+  return true;
+}
+
 auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bool {
   bool loadingSuccess = true;
   std::ifstream ifs(filePath);
@@ -60,6 +110,9 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   }
   if (!jsonTree.IsObject()) {
     std::cerr << "Invalid HJIF input file: not a JSON object" << std::endl;
+    return false;
+  }
+  if (!schemaConformanceCheck(jsonTree, filePath)) {
     return false;
   }
   if (!(jsonTree.HasMember("version") && jsonTree.HasMember("profile") &&

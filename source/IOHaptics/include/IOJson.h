@@ -42,14 +42,24 @@
 #pragma warning(push)
 #pragma warning(disable : 4996 26451 26495 26812 33010)
 #endif
+#include "rapidjson/schema.h"
 #include <rapidjson/document.h>
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
 
 namespace haptics::io {
+
+class MyRemoteSchemaDocumentProvider : public rapidjson::IRemoteSchemaDocumentProvider {
+public:
+  virtual auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
+      -> const rapidjson::SchemaDocument *;
+};
+
 class IOJson {
 public:
+  static auto schemaConformanceCheck(const rapidjson::Document &hjifFile,
+                                     const std::string &filePath) -> bool;
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
       -> bool;
