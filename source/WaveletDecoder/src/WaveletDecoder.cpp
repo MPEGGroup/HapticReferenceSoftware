@@ -77,8 +77,8 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
     }
     std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
     Effect newEffect;
-    newEffect.setPosition((double)b * (double)bl * (double)timescale /
-                          (double)band.getUpperFrequencyLimit());
+    newEffect.setPosition(
+        (int)((double)b * (double)bl * (double)timescale / (double)band.getUpperFrequencyLimit()));
     for (int i = 0; i < bl; i++) {
       Keyframe keyframe;
       keyframe.setAmplitudeModulation(block_time[i]);
