@@ -63,8 +63,8 @@ const int ACTUAL_FREQUENCY_MAX = 300;
 
 namespace haptics::encoder {
 
-[[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out)
-    -> int {
+[[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out,
+                                       const unsigned int timescale) -> int {
   if (out.getChannelsSize() > 1) {
     return EXIT_FAILURE;
   }
@@ -98,7 +98,7 @@ namespace haptics::encoder {
   for (auto &e : pattern) {
     if (e.HasMember("ParameterCurve")) {
       if (e["ParameterCurve"]["ParameterID"] == "HapticIntensityControl") {
-        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &amplitudes);
+        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &amplitudes, timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN AMPLITUDE EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -106,7 +106,7 @@ namespace haptics::encoder {
       }
 
       if (e["ParameterCurve"]["ParameterID"] == "HapticSharpnessControl") {
-        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &frequencies);
+        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &frequencies, timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN FREQUENCY EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -179,8 +179,8 @@ namespace haptics::encoder {
 }
 
 [[nodiscard]] auto AhapEncoder::extractKeyframes(const rapidjson::Value::Object &parameterCurve,
-                                                 std::vector<std::pair<int, double>> *keyframes)
-    -> int {
+                                                 std::vector<std::pair<int, double>> *keyframes,
+                                                 const unsigned int timescale) -> int {
   if (!parameterCurve.HasMember("Time") || !parameterCurve["Time"].IsNumber() ||
       !parameterCurve.HasMember("ParameterCurveControlPoints") ||
       !parameterCurve["ParameterCurveControlPoints"].IsArray()) {
@@ -195,8 +195,9 @@ namespace haptics::encoder {
 
     std::pair<int, double> k;
     // TIME + curve offset
+
     k.first = static_cast<int>((kahap["Time"].GetDouble() + parameterCurve["Time"].GetDouble()) *
-                               SEC_TO_MSEC);
+                               (double)timescale);
     // VALUE
     k.second = kahap["ParameterValue"].GetDouble();
 
