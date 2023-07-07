@@ -33,8 +33,10 @@
 
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOJsonPrimitives.h>
+#include <Tools/include/tools.h>
 #include <algorithm>
 #include <iostream>
+#include <regex>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -68,6 +70,329 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
   return m_s;
 }
 
+auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool {
+  bool conformant = true;
+  // check version
+  auto version = haptic.getVersion();
+  const std::regex txt_regex("([0-9]{4})(-([0-9]))?");
+  std::smatch pieces_match;
+  if (pieces_match.size() == 1) {
+    if (haptics::tools::is_number(pieces_match[0])) {
+      int year = atoi(pieces_match[0].str().c_str());
+      if (year < 2023) {
+        std::cerr << "Incorrect version, the year should be greater or equal to 2023." << std::endl;
+        conformant = false;
+      }
+    } else {
+      std::cerr << "Incorrect version, the year should be a number." << std::endl;
+      conformant = false;
+    }
+    if (haptics::tools::is_number(pieces_match[0])) {
+      int amd = atoi(pieces_match[0].str().c_str());
+      if (amd <= 0) {
+        std::cerr << "Incorrect version, the amendment should be greater than 0." << std::endl;
+        conformant = false;
+      }
+    } else {
+      std::cerr << "Incorrect version, the amendement should be a number." << std::endl;
+      conformant = false;
+    }
+  } else {
+    std::cerr << "Incorrect version, the value should match the following format: XXXX or XXXX-Y, "
+                 "where XXXX is the year of publication and Y is the amendment number, if any."
+              << std::endl;
+    conformant = false;
+  }
+
+  // check profile
+  auto profile = haptic.getProfile();
+  if (profile != "Main" && profile != "Simple Parametric") {
+    std::cerr << "Unknown profile, possible values are \"Main\" and \"Simple Parametric\"."
+              << std::endl;
+    conformant = false;
+  }
+
+  // check level
+  auto level = haptic.getLevel();
+  if (level != 1 && level != 2) {
+    std::cerr << "Unknown level, possible values are 1 and 2." << std::endl;
+    conformant = false;
+  }
+
+  // check date
+  // TODO
+  auto date = haptic.getDate();
+
+  if (date == "TODO") {
+    std::cerr << "Invalid date. The date format shall follow the ISO 8601 standard." << std::endl;
+    conformant = false;
+  }
+
+  auto timescale = haptic.getTimescaleOrDefault();
+  if (profile == "Simple Parametric" && timescale != 1000) {
+    std::cerr << "Incorrect timescale. The simple parametric profile only support a value of 1000"
+              << std::endl;
+    conformant = false;
+  }
+
+  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+    conformant &= semanticConformanceCheckAvatar(haptic.getAvatarAt(i), haptic);
+  }
+
+  for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
+    conformant &= semanticConformanceCheckPerception(haptic.getPerceptionAt(i), haptic);
+  }
+
+  return conformant;
+}
+auto IOJson::semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptics &haptic) -> bool {
+  bool conformant = true;
+  // check id uniqueness
+  auto id = avatar.getId();
+  unsigned int nbInstances = 0;
+  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+    if (haptic.getAvatarAt(i).getId() == id) {
+      nbInstances++;
+    }
+  }
+  if (nbInstances > 1) {
+    std::cerr << "Invalid avatar id. Id " << id << " is not unique." << std::endl;
+    conformant = false;
+  }
+  return conformant;
+}
+
+auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
+                                                types::Haptics &haptic) -> bool {
+  bool conformant = true;
+  // check id uniqueness
+  auto id = perception.getId();
+  unsigned int nbInstances = 0;
+  for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
+    if (haptic.getPerceptionAt(i).getId() == id) {
+      nbInstances++;
+    }
+  }
+  if (nbInstances > 1) {
+    std::cerr << "Invalid perception id. Id " << id << " is not unique." << std::endl;
+    conformant = false;
+  }
+
+  // check that the perception modality is allowed for the given profile and level
+  if (haptic.getProfile() == "Simple Parametric" && haptic.getLevel() == 1) {
+    auto modality = perception.getPerceptionModality();
+    if (!(modality == haptics::types::PerceptionModality::Force ||
+          modality == haptics::types::PerceptionModality::Vibrotactile ||
+          modality == haptics::types::PerceptionModality::Stiffness ||
+          modality == haptics::types::PerceptionModality::VibrotactileTexture)) {
+
+      std::cerr << "The perception modality "
+                << haptics::types::perceptionModalityToString.at(modality) << "of perception " << id
+                << " is not allowed for the level 1 of the Simple Parametric profile." << std::endl;
+      conformant = false;
+    }
+  }
+
+  // check that the avatar id exists
+  auto avatarId = perception.getAvatarId();
+  bool validAvatarId = false;
+  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+    if (haptic.getAvatarAt(i).getId() == avatarId) {
+      validAvatarId = true;
+    }
+  }
+  if (!validAvatarId) {
+    std::cerr << "Avatar id " << avatarId << " of perception " << id << " does not exist."
+              << std::endl;
+    conformant = false;
+  }
+
+  // Check the URN
+  // TODO
+  auto semanticSchemeURN = perception.getEffectSemanticScheme();
+  if (semanticSchemeURN) {
+    std::cerr << "The semantic scheme URN of perception " << id << " is invalid." << std::endl;
+    conformant = false;
+  }
+
+  // check the number of channels
+  if (haptic.getLevel() == 1) {
+    if (perception.getChannelsSize() > 128) {
+      std::cerr << "The number of channels in perception " << id
+                << " is too high. The level 1 only supports up to 128 channels." << std::endl;
+      conformant = false;
+    }
+  } else if (haptic.getLevel() == 2) {
+    if (perception.getChannelsSize() > 65536) {
+      std::cerr << "The number of channels in perception " << id
+                << " is too high. The level 2 only supports up to 65536 channels." << std::endl;
+      conformant = false;
+    }
+  }
+
+  for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+    conformant &=
+        semanticConformanceCheckReferenceDevice(perception.getReferenceDeviceAt(i), perception);
+  }
+
+  for (unsigned int i = 0; i < perception.getChannelsSize(); i++) {
+    conformant &= semanticConformanceCheckChannel(perception.getChannelAt(i), perception, haptic);
+  }
+
+  for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+    conformant &=
+        semanticConformanceCheckLibraryEffect(perception.getBasisEffectAt(i), perception, haptic);
+  }
+
+  return conformant;
+}
+auto IOJson::semanticConformanceCheckReferenceDevice(types::ReferenceDevice &referenceDevice,
+                                                     types::Perception &perception) -> bool {
+  bool conformant = true;
+  // check id uniqueness
+  auto id = referenceDevice.getId();
+  unsigned int nbInstances = 0;
+  for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+    if (perception.getReferenceDeviceAt(i).getId() == id) {
+      nbInstances++;
+    }
+  }
+  if (nbInstances > 1) {
+    std::cerr << "Invalid reference device id for perception " << perception.getId() << ".Id " << id
+              << " is not unique." << std::endl;
+    conformant = false;
+  }
+  return conformant;
+}
+
+auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Perception &perception,
+                                             types::Haptics &haptic) -> bool {
+  bool conformant = true;
+  // check id uniqueness
+  auto id = channel.getId();
+  unsigned int nbInstances = 0;
+  for (unsigned int i = 0; i < perception.getChannelsSize(); i++) {
+    if (perception.getChannelAt(i).getId() == id) {
+      nbInstances++;
+    }
+  }
+  if (nbInstances > 1) {
+    std::cerr << "Invalid channel id for perception " << perception.getId() << ".Id " << id
+              << " is not unique." << std::endl;
+    conformant = false;
+  }
+
+  // check that the reference device id exists
+  auto referenceDeviceId = channel.getReferenceDeviceId();
+  if (referenceDeviceId.has_value()) {
+    bool validReferenceDeviceId = false;
+    for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+      if (perception.getReferenceDeviceAt(i).getId() == referenceDeviceId) {
+        validReferenceDeviceId = true;
+      }
+    }
+    if (!validReferenceDeviceId) {
+      std::cerr << "Reference device id " << referenceDeviceId.value() << " of channel " << id
+                << " of perception " << perception.getId() << " does not exist." << std::endl;
+      conformant = false;
+    }
+  }
+
+  // check the number of bands
+  if (haptic.getLevel() == 1) {
+    if (channel.getBandsSize() > 7) {
+      std::cerr << "The number of bands in channel " << id << " of perception "
+                << perception.getId()
+                << " is too high. The level 1 only supports up to 128 bands per channel."
+                << std::endl;
+      conformant = false;
+    }
+  } else if (haptic.getLevel() == 2) {
+    if (channel.getBandsSize() > 64) {
+      std::cerr << "The number of channels in channel " << id << " of perception "
+                << perception.getId()
+                << " is too high. The level 2 only supports up to 65536 bands per channel."
+                << std::endl;
+      conformant = false;
+    }
+  }
+
+  for (unsigned int i = 0; i < channel.getBandsSize(); i++) {
+    conformant &= semanticConformanceCheckBand(channel.getBandAt(i), channel, perception, haptic);
+  }
+
+  return conformant;
+}
+auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &channel,
+                                          types::Perception &perception, types::Haptics &haptic)
+    -> bool {
+  bool conformant = true;
+  // Check the absence of the curve type for bands that are not curve bands
+  auto bandType = band.getBandType();
+  auto curveType = band.getCurveType();
+  if (bandType != haptics::types::BandType::Curve && curveType.has_value()) {
+    std::cerr << "The curve type should only be specified for Curve Bands in channel "
+              << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
+    conformant = false;
+  }
+  if (haptic.getProfile() == "Simple Parametric") {
+    if (band.getBandType() == haptics::types::BandType::WaveletWave) {
+      std::cerr << "The Simple Parametric profile does not support Wavelet bands in channel "
+                << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
+      conformant = false;
+    }
+  }
+
+  for (unsigned int i = 0; i < band.getEffectsSize(); i++) {
+    conformant &=
+        semanticConformanceCheckEffect(band.getEffectAt(i), band, channel, perception, haptic);
+  }
+
+  return conformant;
+}
+auto IOJson::semanticConformanceCheckEffect(types::Effect &effect, types::Band &band,
+                                            types::Channel &channel, types::Perception &perception,
+                                            types::Haptics &haptic) -> bool {
+  bool conformant = true;
+  auto profile = haptic.getProfile();
+  if (profile == "Simple Parametric") {
+    if (effect.getEffectType() == types::EffectType::Composite) {
+      std::cerr << "The Simple Parametric profile does not support Composite Effect in channel "
+                << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
+      conformant = false;
+    }
+  }
+
+  return conformant;
+}
+auto IOJson::semanticConformanceCheckLibraryEffect(types::Effect &effect,
+                                                   types::Perception &perception,
+                                                   types::Haptics &haptic) -> bool {
+  bool conformant = true;
+  auto profile = haptic.getProfile();
+  if (profile == "Simple Parametric") {
+    if (effect.getEffectType() == types::EffectType::Composite) {
+      std::cerr << "The Simple Parametric profile does not support Composite Effect in perception "
+                << perception.getId() << " for effect " << effect.getId() << "." << std::endl;
+      conformant = false;
+    }
+  }
+
+  // check id uniqueness
+  auto id = effect.getId();
+  unsigned int nbInstances = 0;
+  for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+    if (perception.getBasisEffectAt(i).getId() == id) {
+      nbInstances++;
+    }
+  }
+  if (nbInstances > 1) {
+    std::cerr << "Invalid library effect id for perception " << perception.getId() << ".Id " << id
+              << " is not unique." << std::endl;
+    conformant = false;
+  }
+  return conformant;
+}
 
 auto IOJson::schemaConformanceCheck(const rapidjson::Document &hjifFile,
                                     const std::string &filePath) -> bool {
@@ -142,6 +467,10 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
   loadingSuccess = loadingSuccess && loadSyncs(jsonTree["syncs"], haptic);
+  if (!semanticConformanceCheckExperience(haptic)) {
+    std::cerr << "The HJIF input files is not conformant to the specification." << std::endl;
+    return false;
+  }
   return loadingSuccess;
 }
 
@@ -924,10 +1253,13 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
                        rapidjson::Value(types::bandTypeToString.at(band.getBandType()).c_str(),
                                         jsonTree.GetAllocator()),
                        jsonTree.GetAllocator());
-    jsonBand.AddMember("curve_type",
-                       rapidjson::Value(types::curveTypeToString.at(band.getCurveType()).c_str(),
-                                        jsonTree.GetAllocator()),
-                       jsonTree.GetAllocator());
+    if (band.getCurveType().has_value()) {
+      jsonBand.AddMember(
+          "curve_type",
+          rapidjson::Value(types::curveTypeToString.at(band.getCurveTypeOrDefault()).c_str(),
+                           jsonTree.GetAllocator()),
+          jsonTree.GetAllocator());
+    }
     jsonBand.AddMember("block_length", band.getBlockLength(), jsonTree.GetAllocator());
     jsonBand.AddMember("lower_frequency_limit", band.getLowerFrequencyLimit(),
                        jsonTree.GetAllocator());

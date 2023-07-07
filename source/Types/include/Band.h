@@ -56,7 +56,8 @@ public:
       , effects({}){};
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
-  [[nodiscard]] auto getCurveType() const -> CurveType;
+  [[nodiscard]] auto getCurveTypeOrDefault() const -> CurveType;
+  [[nodiscard]] auto getCurveType() const -> std::optional<CurveType>;
   auto setCurveType(CurveType newCurveType) -> void;
   [[nodiscard]] auto getBlockLength() const -> double;
   auto setBlockLength(double newBlockLength) -> void;
@@ -79,11 +80,12 @@ public:
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
 private:
+  static constexpr CurveType DEFAULT_CURVE_TYPE = CurveType::Unknown;
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit) -> double;
 
   BandType bandType = BandType::VectorialWave;
-  CurveType curveType = CurveType::Unknown;
+  std::optional<CurveType> curveType;
   double blockLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;

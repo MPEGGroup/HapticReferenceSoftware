@@ -60,6 +60,24 @@ class IOJson {
 public:
   static auto schemaConformanceCheck(const rapidjson::Document &hjifFile,
                                      const std::string &filePath) -> bool;
+  static auto semanticConformanceCheckExperience(types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckPerception(types::Perception &perception,
+                                                 types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckReferenceDevice(types::ReferenceDevice &referenceDevice,
+                                                      types::Perception &perception) -> bool;
+  static auto semanticConformanceCheckChannel(types::Channel &channel,
+                                              types::Perception &perception, types::Haptics &haptic)
+      -> bool;
+  static auto semanticConformanceCheckBand(types::Band &band, types::Channel &channel,
+                                           types::Perception &perception, types::Haptics &haptic)
+      -> bool;
+  static auto semanticConformanceCheckEffect(types::Effect &effect, types::Band &band,
+                                             types::Channel &channel, types::Perception &perception,
+                                             types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckLibraryEffect(types::Effect &effect,
+                                                    types::Perception &perception,
+                                                    types::Haptics &haptic) -> bool;
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
       -> bool;

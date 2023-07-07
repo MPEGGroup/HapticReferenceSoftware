@@ -41,7 +41,13 @@ namespace haptics::types {
 
 auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
-[[nodiscard]] auto Band::getCurveType() const -> CurveType { return curveType; }
+[[nodiscard]] auto Band::getCurveTypeOrDefault() const -> CurveType {
+  if (curveType.has_value()) {
+    return curveType.value();
+  }
+    return DEFAULT_CURVE_TYPE;
+}
+[[nodiscard]] auto Band::getCurveType() const -> std::optional<CurveType> { return curveType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
@@ -127,7 +133,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position, this->getCurveType());
+    return effect->EvaluateKeyframes(position, this->getCurveTypeOrDefault());
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
   case BandType::WaveletWave:
@@ -170,7 +176,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad)
       if (keyframes.size() == 2) {
         effectAmp = haptics::tools::linearInterpolation2(keyframes);
       } else {
-        switch (this->curveType) {
+        switch (getCurveTypeOrDefault()) {
         case CurveType::Linear:
           effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;

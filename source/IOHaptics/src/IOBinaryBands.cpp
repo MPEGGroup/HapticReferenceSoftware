@@ -80,7 +80,7 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::vector<bool> &output
   IOBinaryPrimitives::writeNBits<uint8_t, MDBAND_BAND_TYPE>(bandType, output);
 
   if (band.getBandType() == types::BandType::Curve) {
-    auto curveType = static_cast<uint8_t>(band.getCurveType());
+    auto curveType = static_cast<uint8_t>(band.getCurveTypeOrDefault());
     IOBinaryPrimitives::writeNBits<uint8_t, MDBAND_CURVE_TYPE>(curveType, output);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
     auto bl_ms = band.getBlockLength();
@@ -123,7 +123,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
-    } else if (effectType == types::EffectType::Timeline) {
+    } else if (effectType == types::EffectType::Composite) {
       readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
@@ -168,7 +168,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::vector<bool> &output) 
     }
     if (myEffect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(myEffect, output);
-    } else if (myEffect.getEffectType() == types::EffectType::Timeline) {
+    } else if (myEffect.getEffectType() == types::EffectType::Composite) {
       writeTimelineEffect(myEffect, band, output);
     } else {
       switch (band.getBandType()) {
@@ -431,7 +431,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
-    } else if (effectType == types::EffectType::Timeline) {
+    } else if (effectType == types::EffectType::Composite) {
       readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
@@ -470,7 +470,7 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
 
     if (effect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(effect, output);
-    } else if (effect.getEffectType() == types::EffectType::Timeline) {
+    } else if (effect.getEffectType() == types::EffectType::Composite) {
       writeTimelineEffect(effect, band, output);
     } else {
       switch (band.getBandType()) {

@@ -392,4 +392,10 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return interpolation;
 }
 
+
+[[nodiscard]] auto is_number(const std::string &s) -> bool {
+  return !s.empty() && std::find_if(s.begin(), s.end(),
+                                    [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}
+
 } // namespace haptics::tools

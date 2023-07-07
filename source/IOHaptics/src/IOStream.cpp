@@ -1657,7 +1657,7 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
   IOBinaryPrimitives::writeStrBits(bandTypeStr, bitstream);
   if (swriter.bandStream.band.getBandType() == types::BandType::Curve) {
     std::bitset<MDBAND_CURVE_TYPE> curveTypeBits(
-        static_cast<int>(swriter.bandStream.band.getCurveType()));
+        static_cast<int>(swriter.bandStream.band.getCurveTypeOrDefault()));
     std::string curveTypeStr = curveTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(curveTypeStr, bitstream);
   } else if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
@@ -1765,7 +1765,7 @@ auto IOStream::linearizeTimeline(types::Band &band) -> void {
   std::vector<types::Effect> effects = std::vector<types::Effect>();
   for (auto i = 0; i < static_cast<int>(band.getEffectsSize()); i++) {
     auto effect = band.getEffectAt(i);
-    if (effect.getEffectType() == types::EffectType::Timeline) {
+    if (effect.getEffectType() == types::EffectType::Composite) {
       linearizeTimelineEffect(effect, effects);
     } else {
       effects.push_back(effect);
@@ -1782,7 +1782,7 @@ auto IOStream::linearizeTimelineEffect(types::Effect &effect, std::vector<types:
     -> void {
   for (int j = 0; j < static_cast<int>(effect.getTimelineSize()); j++) {
     auto effectTimeline = effect.getTimelineEffectAt(j);
-    if (effectTimeline.getEffectType() == types::EffectType::Timeline) {
+    if (effectTimeline.getEffectType() == types::EffectType::Composite) {
       linearizeTimelineEffect(effectTimeline, effects);
     } else {
       effects.push_back(effectTimeline);

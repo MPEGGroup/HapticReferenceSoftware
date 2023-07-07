@@ -48,7 +48,7 @@ namespace haptics::types {
 
 enum class BaseSignal { Sine = 0, Square = 1, Triangle = 2, SawToothUp = 3, SawToothDown = 4 };
 
-enum class EffectType { Basis = 0, Reference = 1, Timeline = 2 };
+enum class EffectType { Basis = 0, Reference = 1, Composite = 2 };
 
 static const std::map<std::string, BaseSignal> stringToBaseSignal = {
     {"Sine", BaseSignal::Sine},
@@ -66,12 +66,12 @@ static const std::map<BaseSignal, std::string> baseSignalToString = {
 static const std::map<std::string, EffectType> stringToEffectType = {
     {"Basis", EffectType::Basis},
     {"Reference", EffectType::Reference},
-    {"Timeline", EffectType::Timeline}};
+    {"Composite", EffectType::Composite}};
 
 static const std::map<EffectType, std::string> effectTypeToString = {
     {EffectType::Basis, "Basis"},
     {EffectType::Reference, "Reference"},
-    {EffectType::Timeline, "Timeline"}};
+    {EffectType::Composite, "Composite"}};
 
 class Effect {
 public:
