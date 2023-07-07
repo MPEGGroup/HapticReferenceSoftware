@@ -49,7 +49,8 @@ TEST_CASE("extractKeyframes with ParameterCurveControlPoints not set", "[extract
   testingParameterCurve.AddMember("Time", testingTime, testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> resKeyframes;
-  int res = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes, timescale);
+  int res =
+      AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes, timescale);
 
   REQUIRE(res == EXIT_FAILURE);
 }
@@ -67,7 +68,8 @@ TEST_CASE("extractKeyframes with empty ParameterCurveControlPoints", "[extractKe
                                   testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> resKeyframes;
-  int res = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes, timescale);
+  int res =
+      AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes, timescale);
 
   REQUIRE(res == EXIT_SUCCESS);
   CHECK(resKeyframes.empty());
@@ -94,7 +96,8 @@ TEST_CASE("extractKeyframes with ParameterCurveControlPoints", "[extractKeyframe
   }
 
   std::vector<std::pair<int, double>> res;
-  int resExitCode = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &res, timescale);
+  int resExitCode =
+      AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &res, timescale);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == testingControlPoints.size());
@@ -123,7 +126,8 @@ TEST_CASE("extractKeyframes with incorrect ParameterCurveControlPoints", "[extra
       "ParameterValue", 0, testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> resKeyframes;
-  int res = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes, timescale);
+  int res =
+      AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &resKeyframes, timescale);
 
   REQUIRE(res == EXIT_FAILURE);
 }
@@ -172,7 +176,8 @@ TEST_CASE("extractKeyframes with incorrect ControlPoints", "[extractKeyframes]")
       testingParameterCurve.GetAllocator());
 
   std::vector<std::pair<int, double>> res;
-  int resExitCode = AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &res, timescale);
+  int resExitCode =
+      AhapEncoder::extractKeyframes(testingParameterCurve.GetObject(), &res, timescale);
 
   REQUIRE(resExitCode == EXIT_SUCCESS);
   REQUIRE(res.size() == testingControlPoints.size());
