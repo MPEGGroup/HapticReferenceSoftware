@@ -90,6 +90,29 @@ namespace haptics::synthesizer {
       }
     }
   }
+
+  std::vector<std::vector<double>> amplitudes;
+
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
+      types::Channel myChannel;
+      auto sampleCount = static_cast<uint32_t>(std::round(fs * MS_2_S * (timeLength + 2 * pad)));
+      std::vector<double> channelAmp(sampleCount, 0);
+      myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
+      channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad);
+      const double perceptionUnitFactor =
+          std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
+      for (uint32_t k = 0; k < sampleCount; k++) {
+        channelAmp[k] = channelAmp[k] * myChannel.getGain() * perceptionUnitFactor;
+      }
+      amplitudes.push_back(channelAmp);
+    }
+  }
+  return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
+}
+
+[[nodiscard]] auto static playFile4Android(types::Haptics &haptic, double timeLength, int fs,
+                                           int pad, std::string &filename) -> bool {
   std::vector<std::vector<double>> amplitudes;
 
   for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {

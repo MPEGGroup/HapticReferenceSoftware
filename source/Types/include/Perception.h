@@ -149,12 +149,14 @@ public:
       -> std::vector<std::tuple<int, int, int>>;
   auto linearizeLibrary() -> void;
   auto getEffectById(int id) -> std::optional<Effect>;
+  inline static const std::string DEFAULT_SEMANTIC_SCHEME =
+      "urn:mpeg:mpegi:haptics:effectsemantic:2023";
 
 private:
   static constexpr int8_t DEFAULT_UNIT_EXPONENT = -3;
   static constexpr int8_t DEFAULT_PERCEPTION_UNIT_EXPONENT = 0;
-  inline static const std::string DEFAULT_SEMANTIC_SCHEME =
-      "urn:mpeg:mpegi:haptics:effectsemantic:2023";
+  //inline static const std::string DEFAULT_SEMANTIC_SCHEME =
+  //    "urn:mpeg:mpegi:haptics:effectsemantic:2023";
 
   int id = -1;
   int avatarId = -1;

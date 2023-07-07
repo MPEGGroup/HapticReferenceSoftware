@@ -34,6 +34,7 @@
 #include <IOHaptics/include/IOBinaryBands.h>
 #include <IOHaptics/include/IOBinaryFields.h>
 #include <IOHaptics/include/IOBinaryPrimitives.h>
+#include <IOHaptics/include/IOConformance.h>
 #include <IOHaptics/include/IOStream.h>
 
 namespace haptics::io {
@@ -266,14 +267,19 @@ auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> 
 
 auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool {
   int index = 0;
-  IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
-  // MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
+  int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
+  MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
+  sreader.currentUnitType = unitType;
+  sreader.MIHSData = false;
   int syncInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_SYNC);
   bool sync = syncInt == 0;
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
   sreader.packetDuration = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_DURATION);
+  if (sreader.conformance) {
+    IOConformance::checkMIHSUnitTemporalDuraction(sreader);
+  }
   int unitLength = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LENGTH) * BYTE_SIZE;
 
   std::vector<bool> packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
@@ -284,6 +290,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
+  IOConformance::checkMIHSUnitDataPacket(sreader);
   sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
   return true;
 }
@@ -710,6 +717,19 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     return true;
   }
   case (NALuType::Data): {
+    if (sreader.currentUnitType == MIHSUnitType::Initialization) {
+      if (sreader.conformance) {
+        sreader.logs.push_back(
+            hmpgErrorCodeToString.at(hmpgErrorCode::Init_MIHSDataPacket_UnvalidNumber));
+      }
+      return false;
+    } else if (sreader.currentUnitType == MIHSUnitType::Temporal ||
+               sreader.currentUnitType == MIHSUnitType::Spatial) {
+      if (sreader.conformance) {
+        sreader.logs.push_back(
+            hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_MIHSDataPacket_UnvalidNumber));
+      }
+    }
     return readData(sreader, payload);
   }
   case (NALuType::CRC16):
@@ -1037,6 +1057,10 @@ auto IOStream::readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) 
   auto perceId = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
   int perceIndex = searchPerceptionInHaptic(sreader.haptic, perceId);
   if (perceIndex == -1) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_EffectLibrary_PerceptionID_Unknown));
+    }
     return false;
   }
   types::Perception perception = sreader.haptic.getPerceptionAt(perceIndex);
@@ -1045,18 +1069,27 @@ auto IOStream::readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) 
 
   for (int i = 0; i < effectCount; i++) {
     types::Effect libraryEffect;
-    success &= readLibraryEffect(libraryEffect, idx, bitstream);
+    success &= readLibraryEffect(sreader, libraryEffect, idx, bitstream);
     perception.addBasisEffect(libraryEffect);
   }
   sreader.haptic.replacePerceptionAt(perceIndex, perception);
+
   return success;
 }
-auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
+auto IOStream::readLibraryEffect(StreamReader &sreader, types::Effect &libraryEffect, int &idx,
                                  std::vector<bool> &bitstream) -> bool {
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   libraryEffect.setId(id);
 
   int effectType = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
+  if (effectType < static_cast<int>(types::EffectType::Basis) ||
+      effectType > static_cast<int>(types::EffectType::Timeline)) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_EffectLibrary_EffectType_OutofRange));
+    }
+    return false;
+  }
   libraryEffect.setEffectType(static_cast<types::EffectType>(effectType));
 
   int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
@@ -1065,6 +1098,16 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
         bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
     auto semantic = std::string(
         types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+    if (sreader.conformance) {
+      if (sreader.perception.getEffectSemanticSchemeOrDefault() ==
+          types::Perception::DEFAULT_SEMANTIC_SCHEME) {
+        if (types::stringToEffectSemantic.find(semantic) == types::stringToEffectSemantic.end()) {
+          sreader.logs.push_back(
+              hmpgErrorCodeToString.at(hmpgErrorCode::Init_EffectLibrary_SemanticKeyword_Unvalid));
+          return false;
+        }
+      }
+    }
     libraryEffect.setSemantic(semantic);
   }
   int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
@@ -1075,6 +1118,14 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
     libraryEffect.setPhase(phase);
 
     int baseSignal = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_BASE_SIGNAL);
+    if (baseSignal < static_cast<int>(types::BaseSignal::Sine) ||
+        baseSignal > static_cast<int>(types::BaseSignal::SawToothDown)) {
+      if (sreader.conformance) {
+        sreader.logs.push_back(
+            hmpgErrorCodeToString.at(hmpgErrorCode::Init_EffectLibrary_BaseSignal_OutofRange));
+      }
+      return false;
+    }
     libraryEffect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
   }
 
@@ -1104,7 +1155,7 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
   auto timelineEffectCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TIMELINE_COUNT);
   for (int i = 0; i < timelineEffectCount; i++) {
     types::Effect timelineEffect;
-    success &= readLibraryEffect(timelineEffect, idx, bitstream);
+    success &= readLibraryEffect(sreader, timelineEffect, idx, bitstream);
     libraryEffect.addTimelineEffect(timelineEffect);
   }
 
@@ -1687,6 +1738,10 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
   int perceId = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
   int perceIndex = searchPerceptionInHaptic(sreader.haptic, perceId);
   if (perceIndex == -1) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_PerceptionID_Unknown));
+    }
     return false;
   }
   sreader.perception = sreader.haptic.getPerceptionAt(perceIndex);
@@ -1694,6 +1749,9 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
   int channelId = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ID);
   int channelIndex = searchChannelInHaptic(sreader.haptic, channelId);
   if (channelIndex == -1) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_ChannelID_Unknown));
+    }
     return false;
   }
   sreader.channel = sreader.perception.getChannelAt(channelIndex);
@@ -1714,6 +1772,14 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
 
   // read effects count, unused but could be used for check
   IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_EFFECT_COUNT);
+  //=============================================================================
+  // Conformance
+  //=============================================================================
+  if (sreader.conformance) {
+    IOConformance::checkBandTypeRange(sreader);
+    IOConformance::checkCurveTypeRange(sreader);
+  }
+  //=============================================================================
   return true;
 }
 
@@ -2092,13 +2158,27 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
   int perceptionId = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
   auto perceptionIndex = searchPerceptionInHaptic(sreader.haptic, perceptionId);
   if (perceptionIndex == -1) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_DataPacket_PerceptionID_Unvalid));
+    }
     return false;
   }
   sreader.perception = sreader.haptic.getPerceptionAt(perceptionIndex);
-
+  if (sreader.conformance) {
+    if (sreader.currentUnitType == MIHSUnitType::Spatial) {
+      IOConformance::checkMIHSUnitSpatialPerceptionModality(sreader);
+    } else if (sreader.currentUnitType == MIHSUnitType::Temporal) {
+      IOConformance::checkMIHSUnitTemporalPerceptionModality(sreader);
+    }
+  }
   int channelId = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ID);
   auto channelIndex = searchChannelInHaptic(sreader.haptic, channelId);
   if (channelIndex == -1) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_DataPacket_ChannelID_Unvalid));
+    }
     return false;
   }
   sreader.channel = sreader.perception.getChannelAt(channelIndex);
@@ -2107,6 +2187,10 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
   sreader.bandStream.id = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_ID);
   sreader.bandStream.index = searchBandInHaptic(sreader, sreader.bandStream.id);
   if (sreader.bandStream.index == -1) {
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_DataPacket_BandID_Unvalid));
+    }
     return false;
   }
   sreader.bandStream.band = sreader.channel.getBandAt(sreader.bandStream.index);
@@ -2116,7 +2200,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
     std::vector<types::Effect> effects;
     std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
     if (sreader.bandStream.band.getBandType() != types::BandType::WaveletWave) {
-      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx)) {
+      if (!readListObject(effectsBitsList, sreader, fxCount, effects, idx)) {
         return false;
       }
       addTimestampEffect(effects, static_cast<int>(sreader.time));
@@ -2291,15 +2375,20 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   length += idx;
   return true;
 }
-auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
-                          int &length) -> bool {
+auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
+                          types::Effect &effect, int &length) -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
 
-  types::EffectType effectType =
-      static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
-  effect.setEffectType(effectType);
+  int effectTypeInt = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
+  if (effectTypeInt < static_cast<int>(types::EffectType::Basis) ||
+      effectTypeInt > static_cast<int>(types::EffectType::Timeline)) {
+    sreader.logs.push_back(
+        hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_DataPacket_EffectType_OutofRange));
+    return false;
+  }
+  effect.setEffectType(static_cast<types::EffectType>(effectTypeInt));
 
   int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
   if (hasSemantic == 1) {
@@ -2313,14 +2402,16 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
 
-  if (effectType == types::EffectType::Basis &&
-      band.getBandType() != types::BandType::WaveletWave) {
-    if (!readEffectBasis(bitstream, effect, band.getBandType(), idx)) {
+  if (effect.getEffectType() == types::EffectType::Basis &&
+      sreader.bandStream.band.getBandType() != types::BandType::WaveletWave) {
+    if (!readEffectBasis(bitstream, effect, sreader.bandStream.band.getBandType(), idx)) {
       return false;
     }
-  } else if (effectType == types::EffectType::Basis &&
-             band.getBandType() == types::BandType::WaveletWave) {
-    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+  } else if (effect.getEffectType() == types::EffectType::Basis &&
+             sreader.bandStream.band.getBandType() == types::BandType::WaveletWave) {
+    IOBinaryBands::readWaveletEffect(effect, sreader.bandStream.band, bitstream, idx);
+  } else if (effect.getEffectType() == types::EffectType::Reference && sreader.conformance) {
+    IOConformance::checkEffectIDExists(sreader, id);
   }
   length += idx;
   return true;
@@ -2564,13 +2655,13 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
   length += idx;
   return true;
 }
-auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
+auto IOStream::readListObject(std::vector<bool> &bitstream, StreamReader &sreader, int fxCount,
                               std::vector<types::Effect> &fxList, int &length) -> bool {
   int idx = 0;
   for (int i = 0; i < fxCount; i++) {
     std::vector<bool> fxBits(bitstream.begin() + idx, bitstream.end());
     types::Effect effect;
-    if (!readEffect(fxBits, effect, band, idx)) {
+    if (!readEffect(fxBits, sreader, effect, idx)) {
       return false;
     }
     fxList.push_back(effect);

@@ -37,12 +37,15 @@
 #include <Spiht/include/Spiht_Dec.h>
 #include <Spiht/include/Spiht_Enc.h>
 #include <Types/include/Haptics.h>
+#include <Types/include/EffectSemantic.h>
 #include <bitset>
 #include <string>
 #include <tuple>
 #include <vector>
-
+#include<map>
 namespace haptics::io {
+
+class IOConformance;
 
 static constexpr int TIME_TO_MS = 1000;
 static constexpr int DEFAULT_PACKET_DURATION = 128;
@@ -112,6 +115,10 @@ public:
     unsigned int packetDuration = 0;
     unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE;
     bool waitSync = false;
+    bool conformance = false;
+    std::vector<std::string> logs;
+    MIHSUnitType currentUnitType;
+    bool MIHSData = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
@@ -229,7 +236,7 @@ private:
   static auto readReferenceDevice(std::vector<bool> &bitstream, types::ReferenceDevice &refDevice,
                                   int &length) -> bool;
   static auto readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
-  static auto readLibraryEffect(types::Effect &libraryEffect, int &idx,
+  static auto readLibraryEffect(StreamReader &sreader, types::Effect &libraryEffect, int &idx,
                                 std::vector<bool> &bitstream) -> bool;
   static auto readMetadataChannel(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
@@ -253,10 +260,10 @@ private:
   static auto searchChannelInHaptic(types::Haptics &haptic, int id) -> int;
   static auto searchBandInHaptic(StreamReader &sreader, int id) -> int;
 
-  static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
+  static auto readListObject(std::vector<bool> &bitstream, StreamReader &sreader, int fxCount,
                              std::vector<types::Effect> &fxList, int &length) -> bool;
 
-  static auto readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
+  static auto readEffect(std::vector<bool> &bitstream, StreamReader &sreader, types::Effect &effect,
                          int &length) -> bool;
 
   static auto readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
