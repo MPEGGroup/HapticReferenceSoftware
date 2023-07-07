@@ -34,7 +34,7 @@ enum class hmpgErrorCode {
   TempSpat_DataPacket_EffectID_Unvalid,
   TempSpat_DataPacket_EffectType_OutofRange,
 
-  Spat_DataPacket_PerceptionModality_Unvalid,
+  Spat_DataPacket_PerceptionModality_Unvalid
 };
 
 static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {

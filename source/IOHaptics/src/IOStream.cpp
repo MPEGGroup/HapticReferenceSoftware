@@ -36,6 +36,8 @@
 #include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <IOHaptics/include/IOConformance.h>
 #include <IOHaptics/include/IOStream.h>
+#include <fstream>
+#include <iostream>
 
 namespace haptics::io {
 
@@ -77,6 +79,24 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
       }
     }
     index++;
+  }
+  if (sreader.logs.size() > 0) {
+
+    size_t lastindex = filePath.find_last_of(".");
+    std::string logpath = filePath.substr(0, lastindex) + ".log";
+    std::fstream file;
+    file.open(logpath, std::ios_base::out);
+    if (!file) {
+      std::cerr << logpath << ": Cannot open file!" << std::endl;
+      return false;
+    }
+    for (std::string str : sreader.logs) {
+      file << str << std::endl;
+    }
+    file.close();
+    // WRITE PROPER ERROR MESSAGE
+    std::cerr << filePath << ": File does not comply with standard ISOXXXXXX." << std::endl;
+    std::cerr << "More information are provided in file: " << logpath << std::endl;
   }
   haptic = sreader.haptic;
   return true;
