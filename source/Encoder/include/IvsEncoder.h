@@ -72,8 +72,7 @@ public:
   [[nodiscard]] auto static getCount(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getDuration(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getDuration(const pugi::xml_node *basisEffect,
-                                        const pugi::xml_node *launchEvent)
-      -> int;
+                                        const pugi::xml_node *launchEvent) -> int;
   [[nodiscard]] auto static getMagnitude(const pugi::xml_node *basisEffect,
                                          const pugi::xml_node *launchEvent) -> int;
   [[nodiscard]] auto static getPeriod(const pugi::xml_node *basisEffect,

@@ -220,10 +220,10 @@ namespace haptics::encoder {
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect t = haptics::types::Effect(
-      static_cast<int>(std::round(event["Time"].GetDouble() * timescale)),
-      0, // modif to get from sec2ms to ticks
-      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect t =
+      haptics::types::Effect(static_cast<int>(std::round(event["Time"].GetDouble() * timescale)),
+                             0, // modif to get from sec2ms to ticks
+                             haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
@@ -300,9 +300,9 @@ namespace haptics::encoder {
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect c = haptics::types::Effect(
-      static_cast<int>(std::round(event["Time"].GetDouble() * timescale)), 0,
-      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect c =
+      haptics::types::Effect(static_cast<int>(std::round(event["Time"].GetDouble() * timescale)), 0,
+                             haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;

@@ -216,9 +216,9 @@ TEST_CASE("extractContinuous without duration", "[extractContinuous]") {
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
-                                     &testingAmplitudeModulation, &testingFrequencyModulation, timescale);
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                                   &testingAmplitudeModulation,
+                                                   &testingFrequencyModulation, timescale);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
@@ -251,9 +251,9 @@ TEST_CASE("extractContinuous without time", "[extractContinuous]") {
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
-                                     &testingAmplitudeModulation, &testingFrequencyModulation, timescale);
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                                   &testingAmplitudeModulation,
+                                                   &testingFrequencyModulation, timescale);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
@@ -272,9 +272,9 @@ TEST_CASE("extractContinuous without event parameters", "[extractContinuous]") {
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
-                                     &testingAmplitudeModulation, &testingFrequencyModulation, timescale);
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                                   &testingAmplitudeModulation,
+                                                   &testingFrequencyModulation, timescale);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
@@ -306,9 +306,9 @@ TEST_CASE("extractContinuous without event type", "[extractContinuous]") {
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
-                                     &testingAmplitudeModulation, &testingFrequencyModulation, timescale);
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+                                                   &testingAmplitudeModulation,
+                                                   &testingFrequencyModulation, timescale);
 
   REQUIRE(resExitCode == EXIT_FAILURE);
 }
@@ -343,8 +343,7 @@ TEST_CASE("extractContinuous with incorrect event type", "[extractContinuous]") 
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
                                                    &testingAmplitudeModulation,
                                                    &testingFrequencyModulation, timescale);
 
@@ -385,8 +384,7 @@ TEST_CASE("extractContinuous without modulation function", "[extractContinuous]"
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
                                                    &testingAmplitudeModulation,
                                                    &testingFrequencyModulation, timescale);
 
@@ -437,8 +435,7 @@ TEST_CASE("extractContinuous without modulation function and default values",
   std::vector<std::pair<int, double>> testingAmplitudeModulation;
   std::vector<std::pair<int, double>> testingFrequencyModulation;
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
                                                    &testingAmplitudeModulation,
                                                    &testingFrequencyModulation, timescale);
 
@@ -501,8 +498,7 @@ TEST_CASE("extractContinuous with modulation function", "[extractContinuous]") {
       {90, 0}, {200, 1}, {300, 0}};
 
   std::vector<haptics::types::Effect> res;
-  int resExitCode =
-      AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
+  int resExitCode = AhapEncoder::extractContinuous(testingContinuous.GetObject(), &res,
                                                    &testingAmplitudeModulation,
                                                    &testingFrequencyModulation, timescale);
 

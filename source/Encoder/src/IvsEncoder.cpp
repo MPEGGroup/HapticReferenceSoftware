@@ -41,8 +41,8 @@ namespace haptics::encoder {
 
 auto IvsEncoder::encode(const std::string &filename, types::Perception &out, unsigned int timescale)
     -> int {
-  timescale = timescale / 1000; //ivs format is in ms
-    if (filename.empty()) {
+  timescale = timescale / 1000; // ivs format is in ms
+  if (filename.empty()) {
     return EXIT_FAILURE;
   }
 
