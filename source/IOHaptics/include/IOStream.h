@@ -36,13 +36,13 @@
 #include <IOHaptics/include/IOBinary.h>
 #include <Spiht/include/Spiht_Dec.h>
 #include <Spiht/include/Spiht_Enc.h>
-#include <Types/include/Haptics.h>
 #include <Types/include/EffectSemantic.h>
+#include <Types/include/Haptics.h>
 #include <bitset>
+#include <map>
 #include <string>
 #include <tuple>
 #include <vector>
-#include<map>
 namespace haptics::io {
 
 class IOConformance;
@@ -226,15 +226,16 @@ private:
 
   static auto readNALuType(std::vector<bool> &packet) -> NALuType;
   static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
-  static auto readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
-  static auto readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, int &length) -> bool;
+  static auto readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
+  static auto readAvatar(StreamReader &sreader, std::vector<bool> &bitstream, types::Avatar &avatar,
+                         int &length) -> bool;
   static auto readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   // static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect>
   // &effects)
   //     -> bool;
-  static auto readReferenceDevice(std::vector<bool> &bitstream, types::ReferenceDevice &refDevice,
-                                  int &length) -> bool;
+  static auto readReferenceDevice(StreamReader &sreader, std::vector<bool> &bitstream,
+                                  types::ReferenceDevice &refDevice, int &length) -> bool;
   static auto readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readLibraryEffect(StreamReader &sreader, types::Effect &libraryEffect, int &idx,
                                 std::vector<bool> &bitstream) -> bool;
@@ -247,9 +248,9 @@ private:
 
   static auto getEffectsId(types::Haptics &haptic) -> std::vector<int>;
 
-  static auto readListObject(std::vector<bool> &bitstream, int avatarCount,
+  static auto readListObject(StreamReader &sreader, std::vector<bool> &bitstream, int avatarCount,
                              std::vector<types::Avatar> &avatarList) -> bool;
-  static auto readListObject(std::vector<bool> &bitstream, int refDevCount,
+  static auto readListObject(StreamReader &sreader, std::vector<bool> &bitstream, int refDevCount,
                              std::vector<types::ReferenceDevice> &refDevList, int &length) -> bool;
 
   static auto addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int channelIndex,
@@ -297,6 +298,10 @@ private:
   static auto silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void;
 
   static auto getNextSync(types::Haptics &haptic, types::Sync &sync, int &idxs) -> bool;
+
+  static auto checkURIFormat(const ::std::string &uri) -> bool;
+  static auto avatarExists(int avatarId, types::Haptics &haptics) -> bool;
+  static auto referenceDeviceExists(int refDevId, types::Perception &perception) -> bool;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H

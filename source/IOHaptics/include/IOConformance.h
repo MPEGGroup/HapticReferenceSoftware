@@ -11,116 +11,239 @@ class StreamReader;
 enum class MIHSUnitType;
 
 enum class hmpgErrorCode {
-  Init_MIHSDataPacket_UnvalidNumber,
+  Init_Experience_Avatar_ID_OutOfRange,
+  Init_Experience_Avatar_MeshURI_Invalid,
 
+  Init_Perception_ID_NotUnique,
+  Init_Perception_Modality_OutOfRange,
+  Init_Perception_AvatarID_Unkown,
+  Init_Perception_SchemeURN_Invalid,
+  Init_Perception_ReferenceDevice_ID_OutOfRange,
+  Init_Perception_ReferenceDevice_ID_NotUnique,
+  Init_Perception_ReferenceDevice_Type_OutOfRange,
+
+  Init_Channel_ID_NotUnique,
+  Init_Channel_PerceptionID_Unknown,
+  Init_Channel_ReferenceDeviceID_Unknown,
+  Init_Channel_ActuatorResolution_OutOfRange,
+  Init_Channel_BodyPartTarget_OutOfRange,
+  Init_Channel_ActuatorTarget_OutOfRange,
+  Init_Channel_Direction_Invalid,
+
+  Init_Band_ID_NotUnique,
   Init_Band_PerceptionID_Unknown,
   Init_Band_ChannelID_Unknown,
-  Init_Band_BandType_OutofRange,
-  Init_Band_CurveType_OutofRange,
+  Init_Band_BandType_OutOfRange,
+  Init_Band_CurveType_OutOfRange,
 
-  Init_EffectLibrary_PerceptionID_Unknown,
   Init_EffectLibrary_ID_NotUnique,
-  Init_EffectLibrary_EffectType_OutofRange,
-  Init_EffectLibrary_SemanticKeyword_Unvalid,
-  Init_EffectLibrary_BaseSignal_OutofRange,
+  Init_EffectLibrary_PerceptionID_Unknown,
+  Init_EffectLibrary_EffectType_OutOfRange,
+  Init_EffectLibrary_SemanticKeyword_Invalid,
+  Init_EffectLibrary_BaseSignal_OutOfRange,
 
-  TempSpat_MIHSDataPacket_UnvalidNumber,
-  Temp_Duration_Unvalid,
+  NonTempSpat_Data_InvalidNumber,
 
-  Temp_DataPacket_PerceptionModality_Unvalid,
-  TempSpat_DataPacket_PerceptionID_Unvalid,
-  TempSpat_DataPacket_ChannelID_Unvalid,
-  TempSpat_DataPacket_BandID_Unvalid,
-  TempSpat_DataPacket_EffectID_Unvalid,
-  TempSpat_DataPacket_EffectType_OutofRange,
+  NonInit_Timing_InvalidNumber,
+  NonInit_Experience_InvalidNumber,
+  NonInit_Perception_InvalidNumber,
+  NonInit_Channel_InvalidNumber,
+  NonInit_Band_InvalidNumber,
+  NonInit_EffectLibrary_InvalidNumber,
 
-  Spat_DataPacket_PerceptionModality_Unvalid
+  TempSpat_Data_InvalidNumber,
+  TempSpat_Data_PerceptionID_Unknown,
+  TempSpat_Data_ChannelID_Unknown,
+  TempSpat_Data_BandID_Unknown,
+  TempSpat_Data_EffectID_Unknown,
+  TempSpat_Data_EffectType_OutOfRange,
+
+  Temp_Data_PerceptionModality_Invalid,
+
+  Temp_Duration_Invalid,
+
+  Spat_Data_PerceptionModality_Invalid
 };
 
 static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
+    // Init_Experience_*
+    {hmpgErrorCode::Init_Experience_Avatar_ID_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Avatar id is out of range. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Avatar_ID_OutOfRange))},
+    {hmpgErrorCode::Init_Experience_Avatar_MeshURI_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Mesh URI is invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Avatar_MeshURI_Invalid))},
+
+    // Init_Perception_*
+    {hmpgErrorCode::Init_Perception_ID_NotUnique,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Perception ID is not unique. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Perception_ID_NotUnique))},
+    {hmpgErrorCode::Init_Perception_Modality_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Perception_Modality_OutOfRange))},
+    {hmpgErrorCode::Init_Perception_AvatarID_Unkown,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Avatar ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Perception_AvatarID_Unkown))},
+    {hmpgErrorCode::Init_Perception_SchemeURN_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Scheme URN is invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Perception_SchemeURN_Invalid))},
+    {hmpgErrorCode::Init_Perception_ReferenceDevice_ID_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Reference device ID is out of range. "
+     "Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Perception_ReferenceDevice_ID_OutOfRange))},
+    {hmpgErrorCode::Init_Perception_ReferenceDevice_ID_NotUnique,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Reference device ID is not unique. "
+     "Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Perception_ReferenceDevice_ID_NotUnique))},
+    {hmpgErrorCode::Init_Perception_ReferenceDevice_Type_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Reference device type is out of range. "
+     "Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Perception_ReferenceDevice_Type_OutOfRange))},
+
+    // Init_Channel_*
+    {hmpgErrorCode::Init_Channel_ID_NotUnique,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Channel ID is not unique. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_ID_NotUnique))},
+    {hmpgErrorCode::Init_Channel_PerceptionID_Unknown,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Perception ID does not exist. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_PerceptionID_Unknown))},
+    {hmpgErrorCode::Init_Channel_ReferenceDeviceID_Unknown,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Reference device ID does not exist. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_ReferenceDeviceID_Unknown))},
+    {hmpgErrorCode::Init_Channel_ActuatorResolution_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Actuator resolution is out of range, "
+     "positive value expected. Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Channel_ActuatorResolution_OutOfRange))},
+    {hmpgErrorCode::Init_Channel_BodyPartTarget_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Body part target component is out of "
+     "range. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_BodyPartTarget_OutOfRange))},
+    {hmpgErrorCode::Init_Channel_ActuatorTarget_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Actuator target component is out of range. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_ActuatorTarget_OutOfRange))},
+    {hmpgErrorCode::Init_Channel_Direction_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Direction is invalid, unit vector "
+     "expected. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_Direction_Invalid))},
+
+    // Init_Band_*
+    {hmpgErrorCode::Init_Band_ID_NotUnique,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: Band ID is not unique. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_ID_NotUnique))},
     {hmpgErrorCode::Init_Band_PerceptionID_Unknown,
-     "MIHSUnit_Initialization MIHSPacket_Band error: Perception id does not exists. Error code: " +
+     "MIHSUnit_Initialization MIHSPacket_Band error: Perception ID does not exist. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_PerceptionID_Unknown))},
     {hmpgErrorCode::Init_Band_ChannelID_Unknown,
-     "MIHSUnit_Initialization MIHSPacket_Band error: Perception id does not exists. Error code: " +
+     "MIHSUnit_Initialization MIHSPacket_Band error: Channel ID does not exist. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_ChannelID_Unknown))},
-    {hmpgErrorCode::Init_Band_BandType_OutofRange,
-     "MIHSUnit_Initialization MIHSPacket_Band error: band type is out of range. Error code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_BandType_OutofRange))},
-    {hmpgErrorCode::Init_Band_CurveType_OutofRange,
-     "MIHSUnit_Initialization MIHSPacket_Band error: curve type is out of range. Error code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_CurveType_OutofRange))},
+    {hmpgErrorCode::Init_Band_BandType_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Band error: Band type is out of range. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_BandType_OutOfRange))},
+    {hmpgErrorCode::Init_Band_CurveType_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Band error: Curve type is out of range. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_CurveType_OutOfRange))},
+
+    // Init_EffectLibrary_*
     {hmpgErrorCode::Init_EffectLibrary_PerceptionID_Unknown,
-     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: effect library id is unknown. Error "
+     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: Perception ID is unknown. Error "
      "code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_EffectLibrary_PerceptionID_Unknown))},
     {hmpgErrorCode::Init_EffectLibrary_ID_NotUnique,
-     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: effect library id is not unique. "
-     "Error "
+     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: Effect ID is not unique. Error "
      "code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_EffectLibrary_ID_NotUnique))},
-    {hmpgErrorCode::Init_EffectLibrary_EffectType_OutofRange,
-     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: effect type in effect library is not "
-     "valid. Error code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Init_EffectLibrary_EffectType_OutofRange))},
-    {hmpgErrorCode::Init_EffectLibrary_SemanticKeyword_Unvalid,
-     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: effect semantic keyword in effect "
-     "library is not valid. Error "
+    {hmpgErrorCode::Init_EffectLibrary_EffectType_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: Effect type is out of range. Error "
      "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_EffectLibrary_EffectType_OutOfRange))},
+    {hmpgErrorCode::Init_EffectLibrary_SemanticKeyword_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: Effect semantic keyword is invalid. "
+     "Error code: " +
          std::to_string(
-             static_cast<int>(hmpgErrorCode::Init_EffectLibrary_SemanticKeyword_Unvalid))},
-    {hmpgErrorCode::Init_EffectLibrary_BaseSignal_OutofRange,
-     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: effect base signal in effect library "
-     "is not valid. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Init_EffectLibrary_BaseSignal_OutofRange))},
-    {hmpgErrorCode::Init_MIHSDataPacket_UnvalidNumber,
-     "MIHSUnit_Initialization MIHSPacket_Data error: No MIHSPacket_Data are allowed in "
-     "MIHSUnit_Initialization. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Init_MIHSDataPacket_UnvalidNumber))},
-    {hmpgErrorCode::TempSpat_MIHSDataPacket_UnvalidNumber,
+             static_cast<int>(hmpgErrorCode::Init_EffectLibrary_SemanticKeyword_Invalid))},
+    {hmpgErrorCode::Init_EffectLibrary_BaseSignal_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_EffectLibrary error: Effect base signal is out of range. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_EffectLibrary_BaseSignal_OutOfRange))},
+
+    // NonInit_*
+    {hmpgErrorCode::NonInit_Timing_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_Timing error: MIHSPacket_Timing allowed only in "
+     "MIHSUnit_Initialization. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonInit_Timing_InvalidNumber))},
+    {hmpgErrorCode::NonInit_Experience_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_Experience error: MIHSPacket_Experience allowed only in "
+     "MIHSUnit_Initialization. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonInit_Experience_InvalidNumber))},
+    {hmpgErrorCode::NonInit_Perception_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_Perception error: MIHSPacket_Perception allowed only in "
+     "MIHSUnit_Initialization. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonInit_Perception_InvalidNumber))},
+    {hmpgErrorCode::NonInit_Channel_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_Channel error: No MIHSPacket_Channel allowed only in "
+     "MIHSUnit_Initialization. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonInit_Channel_InvalidNumber))},
+    {hmpgErrorCode::NonInit_Band_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_Band error: MIHSPacket_Band allowed only in MIHSUnit_Initialization. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonInit_Band_InvalidNumber))},
+    {hmpgErrorCode::NonInit_EffectLibrary_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_EffectLibrary error: MIHSPacket_EffectLibrary allowed only in "
+     "MIHSUnit_Initialization. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonInit_EffectLibrary_InvalidNumber))},
+
+    // TempSpat_Data_*
+    {hmpgErrorCode::TempSpat_Data_InvalidNumber,
      "MIHSUnit_Temporal MIHSPacket_Data error: Incorrect number of MIHSData packets, one or more "
-     "MIHSPacket_Data expected. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_MIHSDataPacket_UnvalidNumber))},
-    {hmpgErrorCode::Temp_Duration_Unvalid,
-     "MIHSUnit_Temporal error: Incorrect MIHSUnit duration. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Duration_Unvalid))},
-    {hmpgErrorCode::Temp_DataPacket_PerceptionModality_Unvalid,
-     "MIHSUnit_Temporal MIHSPacket_Data error: Perception modality unvalid for temporal MIHSUnit. "
-     "Error "
-     "code: " +
-         std::to_string(
-             static_cast<int>(hmpgErrorCode::Temp_DataPacket_PerceptionModality_Unvalid))},
-    {hmpgErrorCode::TempSpat_DataPacket_PerceptionID_Unvalid,
-     "MIHSUnit_Temporal MIHSPacket_Data error: Perception id is not valid. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_DataPacket_PerceptionID_Unvalid))},
-    {hmpgErrorCode::TempSpat_DataPacket_ChannelID_Unvalid,
-     "MIHSUnit_Temporal MIHSPacket_Data error: Channel id is not valid. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_DataPacket_ChannelID_Unvalid))},
-    {hmpgErrorCode::TempSpat_DataPacket_BandID_Unvalid,
-     "MIHSUnit_Temporal MIHSPacket_Data error: Band id is not valid. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_DataPacket_BandID_Unvalid))},
-    {hmpgErrorCode::TempSpat_DataPacket_EffectID_Unvalid,
-     "MIHSUnit_Temporal MIHSPacket_Data error: Band id is not valid. Error "
-     "code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_DataPacket_EffectID_Unvalid))},
-    {hmpgErrorCode::TempSpat_DataPacket_EffectType_OutofRange,
-     "MIHSUnit_Temporal MIHSPacket_Data error: effect type is is out of range. Error "
-     "code: " +
-         std::to_string(
-             static_cast<int>(hmpgErrorCode::TempSpat_DataPacket_EffectType_OutofRange))},
-    {hmpgErrorCode::Spat_DataPacket_PerceptionModality_Unvalid,
-     "MIHSUnit_Spatial MIHSPacket_Data error: Perception modality unvalid for spatial MIHSUnit. "
-     "Error "
-     "code: " +
-         std::to_string(
-             static_cast<int>(hmpgErrorCode::Spat_DataPacket_PerceptionModality_Unvalid))}};
+     "MIHSPacket_Data expected. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_InvalidNumber))},
+    {hmpgErrorCode::TempSpat_Data_PerceptionID_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Perception ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_PerceptionID_Unknown))},
+    {hmpgErrorCode::TempSpat_Data_ChannelID_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Channel ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_ChannelID_Unknown))},
+    {hmpgErrorCode::TempSpat_Data_BandID_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Band ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_BandID_Unknown))},
+    {hmpgErrorCode::TempSpat_Data_EffectID_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Effect ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectID_Unknown))},
+    {hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Effect type is out of range. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange))},
+
+    // NonTempSpat_*
+    {hmpgErrorCode::NonTempSpat_Data_InvalidNumber,
+     "MIHSUnit_* MIHSPacket_Data error: MIHSPacket_Data allowed only in MIHSUnit_Temporal or "
+     "MIHSUnit_Spatial. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::NonTempSpat_Data_InvalidNumber))},
+
+    // Temp_Data_*
+    {hmpgErrorCode::Temp_Data_PerceptionModality_Invalid,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Data_PerceptionModality_Invalid))},
+
+    // Other Temp_*
+    {hmpgErrorCode::Temp_Duration_Invalid,
+     "MIHSUnit_Temporal error: Duration invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Duration_Invalid))},
+
+    // Spat_Data_*
+    {hmpgErrorCode::Spat_Data_PerceptionModality_Invalid,
+     "MIHSUnit_Spatial MIHSPacket_Data error: Perception modality invalid for spatial MIHSUnit. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid))}};
 
 static class IOConformance {
 public:
@@ -128,7 +251,7 @@ public:
     BandType btype = sreader.bandStream.band.getBandType();
     if (btype < BandType::Transient && btype > BandType::WaveletWave) {
       sreader.logs.push_back(
-          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_OutofRange));
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_OutOfRange));
     }
   };
 
@@ -136,7 +259,7 @@ public:
     types::CurveType ctype = sreader.bandStream.band.getCurveType();
     if (ctype < types::CurveType::Unknown && ctype > types::CurveType::Bspline) {
       sreader.logs.push_back(
-          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutofRange));
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutOfRange));
     }
   };
 
@@ -159,14 +282,14 @@ public:
         sreader.currentUnitType == MIHSUnitType::Temporal) {
       if (!sreader.MIHSData) {
         sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_MIHSDataPacket_UnvalidNumber));
+            hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_InvalidNumber));
       }
     }
   }
 
   static auto checkMIHSUnitTemporalDuraction(IOStream::StreamReader &sreader) -> void {
     if (sreader.packetDuration <= 0) {
-      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Unvalid));
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Invalid));
     }
   }
 
@@ -176,7 +299,7 @@ public:
         modality == types::PerceptionModality::Stiffness ||
         modality == types::PerceptionModality::Friction) {
       sreader.logs.push_back(
-          hmpgErrorCodeToString.at(hmpgErrorCode::Temp_DataPacket_PerceptionModality_Unvalid));
+          hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Data_PerceptionModality_Invalid));
     }
   }
 
@@ -194,7 +317,7 @@ public:
         modality == types::PerceptionModality::Electrotactile ||
         modality == types::PerceptionModality::Other) {
       sreader.logs.push_back(
-          hmpgErrorCodeToString.at(hmpgErrorCode::Spat_DataPacket_PerceptionModality_Unvalid));
+          hmpgErrorCodeToString.at(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid));
     }
   }
 
@@ -204,8 +327,7 @@ public:
         return;
       }
     }
-    sreader.logs.push_back(
-        hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_DataPacket_EffectID_Unvalid));
+    sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectID_Unknown));
   }
 };
 } // namespace haptics::io
