@@ -37,7 +37,7 @@
 #include <catch2/catch.hpp>
 
 using haptics::encoder::IvsEncoder;
-const unsigned int timescale = 1000;
+const unsigned int timescale = 1;
 
 TEST_CASE("IvsEncoder::getLastModified without node", "[getLastModified][withoutNode]") {
   pugi::xml_document doc;
