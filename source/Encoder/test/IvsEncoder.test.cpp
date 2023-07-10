@@ -418,7 +418,7 @@ TEST_CASE("IvsEncoder::getTime without value", "[getTime][withoutValue]") {
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node repeatEvent = node.append_child("repeat-event");
 
-  int res = IvsEncoder::getTime(&repeatEvent) * timescale;
+  int res = IvsEncoder::getTime(&repeatEvent);
 
   REQUIRE(res == -1);
 }
@@ -429,7 +429,7 @@ TEST_CASE("IvsEncoder::getTime with value", "[getTime][withValue]") {
   pugi::xml_node repeatEvent = node.append_child("basis-effect");
   repeatEvent.append_attribute("time") = 3;
 
-  int res = IvsEncoder::getTime(&repeatEvent) * timescale;
+  int res = IvsEncoder::getTime(&repeatEvent);
 
   REQUIRE(res == 3);
 }
@@ -461,7 +461,7 @@ TEST_CASE("IvsEncoder::getDuration(1 param) without value", "[getDuration][witho
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node repeatEvent = node.append_child("repeat-event");
 
-  int res = IvsEncoder::getDuration(&repeatEvent) * timescale;
+  int res = IvsEncoder::getDuration(&repeatEvent);
 
   REQUIRE(res == -1);
 }
@@ -472,7 +472,7 @@ TEST_CASE("IvsEncoder::getDuration(1 param) without override", "[getDuration][wi
   pugi::xml_node repeatEvent = node.append_child("repeat-event");
   repeatEvent.append_attribute("duration") = 3;
 
-  int res = IvsEncoder::getDuration(&repeatEvent) * timescale;
+  int res = IvsEncoder::getDuration(&repeatEvent);
 
   REQUIRE(res == 3);
 }
@@ -495,7 +495,7 @@ TEST_CASE("IvsEncoder::getDuration(2 params) without override", "[getDuration][w
   pugi::xml_node basisEffect = node.append_child("basis-effect");
   basisEffect.append_attribute("duration") = "24";
 
-  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent) * timescale;
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
 
   REQUIRE(res == 24);
 }
@@ -508,7 +508,7 @@ TEST_CASE("IvsEncoder::getDuration(2 params) with override", "[getDuration][with
   pugi::xml_node basisEffect = node.append_child("basis-effect");
   basisEffect.append_attribute("duration") = "24";
 
-  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent) * timescale;
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
 
   REQUIRE(res == 42);
 }
