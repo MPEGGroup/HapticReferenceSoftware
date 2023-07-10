@@ -743,12 +743,6 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
             hmpgErrorCodeToString.at(hmpgErrorCode::Init_MIHSDataPacket_UnvalidNumber));
       }
       return false;
-    } else if (sreader.currentUnitType == MIHSUnitType::Temporal ||
-               sreader.currentUnitType == MIHSUnitType::Spatial) {
-      if (sreader.conformance) {
-        sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_MIHSDataPacket_UnvalidNumber));
-      }
     }
     return readData(sreader, payload);
   }
@@ -2229,8 +2223,12 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
       effects.push_back(effect);
     }
-    return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex,
-                             sreader.bandStream.index, effects);
+    if (addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex, sreader.bandStream.index,
+                          effects)) {
+      sreader.MIHSData = true;
+      return true;
+    }
+    return false;
   }
   return true;
 }
