@@ -102,8 +102,8 @@ private:
 
     auto pushEffect(types::Effect &myEffect, unsigned int timescale) -> bool {
       if (value != nullptr) {
-        int start = IvsEncoder::getTime(value) * timescale;
-        int end = start + IvsEncoder::getDuration(value) * timescale;
+        int start = IvsEncoder::getTime(value) * static_cast<int>(timescale);
+        int end = start + IvsEncoder::getDuration(value) * static_cast<int>(timescale);
         int position = myEffect.getPosition();
         if (start > position || position >= end) {
           return false;
@@ -134,7 +134,7 @@ private:
       int duration = 0;
       if (value != nullptr) {
         count = IvsEncoder::getCount(value);
-        duration = IvsEncoder::getDuration(value) * timescale;
+        duration = IvsEncoder::getDuration(value) * static_cast<int>(timescale);
       }
       auto myEffects_it = myEffects.begin();
       auto children_it = children.begin();
@@ -142,7 +142,9 @@ private:
       std::vector<types::Effect> linearized_effects;
       for (; myEffects_it < myEffects.end() && children_it < children.end();) {
         int repeat_position =
-            children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value) * timescale;
+            children_it->value == nullptr
+                ? 0
+                : IvsEncoder::getTime(children_it->value) * static_cast<int>(timescale);
 
         if (myEffects_it->getPosition() < repeat_position) {
           types::Effect e = *myEffects_it;

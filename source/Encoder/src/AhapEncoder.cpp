@@ -46,7 +46,7 @@
 #pragma warning(pop)
 #endif
 
-const double SEC_TO_MSEC = 1000.0;
+// const double SEC_TO_MSEC = 1000.0;
 const float DEFAULT_AMPLITUDE = 0.5;
 const int DEFAULT_FREQUENCY = 90;
 

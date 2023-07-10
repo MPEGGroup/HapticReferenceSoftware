@@ -127,9 +127,9 @@ auto IvsEncoder::encode(const std::string &filename, types::Perception &out, uns
 
 auto IvsEncoder::isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child,
                                 unsigned int timescale) -> bool {
-  auto parent_start = IvsEncoder::getTime(parent) * timescale;
-  auto parent_end = parent_start + IvsEncoder::getDuration(parent) * timescale;
-  auto child_start = IvsEncoder::getTime(child) * timescale;
+  auto parent_start = IvsEncoder::getTime(parent) * static_cast<int>(timescale);
+  auto parent_end = parent_start + IvsEncoder::getDuration(parent) * static_cast<int>(timescale);
+  auto child_start = IvsEncoder::getTime(child) * static_cast<int>(timescale);
   return IvsEncoder::isRepeatNested(parent_start, parent_end, child_start);
 }
 
@@ -169,10 +169,10 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel)
     return false;
   }
 
-  out->setPosition(IvsEncoder::getTime(launchEvent) * timescale);
+  out->setPosition(IvsEncoder::getTime(launchEvent) * static_cast<int>(timescale));
   out->setPhase(0);
 
-  int duration = IvsEncoder::getDuration(basisEffect, launchEvent) * timescale;
+  int duration = IvsEncoder::getDuration(basisEffect, launchEvent) * static_cast<int>(timescale);
   int magnitude = IvsEncoder::getMagnitude(basisEffect, launchEvent);
 
   float amplitude = static_cast<float>(magnitude) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
@@ -181,7 +181,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel)
   k = types::Keyframe(duration, amplitude, freq);
   out->addKeyframe(k);
 
-  int attackTime = IvsEncoder::getAttackTime(basisEffect) * timescale;
+  int attackTime = IvsEncoder::getAttackTime(basisEffect) * static_cast<int>(timescale);
   if (attackTime != -1) {
     int attackLevel = IvsEncoder::getAttackLevel(basisEffect);
     float attackAmplitude = static_cast<float>(attackLevel) * IvsEncoder::MAGNITUDE_2_AMPLITUDE;
@@ -197,7 +197,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel)
     out->addAmplitudeAt(amplitude, attackTime);
   }
 
-  int fadeDuration = IvsEncoder::getFadeTime(basisEffect) * timescale;
+  int fadeDuration = IvsEncoder::getFadeTime(basisEffect) * static_cast<int>(timescale);
   if (fadeDuration != -1) {
     int fadeTime = duration - fadeDuration;
 
