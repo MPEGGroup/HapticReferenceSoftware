@@ -58,11 +58,11 @@ public:
   [[nodiscard]] auto static extractTransients(
       const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
       const std::vector<std::pair<int, double>> *amplitudes,
-      const std::vector<std::pair<int, double>> *frequencies) -> int;
+      const std::vector<std::pair<int, double>> *frequencies, unsigned int timescale) -> int;
   [[nodiscard]] auto static extractContinuous(
       const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *continuous,
       const std::vector<std::pair<int, double>> *amplitudes,
-      const std::vector<std::pair<int, double>> *frequencies) -> int;
+      const std::vector<std::pair<int, double>> *frequencies, unsigned int timescale) -> int;
   [[nodiscard]] auto static extractKeyframes(const rapidjson::Value::Object &parameterCurve,
                                              std::vector<std::pair<int, double>> *keyframes,
                                              unsigned int timescale) -> int;

@@ -47,7 +47,8 @@ namespace haptics::encoder {
 
 class IvsEncoder {
 public:
-  auto static encode(const std::string &filename, types::Perception &out) -> int;
+  auto static encode(const std::string &filename, types::Perception &out, unsigned int timescale)
+      -> int;
   [[nodiscard]] auto static getLastModified(const pugi::xml_document *doc) -> std::string;
   [[nodiscard]] auto static getBasisEffects(const pugi::xml_document *doc)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
@@ -63,14 +64,16 @@ public:
 
   [[nodiscard]] auto static convertToEffect(const pugi::xml_node *basisEffect,
                                             const pugi::xml_node *launchEvent,
-                                            haptics::types::Effect *out) -> bool;
+                                            haptics::types::Effect *out, unsigned int timescale)
+      -> bool;
 
   [[nodiscard]] auto static getName(const pugi::xml_node *node) -> std::string;
   [[nodiscard]] auto static getTime(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getCount(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getDuration(const pugi::xml_node *node) -> int;
   [[nodiscard]] auto static getDuration(const pugi::xml_node *basisEffect,
-                                        const pugi::xml_node *launchEvent) -> int;
+                                        const pugi::xml_node *launchEvent)
+      -> int;
   [[nodiscard]] auto static getMagnitude(const pugi::xml_node *basisEffect,
                                          const pugi::xml_node *launchEvent) -> int;
   [[nodiscard]] auto static getPeriod(const pugi::xml_node *basisEffect,
@@ -84,7 +87,8 @@ public:
   [[nodiscard]] auto static floatToInt(int f) -> int;
 
 private:
-  auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool;
+  auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child, unsigned int timescale)
+      -> bool;
   auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
   auto static injectIntoBands(types::Effect &effect, types::Channel &channel) -> void;
   static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
@@ -97,10 +101,10 @@ private:
     std::vector<types::Effect> myEffects;
     std::vector<RepeatNode> children;
 
-    auto pushEffect(types::Effect &myEffect) -> bool {
+    auto pushEffect(types::Effect &myEffect, unsigned int timescale) -> bool {
       if (value != nullptr) {
-        int start = IvsEncoder::getTime(value);
-        int end = start + IvsEncoder::getDuration(value);
+        int start = IvsEncoder::getTime(value) * timescale;
+        int end = start + IvsEncoder::getDuration(value) * timescale;
         int position = myEffect.getPosition();
         if (start > position || position >= end) {
           return false;
@@ -108,7 +112,7 @@ private:
       }
 
       for (auto it = children.begin(); it < children.end(); it++) {
-        if (it->pushEffect(myEffect)) {
+        if (it->pushEffect(myEffect, timescale)) {
           return true;
         }
       }
@@ -125,12 +129,13 @@ private:
       return true;
     }
 
-    auto linearize(std::vector<types::Effect> &effectLibrary, int &delay) -> int {
+    auto linearize(std::vector<types::Effect> &effectLibrary, int &delay, unsigned int timescale)
+        -> int {
       int count = 0;
       int duration = 0;
       if (value != nullptr) {
         count = IvsEncoder::getCount(value);
-        duration = IvsEncoder::getDuration(value);
+        duration = IvsEncoder::getDuration(value) * timescale;
       }
       auto myEffects_it = myEffects.begin();
       auto children_it = children.begin();
@@ -138,7 +143,7 @@ private:
       std::vector<types::Effect> linearized_effects;
       for (; myEffects_it < myEffects.end() && children_it < children.end();) {
         int repeat_position =
-            children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value);
+            children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value) * timescale;
 
         if (myEffects_it->getPosition() < repeat_position) {
           types::Effect e = *myEffects_it;
@@ -147,7 +152,7 @@ private:
           linearized_effects.push_back(e);
           myEffects_it++;
         } else {
-          delay_tmp = children_it->linearize(linearized_effects, delay);
+          delay_tmp = children_it->linearize(linearized_effects, delay, timescale);
           duration += delay_tmp;
           delay += delay_tmp;
           children_it++;
@@ -160,7 +165,7 @@ private:
         linearized_effects.push_back(e);
       }
       for (; children_it < children.end(); children_it++) {
-        delay_tmp = children_it->linearize(linearized_effects, delay);
+        delay_tmp = children_it->linearize(linearized_effects, delay, timescale);
         duration += delay_tmp;
         delay += delay_tmp;
       }

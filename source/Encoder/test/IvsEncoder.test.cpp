@@ -37,6 +37,7 @@
 #include <catch2/catch.hpp>
 
 using haptics::encoder::IvsEncoder;
+const unsigned int timescale = 1000;
 
 TEST_CASE("IvsEncoder::getLastModified without node", "[getLastModified][withoutNode]") {
   pugi::xml_document doc;
@@ -417,7 +418,7 @@ TEST_CASE("IvsEncoder::getTime without value", "[getTime][withoutValue]") {
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node repeatEvent = node.append_child("repeat-event");
 
-  int res = IvsEncoder::getTime(&repeatEvent);
+  int res = IvsEncoder::getTime(&repeatEvent) * timescale;
 
   REQUIRE(res == -1);
 }
@@ -428,7 +429,7 @@ TEST_CASE("IvsEncoder::getTime with value", "[getTime][withValue]") {
   pugi::xml_node repeatEvent = node.append_child("basis-effect");
   repeatEvent.append_attribute("time") = 3;
 
-  int res = IvsEncoder::getTime(&repeatEvent);
+  int res = IvsEncoder::getTime(&repeatEvent) * timescale;
 
   REQUIRE(res == 3);
 }
@@ -460,7 +461,7 @@ TEST_CASE("IvsEncoder::getDuration(1 param) without value", "[getDuration][witho
   pugi::xml_node node = doc.append_child("root");
   pugi::xml_node repeatEvent = node.append_child("repeat-event");
 
-  int res = IvsEncoder::getDuration(&repeatEvent);
+  int res = IvsEncoder::getDuration(&repeatEvent) * timescale;
 
   REQUIRE(res == -1);
 }
@@ -471,7 +472,7 @@ TEST_CASE("IvsEncoder::getDuration(1 param) without override", "[getDuration][wi
   pugi::xml_node repeatEvent = node.append_child("repeat-event");
   repeatEvent.append_attribute("duration") = 3;
 
-  int res = IvsEncoder::getDuration(&repeatEvent);
+  int res = IvsEncoder::getDuration(&repeatEvent) * timescale;
 
   REQUIRE(res == 3);
 }
@@ -494,7 +495,7 @@ TEST_CASE("IvsEncoder::getDuration(2 params) without override", "[getDuration][w
   pugi::xml_node basisEffect = node.append_child("basis-effect");
   basisEffect.append_attribute("duration") = "24";
 
-  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent) * timescale;
 
   REQUIRE(res == 24);
 }
@@ -507,7 +508,7 @@ TEST_CASE("IvsEncoder::getDuration(2 params) with override", "[getDuration][with
   pugi::xml_node basisEffect = node.append_child("basis-effect");
   basisEffect.append_attribute("duration") = "24";
 
-  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent);
+  int res = IvsEncoder::getDuration(&basisEffect, &launchEvent) * timescale;
 
   REQUIRE(res == 42);
 }
@@ -773,7 +774,7 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   basisEffect.append_attribute("period") = effectPeriod;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
@@ -823,7 +824,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   basisEffect.append_attribute("attack-level") = effectAttackLevel;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
@@ -880,7 +881,7 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   basisEffect.append_attribute("fade-level") = effectFadeLevel;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == 42);
   CHECK(res.getPhase() == Approx(0.0));
@@ -943,7 +944,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
   basisEffect.append_attribute("fade-level") = effectFadeLevel;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));

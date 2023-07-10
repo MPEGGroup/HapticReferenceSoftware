@@ -119,7 +119,8 @@ namespace haptics::encoder {
 
     if (e.HasMember("Event")) {
       if (e["Event"]["EventType"] == "HapticTransient") {
-        ret = extractTransients(e["Event"].GetObject(), &transients, &amplitudes, &frequencies);
+        ret = extractTransients(e["Event"].GetObject(), &transients, &amplitudes, &frequencies,
+                                timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -127,7 +128,8 @@ namespace haptics::encoder {
       }
 
       if (e["Event"]["EventType"] == "HapticContinuous") {
-        ret = extractContinuous(e["Event"].GetObject(), &continuous, &amplitudes, &frequencies);
+        ret = extractContinuous(e["Event"].GetObject(), &continuous, &amplitudes, &frequencies,
+                                timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN CONTINUOUS EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -207,11 +209,10 @@ namespace haptics::encoder {
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto
-AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
-                               std::vector<haptics::types::Effect> *transients,
-                               const std::vector<std::pair<int, double>> *amplitudes,
-                               const std::vector<std::pair<int, double>> *frequencies) -> int {
+[[nodiscard]] auto AhapEncoder::extractTransients(
+    const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
+    const std::vector<std::pair<int, double>> *amplitudes,
+    const std::vector<std::pair<int, double>> *frequencies, const unsigned int timescale) -> int {
   if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
       !event["EventType"].IsString() ||
       std::string(event["EventType"].GetString()) != "HapticTransient" ||
@@ -220,7 +221,8 @@ AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
   }
 
   haptics::types::Effect t = haptics::types::Effect(
-      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
+      static_cast<int>(std::round(event["Time"].GetDouble() * timescale)),
+      0, // modif to get from sec2ms to ticks
       haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
@@ -286,11 +288,10 @@ AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto
-AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
-                               std::vector<haptics::types::Effect> *continuous,
-                               const std::vector<std::pair<int, double>> *amplitudes,
-                               const std::vector<std::pair<int, double>> *frequencies) -> int {
+[[nodiscard]] auto AhapEncoder::extractContinuous(
+    const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *continuous,
+    const std::vector<std::pair<int, double>> *amplitudes,
+    const std::vector<std::pair<int, double>> *frequencies, const unsigned int timescale) -> int {
   if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
       !event["EventType"].IsString() ||
       std::string(event["EventType"].GetString()) != "HapticContinuous" ||
@@ -300,7 +301,7 @@ AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
   }
 
   haptics::types::Effect c = haptics::types::Effect(
-      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
+      static_cast<int>(std::round(event["Time"].GetDouble() * timescale)), 0,
       haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
@@ -312,7 +313,7 @@ AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
   double base_freq = BASE_FREQUENCY_MAX;
 
   k_end.setRelativePosition(
-      static_cast<int>(std::round(event["EventDuration"].GetDouble() * SEC_TO_MSEC)));
+      static_cast<int>(std::round(event["EventDuration"].GetDouble() * timescale)));
 
   // SET VALUES AS DEFINED
   for (auto &param : event["EventParameters"].GetArray()) {

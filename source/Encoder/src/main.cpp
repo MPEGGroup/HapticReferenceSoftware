@@ -199,7 +199,7 @@ auto main(int argc, char *argv[]) -> int {
         codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
       } else if (ext == "xml" || ext == "ivs") {
         std::cout << "The IVS file to encode : " << filename << std::endl;
-        codeExit = IvsEncoder::encode(filename, myPerception);
+        codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         haptics::encoder::EncodingConfig config;
@@ -241,7 +241,7 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
-    codeExit = IvsEncoder::encode(filename, myPerception);
+    codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
     hapticFile.addPerception(myPerception);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
