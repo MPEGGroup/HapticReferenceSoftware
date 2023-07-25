@@ -2116,13 +2116,15 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
     std::vector<types::Effect> effects;
     std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
     if (sreader.bandStream.band.getBandType() != types::BandType::WaveletWave) {
-      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx)) {
+      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx,
+                          sreader.timescale)) {
         return false;
       }
       addTimestampEffect(effects, static_cast<int>(sreader.time));
     } else {
       types::Effect effect;
-      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
+      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx,
+                                  sreader.timescale);
       effects.push_back(effect);
     }
     return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex,
@@ -2266,7 +2268,8 @@ auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polyn
 }
 
 auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                 types::Effect &effect, int &length) -> bool {
+                                 types::Effect &effect, int &length, const unsigned int timescale)
+    -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
@@ -2287,12 +2290,12 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   int effectPos = static_cast<int>(band.getBlockLength()) * static_cast<int>(band.getEffectsSize());
   effect.setPosition(effectPos);
 
-  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
   length += idx;
   return true;
 }
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
-                          int &length) -> bool {
+                          int &length, const unsigned int timescale) -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
@@ -2320,7 +2323,7 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
     }
   } else if (effectType == types::EffectType::Basis &&
              band.getBandType() == types::BandType::WaveletWave) {
-    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
   }
   length += idx;
   return true;
@@ -2565,12 +2568,13 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
   return true;
 }
 auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
-                              std::vector<types::Effect> &fxList, int &length) -> bool {
+                              std::vector<types::Effect> &fxList, int &length,
+                              unsigned int timescale) -> bool {
   int idx = 0;
   for (int i = 0; i < fxCount; i++) {
     std::vector<bool> fxBits(bitstream.begin() + idx, bitstream.end());
     types::Effect effect;
-    if (!readEffect(fxBits, effect, band, idx)) {
+    if (!readEffect(fxBits, effect, band, idx, timescale)) {
       return false;
     }
     fxList.push_back(effect);

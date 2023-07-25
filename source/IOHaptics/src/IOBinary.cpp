@@ -770,11 +770,13 @@ auto IOBinary::readFileBody(types::Haptics &haptic, std::istream &file,
 
       for (int bandIndex = 0; bandIndex < static_cast<int>(myChannel.getBandsSize()); bandIndex++) {
         myBand = myChannel.getBandAt(bandIndex);
-        if (!IOBinaryBands::readBandHeader(myBand, file, unusedBits)) {
+        if (!IOBinaryBands::readBandHeader(myBand, file, unusedBits,
+                                           haptic.getTimescaleOrDefault())) {
           continue;
         }
 
-        if (!IOBinaryBands::readBandBody(myBand, file, unusedBits)) {
+        if (!IOBinaryBands::readBandBody(myBand, file, unusedBits,
+                                         haptic.getTimescaleOrDefault())) {
           return false;
         }
 
@@ -805,7 +807,7 @@ auto IOBinary::writeFileBody(types::Haptics &haptic, std::vector<bool> &output) 
       for (unsigned short bandIndex = 0;
            bandIndex < static_cast<unsigned short>(myChannel.getBandsSize()); bandIndex++) {
         myBand = myChannel.getBandAt(bandIndex);
-        if (!IOBinaryBands::writeBandHeader(myBand, output)) {
+        if (!IOBinaryBands::writeBandHeader(myBand, output, haptic.getTimescaleOrDefault())) {
           continue;
         }
 
