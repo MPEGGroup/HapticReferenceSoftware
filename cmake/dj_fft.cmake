@@ -8,7 +8,7 @@ if(NO_INTERNET)
 else()
     fetchcontent_declare(DJ_FFT
             GIT_REPOSITORY https://github.com/jdupuy/dj_fft.git
-            GIT_TAG "bce610fa485252a0a34493c4da611f095fdf6c1f"
+            #GIT_TAG "bce610fa485252a0a34493c4da611f095fdf6c1f"
             GIT_PROGRESS TRUE
             GIT_SHALLOW ON
             )
