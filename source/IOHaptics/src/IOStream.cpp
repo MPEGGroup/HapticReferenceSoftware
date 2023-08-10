@@ -1108,7 +1108,7 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
     libraryEffect.addTimelineEffect(timelineEffect);
   }
 
-  return true;
+  return success;
 }
 
 auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &bitstream)
@@ -1138,7 +1138,7 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
     IOBinaryPrimitives::writeStrBits(flagSemanticStr, bitstream);
   }
 
-  std::bitset<EFFECT_POSITION> posBits(libraryEffect.getPosition());
+  std::bitset<EFFECT_POSITION_STREAMING> posBits(libraryEffect.getPosition());
   std::string posStr = posBits.to_string();
   IOBinaryPrimitives::writeStrBits(posStr, bitstream);
 
