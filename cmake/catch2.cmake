@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 option(BUILD_CATCH2 "Build and use Catch2 for unit tests" ON)
 
+set(CATCH_BUILD_STATIC_LIBRARY 1)
+
 if(BUILD_CATCH2)
     include(FetchContent)
     if(NO_INTERNET)
@@ -11,7 +13,7 @@ if(BUILD_CATCH2)
     else()
         fetchcontent_declare(CATCH2
                 GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-                GIT_TAG "v2.13.4"
+                GIT_TAG "v2.13.6"
                 GIT_PROGRESS TRUE
                 GIT_SHALLOW ON
                 )
