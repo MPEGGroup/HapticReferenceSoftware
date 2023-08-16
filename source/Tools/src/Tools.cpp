@@ -190,7 +190,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   m1[n + 2] = 3 * m[n - 2] - 2 * m[n - 3];
 
   for (size_t i = 0; i < m1.size() - 1; i++) {
-    dm[i] = abs(m1[i + 1] - m1[i]);
+    dm[i] = fabs(m1[i + 1] - m1[i]);
     if (i < n) {
       b[i] = m1[i + 1];
     }

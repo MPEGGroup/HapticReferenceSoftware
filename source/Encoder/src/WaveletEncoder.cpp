@@ -53,12 +53,12 @@ WaveletEncoder::WaveletEncoder(int bl_new, int fs_new)
 }
 
 auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff,
-                                  Band &band) -> bool {
+                                  Band &band, const unsigned int timescale) -> bool {
   int numBlocks = (int)ceil((double)sig_time.size() / (double)bl);
   band.setBandType(BandType::WaveletWave);
   band.setLowerFrequencyLimit((int)f_cutoff);
   band.setUpperFrequencyLimit((int)fs);
-  band.setBlockLength((double)bl / fs * S_2_MS_WAVELET);
+  band.setBlockLength((double)bl / fs * (double)timescale);
   int pos_effect = 0;
   long add_start = 0;
   unsigned int add_end = bl;
