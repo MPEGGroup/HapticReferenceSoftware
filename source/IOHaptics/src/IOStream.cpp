@@ -298,11 +298,14 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   }
   sreader.packetDuration = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_DURATION);
   if (sreader.conformance) {
-    IOConformance::checkMIHSUnitTemporalDuraction(sreader);
+    IOConformance::checkMIHSUnitDuration(sreader);
   }
   int unitLength = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LENGTH) * BYTE_SIZE;
 
   std::vector<bool> packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
+  if (sreader.conformance && unitType == MIHSUnitType::Spatial) {
+    IOConformance::checkMIHSUnitSpatialPackets(sreader, packets);
+  }
   while (index < unitLength) {
     if (!readNALu(packets, sreader, crc)) {
       return EXIT_FAILURE;
@@ -1207,7 +1210,7 @@ auto IOStream::readLibraryEffect(StreamReader &sreader, types::Effect &libraryEf
   int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
   libraryEffect.setPosition(position);
 
-  if (effectType == 0) {
+  if (effectType == (int)types::EffectType::Basis) {
     float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
     libraryEffect.setPhase(phase);
 
@@ -2563,6 +2566,9 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
   effect.setId(id);
 
   int effectTypeInt = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
+  if (sreader.conformance) {
+    IOConformance::checkEffectTypeUnknown(sreader, effectTypeInt);
+  }
   if (effectTypeInt < static_cast<int>(types::EffectType::Basis) ||
       effectTypeInt > static_cast<int>(types::EffectType::Timeline)) {
     sreader.logs.push_back(
