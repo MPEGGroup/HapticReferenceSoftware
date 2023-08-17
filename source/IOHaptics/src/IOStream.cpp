@@ -2320,33 +2320,30 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
                           int &length, const unsigned int timescale) -> bool {
   int idx = 0;
-  int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
-  effect.setId(id);
 
   types::EffectType effectType =
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
 
-  int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
-  if (hasSemantic == 1) {
-    int semanticCode = IOBinaryPrimitives::readUInt(
-        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    auto semantic = std::string(
-        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
-    effect.setSemantic(semantic);
-  }
-
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
 
-  if (effectType == types::EffectType::Basis &&
-      band.getBandType() != types::BandType::WaveletWave) {
+  if (effectType == types::EffectType::Basis) {
+    int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
+    if (hasSemantic == 1) {
+      int semanticCode = IOBinaryPrimitives::readUInt(
+          bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+      auto semantic = std::string(
+          types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+      effect.setSemantic(semantic);
+    }
     if (!readEffectBasis(bitstream, effect, band.getBandType(), idx)) {
       return false;
     }
-  } else if (effectType == types::EffectType::Basis &&
-             band.getBandType() == types::BandType::WaveletWave) {
-    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
+  } else if (effectType == types::EffectType::Reference) {
+
+    int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
+    effect.setId(id);
   }
   length += idx;
   return true;
