@@ -2594,7 +2594,7 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::
   for (int i = 0; i < fxCount; i++) {
     std::vector<bool> fxBits(bitstream.begin() + idx, bitstream.end());
     types::Effect effect;
-    if (!readEffect(fxBits, effect, band, idx, timescale)) {
+    if (!readEffect(fxBits, effect, band, idx)) {
       return false;
     }
     fxList.push_back(effect);
