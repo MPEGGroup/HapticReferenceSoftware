@@ -2115,8 +2115,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
     std::vector<types::Effect> effects;
     std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
     if (sreader.bandStream.band.getBandType() != types::BandType::WaveletWave) {
-      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx,
-                          sreader.timescale)) {
+      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx)) {
         return false;
       }
       addTimestampEffect(effects, static_cast<int>(sreader.time));
@@ -2564,8 +2563,7 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
   return true;
 }
 auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
-                              std::vector<types::Effect> &fxList, int &length,
-                              unsigned int timescale) -> bool {
+                              std::vector<types::Effect> &fxList, int &length) -> bool {
   int idx = 0;
   for (int i = 0; i < fxCount; i++) {
     std::vector<bool> fxBits(bitstream.begin() + idx, bitstream.end());
