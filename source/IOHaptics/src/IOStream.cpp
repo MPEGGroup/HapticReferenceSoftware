@@ -1973,38 +1973,34 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
   IOBinaryPrimitives::writeStrBits(fxCountStr, packetBits);
 
   for (auto l = 0; l < static_cast<int>(swriter.effects.size()); l++) {
-    std::bitset<EFFECT_ID> effectIDBits(static_cast<int>(swriter.effects[l].getId()));
-    std::string effectIDStr = effectIDBits.to_string();
-    IOBinaryPrimitives::writeStrBits(effectIDStr, packetBits);
 
     std::bitset<EFFECT_TYPE> effectTypeBits(static_cast<int>(swriter.effects[l].getEffectType()));
     std::string effectTypeStr = effectTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectTypeStr, packetBits);
-
-    if (swriter.effects[l].getSemantic().has_value()) {
-      std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
-      std::string flagSemanticStr = flagSemanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
-
-      types::EffectSemantic semantic =
-          types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
-      std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
-          static_cast<int>(semantic));
-      std::string semanticStr = semanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
-    } else {
-      std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
-      std::string flagSemanticStr = flagSemanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
-    }
 
     int effectPos = static_cast<int>(swriter.effects[l].getPosition()) - swriter.time;
     std::bitset<EFFECT_POSITION> effectPosBits(effectPos);
     std::string effectPosStr = effectPosBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectPosStr, packetBits);
 
-    if (swriter.effects[l].getEffectType() == types::EffectType::Basis &&
-        swriter.bandStream.band.getBandType() != types::BandType::WaveletWave) {
+    if (swriter.effects[l].getEffectType() == types::EffectType::Basis) {
+      if (swriter.effects[l].getSemantic().has_value()) {
+        std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
+        std::string flagSemanticStr = flagSemanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
+
+        types::EffectSemantic semantic =
+            types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
+        std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
+            static_cast<int>(semantic));
+        std::string semanticStr = semanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
+      } else {
+        std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
+        std::string flagSemanticStr = flagSemanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
+      }
+
       std::bitset<EFFECT_KEYFRAME_COUNT> kfCountBits(swriter.keyframesCount[l]);
       std::string kfCountStr = kfCountBits.to_string();
       IOBinaryPrimitives::writeStrBits(kfCountStr, packetBits);
@@ -2016,8 +2012,11 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
         std::string fxBaseStr = fxBaseBits.to_string();
         IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }
+    } else if (swriter.effects[l].getEffectType() == types::EffectType::Reference) {
+      std::bitset<EFFECT_ID> effectIDBits(static_cast<int>(swriter.effects[l].getId()));
+      std::string effectIDStr = effectIDBits.to_string();
+      IOBinaryPrimitives::writeStrBits(effectIDStr, packetBits);
     }
-
     packetBits.insert(packetBits.end(), bufPacketBitstream[l].begin(), bufPacketBitstream[l].end());
   }
   return packetBits;
