@@ -258,7 +258,7 @@ private:
                              unsigned int timescale) -> bool;
 
   static auto readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
-                         int &length, unsigned int timescale) -> bool;
+                         int &length) -> bool;
 
   static auto readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
                               types::BandType bandType, int &idx) -> bool;
