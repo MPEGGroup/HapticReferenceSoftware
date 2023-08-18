@@ -2294,7 +2294,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   return true;
 }
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
-                          int &length, const unsigned int timescale) -> bool {
+                          int &length) -> bool {
   int idx = 0;
 
   types::EffectType effectType =
