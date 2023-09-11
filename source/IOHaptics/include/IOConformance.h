@@ -58,6 +58,7 @@ enum class hmpgErrorCode {
   TempSpat_Data_EffectID_Unknown,
   TempSpat_Data_EffectType_Unknown,
   TempSpat_Data_EffectType_OutOfRange,
+  Temp_Timing_Not_Ascending,
 
   Temp_Data_PerceptionModality_Invalid,
 
@@ -239,6 +240,9 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
          std::to_string(static_cast<int>(hmpgErrorCode::NonTempSpat_Data_InvalidNumber))},
 
     // Temp_Data_*
+    {hmpgErrorCode::Temp_Timing_Not_Ascending,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Effect ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Timing_Not_Ascending))},
     {hmpgErrorCode::Temp_Data_PerceptionModality_Invalid,
      "MIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. "
      "Error code: " +
@@ -331,6 +335,9 @@ public:
     if (effectPos < 0 && !sreader.waitSync) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
     }
+    if (effectPos >= sreader.packetDuration) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
+    }
   }
 
   static auto checkBaseSignal(IOStream::StreamReader &sreader, int baseSignal) -> void {
@@ -380,6 +387,17 @@ public:
     if (effectType < 0 || effectType > 2) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_Unknown));
+    }
+  }
+
+  static auto checkEffectOrder(IOStream::StreamReader &sreader, std::vector<types::Effect> &effects)
+      -> void {
+    int pos = -INFINITY;
+    for (const auto effect : effects) {
+      if (effect.getPosition() < pos) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Timing_Not_Ascending));
+      }
+      pos = effect.getPosition();
     }
   }
 

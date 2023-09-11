@@ -2879,6 +2879,8 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, StreamReader &sreade
     fxList.push_back(effect);
   }
   length += idx;
+  if (sreader.conformance) {
+  }
   return true;
 }
 auto IOStream::readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,
