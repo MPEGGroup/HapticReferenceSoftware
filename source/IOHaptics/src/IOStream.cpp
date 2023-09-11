@@ -2386,7 +2386,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       addTimestampEffect(effects, static_cast<int>(sreader.time));
     } else {
       types::Effect effect;
-      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
+      IOStream::readWaveletEffect(effectsBitsList, sreader, sreader.bandStream.band, effect, idx);
       effects.push_back(effect);
     }
     if (addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex, sreader.bandStream.index,
@@ -2533,8 +2533,8 @@ auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polyn
   return true;
 }
 
-auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                 types::Effect &effect, int &length) -> bool {
+auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, StreamReader &sreader,
+                                 types::Band &band, types::Effect &effect, int &length) -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
@@ -2542,6 +2542,12 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   types::EffectType effectType =
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
+
+  if (sreader.conformance) {
+    if (effect.getEffectType() == types::EffectType::Reference && sreader.conformance) {
+      IOConformance::checkEffectIDExists(sreader, id);
+    }
+  }
 
   int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
   if (hasSemantic == 1) {
@@ -2589,9 +2595,13 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
 
+  if (sreader.conformance) {
+    IOConformance::checkEffectPosition(sreader, effectPos);
+  }
+
   if (effect.getEffectType() == types::EffectType::Basis &&
       sreader.bandStream.band.getBandType() != types::BandType::WaveletWave) {
-    if (!readEffectBasis(bitstream, effect, sreader.bandStream.band.getBandType(), idx)) {
+    if (!readEffectBasis(bitstream, sreader, effect, sreader.bandStream.band.getBandType(), idx)) {
       return false;
     }
   } else if (effect.getEffectType() == types::EffectType::Basis &&
@@ -2630,13 +2640,16 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   }
   return true;
 }
-auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
+auto IOStream::readEffectBasis(std::vector<bool> &bitstream, StreamReader &sreader, Effect &effect,
                                types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
   if (bandType == types::BandType::VectorialWave) {
     float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
     effect.setPhase(phase);
     int baseSignal = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_BASE_SIGNAL);
+    if (sreader.conformance) {
+      IOConformance::checkBaseSignal(sreader, baseSignal);
+    }
     effect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
   }
   std::vector<types::Keyframe> keyframes = std::vector<types::Keyframe>();

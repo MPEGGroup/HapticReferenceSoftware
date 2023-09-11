@@ -201,8 +201,8 @@ private:
   static auto writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
                                         std::vector<bool> &packetBits, StreamWriter &swriter)
       -> std::vector<bool>;
-  static auto readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                types::Effect &effect, int &length) -> bool;
+  static auto readWaveletEffect(std::vector<bool> &bitstream, StreamReader &sreader,
+                                types::Band &band, types::Effect &effect, int &length) -> bool;
   static auto writeEffectHeader(StreamWriter &swriter) -> std::vector<bool>;
   static auto writeEffectBasis(types::Effect effect, StreamWriter &swriter, int &kfCount, bool &rau,
                                std::vector<bool> &bitstream) -> bool;
@@ -267,8 +267,8 @@ private:
   static auto readEffect(std::vector<bool> &bitstream, StreamReader &sreader, types::Effect &effect,
                          int &length) -> bool;
 
-  static auto readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
-                              types::BandType bandType, int &idx) -> bool;
+  static auto readEffectBasis(std::vector<bool> &bitstream, StreamReader &sreader,
+                              types::Effect &effect, types::BandType bandType, int &idx) -> bool;
 
   static auto readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,
                              std::vector<types::Keyframe> &kfList, int &length) -> bool;

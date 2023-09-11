@@ -62,6 +62,8 @@ enum class hmpgErrorCode {
   Temp_Data_PerceptionModality_Invalid,
 
   Temp_Duration_Invalid,
+  Temp_Position_Invalid,
+  Temp_BaseSignal_Invalid,
 
   Spat_Data_PerceptionModality_Invalid,
   Spat_Duration_Invalid,
@@ -246,6 +248,12 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Temp_Duration_Invalid,
      "MIHSUnit_Temporal error: Duration invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Temp_Duration_Invalid))},
+    {hmpgErrorCode::Temp_Position_Invalid,
+     "MIHSUnit_Temporal error: Position invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Position_Invalid))},
+    {hmpgErrorCode::Temp_BaseSignal_Invalid,
+     "MIHSUnit_Temporal error: baseSignal invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_BaseSignal_Invalid))},
 
     // Spat_Data_*
     {hmpgErrorCode::Spat_Data_PerceptionModality_Invalid,
@@ -316,6 +324,18 @@ public:
       } else {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Invalid));
       }
+    }
+  }
+
+  static auto checkEffectPosition(IOStream::StreamReader &sreader, int effectPos) -> void {
+    if (effectPos < 0 && !sreader.waitSync) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
+    }
+  }
+
+  static auto checkBaseSignal(IOStream::StreamReader &sreader, int baseSignal) -> void {
+    if (!(baseSignal >= 0 && baseSignal < 5)) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_BaseSignal_Invalid));
     }
   }
 
