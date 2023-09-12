@@ -2590,6 +2590,9 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
     auto semantic = std::string(
         types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
     effect.setSemantic(semantic);
+    if (sreader.conformance) {
+      IOConformance::checkSemanticUnknown(sreader, semantic);
+    }
   }
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);

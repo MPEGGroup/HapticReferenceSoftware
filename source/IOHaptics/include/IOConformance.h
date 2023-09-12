@@ -3,6 +3,7 @@
 
 #include <IOHaptics/include/IOStream.h>
 #include <string>
+#include <Types/include/EffectSemantic.h>
 
 namespace haptics::io {
 
@@ -58,6 +59,8 @@ enum class hmpgErrorCode {
   TempSpat_Data_EffectID_Unknown,
   TempSpat_Data_EffectType_Unknown,
   TempSpat_Data_EffectType_OutOfRange,
+  TempSpat_Data_Semantic_Unknown,
+
   Temp_Timing_Not_Ascending,
 
   Temp_Data_PerceptionModality_Invalid,
@@ -232,6 +235,9 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange,
      "MIHSUnit_Temporal MIHSPacket_Data error: Effect type is out of range. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange))},
+    {hmpgErrorCode::TempSpat_Data_Semantic_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Semantic does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_Semantic_Unknown))},
 
     // NonTempSpat_*
     {hmpgErrorCode::NonTempSpat_Data_InvalidNumber,
@@ -387,6 +393,13 @@ public:
     if (effectType < 0 || effectType > 2) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_Unknown));
+    }
+  }
+
+  static auto checkSemanticUnknown(IOStream::StreamReader &sreader, std::string semantic) -> void {
+    if (types::stringToEffectSemantic.find(semantic) == types::stringToEffectSemantic.end()) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_Semantic_Unknown));
     }
   }
 
