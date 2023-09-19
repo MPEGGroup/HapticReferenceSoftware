@@ -1965,6 +1965,7 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
 
   return packetBits;
 }
+
 auto IOStream::writePayloadPacket(StreamWriter &swriter,
                                   std::vector<std::vector<bool>> bufPacketBitstream,
                                   std::vector<bool> &packetBits) -> std::vector<bool> {
@@ -1973,6 +1974,9 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
   IOBinaryPrimitives::writeStrBits(fxCountStr, packetBits);
 
   for (auto l = 0; l < static_cast<int>(swriter.effects.size()); l++) {
+    std::bitset<EFFECT_ID> effectIDBits(static_cast<int>(swriter.effects[l].getId()));
+    std::string effectIDStr = effectIDBits.to_string();
+    IOBinaryPrimitives::writeStrBits(effectIDStr, packetBits);
 
     std::bitset<EFFECT_TYPE> effectTypeBits(static_cast<int>(swriter.effects[l].getEffectType()));
     std::string effectTypeStr = effectTypeBits.to_string();
@@ -2012,10 +2016,6 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
         std::string fxBaseStr = fxBaseBits.to_string();
         IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }
-    } else if (swriter.effects[l].getEffectType() == types::EffectType::Reference) {
-      std::bitset<EFFECT_ID> effectIDBits(static_cast<int>(swriter.effects[l].getId()));
-      std::string effectIDStr = effectIDBits.to_string();
-      IOBinaryPrimitives::writeStrBits(effectIDStr, packetBits);
     }
     packetBits.insert(packetBits.end(), bufPacketBitstream[l].begin(), bufPacketBitstream[l].end());
   }
@@ -2296,6 +2296,9 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
                           int &length) -> bool {
   int idx = 0;
 
+  int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
+  effect.setId(id);
+
   types::EffectType effectType =
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
@@ -2315,10 +2318,6 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
     if (!readEffectBasis(bitstream, effect, band.getBandType(), idx)) {
       return false;
     }
-  } else if (effectType == types::EffectType::Reference) {
-
-    int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
-    effect.setId(id);
   }
   length += idx;
   return true;
