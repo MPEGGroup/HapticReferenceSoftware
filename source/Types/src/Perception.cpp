@@ -104,7 +104,23 @@ auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel
   if (index < 0 || index >= (int)channels.size()) {
     return false;
   }
-  channels[index] = newChannel;
+  channels[index].setId(newChannel.getId());
+  channels[index].setDescription(newChannel.getDescription());
+  channels[index].setGain(newChannel.getGain());
+  channels[index].setMixingWeight(newChannel.getMixingWeight());
+  channels[index].setBodyPartMask(newChannel.getBodyPartMask());
+  channels[index].clearVertices();
+  for (auto i = 0; i < newChannel.getVerticesSize(); i++) {
+    channels[index].addVertex((newChannel.getVertexAt(i)));
+  }
+  if (newChannel.getReferenceDeviceId().has_value())
+    channels[index].setReferenceDeviceId(newChannel.getReferenceDeviceId().value());
+  channels[index].setFrequencySampling(newChannel.getFrequencySampling());
+  channels[index].setSampleCount(newChannel.getSampleCount());
+  channels[index].setDirection(newChannel.getDirection());
+  channels[index].setActuatorResolution(newChannel.getActuatorResolution());
+  channels[index].setBodyPartTarget(newChannel.getBodyPartTarget());
+  channels[index].setActuatorTarget(newChannel.getActuatorTarget());
   return true;
 }
 

@@ -129,8 +129,10 @@ public:
   auto addChannel(haptics::types::Channel &newChannel) -> void;
   auto getReferenceDevicesSize() -> size_t;
   auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
+  auto clearReferenceDevices() -> void { referenceDevices.clear(); }
   auto replaceChannelAt(int index, Channel &newChannel) -> bool;
   auto removeChannelAt(int index) -> bool;
+  auto clearChannels() -> void { channels.clear(); };
 
   auto addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void;
   auto addReferenceDevice(
@@ -144,6 +146,7 @@ public:
   auto getEffectLibrarySize() -> size_t;
   auto getBasisEffectAt(int index) -> haptics::types::Effect &;
   auto addBasisEffect(haptics::types::Effect &newEffect) -> void;
+  auto clearEffectLibrary() -> void { effectLibrary.clear(); };
   auto refactorEffects() -> void;
   auto searchForEquivalentEffects(Effect &effect, int startingChannel)
       -> std::vector<std::tuple<int, int, int>>;

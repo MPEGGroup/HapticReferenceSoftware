@@ -63,8 +63,21 @@ auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool 
   if (index < 0 || index >= (int)perceptions.size()) {
     return false;
   }
-
-  perceptions[index] = newPerception;
+  perceptions[index].setId(newPerception.getId());
+  perceptions[index].setAvatarId(newPerception.getId());
+  perceptions[index].setDescription(newPerception.getDescription());
+  perceptions[index].setPerceptionModality(newPerception.getPerceptionModality());
+  perceptions[index].setUnitExponent(newPerception.getUnitExponentOrDefault());
+  perceptions[index].setPerceptionUnitExponent(newPerception.getPerceptionUnitExponentOrDefault());
+  perceptions[index].setEffectSemanticScheme(newPerception.getEffectSemanticSchemeOrDefault());
+  perceptions[index].clearReferenceDevices();
+  for (auto i = 0; i < newPerception.getReferenceDevicesSize(); i++) {
+    perceptions[index].addReferenceDevice(newPerception.getReferenceDeviceAt(i));
+  }
+  perceptions[index].clearEffectLibrary();
+  for (auto i = 0; i < newPerception.getEffectLibrarySize(); i++) {
+    perceptions[index].addBasisEffect(newPerception.getBasisEffectAt(i));
+  }
   return true;
 }
 
