@@ -78,6 +78,14 @@ auto Channel::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   if (index < 0 || index >= (int)this->getBandsSize()) {
     return false;
   }
+  bands[index] = newBand;
+  return true;
+}
+
+auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) -> bool {
+  if (index < 0 || index >= (int)this->getBandsSize()) {
+    return false;
+  }
   bands[index].setBandType(newBand.getBandType());
   bands[index].setCurveType(newBand.getCurveType());
   bands[index].setBlockLength(newBand.getBlockLength());

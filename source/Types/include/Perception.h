@@ -131,6 +131,7 @@ public:
   auto getReferenceDeviceAt(int index) -> ReferenceDevice &;
   auto clearReferenceDevices() -> void { referenceDevices.clear(); }
   auto replaceChannelAt(int index, Channel &newChannel) -> bool;
+  auto replaceChannelMetadataAt(int index, Channel &newChannel) -> bool;
   auto removeChannelAt(int index) -> bool;
   auto clearChannels() -> void { channels.clear(); };
 

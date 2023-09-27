@@ -104,6 +104,13 @@ auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel
   if (index < 0 || index >= (int)channels.size()) {
     return false;
   }
+  channels[index] = newChannel;
+}
+
+auto Perception::replaceChannelMetadataAt(int index, haptics::types::Channel &newChannel) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
+    return false;
+  }
   channels[index].setId(newChannel.getId());
   channels[index].setDescription(newChannel.getDescription());
   channels[index].setGain(newChannel.getGain());

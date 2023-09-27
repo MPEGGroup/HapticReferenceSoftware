@@ -36,19 +36,6 @@
 #include <algorithm>
 
 namespace haptics::types {
-// Band::Band(const Band &band, bool e) {
-//   bandType = band.getBandType();
-//   curveType = band.getCurveType();
-//   blockLength = band.getBlockLength();
-//   lowerFrequencyLimit = band.getLowerFrequencyLimit();
-//   upperFrequencyLimit = band.getUpperFrequencyLimit();
-//   timescale = band.getTimescale();
-//   if (e) {
-//     for (auto effect : band.effects) {
-//       this->addEffect(effect);
-//     }
-//   }
-// }
 
 [[nodiscard]] auto Band::getBandType() const -> BandType { return bandType; }
 

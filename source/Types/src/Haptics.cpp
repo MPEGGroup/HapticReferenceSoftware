@@ -63,6 +63,15 @@ auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool 
   if (index < 0 || index >= (int)perceptions.size()) {
     return false;
   }
+
+  perceptions[index] = newPerception;
+  return true;
+}
+
+auto Haptics::replacePerceptionMetadataAt(int index, Perception &newPerception) -> bool {
+  if (index < 0 || index >= (int)perceptions.size()) {
+    return false;
+  }
   perceptions[index].setId(newPerception.getId());
   perceptions[index].setAvatarId(newPerception.getId());
   perceptions[index].setDescription(newPerception.getDescription());

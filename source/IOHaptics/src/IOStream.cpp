@@ -686,7 +686,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     if (perceIndex == -1) {
       sreader.haptic.addPerception(sreader.perception);
     } else {
-      sreader.haptic.replacePerceptionAt(perceIndex, sreader.perception);
+      sreader.haptic.replacePerceptionMetadataAt(perceIndex, sreader.perception);
     }
     return true;
   }
@@ -702,7 +702,8 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     if (channelIndex == -1) {
       sreader.haptic.getPerceptionAt(perceIndex).addChannel(sreader.channel);
     } else {
-      sreader.haptic.getPerceptionAt(perceIndex).replaceChannelAt(channelIndex, sreader.channel);
+      sreader.haptic.getPerceptionAt(perceIndex)
+          .replaceChannelMetadataAt(channelIndex, sreader.channel);
     }
     return true;
   }
@@ -728,7 +729,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     } else {
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
-          .replaceBandAt(bandIndex, sreader.bandStream.band);
+          .replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
     }
     return true;
   }
