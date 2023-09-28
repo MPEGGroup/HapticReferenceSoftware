@@ -249,7 +249,7 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
 auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
 
 [[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
-  return TRANSIENT_DURATION_MS / static_cast<double>(TIMESCALE / timescale);
+  return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);
 }
 
 } // namespace haptics::types
