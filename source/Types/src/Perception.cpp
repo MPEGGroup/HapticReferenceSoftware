@@ -105,6 +105,7 @@ auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel
     return false;
   }
   channels[index] = newChannel;
+  return true;
 }
 
 auto Perception::replaceChannelMetadataAt(int index, haptics::types::Channel &newChannel) -> bool {
@@ -112,16 +113,18 @@ auto Perception::replaceChannelMetadataAt(int index, haptics::types::Channel &ne
     return false;
   }
   channels[index].setId(newChannel.getId());
-  channels[index].setDescription(newChannel.getDescription());
+  auto desc = newChannel.getDescription();
+  channels[index].setDescription(desc);
   channels[index].setGain(newChannel.getGain());
   channels[index].setMixingWeight(newChannel.getMixingWeight());
   channels[index].setBodyPartMask(newChannel.getBodyPartMask());
   channels[index].clearVertices();
-  for (auto i = 0; i < newChannel.getVerticesSize(); i++) {
+  for (auto i = 0; i < static_cast<int>(newChannel.getVerticesSize()); i++) {
     channels[index].addVertex((newChannel.getVertexAt(i)));
   }
-  if (newChannel.getReferenceDeviceId().has_value())
+  if (newChannel.getReferenceDeviceId().has_value()) {
     channels[index].setReferenceDeviceId(newChannel.getReferenceDeviceId().value());
+  }
   channels[index].setFrequencySampling(newChannel.getFrequencySampling());
   channels[index].setSampleCount(newChannel.getSampleCount());
   channels[index].setDirection(newChannel.getDirection());

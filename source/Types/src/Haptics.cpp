@@ -74,17 +74,19 @@ auto Haptics::replacePerceptionMetadataAt(int index, Perception &newPerception) 
   }
   perceptions[index].setId(newPerception.getId());
   perceptions[index].setAvatarId(newPerception.getId());
-  perceptions[index].setDescription(newPerception.getDescription());
+  auto desc = newPerception.getDescription();
+  perceptions[index].setDescription(desc);
   perceptions[index].setPerceptionModality(newPerception.getPerceptionModality());
   perceptions[index].setUnitExponent(newPerception.getUnitExponentOrDefault());
   perceptions[index].setPerceptionUnitExponent(newPerception.getPerceptionUnitExponentOrDefault());
-  perceptions[index].setEffectSemanticScheme(newPerception.getEffectSemanticSchemeOrDefault());
+  auto semantic = newPerception.getEffectSemanticSchemeOrDefault();
+  perceptions[index].setEffectSemanticScheme(semantic);
   perceptions[index].clearReferenceDevices();
-  for (auto i = 0; i < newPerception.getReferenceDevicesSize(); i++) {
+  for (auto i = 0; i < static_cast<int>(newPerception.getReferenceDevicesSize()); i++) {
     perceptions[index].addReferenceDevice(newPerception.getReferenceDeviceAt(i));
   }
   perceptions[index].clearEffectLibrary();
-  for (auto i = 0; i < newPerception.getEffectLibrarySize(); i++) {
+  for (auto i = 0; i < static_cast<int>(newPerception.getEffectLibrarySize()); i++) {
     perceptions[index].addBasisEffect(newPerception.getBasisEffectAt(i));
   }
   return true;
