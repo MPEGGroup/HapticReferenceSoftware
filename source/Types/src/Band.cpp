@@ -136,8 +136,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::Transient: {
     double res = 0;
     if (effect->getPosition() <= position &&
-        position <=
-            effect->getPosition() + effect->getEffectTimeLength(
+        position <= effect->getPosition() + effect->getEffectTimeLength(
                                                 bandType, Band::getTransientDuration(timescale))) {
       res = effect->EvaluateTransient(position, Band::getTransientDuration(timescale));
     } // TODO: transform condition above to ticks?
@@ -241,7 +240,8 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
     return 0;
   }
   return this->effects.back().getPosition() +
-         this->effects.back().getEffectTimeLength(this->getBandType(), Band::getTransientDuration(timescale));
+         this->effects.back().getEffectTimeLength(this->getBandType(),
+                                                  Band::getTransientDuration(timescale));
 }
 
 [[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
