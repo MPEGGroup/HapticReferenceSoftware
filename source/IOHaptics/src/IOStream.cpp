@@ -716,7 +716,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     int bandIndex = searchBandInHaptic(sreader, sreader.bandStream.id);
     if (bandIndex == -1 ||
         sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize() == 0 ||
-        sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize() <
+        static_cast<int>(sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize()) <
             bandIndex) {
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
