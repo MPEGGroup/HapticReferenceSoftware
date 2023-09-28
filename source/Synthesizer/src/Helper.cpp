@@ -49,6 +49,7 @@ namespace haptics::synthesizer {
   types::Effect effect;
   double maxLength = 0;
   double currentLength = 0;
+  unsigned int timescale = haptic.getTimescale().value();
   for (uint32_t perceptionIndex = 0; perceptionIndex < haptic.getPerceptionsSize();
        perceptionIndex++) {
     perception = haptic.getPerceptionAt((int)perceptionIndex);
@@ -63,7 +64,7 @@ namespace haptics::synthesizer {
       } else {
         for (uint32_t bandIndex = 0; bandIndex < channel.getBandsSize(); bandIndex++) {
           band = channel.getBandAt((int)bandIndex);
-          currentLength = band.getBandTimeLength();
+          currentLength = band.getBandTimeLength(timescale);
           if (currentLength > maxLength) {
             maxLength = currentLength;
           }
@@ -96,10 +97,9 @@ namespace haptics::synthesizer {
   for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
     for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
       types::Channel myChannel;
-      auto sampleCount = static_cast<uint32_t>(std::round(fs * MS_2_S * (timeLength + 2 * pad)));
-      std::vector<double> channelAmp(sampleCount, 0);
+      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) / timescale));
       myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
-      channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
+      std::vector<double> channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
       const double perceptionUnitFactor =
           std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
       for (uint32_t k = 0; k < sampleCount; k++) {
