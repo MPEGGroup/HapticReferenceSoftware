@@ -168,8 +168,7 @@ auto Effect::isEquivalent(Effect &effect) -> bool {
 }
 
 auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit,
-                               unsigned int timescale)
-    -> double {
+                               unsigned int timescale) -> double {
   double res = 0;
 
   double max_position = this->position + this->getEffectTimeLength(BandType::VectorialWave, 0);
@@ -282,7 +281,8 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     }
   }
 
-  return amp_modulation * this->computeBaseSignal(relativePosition / static_cast<double>(timescale), freq_modulation, phi);
+  return amp_modulation * this->computeBaseSignal(relativePosition / static_cast<double>(timescale),
+                                                  freq_modulation, phi);
 }
 
 auto Effect::EvaluateWavelet(double position, int fs, unsigned int timescale) -> double {
