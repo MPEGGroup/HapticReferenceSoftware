@@ -210,8 +210,6 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
         bitstream.push_back(temporalUnit);
         if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
           std::vector<bool> syncUnit = std::vector<bool>();
-          // std::vector<std::vector<bool>> packetList;
-          // writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit, swriter);
           writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
           getNextSync(haptic, nextSync, syncIdx);
           bitstream.push_back(syncUnit);
@@ -223,8 +221,6 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
             bitstream.push_back(silentUnit);
             if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
               std::vector<bool> syncUnit = std::vector<bool>();
-              // std::vector<std::vector<bool>> packetList;
-              // writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit, swriter);
               writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
               getNextSync(haptic, nextSync, syncIdx);
               bitstream.push_back(syncUnit);
@@ -243,8 +239,6 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     bufUnit.clear();
     if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
       std::vector<bool> syncUnit = std::vector<bool>();
-      // std::vector<std::vector<bool>> packetList;
-      // writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit, swriter);
       writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
       getNextSync(haptic, nextSync, syncIdx);
       bitstream.push_back(syncUnit);
@@ -343,7 +337,6 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
   writeNALu(NALuType::Timing, swriter, 0, timingPacket);
-  // listPackets.insert(listPackets.begin(), timingPacket.begin(), timingPacket.end());
   packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
   length += readPacketLength(timingPacket[0]);
   for (auto &packet : listPackets) {
@@ -2524,8 +2517,6 @@ auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyf
   length += idx;
   return true;
 }
-
-// auto IOStream::writeCRC(std::vector<bool> &bitstream) -> bool { return false; }
 
 auto IOStream::searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int {
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
