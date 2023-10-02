@@ -167,7 +167,8 @@ auto Effect::isEquivalent(Effect &effect) -> bool {
   return true;
 }
 
-auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
+auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                               unsigned int timescale)
     -> double {
   double res = 0;
 
@@ -281,7 +282,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     }
   }
 
-  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
+  return amp_modulation * this->computeBaseSignal(relativePosition / static_cast<double>(timescale), freq_modulation, phi);
 }
 
 auto Effect::EvaluateWavelet(double position, int fs, unsigned int timescale) -> double {

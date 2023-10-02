@@ -130,7 +130,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
   case BandType::Curve:
     return effect->EvaluateKeyframes(position, this->getCurveType());
   case BandType::VectorialWave:
-    return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
+    return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit, timescale);
   case BandType::WaveletWave:
     return effect->EvaluateWavelet(position, this->getUpperFrequencyLimit(), timescale);
   case BandType::Transient: {
