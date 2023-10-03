@@ -86,8 +86,7 @@ public:
   [[nodiscard]] auto static floatToInt(int f) -> int;
 
 private:
-  auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child)
-      -> bool;
+  auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool;
   auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
   auto static injectIntoBands(types::Effect &effect, types::Channel &channel,
                               unsigned int timescale) -> void;
@@ -131,8 +130,7 @@ private:
       return true;
     }
 
-    auto linearize(std::vector<types::Effect> &effectLibrary, int &delay)
-        -> int {
+    auto linearize(std::vector<types::Effect> &effectLibrary, int &delay) -> int {
       int count = 0;
       int duration = 0;
       if (value != nullptr) {

@@ -135,8 +135,8 @@ auto IvsEncoder::isRepeatNested(int parent_start, int parent_end, int child_star
   return parent_start <= child_start && child_start < parent_end;
 }
 
-auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel, unsigned int timescale)
-    -> void {
+auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel,
+    unsigned int timescale) -> void {
   effect.setPosition(IvsEncoder::millisecondsToTimeScale(effect.getPosition(), timescale));
   haptics::types::Band *myBand = channel.findBandAvailable(
       effect.getPosition(),
@@ -154,8 +154,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel,
 
 [[nodiscard]] auto IvsEncoder::convertToEffect(const pugi::xml_node *basisEffect,
                                                const pugi::xml_node *launchEvent,
-                                               haptics::types::Effect *out,
-                                               unsigned int timescale)
+                                               haptics::types::Effect *out, unsigned int timescale)
     -> bool {
   int periodLength = IvsEncoder::getPeriod(basisEffect, launchEvent);
   int freq = 0;
@@ -417,6 +416,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel,
 }
 
 auto IvsEncoder::millisecondsToTimeScale(int milliseconds, unsigned int timescale) -> int {
-  return static_cast<int>(std::round(static_cast<double>(milliseconds) * MS_2_S * static_cast<double>(timescale)));
+  return static_cast<int>(
+      std::round(static_cast<double>(milliseconds) * MS_2_S * static_cast<double>(timescale)));
 }
 } // namespace haptics::encoder
