@@ -416,7 +416,6 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel,
 }
 
 auto IvsEncoder::millisecondsToTimeScale(int milliseconds, unsigned int timescale) -> int {
-  return static_cast<int>(
-      round(static_cast<double>(milliseconds) * MS_2_S * static_cast<double>(timescale)));
+  return static_cast<int>(static_cast<double>(milliseconds) * MS_2_S * static_cast<double>(timescale));
 }
 } // namespace haptics::encoder
