@@ -56,8 +56,9 @@ namespace haptics::synthesizer {
     for (uint32_t channelIndex = 0; channelIndex < perception.getChannelsSize(); channelIndex++) {
       channel = perception.getChannelAt((int)channelIndex);
       if (channel.getFrequencySampling().has_value() && channel.getSampleCount().has_value()) {
-        currentLength = S_2_MS * (static_cast<double>(channel.getSampleCount().value()) /
-                                  channel.getFrequencySampling().value());
+        currentLength = static_cast<double>(timescale) *
+                        (static_cast<double>(channel.getSampleCount().value()) /
+                         channel.getFrequencySampling().value());
         if (currentLength > maxLength) {
           maxLength = currentLength;
         }

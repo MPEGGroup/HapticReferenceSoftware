@@ -326,7 +326,8 @@ auto Effect::EvaluateTransient(double position, double transientDuration) -> dou
   return res;
 }
 
-auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> double {
+auto Effect::EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
+    -> double {
   const double relativePosition = position - this->getPosition();
   double res = 0;
   auto k_after = std::find_if(
@@ -345,12 +346,12 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
       return k_after->getAmplitudeModulation().value();
     }
 
-    double t0 = MS_2_S * k_before->getRelativePosition().value();
+    double t0 = k_before->getRelativePosition().value() / static_cast<double>(timescale);
     double f0 = k_before->getAmplitudeModulation().value();
-    double t1 = MS_2_S * k_after->getRelativePosition().value();
+    double t1 = k_after->getRelativePosition().value() / static_cast<double>(timescale);
     double f1 = k_after->getAmplitudeModulation().value();
 
-    double t = MS_2_S * relativePosition;
+    double t = relativePosition / static_cast<double>(timescale);
     switch (curveType) {
     case types::CurveType::Cubic: {
       double h = t1 - t0;

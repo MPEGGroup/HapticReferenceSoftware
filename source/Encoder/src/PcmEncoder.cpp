@@ -158,7 +158,8 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, const uns
   int lastPosition = -1;
   for (std::pair<int, double> p : points) {
     std::optional<int> f;
-    auto position = static_cast<int>(timescale * p.first / samplerate); // to samples
+    auto position = static_cast<int>(std::round(static_cast<double>(timescale) * static_cast<double>(p.first) /
+                         samplerate)); // to samples
     if (position > lastPosition) {
       myEffect.addKeyframe(position, p.second, f);
     } else if (position == lastPosition) {

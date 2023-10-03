@@ -120,7 +120,8 @@ public:
                          unsigned int timescale) -> double;
   auto EvaluateWavelet(double position, int fs, unsigned int timescale) -> double;
   auto EvaluateTransient(double position, double transientDuration) -> double;
-  auto EvaluateKeyframes(double position, types::CurveType curveType) -> double;
+  auto EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
+      -> double;
 
 private:
   int id = -1;
