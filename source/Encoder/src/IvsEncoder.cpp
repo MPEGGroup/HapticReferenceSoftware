@@ -136,7 +136,7 @@ auto IvsEncoder::isRepeatNested(int parent_start, int parent_end, int child_star
 }
 
 auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel,
-    unsigned int timescale) -> void {
+                                 unsigned int timescale) -> void {
   effect.setPosition(IvsEncoder::millisecondsToTimeScale(effect.getPosition(), timescale));
   haptics::types::Band *myBand = channel.findBandAvailable(
       effect.getPosition(),
