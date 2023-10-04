@@ -85,11 +85,14 @@ public:
   auto getVerticesSize() -> size_t;
   auto getVertexAt(int index) -> int &;
   auto addVertex(int &newVertice) -> void;
+  auto clearVertices() -> void { vertices.clear(); };
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
+  auto replaceBandMetadataAt(int index, haptics::types::Band &newBand) -> bool;
   auto removeBandAt(int index) -> bool;
   auto addBand(haptics::types::Band &newBand) -> void;
+  auto clearBands() -> void { bands.clear(); };
   auto generateBand() -> haptics::types::Band *;
   auto generateBand(BandType bandType, CurveType curveType, double blockLength,
                     int lowerFrequencyLimit, int upperFrequencyLimit) -> haptics::types::Band *;

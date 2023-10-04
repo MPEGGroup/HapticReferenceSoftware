@@ -210,15 +210,21 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
         bitstream.push_back(temporalUnit);
         if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
           std::vector<bool> syncUnit = std::vector<bool>();
-          std::vector<std::vector<bool>> packetList;
-          writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit, swriter);
+          writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
           getNextSync(haptic, nextSync, syncIdx);
+          bitstream.push_back(syncUnit);
         }
         if (swriter.time != packetTS) {
           std::vector<std::vector<bool>> silentPackets{bufUnit[bufUnit.size() - 1], packet};
           std::vector<bool> silentUnit = std::vector<bool>();
           if (writeMIHSUnit(MIHSUnitType::Silent, silentPackets, silentUnit, swriter)) {
             bitstream.push_back(silentUnit);
+            if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+              std::vector<bool> syncUnit = std::vector<bool>();
+              writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
+              getNextSync(haptic, nextSync, syncIdx);
+              bitstream.push_back(syncUnit);
+            }
           }
         }
         bufUnit.clear();
@@ -231,6 +237,12 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     writeMIHSUnit(MIHSUnitType::Temporal, bufUnit, temporalUnit, swriter);
     bitstream.push_back(temporalUnit);
     bufUnit.clear();
+    if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+      std::vector<bool> syncUnit = std::vector<bool>();
+      writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
+      getNextSync(haptic, nextSync, syncIdx);
+      bitstream.push_back(syncUnit);
+    }
   }
   silentUnitSyncFlag(bitstream);
   return true;
@@ -325,7 +337,8 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
   writeNALu(NALuType::Timing, swriter, 0, timingPacket);
-  listPackets.insert(listPackets.begin(), timingPacket.begin(), timingPacket.end());
+  packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
+  length += readPacketLength(timingPacket[0]);
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
     length += readPacketLength(packet);
@@ -666,7 +679,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     if (perceIndex == -1) {
       sreader.haptic.addPerception(sreader.perception);
     } else {
-      sreader.haptic.replacePerceptionAt(perceIndex, sreader.perception);
+      sreader.haptic.replacePerceptionMetadataAt(perceIndex, sreader.perception);
     }
     return true;
   }
@@ -682,7 +695,8 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     if (channelIndex == -1) {
       sreader.haptic.getPerceptionAt(perceIndex).addChannel(sreader.channel);
     } else {
-      sreader.haptic.getPerceptionAt(perceIndex).replaceChannelAt(channelIndex, sreader.channel);
+      sreader.haptic.getPerceptionAt(perceIndex)
+          .replaceChannelMetadataAt(channelIndex, sreader.channel);
     }
     return true;
   }
@@ -693,7 +707,11 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     int perceIndex = searchPerceptionInHaptic(sreader.haptic, sreader.perception.getId());
     int channelIndex = searchChannelInHaptic(sreader.haptic, sreader.channel.getId());
     int bandIndex = searchBandInHaptic(sreader, sreader.bandStream.id);
-    if (bandIndex == -1) {
+    if (bandIndex == -1 ||
+        sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize() == 0 ||
+        static_cast<int>(
+            sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize()) <
+            bandIndex) {
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
           .addBand(sreader.bandStream.band);
@@ -705,7 +723,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     } else {
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
-          .replaceBandAt(bandIndex, sreader.bandStream.band);
+          .replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
     }
     return true;
   }
@@ -2389,6 +2407,7 @@ auto IOStream::writeKeyframe(types::BandType bandType, types::Keyframe &keyframe
     return false;
   }
 }
+
 auto IOStream::readKeyframe(std::vector<bool> &bitstream, types::Keyframe &keyframe,
                             types::BandType &bandType, int &length) -> bool {
   switch (bandType) {
@@ -2498,8 +2517,6 @@ auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyf
   length += idx;
   return true;
 }
-
-// auto IOStream::writeCRC(std::vector<bool> &bitstream) -> bool { return false; }
 
 auto IOStream::searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int {
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
@@ -2684,7 +2701,7 @@ auto IOStream::padToByteBoundary(std::vector<bool> &bitstream) -> void {
 }
 
 auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) -> bool {
-  if (idx >= static_cast<int>(haptic.getSyncsSize())) {
+  if (idx >= static_cast<int>(haptic.getSyncsSize()) - 1) {
     idx = -1;
     return false;
   }
@@ -2693,10 +2710,8 @@ auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) 
       idx = -1;
       return false;
     }
-    sync = haptic.getSyncsAt(++idx);
-    return true;
   }
-  idx = -1;
-  return false;
+  sync = haptic.getSyncsAt(++idx);
+  return true;
 }
 } // namespace haptics::io

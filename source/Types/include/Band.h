@@ -54,6 +54,7 @@ public:
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
       , effects({}){};
+
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
   [[nodiscard]] auto getCurveType() const -> CurveType;
