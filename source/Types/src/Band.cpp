@@ -128,17 +128,17 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position, this->getCurveType());
+    return effect->EvaluateKeyframes(position, this->getCurveType(), timescale);
   case BandType::VectorialWave:
-    return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit);
+    return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit, timescale);
   case BandType::WaveletWave:
     return effect->EvaluateWavelet(position, this->getUpperFrequencyLimit(), timescale);
   case BandType::Transient: {
     double res = 0;
     if (effect->getPosition() <= position &&
-        position <=
-            effect->getPosition() + effect->getEffectTimeLength(bandType, TRANSIENT_DURATION_MS)) {
-      res = effect->EvaluateTransient(position, TRANSIENT_DURATION_MS);
+        position <= effect->getPosition() + effect->getEffectTimeLength(
+                                                bandType, Band::getTransientDuration(timescale))) {
+      res = effect->EvaluateTransient(position, Band::getTransientDuration(timescale));
     } // TODO: transform condition above to ticks?
     return res;
   }
@@ -213,7 +213,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
                                      (pad * MS_2_S)); // position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
-                           effects.back().getEffectTimeLength(bandType, TRANSIENT_DURATION_MS) ||
+                           effects.back().getEffectTimeLength(
+                               bandType, Band::getTransientDuration(timescale)) ||
             position < 0) &&
            (this->bandType != types::BandType::WaveletWave))) {
         bandAmp[ti] = 0;
@@ -234,16 +235,21 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
   return bandAmp;
 }
 
-auto Band::getBandTimeLength() -> double {
+auto Band::getBandTimeLength(unsigned int timescale) -> double {
   if (this->effects.empty()) {
     return 0;
   }
   return this->effects.back().getPosition() +
-         this->effects.back().getEffectTimeLength(this->getBandType(), TRANSIENT_DURATION_MS);
+         this->effects.back().getEffectTimeLength(this->getBandType(),
+                                                  Band::getTransientDuration(timescale));
 }
 
 [[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
 
 auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
+
+[[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
+  return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);
+}
 
 } // namespace haptics::types

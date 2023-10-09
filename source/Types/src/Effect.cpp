@@ -167,8 +167,8 @@ auto Effect::isEquivalent(Effect &effect) -> bool {
   return true;
 }
 
-auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
-    -> double {
+auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                               unsigned int timescale) -> double {
   double res = 0;
 
   double max_position = this->position + this->getEffectTimeLength(BandType::VectorialWave, 0);
@@ -281,7 +281,8 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     }
   }
 
-  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
+  return amp_modulation * this->computeBaseSignal(relativePosition / static_cast<double>(timescale),
+                                                  freq_modulation, phi);
 }
 
 auto Effect::EvaluateWavelet(double position, int fs, unsigned int timescale) -> double {
@@ -325,7 +326,8 @@ auto Effect::EvaluateTransient(double position, double transientDuration) -> dou
   return res;
 }
 
-auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> double {
+auto Effect::EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
+    -> double {
   const double relativePosition = position - this->getPosition();
   double res = 0;
   auto k_after = std::find_if(
@@ -344,12 +346,12 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
       return k_after->getAmplitudeModulation().value();
     }
 
-    double t0 = MS_2_S * k_before->getRelativePosition().value();
+    double t0 = k_before->getRelativePosition().value() / static_cast<double>(timescale);
     double f0 = k_before->getAmplitudeModulation().value();
-    double t1 = MS_2_S * k_after->getRelativePosition().value();
+    double t1 = k_after->getRelativePosition().value() / static_cast<double>(timescale);
     double f1 = k_after->getAmplitudeModulation().value();
 
-    double t = MS_2_S * relativePosition;
+    double t = relativePosition / static_cast<double>(timescale);
     switch (curveType) {
     case types::CurveType::Cubic: {
       double h = t1 - t0;

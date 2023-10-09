@@ -116,10 +116,12 @@ public:
 
   auto isEquivalent(Effect &effect) -> bool;
   // Use Absolute position not relative
-  auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
+  auto EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                         unsigned int timescale) -> double;
   auto EvaluateWavelet(double position, int fs, unsigned int timescale) -> double;
   auto EvaluateTransient(double position, double transientDuration) -> double;
-  auto EvaluateKeyframes(double position, types::CurveType curveType) -> double;
+  auto EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
+      -> double;
 
 private:
   int id = -1;
