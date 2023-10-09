@@ -285,7 +285,8 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
-  sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
+  // sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
+  sreader.time += sreader.packetDuration;
   return true;
 }
 
@@ -2296,6 +2297,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   length += idx;
   return true;
 }
+
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
                           int &length) -> bool {
   int idx = 0;
@@ -2357,6 +2359,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   }
   return true;
 }
+
 auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
                                types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
@@ -2391,6 +2394,7 @@ auto IOStream::writeKeyframe(types::BandType bandType, types::Keyframe &keyframe
     return false;
   }
 }
+
 auto IOStream::readKeyframe(std::vector<bool> &bitstream, types::Keyframe &keyframe,
                             types::BandType &bandType, int &length) -> bool {
   switch (bandType) {
@@ -2481,6 +2485,7 @@ auto IOStream::writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bits
   bitstream.insert(bitstream.end(), bufbitstream.begin(), bufbitstream.end());
   return true;
 }
+
 auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
     -> bool {
   int idx = 0;
