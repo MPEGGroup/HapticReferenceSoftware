@@ -254,10 +254,11 @@ private:
   static auto searchBandInHaptic(StreamReader &sreader, int id) -> int;
 
   static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
-                             std::vector<types::Effect> &fxList, int &length) -> bool;
+                             std::vector<types::Effect> &fxList, int &length,
+                             unsigned int timescale) -> bool;
 
   static auto readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
-                         int &length) -> bool;
+                         int &length, unsigned int timescale) -> bool;
 
   static auto readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
                               types::BandType bandType, int &idx) -> bool;

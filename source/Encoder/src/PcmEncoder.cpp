@@ -128,7 +128,7 @@ auto PcmEncoder::encode(std::string &filename, EncodingConfig &config, const uns
       }
       waveletBand = Band();
       if (waveletEnc.encodeSignal(signal_wavelet, config.wavelet_bitbudget,
-                                  config.curveFrequencyLimit, waveletBand)) {
+                                  config.curveFrequencyLimit, waveletBand, timescale)) {
         myChannel.addBand(waveletBand);
       }
       myChannel.setFrequencySampling(wavParser.getSamplerate());

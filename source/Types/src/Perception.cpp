@@ -108,6 +108,32 @@ auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel
   return true;
 }
 
+auto Perception::replaceChannelMetadataAt(int index, haptics::types::Channel &newChannel) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
+    return false;
+  }
+  channels[index].setId(newChannel.getId());
+  auto desc = newChannel.getDescription();
+  channels[index].setDescription(desc);
+  channels[index].setGain(newChannel.getGain());
+  channels[index].setMixingWeight(newChannel.getMixingWeight());
+  channels[index].setBodyPartMask(newChannel.getBodyPartMask());
+  channels[index].clearVertices();
+  for (auto i = 0; i < static_cast<int>(newChannel.getVerticesSize()); i++) {
+    channels[index].addVertex((newChannel.getVertexAt(i)));
+  }
+  if (newChannel.getReferenceDeviceId().has_value()) {
+    channels[index].setReferenceDeviceId(newChannel.getReferenceDeviceId().value());
+  }
+  channels[index].setFrequencySampling(newChannel.getFrequencySampling());
+  channels[index].setSampleCount(newChannel.getSampleCount());
+  channels[index].setDirection(newChannel.getDirection());
+  channels[index].setActuatorResolution(newChannel.getActuatorResolution());
+  channels[index].setBodyPartTarget(newChannel.getBodyPartTarget());
+  channels[index].setActuatorTarget(newChannel.getActuatorTarget());
+  return true;
+}
+
 auto Perception::removeChannelAt(int index) -> bool {
   if (index < 0 || index >= (int)channels.size()) {
     return false;

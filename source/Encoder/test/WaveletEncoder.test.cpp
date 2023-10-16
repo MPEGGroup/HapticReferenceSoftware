@@ -70,6 +70,8 @@ constexpr double S_2_MS_TEST = 1000;
 
 constexpr double FS_filter = 8000;
 
+constexpr double timescale = 1000;
+
 TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
   using haptics::encoder::WaveletEncoder;
@@ -140,7 +142,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
   SECTION("Encoder") {
     std::vector<double> data_time(bl_test, 0);
     data_time[0] = 1;
-    WaveletEncoder waveletEncoder(bl_test, fs_test);
+    WaveletEncoder waveletEncoder(bl_test, fs_test, timescale);
     double scalar = 0;
     int maxbits = 0;
     std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar, maxbits);
