@@ -77,6 +77,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
     }
     index++;
   }
+  sreader.haptic.setTimescale(sreader.timescale); // TODO: earlier?
   haptic = sreader.haptic;
   return true;
 }
@@ -296,7 +297,8 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
-  sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
+  // sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
+  sreader.time += sreader.packetDuration;
   return true;
 }
 
@@ -2305,13 +2307,16 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
     effect.setSemantic(semantic);
   }
 
-  int effectPos = static_cast<int>(band.getBlockLength()) * static_cast<int>(band.getEffectsSize());
+  int effectPos =
+      static_cast<int>((double)timescale * band.getBlockLength() * (double)band.getEffectsSize() /
+                       (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
   length += idx;
   return true;
 }
+
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
                           int &length, const unsigned int timescale) -> bool {
   int idx = 0;
@@ -2373,6 +2378,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   }
   return true;
 }
+
 auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
                                types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
@@ -2498,6 +2504,7 @@ auto IOStream::writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bits
   bitstream.insert(bitstream.end(), bufbitstream.begin(), bufbitstream.end());
   return true;
 }
+
 auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
     -> bool {
   int idx = 0;

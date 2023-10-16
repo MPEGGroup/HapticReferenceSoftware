@@ -55,6 +55,7 @@ public:
 
   static auto readBandHeader(types::Band &band, std::istream &file, std::vector<bool> &unusedBits,
                              unsigned int timescale) -> bool;
+
   static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits,
                            unsigned int timescale) -> bool;
   static auto readBandBodyBool(types::Band &band, std::vector<bool> &bitstream) -> bool;

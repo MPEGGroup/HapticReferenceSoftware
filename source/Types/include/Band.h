@@ -71,17 +71,20 @@ public:
   auto replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool;
   auto removeEffectAt(int index) -> bool;
   [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
-  auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit) -> double;
-  auto EvaluationBand(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
-  auto getBandTimeLength() -> double;
+  auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                unsigned int timescale) -> double;
+  auto EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+      -> std::vector<double>;
+  auto getBandTimeLength(unsigned int timescale) -> double;
   [[nodiscard]] auto getTimescale() const -> int;
   auto setTimescale(int newTimescale) -> void;
 
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
 private:
+  [[nodiscard]] auto static getTransientDuration(unsigned int timescale) -> double;
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
-                        int highFrequencyLimit) -> double;
+                        int highFrequencyLimit, unsigned int timescale) -> double;
 
   BandType bandType = BandType::VectorialWave;
   CurveType curveType = CurveType::Unknown;

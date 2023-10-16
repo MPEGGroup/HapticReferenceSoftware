@@ -46,7 +46,7 @@
 #pragma warning(pop)
 #endif
 
-const double SEC_TO_MSEC = 1000.0;
+// const double SEC_TO_MSEC = 1000.0;
 const float DEFAULT_AMPLITUDE = 0.5;
 const int DEFAULT_FREQUENCY = 90;
 
@@ -63,8 +63,8 @@ const int ACTUAL_FREQUENCY_MAX = 300;
 
 namespace haptics::encoder {
 
-[[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out)
-    -> int {
+[[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out,
+                                       const unsigned int timescale) -> int {
   if (out.getChannelsSize() > 1) {
     return EXIT_FAILURE;
   }
@@ -98,7 +98,7 @@ namespace haptics::encoder {
   for (auto &e : pattern) {
     if (e.HasMember("ParameterCurve")) {
       if (e["ParameterCurve"]["ParameterID"] == "HapticIntensityControl") {
-        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &amplitudes);
+        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &amplitudes, timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN AMPLITUDE EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -106,7 +106,7 @@ namespace haptics::encoder {
       }
 
       if (e["ParameterCurve"]["ParameterID"] == "HapticSharpnessControl") {
-        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &frequencies);
+        ret = extractKeyframes(e["ParameterCurve"].GetObject(), &frequencies, timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN FREQUENCY EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -119,7 +119,8 @@ namespace haptics::encoder {
 
     if (e.HasMember("Event")) {
       if (e["Event"]["EventType"] == "HapticTransient") {
-        ret = extractTransients(e["Event"].GetObject(), &transients, &amplitudes, &frequencies);
+        ret = extractTransients(e["Event"].GetObject(), &transients, &amplitudes, &frequencies,
+                                timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN TRANSIENT EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -127,7 +128,8 @@ namespace haptics::encoder {
       }
 
       if (e["Event"]["EventType"] == "HapticContinuous") {
-        ret = extractContinuous(e["Event"].GetObject(), &continuous, &amplitudes, &frequencies);
+        ret = extractContinuous(e["Event"].GetObject(), &continuous, &amplitudes, &frequencies,
+                                timescale);
         if (ret != 0) {
           std::cerr << "ERROR IN CONTINUOUS EXTRACTION" << std::endl;
           return EXIT_FAILURE;
@@ -179,8 +181,8 @@ namespace haptics::encoder {
 }
 
 [[nodiscard]] auto AhapEncoder::extractKeyframes(const rapidjson::Value::Object &parameterCurve,
-                                                 std::vector<std::pair<int, double>> *keyframes)
-    -> int {
+                                                 std::vector<std::pair<int, double>> *keyframes,
+                                                 const unsigned int timescale) -> int {
   if (!parameterCurve.HasMember("Time") || !parameterCurve["Time"].IsNumber() ||
       !parameterCurve.HasMember("ParameterCurveControlPoints") ||
       !parameterCurve["ParameterCurveControlPoints"].IsArray()) {
@@ -195,8 +197,9 @@ namespace haptics::encoder {
 
     std::pair<int, double> k;
     // TIME + curve offset
+
     k.first = static_cast<int>((kahap["Time"].GetDouble() + parameterCurve["Time"].GetDouble()) *
-                               SEC_TO_MSEC);
+                               (double)timescale);
     // VALUE
     k.second = kahap["ParameterValue"].GetDouble();
 
@@ -206,11 +209,10 @@ namespace haptics::encoder {
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto
-AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
-                               std::vector<haptics::types::Effect> *transients,
-                               const std::vector<std::pair<int, double>> *amplitudes,
-                               const std::vector<std::pair<int, double>> *frequencies) -> int {
+[[nodiscard]] auto AhapEncoder::extractTransients(
+    const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
+    const std::vector<std::pair<int, double>> *amplitudes,
+    const std::vector<std::pair<int, double>> *frequencies, const unsigned int timescale) -> int {
   if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
       !event["EventType"].IsString() ||
       std::string(event["EventType"].GetString()) != "HapticTransient" ||
@@ -218,9 +220,10 @@ AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect t = haptics::types::Effect(
-      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
-      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect t =
+      haptics::types::Effect(static_cast<int>(std::round(event["Time"].GetDouble() * timescale)),
+                             0, // modif to get from sec2ms to ticks
+                             haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k;
   k.setAmplitudeModulation(DEFAULT_AMPLITUDE);
@@ -285,11 +288,10 @@ AhapEncoder::extractTransients(const rapidjson::Value::Object &event,
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] auto
-AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
-                               std::vector<haptics::types::Effect> *continuous,
-                               const std::vector<std::pair<int, double>> *amplitudes,
-                               const std::vector<std::pair<int, double>> *frequencies) -> int {
+[[nodiscard]] auto AhapEncoder::extractContinuous(
+    const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *continuous,
+    const std::vector<std::pair<int, double>> *amplitudes,
+    const std::vector<std::pair<int, double>> *frequencies, const unsigned int timescale) -> int {
   if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
       !event["EventType"].IsString() ||
       std::string(event["EventType"].GetString()) != "HapticContinuous" ||
@@ -298,9 +300,9 @@ AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
     return EXIT_FAILURE;
   }
 
-  haptics::types::Effect c = haptics::types::Effect(
-      static_cast<int>(std::round(event["Time"].GetDouble() * SEC_TO_MSEC)), 0,
-      haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
+  haptics::types::Effect c =
+      haptics::types::Effect(static_cast<int>(std::round(event["Time"].GetDouble() * timescale)), 0,
+                             haptics::types::BaseSignal::Sine, haptics::types::EffectType::Basis);
 
   haptics::types::Keyframe k_start;
   haptics::types::Keyframe k_end;
@@ -311,7 +313,7 @@ AhapEncoder::extractContinuous(const rapidjson::Value::Object &event,
   double base_freq = BASE_FREQUENCY_MAX;
 
   k_end.setRelativePosition(
-      static_cast<int>(std::round(event["EventDuration"].GetDouble() * SEC_TO_MSEC)));
+      static_cast<int>(std::round(event["EventDuration"].GetDouble() * timescale)));
 
   // SET VALUES AS DEFINED
   for (auto &param : event["EventParameters"].GetArray()) {

@@ -115,16 +115,15 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     auto effectType = static_cast<types::EffectType>(
         IOBinaryPrimitives::readNBits<uint8_t, EFFECT_TYPE>(file, unusedBits));
     myEffect.setEffectType(effectType);
-    auto position = 0;
+    int position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
       position = effectIndex * (int)(band.getBlockLength() * (double)timescale /
                                      (double)band.getUpperFrequencyLimit());
     } else {
-      position = static_cast<int>(IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(
-          file, unusedBits)); // TODO: conversion to ms?
+      position = static_cast<int>(
+          IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
     }
-    myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
     } else if (effectType == types::EffectType::Timeline) {
@@ -155,6 +154,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
         return false;
       }
     }
+    myEffect.setPosition(position);
     band.replaceEffectAt(effectIndex, myEffect);
   }
   return true;

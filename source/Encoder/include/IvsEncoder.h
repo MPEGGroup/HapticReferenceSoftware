@@ -47,7 +47,8 @@ namespace haptics::encoder {
 
 class IvsEncoder {
 public:
-  auto static encode(const std::string &filename, types::Perception &out) -> int;
+  auto static encode(const std::string &filename, types::Perception &out, unsigned int timescale)
+      -> int;
   [[nodiscard]] auto static getLastModified(const pugi::xml_document *doc) -> std::string;
   [[nodiscard]] auto static getBasisEffects(const pugi::xml_document *doc)
       -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
@@ -63,7 +64,8 @@ public:
 
   [[nodiscard]] auto static convertToEffect(const pugi::xml_node *basisEffect,
                                             const pugi::xml_node *launchEvent,
-                                            haptics::types::Effect *out) -> bool;
+                                            haptics::types::Effect *out, unsigned int timescale)
+      -> bool;
 
   [[nodiscard]] auto static getName(const pugi::xml_node *node) -> std::string;
   [[nodiscard]] auto static getTime(const pugi::xml_node *node) -> int;
@@ -86,11 +88,14 @@ public:
 private:
   auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool;
   auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
-  auto static injectIntoBands(types::Effect &effect, types::Channel &channel) -> void;
+  auto static injectIntoBands(types::Effect &effect, types::Channel &channel,
+                              unsigned int timescale) -> void;
+  auto static millisecondsToTimeScale(int milliseconds, unsigned int timescale) -> int;
   static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
   static const int MIN_FREQUENCY = 0;
   static const int MAX_FREQUENCY = 1000;
   static const int MAGSWEEP_FREQUENCY = 170;
+  static const int MS_2_SEC = 1000;
 
   struct RepeatNode {
     pugi::xml_node *value;

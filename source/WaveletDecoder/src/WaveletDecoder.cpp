@@ -57,7 +57,7 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
   return sig_rec;
 }
 
-void WaveletDecoder::transformBand(Band &band) {
+void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
 
   if (band.getBandType() != BandType::WaveletWave) {
     return;
@@ -77,7 +77,8 @@ void WaveletDecoder::transformBand(Band &band) {
     }
     std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
     Effect newEffect;
-    newEffect.setPosition(effect.getPosition());
+    newEffect.setPosition(
+        (int)((double)b * (double)bl * (double)timescale / (double)band.getUpperFrequencyLimit()));
     for (int i = 0; i < bl; i++) {
       Keyframe keyframe;
       keyframe.setAmplitudeModulation(block_time[i]);

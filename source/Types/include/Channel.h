@@ -98,8 +98,9 @@ public:
                     int lowerFrequencyLimit, int upperFrequencyLimit) -> haptics::types::Band *;
   auto findBandAvailable(int position, int duration, types::BandType bandType)
       -> haptics::types::Band *;
-  auto Evaluate(double position) -> double;
-  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
+  auto Evaluate(double position, unsigned int timescale) -> double;
+  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+      -> std::vector<double>;
   [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;

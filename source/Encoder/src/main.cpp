@@ -96,6 +96,7 @@ auto help() -> void {
       << "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
          "band for the whole frequency spectrum. This argument will only affect PCM input content."
       << std::endl
+      << "\t-ts, \t\t\tspecify the timescale" << std::endl
       << std::endl;
 }
 
@@ -156,6 +157,12 @@ auto main(int argc, char *argv[]) -> int {
   bool enable_vectorial = !inputParser.cmdOptionExists("--disable-vectorial");
 
   Haptics hapticFile;
+  if (inputParser.cmdOptionExists("-ts")) {
+    hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
+  } else {
+    // NOLINTNEXTLINE
+    hapticFile.setTimescale(1000);
+  }
   Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
@@ -189,10 +196,10 @@ auto main(int argc, char *argv[]) -> int {
       myPerception = hapticFile.getPerceptionAt((int)i);
       if (ext == "json" || ext == "ahap") {
         std::cout << "The AHAP file to encode : " << filename << std::endl;
-        codeExit = AhapEncoder::encode(filename, myPerception);
+        codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
       } else if (ext == "xml" || ext == "ivs") {
         std::cout << "The IVS file to encode : " << filename << std::endl;
-        codeExit = IvsEncoder::encode(filename, myPerception);
+        codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         haptics::encoder::EncodingConfig config;
@@ -230,11 +237,11 @@ auto main(int argc, char *argv[]) -> int {
     }
   } else if (ext == "json" || ext == "ahap") {
     std::cout << "The AHAP file to encode : " << filename << std::endl;
-    codeExit = AhapEncoder::encode(filename, myPerception);
+    codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
     hapticFile.addPerception(myPerception);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
-    codeExit = IvsEncoder::encode(filename, myPerception);
+    codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
     hapticFile.addPerception(myPerception);
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
