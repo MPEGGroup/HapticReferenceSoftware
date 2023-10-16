@@ -161,7 +161,7 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
   } else {
     // NOLINTNEXTLINE
-    hapticFile.setTimescale(2000);
+    hapticFile.setTimescale(1000);
   }
   Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
   std::string ext = InputParser::getFileExt(filename);
