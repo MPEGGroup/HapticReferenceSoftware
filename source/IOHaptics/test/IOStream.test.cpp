@@ -255,7 +255,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
       }
     }
   }
-  SECTION("RMetadataPerception") {
+  SECTION("Read MetadataPerception") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
     bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     haptics::types::Haptics readHaptic;

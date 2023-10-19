@@ -1985,6 +1985,7 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
 
   return packetBits;
 }
+
 auto IOStream::writePayloadPacket(StreamWriter &swriter,
                                   std::vector<std::vector<bool>> bufPacketBitstream,
                                   std::vector<bool> &packetBits) -> std::vector<bool> {
@@ -2001,30 +2002,29 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
     std::string effectTypeStr = effectTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectTypeStr, packetBits);
 
-    if (swriter.effects[l].getSemantic().has_value()) {
-      std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
-      std::string flagSemanticStr = flagSemanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
-
-      types::EffectSemantic semantic =
-          types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
-      std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
-          static_cast<int>(semantic));
-      std::string semanticStr = semanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
-    } else {
-      std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
-      std::string flagSemanticStr = flagSemanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
-    }
-
     int effectPos = static_cast<int>(swriter.effects[l].getPosition()) - swriter.time;
     std::bitset<EFFECT_POSITION> effectPosBits(effectPos);
     std::string effectPosStr = effectPosBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectPosStr, packetBits);
 
-    if (swriter.effects[l].getEffectType() == types::EffectType::Basis &&
-        swriter.bandStream.band.getBandType() != types::BandType::WaveletWave) {
+    if (swriter.effects[l].getEffectType() == types::EffectType::Basis) {
+      if (swriter.effects[l].getSemantic().has_value()) {
+        std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
+        std::string flagSemanticStr = flagSemanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
+
+        types::EffectSemantic semantic =
+            types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
+        std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
+            static_cast<int>(semantic));
+        std::string semanticStr = semanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
+      } else {
+        std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
+        std::string flagSemanticStr = flagSemanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
+      }
+
       std::bitset<EFFECT_KEYFRAME_COUNT> kfCountBits(swriter.keyframesCount[l]);
       std::string kfCountStr = kfCountBits.to_string();
       IOBinaryPrimitives::writeStrBits(kfCountStr, packetBits);
@@ -2037,7 +2037,6 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
         IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }
     }
-
     packetBits.insert(packetBits.end(), bufPacketBitstream[l].begin(), bufPacketBitstream[l].end());
   }
   return packetBits;
@@ -2136,8 +2135,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
     std::vector<types::Effect> effects;
     std::vector<bool> effectsBitsList(bitstream.begin() + idx, bitstream.end());
     if (sreader.bandStream.band.getBandType() != types::BandType::WaveletWave) {
-      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx,
-                          sreader.timescale)) {
+      if (!readListObject(effectsBitsList, fxCount, sreader.bandStream.band, effects, idx)) {
         return false;
       }
       addTimestampEffect(effects, static_cast<int>(sreader.time));
@@ -2318,8 +2316,9 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
 }
 
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
-                          int &length, const unsigned int timescale) -> bool {
+                          int &length) -> bool {
   int idx = 0;
+
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
 
@@ -2327,26 +2326,21 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, t
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
 
-  int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
-  if (hasSemantic == 1) {
-    int semanticCode = IOBinaryPrimitives::readUInt(
-        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    auto semantic = std::string(
-        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
-    effect.setSemantic(semantic);
-  }
-
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
 
-  if (effectType == types::EffectType::Basis &&
-      band.getBandType() != types::BandType::WaveletWave) {
+  if (effectType == types::EffectType::Basis) {
+    int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
+    if (hasSemantic == 1) {
+      int semanticCode = IOBinaryPrimitives::readUInt(
+          bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+      auto semantic = std::string(
+          types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+      effect.setSemantic(semantic);
+    }
     if (!readEffectBasis(bitstream, effect, band.getBandType(), idx)) {
       return false;
     }
-  } else if (effectType == types::EffectType::Basis &&
-             band.getBandType() == types::BandType::WaveletWave) {
-    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
   }
   length += idx;
   return true;
@@ -2592,13 +2586,12 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, int refDevCount,
   return true;
 }
 auto IOStream::readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
-                              std::vector<types::Effect> &fxList, int &length,
-                              unsigned int timescale) -> bool {
+                              std::vector<types::Effect> &fxList, int &length) -> bool {
   int idx = 0;
   for (int i = 0; i < fxCount; i++) {
     std::vector<bool> fxBits(bitstream.begin() + idx, bitstream.end());
     types::Effect effect;
-    if (!readEffect(fxBits, effect, band, idx, timescale)) {
+    if (!readEffect(fxBits, effect, band, idx)) {
       return false;
     }
     fxList.push_back(effect);
