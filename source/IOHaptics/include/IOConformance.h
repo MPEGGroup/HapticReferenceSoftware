@@ -2,8 +2,8 @@
 #define IOCONFORMANCE_H
 
 #include <IOHaptics/include/IOStream.h>
-#include <string>
 #include <Types/include/EffectSemantic.h>
+#include <string>
 
 namespace haptics::io {
 
@@ -72,6 +72,7 @@ enum class hmpgErrorCode {
   Spat_Data_PerceptionModality_Invalid,
   Spat_Duration_Invalid,
   Spat_No_Packets,
+  Spat_UnitSync_Invalid,
 
   Silent_Duration_Invalid
 };
@@ -276,6 +277,9 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Spat_No_Packets,
      "MIHSUnit_Spatial error: No packets in unit. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Spat_No_Packets))},
+    {hmpgErrorCode::Spat_UnitSync_Invalid,
+     "MIHSUnit_Spatial error: UnitSync value invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_UnitSync_Invalid))},
 
     {hmpgErrorCode::Silent_Duration_Invalid,
      "MIHSUnit_Silent error: Duration invalid. Error code: " +
@@ -338,7 +342,7 @@ public:
   }
 
   static auto checkEffectPosition(IOStream::StreamReader &sreader, int effectPos) -> void {
-    if (effectPos < 0 && !sreader.waitSync) {
+    if (effectPos < 0 && (!sreader.waitSync || !(sreader.auType == AUType::DAU))) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
     }
     if (effectPos >= sreader.packetDuration) {
@@ -390,7 +394,7 @@ public:
   }
 
   static auto checkEffectTypeUnknown(IOStream::StreamReader &sreader, int effectType) -> void {
-    if (effectType < 0 || effectType > 2) {
+    if (effectType < 0 || effectType > 1) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_Unknown));
     }
@@ -418,6 +422,10 @@ public:
                                           const std::vector<bool> &packets) -> void {
     if (packets.size() == 0) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_No_Packets));
+    }
+
+    if (sreader.waitSync == 1) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_UnitSync_Invalid));
     }
   }
 };
