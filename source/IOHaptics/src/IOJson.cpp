@@ -137,6 +137,9 @@ auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Hap
 
     haptics::types::Perception perception(perceptionId, perceptionAvatarId, perceptionDescription,
                                           perceptionPerceptionModality);
+    if (jsonPerception.HasMember("priority") && jsonPerception["priority"].IsInt()) {
+      perception.setPriority(jsonPerception["priority"].GetInt());
+    }
     if (jsonPerception.HasMember("unit_exponent") && jsonPerception["unit_exponent"].IsInt()) {
       perception.setUnitExponent(jsonPerception["unit_exponent"].GetInt());
     }
@@ -301,6 +304,10 @@ auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perceptio
     types::Channel channel(channelId, channelDescription, channelGain, channelMixingWeight,
                            channelBodyPart);
 
+    if (jsonChannel.HasMember("priority") && jsonChannel["priority"].IsInt()) {
+      channel.setPriority(jsonChannel["priority"].GetInt());
+    }
+
     types::Vector direction{};
     if (jsonChannel.HasMember("direction") && loadVector(jsonChannel["direction"], direction)) {
       channel.setDirection(direction);
@@ -396,6 +403,9 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
     int upperLimit = jsonBand["upper_frequency_limit"].GetInt();
 
     types::Band band(bandType, curveType, blockLength, lowerLimit, upperLimit);
+    if (jsonBand.HasMember("priority") && jsonBand["priority"].IsInt()) {
+      band.setPriority(jsonBand["priority"].GetInt());
+    }
     loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
     channel.addBand(band);
@@ -669,7 +679,10 @@ auto IOJson::extractPerceptions(types::Haptics &haptic, rapidjson::Value &jsonPe
             types::perceptionModalityToString.at(perception.getPerceptionModality()).c_str(),
             jsonTree.GetAllocator()),
         jsonTree.GetAllocator());
-
+    if (perception.getPriority().has_value()) {
+      jsonPerception.AddMember("priority", perception.getPriority().value(),
+                               jsonTree.GetAllocator());
+    }
     if (perception.getUnitExponent().has_value()) {
       jsonPerception.AddMember("unit_exponent", perception.getUnitExponent().value(),
                                jsonTree.GetAllocator());
@@ -800,6 +813,9 @@ auto IOJson::extractChannels(types::Perception &perception, rapidjson::Value &js
     jsonChannel.AddMember("gain", channel.getGain(), jsonTree.GetAllocator());
     jsonChannel.AddMember("mixing_weight", channel.getMixingWeight(), jsonTree.GetAllocator());
     jsonChannel.AddMember("body_part_mask", channel.getBodyPartMask(), jsonTree.GetAllocator());
+    if (channel.getPriority().has_value()) {
+      jsonChannel.AddMember("priority", channel.getPriority().value(), jsonTree.GetAllocator());
+    }
     if (channel.getReferenceDeviceId().has_value()) {
       jsonChannel.AddMember("reference_device_id", channel.getReferenceDeviceId().value(),
                             jsonTree.GetAllocator());
@@ -871,6 +887,10 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
                        rapidjson::Value(types::bandTypeToString.at(band.getBandType()).c_str(),
                                         jsonTree.GetAllocator()),
                        jsonTree.GetAllocator());
+
+    if (band.getPriority().has_value()) {
+      jsonBand.AddMember("priority", band.getPriority().value(), jsonTree.GetAllocator());
+    }
     jsonBand.AddMember("curve_type",
                        rapidjson::Value(types::curveTypeToString.at(band.getCurveType()).c_str(),
                                         jsonTree.GetAllocator()),

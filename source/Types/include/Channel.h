@@ -74,6 +74,9 @@ public:
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
+  auto getPriority() const -> std::optional<int>;
+  auto getPriorityOrDefault() const -> int;
+  auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getGain() const -> float;
   auto setGain(float newGain) -> void;
   [[nodiscard]] auto getMixingWeight() const -> float;
@@ -122,6 +125,7 @@ private:
   uint32_t bodyPartMask = 0;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
+  std::optional<int> priority;
   std::optional<int> referenceDeviceId;
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;

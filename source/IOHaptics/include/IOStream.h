@@ -46,6 +46,7 @@ namespace haptics::io {
 
 static constexpr int TIME_TO_MS = 1000;
 static constexpr int DEFAULT_PACKET_DURATION = 128;
+static constexpr int DEFAULT_DURATION_DEVIATION = 0;
 
 static constexpr uint32_t CRC32_POLYNOMIAL = 2187366103;
 static constexpr uint16_t CRC16_POLYNOMIAL = 49185;
@@ -63,7 +64,8 @@ enum class NALuType {
   CRC32,
   CRC16,
   GlobalCRC16,
-  GlobalCRC32
+  GlobalCRC32,
+  InitializationTiming
 };
 
 enum class AUType { RAU, DAU };
@@ -88,6 +90,9 @@ public:
     int time = 0;
     unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE; // TODO: use this timescale
     unsigned int packetDuration = DEFAULT_PACKET_DURATION;
+    unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
+    unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
+    bool overlapping = false;
     types::Haptics haptic;
     types::Perception perception;
     types::Channel channel;
@@ -96,6 +101,7 @@ public:
     std::vector<int> keyframesCount;
     std::vector<int> effectsId;
     AUType auType = AUType::RAU;
+    unsigned int layer = 0;
   };
 
   struct StreamReader {
@@ -112,6 +118,10 @@ public:
     unsigned int packetDuration = 0;
     unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE;
     bool waitSync = false;
+    bool overlapping = false;
+    unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
+    unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
+    unsigned int layer = 0;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
@@ -158,10 +168,12 @@ private:
   static auto readMIHSUnitInitialization(std::vector<bool> &mihsunit, StreamReader &sreader)
       -> bool;
 
-  static auto writeNALuHeader(NALuType naluType, int level, int payloadSize,
-                              std::vector<bool> &bitstream) -> bool;
+  static auto writeNALuHeader(NALuType naluType, int payloadSize, std::vector<bool> &bitstream)
+      -> bool;
   static auto writeNALuPayload(NALuType naluType, types::Haptics &haptic,
                                std::vector<bool> &bitstream) -> bool;
+  static auto writeInitializationTiming(StreamWriter &swriter, std::vector<bool> &bitstream)
+      -> bool;
   static auto writeTiming(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool;
   static auto writeMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto writeAvatar(types::Avatar &avatar, std::vector<bool> &bitstream) -> bool;
@@ -221,6 +233,7 @@ private:
   static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, int &length) -> bool;
+  static auto readInitializationTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   // static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect>

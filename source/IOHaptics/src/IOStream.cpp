@@ -286,6 +286,8 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
+  sreader.layer = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LAYER);
+
   sreader.packetDuration = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_DURATION);
   int unitLength = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LENGTH) * BYTE_SIZE;
 
@@ -330,6 +332,9 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::bitset<UNIT_SYNC> syncBits(0);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+  std::bitset<UNIT_LAYER> layerBits(swriter.layer);
+  std::string layerStr = layerBits.to_string();
+  IOBinaryPrimitives::writeStrBits(layerStr, mihsunit);
   std::bitset<UNIT_DURATION> durationBits(0);
   std::string durationStr = durationBits.to_string();
   IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
@@ -375,6 +380,9 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
   std::bitset<UNIT_SYNC> syncBits(syncInt);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+  std::bitset<UNIT_LAYER> layerBits(swriter.layer);
+  std::string layerStr = layerBits.to_string();
+  IOBinaryPrimitives::writeStrBits(layerStr, mihsunit);
   int duration = 0;
   if (nbPacketData > 0) {
     duration = static_cast<int>(swriter.packetDuration);
@@ -407,6 +415,9 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
   std::bitset<UNIT_SYNC> syncBits(sync);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+  std::bitset<UNIT_LAYER> layerBits(swriter.layer);
+  std::string layerStr = layerBits.to_string();
+  IOBinaryPrimitives::writeStrBits(layerStr, mihsunit);
   int duration = 0;
   std::bitset<UNIT_DURATION> durationBits(duration);
   std::string durationStr = durationBits.to_string();
@@ -426,6 +437,9 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
       std::bitset<UNIT_SYNC> syncBits(0);
       std::string syncStr = syncBits.to_string();
       IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+      std::bitset<UNIT_LAYER> layerBits(swriter.layer);
+      std::string layerStr = layerBits.to_string();
+      IOBinaryPrimitives::writeStrBits(layerStr, mihsunit);
       int duration = tFirst;
       if (duration % swriter.packetDuration != 0) {
         duration = duration - (duration % static_cast<int>(swriter.packetDuration));
@@ -445,6 +459,9 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
     std::bitset<UNIT_SYNC> syncBits(0);
     std::string syncStr = syncBits.to_string();
     IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+    std::bitset<UNIT_LAYER> layerBits(swriter.layer);
+    std::string layerStr = layerBits.to_string();
+    IOBinaryPrimitives::writeStrBits(layerStr, mihsunit);
     int start = swriter.time;
     int end =
         readPacketTS(std::vector<bool>(listPackets[1].begin() + H_NBITS, listPackets[1].end()));
@@ -480,17 +497,18 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
   case NALuType::Timing: {
     std::vector<bool> naluPayload = std::vector<bool>();
     writeTiming(swriter, naluPayload);
-    writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+    padToByteBoundary(naluHeader);
     bitstream.push_back(naluHeader);
     return true;
   }
   case NALuType::MetadataHaptics: {
     std::vector<bool> naluPayload = std::vector<bool>();
     writeMetadataHaptics(swriter.haptic, naluPayload);
-    padToByteBoundary(naluPayload);
-    writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+    padToByteBoundary(naluHeader);
     bitstream.push_back(naluHeader);
     return true;
   }
@@ -499,9 +517,9 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       swriter.perception = swriter.haptic.getPerceptionAt(i);
       writeMetadataPerception(swriter, naluPayload);
-      padToByteBoundary(naluPayload);
-      writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+      writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
       naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+      padToByteBoundary(naluHeader);
       bitstream.push_back(naluHeader);
       naluPayload.clear();
       naluHeader.clear();
@@ -514,9 +532,9 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       if (swriter.haptic.getPerceptionAt(i).getEffectLibrarySize() != 0) {
         writeLibrary(swriter.haptic.getPerceptionAt(i), naluPayload);
-        padToByteBoundary(naluPayload);
-        writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+        writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
         naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+        padToByteBoundary(naluHeader);
         bitstream.push_back(naluHeader);
         naluPayload.clear();
         naluHeader.clear();
@@ -533,9 +551,9 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
            j++) {
         swriter.channel = swriter.perception.getChannelAt(j);
         writeMetadataChannel(swriter, naluPayload);
-        padToByteBoundary(naluPayload);
-        writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+        writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
         naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+        padToByteBoundary(naluHeader);
         bitstream.push_back(naluHeader);
         naluPayload.clear();
         naluHeader.clear();
@@ -550,12 +568,21 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
     std::vector<std::vector<bool>> naluPayload = std::vector<std::vector<bool>>();
     writeData(swriter, naluPayload);
     for (auto data : naluPayload) {
-      padToByteBoundary(data);
-      writeNALuHeader(naluType, level, static_cast<int>(data.size()), naluHeader);
+      writeNALuHeader(naluType, static_cast<int>(data.size()), naluHeader);
       naluHeader.insert(naluHeader.end(), data.begin(), data.end());
+      padToByteBoundary(naluHeader);
       bitstream.push_back(naluHeader);
       naluHeader.clear();
     }
+    return true;
+  }
+  case NALuType::InitializationTiming: {
+    std::vector<bool> naluPayload = std::vector<bool>();
+    writeInitializationTiming(swriter, naluPayload);
+    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
+    naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+    padToByteBoundary(naluHeader);
+    bitstream.push_back(naluHeader);
     return true;
   }
   case NALuType::CRC16:
@@ -568,8 +595,9 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
       crcLevel = 1;
     }
     writeCRC(bitstream, naluPayload, crcLevel);
-    writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
     naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
+    padToByteBoundary(naluHeader);
     bitstream.clear();
     bitstream.push_back(naluHeader);
     return true;
@@ -593,7 +621,7 @@ auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType, int level
         swriter.bandStream.id = bandId++;
         writeMetadataBand(swriter, naluPayload);
         padToByteBoundary(naluPayload);
-        writeNALuHeader(naluType, level, static_cast<int>(naluPayload.size()), naluHeader);
+        writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
         naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
         bitstream.push_back(naluHeader);
         naluPayload.clear();
@@ -634,16 +662,12 @@ auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
   }
 }
 
-auto IOStream::writeNALuHeader(NALuType naluType, int level, int payloadSize,
-                               std::vector<bool> &bitstream) -> bool {
+auto IOStream::writeNALuHeader(NALuType naluType, int payloadSize, std::vector<bool> &bitstream)
+    -> bool {
   std::bitset<H_NALU_TYPE> naluTypeBits(static_cast<int>(naluType));
   const std::string naluTypeStr = naluTypeBits.to_string();
   IOBinaryPrimitives::writeStrBits(naluTypeStr, bitstream);
-
-  std::bitset<H_LEVEL> lvlBits(level);
-  const std::string lvlStr = lvlBits.to_string();
-  IOBinaryPrimitives::writeStrBits(lvlStr, bitstream);
-  const int residual = H_NBITS - (H_NALU_TYPE + H_LEVEL + H_PAYLOAD_LENGTH);
+  const int residual = H_NBITS - (H_NALU_TYPE + H_PAYLOAD_LENGTH);
   std::bitset<residual> resBits(0);
   const std::string resStr = resBits.to_string();
   IOBinaryPrimitives::writeStrBits(resStr, bitstream);
@@ -660,7 +684,6 @@ auto IOStream::writeNALuHeader(NALuType naluType, int level, int payloadSize,
 auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
   NALuType naluType = readNALuType(packet);
   int index = H_NALU_TYPE;
-  sreader.level = IOBinaryPrimitives::readUInt(packet, index, H_LEVEL);
   index = H_NBITS - H_PAYLOAD_LENGTH;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
@@ -738,6 +761,9 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
   case (NALuType::GlobalCRC32): {
     return readCRC(payload, crc, naluType);
   }
+  case (NALuType::InitializationTiming): {
+    return readInitializationTiming(sreader, payload);
+  }
   }
   return false;
 }
@@ -779,22 +805,60 @@ auto IOStream::writeTiming(StreamWriter &swriter, std::vector<bool> &bitstream) 
   std::bitset<TIMING_TIME> timestampBits = swriter.time;
   std::string timestampStr = timestampBits.to_string();
   IOBinaryPrimitives::writeStrBits(timestampStr, bitstream);
-  std::bitset<TIMING_TIMESCALE> timescaleBits = swriter.timescale;
-  std::string timescaleStr = timescaleBits.to_string();
-  IOBinaryPrimitives::writeStrBits(timescaleStr, bitstream);
+
   return true;
 }
 
 auto IOStream::readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
   int index = 0;
-  int timestamp = IOBinaryPrimitives::readInt(bitstream, index, TIMING_TIME);
-  uint32_t timescale = IOBinaryPrimitives::readUInt(bitstream, index, TIMING_TIMESCALE);
+  int timestamp = IOBinaryPrimitives::readUInt(bitstream, index, TIMING_TIME);
 
-  types::Sync sync = types::Sync(timestamp, timescale);
+  types::Sync sync = types::Sync(timestamp);
   sreader.time = timestamp;
-  sreader.timescale = timescale;
   sreader.haptic.addSync(sync);
 
+  return true;
+}
+
+auto IOStream::writeInitializationTiming(StreamWriter &swriter, std::vector<bool> &bitstream)
+    -> bool {
+  std::bitset<TIMING_TIME> timestampBits = swriter.time;
+  std::string timestampStr = timestampBits.to_string();
+  IOBinaryPrimitives::writeStrBits(timestampStr, bitstream);
+
+  std::bitset<INITTIMING_TIMESCALE> timescaleBits = swriter.timescale;
+  std::string timescaleStr = timescaleBits.to_string();
+  IOBinaryPrimitives::writeStrBits(timescaleStr, bitstream);
+
+  std::bitset<INITTIMING_NOMINALDURATION> nominalDurationBits = swriter.nominalDuration;
+  std::string nominalDurationStr = nominalDurationBits.to_string();
+  IOBinaryPrimitives::writeStrBits(nominalDurationStr, bitstream);
+
+  std::bitset<INITTIMING_DURATIONDEVIATION> durationDeviationBits = swriter.durationDeviation;
+  std::string durationDeviationStr = durationDeviationBits.to_string();
+  IOBinaryPrimitives::writeStrBits(durationDeviationStr, bitstream);
+
+  std::bitset<INITTIMING_OVERLAPPING> overlappingBits = swriter.overlapping;
+  std::string overlappingStr = overlappingBits.to_string();
+  IOBinaryPrimitives::writeStrBits(overlappingStr, bitstream);
+
+  return true;
+}
+
+auto IOStream::readInitializationTiming(StreamReader &sreader, std::vector<bool> &bitstream)
+    -> bool {
+  int index = 0;
+  int timestamp = IOBinaryPrimitives::readUInt(bitstream, index, TIMING_TIME);
+  int timescale = IOBinaryPrimitives::readUInt(bitstream, index, INITTIMING_TIMESCALE);
+  int nominalDuration = IOBinaryPrimitives::readUInt(bitstream, index, INITTIMING_NOMINALDURATION);
+  int durationDeviation =
+      IOBinaryPrimitives::readUInt(bitstream, index, INITTIMING_DURATIONDEVIATION);
+  bool overlapping = IOBinaryPrimitives::readUInt(bitstream, index, INITTIMING_OVERLAPPING) == 1;
+  types::Sync sync = types::Sync(timestamp, timescale);
+  sreader.haptic.addSync(sync);
+  sreader.overlapping = overlapping;
+  sreader.timescale = timescale;
+  sreader.time = timestamp;
   return true;
 }
 
@@ -920,6 +984,10 @@ auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> 
   std::string perceIdStr = perceIDBits.to_string();
   IOBinaryPrimitives::writeStrBits(perceIdStr, bitstream);
 
+  std::bitset<MDPERCE_PRIORITY> percePriorityBits(swriter.perception.getPriorityOrDefault());
+  std::string percePriorityStr = percePriorityBits.to_string();
+  IOBinaryPrimitives::writeStrBits(percePriorityStr, bitstream);
+
   std::bitset<MDPERCE_DESC_SIZE> descSizeBits(swriter.perception.getDescription().size());
   std::string descSizeStr = descSizeBits.to_string();
   IOBinaryPrimitives::writeStrBits(descSizeStr, bitstream);
@@ -992,6 +1060,11 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
   sreader.perception = types::Perception();
 
   sreader.perception.setId(id);
+
+  int priority = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_PRIORITY);
+  if (priority != 0) {
+    sreader.perception.setPriority(priority);
+  }
 
   int descLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_DESC_SIZE);
 
@@ -1461,6 +1534,10 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
   valueStr = perceidBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
 
+  std::bitset<MDCHANNEL_PRIORITY> priorityBits(swriter.channel.getPriorityOrDefault());
+  std::string priorityStr = priorityBits.to_string();
+  IOBinaryPrimitives::writeStrBits(priorityStr, bitstream);
+
   std::bitset<MDPERCE_DESC_SIZE> descSizeBits(swriter.channel.getDescription().size());
   valueStr = descSizeBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
@@ -1582,6 +1659,11 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
   }
   sreader.perception = sreader.haptic.getPerceptionAt(perceIndex);
 
+  int priority = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_PRIORITY);
+  if (priority != 0) {
+    sreader.channel.setPriority(priority);
+  }
+
   int descLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_DESC_LENGTH);
   std::string desc = IOBinaryPrimitives::readString(bitstream, idx, descLength);
   sreader.channel.setDescription(desc);
@@ -1670,6 +1752,9 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
   std::bitset<MDCHANNEL_ID> channelidBits(swriter.channel.getId());
   std::string channelidStr = channelidBits.to_string();
   IOBinaryPrimitives::writeStrBits(channelidStr, bitstream);
+  std::bitset<MDBAND_PRIORITY> priorityBits(swriter.bandStream.band.getPriorityOrDefault());
+  std::string priorityStr = priorityBits.to_string();
+  IOBinaryPrimitives::writeStrBits(priorityStr, bitstream);
 
   std::bitset<MDBAND_BAND_TYPE> bandTypeBits(
       static_cast<int>(swriter.bandStream.band.getBandType()));
@@ -1717,6 +1802,11 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
     return false;
   }
   sreader.channel = sreader.perception.getChannelAt(channelIndex);
+
+  int priority = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_PRIORITY);
+  if (priority != 0) {
+    sreader.bandStream.band.setPriority(priority);
+  }
 
   int bandType = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_BAND_TYPE);
   sreader.bandStream.band.setBandType(static_cast<types::BandType>(bandType));

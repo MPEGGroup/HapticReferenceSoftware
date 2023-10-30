@@ -116,6 +116,9 @@ public:
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
+  auto getPriority() const -> std::optional<int>;
+  auto getPriorityOrDefault() const -> int;
+  auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
   [[nodiscard]] auto getUnitExponent() const -> std::optional<int8_t>;
@@ -163,6 +166,7 @@ private:
   int id = -1;
   int avatarId = -1;
   std::string description;
+  std::optional<int> priority = std::nullopt;
   std::optional<std::string> effectSemanticScheme = std::nullopt;
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Channel> channels = {};
