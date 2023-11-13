@@ -49,10 +49,12 @@ static constexpr int UNIT_SYNC = 2;
 static constexpr int UNIT_LAYER = 4;
 static constexpr int UNIT_DURATION = 24;
 static constexpr int UNIT_LENGTH = 32;
+static constexpr int UNIT_RESERVED = 4;
 
-static constexpr int H_NBITS = 32;
+static constexpr int H_NBITS = 24;
 static constexpr int H_NALU_TYPE = 6;
 static constexpr int H_PAYLOAD_LENGTH = 17;
+static constexpr int H_RESERVED = 1;
 
 static constexpr int TIMING_TIME = 32;
 

@@ -105,11 +105,11 @@ auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<boo
   while (byteCount < length) {
     std::vector<bool> bufPacket = std::vector<bool>();
     // read packet header
-    int unitNBits = UNIT_TYPE + UNIT_SYNC + UNIT_DURATION + UNIT_LENGTH;
+    int unitNBits = UNIT_TYPE + UNIT_SYNC + UNIT_LAYER + UNIT_DURATION + UNIT_LENGTH + UNIT_RESERVED;
     IOBinaryPrimitives::readNBytes(file, static_cast<int>(unitNBits / BYTE_SIZE), bufPacket);
     byteCount += static_cast<int>(unitNBits / BYTE_SIZE);
     // read packet payload length
-    int lengthIdx = unitNBits - UNIT_LENGTH;
+    int lengthIdx = unitNBits - (UNIT_LENGTH + UNIT_RESERVED);
     int bytesToRead = IOBinaryPrimitives::readUInt(bufPacket, lengthIdx, UNIT_LENGTH);
 
     // int bytesToRead = readPacketLength(bufPacket);
@@ -290,6 +290,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
 
   sreader.packetDuration = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_DURATION);
   int unitLength = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LENGTH) * BYTE_SIZE;
+  index += UNIT_RESERVED;
 
   std::vector<bool> packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   while (index < unitLength) {
@@ -299,7 +300,6 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
-  // sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
   sreader.time += sreader.packetDuration;
   return true;
 }
@@ -339,27 +339,28 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::string durationStr = durationBits.to_string();
   IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
 
-  int length = static_cast<int>((listPackets.size() + 1) * (H_NBITS / BYTE_SIZE));
   std::vector<bool> packetFusion = std::vector<bool>();
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
   writeNALu(NALuType::Timing, swriter, 0, timingPacket);
   packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
-  length += readPacketLength(timingPacket[0]);
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
-    length += readPacketLength(packet);
   }
+  
+  int length = static_cast<int>(packetFusion.size())/ BYTE_SIZE;
   std::bitset<UNIT_LENGTH> lengthBits(length);
   std::string lengthStr = lengthBits.to_string();
   IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+  std::bitset<UNIT_RESERVED> resBits(0);
+  const std::string resStr = resBits.to_string();
+  IOBinaryPrimitives::writeStrBits(resStr, mihsunit);
   mihsunit.insert(mihsunit.end(), packetFusion.begin(), packetFusion.end());
   return true;
 }
 auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets,
                                      std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool {
   bool sync = true;
-  int length = 0;
   int nbPacketData = 0;
   std::vector<bool> payload = std::vector<bool>();
   for (auto &packet : listPackets) {
@@ -372,7 +373,7 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
       int packetStartTime = readPacketTS(std::vector<bool>(packet.begin() + H_NBITS, packet.end()));
       swriter.time = packetStartTime;
     }
-    length += static_cast<int>(H_NBITS / BYTE_SIZE) + readPacketLength(bufPacket);
+    
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
 
@@ -390,9 +391,13 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
   std::bitset<UNIT_DURATION> durationBits(duration);
   std::string durationStr = durationBits.to_string();
   IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
+  int length = static_cast<int>(payload.size()) / BYTE_SIZE;
   std::bitset<UNIT_LENGTH> lengthBits(length);
   std::string lengthStr = lengthBits.to_string();
   IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+  std::bitset<UNIT_RESERVED> reservedBits(0);
+  std::string reservedStr = reservedBits.to_string();
+  IOBinaryPrimitives::writeStrBits(reservedStr, mihsunit);
   mihsunit.insert(mihsunit.end(), payload.begin(), payload.end());
   swriter.time += duration;
   return true;
@@ -425,6 +430,9 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
   std::bitset<UNIT_LENGTH> lengthBits(length);
   std::string lengthStr = lengthBits.to_string();
   IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+  std::bitset<UNIT_RESERVED> reservedBits(0);
+  std::string reservedStr = reservedBits.to_string();
+  IOBinaryPrimitives::writeStrBits(reservedStr, mihsunit);
   mihsunit.insert(mihsunit.end(), payload.begin(), payload.end());
   return true;
 }
@@ -450,6 +458,9 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
       std::bitset<UNIT_LENGTH> lengthBits(0);
       std::string lengthStr = lengthBits.to_string();
       IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+      std::bitset<UNIT_RESERVED> reservedBits(0);
+      std::string reservedStr = reservedBits.to_string();
+      IOBinaryPrimitives::writeStrBits(reservedStr, mihsunit);
       swriter.time += duration;
     }
     return true;
@@ -475,6 +486,9 @@ auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
     std::bitset<UNIT_LENGTH> lengthBits(0);
     std::string lengthStr = lengthBits.to_string();
     IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+    std::bitset<UNIT_RESERVED> reservedBits(0);
+    std::string reservedStr = reservedBits.to_string();
+    IOBinaryPrimitives::writeStrBits(reservedStr, mihsunit);
     swriter.time += duration;
     return true;
   }
@@ -667,25 +681,24 @@ auto IOStream::writeNALuHeader(NALuType naluType, int payloadSize, std::vector<b
   std::bitset<H_NALU_TYPE> naluTypeBits(static_cast<int>(naluType));
   const std::string naluTypeStr = naluTypeBits.to_string();
   IOBinaryPrimitives::writeStrBits(naluTypeStr, bitstream);
-  const int residual = H_NBITS - (H_NALU_TYPE + H_PAYLOAD_LENGTH);
-  std::bitset<residual> resBits(0);
-  const std::string resStr = resBits.to_string();
-  IOBinaryPrimitives::writeStrBits(resStr, bitstream);
-  int payloadSizeByte = payloadSize / BYTE_SIZE;
+  int missing = (payloadSize % BYTE_SIZE) == 0 ? 0 : (BYTE_SIZE - (payloadSize % BYTE_SIZE));
+  int payloadSizeByte = (payloadSize + missing) / BYTE_SIZE;
   if (naluType == NALuType::Data) {
     payloadSizeByte -= DB_DURATION / BYTE_SIZE;
   }
   std::bitset<H_PAYLOAD_LENGTH> payloadSizeBits(payloadSizeByte);
   const std::string payloadSizeStr = payloadSizeBits.to_string();
   IOBinaryPrimitives::writeStrBits(payloadSizeStr, bitstream);
-
+  std::bitset<H_RESERVED> resBits(0);
+  const std::string resStr = resBits.to_string();
+  IOBinaryPrimitives::writeStrBits(resStr, bitstream);
   return true;
 }
 auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
   NALuType naluType = readNALuType(packet);
   int index = H_NALU_TYPE;
-  index = H_NBITS - H_PAYLOAD_LENGTH;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
+  index += H_RESERVED;
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
   switch (naluType) {
   case (NALuType::Timing): {

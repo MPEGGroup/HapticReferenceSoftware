@@ -44,9 +44,9 @@ auto Channel::setId(int newId) -> void { id = newId; }
 auto Channel::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
 auto Channel::getPriority() const -> std::optional<int> { return priority; }
-auto Channel::getPriority() const -> std::optional<int> {
+auto Channel::getPriorityOrDefault() const -> int {
   if (priority.has_value()) {
-    return priority;
+    return priority.value();
   } else {
     return 0;
   }
