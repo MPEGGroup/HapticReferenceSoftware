@@ -77,6 +77,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
     }
     index++;
   }
+  sreader.haptic.setTimescale(sreader.timescale); // TODO: earlier?
   haptic = sreader.haptic;
   return true;
 }
@@ -210,15 +211,21 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
         bitstream.push_back(temporalUnit);
         if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
           std::vector<bool> syncUnit = std::vector<bool>();
-          std::vector<std::vector<bool>> packetList;
-          writeMIHSUnit(MIHSUnitType::Initialization, packetList, syncUnit, swriter);
+          writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
           getNextSync(haptic, nextSync, syncIdx);
+          bitstream.push_back(syncUnit);
         }
         if (swriter.time != packetTS) {
           std::vector<std::vector<bool>> silentPackets{bufUnit[bufUnit.size() - 1], packet};
           std::vector<bool> silentUnit = std::vector<bool>();
           if (writeMIHSUnit(MIHSUnitType::Silent, silentPackets, silentUnit, swriter)) {
             bitstream.push_back(silentUnit);
+            if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+              std::vector<bool> syncUnit = std::vector<bool>();
+              writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
+              getNextSync(haptic, nextSync, syncIdx);
+              bitstream.push_back(syncUnit);
+            }
           }
         }
         bufUnit.clear();
@@ -231,6 +238,12 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     writeMIHSUnit(MIHSUnitType::Temporal, bufUnit, temporalUnit, swriter);
     bitstream.push_back(temporalUnit);
     bufUnit.clear();
+    if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+      std::vector<bool> syncUnit = std::vector<bool>();
+      writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
+      getNextSync(haptic, nextSync, syncIdx);
+      bitstream.push_back(syncUnit);
+    }
   }
   silentUnitSyncFlag(bitstream);
   return true;
@@ -284,7 +297,8 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   }
-  sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
+  // sreader.time += static_cast<int>((sreader.packetDuration * TIME_TO_MS) / sreader.timescale);
+  sreader.time += sreader.packetDuration;
   return true;
 }
 
@@ -325,7 +339,8 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
   writeNALu(NALuType::Timing, swriter, 0, timingPacket);
-  listPackets.insert(listPackets.begin(), timingPacket.begin(), timingPacket.end());
+  packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
+  length += readPacketLength(timingPacket[0]);
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
     length += readPacketLength(packet);
@@ -666,7 +681,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     if (perceIndex == -1) {
       sreader.haptic.addPerception(sreader.perception);
     } else {
-      sreader.haptic.replacePerceptionAt(perceIndex, sreader.perception);
+      sreader.haptic.replacePerceptionMetadataAt(perceIndex, sreader.perception);
     }
     return true;
   }
@@ -682,7 +697,8 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     if (channelIndex == -1) {
       sreader.haptic.getPerceptionAt(perceIndex).addChannel(sreader.channel);
     } else {
-      sreader.haptic.getPerceptionAt(perceIndex).replaceChannelAt(channelIndex, sreader.channel);
+      sreader.haptic.getPerceptionAt(perceIndex)
+          .replaceChannelMetadataAt(channelIndex, sreader.channel);
     }
     return true;
   }
@@ -693,7 +709,11 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     int perceIndex = searchPerceptionInHaptic(sreader.haptic, sreader.perception.getId());
     int channelIndex = searchChannelInHaptic(sreader.haptic, sreader.channel.getId());
     int bandIndex = searchBandInHaptic(sreader, sreader.bandStream.id);
-    if (bandIndex == -1) {
+    if (bandIndex == -1 ||
+        sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize() == 0 ||
+        static_cast<int>(
+            sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize()) <
+            bandIndex) {
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
           .addBand(sreader.bandStream.band);
@@ -705,7 +725,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     } else {
       sreader.haptic.getPerceptionAt(perceIndex)
           .getChannelAt(channelIndex)
-          .replaceBandAt(bandIndex, sreader.bandStream.band);
+          .replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
     }
     return true;
   }
@@ -1108,7 +1128,7 @@ auto IOStream::readLibraryEffect(types::Effect &libraryEffect, int &idx,
     libraryEffect.addTimelineEffect(timelineEffect);
   }
 
-  return true;
+  return success;
 }
 
 auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &bitstream)
@@ -1138,7 +1158,7 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
     IOBinaryPrimitives::writeStrBits(flagSemanticStr, bitstream);
   }
 
-  std::bitset<EFFECT_POSITION> posBits(libraryEffect.getPosition());
+  std::bitset<EFFECT_POSITION_STREAMING> posBits(libraryEffect.getPosition());
   std::string posStr = posBits.to_string();
   IOBinaryPrimitives::writeStrBits(posStr, bitstream);
 
@@ -1965,6 +1985,7 @@ auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
 
   return packetBits;
 }
+
 auto IOStream::writePayloadPacket(StreamWriter &swriter,
                                   std::vector<std::vector<bool>> bufPacketBitstream,
                                   std::vector<bool> &packetBits) -> std::vector<bool> {
@@ -1981,30 +2002,29 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
     std::string effectTypeStr = effectTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectTypeStr, packetBits);
 
-    if (swriter.effects[l].getSemantic().has_value()) {
-      std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
-      std::string flagSemanticStr = flagSemanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
-
-      types::EffectSemantic semantic =
-          types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
-      std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
-          static_cast<int>(semantic));
-      std::string semanticStr = semanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
-    } else {
-      std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
-      std::string flagSemanticStr = flagSemanticBits.to_string();
-      IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
-    }
-
     int effectPos = static_cast<int>(swriter.effects[l].getPosition()) - swriter.time;
     std::bitset<EFFECT_POSITION> effectPosBits(effectPos);
     std::string effectPosStr = effectPosBits.to_string();
     IOBinaryPrimitives::writeStrBits(effectPosStr, packetBits);
 
-    if (swriter.effects[l].getEffectType() == types::EffectType::Basis &&
-        swriter.bandStream.band.getBandType() != types::BandType::WaveletWave) {
+    if (swriter.effects[l].getEffectType() == types::EffectType::Basis) {
+      if (swriter.effects[l].getSemantic().has_value()) {
+        std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(1);
+        std::string flagSemanticStr = flagSemanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
+
+        types::EffectSemantic semantic =
+            types::stringToEffectSemantic.at(swriter.effects[l].getSemantic().value());
+        std::bitset<EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2> semanticBits(
+            static_cast<int>(semantic));
+        std::string semanticStr = semanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(semanticStr, packetBits);
+      } else {
+        std::bitset<EFFECT_FLAG_SEMANTIC> flagSemanticBits(0);
+        std::string flagSemanticStr = flagSemanticBits.to_string();
+        IOBinaryPrimitives::writeStrBits(flagSemanticStr, packetBits);
+      }
+
       std::bitset<EFFECT_KEYFRAME_COUNT> kfCountBits(swriter.keyframesCount[l]);
       std::string kfCountStr = kfCountBits.to_string();
       IOBinaryPrimitives::writeStrBits(kfCountStr, packetBits);
@@ -2017,7 +2037,6 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
         IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }
     }
-
     packetBits.insert(packetBits.end(), bufPacketBitstream[l].begin(), bufPacketBitstream[l].end());
   }
   return packetBits;
@@ -2122,7 +2141,8 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       addTimestampEffect(effects, static_cast<int>(sreader.time));
     } else {
       types::Effect effect;
-      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx);
+      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx,
+                                  sreader.timescale);
       effects.push_back(effect);
     }
     return addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex,
@@ -2266,7 +2286,8 @@ auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polyn
 }
 
 auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                 types::Effect &effect, int &length) -> bool {
+                                 types::Effect &effect, int &length, const unsigned int timescale)
+    -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
@@ -2284,43 +2305,42 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
     effect.setSemantic(semantic);
   }
 
-  int effectPos = static_cast<int>(band.getBlockLength()) * static_cast<int>(band.getEffectsSize());
+  int effectPos =
+      static_cast<int>((double)timescale * band.getBlockLength() * (double)band.getEffectsSize() /
+                       (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
 
-  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
+  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
   length += idx;
   return true;
 }
+
 auto IOStream::readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
                           int &length) -> bool {
   int idx = 0;
+
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
 
   types::EffectType effectType =
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
-
-  int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
-  if (hasSemantic == 1) {
-    int semanticCode = IOBinaryPrimitives::readUInt(
-        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    auto semantic = std::string(
-        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
-    effect.setSemantic(semantic);
-  }
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
 
-  if (effectType == types::EffectType::Basis &&
-      band.getBandType() != types::BandType::WaveletWave) {
+  if (effectType == types::EffectType::Basis) {
+    int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
+    if (hasSemantic == 1) {
+      int semanticCode = IOBinaryPrimitives::readUInt(
+          bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+      auto semantic = std::string(
+          types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+      effect.setSemantic(semantic);
+    }
     if (!readEffectBasis(bitstream, effect, band.getBandType(), idx)) {
       return false;
     }
-  } else if (effectType == types::EffectType::Basis &&
-             band.getBandType() == types::BandType::WaveletWave) {
-    IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx);
   }
   length += idx;
   return true;
@@ -2352,6 +2372,7 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   }
   return true;
 }
+
 auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
                                types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
@@ -2386,6 +2407,7 @@ auto IOStream::writeKeyframe(types::BandType bandType, types::Keyframe &keyframe
     return false;
   }
 }
+
 auto IOStream::readKeyframe(std::vector<bool> &bitstream, types::Keyframe &keyframe,
                             types::BandType &bandType, int &length) -> bool {
   switch (bandType) {
@@ -2476,6 +2498,7 @@ auto IOStream::writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bits
   bitstream.insert(bitstream.end(), bufbitstream.begin(), bufbitstream.end());
   return true;
 }
+
 auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
     -> bool {
   int idx = 0;
@@ -2495,8 +2518,6 @@ auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyf
   length += idx;
   return true;
 }
-
-// auto IOStream::writeCRC(std::vector<bool> &bitstream) -> bool { return false; }
 
 auto IOStream::searchPerceptionInHaptic(types::Haptics &haptic, int id) -> int {
   for (auto i = 0; i < static_cast<int>(haptic.getPerceptionsSize()); i++) {
@@ -2680,7 +2701,7 @@ auto IOStream::padToByteBoundary(std::vector<bool> &bitstream) -> void {
 }
 
 auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) -> bool {
-  if (idx >= static_cast<int>(haptic.getSyncsSize())) {
+  if (idx >= static_cast<int>(haptic.getSyncsSize()) - 1) {
     idx = -1;
     return false;
   }
@@ -2689,10 +2710,8 @@ auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) 
       idx = -1;
       return false;
     }
-    sync = haptic.getSyncsAt(++idx);
-    return true;
   }
-  idx = -1;
-  return false;
+  sync = haptic.getSyncsAt(++idx);
+  return true;
 }
 } // namespace haptics::io

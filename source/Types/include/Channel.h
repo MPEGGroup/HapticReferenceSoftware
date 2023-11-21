@@ -85,18 +85,22 @@ public:
   auto getVerticesSize() -> size_t;
   auto getVertexAt(int index) -> int &;
   auto addVertex(int &newVertice) -> void;
+  auto clearVertices() -> void { vertices.clear(); };
   auto getBandsSize() -> size_t;
   auto getBandAt(int index) -> haptics::types::Band &;
   auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
+  auto replaceBandMetadataAt(int index, haptics::types::Band &newBand) -> bool;
   auto removeBandAt(int index) -> bool;
   auto addBand(haptics::types::Band &newBand) -> void;
+  auto clearBands() -> void { bands.clear(); };
   auto generateBand() -> haptics::types::Band *;
   auto generateBand(BandType bandType, CurveType curveType, double blockLength,
                     int lowerFrequencyLimit, int upperFrequencyLimit) -> haptics::types::Band *;
   auto findBandAvailable(int position, int duration, types::BandType bandType)
       -> haptics::types::Band *;
-  auto Evaluate(double position) -> double;
-  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad) -> std::vector<double>;
+  auto Evaluate(double position, unsigned int timescale) -> double;
+  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+      -> std::vector<double>;
   [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
   auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;

@@ -195,7 +195,7 @@ private:
                                         std::vector<bool> &packetBits, StreamWriter &swriter)
       -> std::vector<bool>;
   static auto readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                types::Effect &effect, int &length) -> bool;
+                                types::Effect &effect, int &length, unsigned int timescale) -> bool;
   static auto writeEffectHeader(StreamWriter &swriter) -> std::vector<bool>;
   static auto writeEffectBasis(types::Effect effect, StreamWriter &swriter, int &kfCount, bool &rau,
                                std::vector<bool> &bitstream) -> bool;

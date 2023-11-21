@@ -71,8 +71,8 @@ class WaveletEncoder {
 public:
   WaveletEncoder(int bl_new, int fs_new);
 
-  auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band)
-      -> bool;
+  auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band,
+                    unsigned int timescale) -> bool;
   auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits)
       -> std::vector<double>;
   static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,

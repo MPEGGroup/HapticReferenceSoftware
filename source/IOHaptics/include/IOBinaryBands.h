@@ -48,17 +48,20 @@ constexpr int S2MS = 1000;
 
 class IOBinaryBands {
 public:
-  static auto writeBandHeader(types::Band &band, std::vector<bool> &output) -> bool;
+  static auto writeBandHeader(types::Band &band, std::vector<bool> &output, unsigned int timescale)
+      -> bool;
   static auto writeBandBody(types::Band &band, std::vector<bool> &output) -> bool;
   static auto writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
 
-  static auto readBandHeader(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
-      -> bool;
-  static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits)
-      -> bool;
+  static auto readBandHeader(types::Band &band, std::istream &file, std::vector<bool> &unusedBits,
+                             unsigned int timescale) -> bool;
+
+  static auto readBandBody(types::Band &band, std::istream &file, std::vector<bool> &unusedBits,
+                           unsigned int timescale) -> bool;
   static auto readBandBodyBool(types::Band &band, std::vector<bool> &bitstream) -> bool;
   static auto readWaveletEffect(types::Effect &effect, types::Band &band,
-                                std::vector<bool> &bitstream, int &idx) -> bool;
+                                std::vector<bool> &bitstream, int &idx, unsigned int timescale)
+      -> bool;
 
 private:
   static auto writeTransientEffect(types::Effect &effect, std::vector<bool> &output) -> bool;
@@ -77,15 +80,15 @@ private:
   static auto readVectorialEffect(types::Effect &effect, int &idx, std::vector<bool> &bitstream)
       -> bool;
   static auto readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
-                                std::vector<bool> &unusedBits) -> bool;
+                                std::vector<bool> &unusedBits, unsigned int timescale) -> bool;
   static auto readReferenceEffect(types::Effect &effect, std::istream &file,
                                   std::vector<bool> &unusedBits) -> bool;
   static auto readReferenceEffect(types::Effect &effect, int &idx, std::vector<bool> &bitstream)
       -> bool;
   static auto readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file,
-                                 std::vector<bool> &unusedBits) -> bool;
+                                 std::vector<bool> &unusedBits, unsigned int timescale) -> bool;
   static auto readTimelineEffect(types::Effect &effect, types::Band &band, int &idx,
-                                 std::vector<bool> &bitstream) -> bool;
+                                 std::vector<bool> &bitstream, unsigned int timescale) -> bool;
 };
 } // namespace haptics::io
 #endif // IOBINARYBANDS_H
