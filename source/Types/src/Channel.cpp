@@ -87,7 +87,7 @@ auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) ->
     return false;
   }
   bands[index].setBandType(newBand.getBandType());
-  bands[index].setCurveType(newBand.getCurveType());
+  bands[index].setCurveType(newBand.getCurveTypeOrDefault());
   bands[index].setBlockLength(newBand.getBlockLength());
   bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
   bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
