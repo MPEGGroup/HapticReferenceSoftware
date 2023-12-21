@@ -34,24 +34,19 @@
 #include <Spiht/include/Spiht_Enc.h>
 
 namespace haptics::spiht {
+  
 
-void Spiht_Enc::encodeEffect(Effect &effect, std::vector<unsigned char> &outstream) {
-  auto bl = (int)effect.getKeyframesSize() - 2;
-  double scalar = effect.getKeyframeAt(bl).getAmplitudeModulation().value();
-  auto bits = (int)effect.getKeyframeAt(bl + 1).getAmplitudeModulation().value();
+void Spiht_Enc::encodeEffect(std::vector<int> &block, const int bits, const double scalar, std::vector<unsigned char> &outstream) {
+  int bl = (int)block.size();
   if (bits == 0) {
     return;
   }
-  double multiplier = pow(2, (double)bits);
-  std::vector<int> block(bl, 0);
-  int index = 0;
   bool zeros = true;
   for (auto &v : block) {
-    v = (int)((double)effect.getKeyframeAt(index).getAmplitudeModulation().value() * multiplier);
     if (v != 0) {
       zeros = false;
+      break;
     }
-    index++;
   }
   if (zeros) {
     return;
@@ -283,24 +278,13 @@ void Spiht_Enc::initMaxDescendants(std::vector<int> &signal) {
 
 void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax) {
 
+  auto m = getQuantMode(qwavmax);
   int integerpart = 0;
-  char mode = 0;
-  encoder::quantMode m = {0, 0};
-  if (qwavmax < 1) {
-    m.integerbits = 0;
-    m.fractionbits = FRACTIONBITS_0;
-  } else {
+  if (m.mode == 1) {
     integerpart = 1;
-    m.integerbits = INTEGERBITS_1;
-    m.fractionbits = FRACTIONBITS_1;
-    mode = 1;
   }
 
-  bitwavmax.clear();
-  bitwavmax.reserve(WAVMAXLENGTH);
-  bitwavmax.push_back(mode);
-  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
-        m.integerbits + m.fractionbits);
+  setBitwavmax(qwavmax, integerpart, m, bitwavmax);
 }
 
 void Spiht_Enc::de2bi(int val, std::vector<unsigned char> &outstream, int length) {
@@ -319,6 +303,30 @@ auto Spiht_Enc::bitget(int in, int bit) -> int {
     return 1;
   }
   return 0;
+}
+
+auto Spiht_Enc::getQuantMode(double wavmax) -> quantMode {
+  int integerpart = 0;
+  quantMode m = {0, 0};
+  m.mode = 0;
+  if (wavmax < 1) {
+    m.integerbits = 0;
+    m.fractionbits = FRACTIONBITS_0;
+  } else {
+    integerpart = 1;
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
+    m.mode = 1;
+  }
+  return m;
+}
+
+void Spiht_Enc::setBitwavmax(double qwavmax, int integerpart, quantMode m, std::vector<unsigned char> &bitwavmax) {
+  bitwavmax.clear();
+  bitwavmax.reserve(spiht::WAVMAXLENGTH);
+  bitwavmax.push_back(m.mode);
+  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
+        m.integerbits + m.fractionbits);
 }
 
 } // namespace haptics::spiht

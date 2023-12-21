@@ -393,9 +393,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
 }
 
 auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
-  spiht::Spiht_Enc enc;
-  std::vector<unsigned char> outstream;
-  enc.encodeEffect(effect, outstream);
+  std::vector<unsigned char> outstream = effect.getWaveletBitstream();
   IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_WAVELET_SIZE>((uint16_t)outstream.size(), output);
   for (auto &b : outstream) {
     IOBinaryPrimitives::writeNBits<unsigned char, BYTE_SIZE>(b, output);
