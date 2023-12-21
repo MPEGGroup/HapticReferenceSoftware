@@ -366,12 +366,11 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
       (int)(band.getBlockLength() * (double)band.getUpperFrequencyLimit()) / (double)timescale;
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
-  std::vector<unsigned char> instream;
+  auto instream = effect.getWaveletBitstream();
   instream.resize(size);
   for (auto &b : instream) {
     b = IOBinaryPrimitives::readNBits<unsigned char, BYTE_SIZE>(file, unusedBits);
   }
-  dec.decodeEffect(instream, effect, (int)blocklength);
 
   return true;
 }
@@ -382,12 +381,11 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
   auto blocklength = band.getBlockLength() * band.getUpperFrequencyLimit() / (double)timescale;
   auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
 
-  std::vector<unsigned char> instream;
+  auto instream = effect.getWaveletBitstream();
   instream.resize(size);
   for (auto &b : instream) {
     b = static_cast<unsigned char>(IOBinaryPrimitives::readUInt(bitstream, idx, BYTE_SIZE));
   }
-  dec.decodeEffect(instream, effect, (int)blocklength);
 
   return true;
 }
