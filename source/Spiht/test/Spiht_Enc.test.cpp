@@ -126,13 +126,13 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     enc.encodeEffect(in, BITS_EFFECT, scalar, stream_enc);
 
     Spiht_Dec dec;
-    std::vector<double> out;
+    std::vector<int> out;
     bool equal = true;
     double scalar_out = 0;
     int bits_out = 0;
     dec.decodeEffect(stream_enc, out, bl, scalar_out, bits_out);
     for (int i = 0; i < (int)bl; i++) {
-      if (!(std::fabs(in[i] - (int)out[i]) < precision)) {
+      if (!(std::fabs(in[i] - out[i]) < precision)) {
         equal = false;
       }
     }

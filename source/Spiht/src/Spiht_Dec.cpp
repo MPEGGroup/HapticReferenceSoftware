@@ -35,11 +35,10 @@
 
 namespace haptics::spiht {
 
-void Spiht_Dec::decodeEffect(std::vector<unsigned char> &in, std::vector<double> block,
+void Spiht_Dec::decodeEffect(std::vector<unsigned char> &in, std::vector<int> &out,
                              int origlength, double &wavmax, int &bits) {
   std::vector<unsigned char> in_bits;
   ArithDec::convert2bits(in, in_bits);
-  std::vector<int> out;
   auto level = (int)(log2((double)origlength) - 2);
   wavmax = 0;
   bits = 0;

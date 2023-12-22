@@ -47,7 +47,7 @@ namespace haptics::spiht {
 
 class Spiht_Dec {
 public:
-  void decodeEffect(std::vector<unsigned char> &in, std::vector<double> block, int origlength,
+  void decodeEffect(std::vector<unsigned char> &in, std::vector<int> &out, int origlength,
                     double &wavmax, int &bits);
   void decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
               int level, double &wavmax, int &n_real);

@@ -376,7 +376,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
                                       const unsigned int timescale) -> bool {
 
   auto instream = effect.getWaveletBitstream();
-  instream.resize(size);
+  instream.resize(instream.size());
   for (auto &b : instream) {
     b = static_cast<unsigned char>(IOBinaryPrimitives::readUInt(bitstream, idx, BYTE_SIZE));
   }

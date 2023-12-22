@@ -44,7 +44,7 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
   for (uint32_t b = 0; b < numBlocks; b++) {
     Effect effect = band.getEffectAt((int)b);
     auto bitstream = effect.getWaveletBitstream();
-    std::vector<double> block_dwt(bl, 0);
+    std::vector<int> block_dwt(bl, 0);
     double scalar = 0;
     int bits = 0;
     spihtDec.decodeEffect(bitstream, block_dwt, bl, scalar, bits);
@@ -67,7 +67,7 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
   for (uint32_t b = 0; b < numBlocks; b++) {
     Effect effect = band.getEffectAt((int)b);
     auto bitstream = effect.getWaveletBitstream();
-    std::vector<double> block_dwt(bl, 0);
+    std::vector<int> block_dwt(bl, 0);
     double scalar = 0;
     int bits = 0;
     spihtDec.decodeEffect(bitstream, block_dwt, bl, scalar, bits);
@@ -81,13 +81,13 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
   }
 }
 
-void WaveletDecoder::decodeBlock(std::vector<double> &block_dwt, std::vector<double> &block_time,
+void WaveletDecoder::decodeBlock(std::vector<int> &block_dwt, std::vector<double> &block_time,
                                  double scalar, int dwtl) {
 
   Wavelet wavelet;
   std::vector<double> block_scaled(block_dwt.size(), 0);
   std::transform(block_dwt.begin(), block_dwt.end(), block_scaled.begin(),
-                 [scalar](double d) -> double { return d * scalar; });
+                 [scalar](int d) -> double { return (double)d * scalar; });
   block_time.resize(block_dwt.size());
   wavelet.inv_DWT(block_scaled, dwtl, block_time);
 }
