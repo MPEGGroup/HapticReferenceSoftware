@@ -290,15 +290,11 @@ auto Effect::EvaluateWavelet(double position, int fs, unsigned int timescale) ->
                             (double)timescale; // relative position in samples rel. to fs
   int index = std::floor(relativePosition);
 
-  if (index >= (int)this->getKeyframesSize()) {
+  auto samples = this->getWaveletSamples();
+  if (index >= (int)samples.size()) {
     return 0;
   }
-  auto myKeyframe = keyframes.begin() + index;
-  if (!myKeyframe->getAmplitudeModulation().has_value()) {
-    return 0;
-  }
-
-  return myKeyframe->getAmplitudeModulation().value();
+  return samples[index];
 }
 
 auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
