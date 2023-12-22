@@ -361,9 +361,6 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                       std::vector<bool> &unusedBits, const unsigned int timescale)
     -> bool {
-  spiht::Spiht_Dec dec;
-  auto blocklength =
-      (int)(band.getBlockLength() * (double)band.getUpperFrequencyLimit()) / (double)timescale;
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
   auto instream = effect.getWaveletBitstream();
@@ -377,9 +374,6 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
                                       std::vector<bool> &bitstream, int &idx,
                                       const unsigned int timescale) -> bool {
-  spiht::Spiht_Dec dec;
-  auto blocklength = band.getBlockLength() * band.getUpperFrequencyLimit() / (double)timescale;
-  auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
 
   auto instream = effect.getWaveletBitstream();
   instream.resize(size);

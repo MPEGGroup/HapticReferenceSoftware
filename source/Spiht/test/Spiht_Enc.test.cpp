@@ -66,7 +66,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     Spiht_Enc enc;
     std::vector<int> signal(bl, 0);
     signal.at(bl / 2) = 1;
-    std::vector<unsigned char> bitwavmax(WAVMAXLENGTH, 0);
+    std::vector<unsigned char> bitwavmax(haptics::spiht::WAVMAXLENGTH, 0);
     bitwavmax.at(0) = 1;
     std::vector<unsigned char> outstream;
     std::vector<int> context;
@@ -79,7 +79,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
     signal.at(bl / 2) = 1;
     signal.at(0) = 4;
     signal.at(3) = 3;
-    std::vector<unsigned char> bitwavmax(WAVMAXLENGTH, 0);
+    std::vector<unsigned char> bitwavmax(haptics::spiht::WAVMAXLENGTH, 0);
     bitwavmax.at(0) = 1;
     std::vector<unsigned char> stream_spiht;
     std::vector<int> context;
@@ -118,40 +118,35 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
 
   SECTION("Effect Encoding") {
     Spiht_Enc enc;
-    Effect effect_in;
+    std::vector<int> in;
     for (size_t i = 0; i < bl; i++) {
-      Keyframe keyframe(i, (float)(i % MOD_VAL) / MOD_VAL, 0);
-      effect_in.addKeyframe(keyframe);
+      in.push_back((float)(i % MOD_VAL) / MOD_VAL);
     }
-    Keyframe keyframe(bl, scalar, 0);
-    effect_in.addKeyframe(keyframe);
-    Keyframe keyframeBits(bl + 1, (float)BITS_EFFECT, 0);
-    effect_in.addKeyframe(keyframeBits);
     std::vector<unsigned char> stream_enc;
-    enc.encodeEffect(effect_in, stream_enc);
+    enc.encodeEffect(in, BITS_EFFECT, scalar, stream_enc);
 
     Spiht_Dec dec;
-    Effect effect_out;
+    std::vector<double> out;
     bool equal = true;
-    dec.decodeEffect(stream_enc, effect_out, bl);
+    double scalar_out = 0;
+    int bits_out = 0;
+    dec.decodeEffect(stream_enc, out, bl, scalar_out, bits_out);
     for (int i = 0; i < (int)bl; i++) {
-      if (!(std::fabs(effect_in.getKeyframeAt(i).getAmplitudeModulation().value() -
-                      effect_out.getKeyframeAt(i).getAmplitudeModulation().value()) < precision)) {
+      if (!(std::fabs(in[i] - (int)out[i]) < precision)) {
         equal = false;
       }
     }
     CHECK(equal);
-    CHECK(std::fabs(effect_in.getKeyframeAt(bl).getAmplitudeModulation().value() -
-                    effect_out.getKeyframeAt(bl).getAmplitudeModulation().value()) < precision);
+    CHECK(std::fabs(scalar - scalar_out) < precision);
     if (!equal) {
       for (int i = 0; i < (int)bl; i++) {
-        std::cout << effect_in.getKeyframeAt(i).getAmplitudeModulation().value() << ","
-                  << effect_out.getKeyframeAt(i).getAmplitudeModulation().value() << std::endl;
+        std::cout << in[i] << ","
+                  << out[i] << std::endl;
       }
-      std::cout << "scalar: " << effect_in.getKeyframeAt(bl).getAmplitudeModulation().value() << ","
-                << effect_out.getKeyframeAt(bl).getAmplitudeModulation().value() << std::endl;
-      std::cout << "bits: " << effect_in.getKeyframeAt(bl + 1).getAmplitudeModulation().value()
-                << "," << effect_out.getKeyframeAt(bl + 1).getAmplitudeModulation().value()
+      std::cout << "scalar: " << scalar << ","
+                << scalar_out << std::endl;
+      std::cout << "bits: " << BITS_EFFECT
+                << "," << bits_out
                 << std::endl;
     }
   }

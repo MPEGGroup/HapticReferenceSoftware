@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-option(BUILD_CATCH2 "Build and use Catch2 for unit tests" ON)
+option(BUILD_CATCH2 "Build and use Catch2 for unit tests" OFF)
 
 if(BUILD_CATCH2)
     include(FetchContent)

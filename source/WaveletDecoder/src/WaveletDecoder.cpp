@@ -71,6 +71,7 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
     double scalar = 0;
     int bits = 0;
     spihtDec.decodeEffect(bitstream, block_dwt, bl, scalar, bits);
+    scalar /= pow(2, (double)bits);
     Effect newEffect;
     newEffect.setPosition(
         (int)((double)b * (double)bl * (double)timescale / (double)band.getUpperFrequencyLimit()));

@@ -44,13 +44,6 @@ void Spiht_Dec::decodeEffect(std::vector<unsigned char> &in, std::vector<double>
   wavmax = 0;
   bits = 0;
   decode(in_bits, out, origlength, level, wavmax, bits);
-  double multiplier = 1 / pow(2, (double)bits);
-  int pos = 0;
-  for (auto v : out) {
-    auto val = (double)v * multiplier;
-    block[pos] = val;
-    pos++;
-  }
 }
 
 void Spiht_Dec::decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
