@@ -70,14 +70,16 @@ struct quantMode {
 
 class Spiht_Enc {
 public:
-  void encodeEffect(std::vector<int> &block, int bits, double scalar, std::vector<unsigned char> &outstream);
+  void encodeEffect(std::vector<int> &block, int bits, double scalar,
+                    std::vector<unsigned char> &outstream);
   void encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
               int maxallocbits, std::vector<unsigned char> &outstream, std::vector<int> &context);
 
   auto maxDescendant(int j, int type) -> int;
   void initMaxDescendants(std::vector<int> &signal);
   auto static getQuantMode(double wavmax) -> quantMode;
-  void static setBitwavmax(double qwavmax, int integerpart, quantMode m, std::vector<unsigned char> &bitwavmax);
+  void static setBitwavmax(double qwavmax, int integerpart, quantMode m,
+                           std::vector<unsigned char> &bitwavmax);
 
 private:
   void static refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,

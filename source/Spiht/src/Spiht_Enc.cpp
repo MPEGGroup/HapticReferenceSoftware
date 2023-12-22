@@ -34,9 +34,9 @@
 #include <Spiht/include/Spiht_Enc.h>
 
 namespace haptics::spiht {
-  
 
-void Spiht_Enc::encodeEffect(std::vector<int> &block, const int bits, const double scalar, std::vector<unsigned char> &outstream) {
+void Spiht_Enc::encodeEffect(std::vector<int> &block, const int bits, const double scalar,
+                             std::vector<unsigned char> &outstream) {
   int bl = (int)block.size();
   if (bits == 0) {
     return;
@@ -321,7 +321,8 @@ auto Spiht_Enc::getQuantMode(double wavmax) -> quantMode {
   return m;
 }
 
-void Spiht_Enc::setBitwavmax(double qwavmax, int integerpart, quantMode m, std::vector<unsigned char> &bitwavmax) {
+void Spiht_Enc::setBitwavmax(double qwavmax, int integerpart, quantMode m,
+                             std::vector<unsigned char> &bitwavmax) {
   bitwavmax.clear();
   bitwavmax.reserve(spiht::WAVMAXLENGTH);
   bitwavmax.push_back(m.mode);
