@@ -2310,7 +2310,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
                        (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
 
-  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
+  IOBinaryBands::readWaveletEffect(effect, bitstream, idx);
   length += idx;
   return true;
 }

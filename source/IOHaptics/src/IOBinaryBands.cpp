@@ -127,7 +127,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
     } else if (effectType == types::EffectType::Timeline) {
-      readTimelineEffect(myEffect, band, file, unusedBits, timescale);
+      readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
       case types::BandType::Transient:
@@ -146,7 +146,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
         }
         break;
       case types::BandType::WaveletWave:
-        if (!IOBinaryBands::readWaveletEffect(myEffect, band, file, unusedBits, timescale)) {
+        if (!IOBinaryBands::readWaveletEffect(myEffect, file, unusedBits)) {
           return false;
         }
         break;
@@ -358,9 +358,8 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
   return true;
 }
 
-auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
-                                      std::vector<bool> &unusedBits, const unsigned int timescale)
-    -> bool {
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::istream &file,
+                                      std::vector<bool> &unusedBits) -> bool {
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
   auto instream = effect.getWaveletBitstream();
@@ -371,9 +370,8 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
 
   return true;
 }
-auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
-                                      std::vector<bool> &bitstream, int &idx,
-                                      const unsigned int timescale) -> bool {
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::vector<bool> &bitstream, int &idx)
+    -> bool {
 
   auto instream = effect.getWaveletBitstream();
   instream.resize(instream.size());
@@ -414,8 +412,7 @@ auto IOBinaryBands::writeReferenceEffect(types::Effect &effect, std::vector<bool
 }
 
 auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file,
-                                       std::vector<bool> &unusedBits, const unsigned int timescale)
-    -> bool {
+                                       std::vector<bool> &unusedBits) -> bool {
   auto timelineEffectCount =
       IOBinaryPrimitives::readNBits<uint16_t, EFFECT_TIMELINE_COUNT>(file, unusedBits);
 
@@ -430,7 +427,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
     } else if (effectType == types::EffectType::Timeline) {
-      readTimelineEffect(myEffect, band, file, unusedBits, timescale);
+      readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
       case types::BandType::Transient:
@@ -443,7 +440,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
         IOBinaryBands::readVectorialEffect(myEffect, file, unusedBits);
         break;
       case types::BandType::WaveletWave:
-        IOBinaryBands::readWaveletEffect(myEffect, band, file, unusedBits, timescale);
+        IOBinaryBands::readWaveletEffect(myEffect, file, unusedBits);
         break;
       default:
         return false;
