@@ -123,8 +123,8 @@ public:
   auto EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
       -> double;
 
-    auto getWaveletBitstream() -> std::vector<unsigned char> &;
-    auto getWaveletSamples() -> std::vector<double> &;
+  auto getWaveletBitstream() -> std::vector<unsigned char> &;
+  auto getWaveletSamples() -> std::vector<double> &;
 
 private:
   int id = -1;

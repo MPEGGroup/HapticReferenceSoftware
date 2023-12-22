@@ -421,12 +421,8 @@ auto Effect::getTimelineEffectAt(int index) -> haptics::types::Effect & {
 }
 auto Effect::addTimelineEffect(Effect &newEffect) -> void { timeline.push_back(newEffect); }
 
-auto Effect::getWaveletBitstream() -> std::vector<unsigned char> & {
-  return waveletBitstream;
-}
+auto Effect::getWaveletBitstream() -> std::vector<unsigned char> & { return waveletBitstream; }
 
-auto Effect::getWaveletSamples() -> std::vector<double> & {
-  return waveletSamples;
-}
+auto Effect::getWaveletSamples() -> std::vector<double> & { return waveletSamples; }
 
 } // namespace haptics::types

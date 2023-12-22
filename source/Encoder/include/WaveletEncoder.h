@@ -39,10 +39,10 @@
 
 #include "FilterBank/include/Wavelet.h"
 #include "PsychohapticModel/include/PsychohapticModel.h"
+#include "Spiht/include/Spiht_Enc.h"
 #include "Types/include/Band.h"
 #include "Types/include/Effect.h"
 #include "Types/include/Keyframe.h"
-#include "Spiht/include/Spiht_Enc.h"
 
 constexpr double LOGFACTOR = 10;
 constexpr double MAXQUANTFACTOR = 0.999;
@@ -50,12 +50,12 @@ constexpr double QUANT_ADD = 0.5;
 constexpr double S_2_MS_WAVELET = 1000;
 
 using haptics::filterbank::Wavelet;
+using haptics::spiht::Spiht_Enc;
 using haptics::tools::modelResult;
 using haptics::tools::PsychohapticModel;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::Effect;
-using haptics::spiht::Spiht_Enc;
 
 namespace haptics::encoder {
 
@@ -65,7 +65,8 @@ public:
 
   auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band,
                     unsigned int timescale) -> bool;
-  void encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits, std::vector<unsigned char> &bitstream);
+  void encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits,
+                   std::vector<unsigned char> &bitstream);
   static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
                                         std::vector<unsigned char> &bitwavmax);
   void static maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
