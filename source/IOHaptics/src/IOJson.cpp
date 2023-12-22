@@ -37,6 +37,9 @@
 #include <algorithm>
 #include <iostream>
 #include <regex>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -54,9 +57,13 @@ namespace haptics::io {
 auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjson::SizeType length)
     -> const rapidjson::SchemaDocument * {
   // Resolve the uri and returns a pointer to that schema.
+  std::string uriString(uri);
+  // TODO: To avoid co dependance loop: this raises the issues that the effect, keyframe and vector schemas will only be parsed once
+  //if (std::find(schemaDocuments.begin(), schemaDocuments.end(), uriString) != schemaDocuments.end())
+  //  return nullptr;
   rapidjson::Document sd;
 
-  printf("GetRemoteDocument %s %d \n", uri, length);
+  //printf("GetRemoteDocument %s %d \n", uri, length);
   std::string path = std::string(JSON_SCHEMA_PATH) + "/" + std::string(uri, length);
   std::ifstream ifs(path);
   rapidjson::IStreamWrapper isw(ifs);
@@ -66,48 +73,75 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
       std::cerr << sd.GetParseError() << std::endl;
     }
   }
+  //schemaDocuments.push_back(uriString);
   rapidjson::SchemaDocument *m_s = new rapidjson::SchemaDocument(sd, 0, 0U, this);
   return m_s;
 }
 
-auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool {
-  bool conformant = true;
-  // check version
-  auto version = haptic.getVersion();
-  const std::regex txt_regex("([0-9]{4})(-([0-9]))?");
+
+auto IOJson::dateCheck(const std::string& date, bool log) -> bool {
+  const std::regex txt_regex("[+-]?[0-9]{4}(-[01][0-9](-[0-3][0-9](T[0-2][0-9]:[0-5][0-9]:?([0-5][0-9](\.[0-9]+)?)?[+-][0-2][0-9]:[0-5][0-9]Z?)?)?)?");
   std::smatch pieces_match;
-  if (pieces_match.size() == 1) {
-    if (haptics::tools::is_number(pieces_match[0])) {
-      int year = atoi(pieces_match[0].str().c_str());
-      if (year < 2023) {
-        std::cerr << "Incorrect version, the year should be greater or equal to 2023." << std::endl;
-        conformant = false;
-      }
-    } else {
-      std::cerr << "Incorrect version, the year should be a number." << std::endl;
-      conformant = false;
+  if (!regex_search(date, pieces_match, txt_regex)) {
+    if (log) {
+      std::cerr << "Invalid date, the date format shall conform to ISO 8601 series." << std::endl;
     }
-    if (haptics::tools::is_number(pieces_match[0])) {
-      int amd = atoi(pieces_match[0].str().c_str());
-      if (amd <= 0) {
-        std::cerr << "Incorrect version, the amendment should be greater than 0." << std::endl;
-        conformant = false;
+    return false;
+  }
+  return true;
+}
+
+auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
+  const std::regex txt_regex("^([0-9]{4})(-([0-9]))?$");
+  std::smatch pieces_match;
+  if (regex_search(version, pieces_match, txt_regex) && pieces_match.size() >= 1) {
+    if (haptics::tools::is_number(pieces_match[1])) {
+      int year = atoi(pieces_match[1].str().c_str());
+      if (year < 2023) {
+        if (log)
+        std::cerr << "Invalid version, the year should be greater or equal to 2023." << std::endl;
+        return false;
       }
     } else {
-      std::cerr << "Incorrect version, the amendement should be a number." << std::endl;
-      conformant = false;
+      if (log)
+      std::cerr << "Invalid version, the year should be a number." << std::endl;
+      return false;
+    }
+    if (pieces_match.size() >= 4) {
+      if (pieces_match[3] != "") {
+          if (haptics::tools::is_number(pieces_match[3])) {
+            int amd = atoi(pieces_match[3].str().c_str());
+            if (amd <= 0) {
+              if (log)
+                std::cerr << "Invalid version, the amendment should be greater than 0." << std::endl;
+              return false;
+            }
+          } else {
+            if (log)
+              std::cerr << "Invalid version, the amendement should be a number." << std::endl;
+            return false;
+          }
+      }
     }
   } else {
-    std::cerr << "Incorrect version, the value should match the following format: XXXX or XXXX-Y, "
+    if (log)
+    std::cerr << "Invalid version, the value should match the following format: XXXX or XXXX-Y, "
                  "where XXXX is the year of publication and Y is the amendment number, if any."
               << std::endl;
-    conformant = false;
+    return false;
   }
+  return true;
+}
+
+auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool {
+  // check version
+  auto version = haptic.getVersion();
+  bool conformant = versionCheck(version, true);
 
   // check profile
   auto profile = haptic.getProfile();
   if (profile != "Main" && profile != "Simple Parametric") {
-    std::cerr << "Unknown profile, possible values are \"Main\" and \"Simple Parametric\"."
+    std::cerr << "Invalid profile, possible values are \"Main\" and \"Simple Parametric\"."
               << std::endl;
     conformant = false;
   }
@@ -115,24 +149,29 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
   // check level
   auto level = haptic.getLevel();
   if (level != 1 && level != 2) {
-    std::cerr << "Unknown level, possible values are 1 and 2." << std::endl;
+    std::cerr << "Invalid level, possible values are 1 and 2." << std::endl;
     conformant = false;
   }
 
   // check date
-  // TODO
   auto date = haptic.getDate();
-
-  if (date == "TODO") {
-    std::cerr << "Invalid date. The date format shall follow the ISO 8601 standard." << std::endl;
-    conformant = false;
-  }
-
-  auto timescale = haptic.getTimescaleOrDefault();
-  if (profile == "Simple Parametric" && timescale != 1000) {
-    std::cerr << "Incorrect timescale. The simple parametric profile only support a value of 1000"
+  conformant &= dateCheck(date, true);
+  if (haptic.getTimescale().has_value()) {
+    auto timescale = haptic.getTimescale().value();
+    if (timescale < 0) {
+      std::cerr << "Invalid timescale. The value must be greater than zero." << std::endl;
+      conformant = false;
+    }
+    else if (profile == "Simple Parametric" && timescale != 1000) {
+      std::cerr << "Invalid timescale. The simple parametric profile only support a value of 1000."
               << std::endl;
-    conformant = false;
+      conformant = false;
+    }
+    else if (profile == "Main" && timescale > 48000) {
+    std::cerr
+        << "Invalid timescale. The main profile only support a value lower than or equal to 48000"
+        << std::endl;
+    }
   }
 
   for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
@@ -154,6 +193,10 @@ auto IOJson::semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptic
     if (haptic.getAvatarAt(i).getId() == id) {
       nbInstances++;
     }
+  }
+  if (id == 0) {
+    std::cerr << "Invalid avatar id. Id 0 is reserved for unspecified avatars." << std::endl;
+    conformant = false;
   }
   if (nbInstances > 1) {
     std::cerr << "Invalid avatar id. Id " << id << " is not unique." << std::endl;
@@ -201,7 +244,7 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
       validAvatarId = true;
     }
   }
-  if (!validAvatarId) {
+  if (avatarId != 0 && !validAvatarId) {
     std::cerr << "Avatar id " << avatarId << " of perception " << id << " does not exist."
               << std::endl;
     conformant = false;
@@ -396,6 +439,7 @@ auto IOJson::semanticConformanceCheckLibraryEffect(types::Effect &effect,
 
 auto IOJson::schemaConformanceCheck(const rapidjson::Document &hjifFile,
                                     const std::string &filePath) -> bool {
+  //std::vector<std::string> schemaDocuments;
   MyRemoteSchemaDocumentProvider provider;
   rapidjson::Document sd;
   std::string path = std::string(JSON_SCHEMA_PATH) + "/MPEG_haptics.schema.json";
@@ -404,7 +448,7 @@ auto IOJson::schemaConformanceCheck(const rapidjson::Document &hjifFile,
   if (sd.ParseStream(isw).HasParseError()) {
     std::cerr << "The following JSON schema is invalid: " << path << std::endl;
   }
-  rapidjson::SchemaDocument schema(sd); // Compile a Document to SchemaDocument
+  rapidjson::SchemaDocument schema(sd,0,0U,&provider); // Compile a Document to SchemaDocument
 
   rapidjson::SchemaValidator validator(schema);
 
@@ -461,8 +505,8 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   haptic.setLevel(level);
   haptic.setDate(date);
   haptic.setDescription(description);
-  if (jsonTree.HasMember("timescale") && jsonTree["timescale"].IsInt()) {
-    haptic.setTimescale(jsonTree["timescale"].GetInt());
+  if (jsonTree.HasMember("timescale") && jsonTree["timescale"].IsUint()) {
+    haptic.setTimescale(jsonTree["timescale"].GetUint());
   }
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
@@ -661,8 +705,8 @@ auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perceptio
       std::cerr << "Missing or invalid channel gain" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasNumber(jsonChannel, "mixing_weight")) {
-      std::cerr << "Missing or invalid channel mixing weight" << std::endl;
+    if (!IOJsonPrimitives::hasNumber(jsonChannel, "mixing_coefficient")) {
+      std::cerr << "Missing or invalid channel mixing coefficient" << std::endl;
       continue;
     }
     if (!IOJsonPrimitives::hasNumber(jsonChannel, "body_part_mask")) {
@@ -677,7 +721,7 @@ auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perceptio
     auto channelId = jsonChannel["id"].GetInt();
     const auto *channelDescription = jsonChannel["description"].GetString();
     auto channelGain = jsonChannel["gain"].GetFloat();
-    auto channelMixingWeight = jsonChannel["mixing_weight"].GetFloat();
+    auto channelMixingWeight = jsonChannel["mixing_coefficient"].GetFloat();
     auto channelBodyPart = jsonChannel["body_part_mask"].GetUint();
 
     types::Channel channel(channelId, channelDescription, channelGain, channelMixingWeight,
@@ -748,11 +792,8 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
       std::cerr << "Missing or invalid band type" << std::endl;
       continue;
     }
-    if (!jsonBand.HasMember("curve_type") || !jsonBand["curve_type"].IsString()) {
-      std::cerr << "Missing or invalid curve type" << std::endl;
-      continue;
-    }
-    if (!jsonBand.HasMember("block_length") || !jsonBand["block_length"].IsDouble()) {
+    if (jsonBand["band_type"] == "WaveletWave" && (!jsonBand.HasMember("block_length") ||
+        !jsonBand["block_length"].IsDouble())) {
       std::cerr << "Missing or invalid block length" << std::endl;
       continue;
     }
@@ -772,12 +813,19 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
     }
 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
-    types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
-    double blockLength = jsonBand["block_length"].GetDouble();
     int lowerLimit = jsonBand["lower_frequency_limit"].GetInt();
     int upperLimit = jsonBand["upper_frequency_limit"].GetInt();
 
-    types::Band band(bandType, curveType, blockLength, lowerLimit, upperLimit);
+    types::Band band(bandType, lowerLimit, upperLimit);
+
+    if (jsonBand.HasMember("curve_type") && jsonBand["curve_type"].IsString()) {
+        types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
+        band.setCurveType(curveType);
+    }
+    if (bandType==types::BandType::WaveletWave && jsonBand.HasMember("block_length") && jsonBand["block_length"].IsDouble()) {
+        double blockLength = jsonBand["block_length"].GetDouble();
+        band.setBlockLength(blockLength);
+    }
     loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
 
     channel.addBand(band);
@@ -1004,19 +1052,36 @@ auto IOJson::loadVector(const rapidjson::Value &jsonVector, types::Vector &vecto
 
 auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &filePath) -> void {
   auto jsonTree = rapidjson::Document(rapidjson::kObjectType);
-  jsonTree.AddMember("version",
-                     rapidjson::Value(haptic.getVersion().c_str(), jsonTree.GetAllocator()),
-                     jsonTree.GetAllocator());
+  if (versionCheck(haptic.getVersion(), false)) {
+    jsonTree.AddMember("version",
+                       rapidjson::Value(haptic.getVersion().c_str(), jsonTree.GetAllocator()),
+                       jsonTree.GetAllocator());
+  } else {
+    jsonTree.AddMember("version", rapidjson::Value("2023", jsonTree.GetAllocator()),
+                       jsonTree.GetAllocator());
+  }
   jsonTree.AddMember("profile",
                      rapidjson::Value(haptic.getProfile().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
   jsonTree.AddMember("level", haptic.getLevel(), jsonTree.GetAllocator());
-  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
+
+  if (dateCheck(haptic.getDate(), false)) {
+    jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
+  } else {
+    auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
+    const std::string currentDate = ss.str();
+    jsonTree.AddMember("date", rapidjson::Value(currentDate.c_str(), jsonTree.GetAllocator()),
+                       jsonTree.GetAllocator());
+  }
   jsonTree.AddMember("description",
                      rapidjson::Value(haptic.getDescription().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());
-  jsonTree.AddMember("timescale", haptic.getTimescaleOrDefault(), jsonTree.GetAllocator());
+  if (haptic.getTimescale().has_value()) {
+    jsonTree.AddMember("timescale", haptic.getTimescale().value(), jsonTree.GetAllocator());
+  }
 
   auto jsonAvatars = rapidjson::Value(rapidjson::kArrayType);
   extractAvatars(haptic, jsonAvatars, jsonTree);
@@ -1180,7 +1245,7 @@ auto IOJson::extractChannels(types::Perception &perception, rapidjson::Value &js
         "description", rapidjson::Value(channel.getDescription().c_str(), jsonTree.GetAllocator()),
         jsonTree.GetAllocator());
     jsonChannel.AddMember("gain", channel.getGain(), jsonTree.GetAllocator());
-    jsonChannel.AddMember("mixing_weight", channel.getMixingWeight(), jsonTree.GetAllocator());
+    jsonChannel.AddMember("mixing_coefficient", channel.getMixingWeight(), jsonTree.GetAllocator());
     jsonChannel.AddMember("body_part_mask", channel.getBodyPartMask(), jsonTree.GetAllocator());
     if (channel.getReferenceDeviceId().has_value()) {
       jsonChannel.AddMember("reference_device_id", channel.getReferenceDeviceId().value(),
@@ -1253,14 +1318,16 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
                        rapidjson::Value(types::bandTypeToString.at(band.getBandType()).c_str(),
                                         jsonTree.GetAllocator()),
                        jsonTree.GetAllocator());
-    if (band.getCurveType().has_value()) {
+    if (band.getBandType() == types::BandType::Curve && band.getCurveType().has_value()) {
       jsonBand.AddMember(
           "curve_type",
           rapidjson::Value(types::curveTypeToString.at(band.getCurveTypeOrDefault()).c_str(),
                            jsonTree.GetAllocator()),
           jsonTree.GetAllocator());
     }
-    jsonBand.AddMember("block_length", band.getBlockLength(), jsonTree.GetAllocator());
+    if (band.getBandType() == types::BandType::WaveletWave) {
+      jsonBand.AddMember("block_length", band.getBlockLengthOrDefault(), jsonTree.GetAllocator());
+    }
     jsonBand.AddMember("lower_frequency_limit", band.getLowerFrequencyLimit(),
                        jsonTree.GetAllocator());
     jsonBand.AddMember("upper_frequency_limit", band.getUpperFrequencyLimit(),

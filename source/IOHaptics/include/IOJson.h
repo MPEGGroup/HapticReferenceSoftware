@@ -54,10 +54,17 @@ class MyRemoteSchemaDocumentProvider : public rapidjson::IRemoteSchemaDocumentPr
 public:
   virtual auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
       -> const rapidjson::SchemaDocument *;
+  //MyRemoteSchemaDocumentProvider(std::vector<std::string> &newSchemaDocuments)
+  //    : schemaDocuments(newSchemaDocuments){}
+//
+//private:
+//  std::vector<std::string> schemaDocuments;
 };
 
 class IOJson {
 public:
+  static auto versionCheck(const std::string &version, bool log) -> bool;
+  static auto dateCheck(const std::string &date, bool log) -> bool;
   static auto schemaConformanceCheck(const rapidjson::Document &hjifFile,
                                      const std::string &filePath) -> bool;
   static auto semanticConformanceCheckExperience(types::Haptics &haptic) -> bool;
