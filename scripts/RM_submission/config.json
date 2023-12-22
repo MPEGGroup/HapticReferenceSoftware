@@ -5,7 +5,7 @@
   "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "reference_files": {
-    "main_folder": "..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
+    "main_folder": "..\\..\\..\\data\\MPEG\\Part40 HapticSupport",
     "reference_bitratePSNR": "reference_bitratePSNR.csv",
     "short_effects": [
       {
@@ -13,402 +13,402 @@
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-1\\AHAP\\APPL-vib-boing-nopad.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\APPL-vib-boing-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\AHAP\\APPL vib boing nopad.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\APPL vib boing 8kHz 16 nopad.wav"
       },
       {
         "name": "DoubleTick",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-DoubleTick.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-DoubleTick-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib DoubleTick.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib DoubleTick 8kHz 16 nopad.wav"
       },
       {
         "name": "Explosion1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Explosion1.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-Explosion1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib Explosion1.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib Explosion1 8kHz 16 nopad.wav"
       },
       {
         "name": "FastPulse1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-FastPulse1.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-FastPulse1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib FastPulse1.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib FastPulse1 8kHz 16 nopad.wav"
       },
       {
         "name": "Fill1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Fill1.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-Fill1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib Fill1.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib Fill1 8kHz 16 nopad.wav"
       },
       {
         "name": "Grain1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Grain1.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-Grain1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib Grain1.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib Grain1 8kHz 16 nopad.wav"
       },
       {
         "name": "Sweep1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Sweep1.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-Sweep1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib Sweep1.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib Sweep1 8kHz 16 nopad.wav"
       },
       {
         "name": "Tick1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-1\\IVS\\IMMR-vib-Tick1.ohm",
-        "reference_file": "Test\\Test1-1\\WAV_noPad\\IMMR-vib-Tick1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 1\\IVS\\IMMR vib Tick1.ohm",
+        "reference_file": "Test\\Test1 1\\WAV_noPad\\IMMR vib Tick1 8kHz 16 nopad.wav"
       },
       {
         "name": "Explosion3",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Explosion3.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-Explosion3-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib Explosion3.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib Explosion3 8kHz 16 nopad.wav"
       },
       {
         "name": "FastPulse2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-FastPulse2.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-FastPulse2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib FastPulse2.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib FastPulse2 8kHz 16 nopad.wav"
       },
       {
         "name": "FastPulse3",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-FastPulse3.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-FastPulse3-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib FastPulse3.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib FastPulse3 8kHz 16 nopad.wav"
       },
       {
         "name": "Fill2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Fill2.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-Fill2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib Fill2.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib Fill2 8kHz 16 nopad.wav"
       },
       {
         "name": "Grain2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Grain2.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-Grain2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib Grain2.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib Grain2 8kHz 16 nopad.wav"
       },
       {
         "name": "RepeatTicks",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-RepeatTicks.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-RepeatTicks-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib RepeatTicks.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib RepeatTicks 8kHz 16 nopad.wav"
       },
       {
         "name": "Sweep2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Sweep2.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-Sweep2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib Sweep2.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib Sweep2 8kHz 16 nopad.wav"
       },
       {
         "name": "Tick2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-1\\IVS\\IMMR-vib-Tick2.ivs",
-        "reference_file": "Training\\Training1-1\\WAV_noPad\\IMMR-vib-Tick2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 1\\IVS\\IMMR vib Tick2.ivs",
+        "reference_file": "Training\\Training1 1\\WAV_noPad\\IMMR vib Tick2 8kHz 16 nopad.wav"
       },
       {
         "name": "ERM_010_Bounce100",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\ERM_010_Bounce100.ivs",
-        "reference_file": "Evaluation\\Evaluation1-1\\WAV_noPad\\ERM_010_Bounce100.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 1\\IVS\\ERM_010_Bounce100.ivs",
+        "reference_file": "Evaluation\\Evaluation1 1\\WAV_noPad\\ERM_010_Bounce100.wav"
       },
       {
         "name": "ERM_074_Explosion1",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\ERM_074_Explosion1.ivs",
-        "reference_file": "Evaluation\\Evaluation1-1\\WAV_noPad\\ERM_074_Explosion1.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 1\\IVS\\ERM_074_Explosion1.ivs",
+        "reference_file": "Evaluation\\Evaluation1 1\\WAV_noPad\\ERM_074_Explosion1.wav"
       },
       {
         "name": "LRA_014_DoubleSharpClick66",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\LRA_014_DoubleSharpClick66.ivs",
-        "reference_file": "Evaluation\\Evaluation1-1\\WAV_noPad\\LRA_014_DoubleSharpClick66.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 1\\IVS\\LRA_014_DoubleSharpClick66.ivs",
+        "reference_file": "Evaluation\\Evaluation1 1\\WAV_noPad\\LRA_014_DoubleSharpClick66.wav"
       },
       {
         "name": "LRA_079_Explosion6",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\LRA_079_Explosion6.ivs",
-        "reference_file": "Evaluation\\Evaluation1-1\\WAV_noPad\\LRA_079_Explosion6.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 1\\IVS\\LRA_079_Explosion6.ivs",
+        "reference_file": "Evaluation\\Evaluation1 1\\WAV_noPad\\LRA_079_Explosion6.wav"
       },
       {
         "name": "Piezo_010_Bounce100",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-1\\IVS\\Piezo_010_Bounce100.ivs",
-        "reference_file": "Evaluation\\Evaluation1-1\\WAV_noPad\\Piezo_010_Bounce100.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 1\\IVS\\Piezo_010_Bounce100.ivs",
+        "reference_file": "Evaluation\\Evaluation1 1\\WAV_noPad\\Piezo_010_Bounce100.wav"
       }
     ],
     "long_effects": [
       {
-        "name": "ACTK-vib-pantheongrandstarfall",
+        "name": "ACTK vib pantheongrandstarfall",
         "type": "Test",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\WAV_noPad\\ACTK vib pantheongrandstarfall 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\ACTK vib pantheongrandstarfall 8kHz 16 nopad.wav"
       },
       {
         "name": "heartbeats",
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-heartbeats-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-heartbeats-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\AHAP\\APPL vib heartbeats nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\APPL vib heartbeats 8kHz 16 nopad.wav"
       },
       {
         "name": "inflate",
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-inflate-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-inflate-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\AHAP\\APPL vib inflate nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\APPL vib inflate 8kHz 16 nopad.wav"
       },
       {
         "name": "oscillate",
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-oscillate-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-oscillate-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\AHAP\\APPL vib oscillate nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\APPL vib oscillate 8kHz 16 nopad.wav"
       },
       {
         "name": "rumble",
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-rumble-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-rumble-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\AHAP\\APPL vib rumble nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\APPL vib rumble 8kHz 16 nopad.wav"
       },
       {
         "name": "Rain",
         "type": "Test",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\WAV_noPad\\IDCC vib Rain 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IDCC vib Rain 8kHz 16 nopad.wav"
       },
       {
         "name": "Rain_chan2",
         "type": "Test",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain_chan2-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Rain_chan2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\WAV_noPad\\IDCC vib Rain_chan2 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IDCC vib Rain_chan2 8kHz 16 nopad.wav"
       },
       {
         "name": "Towel",
         "type": "Test",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Towel-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IDCC-vib-Towel-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\WAV_noPad\\IDCC vib Towel 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IDCC vib Towel 8kHz 16 nopad.wav"
       },
       {
         "name": "Content1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-Content1.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IMMR-vib-Content1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\IVS\\IMMR vib Content1.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IMMR vib Content1 8kHz 16 nopad.wav"
       },
       {
         "name": "PersTexture1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-PersTexture1.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IMMR-vib-PersTexture1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\IVS\\IMMR vib PersTexture1.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IMMR vib PersTexture1 8kHz 16 nopad.wav"
       },
       {
         "name": "Ringtone1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-Ringtone1.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IMMR-vib-Ringtone1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\IVS\\IMMR vib Ringtone1.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IMMR vib Ringtone1 8kHz 16 nopad.wav"
       },
       {
         "name": "Weapon1",
         "type": "Test",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Test\\Test1-2\\IVS\\IMMR-vib-Weapon1.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\IMMR-vib-Weapon1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 2\\IVS\\IMMR vib Weapon1.ohm",
+        "reference_file": "Test\\Test1 2\\WAV_noPad\\IMMR vib Weapon1 8kHz 16 nopad.wav"
       },
       {
         "name": "drums",
         "type": "Training",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-drums-nopad.ahap",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-drums-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\AHAP\\APPL vib drums nopad.ahap",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\APPL vib drums 8kHz 16 nopad.wav"
       },
       {
         "name": "gravel",
         "type": "Training",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-gravel-nopad.ahap",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-gravel-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\AHAP\\APPL vib gravel nopad.ahap",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\APPL vib gravel 8kHz 16 nopad.wav"
       },
       {
         "name": "sparkle",
         "type": "Training",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-sparkle-nopad.ahap",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-sparkle-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\AHAP\\APPL vib sparkle nopad.ahap",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\APPL vib sparkle 8kHz 16 nopad.wav"
       },
       {
         "name": "Carpet",
         "type": "Training",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Carpet-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Carpet-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\WAV_noPad\\IDCC vib Carpet 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IDCC vib Carpet 8kHz 16 nopad.wav"
       },
       {
         "name": "HeartBeat",
         "type": "Training",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-HeartBeat-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-HeartBeat-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\WAV_noPad\\IDCC vib HeartBeat 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IDCC vib HeartBeat 8kHz 16 nopad.wav"
       },
       {
         "name": "Paper",
         "type": "Training",
         "modality": "vib",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Paper-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Paper-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\WAV_noPad\\IDCC vib Paper 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IDCC vib Paper 8kHz 16 nopad.wav"
       },
       {
         "name": "Content2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Content2.ivs",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IMMR-vib-Content2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\IVS\\IMMR vib Content2.ivs",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IMMR vib Content2 8kHz 16 nopad.wav"
       },
       {
         "name": "RandTexture1",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-RandTexture1.ivs",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IMMR-vib-RandTexture1-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\IVS\\IMMR vib RandTexture1.ivs",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IMMR vib RandTexture1 8kHz 16 nopad.wav"
       },
       {
         "name": "Ringtone2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Ringtone2.ivs",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IMMR-vib-Ringtone2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\IVS\\IMMR vib Ringtone2.ivs",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IMMR vib Ringtone2 8kHz 16 nopad.wav"
       },
       {
         "name": "Weapon2",
         "type": "Training",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Training\\Training1-2\\IVS\\IMMR-vib-Weapon2.ivs",
-        "reference_file": "Training\\Training1-2\\WAV_noPad\\IMMR-vib-Weapon2-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 2\\IVS\\IMMR vib Weapon2.ivs",
+        "reference_file": "Training\\Training1 2\\WAV_noPad\\IMMR vib Weapon2 8kHz 16 nopad.wav"
       },
       {
         "name": "a1",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\a1.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\a1.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\a1.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\a1.wav"
       },
       {
         "name": "a2",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\a2.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\a2.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\a2.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\a2.wav"
       },
       {
         "name": "a3",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\a3.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\a3.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\a3.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\a3.wav"
       },
       {
         "name": "ERM_068_Alert5",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\ERM_068_Alert5.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\ERM_068_Alert5.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\ERM_068_Alert5.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\ERM_068_Alert5.wav"
       },
       {
         "name": "LRA_066_Alert3",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\LRA_066_Alert3.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\LRA_066_Alert3.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\LRA_066_Alert3.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\LRA_066_Alert3.wav"
       },
       {
         "name": "Piezo_073_Alert10",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\Piezo_073_Alert10.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\Piezo_073_Alert10.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\Piezo_073_Alert10.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\Piezo_073_Alert10.wav"
       },
       {
         "name": "Piezo_091_Weapon8",
         "type": "Evaluation",
         "modality": "vib",
         "extension": "IVS",
-        "haptic_file_path": "Evaluation\\Evaluation1-2\\IVS\\Piezo_091_Weapon8.ivs",
-        "reference_file": "Evaluation\\Evaluation1-2\\WAV_noPad\\Piezo_091_Weapon8.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 2\\IVS\\Piezo_091_Weapon8.ivs",
+        "reference_file": "Evaluation\\Evaluation1 2\\WAV_noPad\\Piezo_091_Weapon8.wav"
       }
     ],
     "kinesthetic_effects": [
@@ -417,168 +417,767 @@
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin BigBuckBunny 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin BigBuckBunny 8kHz 16 nopad.wav"
       },
       {
         "name": "BikeRiding",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-BikeRiding-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-BikeRiding-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin BikeRiding 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin BikeRiding 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceXFast",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXFast-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXFast-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceXFast 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceXFast 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceXSlow",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXSlow-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceXSlow-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceXSlow 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceXSlow 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceYFast",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYFast-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYFast-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceYFast 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceYFast 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceYSlow",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYSlow-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceYSlow-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceYSlow 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceYSlow 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceZFast",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZFast-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZFast-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceZFast 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceZFast 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceZSlow",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZSlow-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-ForceZSlow-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceZSlow 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin ForceZSlow 8kHz 16 nopad.wav"
       },
       {
         "name": "HorseRiding",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-HorseRiding-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-HorseRiding-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin HorseRiding 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin HorseRiding 8kHz 16 nopad.wav"
       },
       {
         "name": "Rollercoaster",
         "type": "Test",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-8kHz-16-nopad.wav"
+        "haptic_file_path": "Test\\Test1 3\\WAV_noPad\\IDCC kin Rollercoaster 8kHz 16 nopad.ohm",
+        "reference_file": "Test\\Test1 3\\WAV_noPad\\IDCC kin Rollercoaster 8kHz 16 nopad.wav"
       },
       {
         "name": "BigBuckBunny",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BigBuckBunny-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin BigBuckBunny training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin BigBuckBunny training 8kHz 16 nopad.wav"
       },
       {
         "name": "BikeRiding2",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding2-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding2-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin BikeRiding2 training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin BikeRiding2 training 8kHz 16 nopad.wav"
       },
       {
         "name": "BikeRiding",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-BikeRiding-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin BikeRiding training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin BikeRiding training 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceXY",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXY-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXY-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceXY training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceXY training 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceXYZ",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXYZ-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXYZ-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceXYZ training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceXYZ training 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceXZ",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXZ-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceXZ-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceXZ training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceXZ training 8kHz 16 nopad.wav"
       },
       {
         "name": "ForceYZ",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceYZ-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-ForceYZ-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceYZ training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin ForceYZ training 8kHz 16 nopad.wav"
       },
       {
         "name": "HorseRiding2",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding2-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding2-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin HorseRiding2 training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin HorseRiding2 training 8kHz 16 nopad.wav"
       },
       {
         "name": "HorseRiding",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-HorseRiding-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin HorseRiding training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin HorseRiding training 8kHz 16 nopad.wav"
       },
       {
         "name": "Rollercoaster",
         "type": "Training",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.ohm",
-        "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.wav"
+        "haptic_file_path": "Training\\Training1 3\\WAV_noPad\\IDCC kin Rollercoaster training 8kHz 16 nopad.ohm",
+        "reference_file": "Training\\Training1 3\\WAV_noPad\\IDCC kin Rollercoaster training 8kHz 16 nopad.wav"
       },
       {
         "name": "rollercoaster",
         "type": "Evaluation",
         "modality": "kin",
         "extension": "WAV",
-        "haptic_file_path": "Evaluation\\Evaluation1-3\\WAV_noPad\\rollercoaster.wav",
-        "reference_file": "Evaluation\\Evaluation1-3\\WAV_noPad\\rollercoaster.wav"
+        "haptic_file_path": "Evaluation\\Evaluation1 3\\WAV_noPad\\rollercoaster.wav",
+        "reference_file": "Evaluation\\Evaluation1 3\\WAV_noPad\\rollercoaster.wav"
+      }
+    ]
+  },
+  "conformance_files": {
+    "main_folder": "..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance",
+    "schemas_checks": [
+      {
+        "name": "Haptic: version year as number",
+        "haptic_file_path": "SchemaConformance\\haptic-version-year_as_number.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: timescale negative",
+        "haptic_file_path": "SchemaConformance\\haptic-timescale-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: timescale zero",
+        "haptic_file_path": "SchemaConformance\\haptic-timescale-zero.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: id negative",
+        "haptic_file_path": "SchemaConformance\\avatar-id-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: lod negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: type negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: invalid perception modality",
+        "haptic_file_path": "SchemaConformance\\perception-perception_modality-invalid_perception_modality.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: id negative",
+        "haptic_file_path": "SchemaConformance\\perception-id-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: avatar id negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Sync: timestamp negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Sync: timescale negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Sync: timescale zero",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: id negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: body_part_mask negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: body_part_mask too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: minimum_frequency negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_frequency negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: resonance_frequency negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_amplitude negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: impedance negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_voltage negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_current negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_displacement negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: weight negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: size negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: invalid type",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: id negative",
+        "haptic_file_path": "SchemaConformance\\channel-id-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: reference_device_id negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: gain too_small",
+        "haptic_file_path": "SchemaConformance\\channel-gain-too_small.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: mixing_weight negative",
+        "haptic_file_path": "SchemaConformance\\channel-mixing_weight-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: body_part_mask negative",
+        "haptic_file_path": "SchemaConformance\\channel-body_part_mask-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: actuator_resolution negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: actuator_resolution zero",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: actuator_target negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: frequency_sampling negative",
+        "haptic_file_path": "SchemaConformance\\channel-frequency_sampling-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: sample_count negative",
+        "haptic_file_path": "SchemaConformance\\channel-sample_count-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: invalid band_type",
+        "haptic_file_path": "SchemaConformance\\band-band_type-invalid_band_type.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: invalid curve_type",
+        "haptic_file_path": "SchemaConformance\\band-curve_type-invalid_curve_type.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: curve_type defined for WaveletWave band_type",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: block_length too small",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: lower_frequency_limit negative",
+        "haptic_file_path": "SchemaConformance\\band-lower_frequency_limit-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: lower_frequency_limit too large",
+        "haptic_file_path": "SchemaConformance\\band-lower_frequency_limit-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: upper_frequency_limit negative",
+        "haptic_file_path": "SchemaConformance\\band-upper_frequency_limit-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: upper_frequency_limit too large",
+        "haptic_file_path": "SchemaConformance\\band-upper_frequency_limit-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: id negative",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: invalid effect_type",
+        "haptic_file_path": "SchemaConformance\\effect-effect_type-invalid_effect_type.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: position negative",
+        "haptic_file_path": "SchemaConformance\\effect-position-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: phase too_small",
+        "haptic_file_path": "SchemaConformance\\effect-phase-too_small.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: phase too large",
+        "haptic_file_path": "SchemaConformance\\effect-phase-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: invalid base_signal",
+        "haptic_file_path": "SchemaConformance\\effect-base_signal-invalid_base_signal",
+        "expected_output": ""
+      },
+      {
+        "name": "Keyframe: relative_position negative",
+        "haptic_file_path": "SchemaConformance\\keyframe-relative_position-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Keyframe: amplitude_modulation too_small",
+        "haptic_file_path": "SchemaConformance\\keyframe-amplitude_modulation-too_small.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Keyframe: amplitude_modulation too large",
+        "haptic_file_path": "SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Keyframe: frequency_modulation negative",
+        "haptic_file_path": "SchemaConformance\\keyframe-frequency_modulation-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Keyframe: frequency_modulation too large",
+        "haptic_file_path": "SchemaConformance\\keyframe-frequency_modulation-too_large.hjif",
+        "expected_output": ""
+      }
+    ],
+    "semantic_checks": [
+      {
+        "name": "Haptic: invalid version",
+        "haptic_file_path": "SemanticConformance\\haptic-version-invalid_version.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: version invalid amendment",
+        "haptic_file_path": "SemanticConformance\\haptic-version-invalid_amendment.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: version invalid year",
+        "haptic_file_path": "SemanticConformance\\haptic-version-invalid_year.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: version year too small",
+        "haptic_file_path": "SemanticConformance\\haptic-version-year_too_small.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: invalid profile",
+        "haptic_file_path": "SemanticConformance\\haptic-profile-invalid_profile.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: invalid level",
+        "haptic_file_path": "SemanticConformance\\haptic-level-invalid_level.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: invalid date",
+        "haptic_file_path": "SemanticConformance\\haptic-date-invalid_date.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: too many perceptions",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: duplicate id",
+        "haptic_file_path": "SemanticConformance\\avatar-id-duplicate-id.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: id duplicate",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: avatar id non existent",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: too many channels",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: id duplicate",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_frequency less than minimum_frequency",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: resonance_frequency less than minimum_frequency",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: resonance_frequency greater_than_maximum_frequency",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: id duplicate",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: reference_device_id non_existent",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: invalid body_part_target",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: direction non unit_vector",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: block_length not power of 2",
+        "haptic_file_path": "SemanticConformance\\band-block_length-not_power_of_2.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: upper_frequency_limit less than lower_frequency_limit",
+        "haptic_file_path": "SemanticConformance\\band-upper_frequency_limit-less_than_lower_frequency_limit.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: id duplicate",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: id non existent",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: invalid sematic_keywords",
+        "haptic_file_path": "",
+        "expected_output": ""
+      }
+    ],
+    "hmpg_conformance": [
+      {
+        "name": "Haptic: timescale too large",
+        "haptic_file_path": "HMPGConformance\\haptic-timescale-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: description too long",
+        "haptic_file_path": "HMPGConformance\\haptic-description-too_long.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: too many avatars",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: id too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: type too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: mesh too long",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: id too large",
+        "haptic_file_path": "HMPGConformance\\perception-id-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: description too long",
+        "haptic_file_path": "HMPGConformance\\perception-description-too_long.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: semantic scheme too long",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: too many reference devices",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: unit exponent too small",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: unit_exponent too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: perception_unit_exponent too_small",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: perception_unit_exponent too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Sync: timestamp too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Sync: timescale too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: id too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: name too_long",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: minimum_frequency too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_frequency too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: resonance_frequency too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_amplitude too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: impedance too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_voltage too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_current too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: maximum_displacement too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: weight too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: size too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: id too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: description too long",
+        "haptic_file_path": "HMPGConformance\\channel-description-too_long.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: gain too large",
+        "haptic_file_path": "HMPGConformance\\channel-gain-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: mixing_weight too large",
+        "haptic_file_path": "HMPGConformance\\channel-mixing_weight-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: body_part_mask too large",
+        "haptic_file_path": "HMPGConformance\\channel-body_part_mask-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: frequency_sampling too large",
+        "haptic_file_path": "HMPGConformance\\channel-frequency_sampling-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: sample_count too large",
+        "haptic_file_path": "HMPGConformance\\channel-sample_count-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: id too large",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: position too large",
+        "haptic_file_path": "HMPGConformance\\effect-position-too_large.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Keyframe: relative_position too large",
+        "haptic_file_path": "HMPGConformance\\keyframe-relative_position-too_large.hjif",
+        "expected_output": ""
       }
     ]
   }

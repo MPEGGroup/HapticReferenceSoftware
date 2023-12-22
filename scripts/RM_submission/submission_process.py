@@ -58,10 +58,15 @@ MODALITY_KEY = "modality"
 EXTENSION_KEY = "extension"
 NAME_KEY = "name"
 HAPTIC_FILE_PATH_KEY = "haptic_file_path"
-REFERENCE_FILE = "reference_file"
+REFERENCE_FILE_KEY = "reference_file"
 MAIN_FOLDER_KEY = "main_folder"
 COMPARISON_DATA_KEY = "comparison_data"
 REFERENCE_BITRATEPSNR_KEY = "reference_bitratePSNR"
+CONFORMANCE_FILES_KEY = "conformance_files"
+CONFORMANCE_TEST_SET_KEYS = [
+    "schemas_checks",
+    "semantic_checks"
+]
 
 # implements PSNR metric (verified)
 def psnr(x, y):
@@ -238,124 +243,137 @@ def main():
 
     if REFERENCE_FILES_KEY not in config:
         return
-
-    with open("logs.txt", 'w') as log_file:
-        with open('bitratePSNR.csv', 'w', newline='') as csvFile:
-            writer = csv.writer(csvFile)
-            firstRow = ["File", "Test set", "Type"]
-            for current_bitrate in bitrates:
-                firstRow.append(str(current_bitrate)+"kbps bitrate")
-                firstRow.append(str(current_bitrate)+"kbps psnr")
-            writer.writerow(firstRow)
-            for testId in range(1, 4):
-                effects_key = TEST_EFFECT_KEYS[testId-1]
-                if effects_key not in config[REFERENCE_FILES_KEY]:
-                    continue
-                for my_effect in config[REFERENCE_FILES_KEY][effects_key]:
-                    if TYPE_KEY not in my_effect or NAME_KEY not in my_effect or HAPTIC_FILE_PATH_KEY not in my_effect:
+    if reference_evaluation:
+        with open("logs.txt", 'w') as log_file:
+            with open('bitratePSNR.csv', 'w', newline='') as csvFile:
+                writer = csv.writer(csvFile)
+                firstRow = ["File", "Test set", "Type"]
+                for current_bitrate in bitrates:
+                    firstRow.append(str(current_bitrate)+"kbps bitrate")
+                    firstRow.append(str(current_bitrate)+"kbps psnr")
+                writer.writerow(firstRow)
+                for testId in range(1, 4):
+                    effects_key = TEST_EFFECT_KEYS[testId-1]
+                    if effects_key not in config[REFERENCE_FILES_KEY]:
                         continue
-                    if filter_by_type and filter_by_type != my_effect[TYPE_KEY]:
-                        continue
-                    csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}", f"{my_effect[EXTENSION_KEY]}"]
-                    for current_bitrate in bitrates:
-                        formatted_output_name = f"{my_effect[TYPE_KEY]}1-{testId}fvt_{CRM_version}_{my_effect[MODALITY_KEY]}_{current_bitrate}_{my_effect[NAME_KEY]}"
-                        input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
-                        reference_file_path = my_effect[REFERENCE_FILE]
-                        if MAIN_FOLDER_KEY in config[REFERENCE_FILES_KEY]:
-                            input_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
-                            reference_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], reference_file_path)
-                        if(not os.path.exists(input_file_path)):
-                            print(f"FILE NOT FOUND: {input_file_path}")
+                    for my_effect in config[REFERENCE_FILES_KEY][effects_key]:
+                        if TYPE_KEY not in my_effect or NAME_KEY not in my_effect or HAPTIC_FILE_PATH_KEY not in my_effect:
                             continue
-                        hmpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HMPG/{formatted_output_name}.hmpg")
-                        hjif_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HJIF/{formatted_output_name}.hjif")
-                        nopad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_nopad/{formatted_output_name}_nopad.wav")
-                        pad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_pad/{formatted_output_name}_pad.wav")
+                        if filter_by_type and filter_by_type != my_effect[TYPE_KEY]:
+                            continue
+                        csvRow = [f"{my_effect[NAME_KEY]}", f"{my_effect[TYPE_KEY]}1_{testId}", f"{my_effect[EXTENSION_KEY]}"]
+                        for current_bitrate in bitrates:
+                            formatted_output_name = f"{my_effect[TYPE_KEY]}1-{testId}fvt_{CRM_version}_{my_effect[MODALITY_KEY]}_{current_bitrate}_{my_effect[NAME_KEY]}"
+                            input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
+                            reference_file_path = my_effect[REFERENCE_FILE]
+                            if MAIN_FOLDER_KEY in config[REFERENCE_FILES_KEY]:
+                                input_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
+                                reference_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], reference_file_path)
+                            if(not os.path.exists(input_file_path)):
+                                print(f"FILE NOT FOUND: {input_file_path}")
+                                continue
+                            hmpg_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HMPG/{formatted_output_name}.hmpg")
+                            hjif_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/HJIF/{formatted_output_name}.hjif")
+                            nopad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_nopad/{formatted_output_name}_nopad.wav")
+                            pad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_pad/{formatted_output_name}_pad.wav")
 
-                        print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        encoding_command = f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} -cf {cutoff} --binary --refactor"
-                        if(disable_wavelet):
-                            encoding_command += " --disable-wavelet"
-                        elif(disable_vectorial):
-                            encoding_command += " --disable-vectorial"
-                        subprocess.run(encoding_command, stdout=log_file)
-                        print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
-                        print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
-                        if padding:
-                            print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                            addPadding(nopad_file_path, pad_file_path, padding)
-                        bitrate = compute_bitrate(reference_file_path, hmpg_file_path)
-                        psnr = psnr_two_files(nopad_file_path, reference_file_path, True)
-                        csvRow.append(bitrate)
-                        csvRow.append(psnr)
-                    writer.writerow(csvRow)
-
+                            print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                            encoding_command = f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} -cf {cutoff} --binary --refactor"
+                            if(disable_wavelet):
+                                encoding_command += " --disable-wavelet"
+                            elif(disable_vectorial):
+                                encoding_command += " --disable-vectorial"
+                            subprocess.run(encoding_command, stdout=log_file)
+                            print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                            subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
+                            print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                            subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
+                            if padding:
+                                print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
+                                addPadding(nopad_file_path, pad_file_path, padding)
+                            bitrate = compute_bitrate(reference_file_path, hmpg_file_path)
+                            psnr = psnr_two_files(nopad_file_path, reference_file_path, True)
+                            csvRow.append(bitrate)
+                            csvRow.append(psnr)
+                        writer.writerow(csvRow)
     
-    if compute_bjontegaard:
-        try:
-            os.makedirs('Bjontegaard/Plots')
-        except FileExistsError:
-            pass
+        if compute_bjontegaard:
+            try:
+                os.makedirs('Bjontegaard/Plots')
+            except FileExistsError:
+                pass
         
-        with open('bitratePSNR.csv') as csvfile:
-            reader = csv.reader(csvfile)
-            header = next(reader)
-            bitrate_bjontegaard = []
-            psnr_bjontegaard = []
-            for row in reader:
-                bitrate_temp = []
-                psnr_temp = []
-                for i in range(2, len(row),2):
-                    bitrate_temp.append(float(row[i]))
-                    psnr_temp.append(float(row[i+1]))
-                bitrate_bjontegaard.append(bitrate_temp)
-                psnr_bjontegaard.append(psnr_temp)
-            csvfile.close()
+            with open('bitratePSNR.csv') as csvfile:
+                reader = csv.reader(csvfile)
+                header = next(reader)
+                bitrate_bjontegaard = []
+                psnr_bjontegaard = []
+                for row in reader:
+                    bitrate_temp = []
+                    psnr_temp = []
+                    for i in range(2, len(row),2):
+                        bitrate_temp.append(float(row[i]))
+                        psnr_temp.append(float(row[i+1]))
+                    bitrate_bjontegaard.append(bitrate_temp)
+                    psnr_bjontegaard.append(psnr_temp)
+                csvfile.close()
             
-        with open(os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY],config[REFERENCE_FILES_KEY][REFERENCE_BITRATEPSNR_KEY])) as csvfile:
-            reader = csv.reader(csvfile)
-            header = next(reader)
-            signal_name = []
-            signal_type = []
-            bitrate_ref = []
-            psnr_ref = []
-            for row in reader:
-                signal_name.append(row[0])
-                signal_type.append(row[1])
-                bitrate_temp = []
-                psnr_temp = []
-                for i in range(2, len(row),2):
-                    bitrate_temp.append(float(row[i]))
-                    psnr_temp.append(float(row[i+1]))
-                bitrate_ref.append(bitrate_temp)
-                psnr_ref.append(psnr_temp)
-            csvfile.close()
+            with open(os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY],config[REFERENCE_FILES_KEY][REFERENCE_BITRATEPSNR_KEY])) as csvfile:
+                reader = csv.reader(csvfile)
+                header = next(reader)
+                signal_name = []
+                signal_type = []
+                bitrate_ref = []
+                psnr_ref = []
+                for row in reader:
+                    signal_name.append(row[0])
+                    signal_type.append(row[1])
+                    bitrate_temp = []
+                    psnr_temp = []
+                    for i in range(2, len(row),2):
+                        bitrate_temp.append(float(row[i]))
+                        psnr_temp.append(float(row[i+1]))
+                    bitrate_ref.append(bitrate_temp)
+                    psnr_ref.append(psnr_temp)
+                csvfile.close()
             
-        dataWrite = []
-        for i in range(len(bitrate_ref)):
-            dataWrite.append([signal_name[i], signal_type[i],
-                              bjontegaard(bitrate_ref[i], psnr_ref[i], bitrate_bjontegaard[i], psnr_bjontegaard[i])[0],
-                              bjontegaard(bitrate_ref[i], psnr_ref[i], bitrate_bjontegaard[i], psnr_bjontegaard[i])[1]])
+            dataWrite = []
+            for i in range(len(bitrate_ref)):
+                dataWrite.append([signal_name[i], signal_type[i],
+                                  bjontegaard(bitrate_ref[i], psnr_ref[i], bitrate_bjontegaard[i], psnr_bjontegaard[i])[0],
+                                  bjontegaard(bitrate_ref[i], psnr_ref[i], bitrate_bjontegaard[i], psnr_bjontegaard[i])[1]])
 
-            plt.plot(bitrate_ref[i], psnr_ref[i])
-            plt.plot(bitrate_bjontegaard[i], psnr_bjontegaard[i])
-            plt.xlabel('bitrate')
-            plt.ylabel('psnr')
-            plt.legend(['Reference','Residual'])
-            plt.title(signal_name[i])
-            plt.savefig('Bjontegaard/Plots/'+signal_name[i]+'.png')
-            plt.close()
+                plt.plot(bitrate_ref[i], psnr_ref[i])
+                plt.plot(bitrate_bjontegaard[i], psnr_bjontegaard[i])
+                plt.xlabel('bitrate')
+                plt.ylabel('psnr')
+                plt.legend(['Reference','Residual'])
+                plt.title(signal_name[i])
+                plt.savefig('Bjontegaard/Plots/'+signal_name[i]+'.png')
+                plt.close()
 
-        with open('Bjontegaard/bjontegaard.csv', 'w+', newline='') as csvFile:
-            writer = csv.writer(csvFile)
-            writer.writerow(["File", "Type", "PSNR difference", "bitrate savings (%)"])
-            writer.writerows(dataWrite)
-            csvfile.close()
+            with open('Bjontegaard/bjontegaard.csv', 'w+', newline='') as csvFile:
+                writer = csv.writer(csvFile)
+                writer.writerow(["File", "Type", "PSNR difference", "bitrate savings (%)"])
+                writer.writerows(dataWrite)
+                csvfile.close()
 
-        print(datetime.now().strftime("\n[ %Hh : %Mm : %Ss ] => FINISH"))
-
+            print(datetime.now().strftime("\n[ %Hh : %Mm : %Ss ] => FINISH"))
+    if check_conformance:
+        for conformance_check_type in CONFORMANCE_TEST_SET_KEYS:
+            print("\n****** ",conformance_check_type," ******")
+            for conformance_check in config[CONFORMANCE_FILES_KEY][conformance_check_type]:
+                input_file_path = conformance_check[HAPTIC_FILE_PATH_KEY]
+                if MAIN_FOLDER_KEY in config[CONFORMANCE_FILES_KEY]:
+                    if(input_file_path == ""):
+                        continue
+                    input_file_path = os.path.join(config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
+                    if(not os.path.exists(input_file_path)):
+                        print(f"FILE NOT FOUND: {input_file_path}")
+                        continue
+                print("\n",conformance_check[NAME_KEY])
+                print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder on : {input_file_path}"))
+                subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hjif")
 
 if __name__ == "__main__":
     DEFAULT_OUTPUT = "./out"
@@ -365,11 +383,14 @@ if __name__ == "__main__":
     DEFAULT_DISABLE_WAVELET = False
     DEFAULT_DISABLE_VECTORIAL = False
     DEFAULT_BJONTEGAARD = False
+    DEFAULT_REFERENCE = False
+    DEFAULT_CONFORMANCE = False
     DEFAULT_FILTER_BY_TYPE = ""
 
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file", type=str, help="input config file in JSON format")
     parser.add_argument("CRM_version", type=str, help="version of the CRM format")
+    parser.add_argument("--reference", type=bool, default=DEFAULT_REFERENCE, help=f"Encode, decode and synthesize all reference files in the training, test and evaluation sets")
     parser.add_argument("--cutoff", type=float, default=DEFAULT_CUTOFF_FREQUENCY, help="Cutoff frequency. Default is 72.5")
     parser.add_argument("-o", "--output", type=str, default=DEFAULT_OUTPUT, help=f"output folder (default is `{DEFAULT_OUTPUT}`)")
     parser.add_argument("-b", "--bitrates", type=check_positive, nargs='+', default=DEFAULT_BITRATES, help=f"bitrates used for the encoding (default is `[2, 16, 64]`)")
@@ -378,10 +399,12 @@ if __name__ == "__main__":
     parser.add_argument("--disable_wavelet", type=bool, default=DEFAULT_DISABLE_WAVELET, help=f"Desables wavelet encoding")
     parser.add_argument("--disable_vectorial", type=bool, default=DEFAULT_DISABLE_VECTORIAL, help=f"Desables wavelet encoding")
     parser.add_argument("--bjontegaard", type=bool, default=DEFAULT_BJONTEGAARD, help=f"Calculates Bjontegaard's metrics and visualy display the difference")
+    parser.add_argument("--conformance", type=bool, default=DEFAULT_CONFORMANCE, help=f"Check conformance outputs on a conformance test set")
     args = parser.parse_args()
 
     config_file = args.config_file
     CRM_version = args.CRM_version
+    reference_evaluation = args.reference
     cutoff = args.cutoff
     disable_wavelet = args.disable_wavelet
     disable_vectorial = args.disable_vectorial
@@ -391,6 +414,7 @@ if __name__ == "__main__":
     padding = args.padding
     filter_by_type = args.filter_by_type
     compute_bjontegaard = args.bjontegaard
+    check_conformance = args.conformance
 
     assert not config_file.isspace(), "config_file should be provided"
     assert os.path.isfile(config_file), "config_file should be a file"
