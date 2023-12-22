@@ -63,6 +63,7 @@ public:
   static auto loadBands(const rapidjson::Value &jsonBands, types::Channel &channel) -> bool;
   static auto loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool;
   static auto loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool;
+  static auto loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect &effect) -> bool;
   static auto loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool;
   static auto loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic) -> bool;
 

@@ -463,6 +463,9 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
+    if (jsonEffect.HasMember("bitstream")) {
+      loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["bitstream"], effect);
+    }
 
     band.addEffect(effect);
   }
@@ -607,6 +610,15 @@ auto IOJson::loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect 
   return true;
 }
 
+auto IOJson::loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect &effect) -> bool {
+  const auto *const stream = jsonBitstream.GetString();
+  auto length = jsonBitstream.GetStringLength();
+  auto effectStream = effect.getWaveletBitstream();
+  std::string temp(stream, length);
+  std::copy(temp.begin(), temp.end(), std::back_inserter(effectStream));
+  return true;
+}
+
 auto IOJson::loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool {
   if (!(jsonVector.IsObject() && jsonVector.HasMember("X") && jsonVector["X"].IsInt() &&
         jsonVector.HasMember("Y") && jsonVector["Y"].IsInt() && jsonVector.HasMember("Z") &&
@@ -742,6 +754,7 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jso
           rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
           jsonTree.GetAllocator());
     }
+    // TODO: switch to reading bitstream for wavelet
     auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
     auto numKeyframes = effect.getKeyframesSize();
     for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
@@ -908,28 +921,36 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
             rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
                              jsonTree.GetAllocator()),
             jsonTree.GetAllocator());
-        auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
-        auto numKeyframes = effect.getKeyframesSize();
-        for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
-          const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
-          auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
-          if (keyframe.getRelativePosition().has_value()) {
-            jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
-                                   jsonTree.GetAllocator());
+        if (band.getBandType() == types::BandType::WaveletWave) {
+          auto stream = effect.getWaveletBitstream();
+          std::string streamString(stream.begin(), stream.end());
+          jsonEffect.AddMember("bitstream",
+                               rapidjson::Value(streamString.c_str(), streamString.length()),
+                               jsonTree.GetAllocator());
+        } else {
+          auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
+          auto numKeyframes = effect.getKeyframesSize();
+          for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
+            const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
+            auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
+            if (keyframe.getRelativePosition().has_value()) {
+              jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
+                                     jsonTree.GetAllocator());
+            }
+            if (keyframe.getAmplitudeModulation().has_value()) {
+              jsonKeyframe.AddMember("amplitude_modulation",
+                                     keyframe.getAmplitudeModulation().value(),
+                                     jsonTree.GetAllocator());
+            }
+            if (keyframe.getFrequencyModulation().has_value()) {
+              jsonKeyframe.AddMember("frequency_modulation",
+                                     keyframe.getFrequencyModulation().value(),
+                                     jsonTree.GetAllocator());
+            }
+            jsonKeyframes.PushBack(jsonKeyframe, jsonTree.GetAllocator());
           }
-          if (keyframe.getAmplitudeModulation().has_value()) {
-            jsonKeyframe.AddMember("amplitude_modulation",
-                                   keyframe.getAmplitudeModulation().value(),
-                                   jsonTree.GetAllocator());
-          }
-          if (keyframe.getFrequencyModulation().has_value()) {
-            jsonKeyframe.AddMember("frequency_modulation",
-                                   keyframe.getFrequencyModulation().value(),
-                                   jsonTree.GetAllocator());
-          }
-          jsonKeyframes.PushBack(jsonKeyframe, jsonTree.GetAllocator());
+          jsonEffect.AddMember("keyframes", jsonKeyframes, jsonTree.GetAllocator());
         }
-        jsonEffect.AddMember("keyframes", jsonKeyframes, jsonTree.GetAllocator());
       }
       jsonEffects.PushBack(jsonEffect, jsonTree.GetAllocator());
     }
