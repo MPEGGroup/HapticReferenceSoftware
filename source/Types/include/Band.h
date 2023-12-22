@@ -55,12 +55,19 @@ public:
       , upperFrequencyLimit(newUpperFrequencyLimit)
       , effects({}){};
 
+  explicit Band(BandType newBandType, int newLowerFrequencyLimit, int newUpperFrequencyLimit)
+      : bandType(newBandType)
+      , lowerFrequencyLimit(newLowerFrequencyLimit)
+      , upperFrequencyLimit(newUpperFrequencyLimit)
+      , effects({}){};
+
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
   [[nodiscard]] auto getCurveTypeOrDefault() const -> CurveType;
   [[nodiscard]] auto getCurveType() const -> std::optional<CurveType>;
   auto setCurveType(CurveType newCurveType) -> void;
-  [[nodiscard]] auto getBlockLength() const -> double;
+  [[nodiscard]] auto getBlockLengthOrDefault() const -> double;
+  [[nodiscard]] auto getBlockLength() const -> std::optional<double>;
   auto setBlockLength(double newBlockLength) -> void;
   [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
   auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
@@ -77,8 +84,8 @@ public:
   auto EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
       -> std::vector<double>;
   auto getBandTimeLength(unsigned int timescale) -> double;
-  [[nodiscard]] auto getTimescale() const -> int;
-  auto setTimescale(int newTimescale) -> void;
+  //[[nodiscard]] auto getTimescale() const -> int;
+  //auto setTimescale(int newTimescale) -> void;
 
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
@@ -86,16 +93,17 @@ private:
   [[nodiscard]] auto static getTransientDuration(unsigned int timescale)
       -> double;
   static constexpr CurveType DEFAULT_CURVE_TYPE = CurveType::Unknown;
+  static constexpr double DEFAULT_BLOCK_LENGTH = 0;
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit, unsigned int timescale) -> double;
 
   BandType bandType = BandType::VectorialWave;
   std::optional<CurveType> curveType;
-  double blockLength = 0;
+  std::optional<double> blockLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};
-  int timescale = TIMESCALE;
+  //int timescale = TIMESCALE;
 };
 } // namespace haptics::types
 

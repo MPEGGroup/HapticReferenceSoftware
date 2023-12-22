@@ -51,7 +51,14 @@ auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
-[[nodiscard]] auto Band::getBlockLength() const -> double { return blockLength; }
+[[nodiscard]] auto Band::getBlockLengthOrDefault() const -> double {
+    if (blockLength.has_value()) {
+        return blockLength.value();
+    }
+    return DEFAULT_BLOCK_LENGTH;
+}
+
+[[nodiscard]] auto Band::getBlockLength() const -> std::optional<double> { return blockLength; }
 
 auto Band::setBlockLength(double newBlockLength) -> void { blockLength = newBlockLength; }
 
@@ -251,9 +258,9 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
                                                   Band::getTransientDuration(timescale));
 }
 
-[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
+//[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
 
-auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
+//auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
 
 [[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
   return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);

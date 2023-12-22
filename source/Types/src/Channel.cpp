@@ -87,11 +87,15 @@ auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) ->
     return false;
   }
   bands[index].setBandType(newBand.getBandType());
-  bands[index].setCurveType(newBand.getCurveTypeOrDefault());
-  bands[index].setBlockLength(newBand.getBlockLength());
+  if (bands[index].getBandType() == BandType::Curve) {
+    bands[index].setCurveType(newBand.getCurveTypeOrDefault());
+  }
+  if (bands[index].getBandType() == BandType::WaveletWave) {
+    bands[index].setBlockLength(newBand.getBlockLengthOrDefault());
+  }
   bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
   bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
-  bands[index].setTimescale(newBand.getTimescale());
+  //bands[index].setTimescale(newBand.getTimescale());
   return true;
 }
 
