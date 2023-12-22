@@ -109,10 +109,10 @@ TEST_CASE("haptics::encoder::WaveletEncoder,2") {
     double max = WaveletEncoder::findMax(data2);
     CHECK(max == positive);
 
-    quantMode mode{0, FRACTIONBITS_0};
+    quantMode mode{0, FRACTIONBITS_0, 0};
     double quant = WaveletEncoder::maxQuant(unquantized, mode);
     CHECK(fabs(quant - quantized) < prec_comparison);
-    quantMode mode2{3, 4};
+    quantMode mode2{3, 4, 0};
     quant = WaveletEncoder::maxQuant(unquantized + 1, mode2);
     CHECK(quant == quantized + 1);
 
