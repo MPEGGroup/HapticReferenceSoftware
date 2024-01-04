@@ -606,13 +606,18 @@
         "expected_output": ""
       },
       {
-        "name": "Avatar: lod negative",
-        "haptic_file_path": "",
+        "name": "Avatar: id equals zero",
+        "haptic_file_path": "SchemaConformance\\avatar-id-zero.hjif",
         "expected_output": ""
       },
       {
-        "name": "Avatar: type negative",
-        "haptic_file_path": "",
+        "name": "Avatar: lod negative",
+        "haptic_file_path": "SchemaConformance\\avatar-lod-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: type invalid",
+        "haptic_file_path": "SchemaConformance\\avatar-type-invalid.hjif",
         "expected_output": ""
       },
       {
@@ -626,93 +631,103 @@
         "expected_output": ""
       },
       {
+        "name": "Perception: priority negative",
+        "haptic_file_path": "SchemaConformance\\perception-priority-negative.hjif",
+        "expected_output": ""
+      },
+      {
         "name": "Perception: avatar id negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\perception-avatar-id-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Sync: timestamp negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\sync-timestamp-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Sync: timescale negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\sync-timescale-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Sync: timescale zero",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\sync-timescale-zero.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: id negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-id-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Reference Device: id equals zero",
+        "haptic_file_path": "SchemaConformance\\refDevice-id-zero.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: body_part_mask negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-body_part_mask-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: body_part_mask too large",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-body_part_mask-too_large.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: minimum_frequency negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-minimum_frequency-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: maximum_frequency negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-maximum_frequency-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: resonance_frequency negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-resonance_frequency-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: maximum_amplitude negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-maximum_amplitude-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: impedance negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-impedance-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: maximum_voltage negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-maximum_voltage-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: maximum_current negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-maximum_current-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: maximum_displacement negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-maximum_displacement-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: weight negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-weight-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: size negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-size-negative.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: invalid type",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\refDevice-type-invalid.hjif",
         "expected_output": ""
       },
       {
@@ -721,8 +736,13 @@
         "expected_output": ""
       },
       {
+        "name": "Channel: priority negative",
+        "haptic_file_path": "SchemaConformance\\channel-priority-negative.hjif",
+        "expected_output": ""
+      },
+      {
         "name": "Channel: reference_device_id negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\channel-reference_device_id-negative.hjif",
         "expected_output": ""
       },
       {
@@ -771,6 +791,11 @@
         "expected_output": ""
       },
       {
+        "name": "Band: priority negative",
+        "haptic_file_path": "SchemaConformance\\band-priority-negative.hjif",
+        "expected_output": ""
+      },
+      {
         "name": "Band: invalid curve_type",
         "haptic_file_path": "SchemaConformance\\band-curve_type-invalid_curve_type.hjif",
         "expected_output": ""
@@ -807,7 +832,7 @@
       },
       {
         "name": "Effect: id negative",
-        "haptic_file_path": "",
+        "haptic_file_path": "SchemaConformance\\effect-id-negative.hjif",
         "expected_output": ""
       },
       {
@@ -832,7 +857,7 @@
       },
       {
         "name": "Effect: invalid base_signal",
-        "haptic_file_path": "SchemaConformance\\effect-base_signal-invalid_base_signal",
+        "haptic_file_path": "SchemaConformance\\effect-base_signal-invalid_base_signal.hjif",
         "expected_output": ""
       },
       {
