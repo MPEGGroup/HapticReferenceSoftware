@@ -66,9 +66,9 @@ public:
   [[nodiscard]] auto getCurveTypeOrDefault() const -> CurveType;
   [[nodiscard]] auto getCurveType() const -> std::optional<CurveType>;
   auto setCurveType(CurveType newCurveType) -> void;
-  [[nodiscard]] auto getBlockLengthOrDefault() const -> double;
-  [[nodiscard]] auto getBlockLength() const -> std::optional<double>;
-  auto setBlockLength(double newBlockLength) -> void;
+  [[nodiscard]] auto getBlockLengthOrDefault() const -> int;
+  [[nodiscard]] auto getBlockLength() const -> std::optional<int>;
+  auto setBlockLength(int newBlockLength) -> void;
   [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
   auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
   [[nodiscard]] auto getLowerFrequencyLimit() const -> int;
@@ -93,13 +93,13 @@ private:
   [[nodiscard]] auto static getTransientDuration(unsigned int timescale)
       -> double;
   static constexpr CurveType DEFAULT_CURVE_TYPE = CurveType::Unknown;
-  static constexpr double DEFAULT_BLOCK_LENGTH = 0;
+  static constexpr int DEFAULT_BLOCK_LENGTH = 0;
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
                         int highFrequencyLimit, unsigned int timescale) -> double;
 
   BandType bandType = BandType::VectorialWave;
   std::optional<CurveType> curveType;
-  std::optional<double> blockLength = 0;
+  std::optional<int> blockLength = 0;
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};

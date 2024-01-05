@@ -51,16 +51,16 @@ auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
-[[nodiscard]] auto Band::getBlockLengthOrDefault() const -> double {
+[[nodiscard]] auto Band::getBlockLengthOrDefault() const -> int {
     if (blockLength.has_value()) {
         return blockLength.value();
     }
     return DEFAULT_BLOCK_LENGTH;
 }
 
-[[nodiscard]] auto Band::getBlockLength() const -> std::optional<double> { return blockLength; }
+[[nodiscard]] auto Band::getBlockLength() const -> std::optional<int> { return blockLength; }
 
-auto Band::setBlockLength(double newBlockLength) -> void { blockLength = newBlockLength; }
+auto Band::setBlockLength(int newBlockLength) -> void { blockLength = newBlockLength; }
 
 [[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int { return upperFrequencyLimit; }
 

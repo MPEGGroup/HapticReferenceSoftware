@@ -793,7 +793,7 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
       continue;
     }
     if (jsonBand["band_type"] == "WaveletWave" && (!jsonBand.HasMember("block_length") ||
-        !jsonBand["block_length"].IsDouble())) {
+        !jsonBand["block_length"].IsInt())) {
       std::cerr << "Missing or invalid block length" << std::endl;
       continue;
     }
@@ -822,8 +822,8 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
         types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
         band.setCurveType(curveType);
     }
-    if (bandType==types::BandType::WaveletWave && jsonBand.HasMember("block_length") && jsonBand["block_length"].IsDouble()) {
-        double blockLength = jsonBand["block_length"].GetDouble();
+    if (bandType==types::BandType::WaveletWave && jsonBand.HasMember("block_length") && jsonBand["block_length"].IsInt()) {
+        int blockLength = jsonBand["block_length"].GetInt();
         band.setBlockLength(blockLength);
     }
     loadingSuccess = loadingSuccess && loadEffects(jsonBand["effects"], band);
@@ -1351,10 +1351,10 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
             rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
             jsonTree.GetAllocator());
       }
+      jsonEffect.AddMember("phase", effect.getPhase(), jsonTree.GetAllocator());
       if (effect.getEffectType() == types::EffectType::Reference) {
         jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());
       } else if (effect.getEffectType() == types::EffectType::Basis) {
-        jsonEffect.AddMember("phase", effect.getPhase(), jsonTree.GetAllocator());
         jsonEffect.AddMember(
             "base_signal",
             rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
