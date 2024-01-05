@@ -265,7 +265,7 @@ def main():
                         for current_bitrate in bitrates:
                             formatted_output_name = f"{my_effect[TYPE_KEY]}1-{testId}fvt_{CRM_version}_{my_effect[MODALITY_KEY]}_{current_bitrate}_{my_effect[NAME_KEY]}"
                             input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
-                            reference_file_path = my_effect[REFERENCE_FILE]
+                            reference_file_path = my_effect[REFERENCE_FILE_KEY]
                             if MAIN_FOLDER_KEY in config[REFERENCE_FILES_KEY]:
                                 input_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
                                 reference_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], reference_file_path)
@@ -360,20 +360,22 @@ def main():
 
             print(datetime.now().strftime("\n[ %Hh : %Mm : %Ss ] => FINISH"))
     if check_conformance:
+        with open(conformance_config_file, 'r') as conformance_file_stream:
+            conformance_config = json.load(conformance_file_stream)
         for conformance_check_type in CONFORMANCE_TEST_SET_KEYS:
             print("\n****** ",conformance_check_type," ******")
-            for conformance_check in config[CONFORMANCE_FILES_KEY][conformance_check_type]:
+            for conformance_check in conformance_config[CONFORMANCE_FILES_KEY][conformance_check_type]:
                 input_file_path = conformance_check[HAPTIC_FILE_PATH_KEY]
-                if MAIN_FOLDER_KEY in config[CONFORMANCE_FILES_KEY]:
+                if MAIN_FOLDER_KEY in conformance_config[CONFORMANCE_FILES_KEY]:
                     if(input_file_path == ""):
                         continue
-                    input_file_path = os.path.join(config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
+                    input_file_path = os.path.join(conformance_config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
                     if(not os.path.exists(input_file_path)):
                         print(f"FILE NOT FOUND: {input_file_path}")
                         continue
                 print("\n",conformance_check[NAME_KEY])
                 print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder on : {input_file_path}"))
-                subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hjif")
+                subprocess.run(f"{os.path.join(conformance_config[RM_INSTALL_DIR], conformance_config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hjif")
 
 if __name__ == "__main__":
     DEFAULT_OUTPUT = "./out"
@@ -383,8 +385,9 @@ if __name__ == "__main__":
     DEFAULT_DISABLE_WAVELET = False
     DEFAULT_DISABLE_VECTORIAL = False
     DEFAULT_BJONTEGAARD = False
-    DEFAULT_REFERENCE = False
+    DEFAULT_REFERENCE = True
     DEFAULT_CONFORMANCE = False
+    DEFAULT_CONFORMANCE_CONFIG = "conformance_config.json"
     DEFAULT_FILTER_BY_TYPE = ""
 
     parser = argparse.ArgumentParser()
@@ -400,6 +403,7 @@ if __name__ == "__main__":
     parser.add_argument("--disable_vectorial", type=bool, default=DEFAULT_DISABLE_VECTORIAL, help=f"Desables wavelet encoding")
     parser.add_argument("--bjontegaard", type=bool, default=DEFAULT_BJONTEGAARD, help=f"Calculates Bjontegaard's metrics and visualy display the difference")
     parser.add_argument("--conformance", type=bool, default=DEFAULT_CONFORMANCE, help=f"Check conformance outputs on a conformance test set")
+    parser.add_argument("--conformance_config", type=str, help=f"input config file for the conformance in JSON format")
     args = parser.parse_args()
 
     config_file = args.config_file
@@ -415,10 +419,17 @@ if __name__ == "__main__":
     filter_by_type = args.filter_by_type
     compute_bjontegaard = args.bjontegaard
     check_conformance = args.conformance
+    conformance_config_file = args.config_file
 
     assert not config_file.isspace(), "config_file should be provided"
     assert os.path.isfile(config_file), "config_file should be a file"
     assert (os.path.splitext(config_file)[1] == ".json"), "config_file should be a json file"
     assert os.path.exists(config_file), "config_file should be an existing file"
+    
+    if(check_conformance):
+        assert not conformance_config_file.isspace(), "config_file should be provided"
+        assert os.path.isfile(conformance_config_file), "config_file should be a file"
+        assert (os.path.splitext(conformance_config_file)[1] == ".json"), "config_file should be a json file"
+        assert os.path.exists(conformance_config_file), "config_file should be an existing file"
 
     main()
