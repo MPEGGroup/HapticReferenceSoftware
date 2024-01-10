@@ -435,10 +435,12 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
     auto targets = channel.getActuatorTarget();
       if (targets.has_value()) {
         for(auto target:targets.value()) {
-        if (target.X < 0 || target.X > resX || target.Y < 0 || target.Y > resY || target.Z < 0 ||
-            target.Z > resZ)
-            std::cerr << "One actuator target is out of the actuator resolution range in channel " << id << " of perception "
-                      << perception.getId() << std::endl;
+          if (target.X < 0 || target.X > resX || target.Y < 0 || target.Y > resY || target.Z < 0 ||
+            target.Z > resZ) {
+            std::cerr << "One actuator target is out of the actuator resolution range in channel "
+                      << id << " of perception " << perception.getId() << "." << std::endl;
+            conformant = false;
+          }
         }
       }
     

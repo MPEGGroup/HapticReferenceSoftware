@@ -53,6 +53,7 @@ MODALITY_KEY = "modality"
 EXTENSION_KEY = "extension"
 NAME_KEY = "name"
 HAPTIC_FILE_PATH_KEY = "haptic_file_path"
+EXPECTED_OUTPUT_KEY = "expected_output"
 REFERENCE_FILE_KEY = "reference_file"
 MAIN_FOLDER_KEY = "main_folder"
 CONFORMANCE_FILES_KEY = "conformance_files"
@@ -60,92 +61,6 @@ CONFORMANCE_TEST_SET_KEYS = [
     "schemas_checks",
     "semantic_checks"
 ]
-
-# implements PSNR metric (verified)
-def psnr(x, y):
-    mse = (np.square(np.subtract(x, y))).mean()
-    if mse == 0:
-        return 100
-    # xmax and xmin values are respectively the maximum and minimum 
-    # possible values of the signal. Here the haptic signal is normalized 
-    # between -1 and 1
-    xmax = 1
-    xmin = -1
-    max_val = xmax - xmin
-    val = 10 * np.log10((max_val ** 2) / mse)
-    return val
-
-
-def psnr_two_files(original, decompressed, autopad=False):
-    # read data
-    data_original, sample_rate_original = read(original)
-    data_decompressed, sample_rate_decompressed = read(decompressed)
-    
-    # check samplerate
-    if(sample_rate_original != sample_rate_decompressed):
-        sys.exit("[!] The sample rates of the input files are not the same.")
-
-    # check number of channels
-    num_chan_original = 1
-    num_chan_decompressed = 1
-
-    if len(data_original.shape) > 1:
-        num_chan_original = data_original.shape[1]
-
-    if len(data_decompressed.shape) > 1:
-        num_chan_decompressed = data_decompressed.shape[1]
-
-    if(num_chan_decompressed != num_chan_original):
-        sys.exit("[!] The number of channels is not the same.")
-
-    # check file length + channels
-    if(data_original.shape != data_decompressed.shape):
-        # zero-pad signals to the right (start is assumed to be aligned!)
-        if autopad and (data_original.shape[0] != data_decompressed.shape[0]):
-            padLen = data_decompressed.shape[0] - data_original.shape[0]
-            if num_chan_original == 1:
-                zPad = np.zeros( abs(padLen) )
-            else:
-                s = (abs(padLen), num_chan_original)
-                zPad = np.zeros(s)
-            
-            # if the sample length difference is negative, the decompressed file is shorter
-            if padLen < 0:
-                # zero-pads the decompressed file
-                data_decompressed = np.concatenate((data_decompressed, zPad))
-            
-            # if the sample length difference is positive, the original file is shorter
-            elif padLen > 0:
-                # zero-pads the original file
-                data_original = np.concatenate((data_original, zPad))
-            
-        else:
-            sys.exit("[!] The files have different sizes. Automatic padding is off. Exiting.")
-        
-    # calculate psnr (dB)
-    # cast to python float to enable serialization
-    return float(psnr(data_original, data_decompressed))
-
-
-# bitrate kbps
-def compute_bitrate(wav_file, encoded_file):
-    data_original, sample_rate_original = read(wav_file)
-    duration_s = len(data_original) / sample_rate_original
-    num_channels = 1
-    if len(data_original.shape) > 1:
-        num_channels = data_original.shape[1]
-    with open(encoded_file, 'rb') as f:
-        bit_size = len(f.read()) * 8
-    bit_rate = bit_size / duration_s / num_channels / 1000.0
-    return bit_rate
-
-
-def check_positive(value):
-    ivalue = int(value)
-    if ivalue <= 0:
-        raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
-    return ivalue
-
 
 def checkSoftwarePath(config: dict):
     def _check_software(dir_key: str,path_key: str):
@@ -161,18 +76,6 @@ def checkSoftwarePath(config: dict):
     _check_software(RM_INSTALL_DIR, SYNTHESIZER_PATH_KEY)
 
 
-def generateOutputFolderTree(folder: str):
-    os.makedirs(folder)
-    for testType in ["Test", "Training", "Evaluation"]:
-        for testId in range(1, 4):
-            test_directory = os.path.join(folder, rf"{testType}1_{testId}")
-            os.mkdir(test_directory)
-            os.mkdir(os.path.join(test_directory, rf"HMPG"))
-            os.mkdir(os.path.join(test_directory, rf"HJIF"))
-            os.mkdir(os.path.join(test_directory, rf"WAV_nopad"))
-            os.mkdir(os.path.join(test_directory, rf"WAV_pad"))
-
-
 def main():
     print(datetime.now().strftime("[ %Hh : %Mm : %Ss ] => START\n"))
     with open(config_file, 'r') as file_stream:
@@ -181,23 +84,50 @@ def main():
     checkSoftwarePath(config)
     if os.path.exists(output_folder):
         shutil.rmtree(output_folder)
-    generateOutputFolderTree(output_folder)
 
 
+    #text_file = open("testlog.txt", "w")
+    nb_tests = 0
+    nb_success = 0
+    check_fails = []
     for conformance_check_type in CONFORMANCE_TEST_SET_KEYS:
         print("\n****** ",conformance_check_type," ******")
+        test_number = 1;
+        #text_file.write("****** "+conformance_check_type+" ******\n")
         for conformance_check in config[CONFORMANCE_FILES_KEY][conformance_check_type]:
             input_file_path = conformance_check[HAPTIC_FILE_PATH_KEY]
             if MAIN_FOLDER_KEY in config[CONFORMANCE_FILES_KEY]:
                 if(input_file_path == ""):
+                    print("Test #",test_number,":\tTO DO\t|\t",conformance_check[NAME_KEY])
+                    nb_tests+=1
+                    test_number+=1
                     continue
                 input_file_path = os.path.join(config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
                 if(not os.path.exists(input_file_path)):
                     print(f"FILE NOT FOUND: {input_file_path}")
                     continue
-            print("\n",conformance_check[NAME_KEY])
-            print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder on : {input_file_path}"))
-            subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hjif")
+            #print("\n",conformance_check[NAME_KEY])
+            #print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder on : {input_file_path}"))
+            result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hjif",shell=True, capture_output=True, text=True)
+            valid = result.stderr.splitlines()==conformance_check[EXPECTED_OUTPUT_KEY].splitlines()
+            if(not valid):
+                check_fails.append("*********\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
+                check_fails.append("- Output : \n"+result.stderr)
+                check_fails.append("- Expected output: \n"+conformance_check[EXPECTED_OUTPUT_KEY])
+            print("Test #",test_number,":\t",valid,"\t|\t",conformance_check[NAME_KEY])
+            nb_tests+=1
+            test_number+=1
+            if(valid):
+                nb_success+=1
+            #text_file.write('\\n'.join(result.stderr.replace("\\","\\\\").splitlines())+"\n\n")
+    #text_file.close()
+    print("####### Conformance Results")
+    if(nb_success == nb_tests):
+        print("SUCCESS: ",nb_success,"/",nb_tests," valid tests")
+    else:
+        print("FAIL: ",nb_success,"/",nb_tests," valid tests")
+        print("The following test failed:")
+        print("\n".join(check_fails))
 
 if __name__ == "__main__":
     DEFAULT_FILTER_BY_TYPE = ""
