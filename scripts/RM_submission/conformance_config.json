@@ -13,6 +13,21 @@
         "expected_output": ""
       },
       {
+        "name": "Haptic: invalid version",
+        "haptic_file_path": "SchemaConformance\\haptic-version-invalid_version.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: version invalid amendment",
+        "haptic_file_path": "SchemaConformance\\haptic-version-invalid_amendment.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: version invalid year",
+        "haptic_file_path": "SchemaConformance\\haptic-version-invalid_year.hjif",
+        "expected_output": ""
+      },
+	  {
         "name": "Haptic: timescale negative",
         "haptic_file_path": "SchemaConformance\\haptic-timescale-negative.hjif",
         "expected_output": ""
@@ -20,6 +35,11 @@
       {
         "name": "Haptic: timescale zero",
         "haptic_file_path": "SchemaConformance\\haptic-timescale-zero.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: no perceptions",
+        "haptic_file_path": "SchemaConformance\\haptic-perceptions-no_perception.hjif",
         "expected_output": ""
       },
       {
@@ -43,13 +63,13 @@
         "expected_output": ""
       },
       {
-        "name": "Perception: invalid perception modality",
-        "haptic_file_path": "SchemaConformance\\perception-perception_modality-invalid_perception_modality.hjif",
+        "name": "Perception: id negative",
+        "haptic_file_path": "SchemaConformance\\perception-id-negative.hjif",
         "expected_output": ""
       },
       {
-        "name": "Perception: id negative",
-        "haptic_file_path": "SchemaConformance\\perception-id-negative.hjif",
+        "name": "Perception: invalid perception modality",
+        "haptic_file_path": "SchemaConformance\\perception-perception_modality-invalid_perception_modality.hjif",
         "expected_output": ""
       },
       {
@@ -60,6 +80,11 @@
       {
         "name": "Perception: avatar id negative",
         "haptic_file_path": "SchemaConformance\\perception-avatar-id-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: no channel",
+        "haptic_file_path": "SchemaConformance\\perception-channels-no_channels.hjif",
         "expected_output": ""
       },
       {
@@ -183,18 +208,13 @@
         "expected_output": ""
       },
       {
-        "name": "Channel: actuator_resolution negative",
-        "haptic_file_path": "",
+        "name": "Channel: body_part_mask too large",
+        "haptic_file_path": "SchemaConformance\\channel-body_part_mask-too_large.hjif",
         "expected_output": ""
       },
       {
-        "name": "Channel: actuator_resolution zero",
-        "haptic_file_path": "",
-        "expected_output": ""
-      },
-      {
-        "name": "Channel: actuator_target negative",
-        "haptic_file_path": "",
+        "name": "Channel: invalid body_part_target",
+        "haptic_file_path": "SchemaConformance\\channel-body_part_target-invalid_body_part_target.hjif",
         "expected_output": ""
       },
       {
@@ -205,6 +225,21 @@
       {
         "name": "Channel: sample_count negative",
         "haptic_file_path": "SchemaConformance\\channel-sample_count-negative.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Vector: X value out of range",
+        "haptic_file_path": "SchemaConformance\\vector-X-out_of_range.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Vector: Y value out of range",
+        "haptic_file_path": "SchemaConformance\\vector-Y-out_of_range.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Vector: Z value out of range",
+        "haptic_file_path": "SchemaConformance\\vector-Z-out_of_range.hjif",
         "expected_output": ""
       },
       {
@@ -220,11 +255,6 @@
       {
         "name": "Band: invalid curve_type",
         "haptic_file_path": "SchemaConformance\\band-curve_type-invalid_curve_type.hjif",
-        "expected_output": ""
-      },
-      {
-        "name": "Band: curve_type defined for WaveletWave band_type",
-        "haptic_file_path": "",
         "expected_output": ""
       },
       {
@@ -283,11 +313,6 @@
         "expected_output": ""
       },
       {
-        "name": "Keyframe: relative_position negative",
-        "haptic_file_path": "SchemaConformance\\keyframe-relative_position-negative.hjif",
-        "expected_output": ""
-      },
-      {
         "name": "Keyframe: amplitude_modulation too_small",
         "haptic_file_path": "SchemaConformance\\keyframe-amplitude_modulation-too_small.hjif",
         "expected_output": ""
@@ -306,27 +331,22 @@
         "name": "Keyframe: frequency_modulation too large",
         "haptic_file_path": "SchemaConformance\\keyframe-frequency_modulation-too_large.hjif",
         "expected_output": ""
+      },
+      {
+        "name": "Keyframe: relative_position negative",
+        "haptic_file_path": "SchemaConformance\\keyframe-relative_position-negative.hjif",
+        "expected_output": ""
       }
     ],
     "semantic_checks": [
       {
-        "name": "Haptic: invalid version",
-        "haptic_file_path": "SemanticConformance\\haptic-version-invalid_version.hjif",
-        "expected_output": ""
-      },
-      {
-        "name": "Haptic: version invalid amendment",
-        "haptic_file_path": "SemanticConformance\\haptic-version-invalid_amendment.hjif",
-        "expected_output": ""
-      },
-      {
-        "name": "Haptic: version invalid year",
-        "haptic_file_path": "SemanticConformance\\haptic-version-invalid_year.hjif",
-        "expected_output": ""
-      },
-      {
         "name": "Haptic: version year too small",
         "haptic_file_path": "SemanticConformance\\haptic-version-year_too_small.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: version amendement equals zero",
+        "haptic_file_path": "SemanticConformance\\haptic-version-amendement_equals_zero.hjif",
         "expected_output": ""
       },
       {
@@ -345,67 +365,92 @@
         "expected_output": ""
       },
       {
-        "name": "Haptic: too many perceptions",
-        "haptic_file_path": "",
+        "name": "Haptic: invalid timescale",
+        "haptic_file_path": "SemanticConformance\\haptic-timescale-invalid_timescale.hjif",
         "expected_output": ""
       },
       {
         "name": "Avatar: duplicate id",
-        "haptic_file_path": "SemanticConformance\\avatar-id-duplicate-id.hjif",
+        "haptic_file_path": "SemanticConformance\\avatar-id-duplicate_id.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Avatar: uri invalid",
+        "haptic_file_path": "SemanticConformance\\avatar-mesh-invalid_uri.hjif",
         "expected_output": ""
       },
       {
         "name": "Perception: id duplicate",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\perception-id-duplicate_id.hjif",
         "expected_output": ""
       },
       {
-        "name": "Perception: avatar id non existent",
-        "haptic_file_path": "",
+        "name": "Perception: non supported perception modality",
+        "haptic_file_path": "SemanticConformance\\perception-modality-non_supported_perception_modality.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Perception: avatar id non existant",
+        "haptic_file_path": "SemanticConformance\\perception-avatar_id-non_existant_id.hjif",
         "expected_output": ""
       },
       {
         "name": "Perception: too many channels",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\perception-channels-too_many_channels.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: id duplicate",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\refDevice-id-duplicate.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: maximum_frequency less than minimum_frequency",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\refDevice-maximum_frequency-maxi_freq_smaller_than_min_freq.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: resonance_frequency less than minimum_frequency",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\refDevice-resonance_frequency-res_freq_smaller_than_min_freq.hjif",
         "expected_output": ""
       },
       {
         "name": "Reference Device: resonance_frequency greater_than_maximum_frequency",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\refDevice-resonance_frequency-res_freq_greater_than_max_freq.hjif",
         "expected_output": ""
       },
       {
         "name": "Channel: id duplicate",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\channel-channel_id-duplicate.hjif",
         "expected_output": ""
       },
       {
         "name": "Channel: reference_device_id non_existent",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\channel-reference_device-non_existent.hjif",
         "expected_output": ""
       },
       {
-        "name": "Channel: invalid body_part_target",
-        "haptic_file_path": "",
+        "name": "Channel: actuator_resolution negative",
+        "haptic_file_path": "SemanticConformance\\channel-actuator_resolution-contains_negative_value.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: actuator_target out of resolution range",
+        "haptic_file_path": "SemanticConformance\\channel-actuator_target-out_of_resolution_range.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Channel: too many bands",
+        "haptic_file_path": "SemanticConformance\\channel-bands-too_many_bands.hjif",
         "expected_output": ""
       },
       {
         "name": "Channel: direction non unit_vector",
+        "haptic_file_path": "SemanticConformance\\channel-direction-non_unit_vector.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Band: curve_type defined for WaveletWave band_type",
         "haptic_file_path": "",
         "expected_output": ""
       },
@@ -421,17 +466,22 @@
       },
       {
         "name": "Effect: id duplicate",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\effect-id-duplicate.hjif",
         "expected_output": ""
       },
       {
         "name": "Effect: id non existent",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\effect-id-non_existent.hjif",
+        "expected_output": ""
+      },
+      {
+        "name": "Effect: effect_type not supported",
+        "haptic_file_path": "SemanticConformance\\effect-effect_type-effect_type_not_supported.hjif",
         "expected_output": ""
       },
       {
         "name": "Effect: invalid sematic_keywords",
-        "haptic_file_path": "",
+        "haptic_file_path": "SemanticConformance\\effect-semantic-invalid_semantic_keyword.hjif",
         "expected_output": ""
       }
     ],
@@ -448,6 +498,11 @@
       },
       {
         "name": "Haptic: too many avatars",
+        "haptic_file_path": "",
+        "expected_output": ""
+      },
+      {
+        "name": "Haptic: too many perceptions",
         "haptic_file_path": "",
         "expected_output": ""
       },

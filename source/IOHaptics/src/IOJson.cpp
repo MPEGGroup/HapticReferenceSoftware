@@ -79,6 +79,18 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
 }
 
 
+auto IOJson::URICheck(const std::string &uri, bool log) -> bool {
+  const std::regex txt_regex(R"(^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
+  std::smatch pieces_match;
+  if (!regex_search(uri, pieces_match, txt_regex) || pieces_match[0] == "") {
+    if (log) {
+      std::cerr << "Invalid URI, the URI format shall conform to RFC3986." << std::endl;
+    }
+    return false;
+  }
+  return true;
+}
+
 auto IOJson::dateCheck(const std::string& date, bool log) -> bool {
   const std::regex txt_regex("[+-]?[0-9]{4}(-[01][0-9](-[0-3][0-9](T[0-2][0-9]:[0-5][0-9]:?([0-5][0-9](\.[0-9]+)?)?[+-][0-2][0-9]:[0-5][0-9]Z?)?)?)?");
   std::smatch pieces_match;
@@ -163,14 +175,15 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
       conformant = false;
     }
     else if (profile == "Simple Parametric" && timescale != 1000) {
-      std::cerr << "Invalid timescale. The simple parametric profile only support a value of 1000."
+      std::cerr << "Invalid timescale. The simple parametric profile only supports a value of 1000."
               << std::endl;
       conformant = false;
     }
     else if (profile == "Main" && timescale > 48000) {
     std::cerr
-        << "Invalid timescale. The main profile only support a value lower than or equal to 48000"
-        << std::endl;
+        << "Invalid timescale. The main profile only supports a value lower than or equal to 48000"
+                << std::endl;
+      conformant = false;
     }
   }
 
@@ -202,6 +215,12 @@ auto IOJson::semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptic
     std::cerr << "Invalid avatar id. Id " << id << " is not unique." << std::endl;
     conformant = false;
   }
+
+  auto mesh = avatar.getMesh();
+  if (mesh.has_value()) {
+    conformant &= URICheck(mesh.value(), true);
+  }
+
   return conformant;
 }
 
@@ -230,7 +249,7 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
           modality == haptics::types::PerceptionModality::VibrotactileTexture)) {
 
       std::cerr << "The perception modality "
-                << haptics::types::perceptionModalityToString.at(modality) << "of perception " << id
+                << haptics::types::perceptionModalityToString.at(modality) << " of perception " << id
                 << " is not allowed for the level 1 of the Simple Parametric profile." << std::endl;
       conformant = false;
     }
@@ -305,6 +324,34 @@ auto IOJson::semanticConformanceCheckReferenceDevice(types::ReferenceDevice &ref
               << " is not unique." << std::endl;
     conformant = false;
   }
+
+  if (referenceDevice.getMinimumFrequency().has_value()) {
+    if (referenceDevice.getMaximumFrequency().has_value() &&
+        referenceDevice.getMaximumFrequency().value() <
+            referenceDevice.getMinimumFrequency().value()) {
+      conformant = false;
+      std::cerr << "Invalid reference device "<< id <<" for perception " << perception.getId() 
+                << ". The maximum frequency is smaller than the minimum frequency" << std::endl;
+    }
+    if (referenceDevice.getResonanceFrequency().has_value() &&
+        referenceDevice.getResonanceFrequency().value() <
+            referenceDevice.getMinimumFrequency().value()) {
+      conformant = false;
+      std::cerr << "Invalid reference device " << id << " for perception " << perception.getId()
+                << ". The resonance frequency is smaller than the minimum frequency" << std::endl;
+    }
+  }
+
+  if (referenceDevice.getMaximumFrequency().has_value()) {
+    if (referenceDevice.getResonanceFrequency().has_value() &&
+        referenceDevice.getResonanceFrequency().value() >
+            referenceDevice.getMaximumFrequency().value()) {
+      conformant = false;
+      std::cerr << "Invalid reference device " << id << " for perception " << perception.getId()
+                << ". The resonance frequency is greater than the maximum frequency" << std::endl;
+    }
+  }
+
   return conformant;
 }
 
@@ -341,12 +388,25 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
     }
   }
 
+  // check direction is unitary
+  auto dir = channel.getDirection();
+  if (dir.has_value()) {
+    auto x_norm = dir.value().X / 127.0f;
+    auto y_norm = dir.value().Y / 127.0f;
+    auto z_norm = dir.value().Z / 127.0f;
+    auto norm = std::sqrt(std::pow(x_norm, 2) + std::pow(y_norm, 2) + std::pow(z_norm, 2));
+    if (norm < 0.99 || norm > 1.01) {
+      std::cerr << "The direction in channel " << id << " of perception " << perception.getId() << " is not a unit vector." << std::endl;
+      conformant = false;
+    }
+  }
+
   // check the number of bands
   if (haptic.getLevel() == 1) {
     if (channel.getBandsSize() > 7) {
       std::cerr << "The number of bands in channel " << id << " of perception "
                 << perception.getId()
-                << " is too high. The level 1 only supports up to 128 bands per channel."
+                << " is too high. The level 1 only supports up to 7 bands per channel."
                 << std::endl;
       conformant = false;
     }
@@ -358,6 +418,34 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
                 << std::endl;
       conformant = false;
     }
+  }
+
+  // check actuator resolution
+  auto resolution = channel.getActuatorResolution();
+  if (resolution.has_value()) {
+    auto resX = resolution.value().X;
+    auto resY = resolution.value().Y;
+    auto resZ = resolution.value().Z;
+    if (resX < 0 || resolution.value().Y || resolution.value().Z) {
+        std::cerr << "The actuator resolution in channel " << id << " of perception "
+                  << perception.getId() << " is invalid. It contains a negative value."
+                  << std::endl;
+        conformant = false;
+      }
+    auto targets = channel.getActuatorTarget();
+      if (targets.has_value()) {
+        for(auto target:targets.value()) {
+        if (target.X < 0 || target.X > resX || target.Y < 0 || target.Y > resY || target.Z < 0 ||
+            target.Z > resZ)
+            std::cerr << "One actuator target is out of the actuator resolution range in channel " << id << " of perception "
+                      << perception.getId() << std::endl;
+        }
+      }
+    
+  } else if (channel.getActuatorTarget().has_value()) {
+    std::cerr << "The actuator resolution in channel " << id << " of perception "
+              << perception.getId() << " was not specified. The actuator target can not be defined." << std::endl;
+    conformant = false;
   }
 
   for (unsigned int i = 0; i < channel.getBandsSize(); i++) {
@@ -385,6 +473,12 @@ auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &cha
       conformant = false;
     }
   }
+  if (band.getUpperFrequencyLimit() < band.getLowerFrequencyLimit()) {
+    conformant = false;
+    std::cerr << "Invalid band in perception " << perception.getId()
+              << ". The upper limit frequency is smaller than the lower limit frequency" << std::endl;
+  }
+
 
   for (unsigned int i = 0; i < band.getEffectsSize(); i++) {
     conformant &=
@@ -402,6 +496,32 @@ auto IOJson::semanticConformanceCheckEffect(types::Effect &effect, types::Band &
     if (effect.getEffectType() == types::EffectType::Composite) {
       std::cerr << "The Simple Parametric profile does not support Composite Effect in channel "
                 << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
+      conformant = false;
+    }
+  }
+  if (effect.getEffectType() == types::EffectType::Reference) {
+    auto id = effect.getId();
+    bool inLibrary = false;
+    for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+      if (perception.getBasisEffectAt(i).getId() == id);
+      inLibrary = true;
+      break;
+    }
+    if (!inLibrary) {
+      std::cerr << "Effect id " << id << " of channel "
+                << channel.getId() << " of perception " << perception.getId() << " can't be found in the effect library." << std::endl;
+      conformant = false;
+    }
+  }
+
+  // check semantic
+  auto semantic = effect.getSemantic();
+  if (semantic.has_value()) {
+    if ((!perception.getEffectSemanticScheme().has_value() || perception.getEffectSemanticScheme().value() ==
+                   "urn:mpeg:mpegi:haptics:effectsemantic:2023") &&
+               types::stringToEffectSemantic.count(semantic.value()) == 0) {
+      std::cerr << "An effect in channel " << channel.getId()
+                << " of perception " << perception.getId() << " uses invalid semantic keywords." << std::endl;
       conformant = false;
     }
   }
@@ -512,7 +632,7 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
   loadingSuccess = loadingSuccess && loadSyncs(jsonTree["syncs"], haptic);
   if (!semanticConformanceCheckExperience(haptic)) {
-    std::cerr << "The HJIF input files is not conformant to the specification." << std::endl;
+    std::cerr << "The HJIF input file is not conformant to the specification." << std::endl;
     return false;
   }
   return loadingSuccess;
@@ -670,8 +790,8 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
 
     types::Effect effect(position, phase, baseSignal, effectType);
     effect.setId(effectId);
-    if (jsonEffect.HasMember("semantic") && jsonEffect["semantic"].IsString()) {
-      auto semantic = std::string(jsonEffect["semantic"].GetString());
+    if (jsonEffect.HasMember("semantic_keywords") && jsonEffect["semantic_keywords"].IsString()) {
+      auto semantic = std::string(jsonEffect["semantic_keywords"].GetString());
       effect.setSemantic(semantic);
     }
     if (jsonEffect.HasMember("keyframes")) {
@@ -886,8 +1006,8 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
     if (jsonEffect.HasMember("id") && jsonEffect["id"].IsInt()) {
       effect.setId(jsonEffect["id"].GetInt());
     }
-    if (jsonEffect.HasMember("semantic") && jsonEffect["semantic"].IsString()) {
-      auto semantic = std::string(jsonEffect["semantic"].GetString());
+    if (jsonEffect.HasMember("semantic_keywords") && jsonEffect["semantic_keywords"].IsString()) {
+      auto semantic = std::string(jsonEffect["semantic_keywords"].GetString());
       effect.setSemantic(semantic);
     }
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
@@ -1185,7 +1305,7 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jso
         jsonTree.GetAllocator());
     if (effect.getSemantic().has_value()) {
       jsonEffect.AddMember(
-          "semantic",
+          "semantic_keywords",
           rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
           jsonTree.GetAllocator());
     }
@@ -1347,7 +1467,7 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
       jsonEffect.AddMember("position", effect.getPosition(), jsonTree.GetAllocator());
       if (effect.getSemantic().has_value()) {
         jsonEffect.AddMember(
-            "semantic",
+            "semantic_keywords",
             rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
             jsonTree.GetAllocator());
       }
