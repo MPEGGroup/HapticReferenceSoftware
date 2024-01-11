@@ -148,6 +148,12 @@ TEST_CASE("haptics::spiht::Spiht_Enc, wavmax") {
     CHECK(bitwavmax[6] == 0);
     CHECK(bitwavmax[7] == 0);
   }
+}
+
+TEST_CASE("haptics::spiht::Spiht_Enc, wavmax 2") {
+
+  using haptics::spiht::Spiht_Dec;
+  using haptics::spiht::Spiht_Enc;
 
   SECTION("Example wavmax 2") {
     std::vector<unsigned char> bitwavmax;
