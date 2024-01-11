@@ -106,6 +106,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
         std::cout << v << std::endl;
       }
     }
+    CHECK(std::fabs(wavmax - 1) < precision);
   }
 }
 
