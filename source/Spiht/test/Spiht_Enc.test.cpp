@@ -144,7 +144,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
       }
       std::cout << "bits: " << BITS_EFFECT << "," << bits_out << std::endl;
     }
-    if (!std::fabs(scalar - scalar_out) < precision) {
+    if (std::fabs(scalar - scalar_out) >= precision) {
       std::cout << "scalar: " << scalar << "," << scalar_out << std::endl;
     }
   }
