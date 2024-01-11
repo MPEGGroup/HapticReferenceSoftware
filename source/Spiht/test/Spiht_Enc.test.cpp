@@ -142,17 +142,24 @@ TEST_CASE("haptics::spiht::Spiht_Enc, wavmax") {
     CHECK(bitwavmax[0] == 1);
     CHECK(bitwavmax[1] == 0);
     CHECK(bitwavmax[2] == 0);
-    CHECK(bitwavmax[3] == 0);
+    CHECK(bitwavmax[3] == 1);
     CHECK(bitwavmax[4] == 0);
-    CHECK(bitwavmax[5] == 1);
+    CHECK(bitwavmax[5] == 0);
+    CHECK(bitwavmax[6] == 0);
+    CHECK(bitwavmax[7] == 0);
   }
 
   SECTION("Example wavmax 2") {
     std::vector<unsigned char> bitwavmax;
     Spiht_Enc::maximumWaveletCoefficient(scalar2, bitwavmax);
     CHECK(bitwavmax[0] == 0);
-    CHECK(bitwavmax[1] == 1);
+    CHECK(bitwavmax[1] == 0);
     CHECK(bitwavmax[2] == 0);
+    CHECK(bitwavmax[3] == 0);
+    CHECK(bitwavmax[4] == 0);
+    CHECK(bitwavmax[5] == 0);
+    CHECK(bitwavmax[6] == 0);
+    CHECK(bitwavmax[7] == 1);
   }
 }
 
