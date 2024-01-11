@@ -111,7 +111,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
   }
 }
 
-TEST_CASE("haptics::spiht::Spiht_Enc, wavmax") {
+TEST_CASE("haptics::spiht::Spiht_Enc, quantmode") {
 
   using haptics::spiht::Spiht_Dec;
   using haptics::spiht::Spiht_Enc;
@@ -129,6 +129,12 @@ TEST_CASE("haptics::spiht::Spiht_Enc, wavmax") {
     CHECK(m.integerbits == 0);
     CHECK(m.fractionbits == haptics::spiht::FRACTIONBITS_0);
   }
+}
+
+TEST_CASE("haptics::spiht::Spiht_Enc, wavmax") {
+
+  using haptics::spiht::Spiht_Dec;
+  using haptics::spiht::Spiht_Enc;
 
   SECTION("Example wavmax") {
     std::vector<unsigned char> bitwavmax;
