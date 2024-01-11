@@ -306,14 +306,12 @@ auto Spiht_Enc::bitget(int in, int bit) -> int {
 }
 
 auto Spiht_Enc::getQuantMode(double wavmax) -> quantMode {
-  int integerpart = 0;
   quantMode m = {0, 0, 0};
   m.mode = 0;
   if (wavmax < 1) {
     m.integerbits = 0;
     m.fractionbits = FRACTIONBITS_0;
   } else {
-    integerpart = 1;
     m.integerbits = INTEGERBITS_1;
     m.fractionbits = FRACTIONBITS_1;
     m.mode = 1;
