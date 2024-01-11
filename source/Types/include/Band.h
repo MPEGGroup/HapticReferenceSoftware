@@ -57,8 +57,8 @@ public:
 
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
-  auto getPriority() const -> std::optional<int>;
-  auto getPriorityOrDefault() const -> int;
+  [[nodiscard]] auto getPriority() const -> std::optional<int>;
+  [[nodiscard]] auto getPriorityOrDefault() const -> int;
   auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getCurveType() const -> CurveType;
   auto setCurveType(CurveType newCurveType) -> void;

@@ -116,8 +116,8 @@ public:
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
-  auto getPriority() const -> std::optional<int>;
-  auto getPriorityOrDefault() const -> int;
+  [[nodiscard]] auto getPriority() const -> std::optional<int>;
+  [[nodiscard]] auto getPriorityOrDefault() const -> int;
   auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
