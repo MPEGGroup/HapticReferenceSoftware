@@ -475,7 +475,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::writeFile(testingHaptic, filepath, PACKET_DURATION);
 
     std::vector<std::vector<bool>> readBitstream = std::vector<std::vector<bool>>();
-     IOStream::loadFile(filepath, readBitstream);
+    IOStream::loadFile(filepath, readBitstream);
 
     haptics::types::Haptics readHaptic;
     IOStream::readFile(filepath, readHaptic);

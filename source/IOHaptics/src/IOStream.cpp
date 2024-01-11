@@ -105,7 +105,8 @@ auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<boo
   while (byteCount < length) {
     std::vector<bool> bufPacket = std::vector<bool>();
     // read packet header
-    int unitNBits = UNIT_TYPE + UNIT_SYNC + UNIT_LAYER + UNIT_DURATION + UNIT_LENGTH + UNIT_RESERVED;
+    int unitNBits =
+        UNIT_TYPE + UNIT_SYNC + UNIT_LAYER + UNIT_DURATION + UNIT_LENGTH + UNIT_RESERVED;
     IOBinaryPrimitives::readNBytes(file, static_cast<int>(unitNBits / BYTE_SIZE), bufPacket);
     byteCount += static_cast<int>(unitNBits / BYTE_SIZE);
     // read packet payload length
@@ -347,8 +348,8 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
   }
-  
-  int length = static_cast<int>(packetFusion.size())/ BYTE_SIZE;
+
+  int length = static_cast<int>(packetFusion.size()) / BYTE_SIZE;
   std::bitset<UNIT_LENGTH> lengthBits(length);
   std::string lengthStr = lengthBits.to_string();
   IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
@@ -373,7 +374,7 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
       int packetStartTime = readPacketTS(std::vector<bool>(packet.begin() + H_NBITS, packet.end()));
       swriter.time = packetStartTime;
     }
-    
+
     payload.insert(payload.end(), bufPacket.begin(), bufPacket.end());
   }
 
