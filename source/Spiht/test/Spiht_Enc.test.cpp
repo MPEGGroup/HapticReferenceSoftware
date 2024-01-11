@@ -44,6 +44,7 @@ constexpr int BITS_EFFECT = 15;
 constexpr float precision = 0.00000000001;
 constexpr int MOD_VAL = 256;
 constexpr float scalar = 1.5;
+constexpr float scalar2 = 0.5;
 
 TEST_CASE("haptics::spiht::Spiht_Enc") {
 
@@ -107,6 +108,45 @@ TEST_CASE("haptics::spiht::Spiht_Enc") {
       }
     }
     CHECK(std::fabs(wavmax - 1) < precision);
+  }
+}
+
+TEST_CASE("haptics::spiht::Spiht_Enc, wavmax") {
+
+  using haptics::spiht::Spiht_Dec;
+  using haptics::spiht::Spiht_Enc;
+
+  SECTION("QuantMode > 1") {
+    auto m = Spiht_Enc::getQuantMode(scalar);
+    CHECK(m.mode == 1);
+    CHECK(m.integerbits == haptics::spiht::INTEGERBITS_1);
+    CHECK(m.fractionbits == haptics::spiht::FRACTIONBITS_1);
+  }
+
+  SECTION("QuantMode < 1") {
+    auto m = Spiht_Enc::getQuantMode(0);
+    CHECK(m.mode == 0);
+    CHECK(m.integerbits == 0);
+    CHECK(m.fractionbits == haptics::spiht::FRACTIONBITS_0);
+  }
+
+  SECTION("Example wavmax") {
+    std::vector<unsigned char> bitwavmax;
+    Spiht_Enc::maximumWaveletCoefficient(scalar, bitwavmax);
+    CHECK(bitwavmax[0] == 1);
+    CHECK(bitwavmax[1] == 0);
+    CHECK(bitwavmax[2] == 0);
+    CHECK(bitwavmax[3] == 0);
+    CHECK(bitwavmax[4] == 0);
+    CHECK(bitwavmax[5] == 1);
+  }
+
+  SECTION("Example wavmax 2") {
+    std::vector<unsigned char> bitwavmax;
+    Spiht_Enc::maximumWaveletCoefficient(scalar2, bitwavmax);
+    CHECK(bitwavmax[0] == 0);
+    CHECK(bitwavmax[1] == 1);
+    CHECK(bitwavmax[2] == 0);
   }
 }
 
