@@ -169,11 +169,11 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   swriter.packetDuration = packetDuration;
   swriter.timescale = haptic.getTimescaleOrDefault();
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
-  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, 0, initPackets);
-  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, 0, initPackets);
-  writeMIHSPacket(MIHSPacketType::EffectLibrary, swriter, 0, initPackets);
-  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, 0, initPackets);
-  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, 0, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, initPackets);
+  writeMIHSPacket(MIHSPacketType::EffectLibrary, swriter, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, initPackets);
   std::vector<bool> initUnit = std::vector<bool>();
   writeMIHSUnit(MIHSUnitType::Initialization, initPackets, initUnit, swriter);
   bitstream.push_back(initUnit);
@@ -182,7 +182,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   getNextSync(haptic, nextSync, syncIdx);
 
   std::vector<std::vector<bool>> dataPackets = std::vector<std::vector<bool>>();
-  writeMIHSPacket(MIHSPacketType::Data, swriter, 0, dataPackets);
+  writeMIHSPacket(MIHSPacketType::Data, swriter, dataPackets);
   std::vector<std::vector<bool>> bufUnit = std::vector<std::vector<bool>>();
   swriter.time = 0;
   bool first = true;
@@ -343,7 +343,7 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::vector<bool> packetFusion = std::vector<bool>();
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
-  writeMIHSPacket(MIHSPacketType::Timing, swriter, 0, timingPacket);
+  writeMIHSPacket(MIHSPacketType::Timing, swriter, timingPacket);
   packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
@@ -503,7 +503,7 @@ auto IOStream::initializeStream() -> StreamReader {
   return sreader;
 }
 
-auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swriter, int level,
+auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swriter,
                                std::vector<std::vector<bool>> &bitstream) -> bool {
 
   checkHapticComponent(swriter.haptic);

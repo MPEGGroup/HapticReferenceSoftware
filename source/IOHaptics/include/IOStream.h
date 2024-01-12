@@ -112,7 +112,6 @@ public:
     BandStream bandStream;
     std::vector<BandStream> bandStreamsHaptic;
     AUType auType = AUType::RAU;
-    int level = -1;
     unsigned int time = 0;
     unsigned int packetLength = 0;
     unsigned int packetDuration = 0;
@@ -140,7 +139,7 @@ public:
                             std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool;
   static auto readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool;
 
-  static auto writeMIHSPacket(MIHSPacketType mihsPacketType, StreamWriter &swriter, int level,
+  static auto writeMIHSPacket(MIHSPacketType mihsPacketType, StreamWriter &swriter, 
                               std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketType,
                             std::vector<bool> &mihsPacketHeader,
