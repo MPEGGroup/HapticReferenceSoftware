@@ -539,7 +539,6 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
       naluPayload.clear();
       naluHeader.clear();
     }
-
     return true;
   }
   case NALuType::EffectLibrary: {
@@ -555,7 +554,6 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
         naluHeader.clear();
       }
     }
-
     return true;
   }
   case NALuType::MetadataChannel: {
@@ -577,7 +575,7 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
     return true;
   }
   case NALuType::MetadataBand: {
-    return writeAllBands(swriter, naluType, level, naluHeader, bitstream);
+    return writeAllBands(swriter, naluType, naluHeader, bitstream);
   }
   case NALuType::Data: {
     std::vector<std::vector<bool>> naluPayload = std::vector<std::vector<bool>>();
