@@ -846,6 +846,8 @@ auto IOStream::readInitializationTiming(StreamReader &sreader, std::vector<bool>
   bool overlapping = IOBinaryPrimitives::readUInt(bitstream, index, INITTIMING_OVERLAPPING) == 1;
   types::Sync sync = types::Sync(timestamp, timescale);
   sreader.haptic.addSync(sync);
+  sreader.nominalDuration = nominalDuration;
+  sreader.durationDeviation = durationDeviation;
   sreader.overlapping = overlapping;
   sreader.timescale = timescale;
   sreader.time = timestamp;
