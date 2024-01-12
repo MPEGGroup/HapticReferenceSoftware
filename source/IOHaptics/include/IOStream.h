@@ -129,9 +129,6 @@ public:
   static auto writeUnitFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;
 
-  // static auto writePacket(types::Haptics &haptic, std::ofstream &file) -> bool;
-  // static auto writePacket(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-  //                         int packetDuration) -> bool;
   static auto writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
                          int packetDuration) -> bool;
 

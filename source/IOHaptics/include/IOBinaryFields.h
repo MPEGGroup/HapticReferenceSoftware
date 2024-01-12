@@ -64,6 +64,8 @@ static constexpr int INITTIMING_DURATIONDEVIATION = 24;
 static constexpr int INITTIMING_OVERLAPPING = 1;
 
 static constexpr int MDEXP_VERSION = 8;
+static constexpr int MDEXP_PROFILE_SIZE = 8;
+static constexpr int MDEXP_LEVEL = 8;
 static constexpr int MDEXP_DATE = 8;
 static constexpr int MDEXP_DESC_SIZE = 8;
 

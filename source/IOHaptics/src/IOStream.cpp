@@ -123,45 +123,6 @@ auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<boo
   return true;
 }
 
-/* auto IOStream::writePacket(types::Haptics &haptic, std::ofstream &file) -> bool {
-  std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-  StreamWriter swriter;
-  swriter.haptic = haptic;
-  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::Data, swriter, 0, bitstream);
-
-  std::string strBitstream;
-  for (auto &packet : bitstream) {
-    for (auto c : packet) {
-      if (c) {
-        strBitstream += "1";
-      } else {
-        strBitstream += "0";
-      }
-    }
-    strBitstream += "/n";
-  }
-  file.write(strBitstream.c_str(), static_cast<int>(strBitstream.size()));
-  return true;
-}
-auto IOStream::writePacket(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-                           int packetDuration) -> bool {
-  StreamWriter swriter;
-  swriter.haptic = haptic;
-  swriter.packetDuration = packetDuration;
-  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::EffectLibrary, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, 0, bitstream);
-  writeMIHSPacket(MIHSPacketType::Data, swriter, 0, bitstream);
-
-  return true;
-}*/
-
 auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
                           int packetDuration) -> bool {
   StreamWriter swriter;
@@ -343,7 +304,7 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::vector<bool> packetFusion = std::vector<bool>();
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
-  writeMIHSPacket(MIHSPacketType::Timing, swriter, timingPacket);
+  writeMIHSPacket(MIHSPacketType::InitializationTiming, swriter, timingPacket);
   packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
@@ -901,6 +862,19 @@ auto IOStream::writeMetadataHaptics(types::Haptics &haptic, std::vector<bool> &b
     IOBinaryPrimitives::writeStrBits(cStr, bitstream);
   }
 
+  std::bitset<MDEXP_PROFILE_SIZE> profileCountBits(haptic.getProfile().size());
+  const std::string profileCountStr = profileCountBits.to_string();
+  IOBinaryPrimitives::writeStrBits(profileCountStr, bitstream);
+  for (auto c : haptic.getProfile()) {
+    std::bitset<BYTE_SIZE> cBits(c);
+    const std::string cStr = cBits.to_string();
+    IOBinaryPrimitives::writeStrBits(cStr, bitstream);
+  }
+
+  std::bitset<MDEXP_LEVEL> levelBits(haptic.getLevel());
+  std::string levelStr = levelBits.to_string();
+  IOBinaryPrimitives::writeStrBits(levelStr, bitstream);
+
   std::bitset<MDEXP_DATE> dateCountBits(haptic.getDate().size());
   std::string dateCountStr = dateCountBits.to_string();
   IOBinaryPrimitives::writeStrBits(dateCountStr, bitstream);
@@ -938,6 +912,13 @@ auto IOStream::readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bi
   int versionLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_VERSION);
   std::string version = IOBinaryPrimitives::readString(bitstream, index, versionLength);
   haptic.setVersion(version);
+
+  int profileLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_PROFILE_SIZE);
+  std::string profile = IOBinaryPrimitives::readString(bitstream, index, profileLength);
+  haptic.setProfile(profile);
+
+  int level = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_LEVEL);
+  haptic.setLevel(level);
 
   int dateLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_DATE);
   std::string date = IOBinaryPrimitives::readString(bitstream, index, dateLength);
