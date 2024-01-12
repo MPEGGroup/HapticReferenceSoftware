@@ -622,7 +622,7 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
   }
 }
 
-auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType, int level,
+auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType,
                              std::vector<bool> &naluHeader,
                              std::vector<std::vector<bool>> &bitstream) -> bool {
   std::vector<bool> naluPayload = std::vector<bool>();

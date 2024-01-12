@@ -142,8 +142,7 @@ public:
 
   static auto writeNALu(NALuType naluType, StreamWriter &swriter, int level,
                         std::vector<std::vector<bool>> &bitstream) -> bool;
-  static auto writeAllBands(StreamWriter &swriter, NALuType naluType, int level,
-                            std::vector<bool> &naluHeader,
+  static auto writeAllBands(StreamWriter &swriter, NALuType naluType, std::vector<bool> &naluHeader,
                             std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool;
   static auto initializeStream() -> StreamReader;
