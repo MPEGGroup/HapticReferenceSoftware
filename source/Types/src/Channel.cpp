@@ -47,9 +47,8 @@ auto Channel::getPriority() const -> std::optional<int> { return priority; }
 auto Channel::getPriorityOrDefault() const -> int {
   if (priority.has_value()) {
     return priority.value();
-  } else {
-    return 0;
   }
+  return 0;
 }
 auto Channel::setPriority(int newPriority) -> void { priority = newPriority; }
 

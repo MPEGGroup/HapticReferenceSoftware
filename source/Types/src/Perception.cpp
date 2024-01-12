@@ -67,9 +67,8 @@ auto Perception::getPriority() const -> std::optional<int> { return priority; }
 auto Perception::getPriorityOrDefault() const -> int {
   if (priority.has_value()) {
     return priority.value();
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 auto Perception::setPriority(int newPriority) -> void { priority = newPriority; }
