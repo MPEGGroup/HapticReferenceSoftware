@@ -123,15 +123,15 @@ auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<boo
   return true;
 }
 
-auto IOStream::writePacket(types::Haptics &haptic, std::ofstream &file) -> bool {
+/* auto IOStream::writePacket(types::Haptics &haptic, std::ofstream &file) -> bool {
   std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
   StreamWriter swriter;
   swriter.haptic = haptic;
-  writeNALu(NALuType::MetadataHaptics, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataPerception, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataChannel, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataBand, swriter, 0, bitstream);
-  writeNALu(NALuType::Data, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::Data, swriter, 0, bitstream);
 
   std::string strBitstream;
   for (auto &packet : bitstream) {
@@ -152,15 +152,15 @@ auto IOStream::writePacket(types::Haptics &haptic, std::vector<std::vector<bool>
   StreamWriter swriter;
   swriter.haptic = haptic;
   swriter.packetDuration = packetDuration;
-  writeNALu(NALuType::MetadataHaptics, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataPerception, swriter, 0, bitstream);
-  writeNALu(NALuType::EffectLibrary, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataChannel, swriter, 0, bitstream);
-  writeNALu(NALuType::MetadataBand, swriter, 0, bitstream);
-  writeNALu(NALuType::Data, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::EffectLibrary, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, 0, bitstream);
+  writeMIHSPacket(MIHSPacketType::Data, swriter, 0, bitstream);
 
   return true;
-}
+}*/
 
 auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
                           int packetDuration) -> bool {
@@ -169,11 +169,11 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   swriter.packetDuration = packetDuration;
   swriter.timescale = haptic.getTimescaleOrDefault();
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
-  writeNALu(NALuType::MetadataHaptics, swriter, 0, initPackets);
-  writeNALu(NALuType::MetadataPerception, swriter, 0, initPackets);
-  writeNALu(NALuType::EffectLibrary, swriter, 0, initPackets);
-  writeNALu(NALuType::MetadataChannel, swriter, 0, initPackets);
-  writeNALu(NALuType::MetadataBand, swriter, 0, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, 0, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, 0, initPackets);
+  writeMIHSPacket(MIHSPacketType::EffectLibrary, swriter, 0, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataChannel, swriter, 0, initPackets);
+  writeMIHSPacket(MIHSPacketType::MetadataBand, swriter, 0, initPackets);
   std::vector<bool> initUnit = std::vector<bool>();
   writeMIHSUnit(MIHSUnitType::Initialization, initPackets, initUnit, swriter);
   bitstream.push_back(initUnit);
@@ -182,7 +182,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   getNextSync(haptic, nextSync, syncIdx);
 
   std::vector<std::vector<bool>> dataPackets = std::vector<std::vector<bool>>();
-  writeNALu(NALuType::Data, swriter, 0, dataPackets);
+  writeMIHSPacket(MIHSPacketType::Data, swriter, 0, dataPackets);
   std::vector<std::vector<bool>> bufUnit = std::vector<std::vector<bool>>();
   swriter.time = 0;
   bool first = true;
@@ -295,7 +295,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
 
   std::vector<bool> packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
   while (index < unitLength) {
-    if (!readNALu(packets, sreader, crc)) {
+    if (!readMIHSPacket(packets, sreader, crc)) {
       return EXIT_FAILURE;
     }
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
@@ -343,7 +343,7 @@ auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listP
   std::vector<bool> packetFusion = std::vector<bool>();
   std::vector<std::vector<bool>> timingPacket = std::vector<std::vector<bool>>();
   // Add a mandatory timing packet in mihs unit of type initialization
-  writeNALu(NALuType::Timing, swriter, 0, timingPacket);
+  writeMIHSPacket(MIHSPacketType::Timing, swriter, 0, timingPacket);
   packetFusion.insert(packetFusion.end(), timingPacket[0].begin(), timingPacket[0].end());
   for (auto &packet : listPackets) {
     packetFusion.insert(packetFusion.end(), packet.begin(), packet.end());
@@ -366,8 +366,8 @@ auto IOStream::writeMIHSUnitTemporal(std::vector<std::vector<bool>> &listPackets
   std::vector<bool> payload = std::vector<bool>();
   for (auto &packet : listPackets) {
     std::vector<bool> bufPacket = packet;
-    NALuType mihsPacketType = readNALuType(packet);
-    if (mihsPacketType == NALuType::Data) {
+    MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
+    if (mihsPacketType == MIHSPacketType::Data) {
       bufPacket.erase(bufPacket.begin() + H_NBITS, bufPacket.begin() + H_NBITS + DB_DURATION);
       nbPacketData++;
       sync &= !bufPacket[H_NBITS];
@@ -409,8 +409,8 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
   std::vector<bool> payload = std::vector<bool>();
   for (auto &packet : listPackets) {
     std::vector<bool> bufPacket = packet;
-    NALuType mihsPacketType = readNALuType(packet);
-    if (mihsPacketType == NALuType::Data) {
+    MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
+    if (mihsPacketType == MIHSPacketType::Data) {
       bufPacket.erase(bufPacket.begin() + H_NBITS, bufPacket.begin() + H_NBITS + DB_DURATION);
     }
     length += static_cast<int>(H_NBITS / BYTE_SIZE) + readPacketLength(bufPacket);
@@ -503,116 +503,131 @@ auto IOStream::initializeStream() -> StreamReader {
   return sreader;
 }
 
-auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
-                         std::vector<std::vector<bool>> &bitstream) -> bool {
+auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swriter, int level,
+                               std::vector<std::vector<bool>> &bitstream) -> bool {
 
   checkHapticComponent(swriter.haptic);
-  std::vector<bool> naluHeader = std::vector<bool>();
-  switch (naluType) {
-  case NALuType::Timing: {
-    std::vector<bool> naluPayload = std::vector<bool>();
-    writeTiming(swriter, naluPayload);
-    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-    naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-    padToByteBoundary(naluHeader);
-    bitstream.push_back(naluHeader);
+  std::vector<bool> mihsPacketHeader = std::vector<bool>();
+  switch (mihsPacketTyype) {
+  case MIHSPacketType::Timing: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
+    writeTiming(swriter, mihsPacketPayload);
+    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                          mihsPacketHeader);
+    mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                            mihsPacketPayload.end());
+    padToByteBoundary(mihsPacketHeader);
+    bitstream.push_back(mihsPacketHeader);
     return true;
   }
-  case NALuType::MetadataHaptics: {
-    std::vector<bool> naluPayload = std::vector<bool>();
-    writeMetadataHaptics(swriter.haptic, naluPayload);
-    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-    naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-    padToByteBoundary(naluHeader);
-    bitstream.push_back(naluHeader);
+  case MIHSPacketType::MetadataHaptics: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
+    writeMetadataHaptics(swriter.haptic, mihsPacketPayload);
+    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                          mihsPacketHeader);
+    mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                            mihsPacketPayload.end());
+    padToByteBoundary(mihsPacketHeader);
+    bitstream.push_back(mihsPacketHeader);
     return true;
   }
-  case NALuType::MetadataPerception: {
-    std::vector<bool> naluPayload = std::vector<bool>();
+  case MIHSPacketType::MetadataPerception: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       swriter.perception = swriter.haptic.getPerceptionAt(i);
-      writeMetadataPerception(swriter, naluPayload);
-      writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-      naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-      padToByteBoundary(naluHeader);
-      bitstream.push_back(naluHeader);
-      naluPayload.clear();
-      naluHeader.clear();
+      writeMetadataPerception(swriter, mihsPacketPayload);
+      writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                            mihsPacketHeader);
+      mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                              mihsPacketPayload.end());
+      padToByteBoundary(mihsPacketHeader);
+      bitstream.push_back(mihsPacketHeader);
+      mihsPacketPayload.clear();
+      mihsPacketHeader.clear();
     }
     return true;
   }
-  case NALuType::EffectLibrary: {
-    std::vector<bool> naluPayload = std::vector<bool>();
+  case MIHSPacketType::EffectLibrary: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       if (swriter.haptic.getPerceptionAt(i).getEffectLibrarySize() != 0) {
-        writeLibrary(swriter.haptic.getPerceptionAt(i), naluPayload);
-        writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-        naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-        padToByteBoundary(naluHeader);
-        bitstream.push_back(naluHeader);
-        naluPayload.clear();
-        naluHeader.clear();
+        writeLibrary(swriter.haptic.getPerceptionAt(i), mihsPacketPayload);
+        writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                              mihsPacketHeader);
+        mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                                mihsPacketPayload.end());
+        padToByteBoundary(mihsPacketHeader);
+        bitstream.push_back(mihsPacketHeader);
+        mihsPacketPayload.clear();
+        mihsPacketHeader.clear();
       }
     }
     return true;
   }
-  case NALuType::MetadataChannel: {
-    std::vector<bool> naluPayload = std::vector<bool>();
+  case MIHSPacketType::MetadataChannel: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       swriter.perception = swriter.haptic.getPerceptionAt(i);
       for (auto j = 0; j < static_cast<int>(swriter.haptic.getPerceptionAt(i).getChannelsSize());
            j++) {
         swriter.channel = swriter.perception.getChannelAt(j);
-        writeMetadataChannel(swriter, naluPayload);
-        writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-        naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-        padToByteBoundary(naluHeader);
-        bitstream.push_back(naluHeader);
-        naluPayload.clear();
-        naluHeader.clear();
+        writeMetadataChannel(swriter, mihsPacketPayload);
+        writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                              mihsPacketHeader);
+        mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                                mihsPacketPayload.end());
+        padToByteBoundary(mihsPacketHeader);
+        bitstream.push_back(mihsPacketHeader);
+        mihsPacketPayload.clear();
+        mihsPacketHeader.clear();
       }
     }
     return true;
   }
-  case NALuType::MetadataBand: {
-    return writeAllBands(swriter, naluType, naluHeader, bitstream);
+  case MIHSPacketType::MetadataBand: {
+    return writeAllBands(swriter, mihsPacketTyype, mihsPacketHeader, bitstream);
   }
-  case NALuType::Data: {
-    std::vector<std::vector<bool>> naluPayload = std::vector<std::vector<bool>>();
-    writeData(swriter, naluPayload);
-    for (auto data : naluPayload) {
-      writeNALuHeader(naluType, static_cast<int>(data.size()), naluHeader);
-      naluHeader.insert(naluHeader.end(), data.begin(), data.end());
-      padToByteBoundary(naluHeader);
-      bitstream.push_back(naluHeader);
-      naluHeader.clear();
+  case MIHSPacketType::Data: {
+    std::vector<std::vector<bool>> mihsPacketPayload = std::vector<std::vector<bool>>();
+    writeData(swriter, mihsPacketPayload);
+    for (auto data : mihsPacketPayload) {
+      writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(data.size()), mihsPacketHeader);
+      mihsPacketHeader.insert(mihsPacketHeader.end(), data.begin(), data.end());
+      padToByteBoundary(mihsPacketHeader);
+      bitstream.push_back(mihsPacketHeader);
+      mihsPacketHeader.clear();
     }
     return true;
   }
-  case NALuType::InitializationTiming: {
-    std::vector<bool> naluPayload = std::vector<bool>();
-    writeInitializationTiming(swriter, naluPayload);
-    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-    naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-    padToByteBoundary(naluHeader);
-    bitstream.push_back(naluHeader);
+  case MIHSPacketType::InitializationTiming: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
+    writeInitializationTiming(swriter, mihsPacketPayload);
+    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                          mihsPacketHeader);
+    mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                            mihsPacketPayload.end());
+    padToByteBoundary(mihsPacketHeader);
+    bitstream.push_back(mihsPacketHeader);
     return true;
   }
-  case NALuType::CRC16:
-  case NALuType::GlobalCRC16:
-  case NALuType::CRC32:
-  case NALuType::GlobalCRC32: {
-    std::vector<bool> naluPayload = std::vector<bool>();
+  case MIHSPacketType::CRC16:
+  case MIHSPacketType::GlobalCRC16:
+  case MIHSPacketType::CRC32:
+  case MIHSPacketType::GlobalCRC32: {
+    std::vector<bool> mihsPacketPayload = std::vector<bool>();
     int crcLevel = 0;
-    if (naluType == NALuType::CRC32 || naluType == NALuType::GlobalCRC32) {
+    if (mihsPacketTyype == MIHSPacketType::CRC32 ||
+        mihsPacketTyype == MIHSPacketType::GlobalCRC32) {
       crcLevel = 1;
     }
-    writeCRC(bitstream, naluPayload, crcLevel);
-    writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-    naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-    padToByteBoundary(naluHeader);
+    writeCRC(bitstream, mihsPacketPayload, crcLevel);
+    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                          mihsPacketHeader);
+    mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                            mihsPacketPayload.end());
+    padToByteBoundary(mihsPacketHeader);
     bitstream.clear();
-    bitstream.push_back(naluHeader);
+    bitstream.push_back(mihsPacketHeader);
     return true;
   }
   default:
@@ -620,10 +635,10 @@ auto IOStream::writeNALu(NALuType naluType, StreamWriter &swriter, int level,
   }
 }
 
-auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType,
-                             std::vector<bool> &naluHeader,
+auto IOStream::writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketTyype,
+                             std::vector<bool> &mihsPacketHeader,
                              std::vector<std::vector<bool>> &bitstream) -> bool {
-  std::vector<bool> naluPayload = std::vector<bool>();
+  std::vector<bool> mihsPacketPayload = std::vector<bool>();
   int bandId = 0;
   for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
     swriter.perception = swriter.haptic.getPerceptionAt(i);
@@ -632,13 +647,15 @@ auto IOStream::writeAllBands(StreamWriter &swriter, NALuType naluType,
       for (auto k = 0; k < static_cast<int>(swriter.channel.getBandsSize()); k++) {
         swriter.bandStream.band = swriter.channel.getBandAt(k);
         swriter.bandStream.id = bandId++;
-        writeMetadataBand(swriter, naluPayload);
-        padToByteBoundary(naluPayload);
-        writeNALuHeader(naluType, static_cast<int>(naluPayload.size()), naluHeader);
-        naluHeader.insert(naluHeader.end(), naluPayload.begin(), naluPayload.end());
-        bitstream.push_back(naluHeader);
-        naluPayload.clear();
-        naluHeader.clear();
+        writeMetadataBand(swriter, mihsPacketPayload);
+        padToByteBoundary(mihsPacketPayload);
+        writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+                              mihsPacketHeader);
+        mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
+                                mihsPacketPayload.end());
+        bitstream.push_back(mihsPacketHeader);
+        mihsPacketPayload.clear();
+        mihsPacketHeader.clear();
       }
     }
   }
@@ -675,14 +692,14 @@ auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
   }
 }
 
-auto IOStream::writeNALuHeader(NALuType naluType, int payloadSize, std::vector<bool> &bitstream)
-    -> bool {
-  std::bitset<H_NALU_TYPE> naluTypeBits(static_cast<int>(naluType));
-  const std::string naluTypeStr = naluTypeBits.to_string();
-  IOBinaryPrimitives::writeStrBits(naluTypeStr, bitstream);
+auto IOStream::writeMIHSPacketHeader(MIHSPacketType mihsPacketTyype, int payloadSize,
+                                     std::vector<bool> &bitstream) -> bool {
+  std::bitset<H_MIHS_PACKET_TYPE> mihsPacketTyypeBits(static_cast<int>(mihsPacketTyype));
+  const std::string mihsPacketTyypeStr = mihsPacketTyypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(mihsPacketTyypeStr, bitstream);
   int missing = (payloadSize % BYTE_SIZE) == 0 ? 0 : (BYTE_SIZE - (payloadSize % BYTE_SIZE));
   int payloadSizeByte = (payloadSize + missing) / BYTE_SIZE;
-  if (naluType == NALuType::Data) {
+  if (mihsPacketTyype == MIHSPacketType::Data) {
     payloadSizeByte -= DB_DURATION / BYTE_SIZE;
   }
   std::bitset<H_PAYLOAD_LENGTH> payloadSizeBits(payloadSizeByte);
@@ -693,22 +710,22 @@ auto IOStream::writeNALuHeader(NALuType naluType, int payloadSize, std::vector<b
   IOBinaryPrimitives::writeStrBits(resStr, bitstream);
   return true;
 }
-auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
-  NALuType naluType = readNALuType(packet);
-  int index = H_NALU_TYPE;
+auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
+  MIHSPacketType mihsPacketTyype = readMIHSPacketType(packet);
+  int index = H_MIHS_PACKET_TYPE;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   index += H_RESERVED;
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
-  switch (naluType) {
-  case (NALuType::Timing): {
+  switch (mihsPacketTyype) {
+  case (MIHSPacketType::Timing): {
     readTiming(sreader, payload);
     sreader.time = (sreader.time * TIME_TO_MS) / sreader.timescale;
     return true;
   }
-  case (NALuType::MetadataHaptics): {
+  case (MIHSPacketType::MetadataHaptics): {
     return readMetadataHaptics(sreader.haptic, payload);
   }
-  case (NALuType::MetadataPerception): {
+  case (MIHSPacketType::MetadataPerception): {
     if (!readMetadataPerception(sreader, payload)) {
       return false;
     }
@@ -720,10 +737,10 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     }
     return true;
   }
-  case (NALuType::EffectLibrary): {
+  case (MIHSPacketType::EffectLibrary): {
     return readLibrary(sreader, payload);
   }
-  case (NALuType::MetadataChannel): {
+  case (MIHSPacketType::MetadataChannel): {
     if (!readMetadataChannel(sreader, payload)) {
       return false;
     }
@@ -737,7 +754,7 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     }
     return true;
   }
-  case (NALuType::MetadataBand): {
+  case (MIHSPacketType::MetadataBand): {
     if (!readMetadataBand(sreader, payload)) {
       return false;
     }
@@ -764,16 +781,16 @@ auto IOStream::readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &cr
     }
     return true;
   }
-  case (NALuType::Data): {
+  case (MIHSPacketType::Data): {
     return readData(sreader, payload);
   }
-  case (NALuType::CRC16):
-  case (NALuType::CRC32):
-  case (NALuType::GlobalCRC16):
-  case (NALuType::GlobalCRC32): {
-    return readCRC(payload, crc, naluType);
+  case (MIHSPacketType::CRC16):
+  case (MIHSPacketType::CRC32):
+  case (MIHSPacketType::GlobalCRC16):
+  case (MIHSPacketType::GlobalCRC32): {
+    return readCRC(payload, crc, mihsPacketTyype);
   }
-  case (NALuType::InitializationTiming): {
+  case (MIHSPacketType::InitializationTiming): {
     return readInitializationTiming(sreader, payload);
   }
   }
@@ -792,11 +809,11 @@ auto IOStream::readPacketTS(std::vector<bool> bitstream) -> int {
   return std::stoi(tsBits, nullptr, 2);
 }
 
-auto IOStream::readNALuType(std::vector<bool> &packet) -> NALuType {
+auto IOStream::readMIHSPacketType(std::vector<bool> &packet) -> MIHSPacketType {
   int idx = 0;
-  int typeInt = IOBinaryPrimitives::readUInt(packet, idx, H_NALU_TYPE);
+  int typeInt = IOBinaryPrimitives::readUInt(packet, idx, H_MIHS_PACKET_TYPE);
 
-  return static_cast<NALuType>(typeInt);
+  return static_cast<MIHSPacketType>(typeInt);
 }
 auto IOStream::readPacketLength(std::vector<bool> &bitstream) -> int {
   int beginIdx = haptics::io::H_NBITS - haptics::io::H_PAYLOAD_LENGTH;
@@ -2296,27 +2313,28 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   packetCRC.insert(packetCRC.end(), quotient.begin(), quotient.end());
   return true;
 }
-auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType) -> bool {
+auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, MIHSPacketType mihsPacketTyype)
+    -> bool {
   int idx = 0;
-  if (naluType == NALuType::CRC16) {
+  if (mihsPacketTyype == MIHSPacketType::CRC16) {
     crc.nbPackets = 1;
     crc.value16 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
   }
-  if (naluType == NALuType::CRC32) {
+  if (mihsPacketTyype == MIHSPacketType::CRC32) {
     crc.nbPackets = 1;
     crc.value32 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC32_NB_BITS);
     crc.value16 = 0;
     return true;
   }
-  if (naluType == NALuType::GlobalCRC16) {
+  if (mihsPacketTyype == MIHSPacketType::GlobalCRC16) {
     crc.nbPackets = IOBinaryPrimitives::readUInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value16 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
   }
-  if (naluType == NALuType::GlobalCRC32) {
+  if (mihsPacketTyype == MIHSPacketType::GlobalCRC32) {
     crc.nbPackets = IOBinaryPrimitives::readUInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value32 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC32_NB_BITS);
     crc.value16 = 0;

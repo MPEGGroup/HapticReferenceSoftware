@@ -52,7 +52,7 @@ static constexpr int UNIT_LENGTH = 32;
 static constexpr int UNIT_RESERVED = 4;
 
 static constexpr int H_NBITS = 24;
-static constexpr int H_NALU_TYPE = 6;
+static constexpr int H_MIHS_PACKET_TYPE = 6;
 static constexpr int H_PAYLOAD_LENGTH = 17;
 static constexpr int H_RESERVED = 1;
 
