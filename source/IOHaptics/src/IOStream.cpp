@@ -464,16 +464,16 @@ auto IOStream::initializeStream() -> StreamReader {
   return sreader;
 }
 
-auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swriter,
+auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketType, StreamWriter &swriter,
                                std::vector<std::vector<bool>> &bitstream) -> bool {
 
   checkHapticComponent(swriter.haptic);
   std::vector<bool> mihsPacketHeader = std::vector<bool>();
-  switch (mihsPacketTyype) {
+  switch (mihsPacketType) {
   case MIHSPacketType::Timing: {
     std::vector<bool> mihsPacketPayload = std::vector<bool>();
     writeTiming(swriter, mihsPacketPayload);
-    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+    writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                           mihsPacketHeader);
     mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                             mihsPacketPayload.end());
@@ -484,7 +484,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
   case MIHSPacketType::MetadataHaptics: {
     std::vector<bool> mihsPacketPayload = std::vector<bool>();
     writeMetadataHaptics(swriter.haptic, mihsPacketPayload);
-    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+    writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                           mihsPacketHeader);
     mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                             mihsPacketPayload.end());
@@ -497,7 +497,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       swriter.perception = swriter.haptic.getPerceptionAt(i);
       writeMetadataPerception(swriter, mihsPacketPayload);
-      writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+      writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                             mihsPacketHeader);
       mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                               mihsPacketPayload.end());
@@ -513,7 +513,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
     for (auto i = 0; i < static_cast<int>(swriter.haptic.getPerceptionsSize()); i++) {
       if (swriter.haptic.getPerceptionAt(i).getEffectLibrarySize() != 0) {
         writeLibrary(swriter.haptic.getPerceptionAt(i), mihsPacketPayload);
-        writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+        writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                               mihsPacketHeader);
         mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                                 mihsPacketPayload.end());
@@ -533,7 +533,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
            j++) {
         swriter.channel = swriter.perception.getChannelAt(j);
         writeMetadataChannel(swriter, mihsPacketPayload);
-        writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+        writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                               mihsPacketHeader);
         mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                                 mihsPacketPayload.end());
@@ -546,13 +546,13 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
     return true;
   }
   case MIHSPacketType::MetadataBand: {
-    return writeAllBands(swriter, mihsPacketTyype, mihsPacketHeader, bitstream);
+    return writeAllBands(swriter, mihsPacketType, mihsPacketHeader, bitstream);
   }
   case MIHSPacketType::Data: {
     std::vector<std::vector<bool>> mihsPacketPayload = std::vector<std::vector<bool>>();
     writeData(swriter, mihsPacketPayload);
     for (auto data : mihsPacketPayload) {
-      writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(data.size()), mihsPacketHeader);
+      writeMIHSPacketHeader(mihsPacketType, static_cast<int>(data.size()), mihsPacketHeader);
       mihsPacketHeader.insert(mihsPacketHeader.end(), data.begin(), data.end());
       padToByteBoundary(mihsPacketHeader);
       bitstream.push_back(mihsPacketHeader);
@@ -563,7 +563,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
   case MIHSPacketType::InitializationTiming: {
     std::vector<bool> mihsPacketPayload = std::vector<bool>();
     writeInitializationTiming(swriter, mihsPacketPayload);
-    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+    writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                           mihsPacketHeader);
     mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                             mihsPacketPayload.end());
@@ -577,12 +577,12 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
   case MIHSPacketType::GlobalCRC32: {
     std::vector<bool> mihsPacketPayload = std::vector<bool>();
     int crcLevel = 0;
-    if (mihsPacketTyype == MIHSPacketType::CRC32 ||
-        mihsPacketTyype == MIHSPacketType::GlobalCRC32) {
+    if (mihsPacketType == MIHSPacketType::CRC32 ||
+        mihsPacketType == MIHSPacketType::GlobalCRC32) {
       crcLevel = 1;
     }
     writeCRC(bitstream, mihsPacketPayload, crcLevel);
-    writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+    writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                           mihsPacketHeader);
     mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                             mihsPacketPayload.end());
@@ -596,7 +596,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketTyype, StreamWriter &swr
   }
 }
 
-auto IOStream::writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketTyype,
+auto IOStream::writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketType,
                              std::vector<bool> &mihsPacketHeader,
                              std::vector<std::vector<bool>> &bitstream) -> bool {
   std::vector<bool> mihsPacketPayload = std::vector<bool>();
@@ -610,7 +610,7 @@ auto IOStream::writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketTyy
         swriter.bandStream.id = bandId++;
         writeMetadataBand(swriter, mihsPacketPayload);
         padToByteBoundary(mihsPacketPayload);
-        writeMIHSPacketHeader(mihsPacketTyype, static_cast<int>(mihsPacketPayload.size()),
+        writeMIHSPacketHeader(mihsPacketType, static_cast<int>(mihsPacketPayload.size()),
                               mihsPacketHeader);
         mihsPacketHeader.insert(mihsPacketHeader.end(), mihsPacketPayload.begin(),
                                 mihsPacketPayload.end());
@@ -653,14 +653,14 @@ auto IOStream::checkHapticComponent(types::Haptics &haptic) -> void {
   }
 }
 
-auto IOStream::writeMIHSPacketHeader(MIHSPacketType mihsPacketTyype, int payloadSize,
+auto IOStream::writeMIHSPacketHeader(MIHSPacketType mihsPacketType, int payloadSize,
                                      std::vector<bool> &bitstream) -> bool {
-  std::bitset<H_MIHS_PACKET_TYPE> mihsPacketTyypeBits(static_cast<int>(mihsPacketTyype));
-  const std::string mihsPacketTyypeStr = mihsPacketTyypeBits.to_string();
-  IOBinaryPrimitives::writeStrBits(mihsPacketTyypeStr, bitstream);
+  std::bitset<H_MIHS_PACKET_TYPE> mihsPacketTypeBits(static_cast<int>(mihsPacketType));
+  const std::string mihsPacketTypeStr = mihsPacketTypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(mihsPacketTypeStr, bitstream);
   int missing = (payloadSize % BYTE_SIZE) == 0 ? 0 : (BYTE_SIZE - (payloadSize % BYTE_SIZE));
   int payloadSizeByte = (payloadSize + missing) / BYTE_SIZE;
-  if (mihsPacketTyype == MIHSPacketType::Data) {
+  if (mihsPacketType == MIHSPacketType::Data) {
     payloadSizeByte -= DB_DURATION / BYTE_SIZE;
   }
   std::bitset<H_PAYLOAD_LENGTH> payloadSizeBits(payloadSizeByte);
@@ -672,12 +672,12 @@ auto IOStream::writeMIHSPacketHeader(MIHSPacketType mihsPacketTyype, int payload
   return true;
 }
 auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
-  MIHSPacketType mihsPacketTyype = readMIHSPacketType(packet);
+  MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
   int index = H_MIHS_PACKET_TYPE;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   index += H_RESERVED;
   std::vector<bool> payload = std::vector<bool>(packet.begin() + index, packet.end());
-  switch (mihsPacketTyype) {
+  switch (mihsPacketType) {
   case (MIHSPacketType::Timing): {
     readTiming(sreader, payload);
     sreader.time = (sreader.time * TIME_TO_MS) / sreader.timescale;
@@ -749,7 +749,7 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
   case (MIHSPacketType::CRC32):
   case (MIHSPacketType::GlobalCRC16):
   case (MIHSPacketType::GlobalCRC32): {
-    return readCRC(payload, crc, mihsPacketTyype);
+    return readCRC(payload, crc, mihsPacketType);
   }
   case (MIHSPacketType::InitializationTiming): {
     return readInitializationTiming(sreader, payload);
@@ -2296,28 +2296,28 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   packetCRC.insert(packetCRC.end(), quotient.begin(), quotient.end());
   return true;
 }
-auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, MIHSPacketType mihsPacketTyype)
+auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, MIHSPacketType mihsPacketType)
     -> bool {
   int idx = 0;
-  if (mihsPacketTyype == MIHSPacketType::CRC16) {
+  if (mihsPacketType == MIHSPacketType::CRC16) {
     crc.nbPackets = 1;
     crc.value16 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
   }
-  if (mihsPacketTyype == MIHSPacketType::CRC32) {
+  if (mihsPacketType == MIHSPacketType::CRC32) {
     crc.nbPackets = 1;
     crc.value32 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC32_NB_BITS);
     crc.value16 = 0;
     return true;
   }
-  if (mihsPacketTyype == MIHSPacketType::GlobalCRC16) {
+  if (mihsPacketType == MIHSPacketType::GlobalCRC16) {
     crc.nbPackets = IOBinaryPrimitives::readUInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value16 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC16_NB_BITS);
     crc.value32 = 0;
     return true;
   }
-  if (mihsPacketTyype == MIHSPacketType::GlobalCRC32) {
+  if (mihsPacketType == MIHSPacketType::GlobalCRC32) {
     crc.nbPackets = IOBinaryPrimitives::readUInt(bitstream, idx, GCRC_NB_PACKET);
     crc.value32 = IOBinaryPrimitives::readUInt(bitstream, idx, CRC32_NB_BITS);
     crc.value16 = 0;
