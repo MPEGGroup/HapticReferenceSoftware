@@ -141,7 +141,7 @@ public:
   static auto readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool;
 
   static auto writeMIHSPacket(MIHSPacketType mihsPacketType, StreamWriter &swriter, int level,
-                        std::vector<std::vector<bool>> &bitstream) -> bool;
+                              std::vector<std::vector<bool>> &bitstream) -> bool;
   static auto writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketType,
                             std::vector<bool> &mihsPacketHeader,
                             std::vector<std::vector<bool>> &bitstream) -> bool;
@@ -171,7 +171,7 @@ private:
   static auto writeMIHSPacketHeader(MIHSPacketType mihsPacketType, int payloadSize,
                                     std::vector<bool> &bitstream) -> bool;
   static auto writeMIHSPacketPayload(MIHSPacketType mihsPacketType, types::Haptics &haptic,
-                               std::vector<bool> &bitstream) -> bool;
+                                     std::vector<bool> &bitstream) -> bool;
   static auto writeInitializationTiming(StreamWriter &swriter, std::vector<bool> &bitstream)
       -> bool;
   static auto writeTiming(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool;
