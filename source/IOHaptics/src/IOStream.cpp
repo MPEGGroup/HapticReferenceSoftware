@@ -577,8 +577,7 @@ auto IOStream::writeMIHSPacket(MIHSPacketType mihsPacketType, StreamWriter &swri
   case MIHSPacketType::GlobalCRC32: {
     std::vector<bool> mihsPacketPayload = std::vector<bool>();
     int crcLevel = 0;
-    if (mihsPacketType == MIHSPacketType::CRC32 ||
-        mihsPacketType == MIHSPacketType::GlobalCRC32) {
+    if (mihsPacketType == MIHSPacketType::CRC32 || mihsPacketType == MIHSPacketType::GlobalCRC32) {
       crcLevel = 1;
     }
     writeCRC(bitstream, mihsPacketPayload, crcLevel);
