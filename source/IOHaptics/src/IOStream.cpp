@@ -827,7 +827,7 @@ auto IOStream::writeInitializationTiming(StreamWriter &swriter, std::vector<bool
   std::string durationDeviationStr = durationDeviationBits.to_string();
   IOBinaryPrimitives::writeStrBits(durationDeviationStr, bitstream);
 
-  std::bitset<INITTIMING_OVERLAPPING> overlappingBits(swriter.overlapping);
+  std::bitset<INITTIMING_OVERLAPPING> overlappingBits(static_cast<int>(swriter.overlapping));
   std::string overlappingStr = overlappingBits.to_string();
   IOBinaryPrimitives::writeStrBits(overlappingStr, bitstream);
 
