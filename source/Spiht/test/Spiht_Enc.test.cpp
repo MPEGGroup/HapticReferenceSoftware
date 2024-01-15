@@ -180,7 +180,7 @@ TEST_CASE("haptics::spiht::Spiht_Enc,2") {
     Spiht_Enc enc;
     std::vector<int> in;
     for (size_t i = 0; i < bl; i++) {
-      in.push_back((int)((float)(i % MOD_VAL) / MOD_VAL));
+      in.push_back(i % MOD_VAL);
     }
     std::vector<unsigned char> stream_enc;
     enc.encodeEffect(in, BITS_EFFECT, scalar, stream_enc);
