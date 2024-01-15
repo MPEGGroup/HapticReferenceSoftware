@@ -802,7 +802,7 @@ auto IOStream::readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -
   int index = 0;
   int timestamp = IOBinaryPrimitives::readUInt(bitstream, index, TIMING_TIME);
 
-  types::Sync sync = types::Sync(timestamp);
+  auto sync = types::Sync(timestamp);
   sreader.time = timestamp;
   sreader.haptic.addSync(sync);
 
