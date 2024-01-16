@@ -54,11 +54,11 @@ class MyRemoteSchemaDocumentProvider : public rapidjson::IRemoteSchemaDocumentPr
 public:
   virtual auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
       -> const rapidjson::SchemaDocument *;
-  //MyRemoteSchemaDocumentProvider(std::vector<std::string> &newSchemaDocuments)
-  //    : schemaDocuments(newSchemaDocuments){}
-//
-//private:
-//  std::vector<std::string> schemaDocuments;
+  // MyRemoteSchemaDocumentProvider(std::vector<std::string> &newSchemaDocuments)
+  //     : schemaDocuments(newSchemaDocuments){}
+  //
+  // private:
+  //  std::vector<std::string> schemaDocuments;
 };
 
 class IOJson {

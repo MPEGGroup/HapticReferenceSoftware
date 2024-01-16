@@ -1852,9 +1852,8 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
 
 auto IOStream::createWaveletPayload(StreamWriter &swriter,
                                     std::vector<std::vector<bool>> &bitstream) -> bool {
-    if (swriter.bandStream.band.getBandType() != BandType::WaveletWave ||
-        !swriter.bandStream.band.getBlockLength().has_value())
-    {
+  if (swriter.bandStream.band.getBandType() != BandType::WaveletWave ||
+      !swriter.bandStream.band.getBlockLength().has_value()) {
     return false;
   }
   int nbWaveBlock = static_cast<int>(swriter.packetDuration) /
@@ -2314,8 +2313,8 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   }
 
   int effectPos =
-      static_cast<int>((double)timescale * band.getBlockLength().value() * (double)band.getEffectsSize() /
-                       (double)band.getUpperFrequencyLimit());
+      static_cast<int>((double)timescale * band.getBlockLength().value() *
+                       (double)band.getEffectsSize() / (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);

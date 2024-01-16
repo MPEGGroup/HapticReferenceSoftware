@@ -364,8 +364,8 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
   if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value())
     return false;
   spiht::Spiht_Dec dec;
-  auto blocklength =
-      (int)(band.getBlockLength().value() * (double)band.getUpperFrequencyLimit()) / (double)timescale;
+  auto blocklength = (int)(band.getBlockLength().value() * (double)band.getUpperFrequencyLimit()) /
+                     (double)timescale;
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
   std::vector<unsigned char> instream;
@@ -383,7 +383,8 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
   if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value())
     return false;
   spiht::Spiht_Dec dec;
-  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() / (double)timescale;
+  auto blocklength =
+      band.getBlockLength().value() * band.getUpperFrequencyLimit() / (double)timescale;
   auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
 
   std::vector<unsigned char> instream;

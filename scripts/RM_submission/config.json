@@ -184,14 +184,14 @@
         "modality": "vib",
         "extension": "WAV",
         "haptic_file_path": "Test\\Test1-2\\WAV_noPad\\ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.ohm",
-        "reference_file": "Test\\Test1-2\\WAV_noPad\\ACTK-vib-antheongrandstarfall-8kHz-16-nopad.wav"
+        "reference_file": "Test\\Test1-2\\WAV_noPad\\ACTK-vib-pantheongrandstarfall-8kHz-16-nopad.wav"
       },
       {
         "name": "heartbeats",
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-heartbeats nopad.ohm",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-heartbeats-nopad.ohm",
         "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-heartbeats-8kHz-16-nopad.wav"
       },
       {
@@ -199,7 +199,7 @@
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-inflate nopad.ohm",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-inflate-nopad.ohm",
         "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-inflate-8kHz-16-nopad.wav"
       },
       {
@@ -207,7 +207,7 @@
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-oscillate nopad.ohm",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-oscillate-nopad.ohm",
         "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-oscillate-8kHz-16-nopad.wav"
       },
       {
@@ -215,7 +215,7 @@
         "type": "Test",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-rumble nopad.ohm",
+        "haptic_file_path": "Test\\Test1-2\\AHAP\\APPL-vib-rumble-nopad.ohm",
         "reference_file": "Test\\Test1-2\\WAV_noPad\\APPL-vib-rumble-8kHz-16-nopad.wav"
       },
       {
@@ -279,7 +279,7 @@
         "type": "Training",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-drums nopad.ahap",
+        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-drums-nopad.ahap",
         "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-drums-8kHz-16-nopad.wav"
       },
       {
@@ -287,7 +287,7 @@
         "type": "Training",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-gravel nopad.ahap",
+        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-gravel-nopad.ahap",
         "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-gravel-8kHz-16-nopad.wav"
       },
       {
@@ -295,7 +295,7 @@
         "type": "Training",
         "modality": "vib",
         "extension": "AHAP",
-        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-sparkle nopad.ahap",
+        "haptic_file_path": "Training\\Training1-2\\AHAP\\APPL-vib-sparkle-nopad.ahap",
         "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-sparkle-8kHz-16-nopad.wav"
       },
       {

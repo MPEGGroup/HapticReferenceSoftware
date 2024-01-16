@@ -45,17 +45,17 @@ auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
   if (curveType.has_value()) {
     return curveType.value();
   }
-    return DEFAULT_CURVE_TYPE;
+  return DEFAULT_CURVE_TYPE;
 }
 [[nodiscard]] auto Band::getCurveType() const -> std::optional<CurveType> { return curveType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
 [[nodiscard]] auto Band::getBlockLengthOrDefault() const -> int {
-    if (blockLength.has_value()) {
-        return blockLength.value();
-    }
-    return DEFAULT_BLOCK_LENGTH;
+  if (blockLength.has_value()) {
+    return blockLength.value();
+  }
+  return DEFAULT_BLOCK_LENGTH;
 }
 
 [[nodiscard]] auto Band::getBlockLength() const -> std::optional<int> { return blockLength; }
@@ -141,8 +141,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position, this->getCurveTypeOrDefault(),
-                                     timescale);
+    return effect->EvaluateKeyframes(position, this->getCurveTypeOrDefault(), timescale);
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit, timescale);
   case BandType::WaveletWave:
@@ -260,7 +259,7 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
 
 //[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
 
-//auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
+// auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
 
 [[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
   return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);

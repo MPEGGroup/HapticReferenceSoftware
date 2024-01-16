@@ -85,13 +85,12 @@ public:
       -> std::vector<double>;
   auto getBandTimeLength(unsigned int timescale) -> double;
   //[[nodiscard]] auto getTimescale() const -> int;
-  //auto setTimescale(int newTimescale) -> void;
+  // auto setTimescale(int newTimescale) -> void;
 
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
 private:
-  [[nodiscard]] auto static getTransientDuration(unsigned int timescale)
-      -> double;
+  [[nodiscard]] auto static getTransientDuration(unsigned int timescale) -> double;
   static constexpr CurveType DEFAULT_CURVE_TYPE = CurveType::Unknown;
   static constexpr int DEFAULT_BLOCK_LENGTH = 0;
   auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
@@ -103,7 +102,7 @@ private:
   int lowerFrequencyLimit = 0;
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};
-  //int timescale = TIMESCALE;
+  // int timescale = TIMESCALE;
 };
 } // namespace haptics::types
 
