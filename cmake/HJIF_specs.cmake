@@ -8,7 +8,7 @@ if(NO_INTERNET)
     FetchContent_Declare(HJIF_SPECS URL ${LOCAL_HJIF_SPECS_DIR})
 else()
     FetchContent_Declare(HJIF_SPECS
-        GIT_REPOSITORY http://mpeg.expert/software/MPEG/3dgh/haptics/mpeg_haptics_json_specifications.git
+        GIT_REPOSITORY https://git.mpeg.expert/MPEG/3dgh/haptics/mpeg_haptics_json_specifications.git
 		GIT_TAG "main"
   		CONFIGURE_COMMAND ""
   		BUILD_COMMAND "")
