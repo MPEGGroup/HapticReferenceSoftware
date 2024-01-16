@@ -229,8 +229,8 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      //TODO: check if effect is not wavelet -> having no keyframes is allowed
-      //check for HasMember("bitstream")?
+      // TODO: check if effect is not wavelet -> having no keyframes is allowed
+      // check for HasMember("bitstream")?
       if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
         std::cerr << "Missing or invalid list of keyframes" << std::endl;
         continue;
