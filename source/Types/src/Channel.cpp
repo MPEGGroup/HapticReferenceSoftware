@@ -95,7 +95,7 @@ auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) ->
   }
   bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
   bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
-  //bands[index].setTimescale(newBand.getTimescale());
+  // bands[index].setTimescale(newBand.getTimescale());
   return true;
 }
 
