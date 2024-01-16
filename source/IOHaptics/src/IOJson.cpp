@@ -229,6 +229,8 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
+      //TODO: check if effect is not wavelet -> having no keyframes is allowed
+      //check for HasMember("bitstream")?
       if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
         std::cerr << "Missing or invalid list of keyframes" << std::endl;
         continue;
@@ -384,12 +386,15 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
       std::cerr << "Missing or invalid upper frequency limit" << std::endl;
       continue;
     }
-    if (!jsonBand.HasMember("effects") || !jsonBand["effects"].IsArray()) {
-      std::cerr << "Missing or invalid list of effects" << std::endl;
-      continue;
-    }
 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
+    if (bandType != types::BandType::WaveletWave) {
+      if (!jsonBand.HasMember("effects") || !jsonBand["effects"].IsArray()) {
+        std::cerr << "Missing or invalid list of effects" << std::endl;
+        continue;
+      }
+    }
+
     types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
     double blockLength = jsonBand["block_length"].GetDouble();
     int lowerLimit = jsonBand["lower_frequency_limit"].GetInt();
@@ -440,9 +445,16 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
-        std::cerr << "Missing or invalid list of keyframes" << std::endl;
-        continue;
+      if (band.getBandType() != types::BandType::WaveletWave) {
+        if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
+          std::cerr << "Missing or invalid list of keyframes" << std::endl;
+          continue;
+        }
+      } else {
+        if (!jsonEffect.HasMember("bitstream")) {
+          std::cerr << "Missing bitstream" << std::endl;
+          continue;
+        }
       }
     }
 
@@ -464,7 +476,7 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
     if (jsonEffect.HasMember("bitstream")) {
-      loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["bitstream"], effect);
+      loadingSuccess = loadingSuccess && loadBitstream(jsonEffect["bitstream"], effect);
     }
 
     band.addEffect(effect);

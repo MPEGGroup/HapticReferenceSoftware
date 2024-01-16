@@ -1858,7 +1858,8 @@ auto IOStream::createWaveletPayload(StreamWriter &swriter,
        i += nbWaveBlock) {
     std::vector<bool> bufbitstream = std::vector<bool>();
     types::Effect bufEffect = swriter.bandStream.band.getEffectAt(i);
-    if (bufEffect.getKeyframesSize() > 1) {
+    //TODO: is this according to the intention of the previous check for keyframes?
+    if (!bufEffect.getWaveletBitstream().empty()) {
       IOBinaryBands::writeWaveletEffect(bufEffect, bufbitstream);
       bitstream.push_back(bufbitstream);
     }
@@ -2309,7 +2310,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
       static_cast<int>((double)timescale * band.getBlockLength() * (double)band.getEffectsSize() /
                        (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
-
+  
   IOBinaryBands::readWaveletEffect(effect, bitstream, idx);
   length += idx;
   return true;

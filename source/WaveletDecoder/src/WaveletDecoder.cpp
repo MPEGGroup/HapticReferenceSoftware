@@ -61,7 +61,7 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
     return;
   }
   size_t numBlocks = band.getEffectsSize();
-  auto bl = (int)band.getEffectAt(0).getKeyframesSize() - 2;
+  auto bl = (int)(band.getBlockLength() * MS_2_S_WAVELET * (double)band.getUpperFrequencyLimit());
   int dwtlevel = (int)log2((double)bl / 4);
 
   for (uint32_t b = 0; b < numBlocks; b++) {
