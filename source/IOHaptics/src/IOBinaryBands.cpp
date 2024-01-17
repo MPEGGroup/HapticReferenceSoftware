@@ -361,24 +361,24 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::istream &file,
                                       std::vector<bool> &unusedBits) -> bool {
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
-
-  auto instream = effect.getWaveletBitstream();
-  instream.resize(size);
-  for (auto &b : instream) {
+  auto outstream = std::vector<unsigned char>();
+  outstream.resize(size);
+  for (auto &b : outstream) {
     b = IOBinaryPrimitives::readNBits<unsigned char, BYTE_SIZE>(file, unusedBits);
   }
-
+  effect.setWaveletBitstream(outstream);
   return true;
 }
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::vector<bool> &bitstream, int &idx)
     -> bool {
 
-  auto instream = effect.getWaveletBitstream();
-  instream.resize(instream.size());
-  for (auto &b : instream) {
+  auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
+  auto outstream = std::vector<unsigned char>();
+  outstream.resize(size);
+  for (auto &b : outstream) {
     b = static_cast<unsigned char>(IOBinaryPrimitives::readUInt(bitstream, idx, BYTE_SIZE));
   }
-
+  effect.setWaveletBitstream(outstream);
   return true;
 }
 

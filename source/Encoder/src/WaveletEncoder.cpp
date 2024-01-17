@@ -114,6 +114,10 @@ void WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     }
   }
 
+  if (bitbudget > ((int)book.size() * spiht::MAXBITS)) {
+    bitbudget = ((int)book.size() * spiht::MAXBITS);
+  }
+
   while (bitalloc_sum < bitbudget) {
 
     updateNoise(pm_result.bandenergy, noiseenergy, SNR, MNR, pm_result.SMR);
@@ -155,7 +159,6 @@ void WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   }
   scalar = qwavmax;
   maxbits = bitmax;
-
   spihtEnc.encodeEffect(block_intquant, maxbits, scalar, bitstream);
 }
 

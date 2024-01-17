@@ -625,9 +625,10 @@ auto IOJson::loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect 
 auto IOJson::loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect &effect) -> bool {
   const auto *const stream = jsonBitstream.GetString();
   auto length = jsonBitstream.GetStringLength();
-  auto effectStream = effect.getWaveletBitstream();
+  auto effectStream = std::vector<unsigned char>();
   std::string temp(stream, length);
   std::copy(temp.begin(), temp.end(), std::back_inserter(effectStream));
+  effect.setWaveletBitstream(effectStream);
   return true;
 }
 
@@ -937,7 +938,7 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
           auto stream = effect.getWaveletBitstream();
           std::string streamString(stream.begin(), stream.end());
           jsonEffect.AddMember("bitstream",
-                               rapidjson::Value(streamString.c_str(), streamString.length()),
+                               rapidjson::Value(streamString.c_str(), jsonTree.GetAllocator()),
                                jsonTree.GetAllocator());
         } else {
           auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);

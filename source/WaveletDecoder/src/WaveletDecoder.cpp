@@ -75,8 +75,9 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
     Effect newEffect;
     newEffect.setPosition(
         (int)((double)b * (double)bl * (double)timescale / (double)band.getUpperFrequencyLimit()));
-    auto block_time = newEffect.getWaveletSamples();
+    auto block_time = std::vector<double>();
     decodeBlock(block_dwt, block_time, scalar, dwtlevel);
+    newEffect.setWaveletSamples(block_time);
     band.replaceEffectAt((int)b, newEffect);
   }
 }

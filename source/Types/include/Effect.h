@@ -124,7 +124,9 @@ public:
       -> double;
 
   auto getWaveletBitstream() -> std::vector<unsigned char> &;
+  void setWaveletBitstream(std::vector<unsigned char> stream);
   auto getWaveletSamples() -> std::vector<double> &;
+  void setWaveletSamples(std::vector<double> samples);
 
 private:
   int id = -1;
