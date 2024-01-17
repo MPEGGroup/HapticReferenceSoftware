@@ -425,8 +425,6 @@ void Effect::setWaveletBitstream(std::vector<unsigned char> stream) {
 
 auto Effect::getWaveletSamples() -> std::vector<double> & { return waveletSamples; }
 
-void Effect::setWaveletSamples(std::vector<double> samples) {
-  waveletSamples = std::move(samples);
-}
+void Effect::setWaveletSamples(std::vector<double> samples) { waveletSamples = std::move(samples); }
 
 } // namespace haptics::types
