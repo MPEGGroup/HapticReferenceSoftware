@@ -59,6 +59,7 @@ void Spiht_Enc::encodeEffect(std::vector<int> &block, const int bits, const doub
   encode(block, level, bitwavmax, bits, stream_spiht, context);
   std::vector<unsigned char> stream_arithmetic;
   arithEnc.encode(stream_spiht, context, stream_arithmetic);
+  arithEnc.resetCounter();
   ArithEnc::convert2bytes(stream_arithmetic, outstream);
 }
 

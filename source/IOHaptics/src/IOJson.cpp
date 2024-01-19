@@ -628,7 +628,16 @@ auto IOJson::loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect 
   auto effectStream = std::vector<unsigned char>();
   std::string temp(stream, length);
   std::copy(temp.begin(), temp.end(), std::back_inserter(effectStream));
-  effect.setWaveletBitstream(effectStream);
+  for (auto &b : effectStream) {
+    if (b == '0') {
+      b = (unsigned char)0;
+    } else {
+      b = (unsigned char)1;
+    }
+  }
+  auto effectStream_bytes = std::vector<unsigned char>();
+  bits2bytes(effectStream, effectStream_bytes);
+  effect.setWaveletBitstream(effectStream_bytes);
   return true;
 }
 
@@ -936,7 +945,16 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
             jsonTree.GetAllocator());
         if (band.getBandType() == types::BandType::WaveletWave) {
           auto stream = effect.getWaveletBitstream();
-          std::string streamString(stream.begin(), stream.end());
+          auto stream_bits = std::vector<unsigned char>();
+          bytes2bits(stream, stream_bits);
+          for (auto &b : stream_bits) {
+            if ((int)b == 0) {
+              b = '0';
+            } else {
+              b = '1';
+            }
+          }
+          std::string streamString(stream_bits.begin(), stream_bits.end());
           jsonEffect.AddMember("bitstream",
                                rapidjson::Value(streamString.c_str(), jsonTree.GetAllocator()),
                                jsonTree.GetAllocator());
@@ -1057,4 +1075,37 @@ auto IOJson::extractVector(types::Vector &vector, rapidjson::Value &jsonVector,
   jsonVector.AddMember("Y", vector.Y, jsonTree.GetAllocator());
   jsonVector.AddMember("Z", vector.Z, jsonTree.GetAllocator());
 }
+
+auto IOJson::bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.resize(in.size() * BYTE_SIZE_IO);
+  int index = 0;
+  for (auto &v : in) {
+    std::bitset<BYTE_SIZE_IO> temp((unsigned long)v);
+    for (int j = 0; j < BYTE_SIZE_IO; j++) {
+      if (temp[j]) {
+        out.at(index) = 1;
+      }
+      index++;
+    }
+  }
+}
+
+auto IOJson::bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.resize(ceil((double)in.size() / BYTE_SIZE_IO));
+  size_t index = 0;
+  for (auto &v : out) {
+    std::bitset<BYTE_SIZE_IO> temp;
+    for (int j = 0; j < BYTE_SIZE_IO; j++) {
+      if (index >= in.size()) {
+        break;
+      }
+      if (in.at(index) == 1) {
+        temp[j] = true;
+      }
+      index++;
+    }
+    v = (unsigned char)temp.to_ulong();
+  }
+}
+
 } // namespace haptics::io

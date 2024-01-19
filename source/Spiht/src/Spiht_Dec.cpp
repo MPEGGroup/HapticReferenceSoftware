@@ -66,7 +66,7 @@ void Spiht_Dec::decode(std::vector<unsigned char> &bitstream, std::vector<int> &
     n--;
   }
 
-  arithDec.rescaleCounter();
+  arithDec.resetCounter();
 }
 
 void Spiht_Dec::initLists(int origlength, int level) {

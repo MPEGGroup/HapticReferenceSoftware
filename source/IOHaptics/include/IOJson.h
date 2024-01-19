@@ -35,6 +35,8 @@
 #define IOJSON_H
 
 #include <Types/include/Haptics.h>
+#include <bitset>
+#include <cmath>
 #include <map>
 #include <string>
 
@@ -48,6 +50,9 @@
 #endif
 
 namespace haptics::io {
+
+constexpr int BYTE_SIZE_IO = 8;
+
 class IOJson {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
@@ -86,6 +91,9 @@ public:
                            rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
+
+  static auto bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
+  static auto bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
 };
 } // namespace haptics::io
 #endif // IOJSON_H
