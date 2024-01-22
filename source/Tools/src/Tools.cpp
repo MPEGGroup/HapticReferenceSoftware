@@ -392,7 +392,7 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return interpolation;
 }
 
-bool is_number(const std::string &s) {
+[[nodiscard]] auto is_number(const std::string &s) -> bool {
   std::string::const_iterator it = s.begin();
   while (it != s.end() && std::isdigit(*it))
     ++it;
