@@ -52,8 +52,8 @@ namespace haptics::io {
 
 class MyRemoteSchemaDocumentProvider : public rapidjson::IRemoteSchemaDocumentProvider {
 public:
-  virtual auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
-      -> const rapidjson::SchemaDocument *;
+  auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
+      -> const rapidjson::SchemaDocument * override;
   // MyRemoteSchemaDocumentProvider(std::vector<std::string> &newSchemaDocuments)
   //     : schemaDocuments(newSchemaDocuments){}
   //
@@ -63,6 +63,14 @@ public:
 
 class IOJson {
 public:
+  static constexpr int MAX_TIMESCALE_PARAMETRIC = 1000;
+  static constexpr int MAX_TIMESCALE_MAIN = 48000;
+  static constexpr int MAX_CHANNELS_LEVEL1 = 127;
+  static constexpr int MAX_CHANNELS_LEVEL2 = 65535;
+  static constexpr int MAX_BANDS_LEVEL1 = 7;
+  static constexpr int MAX_BANDS_LEVEL2 = 63;
+  static constexpr int VECTOR_RANGE = 48000;
+
   static auto versionCheck(const std::string &version, bool log) -> bool;
   static auto dateCheck(const std::string &date, bool log) -> bool;
   static auto URICheck(const std::string &uri, bool log) -> bool;

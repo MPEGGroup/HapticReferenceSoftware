@@ -33,8 +33,9 @@
 
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOJsonPrimitives.h>
-#include <Tools/include/tools.h>
+#include <Tools/include/Tools.h>
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -76,7 +77,8 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
     }
   }
   // schemaDocuments.push_back(uriString);
-  rapidjson::SchemaDocument *m_s = new rapidjson::SchemaDocument(sd, 0, 0U, this);
+  rapidjson::SchemaDocument *m_s = nullptr;
+  m_s = new rapidjson::SchemaDocument(sd, 0, 0U, this);
   return m_s;
 }
 
@@ -110,38 +112,49 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
   std::smatch pieces_match;
   if (regex_search(version, pieces_match, txt_regex) && pieces_match.size() >= 1) {
     if (haptics::tools::is_number(pieces_match[1])) {
-      int year = atoi(pieces_match[1].str().c_str());
+      int year = 0;
+      std::from_chars(pieces_match[1].str().data(),
+                      pieces_match[1].str().data() + pieces_match[1].str().size(), year);
+      //int year = atoi(pieces_match[1].str().c_str());
       if (year < 2023) {
-        if (log)
+        if (log) {
           std::cerr << "Invalid version, the year should be greater or equal to 2023." << std::endl;
+        }
         return false;
       }
     } else {
-      if (log)
+      if (log) {
         std::cerr << "Invalid version, the year should be a number." << std::endl;
+      }
       return false;
     }
     if (pieces_match.size() >= 4) {
       if (pieces_match[3] != "") {
         if (haptics::tools::is_number(pieces_match[3])) {
-          int amd = atoi(pieces_match[3].str().c_str());
+          int amd = 0;
+          std::from_chars(pieces_match[3].str().data(),
+                          pieces_match[3].str().data() + pieces_match[3].str().size(), amd);
+          //int amd = atoi(pieces_match[3].str().c_str());
           if (amd <= 0) {
-            if (log)
+            if (log) {
               std::cerr << "Invalid version, the amendment should be greater than 0." << std::endl;
+            }
             return false;
           }
         } else {
-          if (log)
+          if (log) {
             std::cerr << "Invalid version, the amendement should be a number." << std::endl;
+          }
           return false;
         }
       }
     }
   } else {
-    if (log)
+    if (log) {
       std::cerr << "Invalid version, the value should match the following format: XXXX or XXXX-Y, "
                    "where XXXX is the year of publication and Y is the amendment number, if any."
                 << std::endl;
+    }
     return false;
   }
   return true;
@@ -155,7 +168,7 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
   // check profile
   auto profile = haptic.getProfile();
   if (profile != "Main" && profile != "Simple Parametric") {
-    std::cerr << "Invalid profile, possible values are \"Main\" and \"Simple Parametric\"."
+    std::cerr << R"(Invalid profile, possible values are "Main" and "Simple Parametric".)"
               << std::endl;
     conformant = false;
   }
@@ -175,11 +188,11 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
     if (timescale < 0) {
       std::cerr << "Invalid timescale. The value must be greater than zero." << std::endl;
       conformant = false;
-    } else if (profile == "Simple Parametric" && timescale != 1000) {
+    } else if (profile == "Simple Parametric" && timescale != MAX_TIMESCALE_PARAMETRIC) {
       std::cerr << "Invalid timescale. The simple parametric profile only supports a value of 1000."
                 << std::endl;
       conformant = false;
-    } else if (profile == "Main" && timescale > 48000) {
+    } else if (profile == "Main" && timescale > MAX_TIMESCALE_MAIN) {
       std::cerr << "Invalid timescale. The main profile only supports a value lower than or equal "
                    "to 48000"
                 << std::endl;
@@ -187,11 +200,11 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
     }
   }
 
-  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+  for (int i = 0; i < haptic.getAvatarsSize(); i++) {
     conformant &= semanticConformanceCheckAvatar(haptic.getAvatarAt(i), haptic);
   }
 
-  for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
+  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
     conformant &= semanticConformanceCheckPerception(haptic.getPerceptionAt(i), haptic);
   }
 
@@ -202,7 +215,7 @@ auto IOJson::semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptic
   // check id uniqueness
   auto id = avatar.getId();
   unsigned int nbInstances = 0;
-  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+  for (int i = 0; i < haptic.getAvatarsSize(); i++) {
     if (haptic.getAvatarAt(i).getId() == id) {
       nbInstances++;
     }
@@ -230,7 +243,7 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
   // check id uniqueness
   auto id = perception.getId();
   unsigned int nbInstances = 0;
-  for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
+  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
     if (haptic.getPerceptionAt(i).getId() == id) {
       nbInstances++;
     }
@@ -259,7 +272,7 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
   // check that the avatar id exists
   auto avatarId = perception.getAvatarId();
   bool validAvatarId = false;
-  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+  for (int i = 0; i < haptic.getAvatarsSize(); i++) {
     if (haptic.getAvatarAt(i).getId() == avatarId) {
       validAvatarId = true;
     }
@@ -280,29 +293,29 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
 
   // check the number of channels
   if (haptic.getLevel() == 1) {
-    if (perception.getChannelsSize() > 128) {
+    if (perception.getChannelsSize() > MAX_CHANNELS_LEVEL1) {
       std::cerr << "The number of channels in perception " << id
                 << " is too high. The level 1 only supports up to 128 channels." << std::endl;
       conformant = false;
     }
   } else if (haptic.getLevel() == 2) {
-    if (perception.getChannelsSize() > 65536) {
+    if (perception.getChannelsSize() > MAX_CHANNELS_LEVEL2) {
       std::cerr << "The number of channels in perception " << id
                 << " is too high. The level 2 only supports up to 65536 channels." << std::endl;
       conformant = false;
     }
   }
 
-  for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+  for (int i = 0; i < perception.getReferenceDevicesSize(); i++) {
     conformant &=
         semanticConformanceCheckReferenceDevice(perception.getReferenceDeviceAt(i), perception);
   }
 
-  for (unsigned int i = 0; i < perception.getChannelsSize(); i++) {
+  for (int i = 0; i < perception.getChannelsSize(); i++) {
     conformant &= semanticConformanceCheckChannel(perception.getChannelAt(i), perception, haptic);
   }
 
-  for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+  for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
     conformant &=
         semanticConformanceCheckLibraryEffect(perception.getBasisEffectAt(i), perception, haptic);
   }
@@ -315,7 +328,7 @@ auto IOJson::semanticConformanceCheckReferenceDevice(types::ReferenceDevice &ref
   // check id uniqueness
   auto id = referenceDevice.getId();
   unsigned int nbInstances = 0;
-  for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+  for (int i = 0; i < perception.getReferenceDevicesSize(); i++) {
     if (perception.getReferenceDeviceAt(i).getId() == id) {
       nbInstances++;
     }
@@ -362,7 +375,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   // check id uniqueness
   auto id = channel.getId();
   unsigned int nbInstances = 0;
-  for (unsigned int i = 0; i < perception.getChannelsSize(); i++) {
+  for (int i = 0; i < perception.getChannelsSize(); i++) {
     if (perception.getChannelAt(i).getId() == id) {
       nbInstances++;
     }
@@ -377,7 +390,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   auto referenceDeviceId = channel.getReferenceDeviceId();
   if (referenceDeviceId.has_value()) {
     bool validReferenceDeviceId = false;
-    for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+    for (int i = 0; i < perception.getReferenceDevicesSize(); i++) {
       if (perception.getReferenceDeviceAt(i).getId() == referenceDeviceId) {
         validReferenceDeviceId = true;
       }
@@ -392,9 +405,9 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   // check direction is unitary
   auto dir = channel.getDirection();
   if (dir.has_value()) {
-    auto x_norm = dir.value().X / 127.0f;
-    auto y_norm = dir.value().Y / 127.0f;
-    auto z_norm = dir.value().Z / 127.0f;
+    auto x_norm = dir.value().X / static_cast<float>(VECTOR_RANGE);
+    auto y_norm = dir.value().Y / static_cast<float>(VECTOR_RANGE);
+    auto z_norm = dir.value().Z / static_cast<float>(VECTOR_RANGE);
     auto norm = std::sqrt(std::pow(x_norm, 2) + std::pow(y_norm, 2) + std::pow(z_norm, 2));
     if (norm < 0.99 || norm > 1.01) {
       std::cerr << "The direction in channel " << id << " of perception " << perception.getId()
@@ -452,7 +465,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
     conformant = false;
   }
 
-  for (unsigned int i = 0; i < channel.getBandsSize(); i++) {
+  for (int i = 0; i < channel.getBandsSize(); i++) {
     conformant &= semanticConformanceCheckBand(channel.getBandAt(i), channel, perception, haptic);
   }
 
@@ -484,7 +497,7 @@ auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &cha
               << std::endl;
   }
 
-  for (unsigned int i = 0; i < band.getEffectsSize(); i++) {
+  for (int i = 0; i < band.getEffectsSize(); i++) {
     conformant &=
         semanticConformanceCheckEffect(band.getEffectAt(i), band, channel, perception, haptic);
   }
@@ -506,7 +519,7 @@ auto IOJson::semanticConformanceCheckEffect(types::Effect &effect, types::Band &
   if (effect.getEffectType() == types::EffectType::Reference) {
     auto id = effect.getId();
     bool inLibrary = false;
-    for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+    for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
       if (perception.getBasisEffectAt(i).getId() == id)
         ;
       inLibrary = true;
@@ -550,7 +563,7 @@ auto IOJson::semanticConformanceCheckLibraryEffect(types::Effect &effect,
   // check id uniqueness
   auto id = effect.getId();
   unsigned int nbInstances = 0;
-  for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+  for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
     if (perception.getBasisEffectAt(i).getId() == id) {
       nbInstances++;
     }
