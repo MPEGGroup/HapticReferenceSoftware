@@ -115,7 +115,7 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
       int year = 0;
       std::from_chars(pieces_match[1].str().data(),
                       pieces_match[1].str().data() + pieces_match[1].str().size(), year);
-      //int year = atoi(pieces_match[1].str().c_str());
+      // int year = atoi(pieces_match[1].str().c_str());
       if (year < 2023) {
         if (log) {
           std::cerr << "Invalid version, the year should be greater or equal to 2023." << std::endl;
@@ -134,7 +134,7 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
           int amd = 0;
           std::from_chars(pieces_match[3].str().data(),
                           pieces_match[3].str().data() + pieces_match[3].str().size(), amd);
-          //int amd = atoi(pieces_match[3].str().c_str());
+          // int amd = atoi(pieces_match[3].str().c_str());
           if (amd <= 0) {
             if (log) {
               std::cerr << "Invalid version, the amendment should be greater than 0." << std::endl;
