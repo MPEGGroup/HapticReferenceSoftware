@@ -199,8 +199,7 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
       conformant = false;
     }
   }
-  auto nbAvatars = haptic.getAvatarsSize();
-  for (decltype(nbAvatars) i = 0; i < haptic.getAvatarsSize(); i++) {
+  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
     conformant &= semanticConformanceCheckAvatar(haptic.getAvatarAt(static_cast<int>(i)), haptic);
   }
 
@@ -216,8 +215,8 @@ auto IOJson::semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptic
   // check id uniqueness
   auto id = avatar.getId();
   unsigned int nbInstances = 0;
-  for (int i = 0; i < haptic.getAvatarsSize(); i++) {
-    if (haptic.getAvatarAt(i).getId() == id) {
+  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+    if (haptic.getAvatarAt(static_cast<int>(i)).getId() == id) {
       nbInstances++;
     }
   }
@@ -244,8 +243,8 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
   // check id uniqueness
   auto id = perception.getId();
   unsigned int nbInstances = 0;
-  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    if (haptic.getPerceptionAt(i).getId() == id) {
+  for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
+    if (haptic.getPerceptionAt(static_cast<int>(i)).getId() == id) {
       nbInstances++;
     }
   }
@@ -273,8 +272,8 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
   // check that the avatar id exists
   auto avatarId = perception.getAvatarId();
   bool validAvatarId = false;
-  for (int i = 0; i < haptic.getAvatarsSize(); i++) {
-    if (haptic.getAvatarAt(i).getId() == avatarId) {
+  for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
+    if (haptic.getAvatarAt(static_cast<int>(i)).getId() == avatarId) {
       validAvatarId = true;
     }
   }
@@ -307,18 +306,19 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
     }
   }
 
-  for (int i = 0; i < perception.getReferenceDevicesSize(); i++) {
-    conformant &=
-        semanticConformanceCheckReferenceDevice(perception.getReferenceDeviceAt(i), perception);
+  for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+    conformant &= semanticConformanceCheckReferenceDevice(
+        perception.getReferenceDeviceAt(static_cast<int>(i)), perception);
   }
 
-  for (int i = 0; i < perception.getChannelsSize(); i++) {
-    conformant &= semanticConformanceCheckChannel(perception.getChannelAt(i), perception, haptic);
+  for (unsigned int i = 0; i < perception.getChannelsSize(); i++) {
+    conformant &= semanticConformanceCheckChannel(perception.getChannelAt(static_cast<int>(i)),
+                                                  perception, haptic);
   }
 
-  for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
-    conformant &=
-        semanticConformanceCheckLibraryEffect(perception.getBasisEffectAt(i), perception, haptic);
+  for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+    conformant &= semanticConformanceCheckLibraryEffect(
+        perception.getBasisEffectAt(static_cast<int>(i)), perception, haptic);
   }
 
   return conformant;
@@ -329,8 +329,8 @@ auto IOJson::semanticConformanceCheckReferenceDevice(types::ReferenceDevice &ref
   // check id uniqueness
   auto id = referenceDevice.getId();
   unsigned int nbInstances = 0;
-  for (int i = 0; i < perception.getReferenceDevicesSize(); i++) {
-    if (perception.getReferenceDeviceAt(i).getId() == id) {
+  for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+    if (perception.getReferenceDeviceAt(static_cast<int>(i)).getId() == id) {
       nbInstances++;
     }
   }
@@ -376,8 +376,8 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   // check id uniqueness
   auto id = channel.getId();
   unsigned int nbInstances = 0;
-  for (int i = 0; i < perception.getChannelsSize(); i++) {
-    if (perception.getChannelAt(i).getId() == id) {
+  for (unsigned int i = 0; i < perception.getChannelsSize(); i++) {
+    if (perception.getChannelAt(static_cast<int>(i)).getId() == id) {
       nbInstances++;
     }
   }
@@ -391,8 +391,8 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   auto referenceDeviceId = channel.getReferenceDeviceId();
   if (referenceDeviceId.has_value()) {
     bool validReferenceDeviceId = false;
-    for (int i = 0; i < perception.getReferenceDevicesSize(); i++) {
-      if (perception.getReferenceDeviceAt(i).getId() == referenceDeviceId) {
+    for (unsigned int i = 0; i < perception.getReferenceDevicesSize(); i++) {
+      if (perception.getReferenceDeviceAt(static_cast<int>(i)).getId() == referenceDeviceId) {
         validReferenceDeviceId = true;
       }
     }
@@ -406,9 +406,9 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   // check direction is unitary
   auto dir = channel.getDirection();
   if (dir.has_value()) {
-    auto x_norm = dir.value().X / static_cast<float>(VECTOR_RANGE);
-    auto y_norm = dir.value().Y / static_cast<float>(VECTOR_RANGE);
-    auto z_norm = dir.value().Z / static_cast<float>(VECTOR_RANGE);
+    auto x_norm = static_cast<float>(dir.value().X) / VECTOR_RANGE;
+    auto y_norm = static_cast<float>(dir.value().Y) / VECTOR_RANGE;
+    auto z_norm = static_cast<float>(dir.value().Z) / VECTOR_RANGE;
     auto norm = std::sqrt(std::pow(x_norm, 2) + std::pow(y_norm, 2) + std::pow(z_norm, 2));
     if (norm < MIN_UNIT_VECTOR_NORM || norm > MAX_UNIT_VECTOR_NORM) {
       std::cerr << "The direction in channel " << id << " of perception " << perception.getId()
@@ -466,8 +466,9 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
     conformant = false;
   }
 
-  for (int i = 0; i < channel.getBandsSize(); i++) {
-    conformant &= semanticConformanceCheckBand(channel.getBandAt(i), channel, perception, haptic);
+  for (unsigned int i = 0; i < channel.getBandsSize(); i++) {
+    conformant &= semanticConformanceCheckBand(channel.getBandAt(static_cast<int>(i)), channel,
+                                               perception, haptic);
   }
 
   return conformant;
@@ -498,9 +499,9 @@ auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &cha
               << std::endl;
   }
 
-  for (int i = 0; i < band.getEffectsSize(); i++) {
-    conformant &=
-        semanticConformanceCheckEffect(band.getEffectAt(i), band, channel, perception, haptic);
+  for (unsigned int i = 0; i < band.getEffectsSize(); i++) {
+    conformant &= semanticConformanceCheckEffect(band.getEffectAt(static_cast<int>(i)), band,
+                                                 channel, perception, haptic);
   }
 
   return conformant;
@@ -520,15 +521,17 @@ auto IOJson::semanticConformanceCheckEffect(types::Effect &effect, types::Band &
   if (effect.getEffectType() == types::EffectType::Reference) {
     auto id = effect.getId();
     bool inLibrary = false;
-    for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
-      if (perception.getBasisEffectAt(i).getId() == id) {
+    for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+      if (perception.getBasisEffectAt(static_cast<int>(i)).getId() == id) {
         inLibrary = true;
         break;
       }
     }
     if (!inLibrary) {
-      std::cerr << "Effect id " << id << " of channel " << channel.getId() << " of perception "
-                << perception.getId() << " can't be found in the effect library." << std::endl;
+      std::cerr << "Effect id " << id << " of band "
+                << types::bandTypeToString.at(band.getBandType()) << " of channel "
+                << channel.getId() << " of perception " << perception.getId()
+                << " can't be found in the effect library." << std::endl;
       conformant = false;
     }
   }
@@ -564,8 +567,8 @@ auto IOJson::semanticConformanceCheckLibraryEffect(types::Effect &effect,
   // check id uniqueness
   auto id = effect.getId();
   unsigned int nbInstances = 0;
-  for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
-    if (perception.getBasisEffectAt(i).getId() == id) {
+  for (unsigned int i = 0; i < perception.getEffectLibrarySize(); i++) {
+    if (perception.getBasisEffectAt(static_cast<int>(i)).getId() == id) {
       nbInstances++;
     }
   }
