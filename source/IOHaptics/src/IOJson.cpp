@@ -205,7 +205,8 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
   }
 
   for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    conformant &= semanticConformanceCheckPerception(haptic.getPerceptionAt(static_cast<int>(i)), haptic);
+    conformant &=
+        semanticConformanceCheckPerception(haptic.getPerceptionAt(static_cast<int>(i)), haptic);
   }
 
   return conformant;
