@@ -361,8 +361,9 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
                                       std::vector<bool> &unusedBits, const unsigned int timescale)
     -> bool {
-  if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value())
+  if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value()) {
     return false;
+  }
   spiht::Spiht_Dec dec;
   auto blocklength = (int)(band.getBlockLength().value() * (double)band.getUpperFrequencyLimit()) /
                      (double)timescale;
@@ -380,8 +381,9 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
 auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
                                       std::vector<bool> &bitstream, int &idx,
                                       const unsigned int timescale) -> bool {
-  if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value())
+  if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value()) {
     return false;
+  }
   spiht::Spiht_Dec dec;
   auto blocklength =
       band.getBlockLength().value() * band.getUpperFrequencyLimit() / (double)timescale;

@@ -78,7 +78,7 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
   }
   // schemaDocuments.push_back(uriString);
   rapidjson::SchemaDocument *m_s = nullptr;
-  m_s = new rapidjson::SchemaDocument(sd, 0, 0U, this);
+  m_s = new rapidjson::SchemaDocument(sd, nullptr, 0U, this);
   return m_s;
 }
 
@@ -96,7 +96,7 @@ auto IOJson::URICheck(const std::string &uri, bool log) -> bool {
 
 auto IOJson::dateCheck(const std::string &date, bool log) -> bool {
   const std::regex txt_regex("[+-]?[0-9]{4}(-[01][0-9](-[0-3][0-9](T[0-2][0-9]:[0-5][0-9]:?([0-5]["
-                             "0-9](\.[0-9]+)?)?[+-][0-2][0-9]:[0-5][0-9]Z?)?)?)?");
+                             "0-9](.[0-9]+)?)?[+-][0-2][0-9]:[0-5][0-9]Z?)?)?)?");
   std::smatch pieces_match;
   if (!regex_search(date, pieces_match, txt_regex)) {
     if (log) {
@@ -110,13 +110,13 @@ auto IOJson::dateCheck(const std::string &date, bool log) -> bool {
 auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
   const std::regex txt_regex("^([0-9]{4})(-([0-9]))?$");
   std::smatch pieces_match;
-  if (regex_search(version, pieces_match, txt_regex) && pieces_match.size() >= 1) {
+  if (regex_search(version, pieces_match, txt_regex) && !pieces_match.empty()) {
     if (haptics::tools::is_number(pieces_match[1])) {
       int year = 0;
       std::from_chars(pieces_match[1].str().data(),
                       pieces_match[1].str().data() + pieces_match[1].str().size(), year);
       // int year = atoi(pieces_match[1].str().c_str());
-      if (year < 2023) {
+      if (year < MIN_VERSION_YEAR) {
         if (log) {
           std::cerr << "Invalid version, the year should be greater or equal to 2023." << std::endl;
         }
@@ -199,13 +199,13 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
       conformant = false;
     }
   }
-
-  for (int i = 0; i < haptic.getAvatarsSize(); i++) {
-    conformant &= semanticConformanceCheckAvatar(haptic.getAvatarAt(i), haptic);
+  auto nbAvatars = haptic.getAvatarsSize();
+  for (decltype(nbAvatars) i = 0; i < haptic.getAvatarsSize(); i++) {
+    conformant &= semanticConformanceCheckAvatar(haptic.getAvatarAt(static_cast<int>(i)), haptic);
   }
 
-  for (int i = 0; i < haptic.getPerceptionsSize(); i++) {
-    conformant &= semanticConformanceCheckPerception(haptic.getPerceptionAt(i), haptic);
+  for (unsigned int i = 0; i < haptic.getPerceptionsSize(); i++) {
+    conformant &= semanticConformanceCheckPerception(haptic.getPerceptionAt(static_cast<int>(i)), haptic);
   }
 
   return conformant;
@@ -409,7 +409,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
     auto y_norm = dir.value().Y / static_cast<float>(VECTOR_RANGE);
     auto z_norm = dir.value().Z / static_cast<float>(VECTOR_RANGE);
     auto norm = std::sqrt(std::pow(x_norm, 2) + std::pow(y_norm, 2) + std::pow(z_norm, 2));
-    if (norm < 0.99 || norm > 1.01) {
+    if (norm < MIN_UNIT_VECTOR_NORM || norm > MAX_UNIT_VECTOR_NORM) {
       std::cerr << "The direction in channel " << id << " of perception " << perception.getId()
                 << " is not a unit vector." << std::endl;
       conformant = false;
@@ -418,7 +418,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
 
   // check the number of bands
   if (haptic.getLevel() == 1) {
-    if (channel.getBandsSize() > 7) {
+    if (channel.getBandsSize() > MAX_BANDS_LEVEL1) {
       std::cerr << "The number of bands in channel " << id << " of perception "
                 << perception.getId()
                 << " is too high. The level 1 only supports up to 7 bands per channel."
@@ -426,7 +426,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
       conformant = false;
     }
   } else if (haptic.getLevel() == 2) {
-    if (channel.getBandsSize() > 64) {
+    if (channel.getBandsSize() > MAX_BANDS_LEVEL2) {
       std::cerr << "The number of channels in channel " << id << " of perception "
                 << perception.getId()
                 << " is too high. The level 2 only supports up to 65536 bands per channel."
@@ -441,7 +441,7 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
     auto resX = resolution.value().X;
     auto resY = resolution.value().Y;
     auto resZ = resolution.value().Z;
-    if (resX < 0 || resolution.value().Y || resolution.value().Z) {
+    if (resX < 0 || resY < 0 || resZ < 0) {
       std::cerr << "The actuator resolution in channel " << id << " of perception "
                 << perception.getId() << " is invalid. It contains a negative value." << std::endl;
       conformant = false;
@@ -520,10 +520,10 @@ auto IOJson::semanticConformanceCheckEffect(types::Effect &effect, types::Band &
     auto id = effect.getId();
     bool inLibrary = false;
     for (int i = 0; i < perception.getEffectLibrarySize(); i++) {
-      if (perception.getBasisEffectAt(i).getId() == id)
-        ;
-      inLibrary = true;
-      break;
+      if (perception.getBasisEffectAt(i).getId() == id) {
+        inLibrary = true;
+        break;
+      }
     }
     if (!inLibrary) {
       std::cerr << "Effect id " << id << " of channel " << channel.getId() << " of perception "

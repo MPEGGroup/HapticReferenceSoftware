@@ -70,6 +70,9 @@ public:
   static constexpr int MAX_BANDS_LEVEL1 = 7;
   static constexpr int MAX_BANDS_LEVEL2 = 63;
   static constexpr int VECTOR_RANGE = 48000;
+  static constexpr float MIN_UNIT_VECTOR_NORM = 0.99f;
+  static constexpr float MAX_UNIT_VECTOR_NORM = 1.01f;
+  static constexpr int MIN_VERSION_YEAR = 2023;
 
   static auto versionCheck(const std::string &version, bool log) -> bool;
   static auto dateCheck(const std::string &date, bool log) -> bool;
