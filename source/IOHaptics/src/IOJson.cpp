@@ -77,7 +77,6 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
     }
   }
   // schemaDocuments.push_back(uriString);
-  rapidjson::SchemaDocument *m_s = nullptr;
   return new rapidjson::SchemaDocument(sd, nullptr, 0U, this);
 }
 
