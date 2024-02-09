@@ -78,8 +78,7 @@ auto MyRemoteSchemaDocumentProvider::GetRemoteDocument(const char *uri, rapidjso
   }
   // schemaDocuments.push_back(uriString);
   rapidjson::SchemaDocument *m_s = nullptr;
-  m_s = new rapidjson::SchemaDocument(sd, nullptr, 0U, this);
-  return m_s;
+  return new rapidjson::SchemaDocument(sd, nullptr, 0U, this);
 }
 
 auto IOJson::URICheck(const std::string &uri, bool log) -> bool {
@@ -113,9 +112,9 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
   if (regex_search(version, pieces_match, txt_regex) && !pieces_match.empty()) {
     if (haptics::tools::is_number(pieces_match[1])) {
       int year = 0;
-      std::from_chars(pieces_match[1].str().data(),
-                      pieces_match[1].str().data() + pieces_match[1].str().size(), year);
-      // int year = atoi(pieces_match[1].str().c_str());
+      // std::from_chars(pieces_match[1].str().data(),
+      //                 pieces_match[1].str().data() + pieces_match[1].str().size(), year);
+      year = atoi(pieces_match[1].str().c_str());
       if (year < MIN_VERSION_YEAR) {
         if (log) {
           std::cerr << "Invalid version, the year should be greater or equal to 2023." << std::endl;
@@ -132,9 +131,9 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
       if (pieces_match[3] != "") {
         if (haptics::tools::is_number(pieces_match[3])) {
           int amd = 0;
-          std::from_chars(pieces_match[3].str().data(),
-                          pieces_match[3].str().data() + pieces_match[3].str().size(), amd);
-          // int amd = atoi(pieces_match[3].str().c_str());
+          // std::from_chars(pieces_match[3].str().data(),
+          //                 pieces_match[3].str().data() + pieces_match[3].str().size(), amd);
+          amd = atoi(pieces_match[3].str().c_str());
           if (amd <= 0) {
             if (log) {
               std::cerr << "Invalid version, the amendment should be greater than 0." << std::endl;
@@ -591,7 +590,8 @@ auto IOJson::schemaConformanceCheck(const rapidjson::Document &hjifFile,
   if (sd.ParseStream(isw).HasParseError()) {
     std::cerr << "The following JSON schema is invalid: " << path << std::endl;
   }
-  rapidjson::SchemaDocument schema(sd, 0, 0U, &provider); // Compile a Document to SchemaDocument
+  rapidjson::SchemaDocument schema(sd, nullptr, 0U,
+                                   &provider); // Compile a Document to SchemaDocument
 
   rapidjson::SchemaValidator validator(schema);
 

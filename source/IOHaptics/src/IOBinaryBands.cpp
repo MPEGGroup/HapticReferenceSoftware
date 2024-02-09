@@ -63,7 +63,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
 
   if (band.getBandType() == types::BandType::WaveletWave) {
-    double blockLength_ticks = blockLength_samp / (double)upperFrequencyLimit * timescale;
+    auto blockLength_ticks = static_cast<int>(blockLength_samp / (double)upperFrequencyLimit * timescale);
     band.setBlockLength(blockLength_ticks);
   }
   auto effectCount = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_EFFECT_COUNT>(file, unusedBits);
