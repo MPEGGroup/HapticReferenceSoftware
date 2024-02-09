@@ -670,7 +670,8 @@ TEST_CASE("write/read file for body testing") {
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
-  haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0, testingLowerFrequencyLimit_band0,
+  haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
+                                    testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
