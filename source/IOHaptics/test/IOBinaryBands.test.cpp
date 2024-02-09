@@ -213,7 +213,7 @@ TEST_CASE("write/read BandHeader on vectorial wave") {
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandHeader on wavelet wave") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::WaveletWave;
-  const double testingBlockLength = 128;
+  const int testingBlockLength = 128;
   const int testingLowerFrequencyLimit = 65;
   const int testingUpperFrequencyLimit = 8000;
   haptics::types::Band testingBand(testingBandType, testingBlockLength, testingLowerFrequencyLimit,
@@ -516,7 +516,7 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read BandBody on wavelet") {
   const haptics::types::BandType testingBandType = haptics::types::BandType::WaveletWave;
-  const double testingBlockLength = 255;
+  const int testingBlockLength = 255;
   const int testingLowerFrequencyLimit = 75;
   const int testingUpperFrequencyLimit = 1000;
   haptics::types::Band testingBand(testingBandType, testingBlockLength, testingLowerFrequencyLimit,

@@ -49,7 +49,7 @@ TEST_CASE("write/read hjif haptic file without avatar") {
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
   haptics::types::Perception testingPerception(0, 0, "First Percetion",
                                                haptics::types::PerceptionModality::Electrotactile);
-  haptics::types::Channel testingChannel(0, "Testing channel", 1.0f, 1.0f, 0);
+  haptics::types::Channel testingChannel(0, "Testing channel", 1.0F, 1.0F, 0);
   testingPerception.addChannel(testingChannel);
   testingHaptic.addPerception(testingPerception);
 
@@ -98,7 +98,7 @@ TEST_CASE("write/read hjif haptic file for avatar testing") {
 
   haptics::types::Perception testingPerception(0, 0, "First Percetion",
                                                haptics::types::PerceptionModality::Electrotactile);
-  haptics::types::Channel testingChannel(0, "Testing channel", 1.0f, 1.0f, 0);
+  haptics::types::Channel testingChannel(0, "Testing channel", 1.0F, 1.0F, 0);
   testingPerception.addChannel(testingChannel);
   testingHaptic.addPerception(testingPerception);
 
@@ -160,7 +160,7 @@ TEST_CASE("write/read hjif haptic file for reference device testing") {
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
   testingPerception.addReferenceDevice(testingReferenceDeviceValue_perception0);
-  haptics::types::Channel testingChannel(0, "Testing channel", 1.0f, 1.0f, 0);
+  haptics::types::Channel testingChannel(0, "Testing channel", 1.0F, 1.0F, 0);
   testingPerception.addChannel(testingChannel);
   testingHaptic.addPerception(testingPerception);
 
