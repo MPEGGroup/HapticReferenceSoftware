@@ -183,10 +183,7 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
   conformant &= dateCheck(date, true);
   if (haptic.getTimescale().has_value()) {
     auto timescale = haptic.getTimescale().value();
-    if (timescale < 0) {
-      std::cerr << "Invalid timescale. The value must be greater than zero." << std::endl;
-      conformant = false;
-    } else if (profile == "Simple Parametric" && timescale != MAX_TIMESCALE_PARAMETRIC) {
+    if (profile == "Simple Parametric" && timescale != MAX_TIMESCALE_PARAMETRIC) {
       std::cerr << "Invalid timescale. The simple parametric profile only supports a value of 1000."
                 << std::endl;
       conformant = false;
