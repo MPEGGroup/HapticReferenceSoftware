@@ -740,7 +740,6 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
         testingVertices_channel2.size() + 314;
-    auto sizer = std::filesystem::file_size(filename);
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
