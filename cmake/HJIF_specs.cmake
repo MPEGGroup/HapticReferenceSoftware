@@ -9,7 +9,7 @@ if(NO_INTERNET)
 else()
     FetchContent_Declare(HJIF_SPECS
         GIT_REPOSITORY https://git.mpeg.expert/MPEG/3dgh/haptics/mpeg_haptics_json_specifications.git
-		GIT_TAG "main"
+		GIT_TAG "9e7f67434470a8d9b579a4158cd4f03899c041d4"
   		CONFIGURE_COMMAND ""
   		BUILD_COMMAND "")
 endif()

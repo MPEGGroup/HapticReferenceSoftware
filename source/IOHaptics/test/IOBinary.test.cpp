@@ -580,8 +580,8 @@ TEST_CASE("write/read file header for channel testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read file for body testing") {
-  const std::string testingVersion = "RM1";
-  const std::string testingDate = "Today";
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "I'm a testing value";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
@@ -676,21 +676,15 @@ TEST_CASE("write/read file for body testing") {
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
-  const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const int testingBlockLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
-  haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingBlockLength_band1, testingLowerFrequencyLimit_band1,
+  haptics::types::Band testingBand1(testingBandType_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
   const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
-  const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const int testingBlockLength_band2 = 0;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
-  haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingBlockLength_band2, testingLowerFrequencyLimit_band2,
+  haptics::types::Band testingBand2(testingBandType_band2, testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
@@ -746,6 +740,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
         testingVertices_channel2.size() + 314;
+    auto sizer = std::filesystem::file_size(filename);
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -844,14 +839,10 @@ TEST_CASE("write/read file for body testing") {
     REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBandsSize() == 1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getBandType() ==
           testingBandType_band1);
-    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getCurveType() ==
-          testingCurveType_band1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band1);
-    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getBlockLength() ==
-          testingBlockLength_band1);
     REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getEffectsSize() ==
             testingKeyframes_effect1.size());
 
@@ -899,14 +890,10 @@ TEST_CASE("write/read file for body testing") {
     REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getBandsSize() == 1);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getBandType() ==
           testingBandType_band2);
-    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getCurveType() ==
-          testingCurveType_band2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getBlockLength() ==
-          testingBlockLength_band2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
           0);
