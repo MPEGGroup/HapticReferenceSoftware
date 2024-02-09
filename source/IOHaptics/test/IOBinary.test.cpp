@@ -668,11 +668,9 @@ TEST_CASE("write/read file for body testing") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const int testingBlockLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
-  haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingBlockLength_band0, testingLowerFrequencyLimit_band0,
+  haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0, testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
@@ -799,8 +797,6 @@ TEST_CASE("write/read file for body testing") {
           testingLowerFrequencyLimit_band0);
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band0);
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getBlockLength() ==
-          testingBlockLength_band0);
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectsSize() == 1);
 
     // CHECK effect

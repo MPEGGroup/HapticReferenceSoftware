@@ -69,7 +69,7 @@ public:
   static constexpr int MAX_CHANNELS_LEVEL2 = 65535;
   static constexpr int MAX_BANDS_LEVEL1 = 7;
   static constexpr int MAX_BANDS_LEVEL2 = 63;
-  static constexpr int VECTOR_RANGE = 48000;
+  static constexpr int VECTOR_RANGE = 127;
   static constexpr float MIN_UNIT_VECTOR_NORM = 0.99F;
   static constexpr float MAX_UNIT_VECTOR_NORM = 1.01F;
   static constexpr int MIN_VERSION_YEAR = 2023;

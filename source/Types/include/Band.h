@@ -46,10 +46,17 @@ static constexpr int TIMESCALE = 1000;
 class Band {
 public:
   explicit Band() = default;
-  explicit Band(BandType newBandType, CurveType newCurveType, double newBlockLength,
-                int newLowerFrequencyLimit, int newUpperFrequencyLimit)
+  explicit Band(BandType newBandType, CurveType newCurveType, int newLowerFrequencyLimit,
+                int newUpperFrequencyLimit)
       : bandType(newBandType)
       , curveType(newCurveType)
+      , lowerFrequencyLimit(newLowerFrequencyLimit)
+      , upperFrequencyLimit(newUpperFrequencyLimit)
+      , effects({}){};
+
+  explicit Band(BandType newBandType, int newBlockLength, int newLowerFrequencyLimit,
+                int newUpperFrequencyLimit)
+      : bandType(newBandType)
       , blockLength(newBlockLength)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)

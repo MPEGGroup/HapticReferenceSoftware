@@ -113,10 +113,23 @@ auto Channel::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Channel::generateBand(BandType bandType, CurveType curveType, double blockLength,
-                           int lowerFrequencyLimit, int upperFrequencyLimit)
+auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
+  Band newBand(bandType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Channel::generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, curveType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Channel::generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
