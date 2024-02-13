@@ -170,9 +170,9 @@ TEST_CASE("Encoder/Decoder Integration") {
     std::vector<double> sig_time(BL * 2, 0);
     sig_time[0] = 1;
     Band b;
-    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
+    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b, timescale);
 
-    std::vector<double> sig_rec = WaveletDecoder::decodeBand(b);
+    std::vector<double> sig_rec = WaveletDecoder::decodeBand(b, timescale);
     CHECK(sig_time.size() == sig_rec.size());
   }
 }

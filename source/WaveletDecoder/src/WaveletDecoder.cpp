@@ -35,12 +35,12 @@
 
 namespace haptics::waveletdecoder {
 
-auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
+auto WaveletDecoder::decodeBand(Band &band, int timescale) -> std::vector<double> {
   if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value()) {
     return std::vector<double>();
   }
   size_t numBlocks = band.getEffectsSize();
-  int bl = band.getBlockLength().value() * MS_2_S_WAVELET * band.getUpperFrequencyLimit();
+  int bl = band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
   int dwtlevel = (int)log2((double)bl / 4);
   std::vector<double> sig_rec(numBlocks * bl, 0);
 
