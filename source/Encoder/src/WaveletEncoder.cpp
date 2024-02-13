@@ -58,7 +58,7 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   band.setBandType(BandType::WaveletWave);
   band.setLowerFrequencyLimit((int)f_cutoff);
   band.setUpperFrequencyLimit((int)fs);
-  band.setBlockLength(bl / fs * static_cast<int>(timescale));
+  band.setBlockLength(bl * static_cast<int>(timescale) / fs );
   int pos_effect = 0;
   long add_start = 0;
   unsigned int add_end = bl;

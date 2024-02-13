@@ -44,13 +44,13 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
     -> bool {
   auto bandType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BAND_TYPE>(file, unusedBits);
   band.setBandType(static_cast<types::BandType>(bandType));
-  double blockLength_samp = 0;
+  int blockLength_samp = 0;
   if (band.getBandType() == types::BandType::Curve) {
     auto curveType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_CURVE_TYPE>(file, unusedBits);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
     auto blockLength_code =
-        (double)IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
+        IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
     blockLength_samp = pow(2, blockLength_code + 4);
   }
 
@@ -64,7 +64,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
 
   if (band.getBandType() == types::BandType::WaveletWave) {
     auto blockLength_ticks =
-        static_cast<int>(blockLength_samp / (double)upperFrequencyLimit * timescale);
+        static_cast<int>(blockLength_samp * timescale / upperFrequencyLimit);
     band.setBlockLength(blockLength_ticks);
   }
   auto effectCount = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_EFFECT_COUNT>(file, unusedBits);
@@ -119,8 +119,8 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     int position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * (int)(band.getBlockLengthOrDefault() * (double)timescale /
-                                     (double)band.getUpperFrequencyLimit());
+      position = effectIndex * band.getBlockLengthOrDefault() * timescale /
+                                     band.getUpperFrequencyLimit();
     } else {
       position = static_cast<int>(
           IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
@@ -366,8 +366,8 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
     return false;
   }
   spiht::Spiht_Dec dec;
-  auto blocklength = (int)(band.getBlockLength().value() * (double)band.getUpperFrequencyLimit()) /
-                     (double)timescale;
+  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() /
+                     timescale;
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
   std::vector<unsigned char> instream;
@@ -387,7 +387,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
   }
   spiht::Spiht_Dec dec;
   auto blocklength =
-      band.getBlockLength().value() * band.getUpperFrequencyLimit() / (double)timescale;
+      band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
   auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
 
   std::vector<unsigned char> instream;

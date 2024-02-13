@@ -40,8 +40,7 @@ auto WaveletDecoder::decodeBand(Band &band) -> std::vector<double> {
     return std::vector<double>();
   }
   size_t numBlocks = band.getEffectsSize();
-  int bl =
-      (int)(band.getBlockLength().value() * MS_2_S_WAVELET * (double)band.getUpperFrequencyLimit());
+  int bl = band.getBlockLength().value() * MS_2_S_WAVELET * band.getUpperFrequencyLimit();
   int dwtlevel = (int)log2((double)bl / 4);
   std::vector<double> sig_rec(numBlocks * bl, 0);
 
