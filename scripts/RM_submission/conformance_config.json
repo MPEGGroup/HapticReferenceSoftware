@@ -472,7 +472,7 @@
       {
         "name": "Effect: id non existent",
         "haptic_file_path": "SemanticConformance\\effect-id-non_existent.hjif",
-        "expected_output": "Effect id 1 of channel 0 of perception 0 can't be found in the effect library.\nThe HJIF input file is not conformant to the specification."
+        "expected_output": "Effect id 1 of band VectorialWave of channel 0 of perception 0 can't be found in the effect library.\nThe HJIF input file is not conformant to the specification."
       },
       {
         "name": "Effect: effect_type not supported",
