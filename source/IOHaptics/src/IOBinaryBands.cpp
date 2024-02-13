@@ -63,8 +63,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
 
   if (band.getBandType() == types::BandType::WaveletWave) {
-    auto blockLength_ticks =
-        static_cast<int>(blockLength_samp * timescale / upperFrequencyLimit);
+    auto blockLength_ticks = static_cast<int>(blockLength_samp * timescale / upperFrequencyLimit);
     band.setBlockLength(blockLength_ticks);
   }
   auto effectCount = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_EFFECT_COUNT>(file, unusedBits);
@@ -119,8 +118,8 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     int position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * band.getBlockLengthOrDefault() * timescale /
-                                     band.getUpperFrequencyLimit();
+      position =
+          effectIndex * band.getBlockLengthOrDefault() * timescale / band.getUpperFrequencyLimit();
     } else {
       position = static_cast<int>(
           IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
@@ -366,8 +365,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, 
     return false;
   }
   spiht::Spiht_Dec dec;
-  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() /
-                     timescale;
+  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
 
   std::vector<unsigned char> instream;
@@ -386,8 +384,7 @@ auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
     return false;
   }
   spiht::Spiht_Dec dec;
-  auto blocklength =
-      band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
+  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
   auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
 
   std::vector<unsigned char> instream;
