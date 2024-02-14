@@ -51,7 +51,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
   } else if (band.getBandType() == types::BandType::WaveletWave) {
     auto blockLength_code =
         IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
-    blockLength_samp = pow(2, blockLength_code + 4);
+    blockLength_samp = static_cast<int>(pow(2, blockLength_code + 4));
   }
 
   auto lowerFrequencyLimit =
@@ -118,8 +118,8 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     int position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position =
-          effectIndex * band.getBlockLengthOrDefault() * timescale / band.getUpperFrequencyLimit();
+      position = effectIndex * band.getBlockLengthOrDefault() * static_cast<int>(timescale) /
+                 band.getUpperFrequencyLimit();
     } else {
       position = static_cast<int>(
           IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));

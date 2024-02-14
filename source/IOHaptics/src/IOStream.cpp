@@ -2312,8 +2312,8 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
     effect.setSemantic(semantic);
   }
 
-  int effectPos = timescale * band.getBlockLength().value() * band.getEffectsSize() /
-                  band.getUpperFrequencyLimit();
+  int effectPos = static_cast<int>(timescale) * band.getBlockLength().value() *
+                  band.getEffectsSize() / band.getUpperFrequencyLimit();
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
