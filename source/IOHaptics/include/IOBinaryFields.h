@@ -46,18 +46,26 @@ static constexpr int LEVEL = 8;
 
 static constexpr int UNIT_TYPE = 6;
 static constexpr int UNIT_SYNC = 2;
+static constexpr int UNIT_LAYER = 4;
 static constexpr int UNIT_DURATION = 24;
 static constexpr int UNIT_LENGTH = 32;
+static constexpr int UNIT_RESERVED = 4;
 
-static constexpr int H_NBITS = 32;
-static constexpr int H_NALU_TYPE = 6;
-static constexpr int H_LEVEL = 4;
+static constexpr int H_NBITS = 24;
+static constexpr int H_MIHS_PACKET_TYPE = 6;
 static constexpr int H_PAYLOAD_LENGTH = 17;
+static constexpr int H_RESERVED = 1;
 
 static constexpr int TIMING_TIME = 32;
-static constexpr int TIMING_TIMESCALE = 32;
+
+static constexpr int INITTIMING_TIMESCALE = 32;
+static constexpr int INITTIMING_NOMINALDURATION = 24;
+static constexpr int INITTIMING_DURATIONDEVIATION = 24;
+static constexpr int INITTIMING_OVERLAPPING = 1;
 
 static constexpr int MDEXP_VERSION = 8;
+static constexpr int MDEXP_PROFILE_SIZE = 8;
+static constexpr int MDEXP_LEVEL = 8;
 static constexpr int MDEXP_DATE = 8;
 static constexpr int MDEXP_DESC_SIZE = 8;
 
@@ -71,6 +79,7 @@ static constexpr int AVATAR_TYPE = 8;
 static constexpr int AVATAR_MESH_COUNT = 8;
 
 static constexpr int MDPERCE_ID = 8;
+static constexpr int MDPERCE_PRIORITY = 8;
 static constexpr int MDPERCE_DESC_SIZE = 8;
 static constexpr int MDPERCE_MODALITY = 8;
 static constexpr int MDPERCE_UNIT_EXP = 8;
@@ -103,6 +112,7 @@ static constexpr int REFDEV_TYPE = 4;
 static constexpr int REFDEV_MAX_ID = 255;
 
 static constexpr int MDCHANNEL_ID = 8;
+static constexpr int MDCHANNEL_PRIORITY = 8;
 static constexpr int MDCHANNEL_DESC_LENGTH = 8;
 static constexpr int MDCHANNEL_DEVICE_ID = 8;
 static constexpr int MDCHANNEL_GAIN = 32;
@@ -121,6 +131,7 @@ static constexpr int MDCHANNEL_ACTUATOR_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_BODY_PART_TARGET = 8;
 
 static constexpr int MDBAND_ID = 16;
+static constexpr int MDBAND_PRIORITY = 8;
 static constexpr int MDBAND_BAND_TYPE = 3;
 static constexpr int MDBAND_CURVE_TYPE = 4;
 static constexpr int MDBAND_WIN_LEN = 8;

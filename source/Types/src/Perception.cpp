@@ -63,6 +63,16 @@ auto Perception::setDescription(std::string &newDescription) -> void {
   description = newDescription;
 }
 
+auto Perception::getPriority() const -> std::optional<int> { return priority; }
+auto Perception::getPriorityOrDefault() const -> int {
+  if (priority.has_value()) {
+    return priority.value();
+  }
+  return 0;
+}
+
+auto Perception::setPriority(int newPriority) -> void { priority = newPriority; }
+
 [[nodiscard]] auto Perception::getPerceptionModality() const -> PerceptionModality {
   return perceptionModality;
 }

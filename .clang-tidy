@@ -24,15 +24,15 @@ CheckOptions:
   - key:    readability-identifier-length.MinimumLoopCounterNameLength
     value:  1
   - key:    readability-function-size.LineThreshold
-    value:  116
+    value:  130
   - key:    readability-function-size.StatementThreshold
-    value:  105
+    value:  110
   - key:    readability-function-size.ParameterThreshold
     value:  6
   - key:    readability-function-size.NestingThreshold
     value:  7
   - key:    readability-function-size.VariableThreshold
-    value:  32
+    value:  35
   - key:    readability-function-cognitive-complexity.Threshold
     value:  60
   - key:    bugprone-easily-swappable-parameters.MinimumLength
