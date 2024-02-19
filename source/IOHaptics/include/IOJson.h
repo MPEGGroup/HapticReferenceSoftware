@@ -94,6 +94,8 @@ public:
 
   static auto bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
   static auto bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
+  static auto base642bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
+  static auto bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
 };
 } // namespace haptics::io
 #endif // IOJSON_H

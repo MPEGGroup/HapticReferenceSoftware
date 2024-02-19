@@ -628,15 +628,10 @@ auto IOJson::loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect 
   auto effectStream = std::vector<unsigned char>();
   std::string temp(stream, length);
   std::copy(temp.begin(), temp.end(), std::back_inserter(effectStream));
-  for (auto &b : effectStream) {
-    if (b == '0') {
-      b = (unsigned char)0;
-    } else {
-      b = (unsigned char)1;
-    }
-  }
+  auto effectStream_bits = std::vector<unsigned char>();
+  base642bits(effectStream, effectStream_bits);
   auto effectStream_bytes = std::vector<unsigned char>();
-  bits2bytes(effectStream, effectStream_bytes);
+  bits2bytes(effectStream_bits, effectStream_bytes);
   effect.setWaveletBitstream(effectStream_bytes);
   return true;
 }
@@ -947,14 +942,9 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
           auto stream = effect.getWaveletBitstream();
           auto stream_bits = std::vector<unsigned char>();
           bytes2bits(stream, stream_bits);
-          for (auto &b : stream_bits) {
-            if ((int)b == 0) {
-              b = '0';
-            } else {
-              b = '1';
-            }
-          }
-          std::string streamString(stream_bits.begin(), stream_bits.end());
+          auto stream_base64 = std::vector<unsigned char>();
+          bits2base64(stream_bits, stream_base64);
+          std::string streamString(stream_base64.begin(), stream_base64.end());
           jsonEffect.AddMember("bitstream",
                                rapidjson::Value(streamString.c_str(), jsonTree.GetAllocator()),
                                jsonTree.GetAllocator());
@@ -1105,6 +1095,65 @@ auto IOJson::bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned cha
       index++;
     }
     v = (unsigned char)temp.to_ulong();
+  }
+}
+
+auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.reserve(in.size() * 6);
+  int index = 0;
+  for (auto &v : in) {
+    auto temp = (short)v;
+    if (65 <= temp && temp <= 90) {
+      temp -= 65;
+    } else if (97 <= temp && temp <= 122) {
+      temp -= 71;
+    } else if (48 <= temp && temp <= 57) {
+      temp += 4;
+    } else if (temp == 43) {
+      temp = 62;
+    } else {
+      temp = 63;
+    }
+
+    int compare = 32;
+    for (int j = 0; j < 6; j++) {
+      if (temp >= compare) {
+        out.push_back((unsigned char)1);
+        temp -= compare;
+      } else {
+        out.push_back((unsigned char)0);
+      }
+      index++;
+      compare = compare >> 1;
+    }
+  }
+}
+
+auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.reserve(in.size() / 6);
+  int compare = 32;
+  int temp = 0;
+  for (auto &v : in) {
+    if ((int)v == 1) {
+      temp += compare;
+    }
+    compare = compare >> 1;
+    if (compare == 0) {
+      compare = 32;
+      if (0 <= temp && temp <= 25) {
+        temp += 65;
+      } else if (26 <= temp && temp <= 51) {
+        temp += 71;
+      } else if (52 <= temp && temp <= 61) {
+        temp -= 4;
+      } else if (temp == 62) {
+        temp = 43;
+      } else {
+        temp = 47;
+      }
+      out.push_back(temp);
+      temp = 0;
+    }
   }
 }
 
