@@ -1099,10 +1099,10 @@ auto IOJson::bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned cha
 }
 
 auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
-  out.reserve(in.size() * 6);
+  out.reserve(in.size() * BASE64_SIZE);
   int index = 0;
   for (auto &v : in) {
-    auto temp = (short)v;
+    auto temp = (int)v;
     if (ASCII_UPPER_1 <= temp && temp <= ASCII_UPPER_2) {
       temp -= DIFF_UPPER;
     } else if (ASCII_LOWER_1 <= temp && temp <= ASCII_LOWER_2) {
@@ -1115,29 +1115,29 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
       temp = BASE64_SOLIDUS;
     }
 
-    short compare = COMPARE_START;
+    int compare = COMPARE_START;
     for (int j = 0; j < BASE64_SIZE; j++) {
       if (temp >= compare) {
         out.push_back((unsigned char)1);
-        temp = temp - compare;
+        temp -= compare;
       } else {
         out.push_back((unsigned char)0);
       }
       index++;
-      compare = (short)compare >> 1;
+      compare = compare >> 1;
     }
   }
 }
 
 auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
   out.reserve(in.size() / BASE64_SIZE);
-  short compare = COMPARE_START;
-  short temp = 0;
+  int compare = COMPARE_START;
+  int temp = 0;
   for (auto &v : in) {
-    if ((short)v == 1) {
+    if ((int)v == 1) {
       temp += compare;
     }
-    compare = (short)compare >> 1;
+    compare = compare >> 1;
     if (compare == 0) {
       compare = COMPARE_START;
       if (BASE64_UPPER_1 <= temp && temp <= BASE64_UPPER_2) {
