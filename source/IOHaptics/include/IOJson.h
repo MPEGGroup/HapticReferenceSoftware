@@ -53,6 +53,31 @@ namespace haptics::io {
 
 constexpr int BYTE_SIZE_IO = 8;
 
+constexpr short COMPARE_START = 32;
+constexpr short ASCII_UPPER_1 = 65;
+constexpr short ASCII_UPPER_2 = 90;
+constexpr short ASCII_LOWER_1 = 97;
+constexpr short ASCII_LOWER_2 = 122;
+constexpr short ASCII_DIGIT_1 = 48;
+constexpr short ASCII_DIGIT_2 = 57;
+constexpr short ASCII_PLUS = 43;
+constexpr short ASCII_SOLIDUS = 47;
+
+constexpr short BASE64_UPPER_1 = 0;
+constexpr short BASE64_UPPER_2 = 25;
+constexpr short BASE64_LOWER_1 = 26;
+constexpr short BASE64_LOWER_2 = 51;
+constexpr short BASE64_DIGIT_1 = 52;
+constexpr short BASE64_DIGIT_2 = 61;
+constexpr short BASE64_PLUS = 62;
+constexpr short BASE64_SOLIDUS = 63;
+
+constexpr short DIFF_UPPER = 65;
+constexpr short DIFF_LOWER = 71;
+constexpr short DIFF_DIGIT = 4;
+
+
+
 class IOJson {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;

@@ -1103,19 +1103,19 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
   int index = 0;
   for (auto &v : in) {
     auto temp = (short)v;
-    if (65 <= temp && temp <= 90) {
-      temp -= 65;
-    } else if (97 <= temp && temp <= 122) {
-      temp -= 71;
-    } else if (48 <= temp && temp <= 57) {
-      temp += 4;
-    } else if (temp == 43) {
-      temp = 62;
+    if (ASCII_UPPER_1 <= temp && temp <= ASCII_UPPER_2) {
+      temp -= DIFF_UPPER;
+    } else if (ASCII_LOWER_1 <= temp && temp <= ASCII_LOWER_2) {
+      temp -= DIFF_LOWER;
+    } else if (ASCII_DIGIT_1 <= temp && temp <= ASCII_DIGIT_2) {
+      temp += DIFF_DIGIT;
+    } else if (temp == ASCII_PLUS) {
+      temp = BASE64_PLUS;
     } else {
-      temp = 63;
+      temp = BASE64_SOLIDUS;
     }
 
-    int compare = 32;
+    short compare = COMPARE_START;
     for (int j = 0; j < 6; j++) {
       if (temp >= compare) {
         out.push_back((unsigned char)1);
@@ -1131,25 +1131,25 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
 
 auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
   out.reserve(in.size() / 6);
-  int compare = 32;
-  int temp = 0;
+  short compare = 32;
+  short temp = 0;
   for (auto &v : in) {
-    if ((int)v == 1) {
+    if ((short)v == 1) {
       temp += compare;
     }
     compare = compare >> 1;
     if (compare == 0) {
-      compare = 32;
-      if (0 <= temp && temp <= 25) {
-        temp += 65;
-      } else if (26 <= temp && temp <= 51) {
-        temp += 71;
-      } else if (52 <= temp && temp <= 61) {
-        temp -= 4;
-      } else if (temp == 62) {
-        temp = 43;
+      compare = COMPARE_START;
+      if (BASE64_UPPER_1 <= temp && temp <= BASE64_UPPER_2) {
+        temp += DIFF_UPPER;
+      } else if (BASE64_LOWER_1 <= temp && temp <= BASE64_LOWER_2) {
+        temp += DIFF_LOWER;
+      } else if (BASE64_DIGIT_1 <= temp && temp <= BASE64_DIGIT_2) {
+        temp -= DIFF_DIGIT;
+      } else if (temp == BASE64_PLUS) {
+        temp = ASCII_PLUS;
       } else {
-        temp = 47;
+        temp = ASCII_SOLIDUS;
       }
       out.push_back(temp);
       temp = 0;
