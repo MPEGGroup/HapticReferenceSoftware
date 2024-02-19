@@ -76,6 +76,8 @@ constexpr short DIFF_UPPER = 65;
 constexpr short DIFF_LOWER = 71;
 constexpr short DIFF_DIGIT = 4;
 
+constexpr size_t BASE64_SIZE = 6;
+
 class IOJson {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;

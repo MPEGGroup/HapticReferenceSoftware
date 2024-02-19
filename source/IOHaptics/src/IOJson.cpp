@@ -1116,28 +1116,28 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
     }
 
     short compare = COMPARE_START;
-    for (int j = 0; j < 6; j++) {
+    for (int j = 0; j < BASE64_SIZE; j++) {
       if (temp >= compare) {
         out.push_back((unsigned char)1);
-        temp -= compare;
+        temp = temp - compare;
       } else {
         out.push_back((unsigned char)0);
       }
       index++;
-      compare = compare >> 1;
+      compare = (short)compare >> 1;
     }
   }
 }
 
 auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
-  out.reserve(in.size() / 6);
-  short compare = 32;
+  out.reserve(in.size() / BASE64_SIZE);
+  short compare = COMPARE_START;
   short temp = 0;
   for (auto &v : in) {
     if ((short)v == 1) {
       temp += compare;
     }
-    compare = compare >> 1;
+    compare = (short)compare >> 1;
     if (compare == 0) {
       compare = COMPARE_START;
       if (BASE64_UPPER_1 <= temp && temp <= BASE64_UPPER_2) {
