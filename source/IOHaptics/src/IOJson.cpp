@@ -1116,7 +1116,7 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
     }
 
     int compare = COMPARE_START;
-    for (int j = 0; j < BASE64_SIZE; j++) {
+    for (size_t j = 0; j < BASE64_SIZE; j++) {
       if (temp >= compare) {
         out.push_back((unsigned char)1);
         temp -= compare;
