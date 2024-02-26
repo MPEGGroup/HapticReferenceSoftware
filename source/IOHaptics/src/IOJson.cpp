@@ -232,12 +232,6 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      // TODO: check if effect is not wavelet -> having no keyframes is allowed
-      // check for HasMember("bitstream")?
-      if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
-        std::cerr << "Missing or invalid list of keyframes" << std::endl;
-        continue;
-      }
     }
 
     auto effectId = jsonEffect["id"].GetInt();
@@ -455,14 +449,13 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      if (band.getBandType() != types::BandType::WaveletWave) {
-        if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
-          std::cerr << "Missing or invalid list of keyframes" << std::endl;
+      if (band.getBandType() == types::BandType::WaveletWave) {
+        if (jsonEffect.HasMember("keyframes")) {
+          std::cerr << "Keyframes shall not be defined fot wavelet wave bands" << std::endl;
           continue;
         }
-      } else {
-        if (!jsonEffect.HasMember("bitstream")) {
-          std::cerr << "Missing bitstream" << std::endl;
+        if (!jsonEffect.HasMember("wavelet_stream")) {
+          std::cerr << "Missing wavelet_stream" << std::endl;
           continue;
         }
       }
@@ -485,8 +478,8 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
     }
-    if (jsonEffect.HasMember("bitstream")) {
-      loadingSuccess = loadingSuccess && loadBitstream(jsonEffect["bitstream"], effect);
+    if (jsonEffect.HasMember("wavelet_stream")) {
+      loadingSuccess = loadingSuccess && loadBitstream(jsonEffect["wavelet_stream"], effect);
     }
 
     band.addEffect(effect);
@@ -965,7 +958,7 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
           auto stream_base64 = std::vector<unsigned char>();
           bits2base64(stream_bits, stream_base64);
           std::string streamString(stream_base64.begin(), stream_base64.end());
-          jsonEffect.AddMember("bitstream",
+          jsonEffect.AddMember("wavelet_stream",
                                rapidjson::Value(streamString.c_str(), jsonTree.GetAllocator()),
                                jsonTree.GetAllocator());
         } else {
