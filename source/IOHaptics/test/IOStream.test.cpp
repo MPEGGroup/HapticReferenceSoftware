@@ -470,7 +470,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("Save/Read binary streaming file") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream, PACKET_DURATION);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     std::string filepath = "test.impg";
     IOStream::writeFile(testingHaptic, filepath, PACKET_DURATION);
 
