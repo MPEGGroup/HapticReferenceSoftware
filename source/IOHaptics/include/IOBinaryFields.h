@@ -89,7 +89,7 @@ static constexpr int MDPERCE_FLAG_SEMANTIC = 1;
 static constexpr int MDPERCE_SCHEME_LENGTH = 8;
 static constexpr int MDPERCE_SCHEME_CHAR = 8;
 static constexpr int MDPERCE_REFDEVICE_COUNT = 8;
-static constexpr int MDPERCE_CHANNEL_COUNT = 8;
+static constexpr int MDPERCE_CHANNEL_COUNT = 16;
 
 static constexpr int REFDEV_ID = 8;
 
@@ -111,7 +111,7 @@ static constexpr int REFDEV_CUSTOM = 32;
 static constexpr int REFDEV_TYPE = 4;
 static constexpr int REFDEV_MAX_ID = 255;
 
-static constexpr int MDCHANNEL_ID = 8;
+static constexpr int MDCHANNEL_ID = 16;
 static constexpr int MDCHANNEL_PRIORITY = 8;
 static constexpr int MDCHANNEL_DESC_LENGTH = 8;
 static constexpr int MDCHANNEL_DEVICE_ID = 8;
@@ -125,12 +125,12 @@ static constexpr int MDCHANNEL_DIRECTION_MASK = 1;
 static constexpr int MDCHANNEL_DIRECTION_AXIS = 8;
 static constexpr int MDCHANNEL_VERT_COUNT = 16;
 static constexpr int MDCHANNEL_VERT = 32;
-static constexpr int MDCHANNEL_BANDS_COUNT = 16;
+static constexpr int MDCHANNEL_BANDS_COUNT = 8;
 static constexpr int MDCHANNEL_BODY_PART_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_ACTUATOR_TARGET_COUNT = 8;
 static constexpr int MDCHANNEL_BODY_PART_TARGET = 8;
 
-static constexpr int MDBAND_ID = 16;
+static constexpr int MDBAND_ID = 8;
 static constexpr int MDBAND_PRIORITY = 8;
 static constexpr int MDBAND_BAND_TYPE = 3;
 static constexpr int MDBAND_CURVE_TYPE = 4;
@@ -141,7 +141,7 @@ static constexpr int MDBAND_UP_FREQ = 16;
 static constexpr int MDBAND_EFFECT_COUNT = 16;
 
 static constexpr int EFFECT_ID = 16;
-static constexpr int EFFECT_POSITION = 24;
+static constexpr int EFFECT_POSITION = 25;
 static constexpr int EFFECT_FLAG_SEMANTIC = 1;
 static constexpr int EFFECT_SEMANTIC_LAYER_1 = 4;
 static constexpr int EFFECT_SEMANTIC_LAYER_2 = 8;
