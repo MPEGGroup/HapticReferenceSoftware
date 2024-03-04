@@ -72,18 +72,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
 
     double scalar = 0;
     int maxbits = 0;
-    std::vector<double> block_quant = encodeBlock(block_time, bitbudget, scalar, maxbits);
+    encodeBlock(block_time, bitbudget, scalar, maxbits, effect.getWaveletBitstream());
 
-    int pos = 0;
-    for (auto v : block_quant) {
-      Keyframe keyframe(pos, (float)v, 0);
-      effect.addKeyframe(keyframe);
-      pos++;
-    }
-    Keyframe keyframe(bl, (float)scalar, 0); // add scalar of block to block data for now
-    effect.addKeyframe(keyframe);
-    Keyframe keyframeBits(bl + 1, (float)maxbits, 0); // add maxbits to block data for now
-    effect.addKeyframe(keyframeBits);
     effect.setPosition(pos_effect);
     band.addEffect(effect);
     pos_effect += (int)band.getBlockLength();
@@ -93,8 +83,8 @@ auto WaveletEncoder::encodeSignal(std::vector<double> &sig_time, int bitbudget, 
   return true;
 }
 
-auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar,
-                                 int &maxbits) -> std::vector<double> {
+void WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar,
+                                 int &maxbits, std::vector<unsigned char> &bitstream) {
 
   std::vector<double> block_dwt(bl, 0);
   Wavelet wavelet;
@@ -111,7 +101,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
 
   double qwavmax = 0;
   std::vector<unsigned char> bitwavmax;
-  bitwavmax.reserve(WAVMAXLENGTH);
+  bitwavmax.reserve(spiht::WAVMAXLENGTH);
   maximumWaveletCoefficient(block_dwt, qwavmax, bitwavmax);
 
   // Quantization
@@ -124,18 +114,22 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
     }
   }
 
+  if (bitbudget > ((int)book.size() * spiht::MAXBITS)) {
+    bitbudget = ((int)book.size() * spiht::MAXBITS);
+  }
+
   while (bitalloc_sum < bitbudget) {
 
     updateNoise(pm_result.bandenergy, noiseenergy, SNR, MNR, pm_result.SMR);
     for (uint32_t i = 0; i < book.size(); i++) {
-      if (bitalloc[i] >= MAXBITS) {
+      if (bitalloc[i] >= spiht::MAXBITS) {
         MNR[i] = INFINITY;
       }
     }
     size_t index = findMinInd(MNR);
-    if (bitalloc_sum - bitalloc[book.size() - 1] >= MAXBITS * dwtlevel) {
+    if (bitalloc_sum - bitalloc[book.size() - 1] >= spiht::MAXBITS * dwtlevel) {
       int temp = bitalloc[book.size() - 1];
-      bitalloc[book.size() - 1] = bitbudget - MAXBITS * dwtlevel;
+      bitalloc[book.size() - 1] = bitbudget - spiht::MAXBITS * dwtlevel;
       bitalloc_sum += bitalloc[book.size() - 1] - temp;
     } else {
       bitalloc[index]++;
@@ -165,8 +159,7 @@ auto WaveletEncoder::encodeBlock(std::vector<double> &block_time, int bitbudget,
   }
   scalar = qwavmax;
   maxbits = bitmax;
-
-  return block_dwt_quant;
+  spihtEnc.encodeEffect(block_intquant, maxbits, scalar, bitstream);
 }
 
 void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
@@ -174,48 +167,26 @@ void WaveletEncoder::maximumWaveletCoefficient(std::vector<double> &sig, double 
 
   double wavmax = findMax(sig);
 
+  auto m = Spiht_Enc::getQuantMode(wavmax);
   int integerpart = 0;
-  char mode = 0;
-  quantMode m = {0, 0};
-  if (wavmax < 1) {
-    m.integerbits = 0;
-    m.fractionbits = FRACTIONBITS_0;
-  } else {
+  if (m.mode == 1) {
     integerpart = 1;
-    m.integerbits = INTEGERBITS_1;
-    m.fractionbits = FRACTIONBITS_1;
-    mode = 1;
   }
 
   qwavmax = maxQuant(wavmax - (double)integerpart, m) + integerpart;
-  bitwavmax.clear();
-  bitwavmax.reserve(WAVMAXLENGTH);
-  bitwavmax.push_back(mode);
-  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
-        m.integerbits + m.fractionbits);
+  Spiht_Enc::setBitwavmax(qwavmax, integerpart, m, bitwavmax);
 }
 
 void WaveletEncoder::maximumWaveletCoefficient(double qwavmax,
                                                std::vector<unsigned char> &bitwavmax) {
 
+  auto m = Spiht_Enc::getQuantMode(qwavmax);
   int integerpart = 0;
-  char mode = 0;
-  quantMode m = {0, 0};
-  if (qwavmax < 1) {
-    m.integerbits = 0;
-    m.fractionbits = FRACTIONBITS_0;
-  } else {
+  if (m.mode == 1) {
     integerpart = 1;
-    m.integerbits = INTEGERBITS_1;
-    m.fractionbits = FRACTIONBITS_1;
-    mode = 1;
   }
 
-  bitwavmax.clear();
-  bitwavmax.reserve(WAVMAXLENGTH);
-  bitwavmax.push_back(mode);
-  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
-        m.integerbits + m.fractionbits);
+  Spiht_Enc::setBitwavmax(qwavmax, integerpart, m, bitwavmax);
 }
 
 void WaveletEncoder::updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
@@ -247,7 +218,7 @@ void WaveletEncoder::uniformQuant(std::vector<double> &in, size_t start, double 
   }
 }
 
-auto WaveletEncoder::maxQuant(double in, quantMode m) -> double {
+auto WaveletEncoder::maxQuant(double in, spiht::quantMode m) -> double {
 
   double max = ((double)(1 << (m.integerbits + m.fractionbits)) - 1) / (1 << m.fractionbits);
 

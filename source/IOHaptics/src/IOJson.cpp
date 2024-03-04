@@ -232,10 +232,6 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
-        std::cerr << "Missing or invalid list of keyframes" << std::endl;
-        continue;
-      }
     }
 
     auto effectId = jsonEffect["id"].GetInt();
@@ -391,12 +387,15 @@ auto IOJson::loadBands(const rapidjson::Value &jsonBands, types::Channel &channe
       std::cerr << "Missing or invalid upper frequency limit" << std::endl;
       continue;
     }
-    if (!jsonBand.HasMember("effects") || !jsonBand["effects"].IsArray()) {
-      std::cerr << "Missing or invalid list of effects" << std::endl;
-      continue;
-    }
 
     types::BandType bandType = types::stringToBandType.at(jsonBand["band_type"].GetString());
+    if (bandType != types::BandType::WaveletWave) {
+      if (!jsonBand.HasMember("effects") || !jsonBand["effects"].IsArray()) {
+        std::cerr << "Missing or invalid list of effects" << std::endl;
+        continue;
+      }
+    }
+
     types::CurveType curveType = types::stringToCurveType.at(jsonBand["curve_type"].GetString());
     double blockLength = jsonBand["block_length"].GetDouble();
     int lowerLimit = jsonBand["lower_frequency_limit"].GetInt();
@@ -450,9 +449,15 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
         std::cerr << "Missing or invalid effect base_signal" << std::endl;
         continue;
       }
-      if (!jsonEffect.HasMember("keyframes") || !jsonEffect["keyframes"].IsArray()) {
-        std::cerr << "Missing or invalid list of keyframes" << std::endl;
-        continue;
+      if (band.getBandType() == types::BandType::WaveletWave) {
+        if (jsonEffect.HasMember("keyframes")) {
+          std::cerr << "Keyframes shall not be defined fot wavelet wave bands" << std::endl;
+          continue;
+        }
+        if (!jsonEffect.HasMember("wavelet_stream")) {
+          std::cerr << "Missing wavelet_stream" << std::endl;
+          continue;
+        }
       }
     }
 
@@ -472,6 +477,9 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
     }
     if (jsonEffect.HasMember("keyframes") && jsonEffect["keyframes"].IsArray()) {
       loadingSuccess = loadingSuccess && loadKeyframes(jsonEffect["keyframes"], effect);
+    }
+    if (jsonEffect.HasMember("wavelet_stream")) {
+      loadingSuccess = loadingSuccess && loadBitstream(jsonEffect["wavelet_stream"], effect);
     }
 
     band.addEffect(effect);
@@ -617,6 +625,20 @@ auto IOJson::loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect 
   return true;
 }
 
+auto IOJson::loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect &effect) -> bool {
+  const auto *const stream = jsonBitstream.GetString();
+  auto length = jsonBitstream.GetStringLength();
+  auto effectStream = std::vector<unsigned char>();
+  std::string temp(stream, length);
+  std::copy(temp.begin(), temp.end(), std::back_inserter(effectStream));
+  auto effectStream_bits = std::vector<unsigned char>();
+  base642bits(effectStream, effectStream_bits);
+  auto effectStream_bytes = std::vector<unsigned char>();
+  bits2bytes(effectStream_bits, effectStream_bytes);
+  effect.setWaveletBitstream(effectStream_bytes);
+  return true;
+}
+
 auto IOJson::loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool {
   if (!(jsonVector.IsObject() && jsonVector.HasMember("X") && jsonVector["X"].IsInt() &&
         jsonVector.HasMember("Y") && jsonVector["Y"].IsInt() && jsonVector.HasMember("Z") &&
@@ -755,6 +777,7 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jso
           rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
           jsonTree.GetAllocator());
     }
+    // TODO: switch to reading bitstream for wavelet
     auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
     auto numKeyframes = effect.getKeyframesSize();
     for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
@@ -928,28 +951,40 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
             rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
                              jsonTree.GetAllocator()),
             jsonTree.GetAllocator());
-        auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
-        auto numKeyframes = effect.getKeyframesSize();
-        for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
-          const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
-          auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
-          if (keyframe.getRelativePosition().has_value()) {
-            jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
-                                   jsonTree.GetAllocator());
+        if (band.getBandType() == types::BandType::WaveletWave) {
+          auto stream = effect.getWaveletBitstream();
+          auto stream_bits = std::vector<unsigned char>();
+          bytes2bits(stream, stream_bits);
+          auto stream_base64 = std::vector<unsigned char>();
+          bits2base64(stream_bits, stream_base64);
+          std::string streamString(stream_base64.begin(), stream_base64.end());
+          jsonEffect.AddMember("wavelet_stream",
+                               rapidjson::Value(streamString.c_str(), jsonTree.GetAllocator()),
+                               jsonTree.GetAllocator());
+        } else {
+          auto jsonKeyframes = rapidjson::Value(rapidjson::kArrayType);
+          auto numKeyframes = effect.getKeyframesSize();
+          for (decltype(numKeyframes) kfix = 0; kfix < numKeyframes; kfix++) {
+            const auto &keyframe = effect.getKeyframeAt(static_cast<int>(kfix));
+            auto jsonKeyframe = rapidjson::Value(rapidjson::kObjectType);
+            if (keyframe.getRelativePosition().has_value()) {
+              jsonKeyframe.AddMember("relative_position", keyframe.getRelativePosition().value(),
+                                     jsonTree.GetAllocator());
+            }
+            if (keyframe.getAmplitudeModulation().has_value()) {
+              jsonKeyframe.AddMember("amplitude_modulation",
+                                     keyframe.getAmplitudeModulation().value(),
+                                     jsonTree.GetAllocator());
+            }
+            if (keyframe.getFrequencyModulation().has_value()) {
+              jsonKeyframe.AddMember("frequency_modulation",
+                                     keyframe.getFrequencyModulation().value(),
+                                     jsonTree.GetAllocator());
+            }
+            jsonKeyframes.PushBack(jsonKeyframe, jsonTree.GetAllocator());
           }
-          if (keyframe.getAmplitudeModulation().has_value()) {
-            jsonKeyframe.AddMember("amplitude_modulation",
-                                   keyframe.getAmplitudeModulation().value(),
-                                   jsonTree.GetAllocator());
-          }
-          if (keyframe.getFrequencyModulation().has_value()) {
-            jsonKeyframe.AddMember("frequency_modulation",
-                                   keyframe.getFrequencyModulation().value(),
-                                   jsonTree.GetAllocator());
-          }
-          jsonKeyframes.PushBack(jsonKeyframe, jsonTree.GetAllocator());
+          jsonEffect.AddMember("keyframes", jsonKeyframes, jsonTree.GetAllocator());
         }
-        jsonEffect.AddMember("keyframes", jsonKeyframes, jsonTree.GetAllocator());
       }
       jsonEffects.PushBack(jsonEffect, jsonTree.GetAllocator());
     }
@@ -1043,4 +1078,124 @@ auto IOJson::extractVector(types::Vector &vector, rapidjson::Value &jsonVector,
   jsonVector.AddMember("Y", vector.Y, jsonTree.GetAllocator());
   jsonVector.AddMember("Z", vector.Z, jsonTree.GetAllocator());
 }
+
+auto IOJson::bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.resize(in.size() * BYTE_SIZE_IO);
+  int index = 0;
+  for (auto &v : in) {
+    std::bitset<BYTE_SIZE_IO> temp((unsigned long)v);
+    for (int j = 0; j < BYTE_SIZE_IO; j++) {
+      if (temp[j]) {
+        out.at(index) = 1;
+      }
+      index++;
+    }
+  }
+  if (!out.empty()) {
+    int index_end = (int)out.size() - 1;
+    while ((int)out.at(index_end) == 0 && index_end >= 0) {
+      index_end--;
+    }
+    out.resize(index_end + 1);
+  }
+}
+
+auto IOJson::bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.resize((size_t)ceil((double)in.size() / (double)BYTE_SIZE_IO));
+  size_t index = 0;
+  for (auto &v : out) {
+    std::bitset<BYTE_SIZE_IO> temp;
+    for (int j = 0; j < BYTE_SIZE_IO; j++) {
+      if (index >= in.size()) {
+        break;
+      }
+      if (in.at(index) == 1) {
+        temp[j] = true;
+      }
+      index++;
+    }
+    v = (unsigned char)temp.to_ulong();
+  }
+}
+
+auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.reserve(in.size() * BASE64_SIZE);
+  int index = 0;
+  for (auto &v : in) {
+    auto temp = (int)v;
+    if (ASCII_UPPER_1 <= temp && temp <= ASCII_UPPER_2) {
+      temp -= DIFF_UPPER;
+    } else if (ASCII_LOWER_1 <= temp && temp <= ASCII_LOWER_2) {
+      temp -= DIFF_LOWER;
+    } else if (ASCII_DIGIT_1 <= temp && temp <= ASCII_DIGIT_2) {
+      temp += DIFF_DIGIT;
+    } else if (temp == ASCII_PLUS) {
+      temp = BASE64_PLUS;
+    } else {
+      temp = BASE64_SOLIDUS;
+    }
+
+    int compare = COMPARE_START;
+    for (size_t j = 0; j < BASE64_SIZE; j++) {
+      if (temp >= compare) {
+        out.push_back((unsigned char)1);
+        temp -= compare;
+      } else {
+        out.push_back((unsigned char)0);
+      }
+      index++;
+      compare = compare >> 1;
+    }
+  }
+  if (!out.empty()) {
+    int index_end = (int)out.size() - 1;
+    while ((int)out.at(index_end) == 0 && index_end >= 0) {
+      index_end--;
+    }
+    out.resize(index_end + 1);
+  }
+}
+
+auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
+  out.reserve((size_t)ceil((double)in.size() / (double)BASE64_SIZE));
+  int compare = COMPARE_START;
+  int temp = 0;
+  for (auto &v : in) {
+    if ((int)v == 1) {
+      temp += compare;
+    }
+    compare = compare >> 1;
+    if (compare == 0) {
+      compare = COMPARE_START;
+      if (BASE64_UPPER_1 <= temp && temp <= BASE64_UPPER_2) {
+        temp += DIFF_UPPER;
+      } else if (BASE64_LOWER_1 <= temp && temp <= BASE64_LOWER_2) {
+        temp += DIFF_LOWER;
+      } else if (BASE64_DIGIT_1 <= temp && temp <= BASE64_DIGIT_2) {
+        temp -= DIFF_DIGIT;
+      } else if (temp == BASE64_PLUS) {
+        temp = ASCII_PLUS;
+      } else {
+        temp = ASCII_SOLIDUS;
+      }
+      out.push_back(temp);
+      temp = 0;
+    }
+  }
+  if (temp > 0) {
+    if (BASE64_UPPER_1 <= temp && temp <= BASE64_UPPER_2) {
+      temp += DIFF_UPPER;
+    } else if (BASE64_LOWER_1 <= temp && temp <= BASE64_LOWER_2) {
+      temp += DIFF_LOWER;
+    } else if (BASE64_DIGIT_1 <= temp && temp <= BASE64_DIGIT_2) {
+      temp -= DIFF_DIGIT;
+    } else if (temp == BASE64_PLUS) {
+      temp = ASCII_PLUS;
+    } else {
+      temp = ASCII_SOLIDUS;
+    }
+    out.push_back(temp);
+  }
+}
+
 } // namespace haptics::io

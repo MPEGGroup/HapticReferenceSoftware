@@ -35,6 +35,8 @@
 #define IOJSON_H
 
 #include <Types/include/Haptics.h>
+#include <bitset>
+#include <cmath>
 #include <map>
 #include <string>
 
@@ -48,6 +50,34 @@
 #endif
 
 namespace haptics::io {
+
+constexpr int BYTE_SIZE_IO = 8;
+
+constexpr int COMPARE_START = 32;
+constexpr int ASCII_UPPER_1 = 65;
+constexpr int ASCII_UPPER_2 = 90;
+constexpr int ASCII_LOWER_1 = 97;
+constexpr int ASCII_LOWER_2 = 122;
+constexpr int ASCII_DIGIT_1 = 48;
+constexpr int ASCII_DIGIT_2 = 57;
+constexpr int ASCII_PLUS = 43;
+constexpr int ASCII_SOLIDUS = 47;
+
+constexpr int BASE64_UPPER_1 = 0;
+constexpr int BASE64_UPPER_2 = 25;
+constexpr int BASE64_LOWER_1 = 26;
+constexpr int BASE64_LOWER_2 = 51;
+constexpr int BASE64_DIGIT_1 = 52;
+constexpr int BASE64_DIGIT_2 = 61;
+constexpr int BASE64_PLUS = 62;
+constexpr int BASE64_SOLIDUS = 63;
+
+constexpr int DIFF_UPPER = 65;
+constexpr int DIFF_LOWER = 71;
+constexpr int DIFF_DIGIT = 4;
+
+constexpr size_t BASE64_SIZE = 6;
+
 class IOJson {
 public:
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
@@ -63,6 +93,7 @@ public:
   static auto loadBands(const rapidjson::Value &jsonBands, types::Channel &channel) -> bool;
   static auto loadEffects(const rapidjson::Value &jsonEffects, types::Band &band) -> bool;
   static auto loadKeyframes(const rapidjson::Value &jsonKeyframes, types::Effect &effect) -> bool;
+  static auto loadBitstream(const rapidjson::Value &jsonBitstream, types::Effect &effect) -> bool;
   static auto loadVector(const rapidjson::Value &jsonVector, types::Vector &vector) -> bool;
   static auto loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic) -> bool;
 
@@ -85,6 +116,11 @@ public:
                            rapidjson::Document &jsonTree) -> void;
 
   static auto writeFile(types::Haptics &haptic, const std::string &filePath) -> void;
+
+  static auto bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
+  static auto bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
+  static auto base642bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
+  static auto bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void;
 };
 } // namespace haptics::io
 #endif // IOJSON_H

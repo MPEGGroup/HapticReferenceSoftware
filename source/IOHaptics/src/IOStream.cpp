@@ -1088,15 +1088,15 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
   int avatarId = IOBinaryPrimitives::readUInt(bitstream, idx, AVATAR_ID);
   sreader.perception.setAvatarId(avatarId);
 
+  // read effect library size, unused but could be used for check
+  IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_LIBRARY_COUNT);
+
   int flagScheme = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_FLAG_SEMANTIC);
   if (flagScheme == 1) {
     int schemeLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_SCHEME_LENGTH);
     std::string schemeStr = IOBinaryPrimitives::readString(bitstream, idx, schemeLength);
     sreader.perception.setEffectSemanticScheme(schemeStr);
   }
-
-  // read effect library size, unused but could be used for check
-  IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_LIBRARY_COUNT);
 
   int unitExp = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_UNIT_EXP);
   sreader.perception.setUnitExponent(unitExp);
@@ -1725,8 +1725,6 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
       IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_FREQ_SAMPLING);
   if (frequencySampling > 0) {
     sreader.channel.setFrequencySampling(frequencySampling);
-  }
-  if (frequencySampling > 0) {
     uint32_t sampleCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_SAMPLE_COUNT);
     sreader.channel.setSampleCount(sampleCount);
   }
@@ -1777,7 +1775,7 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
     std::string curveTypeStr = curveTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(curveTypeStr, bitstream);
   } else if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
-    std::bitset<MDBAND_WIN_LEN> winLengthBits(
+    std::bitset<MDBAND_BLK_LEN> winLengthBits(
         static_cast<uint8_t>(swriter.bandStream.band.getBlockLength()));
     std::string winLengthStr = winLengthBits.to_string();
     IOBinaryPrimitives::writeStrBits(winLengthStr, bitstream);
@@ -1825,7 +1823,7 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
     int curveType = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_CURVE_TYPE);
     sreader.bandStream.band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (sreader.bandStream.band.getBandType() == types::BandType::WaveletWave) {
-    int windowLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_WIN_LEN);
+    int windowLength = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_BLK_LEN);
     sreader.bandStream.band.setBlockLength(windowLength);
   }
   int lowFreq = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_LOW_FREQ);
@@ -1959,10 +1957,8 @@ auto IOStream::createWaveletPayload(StreamWriter &swriter,
        i += nbWaveBlock) {
     std::vector<bool> bufbitstream = std::vector<bool>();
     types::Effect bufEffect = swriter.bandStream.band.getEffectAt(i);
-    if (bufEffect.getKeyframesSize() > 1) {
-      IOBinaryBands::writeWaveletEffect(bufEffect, bufbitstream);
-      bitstream.push_back(bufbitstream);
-    }
+    IOBinaryBands::writeWaveletEffect(bufEffect, bufbitstream);
+    bitstream.push_back(bufbitstream);
     int overflow = static_cast<int>(swriter.bandStream.band.getEffectsSize()) - (i + nbWaveBlock);
     if (overflow < 0) {
       nbWaveBlock = static_cast<int>(swriter.bandStream.band.getEffectsSize()) - i;
@@ -2412,7 +2408,7 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
                        (double)band.getUpperFrequencyLimit());
   effect.setPosition(effectPos);
 
-  IOBinaryBands::readWaveletEffect(effect, band, bitstream, idx, timescale);
+  IOBinaryBands::readWaveletEffect(effect, bitstream, idx);
   length += idx;
   return true;
 }
