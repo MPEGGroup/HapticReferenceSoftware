@@ -79,7 +79,6 @@ constexpr int DIFF_DIGIT = 4;
 
 constexpr size_t BASE64_SIZE = 6;
 
-
 class MyRemoteSchemaDocumentProvider : public rapidjson::IRemoteSchemaDocumentProvider {
 public:
   auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
