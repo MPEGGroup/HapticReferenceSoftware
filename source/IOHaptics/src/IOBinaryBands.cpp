@@ -127,7 +127,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
     } else if (effectType == types::EffectType::Composite) {
-      readTimelineEffect(myEffect, band, file, unusedBits, timescale);
+      readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
       case types::BandType::Transient:
@@ -146,7 +146,7 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
         }
         break;
       case types::BandType::WaveletWave:
-        if (!IOBinaryBands::readWaveletEffect(myEffect, band, file, unusedBits, timescale)) {
+        if (!IOBinaryBands::readWaveletEffect(myEffect, file, unusedBits)) {
           return false;
         }
         break;
@@ -358,49 +358,32 @@ auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool
   return true;
 }
 
-auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band, std::istream &file,
-                                      std::vector<bool> &unusedBits, const unsigned int timescale)
-    -> bool {
-  if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value()) {
-    return false;
-  }
-  spiht::Spiht_Dec dec;
-  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::istream &file,
+                                      std::vector<bool> &unusedBits) -> bool {
   auto size = IOBinaryPrimitives::readNBits<uint16_t, EFFECT_WAVELET_SIZE>(file, unusedBits);
-
-  std::vector<unsigned char> instream;
-  instream.resize(size);
-  for (auto &b : instream) {
+  auto outstream = std::vector<unsigned char>();
+  outstream.resize(size);
+  for (auto &b : outstream) {
     b = IOBinaryPrimitives::readNBits<unsigned char, BYTE_SIZE>(file, unusedBits);
   }
-  dec.decodeEffect(instream, effect, (int)blocklength);
-
+  effect.setWaveletBitstream(outstream);
   return true;
 }
-auto IOBinaryBands::readWaveletEffect(types::Effect &effect, types::Band &band,
-                                      std::vector<bool> &bitstream, int &idx,
-                                      const unsigned int timescale) -> bool {
-  if (band.getBandType() != BandType::WaveletWave || !band.getBlockLength().has_value()) {
-    return false;
-  }
-  spiht::Spiht_Dec dec;
-  auto blocklength = band.getBlockLength().value() * band.getUpperFrequencyLimit() / timescale;
-  auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
+auto IOBinaryBands::readWaveletEffect(types::Effect &effect, std::vector<bool> &bitstream, int &idx)
+    -> bool {
 
-  std::vector<unsigned char> instream;
-  instream.resize(size);
-  for (auto &b : instream) {
+  auto size = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_WAVELET_SIZE);
+  auto outstream = std::vector<unsigned char>();
+  outstream.resize(size);
+  for (auto &b : outstream) {
     b = static_cast<unsigned char>(IOBinaryPrimitives::readUInt(bitstream, idx, BYTE_SIZE));
   }
-  dec.decodeEffect(instream, effect, (int)blocklength);
-
+  effect.setWaveletBitstream(outstream);
   return true;
 }
 
 auto IOBinaryBands::writeWaveletEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
-  spiht::Spiht_Enc enc;
-  std::vector<unsigned char> outstream;
-  enc.encodeEffect(effect, outstream);
+  std::vector<unsigned char> outstream = effect.getWaveletBitstream();
   IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_WAVELET_SIZE>((uint16_t)outstream.size(), output);
   for (auto &b : outstream) {
     IOBinaryPrimitives::writeNBits<unsigned char, BYTE_SIZE>(b, output);
@@ -429,8 +412,7 @@ auto IOBinaryBands::writeReferenceEffect(types::Effect &effect, std::vector<bool
 }
 
 auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band, std::istream &file,
-                                       std::vector<bool> &unusedBits, const unsigned int timescale)
-    -> bool {
+                                       std::vector<bool> &unusedBits) -> bool {
   auto timelineEffectCount =
       IOBinaryPrimitives::readNBits<uint16_t, EFFECT_TIMELINE_COUNT>(file, unusedBits);
 
@@ -445,7 +427,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
     } else if (effectType == types::EffectType::Composite) {
-      readTimelineEffect(myEffect, band, file, unusedBits, timescale);
+      readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
       case types::BandType::Transient:
@@ -458,7 +440,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
         IOBinaryBands::readVectorialEffect(myEffect, file, unusedBits);
         break;
       case types::BandType::WaveletWave:
-        IOBinaryBands::readWaveletEffect(myEffect, band, file, unusedBits, timescale);
+        IOBinaryBands::readWaveletEffect(myEffect, file, unusedBits);
         break;
       default:
         return false;

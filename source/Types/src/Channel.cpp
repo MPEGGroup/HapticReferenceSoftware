@@ -43,6 +43,15 @@ auto Channel::setId(int newId) -> void { id = newId; }
 
 auto Channel::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
+auto Channel::getPriority() const -> std::optional<int> { return priority; }
+auto Channel::getPriorityOrDefault() const -> int {
+  if (priority.has_value()) {
+    return priority.value();
+  }
+  return 0;
+}
+auto Channel::setPriority(int newPriority) -> void { priority = newPriority; }
+
 [[nodiscard]] auto Channel::getGain() const -> float { return gain; }
 
 auto Channel::setGain(float newGain) -> void { gain = newGain; }

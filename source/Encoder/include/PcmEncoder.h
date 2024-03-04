@@ -101,7 +101,7 @@ struct EncodingConfig {
     auto temp = (double)bitrate;
     auto wavelet_bitbudget =
         (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
-    auto max_bitbudget = (int)(log2(wavelet_blockLength) - 1) * MAXBITS;
+    auto max_bitbudget = (int)(log2(wavelet_blockLength) - 1) * spiht::MAXBITS;
     if (wavelet_bitbudget > max_bitbudget) {
       wavelet_bitbudget = max_bitbudget;
     } else if (wavelet_bitbudget < 1) {

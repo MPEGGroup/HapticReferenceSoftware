@@ -40,11 +40,13 @@
 #include <vector>
 
 #include "FilterBank/include/Wavelet.h"
+#include "Spiht/include/Spiht_Dec.h"
 #include "Types/include/Band.h"
 #include "Types/include/Effect.h"
 #include "Types/include/Keyframe.h"
 
 using haptics::filterbank::Wavelet;
+using haptics::spiht::Spiht_Dec;
 using haptics::types::Band;
 using haptics::types::BandType;
 using haptics::types::Effect;
@@ -55,13 +57,14 @@ constexpr double MS_2_S_WAVELET = 0.001;
 
 class WaveletDecoder {
 public:
-  auto static decodeBand(Band &band, int timescale) -> std::vector<double>;
-  void static transformBand(Band &band, unsigned int timescale);
-  auto static decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl)
-      -> std::vector<double>;
+  auto decodeBand(Band &band, int timescale) -> std::vector<double>;
+  void transformBand(Band &band, unsigned int timescale);
+  void static decodeBlock(std::vector<int> &block_dwt, std::vector<double> &block_time,
+                          double scalar, int dwtl);
 
 private:
   std::vector<double> sig_rec;
+  Spiht_Dec spihtDec = Spiht_Dec();
 };
 } // namespace haptics::waveletdecoder
 #endif // WAVELETDECODER_H

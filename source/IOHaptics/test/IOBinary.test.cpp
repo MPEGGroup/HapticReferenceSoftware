@@ -236,7 +236,7 @@ TEST_CASE("write/read file header for reference device testing") {
         testingDescription_perception0.size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(0)).size() +
         std::get<1>(testingReferenceDeviceValue_perception0.at(1)).size() +
-        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 105;
+        std::get<1>(testingReferenceDeviceValue_perception0.at(2)).size() + 106;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -478,7 +478,7 @@ TEST_CASE("write/read file header for channel testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
-        testingVertices_channel2.size() + 142;
+        testingVertices_channel2.size() + 144;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 
@@ -738,7 +738,7 @@ TEST_CASE("write/read file for body testing") {
         testingDescription_perception0.size() + testingDescription_perception1.size() +
         testingDescription_channel0.size() + testingDescription_channel1.size() +
         testingDescription_channel2.size() + testingVertices_channel0.size() +
-        testingVertices_channel2.size() + 314;
+        testingVertices_channel2.size() + 316;
     CHECK(std::filesystem::file_size(filename) == expectedFileSize);
   }
 

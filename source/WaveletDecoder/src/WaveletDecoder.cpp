@@ -46,15 +46,13 @@ auto WaveletDecoder::decodeBand(Band &band, int timescale) -> std::vector<double
 
   for (uint32_t b = 0; b < numBlocks; b++) {
     Effect effect = band.getEffectAt((int)b);
-    std::vector<double> block_dwt(bl, 0);
-    Keyframe keyframe = effect.getKeyframeAt(bl);
-    auto scalar = (double)keyframe.getAmplitudeModulation().value();
-    for (int i = 0; i < bl; i++) {
-      Keyframe keyframe = effect.getKeyframeAt(i);
-      block_dwt[i] = (double)keyframe.getAmplitudeModulation().value();
-    }
-
-    std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
+    auto bitstream = effect.getWaveletBitstream();
+    std::vector<int> block_dwt(bl, 0);
+    double scalar = 0;
+    int bits = 0;
+    spihtDec.decodeEffect(bitstream, block_dwt, bl, scalar, bits);
+    std::vector<double> block_time(bl);
+    decodeBlock(block_dwt, block_time, scalar, dwtlevel);
     std::copy(block_time.begin(), block_time.end(), sig_rec.begin() + effect.getPosition());
   }
   return sig_rec;
@@ -66,42 +64,36 @@ void WaveletDecoder::transformBand(Band &band, unsigned int timescale) {
     return;
   }
   size_t numBlocks = band.getEffectsSize();
-  auto bl = (int)band.getEffectAt(0).getKeyframesSize() - 2;
+  auto bl = (int)(band.getBlockLengthOrDefault() * MS_2_S_WAVELET * (double)band.getUpperFrequencyLimit());
   int dwtlevel = (int)log2((double)bl / 4);
 
   for (uint32_t b = 0; b < numBlocks; b++) {
     Effect effect = band.getEffectAt((int)b);
-    std::vector<double> block_dwt(bl, 0);
-    Keyframe keyframe = effect.getKeyframeAt(bl);
-    auto scalar = (double)keyframe.getAmplitudeModulation().value();
-    for (int i = 0; i < bl; i++) {
-      Keyframe keyframe = effect.getKeyframeAt(i);
-      block_dwt[i] = (double)keyframe.getAmplitudeModulation().value();
-    }
-    std::vector<double> block_time = decodeBlock(block_dwt, scalar, dwtlevel);
+    auto bitstream = effect.getWaveletBitstream();
+    std::vector<int> block_dwt(bl, 0);
+    double scalar = 0;
+    int bits = 0;
+    spihtDec.decodeEffect(bitstream, block_dwt, bl, scalar, bits);
+    scalar /= pow(2, (double)bits);
     Effect newEffect;
     newEffect.setPosition(
         (int)((double)b * (double)bl * (double)timescale / (double)band.getUpperFrequencyLimit()));
-    for (int i = 0; i < bl; i++) {
-      Keyframe keyframe;
-      keyframe.setAmplitudeModulation(block_time[i]);
-      keyframe.setRelativePosition(i);
-      newEffect.addKeyframe(keyframe);
-    }
+    auto block_time = std::vector<double>();
+    decodeBlock(block_dwt, block_time, scalar, dwtlevel);
+    newEffect.setWaveletSamples(block_time);
     band.replaceEffectAt((int)b, newEffect);
   }
 }
 
-auto WaveletDecoder::decodeBlock(std::vector<double> &block_dwt, double scalar, int dwtl)
-    -> std::vector<double> {
+void WaveletDecoder::decodeBlock(std::vector<int> &block_dwt, std::vector<double> &block_time,
+                                 double scalar, int dwtl) {
 
   Wavelet wavelet;
   std::vector<double> block_scaled(block_dwt.size(), 0);
   std::transform(block_dwt.begin(), block_dwt.end(), block_scaled.begin(),
-                 [scalar](double d) -> double { return d * scalar; });
-  std::vector<double> block_time(block_dwt.size(), 0);
+                 [scalar](int d) -> double { return (double)d * scalar; });
+  block_time.resize(block_dwt.size());
   wavelet.inv_DWT(block_scaled, dwtl, block_time);
-  return block_time;
 }
 
 } // namespace haptics::waveletdecoder

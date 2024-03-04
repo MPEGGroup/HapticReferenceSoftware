@@ -123,6 +123,11 @@ public:
   auto EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
       -> double;
 
+  auto getWaveletBitstream() -> std::vector<unsigned char> &;
+  void setWaveletBitstream(std::vector<unsigned char> stream);
+  auto getWaveletSamples() -> std::vector<double> &;
+  void setWaveletSamples(std::vector<double> samples);
+
 private:
   int id = -1;
   int position = 0;
@@ -132,6 +137,8 @@ private:
   BaseSignal baseSignal = BaseSignal::Sine;
   EffectType effectType = EffectType::Basis;
   std::vector<Effect> timeline = std::vector<Effect>{};
+  std::vector<double> waveletSamples;
+  std::vector<unsigned char> waveletBitstream;
 
   [[nodiscard]] auto computeBaseSignal(double time, double frequency, double phase) const -> double;
 };

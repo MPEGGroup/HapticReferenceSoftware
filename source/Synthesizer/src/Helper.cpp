@@ -80,13 +80,14 @@ namespace haptics::synthesizer {
                                     const int pad, std::string &filename) -> bool {
 
   // Apply preprocessing on wavelet bands
+  WaveletDecoder waveletDecoder;
   for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
     for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
       for (uint32_t k = 0; k < haptic.getPerceptionAt((int)i).getChannelAt((int)j).getBandsSize();
            k++) {
         types::Band band = haptic.getPerceptionAt((int)i).getChannelAt((int)j).getBandAt((int)k);
         if (band.getBandType() == types::BandType::WaveletWave) {
-          WaveletDecoder::transformBand(band, haptic.getTimescaleOrDefault());
+          waveletDecoder.transformBand(band, haptic.getTimescaleOrDefault());
           haptic.getPerceptionAt((int)i).getChannelAt((int)j).replaceBandAt((int)k, band);
         }
       }

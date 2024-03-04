@@ -70,6 +70,9 @@ public:
 
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;
+  [[nodiscard]] auto getPriority() const -> std::optional<int>;
+  [[nodiscard]] auto getPriorityOrDefault() const -> int;
+  auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getCurveTypeOrDefault() const -> CurveType;
   [[nodiscard]] auto getCurveType() const -> std::optional<CurveType>;
   auto setCurveType(CurveType newCurveType) -> void;
@@ -110,6 +113,7 @@ private:
   int upperFrequencyLimit = 0;
   std::vector<Effect> effects = std::vector<Effect>{};
   // int timescale = TIMESCALE;
+  std::optional<int> priority;
 };
 } // namespace haptics::types
 
