@@ -1091,10 +1091,17 @@ auto IOJson::bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned cha
       index++;
     }
   }
+  if (out.size() > 0) {
+    int index_end = (int)out.size() - 1;
+    while ((int)out.at(index_end) == 0 && index_end >= 0) {
+      index_end--;
+    }
+    out.resize(index_end + 1);
+  }
 }
 
 auto IOJson::bits2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
-  out.resize(ceil((double)in.size() / BYTE_SIZE_IO));
+  out.resize((size_t)ceil((double)in.size() / (double)BYTE_SIZE_IO));
   size_t index = 0;
   for (auto &v : out) {
     std::bitset<BYTE_SIZE_IO> temp;
@@ -1140,10 +1147,17 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
       compare = compare >> 1;
     }
   }
+  if (out.size() > 0) {
+    int index_end = (int)out.size() - 1;
+    while ((int)out.at(index_end) == 0 && index_end >= 0) {
+      index_end--;
+    }
+    out.resize(index_end + 1);
+  }
 }
 
 auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned char> &out) -> void {
-  out.reserve(in.size() / BASE64_SIZE);
+  out.reserve((size_t)ceil((double)in.size() / (double)BASE64_SIZE));
   int compare = COMPARE_START;
   int temp = 0;
   for (auto &v : in) {
@@ -1167,6 +1181,20 @@ auto IOJson::bits2base64(std::vector<unsigned char> &in, std::vector<unsigned ch
       out.push_back(temp);
       temp = 0;
     }
+  }
+  if (temp > 0) {
+    if (BASE64_UPPER_1 <= temp && temp <= BASE64_UPPER_2) {
+      temp += DIFF_UPPER;
+    } else if (BASE64_LOWER_1 <= temp && temp <= BASE64_LOWER_2) {
+      temp += DIFF_LOWER;
+    } else if (BASE64_DIGIT_1 <= temp && temp <= BASE64_DIGIT_2) {
+      temp -= DIFF_DIGIT;
+    } else if (temp == BASE64_PLUS) {
+      temp = ASCII_PLUS;
+    } else {
+      temp = ASCII_SOLIDUS;
+    }
+    out.push_back(temp);
   }
 }
 
