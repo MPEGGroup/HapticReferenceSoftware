@@ -1091,7 +1091,7 @@ auto IOJson::bytes2bits(std::vector<unsigned char> &in, std::vector<unsigned cha
       index++;
     }
   }
-  if (out.size() > 0) {
+  if (!out.empty()) {
     int index_end = (int)out.size() - 1;
     while ((int)out.at(index_end) == 0 && index_end >= 0) {
       index_end--;
@@ -1147,7 +1147,7 @@ auto IOJson::base642bits(std::vector<unsigned char> &in, std::vector<unsigned ch
       compare = compare >> 1;
     }
   }
-  if (out.size() > 0) {
+  if (!out.empty()) {
     int index_end = (int)out.size() - 1;
     while ((int)out.at(index_end) == 0 && index_end >= 0) {
       index_end--;
