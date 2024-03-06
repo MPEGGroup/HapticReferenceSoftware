@@ -84,10 +84,7 @@ public:
       , baseSignal(newBaseSignal)
       , effectType(newEffectType){};
   explicit Effect(int newPosition, EffectType newEffectType)
-      : position(newPosition)
-      , keyframes({})
-      , baseSignal(newBaseSignal)
-      , effectType(newEffectType){};
+      : position(newPosition), keyframes({}), effectType(newEffectType){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
