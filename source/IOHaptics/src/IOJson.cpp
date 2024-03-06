@@ -789,24 +789,20 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
         std::cerr << "Missing or invalid effect position" << std::endl;
         continue;
       }
-      if (!jsonEffect.HasMember("phase") || !jsonEffect["phase"].IsNumber()) {
-        std::cerr << "Missing or invalid effect phase" << std::endl;
-        continue;
-      }
-      if (!jsonEffect.HasMember("base_signal") || !jsonEffect["base_signal"].IsString()) {
-        std::cerr << "Missing or invalid effect base_signal" << std::endl;
-        continue;
-      }
     }
 
     auto effectId = jsonEffect["id"].GetInt();
     auto position = jsonEffect["position"].GetInt();
-    auto phase = jsonEffect.HasMember("phase") ? jsonEffect["phase"].GetFloat() : 0;
-    auto baseSignal = jsonEffect.HasMember("base_signal")
-                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"].GetString())
-                          : types::BaseSignal::Sine;
 
-    types::Effect effect(position, phase, baseSignal, effectType);
+    types::Effect effect(position, effectType);
+    if (jsonEffect.HasMember("phase") && jsonEffect["phase"].IsNumber()) {
+      auto phase = jsonEffect["phase"].GetFloat();
+      effect.setPhase(phase);
+    }
+    if (jsonEffect.HasMember("base_signal") && jsonEffect["base_signal"].IsString()) {
+      auto baseSignal = types::stringToBaseSignal.at(jsonEffect["base_signal"].GetString());
+      effect.setBaseSignal(baseSignal);
+    }
     effect.setId(effectId);
     if (jsonEffect.HasMember("semantic_keywords") && jsonEffect["semantic_keywords"].IsString()) {
       auto semantic = std::string(jsonEffect["semantic_keywords"].GetString());
@@ -1008,14 +1004,6 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
         std::cerr << "Missing or invalid effect position" << std::endl;
         continue;
       }
-      if (!jsonEffect.HasMember("phase") || !jsonEffect["phase"].IsNumber()) {
-        std::cerr << "Missing or invalid effect phase" << std::endl;
-        continue;
-      }
-      if (!jsonEffect.HasMember("base_signal") || !jsonEffect["base_signal"].IsString()) {
-        std::cerr << "Missing or invalid effect base_signal" << std::endl;
-        continue;
-      }
       if (band.getBandType() == types::BandType::WaveletWave) {
         if (jsonEffect.HasMember("keyframes")) {
           std::cerr << "Keyframes shall not be defined fot wavelet wave bands" << std::endl;
@@ -1029,12 +1017,15 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
     }
 
     auto position = jsonEffect["position"].GetInt();
-    auto phase = jsonEffect.HasMember("phase") ? jsonEffect["phase"].GetFloat() : 0;
-    auto baseSignal = jsonEffect.HasMember("base_signal")
-                          ? types::stringToBaseSignal.at(jsonEffect["base_signal"].GetString())
-                          : types::BaseSignal::Sine;
-
-    types::Effect effect(position, phase, baseSignal, effectType);
+    types::Effect effect(position, effectType);
+    if (jsonEffect.HasMember("phase") && jsonEffect["phase"].IsNumber()) {
+      auto phase = jsonEffect["phase"].GetFloat();
+      effect.setPhase(phase);
+    }
+    if (jsonEffect.HasMember("base_signal") && jsonEffect["base_signal"].IsString()) {
+      auto baseSignal = types::stringToBaseSignal.at(jsonEffect["base_signal"].GetString());
+      effect.setBaseSignal(baseSignal);
+    }
     if (jsonEffect.HasMember("id") && jsonEffect["id"].IsInt()) {
       effect.setId(jsonEffect["id"].GetInt());
     }
