@@ -461,8 +461,8 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 
     resEffect1 = res.getEffectAt(0);
     CHECK(resEffect1.getPosition() == testingEffect1_position);
-    CHECK(std::fabs(resEffect1.getPhase() - (testingEffect1_phase)) < floatPrecision);
-    CHECK(resEffect1.getBaseSignal() == testingEffect1_baseSignal);
+    CHECK(std::fabs(resEffect1.getPhaseOrDefault() - (testingEffect1_phase)) < floatPrecision);
+    CHECK(resEffect1.getBaseSignalOrDefault() == testingEffect1_baseSignal);
     REQUIRE(resEffect1.getKeyframesSize() == testingEffect1_keyframes.size());
     for (int i = 0; i < static_cast<int>(resEffect1.getKeyframesSize()); i++) {
       haptics::types::Keyframe resKeyframe = resEffect1.getKeyframeAt(i);
@@ -487,8 +487,8 @@ TEST_CASE("write/read BandBody on vectorial wave") {
 
     resEffect2 = res.getEffectAt(1);
     CHECK(resEffect2.getPosition() == testingEffect2_position);
-    CHECK(std::fabs(resEffect2.getPhase() - testingEffect2_phase) < floatPrecision);
-    CHECK(resEffect2.getBaseSignal() == testingEffect2_baseSignal);
+    CHECK(std::fabs(resEffect2.getPhaseOrDefault() - testingEffect2_phase) < floatPrecision);
+    CHECK(resEffect2.getBaseSignalOrDefault() == testingEffect2_baseSignal);
     REQUIRE(resEffect2.getKeyframesSize() == testingEffect2_keyframes.size());
     for (int i = 0; i < static_cast<int>(resEffect2.getKeyframesSize()); i++) {
       haptics::types::Keyframe resKeyframe = resEffect2.getKeyframeAt(i);

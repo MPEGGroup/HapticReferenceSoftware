@@ -1248,10 +1248,11 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
 
   if (libraryEffect.getEffectType() == types::EffectType::Basis) {
 
-    IOBinaryPrimitives::writeFloatNBits<uint32_t, EFFECT_PHASE>(libraryEffect.getPhase(), bitstream,
-                                                                0, MAX_PHASE);
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, EFFECT_PHASE>(libraryEffect.getPhaseOrDefault(),
+                                                                bitstream, 0, MAX_PHASE);
 
-    std::bitset<EFFECT_BASE_SIGNAL> baseBits(static_cast<int>(libraryEffect.getBaseSignal()));
+    std::bitset<EFFECT_BASE_SIGNAL> baseBits(
+        static_cast<int>(libraryEffect.getBaseSignalOrDefault()));
     std::string baseStr = baseBits.to_string();
     IOBinaryPrimitives::writeStrBits(baseStr, bitstream);
   }
@@ -2130,10 +2131,10 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
       std::string kfCountStr = kfCountBits.to_string();
       IOBinaryPrimitives::writeStrBits(kfCountStr, packetBits);
       if (swriter.bandStream.band.getBandType() == types::BandType::VectorialWave) {
-        IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(swriter.effects[l].getPhase(),
-                                                                    packetBits, 0, MAX_PHASE);
+        IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(
+            swriter.effects[l].getPhaseOrDefault(), packetBits, 0, MAX_PHASE);
         std::bitset<EFFECT_BASE_SIGNAL> fxBaseBits(
-            static_cast<int>(swriter.effects[l].getBaseSignal()));
+            static_cast<int>(swriter.effects[l].getBaseSignalOrDefault()));
         std::string fxBaseStr = fxBaseBits.to_string();
         IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }

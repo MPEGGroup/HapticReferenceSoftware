@@ -1349,12 +1349,16 @@ auto IOJson::extractLibrary(types::Perception &perception, rapidjson::Value &jso
         jsonTree.GetAllocator());
     jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());
     jsonEffect.AddMember("position", effect.getPosition(), jsonTree.GetAllocator());
-    jsonEffect.AddMember("phase", effect.getPhase(), jsonTree.GetAllocator());
-    jsonEffect.AddMember(
-        "base_signal",
-        rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
-                         jsonTree.GetAllocator()),
-        jsonTree.GetAllocator());
+    if (effect.getPhase().has_value()) {
+      jsonEffect.AddMember("phase", effect.getPhaseOrDefault(), jsonTree.GetAllocator());
+    }
+    if (effect.getBaseSignal().has_value()) {
+      jsonEffect.AddMember(
+          "base_signal",
+          rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignalOrDefault()).c_str(),
+                           jsonTree.GetAllocator()),
+          jsonTree.GetAllocator());
+    }
     if (effect.getSemantic().has_value()) {
       jsonEffect.AddMember(
           "semantic_keywords",
@@ -1530,15 +1534,23 @@ auto IOJson::extractBands(types::Channel &channel, rapidjson::Value &jsonBands,
             rapidjson::Value(effect.getSemantic().value().c_str(), jsonTree.GetAllocator()),
             jsonTree.GetAllocator());
       }
-      jsonEffect.AddMember("phase", effect.getPhase(), jsonTree.GetAllocator());
       if (effect.getEffectType() == types::EffectType::Reference) {
         jsonEffect.AddMember("id", effect.getId(), jsonTree.GetAllocator());
       } else if (effect.getEffectType() == types::EffectType::Basis) {
-        jsonEffect.AddMember(
-            "base_signal",
-            rapidjson::Value(types::baseSignalToString.at(effect.getBaseSignal()).c_str(),
-                             jsonTree.GetAllocator()),
-            jsonTree.GetAllocator());
+        if (band.getBandType() == types::BandType::Transient ||
+            band.getBandType() == types::BandType::VectorialWave) {
+          if (effect.getPhase().has_value()) {
+            jsonEffect.AddMember("phase", effect.getPhaseOrDefault(), jsonTree.GetAllocator());
+          }
+          if (effect.getBaseSignal().has_value()) {
+            jsonEffect.AddMember(
+                "base_signal",
+                rapidjson::Value(
+                    types::baseSignalToString.at(effect.getBaseSignalOrDefault()).c_str(),
+                    jsonTree.GetAllocator()),
+                jsonTree.GetAllocator());
+          }
+        }
         if (band.getBandType() == types::BandType::WaveletWave) {
           auto stream = effect.getWaveletBitstream();
           auto stream_bits = std::vector<unsigned char>();

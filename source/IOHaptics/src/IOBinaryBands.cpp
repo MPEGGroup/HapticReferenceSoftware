@@ -323,9 +323,9 @@ auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::istream &fil
 
 auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
 
-  float phase = effect.getPhase();
+  float phase = effect.getPhaseOrDefault();
   IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
-  auto baseSignal = static_cast<uint8_t>(effect.getBaseSignal());
+  auto baseSignal = static_cast<uint8_t>(effect.getBaseSignalOrDefault());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto keyframeCount = static_cast<uint16_t>(effect.getKeyframesSize());
   IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_KEYFRAME_COUNT>(keyframeCount, output);

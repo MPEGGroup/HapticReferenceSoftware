@@ -803,10 +803,15 @@ TEST_CASE("write/read file for body testing") {
     // CHECK effect
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPosition() ==
           testingPosition_effect0);
-    CHECK(std::fabs(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPhase() -
-                    testingPhase_effect0) < floatPrecision);
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getBaseSignal() ==
-          testingBaseSignal_effect0);
+    CHECK(
+        std::fabs(
+            res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPhaseOrDefault() -
+            testingPhase_effect0) < floatPrecision);
+    CHECK(res.getPerceptionAt(0)
+              .getChannelAt(0)
+              .getBandAt(0)
+              .getEffectAt(0)
+              .getBaseSignalOrDefault() == testingBaseSignal_effect0);
     REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
             testingKeyframes_effect0.size());
     for (int i = 0; i < static_cast<int>(testingKeyframes_effect0.size()); i++) {
@@ -847,7 +852,7 @@ TEST_CASE("write/read file for body testing") {
       haptics::types::Effect resEffect =
           res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getEffectAt(i);
       CHECK(resEffect.getPosition() == std::get<0>(testingKeyframes_effect1.at(i)));
-      CHECK(std::fabs(resEffect.getPhase() - 0) < floatPrecision);
+      CHECK(std::fabs(resEffect.getPhaseOrDefault() - 0) < floatPrecision);
       REQUIRE(resEffect.getKeyframesSize() == 1);
       REQUIRE(resEffect.getKeyframeAt(0).getRelativePosition().has_value());
       REQUIRE(resEffect.getKeyframeAt(0).getAmplitudeModulation().has_value());

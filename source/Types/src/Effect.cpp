@@ -50,11 +50,24 @@ auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
 
 auto Effect::setSemantic(std::string &newSemantic) -> void { semantic = newSemantic; }
 
-[[nodiscard]] auto Effect::getPhase() const -> float { return phase; }
+[[nodiscard]] auto Effect::getPhaseOrDefault() const -> float {
+  if (phase.has_value()) {
+    return phase.value();
+  }
+  return DEFAULT_PHASE;
+}
+
+[[nodiscard]] auto Effect::getPhase() const -> std::optional<float> { return phase; }
 
 auto Effect::setPhase(float newPhase) -> void { phase = newPhase; }
 
-[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal { return baseSignal; }
+[[nodiscard]] auto Effect::getBaseSignalOrDefault() const -> BaseSignal {
+  if (baseSignal.has_value()) {
+    return baseSignal.value();
+  }
+  return DEFAULT_BASE_SIGNAL;
+}
+[[nodiscard]] auto Effect::getBaseSignal() const -> std::optional<BaseSignal> { return baseSignal; }
 
 auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void { baseSignal = newBaseSignal; }
 
@@ -215,7 +228,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   // FREQUENCY MODULATION
   double freq_modulation = 0;
-  double phi = this->getPhase();
+  double phi = this->getPhaseOrDefault();
   // First frequency keyframe after the relative position
   // Find phase corresponding to this keyframe
   auto firstFrequencyKeyframeAfterPositionIt = keyframes.begin();
@@ -371,7 +384,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType, unsi
   if (frequency != 0) {
     time += phase / (2 * M_PI * frequency);
   }
-  switch (this->getBaseSignal()) {
+  switch (this->getBaseSignalOrDefault()) {
   case BaseSignal::Sine:
     return std::sin(2 * M_PI * time * frequency);
   case BaseSignal::Square:

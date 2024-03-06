@@ -90,10 +90,11 @@ public:
   auto setPosition(int newPosition) -> void;
   [[nodiscard]] auto getSemantic() const -> std::optional<std::string>;
   auto setSemantic(std::string &newSemantic) -> void;
-  [[nodiscard]] auto getPhase() const -> float;
-
+  [[nodiscard]] auto getPhaseOrDefault() const -> float;
+  [[nodiscard]] auto getPhase() const -> std::optional<float>;
   auto setPhase(float newPhase) -> void;
-  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  [[nodiscard]] auto getBaseSignalOrDefault() const -> BaseSignal;
+  [[nodiscard]] auto getBaseSignal() const -> std::optional<BaseSignal>;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   [[nodiscard]] auto getEffectType() const -> EffectType;
   auto setEffectType(EffectType newEffectType) -> void;
@@ -129,12 +130,14 @@ public:
   void setWaveletSamples(std::vector<double> samples);
 
 private:
+  static constexpr float DEFAULT_PHASE = 0;
+  static constexpr BaseSignal DEFAULT_BASE_SIGNAL = BaseSignal::Sine;
   int id = -1;
   int position = 0;
-  float phase = 0;
+  std::optional<float> phase;
   std::optional<std::string> semantic;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
-  BaseSignal baseSignal = BaseSignal::Sine;
+  std::optional<BaseSignal> baseSignal = BaseSignal::Sine;
   EffectType effectType = EffectType::Basis;
   std::vector<Effect> timeline = std::vector<Effect>{};
   std::vector<double> waveletSamples;
