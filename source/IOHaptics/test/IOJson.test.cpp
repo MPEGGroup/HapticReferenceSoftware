@@ -579,13 +579,9 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
-  const float testingPhase_effect0 = 0;
-  const auto testingBaseSignal_effect0 = haptics::types::BaseSignal::Sine;
   const std::vector<std::tuple<int, float>> testingKeyframes_effect0 = {
       {0, 0}, {176, .2143543}, {177, 1}, {52345, .453}};
-  haptics::types::Effect testingEffect0(testingPosition_effect0, testingPhase_effect0,
-                                        testingBaseSignal_effect0,
-                                        haptics::types::EffectType::Basis);
+  haptics::types::Effect testingEffect0(testingPosition_effect0, haptics::types::EffectType::Basis);
   for (auto value : testingKeyframes_effect0) {
     testingEffect0.addAmplitudeAt(std::get<1>(value), std::get<0>(value));
   }
@@ -681,10 +677,6 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
     // CHECK effect
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPosition() ==
           testingPosition_effect0);
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPhase() ==
-          Approx(testingPhase_effect0));
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getBaseSignal() ==
-          testingBaseSignal_effect0);
     REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
             testingKeyframes_effect0.size());
     for (int i = 0; i < static_cast<int>(testingKeyframes_effect0.size()); i++) {

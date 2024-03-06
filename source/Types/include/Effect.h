@@ -139,7 +139,7 @@ private:
   std::optional<float> phase;
   std::optional<std::string> semantic;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
-  std::optional<BaseSignal> baseSignal = BaseSignal::Sine;
+  std::optional<BaseSignal> baseSignal;
   EffectType effectType = EffectType::Basis;
   std::vector<Effect> timeline = std::vector<Effect>{};
   std::vector<double> waveletSamples;
