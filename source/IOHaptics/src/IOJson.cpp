@@ -521,6 +521,11 @@ auto IOJson::semanticConformanceCheckEffect(types::Effect &effect, types::Band &
       conformant = false;
     }
   }
+  if (band.getBandType() == types::BandType::WaveletWave && effect.getKeyframesSize() > 0) {
+    std::cerr << "Effects in wavelet bands sould not contain keyframes in channel "
+              << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
+    conformant = false;
+  }
   if (effect.getEffectType() == types::EffectType::Reference) {
     auto id = effect.getId();
     bool inLibrary = false;
@@ -1013,10 +1018,6 @@ auto IOJson::loadEffects(const rapidjson::Value &jsonEffects, types::Band &band)
         continue;
       }
       if (band.getBandType() == types::BandType::WaveletWave) {
-        if (jsonEffect.HasMember("keyframes")) {
-          std::cerr << "Keyframes shall not be defined fot wavelet wave bands" << std::endl;
-          continue;
-        }
         if (!jsonEffect.HasMember("wavelet_stream")) {
           std::cerr << "Missing wavelet_stream" << std::endl;
           continue;

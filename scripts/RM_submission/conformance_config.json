@@ -483,6 +483,11 @@
         "name": "Effect: invalid sematic_keywords",
         "haptic_file_path": "SemanticConformance\\effect-semantic-invalid_semantic_keyword.hjif",
         "expected_output": "An effect in channel 0 of perception 0 uses invalid semantic keywords.\nThe HJIF input file is not conformant to the specification."
+      },
+      {
+        "name": "Effect: wavelet effect contains keyframes",
+        "haptic_file_path": "SemanticConformance\\effect-keyframes-wavelet_effect_contains_keyframes.hjif",
+        "expected_output": "Effects in wavelet bands sould not contain keyframes in channel 0 of perception 0.\nThe HJIF input file is not conformant to the specification."
       }
     ],
     "hmpg_conformance": [
