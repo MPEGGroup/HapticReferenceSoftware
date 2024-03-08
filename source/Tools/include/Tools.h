@@ -84,7 +84,7 @@ namespace haptics::tools {
 
 [[nodiscard]] auto isNumber(const std::string &s) -> bool;
 
-[[nodiscard]] auto isPowerOfTwo(const int n) -> bool;
+[[nodiscard]] auto isPowerOfTwo(int n) -> bool;
 
 } // namespace haptics::tools
 #endif

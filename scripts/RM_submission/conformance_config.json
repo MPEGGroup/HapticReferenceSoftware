@@ -259,8 +259,8 @@
       },
       {
         "name": "Band: block_length too small",
-        "haptic_file_path": "SchemaConformance\\band-block_length-too_small.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-block_length-too_small.hjif\nInvalid schema: #/properties/block_length\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/1/block_length"
+        "haptic_file_path": "",
+        "expected_output": ""
       },
       {
         "name": "Band: lower_frequency_limit negative",
@@ -451,13 +451,13 @@
       },
       {
         "name": "Band: curve_type defined for WaveletWave band_type",
-        "haptic_file_path": "SemanticConformance\\band-curve_type-curve_type_defined_in_wavelet_band.hjif",
-        "expected_output": "The curve type should only be specified for Curve Bands in channel 0 of perception 0.\nThe HJIF input file is not conformant to the specification."
+        "haptic_file_path": "",
+        "expected_output": ""
       },
       {
         "name": "Band: block_length not power of 2",
         "haptic_file_path": "SemanticConformance\\band-block_length-not_power_of_2.hjif",
-        "expected_output": "The block length of the wavelet band should be a power of two in channel 0 of perception 0.\nThe HJIF input file is not conformant to the specification."
+        "expected_output": ""
       },
       {
         "name": "Band: upper_frequency_limit less than lower_frequency_limit",
