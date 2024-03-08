@@ -278,7 +278,6 @@ def main():
                             encoding_command += " --disable-wavelet"
                         elif(disable_vectorial):
                             encoding_command += " --disable-vectorial"
-                        print(encoding_command)
                         subprocess.run(encoding_command, stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
