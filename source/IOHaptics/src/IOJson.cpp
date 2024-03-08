@@ -109,7 +109,7 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
   const std::regex txt_regex("^([0-9]{4})(-([0-9]))?$");
   std::smatch pieces_match;
   if (regex_search(version, pieces_match, txt_regex) && !pieces_match.empty()) {
-    if (haptics::tools::is_number(pieces_match[1])) {
+    if (haptics::tools::isNumber(pieces_match[1])) {
       int year = 0;
       // std::from_chars(pieces_match[1].str().data(),
       //                 pieces_match[1].str().data() + pieces_match[1].str().size(), year);
@@ -128,7 +128,7 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
     }
     if (pieces_match.size() >= 4) {
       if (pieces_match[3] != "") {
-        if (haptics::tools::is_number(pieces_match[3])) {
+        if (haptics::tools::isNumber(pieces_match[3])) {
           int amd = 0;
           // std::from_chars(pieces_match[3].str().data(),
           //                 pieces_match[3].str().data() + pieces_match[3].str().size(), amd);
@@ -479,6 +479,14 @@ auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &cha
     std::cerr << "The curve type should only be specified for Curve Bands in channel "
               << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
     conformant = false;
+  }
+  if (bandType == haptics::types::BandType::WaveletWave) {
+    auto block_length = band.getBlockLengthOrDefault();
+    if (!haptics::tools::isPowerOfTwo(block_length)) {
+      std::cerr << "The block length of the wavelet band should be a power of two in channel "
+                << channel.getId() << " of perception " << perception.getId() << "." << std::endl;
+      conformant = false;
+    }
   }
   if (haptic.getProfile() == "Simple Parametric") {
     if (band.getBandType() == haptics::types::BandType::WaveletWave) {

@@ -425,12 +425,17 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return interpolation;
 }
 
-[[nodiscard]] auto is_number(const std::string &s) -> bool {
+[[nodiscard]] auto isNumber(const std::string &s) -> bool {
   std::string::const_iterator it = s.begin();
   while (it != s.end() && std::isdigit(*it) != 0) {
     ++it;
   }
   return !s.empty() && it == s.end();
+}
+
+
+[[nodiscard]] auto isPowerOfTwo(const int n) -> bool {
+  return (n != 0) && ((n & (n - 1)) == 0);
 }
 
 } // namespace haptics::tools
