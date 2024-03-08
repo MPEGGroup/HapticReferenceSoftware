@@ -433,9 +433,6 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
   return !s.empty() && it == s.end();
 }
 
-
-[[nodiscard]] auto isPowerOfTwo(const int n) -> bool {
-  return (n != 0) && ((n & (n - 1)) == 0);
-}
+[[nodiscard]] auto isPowerOfTwo(const int n) -> bool { return (n != 0) && ((n & (n - 1)) == 0); }
 
 } // namespace haptics::tools
