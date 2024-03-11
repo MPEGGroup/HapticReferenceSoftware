@@ -58,7 +58,7 @@ MODALITY_KEY = "modality"
 EXTENSION_KEY = "extension"
 NAME_KEY = "name"
 HAPTIC_FILE_PATH_KEY = "haptic_file_path"
-REFERENCE_FILE = "reference_file"
+REFERENCE_FILE_KEY = "reference_file"
 MAIN_FOLDER_KEY = "main_folder"
 COMPARISON_DATA_KEY = "comparison_data"
 REFERENCE_BITRATEPSNR_KEY = "reference_bitratePSNR"
@@ -260,7 +260,7 @@ def main():
                     for current_bitrate in bitrates:
                         formatted_output_name = f"{my_effect[TYPE_KEY]}1-{testId}fvt_{CRM_version}_{my_effect[MODALITY_KEY]}_{current_bitrate}_{my_effect[NAME_KEY]}"
                         input_file_path = my_effect[HAPTIC_FILE_PATH_KEY]
-                        reference_file_path = my_effect[REFERENCE_FILE]
+                        reference_file_path = my_effect[REFERENCE_FILE_KEY]
                         if MAIN_FOLDER_KEY in config[REFERENCE_FILES_KEY]:
                             input_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
                             reference_file_path = os.path.join(config[REFERENCE_FILES_KEY][MAIN_FOLDER_KEY], reference_file_path)

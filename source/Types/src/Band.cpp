@@ -49,13 +49,26 @@ auto Band::getPriorityOrDefault() const -> int {
 }
 auto Band::setPriority(int newPriority) -> void { priority = newPriority; }
 
-[[nodiscard]] auto Band::getCurveType() const -> CurveType { return curveType; }
+[[nodiscard]] auto Band::getCurveTypeOrDefault() const -> CurveType {
+  if (curveType.has_value()) {
+    return curveType.value();
+  }
+  return DEFAULT_CURVE_TYPE;
+}
+[[nodiscard]] auto Band::getCurveType() const -> std::optional<CurveType> { return curveType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
-[[nodiscard]] auto Band::getBlockLength() const -> double { return blockLength; }
+[[nodiscard]] auto Band::getBlockLengthOrDefault() const -> int {
+  if (blockLength.has_value()) {
+    return blockLength.value();
+  }
+  return DEFAULT_BLOCK_LENGTH;
+}
 
-auto Band::setBlockLength(double newBlockLength) -> void { blockLength = newBlockLength; }
+[[nodiscard]] auto Band::getBlockLength() const -> std::optional<int> { return blockLength; }
+
+auto Band::setBlockLength(int newBlockLength) -> void { blockLength = newBlockLength; }
 
 [[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int { return upperFrequencyLimit; }
 
@@ -136,7 +149,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position, this->getCurveType(), timescale);
+    return effect->EvaluateKeyframes(position, this->getCurveTypeOrDefault(), timescale);
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit, timescale);
   case BandType::WaveletWave:
@@ -178,7 +191,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
       if (keyframes.size() == 2) {
         effectAmp = haptics::tools::linearInterpolation2(keyframes);
       } else {
-        switch (this->curveType) {
+        switch (getCurveTypeOrDefault()) {
         case CurveType::Linear:
           effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;
@@ -252,9 +265,9 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
                                                   Band::getTransientDuration(timescale));
 }
 
-[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
+//[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
 
-auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
+// auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
 
 [[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
   return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);

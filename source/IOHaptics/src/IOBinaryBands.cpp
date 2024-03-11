@@ -44,14 +44,14 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
     -> bool {
   auto bandType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BAND_TYPE>(file, unusedBits);
   band.setBandType(static_cast<types::BandType>(bandType));
-  double blockLength_samp = 0;
+  int blockLength_samp = 0;
   if (band.getBandType() == types::BandType::Curve) {
     auto curveType = IOBinaryPrimitives::readNBits<uint8_t, MDBAND_CURVE_TYPE>(file, unusedBits);
     band.setCurveType(static_cast<types::CurveType>(curveType));
   } else if (band.getBandType() == types::BandType::WaveletWave) {
     auto blockLength_code =
-        (double)IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
-    blockLength_samp = pow(2, blockLength_code + 4);
+        IOBinaryPrimitives::readNBits<uint8_t, MDBAND_BLK_LEN>(file, unusedBits);
+    blockLength_samp = static_cast<int>(pow(2, blockLength_code + 4));
   }
 
   auto lowerFrequencyLimit =
@@ -63,7 +63,7 @@ auto IOBinaryBands::readBandHeader(types::Band &band, std::istream &file,
   band.setUpperFrequencyLimit(static_cast<int>(upperFrequencyLimit));
 
   if (band.getBandType() == types::BandType::WaveletWave) {
-    double blockLength_ticks = blockLength_samp / (double)upperFrequencyLimit * timescale;
+    auto blockLength_ticks = static_cast<int>(blockLength_samp * timescale / upperFrequencyLimit);
     band.setBlockLength(blockLength_ticks);
   }
   auto effectCount = IOBinaryPrimitives::readNBits<uint16_t, MDBAND_EFFECT_COUNT>(file, unusedBits);
@@ -82,10 +82,10 @@ auto IOBinaryBands::writeBandHeader(types::Band &band, std::vector<bool> &output
   IOBinaryPrimitives::writeNBits<uint8_t, MDBAND_BAND_TYPE>(bandType, output);
 
   if (band.getBandType() == types::BandType::Curve) {
-    auto curveType = static_cast<uint8_t>(band.getCurveType());
+    auto curveType = static_cast<uint8_t>(band.getCurveTypeOrDefault());
     IOBinaryPrimitives::writeNBits<uint8_t, MDBAND_CURVE_TYPE>(curveType, output);
   } else if (band.getBandType() == types::BandType::WaveletWave) {
-    auto bl_ticks = band.getBlockLength();
+    auto bl_ticks = band.getBlockLength().value();
     auto blockLength_samples =
         (int)((double)bl_ticks / (double)timescale * (double)band.getUpperFrequencyLimit());
     auto blockLength_code = (int)log2(blockLength_samples) - 4;
@@ -118,15 +118,15 @@ auto IOBinaryBands::readBandBody(types::Band &band, std::istream &file,
     int position = 0;
     if ((myEffect.getEffectType() == types::EffectType::Basis &&
          band.getBandType() == types::BandType::WaveletWave)) {
-      position = effectIndex * (int)(band.getBlockLength() * (double)timescale /
-                                     (double)band.getUpperFrequencyLimit());
+      position = effectIndex * band.getBlockLengthOrDefault() * static_cast<int>(timescale) /
+                 band.getUpperFrequencyLimit();
     } else {
       position = static_cast<int>(
           IOBinaryPrimitives::readNBits<uint32_t, EFFECT_POSITION>(file, unusedBits));
     }
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
-    } else if (effectType == types::EffectType::Timeline) {
+    } else if (effectType == types::EffectType::Composite) {
       readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
@@ -172,7 +172,7 @@ auto IOBinaryBands::writeBandBody(types::Band &band, std::vector<bool> &output) 
     }
     if (myEffect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(myEffect, output);
-    } else if (myEffect.getEffectType() == types::EffectType::Timeline) {
+    } else if (myEffect.getEffectType() == types::EffectType::Composite) {
       writeTimelineEffect(myEffect, band, output);
     } else {
       switch (band.getBandType()) {
@@ -323,9 +323,9 @@ auto IOBinaryBands::readVectorialEffect(types::Effect &effect, std::istream &fil
 
 auto IOBinaryBands::writeVectorialEffect(types::Effect &effect, std::vector<bool> &output) -> bool {
 
-  float phase = effect.getPhase();
+  float phase = effect.getPhaseOrDefault();
   IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
-  auto baseSignal = static_cast<uint8_t>(effect.getBaseSignal());
+  auto baseSignal = static_cast<uint8_t>(effect.getBaseSignalOrDefault());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   auto keyframeCount = static_cast<uint16_t>(effect.getKeyframesSize());
   IOBinaryPrimitives::writeNBits<uint16_t, EFFECT_KEYFRAME_COUNT>(keyframeCount, output);
@@ -426,7 +426,7 @@ auto IOBinaryBands::readTimelineEffect(types::Effect &effect, types::Band &band,
     myEffect.setPosition(position);
     if (effectType == types::EffectType::Reference) {
       readReferenceEffect(myEffect, file, unusedBits);
-    } else if (effectType == types::EffectType::Timeline) {
+    } else if (effectType == types::EffectType::Composite) {
       readTimelineEffect(myEffect, band, file, unusedBits);
     } else {
       switch (band.getBandType()) {
@@ -465,7 +465,7 @@ auto IOBinaryBands::writeTimelineEffect(types::Effect &effect, types::Band &band
 
     if (effect.getEffectType() == types::EffectType::Reference) {
       writeReferenceEffect(effect, output);
-    } else if (effect.getEffectType() == types::EffectType::Timeline) {
+    } else if (effect.getEffectType() == types::EffectType::Composite) {
       writeTimelineEffect(effect, band, output);
     } else {
       switch (band.getBandType()) {

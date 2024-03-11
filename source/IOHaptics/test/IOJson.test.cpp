@@ -42,11 +42,16 @@ using haptics::io::IOJson;
 const std::string filename = "testing_IOJson.hjif";
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
-TEST_CASE("write/read hjif haptic file without avatar and perceptions") {
-  const std::string testingVersion = "1";
-  const std::string testingDate = "Monday, February 14, 2022";
+TEST_CASE("write/read hjif haptic file without avatar") {
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
+  haptics::types::Perception testingPerception(0, 0, "First Percetion",
+                                               haptics::types::PerceptionModality::Electrotactile);
+  haptics::types::Channel testingChannel(0, "Testing channel", 1.0F, 1.0F, 0);
+  testingPerception.addChannel(testingChannel);
+  testingHaptic.addPerception(testingPerception);
 
   SECTION("write haptic file") {
     IOJson::writeFile(testingHaptic, filename);
@@ -61,7 +66,7 @@ TEST_CASE("write/read hjif haptic file without avatar and perceptions") {
     CHECK(res.getDate() == testingDate);
     CHECK(res.getDescription() == testingDescription);
     CHECK(res.getAvatarsSize() == 0);
-    CHECK(res.getPerceptionsSize() == 0);
+    CHECK(res.getPerceptionsSize() == 1);
 
     std::filesystem::remove(filename);
     CHECK(!std::filesystem::is_regular_file(filename));
@@ -70,8 +75,8 @@ TEST_CASE("write/read hjif haptic file without avatar and perceptions") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for avatar testing") {
-  const std::string testingVersion = "1";
-  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
@@ -90,6 +95,12 @@ TEST_CASE("write/read hjif haptic file for avatar testing") {
   haptics::types::Avatar avatar2(testingId_avatar2, testingLod_avatar2, testingType_avatar2);
   avatar2.setMesh(testingMesh_avatar2);
   testingHaptic.addAvatar(avatar2);
+
+  haptics::types::Perception testingPerception(0, 0, "First Percetion",
+                                               haptics::types::PerceptionModality::Electrotactile);
+  haptics::types::Channel testingChannel(0, "Testing channel", 1.0F, 1.0F, 0);
+  testingPerception.addChannel(testingChannel);
+  testingHaptic.addPerception(testingPerception);
 
   SECTION("write haptic file") {
     IOJson::writeFile(testingHaptic, filename);
@@ -120,8 +131,8 @@ TEST_CASE("write/read hjif haptic file for avatar testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for reference device testing") {
-  const std::string testingVersion = "1";
-  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
@@ -140,15 +151,17 @@ TEST_CASE("write/read hjif haptic file for reference device testing") {
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
-          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
+          {1, "This is a name", std::nullopt, 1000, 0, std::nullopt, 1, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
            haptics::types::ActuatorType::LRA},
-          {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
+          {6534, "MPEG actuator", ~(uint32_t)(0), 1000, 0, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
-          {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+          {2, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
   testingPerception.addReferenceDevice(testingReferenceDeviceValue_perception0);
+  haptics::types::Channel testingChannel(0, "Testing channel", 1.0F, 1.0F, 0);
+  testingPerception.addChannel(testingChannel);
   testingHaptic.addPerception(testingPerception);
 
   SECTION("write haptic file") {
@@ -161,7 +174,7 @@ TEST_CASE("write/read hjif haptic file for reference device testing") {
     bool succeed = IOJson::loadFile(filename, res);
     REQUIRE(succeed);
     REQUIRE(res.getPerceptionsSize() == 1);
-    CHECK(res.getPerceptionAt(0).getChannelsSize() == 0);
+    CHECK(res.getPerceptionAt(0).getChannelsSize() == 1);
     REQUIRE(res.getPerceptionAt(0).getReferenceDevicesSize() ==
             testingReferenceDeviceValue_perception0.size());
 
@@ -213,8 +226,8 @@ TEST_CASE("write/read hjif haptic file for reference device testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for channel testing") {
-  const std::string testingVersion = "1";
-  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
@@ -230,7 +243,7 @@ TEST_CASE("write/read hjif haptic file for channel testing") {
   testingPerception0.setUnitExponent(testingUnitExponent_perception0);
 
   const int testingId_perception1 = 423;
-  const int testingAvatarId_perception1 = 3;
+  const int testingAvatarId_perception1 = 0;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
   const int8_t testingPerceptionUnitExponent_perception1 = 3;
@@ -245,8 +258,8 @@ TEST_CASE("write/read hjif haptic file for channel testing") {
   const float testingMixingWeight_channel0 = 1;
   const uint32_t testingBodyPartMask_channel0 = 32;
   const std::vector<int> testingVertices_channel0 = {0, 453, -3, 7657};
-  const size_t testingBandsCount_channel0 = 45;
-  const haptics::types::Vector testingDirection_channel0((int8_t)128, (int8_t)-54, (int8_t)0);
+  const size_t testingBandsCount_channel0 = 7;
+  const haptics::types::Vector testingDirection_channel0((int8_t)127, (int8_t)0, (int8_t)0);
   haptics::types::Channel testingChannel0(testingId_channel0, testingDescription_channel0,
                                           testingGain_channel0, testingMixingWeight_channel0,
                                           testingBodyPartMask_channel0);
@@ -258,7 +271,7 @@ TEST_CASE("write/read hjif haptic file for channel testing") {
     testingChannel0.generateBand();
   }
 
-  const int testingId_channel1 = 432;
+  const int testingId_channel1 = 5;
   const std::string testingDescription_channel1 = "again another string";
   const float testingGain_channel1 = 0;
   const float testingMixingWeight_channel1 = .333;
@@ -368,8 +381,8 @@ TEST_CASE("write/read hjif haptic file for channel testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for body targetting testing") {
-  const std::string testingVersion = "1";
-  const std::string testingDate = "Thursday, September 15, 2022";
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
@@ -378,20 +391,25 @@ TEST_CASE("write/read hjif haptic file for body targetting testing") {
   const std::string testingDescription_perception = "I'm just a random string to fill the place";
   const auto testingPerceptionModality_perception =
       haptics::types::PerceptionModality::Vibrotactile;
-  const int testingId_channel = 0;
-  const std::string testingDescription_channel = "testingDescription_channel0";
-  const float testingGain_channel = .34;
-  const float testingMixingWeight_channel = 1;
-  const uint32_t testingBodyPartMask_channel = 32;
+  const int testingId_channel1 = 0;
+  const std::string testingDescription_channel1 = "testingDescription_channel0";
+  const float testingGain_channel1 = .34;
+  const float testingMixingWeight_channel1 = 1;
+  const uint32_t testingBodyPartMask_channel1 = 32;
+  const int testingId_channel2 = 1;
+  const std::string testingDescription_channel2 = "testingDescription_channel0";
+  const float testingGain_channel2 = .34;
+  const float testingMixingWeight_channel2 = 1;
+  const uint32_t testingBodyPartMask_channel2 = 32;
   haptics::types::Perception testingPerception(testingId_perception, testingAvatarId_perception,
                                                testingDescription_perception,
                                                testingPerceptionModality_perception);
-  haptics::types::Channel testingChannel0(testingId_channel, testingDescription_channel,
-                                          testingGain_channel, testingMixingWeight_channel,
-                                          testingBodyPartMask_channel);
-  haptics::types::Channel testingChannel1(testingId_channel, testingDescription_channel,
-                                          testingGain_channel, testingMixingWeight_channel,
-                                          testingBodyPartMask_channel);
+  haptics::types::Channel testingChannel0(testingId_channel1, testingDescription_channel1,
+                                          testingGain_channel1, testingMixingWeight_channel1,
+                                          testingBodyPartMask_channel1);
+  haptics::types::Channel testingChannel1(testingId_channel2, testingDescription_channel2,
+                                          testingGain_channel2, testingMixingWeight_channel2,
+                                          testingBodyPartMask_channel2);
 
   const haptics::types::Vector testingChannelResolution_channel0(32, 110, 3);
   const std::vector<haptics::types::Vector> testingActuatorTarget_channel0{
@@ -453,8 +471,8 @@ TEST_CASE("write/read hjif haptic file for body targetting testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for signal testing") {
-  const std::string testingVersion = "1";
-  const std::string testingDate = "Monday, February 14, 2022";
+  const std::string testingVersion = "2023";
+  const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
 
@@ -480,24 +498,25 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
   haptics::types::Perception testingPerception0(testingId_perception0, testingAvatarId_perception0,
                                                 testingDescription_perception0,
                                                 testingPerceptionModality_perception0);
+
   const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
-          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
+          {1, "This is a name", std::nullopt, 1000, 0, std::nullopt, 1, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
            haptics::types::ActuatorType::LRA},
-          {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
+          {6534, "MPEG actuator", ~(uint32_t)(0), 1000, 0, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
-          {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+          {2, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
   testingPerception0.addReferenceDevice(testingReferenceDeviceValue_perception0);
 
   const int testingId_perception1 = 423;
-  const int testingAvatarId_perception1 = 3;
+  const int testingAvatarId_perception1 = 42;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
   haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
@@ -541,39 +560,28 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const int testingBlockLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingBlockLength_band0, testingLowerFrequencyLimit_band0,
+                                    testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
-  const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const int testingBlockLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
-  haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingBlockLength_band1, testingLowerFrequencyLimit_band1,
+  haptics::types::Band testingBand1(testingBandType_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
   const auto testingBandType_band2 = haptics::types::BandType::VectorialWave;
-  const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
-  const int testingBlockLength_band2 = 0;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
-  haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingBlockLength_band2, testingLowerFrequencyLimit_band2,
+  haptics::types::Band testingBand2(testingBandType_band2, testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
-  const float testingPhase_effect0 = 0;
-  const auto testingBaseSignal_effect0 = haptics::types::BaseSignal::Sine;
   const std::vector<std::tuple<int, float>> testingKeyframes_effect0 = {
       {0, 0}, {176, .2143543}, {177, 1}, {52345, .453}};
-  haptics::types::Effect testingEffect0(testingPosition_effect0, testingPhase_effect0,
-                                        testingBaseSignal_effect0,
-                                        haptics::types::EffectType::Basis);
+  haptics::types::Effect testingEffect0(testingPosition_effect0, haptics::types::EffectType::Basis);
   for (auto value : testingKeyframes_effect0) {
     testingEffect0.addAmplitudeAt(std::get<1>(value), std::get<0>(value));
   }
@@ -664,17 +672,11 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
           testingLowerFrequencyLimit_band0);
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band0);
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getBlockLength() ==
-          testingBlockLength_band0);
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectsSize() == 1);
 
     // CHECK effect
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPosition() ==
           testingPosition_effect0);
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getPhase() ==
-          Approx(testingPhase_effect0));
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getBaseSignal() ==
-          testingBaseSignal_effect0);
     REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
             testingKeyframes_effect0.size());
     for (int i = 0; i < static_cast<int>(testingKeyframes_effect0.size()); i++) {
@@ -702,14 +704,10 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
     REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBandsSize() == 1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getBandType() ==
           testingBandType_band1);
-    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getCurveType() ==
-          testingCurveType_band1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band1);
-    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getBlockLength() ==
-          testingBlockLength_band1);
     REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBandAt(0).getEffectsSize() ==
             testingKeyframes_effect1.size());
 
@@ -756,14 +754,10 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
     REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getBandsSize() == 1);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getBandType() ==
           testingBandType_band2);
-    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getCurveType() ==
-          testingCurveType_band2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getLowerFrequencyLimit() ==
           testingLowerFrequencyLimit_band2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getUpperFrequencyLimit() ==
           testingUpperFrequencyLimit_band2);
-    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getBlockLength() ==
-          testingBlockLength_band2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getEffectsSize() == 1);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getBandAt(0).getEffectAt(0).getKeyframesSize() ==
           0);

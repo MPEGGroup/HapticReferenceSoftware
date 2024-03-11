@@ -96,11 +96,15 @@ auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) ->
     return false;
   }
   bands[index].setBandType(newBand.getBandType());
-  bands[index].setCurveType(newBand.getCurveType());
-  bands[index].setBlockLength(newBand.getBlockLength());
+  if (bands[index].getBandType() == BandType::Curve) {
+    bands[index].setCurveType(newBand.getCurveTypeOrDefault());
+  }
+  if (bands[index].getBandType() == BandType::WaveletWave) {
+    bands[index].setBlockLength(newBand.getBlockLengthOrDefault());
+  }
   bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
   bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
-  bands[index].setTimescale(newBand.getTimescale());
+  // bands[index].setTimescale(newBand.getTimescale());
   return true;
 }
 
@@ -118,10 +122,23 @@ auto Channel::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Channel::generateBand(BandType bandType, CurveType curveType, double blockLength,
-                           int lowerFrequencyLimit, int upperFrequencyLimit)
+auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
+  Band newBand(bandType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Channel::generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, curveType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Channel::generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }

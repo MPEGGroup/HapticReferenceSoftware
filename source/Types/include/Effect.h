@@ -48,7 +48,7 @@ namespace haptics::types {
 
 enum class BaseSignal { Sine = 0, Square = 1, Triangle = 2, SawToothUp = 3, SawToothDown = 4 };
 
-enum class EffectType { Basis = 0, Reference = 1, Timeline = 2 };
+enum class EffectType { Basis = 0, Reference = 1, Composite = 2 };
 
 static const std::map<std::string, BaseSignal> stringToBaseSignal = {
     {"Sine", BaseSignal::Sine},
@@ -66,12 +66,12 @@ static const std::map<BaseSignal, std::string> baseSignalToString = {
 static const std::map<std::string, EffectType> stringToEffectType = {
     {"Basis", EffectType::Basis},
     {"Reference", EffectType::Reference},
-    {"Timeline", EffectType::Timeline}};
+    {"Composite", EffectType::Composite}};
 
 static const std::map<EffectType, std::string> effectTypeToString = {
     {EffectType::Basis, "Basis"},
     {EffectType::Reference, "Reference"},
-    {EffectType::Timeline, "Timeline"}};
+    {EffectType::Composite, "Composite"}};
 
 class Effect {
 public:
@@ -83,6 +83,8 @@ public:
       , keyframes({})
       , baseSignal(newBaseSignal)
       , effectType(newEffectType){};
+  explicit Effect(int newPosition, EffectType newEffectType)
+      : position(newPosition), keyframes({}), effectType(newEffectType){};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -90,10 +92,11 @@ public:
   auto setPosition(int newPosition) -> void;
   [[nodiscard]] auto getSemantic() const -> std::optional<std::string>;
   auto setSemantic(std::string &newSemantic) -> void;
-  [[nodiscard]] auto getPhase() const -> float;
-
+  [[nodiscard]] auto getPhaseOrDefault() const -> float;
+  [[nodiscard]] auto getPhase() const -> std::optional<float>;
   auto setPhase(float newPhase) -> void;
-  [[nodiscard]] auto getBaseSignal() const -> BaseSignal;
+  [[nodiscard]] auto getBaseSignalOrDefault() const -> BaseSignal;
+  [[nodiscard]] auto getBaseSignal() const -> std::optional<BaseSignal>;
   auto setBaseSignal(BaseSignal newBaseSignal) -> void;
   [[nodiscard]] auto getEffectType() const -> EffectType;
   auto setEffectType(EffectType newEffectType) -> void;
@@ -129,12 +132,14 @@ public:
   void setWaveletSamples(std::vector<double> samples);
 
 private:
+  static constexpr float DEFAULT_PHASE = 0;
+  static constexpr BaseSignal DEFAULT_BASE_SIGNAL = BaseSignal::Sine;
   int id = -1;
   int position = 0;
-  float phase = 0;
+  std::optional<float> phase;
   std::optional<std::string> semantic;
   std::vector<Keyframe> keyframes = std::vector<Keyframe>{};
-  BaseSignal baseSignal = BaseSignal::Sine;
+  std::optional<BaseSignal> baseSignal;
   EffectType effectType = EffectType::Basis;
   std::vector<Effect> timeline = std::vector<Effect>{};
   std::vector<double> waveletSamples;

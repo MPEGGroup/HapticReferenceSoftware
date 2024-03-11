@@ -97,8 +97,12 @@ public:
   auto addBand(haptics::types::Band &newBand) -> void;
   auto clearBands() -> void { bands.clear(); };
   auto generateBand() -> haptics::types::Band *;
-  auto generateBand(BandType bandType, CurveType curveType, double blockLength,
-                    int lowerFrequencyLimit, int upperFrequencyLimit) -> haptics::types::Band *;
+  auto generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
+      -> haptics::types::Band *;
+  auto generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+                    int upperFrequencyLimit) -> haptics::types::Band *;
+  auto generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+                    int upperFrequencyLimit) -> haptics::types::Band *;
   auto findBandAvailable(int position, int duration, types::BandType bandType)
       -> haptics::types::Band *;
   auto Evaluate(double position, unsigned int timescale) -> double;

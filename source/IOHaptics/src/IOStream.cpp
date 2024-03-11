@@ -1248,10 +1248,11 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
 
   if (libraryEffect.getEffectType() == types::EffectType::Basis) {
 
-    IOBinaryPrimitives::writeFloatNBits<uint32_t, EFFECT_PHASE>(libraryEffect.getPhase(), bitstream,
-                                                                0, MAX_PHASE);
+    IOBinaryPrimitives::writeFloatNBits<uint32_t, EFFECT_PHASE>(libraryEffect.getPhaseOrDefault(),
+                                                                bitstream, 0, MAX_PHASE);
 
-    std::bitset<EFFECT_BASE_SIGNAL> baseBits(static_cast<int>(libraryEffect.getBaseSignal()));
+    std::bitset<EFFECT_BASE_SIGNAL> baseBits(
+        static_cast<int>(libraryEffect.getBaseSignalOrDefault()));
     std::string baseStr = baseBits.to_string();
     IOBinaryPrimitives::writeStrBits(baseStr, bitstream);
   }
@@ -1771,12 +1772,12 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
   IOBinaryPrimitives::writeStrBits(bandTypeStr, bitstream);
   if (swriter.bandStream.band.getBandType() == types::BandType::Curve) {
     std::bitset<MDBAND_CURVE_TYPE> curveTypeBits(
-        static_cast<int>(swriter.bandStream.band.getCurveType()));
+        static_cast<int>(swriter.bandStream.band.getCurveTypeOrDefault()));
     std::string curveTypeStr = curveTypeBits.to_string();
     IOBinaryPrimitives::writeStrBits(curveTypeStr, bitstream);
   } else if (swriter.bandStream.band.getBandType() == types::BandType::WaveletWave) {
     std::bitset<MDBAND_BLK_LEN> winLengthBits(
-        static_cast<uint8_t>(swriter.bandStream.band.getBlockLength()));
+        static_cast<uint8_t>(swriter.bandStream.band.getBlockLengthOrDefault()));
     std::string winLengthStr = winLengthBits.to_string();
     IOBinaryPrimitives::writeStrBits(winLengthStr, bitstream);
   }
@@ -1884,7 +1885,7 @@ auto IOStream::linearizeTimeline(types::Band &band) -> void {
   std::vector<types::Effect> effects = std::vector<types::Effect>();
   for (auto i = 0; i < static_cast<int>(band.getEffectsSize()); i++) {
     auto effect = band.getEffectAt(i);
-    if (effect.getEffectType() == types::EffectType::Timeline) {
+    if (effect.getEffectType() == types::EffectType::Composite) {
       linearizeTimelineEffect(effect, effects);
     } else {
       effects.push_back(effect);
@@ -1901,7 +1902,7 @@ auto IOStream::linearizeTimelineEffect(types::Effect &effect, std::vector<types:
     -> void {
   for (int j = 0; j < static_cast<int>(effect.getTimelineSize()); j++) {
     auto effectTimeline = effect.getTimelineEffectAt(j);
-    if (effectTimeline.getEffectType() == types::EffectType::Timeline) {
+    if (effectTimeline.getEffectType() == types::EffectType::Composite) {
       linearizeTimelineEffect(effectTimeline, effects);
     } else {
       effects.push_back(effectTimeline);
@@ -1924,7 +1925,7 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
       packetBits = writeEffectHeader(swriter);
       packetBits = writeWaveletPayloadPacket(bufpacket, packetBits, swriter);
       bitstreams.push_back(packetBits);
-      swriter.time += static_cast<int>(swriter.bandStream.band.getBlockLength());
+      swriter.time += static_cast<int>(swriter.bandStream.band.getBlockLengthOrDefault());
     }
   } else {
     while (!createPayloadPacket(swriter, bufPacketBitstream)) {
@@ -1951,8 +1952,12 @@ auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool
 
 auto IOStream::createWaveletPayload(StreamWriter &swriter,
                                     std::vector<std::vector<bool>> &bitstream) -> bool {
+  if (swriter.bandStream.band.getBandType() != types::BandType::WaveletWave ||
+      !swriter.bandStream.band.getBlockLength().has_value()) {
+    return false;
+  }
   int nbWaveBlock = static_cast<int>(swriter.packetDuration) /
-                    static_cast<int>(swriter.bandStream.band.getBlockLength());
+                    static_cast<int>(swriter.bandStream.band.getBlockLength().value());
   for (auto i = 0; i < static_cast<int>(swriter.bandStream.band.getEffectsSize());
        i += nbWaveBlock) {
     std::vector<bool> bufbitstream = std::vector<bool>();
@@ -2126,10 +2131,10 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
       std::string kfCountStr = kfCountBits.to_string();
       IOBinaryPrimitives::writeStrBits(kfCountStr, packetBits);
       if (swriter.bandStream.band.getBandType() == types::BandType::VectorialWave) {
-        IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(swriter.effects[l].getPhase(),
-                                                                    packetBits, 0, MAX_PHASE);
+        IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(
+            swriter.effects[l].getPhaseOrDefault(), packetBits, 0, MAX_PHASE);
         std::bitset<EFFECT_BASE_SIGNAL> fxBaseBits(
-            static_cast<int>(swriter.effects[l].getBaseSignal()));
+            static_cast<int>(swriter.effects[l].getBaseSignalOrDefault()));
         std::string fxBaseStr = fxBaseBits.to_string();
         IOBinaryPrimitives::writeStrBits(fxBaseStr, packetBits);
       }
@@ -2403,9 +2408,8 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
     effect.setSemantic(semantic);
   }
 
-  int effectPos =
-      static_cast<int>((double)timescale * band.getBlockLength() * (double)band.getEffectsSize() /
-                       (double)band.getUpperFrequencyLimit());
+  int effectPos = static_cast<int>(timescale) * band.getBlockLength().value() *
+                  static_cast<int>(band.getEffectsSize()) / band.getUpperFrequencyLimit();
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, bitstream, idx);

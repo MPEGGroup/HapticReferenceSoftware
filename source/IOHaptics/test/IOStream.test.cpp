@@ -144,29 +144,24 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const int testingWindowLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingWindowLength_band0, testingLowerFrequencyLimit_band0,
+                                    testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
-  const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
-  haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingWindowLength_band1, testingLowerFrequencyLimit_band1,
+  haptics::types::Band testingBand1(testingBandType_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
   const auto testingBandType_band2 = haptics::types::BandType::WaveletWave;
-  const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
   const int testingWindowLength_band2 = 128;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
-  haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingWindowLength_band2, testingLowerFrequencyLimit_band2,
+  haptics::types::Band testingBand2(testingBandType_band2, testingWindowLength_band2,
+                                    testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;

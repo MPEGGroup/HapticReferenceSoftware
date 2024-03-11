@@ -19,6 +19,7 @@ include(cmake/rapidjson.cmake)
 include(cmake/catch2.cmake)
 include(cmake/iir.cmake)
 include(cmake/pugixml.cmake)
+include(cmake/HJIF_specs.cmake)
 
 if (BUILD_CATCH2)
     include(CTest)

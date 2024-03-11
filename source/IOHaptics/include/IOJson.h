@@ -44,6 +44,7 @@
 #pragma warning(push)
 #pragma warning(disable : 4996 26451 26495 26812 33010)
 #endif
+#include "rapidjson/schema.h"
 #include <rapidjson/document.h>
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -78,8 +79,53 @@ constexpr int DIFF_DIGIT = 4;
 
 constexpr size_t BASE64_SIZE = 6;
 
+class MyRemoteSchemaDocumentProvider : public rapidjson::IRemoteSchemaDocumentProvider {
+public:
+  auto GetRemoteDocument(const char *uri, rapidjson::SizeType length)
+      -> const rapidjson::SchemaDocument * override;
+  // MyRemoteSchemaDocumentProvider(std::vector<std::string> &newSchemaDocuments)
+  //     : schemaDocuments(newSchemaDocuments){}
+  //
+  // private:
+  //  std::vector<std::string> schemaDocuments;
+};
+
 class IOJson {
 public:
+  static constexpr int MAX_TIMESCALE_PARAMETRIC = 1000;
+  static constexpr int MAX_TIMESCALE_MAIN = 48000;
+  static constexpr int MAX_CHANNELS_LEVEL1 = 127;
+  static constexpr int MAX_CHANNELS_LEVEL2 = 65535;
+  static constexpr int MAX_BANDS_LEVEL1 = 7;
+  static constexpr int MAX_BANDS_LEVEL2 = 63;
+  static constexpr int VECTOR_RANGE = 127;
+  static constexpr float MIN_UNIT_VECTOR_NORM = 0.99F;
+  static constexpr float MAX_UNIT_VECTOR_NORM = 1.01F;
+  static constexpr int MIN_VERSION_YEAR = 2023;
+
+  static auto versionCheck(const std::string &version, bool log) -> bool;
+  static auto dateCheck(const std::string &date, bool log) -> bool;
+  static auto URICheck(const std::string &uri, bool log) -> bool;
+  static auto schemaConformanceCheck(const rapidjson::Document &hjifFile,
+                                     const std::string &filePath) -> bool;
+  static auto semanticConformanceCheckExperience(types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckAvatar(types::Avatar &avatar, types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckPerception(types::Perception &perception,
+                                                 types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckReferenceDevice(types::ReferenceDevice &referenceDevice,
+                                                      types::Perception &perception) -> bool;
+  static auto semanticConformanceCheckChannel(types::Channel &channel,
+                                              types::Perception &perception, types::Haptics &haptic)
+      -> bool;
+  static auto semanticConformanceCheckBand(types::Band &band, types::Channel &channel,
+                                           types::Perception &perception, types::Haptics &haptic)
+      -> bool;
+  static auto semanticConformanceCheckEffect(types::Effect &effect, types::Band &band,
+                                             types::Channel &channel, types::Perception &perception,
+                                             types::Haptics &haptic) -> bool;
+  static auto semanticConformanceCheckLibraryEffect(types::Effect &effect,
+                                                    types::Perception &perception,
+                                                    types::Haptics &haptic) -> bool;
   static auto loadFile(const std::string &filePath, types::Haptics &haptic) -> bool;
   static auto loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
       -> bool;
