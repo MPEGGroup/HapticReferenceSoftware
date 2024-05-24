@@ -230,8 +230,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
     break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double position = timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
-                                     (pad * MS_2_S)); // position in ticks needed
+      double position = (double)timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
+                                             (pad * MS_2_S)); // position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
                            effects.back().getEffectTimeLength(
