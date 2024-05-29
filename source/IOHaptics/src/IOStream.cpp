@@ -81,9 +81,9 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
     }
     index++;
   }
-  if (sreader.logs.size() > 0) {
+  if (!sreader.logs.empty()) {
 
-    size_t lastindex = filePath.find_last_of(".");
+    size_t lastindex = filePath.find_last_of('.');
     std::string logpath = filePath.substr(0, lastindex) + ".log";
     std::fstream file;
     file.open(logpath, std::ios_base::out);
@@ -91,7 +91,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
       std::cerr << logpath << ": Cannot open file!" << std::endl;
       return false;
     }
-    for (std::string str : sreader.logs) {
+    for (const std::string str : sreader.logs) {
       file << str << std::endl;
     }
     file.close();
@@ -263,7 +263,7 @@ auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> 
 auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool {
   int index = 0;
   int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
-  MIHSUnitType unitType = static_cast<MIHSUnitType>(unitTypeInt);
+  auto unitType = static_cast<MIHSUnitType>(unitTypeInt);
   sreader.currentUnitType = unitType;
   sreader.MIHSData = false;
   int syncInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_SYNC);
@@ -2695,7 +2695,7 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
         hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange));
     return false;
   }
-  types::EffectType effectType = static_cast<types::EffectType>(effectTypeInt);
+  auto effectType = static_cast<types::EffectType>(effectTypeInt);
   effect.setEffectType(effectType);
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
@@ -3111,8 +3111,8 @@ auto IOStream::checkURIFormat(const ::std::string &uri) -> bool {
 
 auto IOStream::avatarExists(int avatarId, types::Haptics &haptics) -> bool {
   auto avatarsSize = haptics.getAvatarsSize();
-  for (int i = 0; i < avatarsSize; ++i) {
-    if (avatarId == haptics.getAvatarAt(i).getId()) {
+  for (unsigned int i = 0; i < avatarsSize; ++i) {
+    if (avatarId == haptics.getAvatarAt(static_cast<int>(i)).getId()) {
       return true;
     }
   }
@@ -3121,8 +3121,8 @@ auto IOStream::avatarExists(int avatarId, types::Haptics &haptics) -> bool {
 
 auto IOStream::referenceDeviceExists(int refDevId, types::Perception &perception) -> bool {
   auto refDevSize = perception.getReferenceDevicesSize();
-  for (int i = 0; i < refDevSize; ++i) {
-    if (refDevId == perception.getReferenceDeviceAt(i).getId()) {
+  for (unsigned int i = 0; i < refDevSize; ++i) {
+    if (refDevId == perception.getReferenceDeviceAt(static_cast<int>(i)).getId()) {
       return true;
     }
   }

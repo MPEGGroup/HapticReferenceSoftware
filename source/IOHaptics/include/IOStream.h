@@ -126,7 +126,7 @@ public:
     unsigned int layer = 0;
     bool conformance = false;
     std::vector<std::string> logs;
-    MIHSUnitType currentUnitType;
+    MIHSUnitType currentUnitType = MIHSUnitType::Initialization;
     bool MIHSData = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;

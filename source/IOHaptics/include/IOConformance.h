@@ -245,11 +245,11 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
      "Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid))}};
 
-static class IOConformance {
+class IOConformance {
 public:
   static auto checkBandTypeRange(IOStream::StreamReader &sreader) -> void {
     auto btype = sreader.bandStream.band.getBandType();
-    if (btype < types::BandType::Transient && btype > types::BandType::WaveletWave) {
+    if (btype < types::BandType::Transient || btype > types::BandType::WaveletWave) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_OutOfRange));
     }
@@ -257,7 +257,7 @@ public:
 
   static auto checkCurveTypeRange(IOStream::StreamReader &sreader) -> void {
     auto ctype = sreader.bandStream.band.getCurveTypeOrDefault();
-    if (ctype < types::CurveType::Unknown && ctype > types::CurveType::Bspline) {
+    if (ctype < types::CurveType::Unknown || ctype > types::CurveType::Bspline) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutOfRange));
     }
@@ -266,8 +266,8 @@ public:
   static auto checkEffectLibrary(IOStream::StreamReader &sreader, types::Perception &perce)
       -> void {
     std::vector<int> effectsID = std::vector<int>();
-    for (int i = 0; i < perce.getEffectLibrarySize(); i++) {
-      auto e = perce.getBasisEffectAt(i);
+    for (unsigned int i = 0; i < perce.getEffectLibrarySize(); i++) {
+      auto e = perce.getBasisEffectAt(static_cast<int>(i));
       int eId = e.getId();
       if (std::find(effectsID.begin(), effectsID.end(), eId) != effectsID.end()) {
         sreader.logs.push_back(
@@ -322,8 +322,8 @@ public:
   }
 
   static auto checkEffectIDExists(IOStream::StreamReader &sreader, int effectId) -> void {
-    for (int i = 0; i < sreader.perception.getEffectLibrarySize(); i++) {
-      if (sreader.perception.getBasisEffectAt(i).getId() == effectId) {
+    for (unsigned int i = 0; i < sreader.perception.getEffectLibrarySize(); i++) {
+      if (sreader.perception.getBasisEffectAt(static_cast<int>(i)).getId() == effectId) {
         return;
       }
     }
