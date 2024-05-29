@@ -114,25 +114,25 @@ namespace haptics::synthesizer {
   return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
 }
 
-[[nodiscard]] auto static playFile4Android(types::Haptics &haptic, double timeLength, int fs,
-                                           int pad, std::string &filename) -> bool {
-  std::vector<std::vector<double>> amplitudes;
-
-  unsigned int timescale = haptic.getTimescale().value();
-  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
-    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
-      types::Channel myChannel;
-      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) / timescale));
-      myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
-      std::vector<double> channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
-      const double perceptionUnitFactor =
-          std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
-      for (uint32_t k = 0; k < sampleCount; k++) {
-        channelAmp[k] = channelAmp[k] * myChannel.getGain() * perceptionUnitFactor;
-      }
-      amplitudes.push_back(channelAmp);
-    }
-  }
-  return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
-}
+//[[nodiscard]] auto static playFile4Android(types::Haptics &haptic, double timeLength, int fs,
+//                                           int pad, std::string &filename) -> bool {
+//  std::vector<std::vector<double>> amplitudes;
+//
+//  unsigned int timescale = haptic.getTimescale().value();
+//  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+//    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
+//      types::Channel myChannel;
+//      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) / timescale));
+//      myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
+//      std::vector<double> channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
+//      const double perceptionUnitFactor =
+//          std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
+//      for (uint32_t k = 0; k < sampleCount; k++) {
+//        channelAmp[k] = channelAmp[k] * myChannel.getGain() * perceptionUnitFactor;
+//      }
+//      amplitudes.push_back(channelAmp);
+//    }
+//  }
+//  return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
+//}
 } // namespace haptics::synthesizer
