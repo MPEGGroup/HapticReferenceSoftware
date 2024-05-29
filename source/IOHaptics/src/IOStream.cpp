@@ -91,7 +91,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
       std::cerr << logpath << ": Cannot open file!" << std::endl;
       return false;
     }
-    for (const std::string& str : sreader.logs) {
+    for (const std::string &str : sreader.logs) {
       file << str << std::endl;
     }
     file.close();
