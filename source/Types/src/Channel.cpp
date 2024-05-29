@@ -43,6 +43,15 @@ auto Channel::setId(int newId) -> void { id = newId; }
 
 auto Channel::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
+auto Channel::getPriority() const -> std::optional<int> { return priority; }
+auto Channel::getPriorityOrDefault() const -> int {
+  if (priority.has_value()) {
+    return priority.value();
+  }
+  return 0;
+}
+auto Channel::setPriority(int newPriority) -> void { priority = newPriority; }
+
 [[nodiscard]] auto Channel::getGain() const -> float { return gain; }
 
 auto Channel::setGain(float newGain) -> void { gain = newGain; }
@@ -78,7 +87,24 @@ auto Channel::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
   if (index < 0 || index >= (int)this->getBandsSize()) {
     return false;
   }
-  this->bands[index] = newBand;
+  bands[index] = newBand;
+  return true;
+}
+
+auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) -> bool {
+  if (index < 0 || index >= (int)this->getBandsSize()) {
+    return false;
+  }
+  bands[index].setBandType(newBand.getBandType());
+  if (bands[index].getBandType() == BandType::Curve) {
+    bands[index].setCurveType(newBand.getCurveTypeOrDefault());
+  }
+  if (bands[index].getBandType() == BandType::WaveletWave) {
+    bands[index].setBlockLength(newBand.getBlockLengthOrDefault());
+  }
+  bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
+  bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
+  // bands[index].setTimescale(newBand.getTimescale());
   return true;
 }
 
@@ -96,10 +122,23 @@ auto Channel::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Channel::generateBand(BandType bandType, CurveType curveType, double blockLength,
-                           int lowerFrequencyLimit, int upperFrequencyLimit)
+auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
     -> haptics::types::Band * {
-  Band newBand(bandType, curveType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
+  Band newBand(bandType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Channel::generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, curveType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
+
+auto Channel::generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
 }
@@ -129,12 +168,12 @@ auto Channel::findBandAvailable(const int position, const int duration,
   return nullptr;
 }
 
-auto Channel::Evaluate(double position) -> double {
+auto Channel::Evaluate(double position, unsigned int timescale) -> double {
 
   double res = 0;
 
   for (haptics::types::Band &b : bands) {
-    res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit());
+    res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit(), timescale);
   }
 
   if (res < -1) {
@@ -146,10 +185,11 @@ auto Channel::Evaluate(double position) -> double {
   return res;
 }
 
-auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad) -> std::vector<double> {
+auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+    -> std::vector<double> {
   std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
   for (haptics::types::Band &b : bands) {
-    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad);
+    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, timescale);
     for (uint32_t i = 0; i < bandAmp.size(); i++) {
       channelAmp[i] += bandAmp[i];
       if (channelAmp[i] < -1) {

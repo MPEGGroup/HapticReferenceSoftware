@@ -37,6 +37,7 @@
 #include <catch2/catch.hpp>
 
 using haptics::encoder::IvsEncoder;
+const unsigned int timescale = 2000;
 
 TEST_CASE("IvsEncoder::getLastModified without node", "[getLastModified][withoutNode]") {
   pugi::xml_document doc;
@@ -755,6 +756,7 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   const int effectMagnitude = 5000;
   const char *effectWaveform = "sawtooth-down";
   const int effectPeriod = 80;
+  const int expectedDuration = 1000;
   const float expectedAmplitude = .5;
   const int expectedFrequency = 12;
 
@@ -773,7 +775,7 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   basisEffect.append_attribute("period") = effectPeriod;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
@@ -781,12 +783,12 @@ TEST_CASE("IVSEncoder::convertToEffect simple case", "[getWaveform][withoutAttac
   CHECK(res.getKeyframesSize() == 2);
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
-  CHECK(k.getRelativePosition() == 0);
+  CHECK(k.getRelativePosition().value() == 0);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getRelativePosition().value() == expectedDuration);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
@@ -802,8 +804,10 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   const int effectPeriod = 80;
   const int effectAttackTime = 10;
   const int effectAttackLevel = 1000;
+  const int expectedDuration = 1000;
   const float expectedAmplitude = .75F;
   const float expectedAttackAmplitude = .1F;
+  const int expectedAttackTime = 20;
   const int expectedFrequency = 12;
 
   pugi::xml_document doc;
@@ -823,7 +827,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   basisEffect.append_attribute("attack-level") = effectAttackLevel;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
@@ -831,19 +835,19 @@ TEST_CASE("IVSEncoder::convertToEffect with attack", "[getWaveform][withAttack][
   CHECK(res.getKeyframesSize() == 3);
 
   haptics::types::Keyframe k = res.getKeyframeAt(0);
-  CHECK(k.getRelativePosition() == 0);
+  CHECK(k.getRelativePosition().value() == 0);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAttackAmplitude));
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == effectAttackTime);
+  CHECK(k.getRelativePosition().value() == expectedAttackTime);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   if (k.getFrequencyModulation().has_value()) {
     CHECK(k.getFrequencyModulation().value() == expectedFrequency);
   }
 
   k = res.getKeyframeAt(2);
-  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getRelativePosition().value() == expectedDuration);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
@@ -859,6 +863,8 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   const int effectPeriod = 80;
   const int effectFadeTime = 1;
   const int effectFadeLevel = 10000;
+  const int expectedDuration = 1000;
+  const int expectedFadeTime = expectedDuration - 2;
   const float expectedAmplitude = .25F;
   const float expectedFadeAmplitude = 1.0F;
   const int expectedFrequency = 12;
@@ -880,7 +886,7 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   basisEffect.append_attribute("fade-level") = effectFadeLevel;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == 42);
   CHECK(res.getPhase() == Approx(0.0));
@@ -893,14 +899,14 @@ TEST_CASE("IVSEncoder::convertToEffect with fade", "[getWaveform][withoutAttack]
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
+  CHECK(k.getRelativePosition() == expectedFadeTime);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   if (k.getFrequencyModulation().has_value()) {
     CHECK(k.getFrequencyModulation().value() == expectedFrequency);
   }
 
   k = res.getKeyframeAt(2);
-  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getRelativePosition() == expectedDuration);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedFadeAmplitude));
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }
@@ -919,6 +925,9 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
   const int effectAttackLevel = 1000;
   const int effectFadeTime = 20;
   const int effectFadeLevel = 10000;
+  const int expectedDuration = 1000;
+  const int expectedAttackTime = 2;
+  const int expectedFadeTime = expectedDuration - 40;
   const float expectedAmplitude = .05F;
   const float expectedAttackAmplitude = .1F;
   const float expectedFadeAmplitude = 1.0F;
@@ -943,7 +952,7 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
   basisEffect.append_attribute("fade-level") = effectFadeLevel;
 
   haptics::types::Effect res;
-  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res));
+  REQUIRE(IvsEncoder::convertToEffect(&basisEffect, &launchEvent, &res, timescale));
 
   CHECK(res.getPosition() == launchTime);
   CHECK(res.getPhase() == Approx(0.0));
@@ -956,21 +965,21 @@ TEST_CASE("IVSEncoder::convertToEffect with attack and fade",
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 
   k = res.getKeyframeAt(1);
-  CHECK(k.getRelativePosition() == effectAttackTime);
+  CHECK(k.getRelativePosition() == expectedAttackTime);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   if (k.getFrequencyModulation().has_value()) {
     CHECK(k.getFrequencyModulation().value() == expectedFrequency);
   }
 
   k = res.getKeyframeAt(2);
-  CHECK(k.getRelativePosition() == effectDuration - effectFadeTime);
+  CHECK(k.getRelativePosition() == expectedFadeTime);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   if (k.getFrequencyModulation().has_value()) {
     CHECK(k.getFrequencyModulation().value() == expectedFrequency);
   }
 
   k = res.getKeyframeAt(3);
-  CHECK(k.getRelativePosition() == effectDuration);
+  CHECK(k.getRelativePosition() == expectedDuration);
   CHECK(k.getAmplitudeModulation().value() == Approx(expectedFadeAmplitude));
   CHECK(k.getFrequencyModulation().value() == expectedFrequency);
 }

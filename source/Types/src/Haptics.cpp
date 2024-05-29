@@ -55,9 +55,11 @@ auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
 
 auto Haptics::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
-auto Haptics::getPerceptionsSize() -> size_t { return perceptions.size(); }
+[[nodiscard]] auto Haptics::getPerceptionsSize() -> size_t { return perceptions.size(); }
 
-auto Haptics::getPerceptionAt(int index) -> Perception & { return perceptions.at(index); }
+[[nodiscard]] auto Haptics::getPerceptionAt(int index) -> Perception & {
+  return perceptions.at(index);
+}
 
 auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool {
   if (index < 0 || index >= (int)perceptions.size()) {
@@ -65,6 +67,30 @@ auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool 
   }
 
   perceptions[index] = newPerception;
+  return true;
+}
+
+auto Haptics::replacePerceptionMetadataAt(int index, Perception &newPerception) -> bool {
+  if (index < 0 || index >= (int)perceptions.size()) {
+    return false;
+  }
+  perceptions[index].setId(newPerception.getId());
+  perceptions[index].setAvatarId(newPerception.getId());
+  auto desc = newPerception.getDescription();
+  perceptions[index].setDescription(desc);
+  perceptions[index].setPerceptionModality(newPerception.getPerceptionModality());
+  perceptions[index].setUnitExponent(newPerception.getUnitExponentOrDefault());
+  perceptions[index].setPerceptionUnitExponent(newPerception.getPerceptionUnitExponentOrDefault());
+  auto semantic = newPerception.getEffectSemanticSchemeOrDefault();
+  perceptions[index].setEffectSemanticScheme(semantic);
+  perceptions[index].clearReferenceDevices();
+  for (auto i = 0; i < static_cast<int>(newPerception.getReferenceDevicesSize()); i++) {
+    perceptions[index].addReferenceDevice(newPerception.getReferenceDeviceAt(i));
+  }
+  perceptions[index].clearEffectLibrary();
+  for (auto i = 0; i < static_cast<int>(newPerception.getEffectLibrarySize()); i++) {
+    perceptions[index].addBasisEffect(newPerception.getBasisEffectAt(i));
+  }
   return true;
 }
 
@@ -81,9 +107,9 @@ auto Haptics::addPerception(Perception &newPerception) -> void {
   perceptions.push_back(newPerception);
 }
 
-auto Haptics::getAvatarsSize() -> size_t { return avatars.size(); }
+[[nodiscard]] auto Haptics::getAvatarsSize() -> size_t { return avatars.size(); }
 
-auto Haptics::getAvatarAt(int index) -> Avatar & { return avatars.at(index); }
+[[nodiscard]] auto Haptics::getAvatarAt(int index) -> Avatar & { return avatars.at(index); }
 
 auto Haptics::addAvatar(Avatar &newAvatar) -> void { avatars.push_back(newAvatar); }
 
@@ -99,9 +125,9 @@ auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
   this->timescale = newTimescale;
 }
 
-auto Haptics::getSyncsSize() -> size_t { return syncs.size(); }
+[[nodiscard]] auto Haptics::getSyncsSize() -> size_t { return syncs.size(); }
 
-auto Haptics::getSyncsAt(int index) -> Sync & { return syncs.at(index); }
+[[nodiscard]] auto Haptics::getSyncsAt(int index) -> Sync & { return syncs.at(index); }
 
 auto Haptics::addSync(Sync &newSync) -> void { syncs.push_back(newSync); }
 

@@ -50,11 +50,24 @@ auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
 
 auto Effect::setSemantic(std::string &newSemantic) -> void { semantic = newSemantic; }
 
-[[nodiscard]] auto Effect::getPhase() const -> float { return phase; }
+[[nodiscard]] auto Effect::getPhaseOrDefault() const -> float {
+  if (phase.has_value()) {
+    return phase.value();
+  }
+  return DEFAULT_PHASE;
+}
+
+[[nodiscard]] auto Effect::getPhase() const -> std::optional<float> { return phase; }
 
 auto Effect::setPhase(float newPhase) -> void { phase = newPhase; }
 
-[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal { return baseSignal; }
+[[nodiscard]] auto Effect::getBaseSignalOrDefault() const -> BaseSignal {
+  if (baseSignal.has_value()) {
+    return baseSignal.value();
+  }
+  return DEFAULT_BASE_SIGNAL;
+}
+[[nodiscard]] auto Effect::getBaseSignal() const -> std::optional<BaseSignal> { return baseSignal; }
 
 auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void { baseSignal = newBaseSignal; }
 
@@ -167,8 +180,8 @@ auto Effect::isEquivalent(Effect &effect) -> bool {
   return true;
 }
 
-auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit)
-    -> double {
+auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                               unsigned int timescale) -> double {
   double res = 0;
 
   double max_position = this->position + this->getEffectTimeLength(BandType::VectorialWave, 0);
@@ -215,7 +228,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   // FREQUENCY MODULATION
   double freq_modulation = 0;
-  double phi = this->getPhase();
+  double phi = this->getPhaseOrDefault();
   // First frequency keyframe after the relative position
   // Find phase corresponding to this keyframe
   auto firstFrequencyKeyframeAfterPositionIt = keyframes.begin();
@@ -281,23 +294,20 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
     }
   }
 
-  return amp_modulation * this->computeBaseSignal(MS_2_S * relativePosition, freq_modulation, phi);
+  return amp_modulation * this->computeBaseSignal(relativePosition / static_cast<double>(timescale),
+                                                  freq_modulation, phi);
 }
 
-auto Effect::EvaluateWavelet(double position, int fs, int timescale) -> double {
+auto Effect::EvaluateWavelet(double position, int fs, unsigned int timescale) -> double {
   double relativePosition = (position - this->getPosition()) * (double)fs /
                             (double)timescale; // relative position in samples rel. to fs
   int index = std::floor(relativePosition);
 
-  if (index >= (int)this->getKeyframesSize()) {
+  auto samples = this->getWaveletSamples();
+  if (index >= (int)samples.size()) {
     return 0;
   }
-  auto myKeyframe = keyframes.begin() + index;
-  if (!myKeyframe->getAmplitudeModulation().has_value()) {
-    return 0;
-  }
-
-  return myKeyframe->getAmplitudeModulation().value();
+  return samples[index];
 }
 
 auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
@@ -325,7 +335,8 @@ auto Effect::EvaluateTransient(double position, double transientDuration) -> dou
   return res;
 }
 
-auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> double {
+auto Effect::EvaluateKeyframes(double position, types::CurveType curveType, unsigned int timescale)
+    -> double {
   const double relativePosition = position - this->getPosition();
   double res = 0;
   auto k_after = std::find_if(
@@ -344,12 +355,12 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
       return k_after->getAmplitudeModulation().value();
     }
 
-    double t0 = MS_2_S * k_before->getRelativePosition().value();
+    double t0 = k_before->getRelativePosition().value() / static_cast<double>(timescale);
     double f0 = k_before->getAmplitudeModulation().value();
-    double t1 = MS_2_S * k_after->getRelativePosition().value();
+    double t1 = k_after->getRelativePosition().value() / static_cast<double>(timescale);
     double f1 = k_after->getAmplitudeModulation().value();
 
-    double t = MS_2_S * relativePosition;
+    double t = relativePosition / static_cast<double>(timescale);
     switch (curveType) {
     case types::CurveType::Cubic: {
       double h = t1 - t0;
@@ -373,7 +384,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType) -> d
   if (frequency != 0) {
     time += phase / (2 * M_PI * frequency);
   }
-  switch (this->getBaseSignal()) {
+  switch (this->getBaseSignalOrDefault()) {
   case BaseSignal::Sine:
     return std::sin(2 * M_PI * time * frequency);
   case BaseSignal::Square:
@@ -418,5 +429,15 @@ auto Effect::getTimelineEffectAt(int index) -> haptics::types::Effect & {
   return timeline.at(index);
 }
 auto Effect::addTimelineEffect(Effect &newEffect) -> void { timeline.push_back(newEffect); }
+
+auto Effect::getWaveletBitstream() -> std::vector<unsigned char> & { return waveletBitstream; }
+
+void Effect::setWaveletBitstream(std::vector<unsigned char> stream) {
+  waveletBitstream = std::move(stream);
+}
+
+auto Effect::getWaveletSamples() -> std::vector<double> & { return waveletSamples; }
+
+void Effect::setWaveletSamples(std::vector<double> samples) { waveletSamples = std::move(samples); }
 
 } // namespace haptics::types

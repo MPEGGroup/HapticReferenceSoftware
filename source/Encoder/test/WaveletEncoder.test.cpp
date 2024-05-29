@@ -70,6 +70,8 @@ constexpr double S_2_MS_TEST = 1000;
 
 constexpr double FS_filter = 8000;
 
+constexpr double timescale = 1000;
+
 TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
   using haptics::encoder::WaveletEncoder;
@@ -107,10 +109,10 @@ TEST_CASE("haptics::encoder::WaveletEncoder,2") {
     double max = WaveletEncoder::findMax(data2);
     CHECK(max == positive);
 
-    quantMode mode{0, FRACTIONBITS_0};
+    quantMode mode{0, FRACTIONBITS_0, 0};
     double quant = WaveletEncoder::maxQuant(unquantized, mode);
     CHECK(fabs(quant - quantized) < prec_comparison);
-    quantMode mode2{3, 4};
+    quantMode mode2{3, 4, 0};
     quant = WaveletEncoder::maxQuant(unquantized + 1, mode2);
     CHECK(quant == quantized + 1);
 
@@ -140,7 +142,7 @@ TEST_CASE("haptics::encoder::WaveletEncoder,3") {
   SECTION("Encoder") {
     std::vector<double> data_time(bl_test, 0);
     data_time[0] = 1;
-    WaveletEncoder waveletEncoder(bl_test, fs_test);
+    WaveletEncoder waveletEncoder(bl_test, fs_test, timescale);
     double scalar = 0;
     int maxbits = 0;
     std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar, maxbits);
@@ -168,9 +170,9 @@ TEST_CASE("Encoder/Decoder Integration") {
     std::vector<double> sig_time(BL * 2, 0);
     sig_time[0] = 1;
     Band b;
-    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
+    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b, timescale);
 
-    std::vector<double> sig_rec = WaveletDecoder::decodeBand(b);
+    std::vector<double> sig_rec = WaveletDecoder::decodeBand(b, timescale);
     CHECK(sig_time.size() == sig_rec.size());
   }
 }

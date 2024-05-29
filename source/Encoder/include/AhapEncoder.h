@@ -53,17 +53,19 @@ namespace haptics::encoder {
 
 class AhapEncoder {
 public:
-  [[nodiscard]] auto static encode(std::string &filename, types::Perception &out) -> int;
+  [[nodiscard]] auto static encode(std::string &filename, types::Perception &out,
+                                   unsigned int timescale) -> int;
   [[nodiscard]] auto static extractTransients(
       const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
       const std::vector<std::pair<int, double>> *amplitudes,
-      const std::vector<std::pair<int, double>> *frequencies) -> int;
+      const std::vector<std::pair<int, double>> *frequencies, unsigned int timescale) -> int;
   [[nodiscard]] auto static extractContinuous(
       const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *continuous,
       const std::vector<std::pair<int, double>> *amplitudes,
-      const std::vector<std::pair<int, double>> *frequencies) -> int;
+      const std::vector<std::pair<int, double>> *frequencies, unsigned int timescale) -> int;
   [[nodiscard]] auto static extractKeyframes(const rapidjson::Value::Object &parameterCurve,
-                                             std::vector<std::pair<int, double>> *keyframes) -> int;
+                                             std::vector<std::pair<int, double>> *keyframes,
+                                             unsigned int timescale) -> int;
 
 private:
   auto static modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>> *amplitudes,

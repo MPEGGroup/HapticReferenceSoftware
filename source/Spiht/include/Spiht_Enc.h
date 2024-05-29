@@ -39,13 +39,18 @@
 #include <list>
 #include <vector>
 
-#include <Encoder/include/WaveletEncoder.h>
 #include <Spiht/include/ArithEnc.h>
 #include <Types/include/Effect.h>
 
 namespace haptics::spiht {
 
 using haptics::types::Effect;
+
+constexpr size_t WAVMAXLENGTH = 8;
+constexpr int MAXBITS = 15;
+constexpr int FRACTIONBITS_0 = 7;
+constexpr int FRACTIONBITS_1 = 3;
+constexpr int INTEGERBITS_1 = 4;
 
 constexpr size_t MAXALLOCBITS_SIZE = 4;
 constexpr int CONTEXT_0 = 0;
@@ -57,14 +62,25 @@ constexpr int CONTEXT_5 = 5;
 constexpr int CONTEXT_6 = 6;
 constexpr size_t BUFFER_SIZE = 100000;
 
+struct quantMode {
+  int integerbits;
+  int fractionbits;
+  char mode;
+};
+
 class Spiht_Enc {
 public:
-  void encodeEffect(Effect &effect, std::vector<unsigned char> &outstream);
+  void encodeEffect(std::vector<int> &block, int bits, double scalar,
+                    std::vector<unsigned char> &outstream);
   void encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
               int maxallocbits, std::vector<unsigned char> &outstream, std::vector<int> &context);
 
   auto maxDescendant(int j, int type) -> int;
   void initMaxDescendants(std::vector<int> &signal);
+  auto static getQuantMode(double wavmax) -> quantMode;
+  void static setBitwavmax(double qwavmax, int integerpart, quantMode m,
+                           std::vector<unsigned char> &bitwavmax);
+  static void maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
 
 private:
   void static refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,
@@ -73,7 +89,6 @@ private:
   void static addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream,
                           std::vector<int> &context);
 
-  static void maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
   void static de2bi(int val, std::vector<unsigned char> &outstream, int length);
   auto static bitget(int in, int bit) -> int;
 
