@@ -248,15 +248,15 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
 static class IOConformance {
 public:
   static auto checkBandTypeRange(IOStream::StreamReader &sreader) -> void {
-    BandType btype = sreader.bandStream.band.getBandType();
-    if (btype < BandType::Transient && btype > BandType::WaveletWave) {
+    auto btype = sreader.bandStream.band.getBandType();
+    if (btype < types::BandType::Transient && btype > types::BandType::WaveletWave) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_OutOfRange));
     }
   };
 
   static auto checkCurveTypeRange(IOStream::StreamReader &sreader) -> void {
-    types::CurveType ctype = sreader.bandStream.band.getCurveType();
+    auto ctype = sreader.bandStream.band.getCurveTypeOrDefault();
     if (ctype < types::CurveType::Unknown && ctype > types::CurveType::Bspline) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutOfRange));
@@ -267,7 +267,7 @@ public:
       -> void {
     std::vector<int> effectsID = std::vector<int>();
     for (int i = 0; i < perce.getEffectLibrarySize(); i++) {
-      Effect e = perce.getBasisEffectAt(i);
+      auto e = perce.getBasisEffectAt(i);
       int eId = e.getId();
       if (std::find(effectsID.begin(), effectsID.end(), eId) != effectsID.end()) {
         sreader.logs.push_back(

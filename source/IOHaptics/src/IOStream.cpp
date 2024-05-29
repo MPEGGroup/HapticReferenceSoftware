@@ -724,7 +724,7 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
     }
     return readMetadataHaptics(sreader, payload);
   }
-  case (NALuType::MetadataPerception): {
+  case (MIHSPacketType::MetadataPerception): {
     if (sreader.conformance) {
       if (sreader.currentUnitType != MIHSUnitType::Initialization) {
         sreader.logs.push_back(
@@ -997,10 +997,10 @@ auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bit
 
   int profileLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_PROFILE_SIZE);
   std::string profile = IOBinaryPrimitives::readString(bitstream, index, profileLength);
-  haptic.setProfile(profile);
+  sreader.haptic.setProfile(profile);
 
   int level = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_LEVEL);
-  haptic.setLevel(level);
+  sreader.haptic.setLevel(level);
 
   int dateLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_DATE);
   std::string date = IOBinaryPrimitives::readString(bitstream, index, dateLength);
@@ -1282,7 +1282,7 @@ auto IOStream::readLibraryEffect(StreamReader &sreader, types::Effect &libraryEf
 
   int effectType = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
   if (effectType < static_cast<int>(types::EffectType::Basis) ||
-      effectType > static_cast<int>(types::EffectType::Timeline)) {
+      effectType > static_cast<int>(types::EffectType::Composite)) {
     if (sreader.conformance) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_EffectLibrary_EffectType_OutOfRange));
@@ -2691,12 +2691,13 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
 
   int effectTypeInt = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
   if (effectTypeInt < static_cast<int>(types::EffectType::Basis) ||
-      effectTypeInt > static_cast<int>(types::EffectType::Timeline)) {
+      effectTypeInt > static_cast<int>(types::EffectType::Composite)) {
     sreader.logs.push_back(
         hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange));
     return false;
   }
-  effect.setEffectType(static_cast<types::EffectType>(effectTypeInt));
+  types::EffectType effectType = static_cast<types::EffectType>(effectTypeInt);
+  effect.setEffectType(effectType);
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
@@ -2710,7 +2711,7 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
           types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
       effect.setSemantic(semantic);
     }
-    if (!readEffectBasis(bitstream, effect, sreader.bandStream.getBandType(),
+    if (!readEffectBasis(bitstream, effect, sreader.bandStream.band.getBandType(),
                          idx)) {
       return false;
     }
