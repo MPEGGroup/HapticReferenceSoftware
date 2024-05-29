@@ -235,8 +235,8 @@ private:
   static auto readMIHSPacketType(std::vector<bool> &packet) -> MIHSPacketType;
   static auto readMIHSPacketHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
-  static auto readAvatar(StreamReader &sreader, std::vector<bool> &bitstream,
-                         types::Avatar &avatar, int &length) -> bool;
+  static auto readAvatar(StreamReader &sreader, std::vector<bool> &bitstream, types::Avatar &avatar,
+                         int &length) -> bool;
   static auto readInitializationTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;

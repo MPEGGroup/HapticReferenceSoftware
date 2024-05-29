@@ -742,8 +742,7 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::Init_Perception_ID_NotUnique));
       }
-      sreader.haptic.replacePerceptionMetadataAt(perceIndex,
-                                                 sreader.perception);
+      sreader.haptic.replacePerceptionMetadataAt(perceIndex, sreader.perception);
     }
     return true;
   }
@@ -2711,8 +2710,7 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
           types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
       effect.setSemantic(semantic);
     }
-    if (!readEffectBasis(bitstream, effect, sreader.bandStream.band.getBandType(),
-                         idx)) {
+    if (!readEffectBasis(bitstream, effect, sreader.bandStream.band.getBandType(), idx)) {
       return false;
     }
   } else if (effect.getEffectType() == types::EffectType::Reference && sreader.conformance) {
