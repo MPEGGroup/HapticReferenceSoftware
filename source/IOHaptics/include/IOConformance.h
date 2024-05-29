@@ -6,6 +6,8 @@
 
 namespace haptics::io {
 
+constexpr int LOWER_RANGE_UNIT_VECTOR = 15692;
+constexpr int UPPER_RANGE_UNIT_VECTOR = 16572;
 class IOStream;
 class StreamReader;
 enum class MIHSUnitType;

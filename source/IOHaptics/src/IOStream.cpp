@@ -91,7 +91,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
       std::cerr << logpath << ": Cannot open file!" << std::endl;
       return false;
     }
-    for (const std::string str : sreader.logs) {
+    for (const std::string& str : sreader.logs) {
       file << str << std::endl;
     }
     file.close();
@@ -1961,7 +1961,7 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
       // range for the sum of the squares of the components is [15692,16572], which we can work out
       // by finding the range of (x+/-1/127)^2 + (y+/-1/127)^2 + (z+/-1/127)^2.
       auto dot = X * X + Y * Y + Z * Z;
-      if ((dot < 15692) || (dot > 16572)) {
+      if ((dot < LOWER_RANGE_UNIT_VECTOR) || (dot > UPPER_RANGE_UNIT_VECTOR)) {
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::Init_Channel_Direction_Invalid));
       }
