@@ -122,8 +122,8 @@ namespace haptics::synthesizer {
 //  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
 //    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
 //      types::Channel myChannel;
-//      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) / timescale));
-//      myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
+//      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) /
+//      timescale)); myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
 //      std::vector<double> channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
 //      const double perceptionUnitFactor =
 //          std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
