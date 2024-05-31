@@ -2716,20 +2716,21 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
     IOConformance::checkEffectPosition(sreader, effectPos);
   }
 
-  int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
-  if (hasSemantic == 1) {
-    int semanticCode = IOBinaryPrimitives::readUInt(
-        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-    auto semantic = std::string(
-        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
-    effect.setSemantic(semantic);
-    if (sreader.conformance) {
-      IOConformance::checkSemanticUnknown(sreader, semantic);
+  if (effectType == types::EffectType::Basis) {
+    int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
+    if (hasSemantic == 1) {
+      int semanticCode = IOBinaryPrimitives::readUInt(
+          bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+      auto semantic = std::string(
+          types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+      effect.setSemantic(semantic);
+      if (sreader.conformance) {
+        IOConformance::checkSemanticUnknown(sreader, semantic);
+      }
     }
-  }
-
-  if (!readEffectBasis(bitstream, sreader, effect, sreader.bandStream.band.getBandType(), idx)) {
-    return false;
+    if (!readEffectBasis(bitstream, sreader, effect, idx)) {
+      return false;
+    }
   } else if (effect.getEffectType() == types::EffectType::Reference && sreader.conformance) {
     IOConformance::checkEffectIDExists(sreader, id);
   }
@@ -2764,8 +2765,9 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   return true;
 }
 auto IOStream::readEffectBasis(std::vector<bool> &bitstream, StreamReader &sreader,
-                               types::Effect &effect, types::BandType bandType, int &idx) -> bool {
+                               types::Effect &effect, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
+  auto bandType = sreader.bandStream.band.getBandType();
   if (bandType == types::BandType::VectorialWave) {
     float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
     effect.setPhase(phase);

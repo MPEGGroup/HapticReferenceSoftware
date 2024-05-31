@@ -278,7 +278,7 @@ private:
                          int &length) -> bool;
 
   static auto readEffectBasis(std::vector<bool> &bitstream, StreamReader &sreader,
-                              types::Effect &effect, types::BandType bandType, int &idx) -> bool;
+                              types::Effect &effect, int &idx) -> bool;
 
   static auto readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,
                              std::vector<types::Keyframe> &kfList, int &length) -> bool;
