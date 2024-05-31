@@ -275,12 +275,15 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
 
   sreader.packetDuration = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_DURATION);
   if (sreader.conformance) {
-    IOConformance::checkMIHSUnitTemporalDuraction(sreader);
+    IOConformance::checkMIHSUnitDuration(sreader);
   }
   int unitLength = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LENGTH) * BYTE_SIZE;
   index += UNIT_RESERVED;
 
   std::vector<bool> packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
+  if (sreader.conformance && unitType == MIHSUnitType::Spatial) {
+    IOConformance::checkMIHSUnitSpatialPackets(sreader, packets);
+  }
   while (index < unitLength) {
     if (!readMIHSPacket(packets, sreader, crc)) {
       return EXIT_FAILURE;
@@ -1311,7 +1314,7 @@ auto IOStream::readLibraryEffect(StreamReader &sreader, types::Effect &libraryEf
   int position = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_POSITION_STREAMING);
   libraryEffect.setPosition(position);
 
-  if (effectType == 0) {
+  if (effectType == (int)types::EffectType::Basis) {
     float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
     libraryEffect.setPhase(phase);
 
@@ -2504,8 +2507,7 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
       addTimestampEffect(effects, static_cast<int>(sreader.time));
     } else {
       types::Effect effect;
-      IOStream::readWaveletEffect(effectsBitsList, sreader.bandStream.band, effect, idx,
-                                  sreader.timescale);
+      IOStream::readWaveletEffect(effectsBitsList, sreader, effect, idx);
       effects.push_back(effect);
     }
     if (addEffectToHaptic(sreader.haptic, perceptionIndex, channelIndex, sreader.bandStream.index,
@@ -2653,9 +2655,8 @@ auto IOStream::computeCRC(std::vector<bool> &bitstream, std::vector<bool> &polyn
   return true;
 }
 
-auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                 types::Effect &effect, int &length, const unsigned int timescale)
-    -> bool {
+auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, StreamReader &sreader,
+                                 types::Effect &effect, int &length) -> bool {
   int idx = 0;
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_ID);
   effect.setId(id);
@@ -2663,6 +2664,12 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
   types::EffectType effectType =
       static_cast<types::EffectType>(IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE));
   effect.setEffectType(effectType);
+
+  if (sreader.conformance) {
+    if (effect.getEffectType() == types::EffectType::Reference && sreader.conformance) {
+      IOConformance::checkEffectIDExists(sreader, id);
+    }
+  }
 
   int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
   if (hasSemantic == 1) {
@@ -2673,8 +2680,9 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, types::Band &band
     effect.setSemantic(semantic);
   }
 
-  int effectPos = static_cast<int>(timescale) * band.getBlockLength().value() *
-                  static_cast<int>(band.getEffectsSize()) / band.getUpperFrequencyLimit();
+  int effectPos = static_cast<int>(sreader.timescale) * sreader.bandStream.band.getBlockLength().value() *
+                  static_cast<int>(sreader.bandStream.band.getEffectsSize()) /
+                  sreader.bandStream.band.getUpperFrequencyLimit();
   effect.setPosition(effectPos);
 
   IOBinaryBands::readWaveletEffect(effect, bitstream, idx);
@@ -2689,6 +2697,9 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
   effect.setId(id);
 
   int effectTypeInt = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
+  if (sreader.conformance) {
+    IOConformance::checkEffectTypeUnknown(sreader, effectTypeInt);
+  }
   if (effectTypeInt < static_cast<int>(types::EffectType::Basis) ||
       effectTypeInt > static_cast<int>(types::EffectType::Composite)) {
     sreader.logs.push_back(
@@ -2700,19 +2711,24 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
 
   int effectPos = IOBinaryPrimitives::readInt(bitstream, idx, EFFECT_POSITION);
   effect.setPosition(effectPos);
+  if (sreader.conformance) {
+    IOConformance::checkEffectPosition(sreader, effectPos);
+  }
 
-  if (effectType == types::EffectType::Basis) {
-    int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
-    if (hasSemantic == 1) {
-      int semanticCode = IOBinaryPrimitives::readUInt(
-          bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
-      auto semantic = std::string(
-          types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
-      effect.setSemantic(semantic);
+  int hasSemantic = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_FLAG_SEMANTIC);
+  if (hasSemantic == 1) {
+    int semanticCode = IOBinaryPrimitives::readUInt(
+        bitstream, idx, EFFECT_SEMANTIC_LAYER_1 + EFFECT_SEMANTIC_LAYER_2);
+    auto semantic = std::string(
+        types::effectSemanticToString.at(static_cast<types::EffectSemantic>(semanticCode)));
+    effect.setSemantic(semantic);
+    if (sreader.conformance) {
+      IOConformance::checkSemanticUnknown(sreader, semantic);
     }
-    if (!readEffectBasis(bitstream, effect, sreader.bandStream.band.getBandType(), idx)) {
-      return false;
-    }
+  }
+
+  if (!readEffectBasis(bitstream, sreader, effect, sreader.bandStream.band.getBandType(), idx)) {
+    return false;
   } else if (effect.getEffectType() == types::EffectType::Reference && sreader.conformance) {
     IOConformance::checkEffectIDExists(sreader, id);
   }
@@ -2746,14 +2762,16 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   }
   return true;
 }
-
-auto IOStream::readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
-                               types::BandType bandType, int &idx) -> bool {
+auto IOStream::readEffectBasis(std::vector<bool> &bitstream, StreamReader &sreader,
+                               types::Effect &effect, types::BandType bandType, int &idx) -> bool {
   int kfCount = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_KEYFRAME_COUNT);
   if (bandType == types::BandType::VectorialWave) {
     float phase = IOBinaryPrimitives::readFloatNBits<EFFECT_PHASE>(bitstream, idx, 0, MAX_PHASE);
     effect.setPhase(phase);
     int baseSignal = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_BASE_SIGNAL);
+    if (sreader.conformance) {
+      IOConformance::checkBaseSignal(sreader, baseSignal);
+    }
     effect.setBaseSignal(static_cast<types::BaseSignal>(baseSignal));
   }
   std::vector<types::Keyframe> keyframes = std::vector<types::Keyframe>();
@@ -2983,6 +3001,8 @@ auto IOStream::readListObject(std::vector<bool> &bitstream, StreamReader &sreade
     fxList.push_back(effect);
   }
   length += idx;
+  if (sreader.conformance) {
+  }
   return true;
 }
 auto IOStream::readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,

@@ -2,6 +2,7 @@
 #define IOCONFORMANCE_H
 
 #include <IOHaptics/include/IOStream.h>
+#include <Types/include/EffectSemantic.h>
 #include <string>
 
 namespace haptics::io {
@@ -58,13 +59,24 @@ enum class hmpgErrorCode {
   TempSpat_Data_ChannelID_Unknown,
   TempSpat_Data_BandID_Unknown,
   TempSpat_Data_EffectID_Unknown,
+  TempSpat_Data_EffectType_Unknown,
   TempSpat_Data_EffectType_OutOfRange,
+  TempSpat_Data_Semantic_Unknown,
+
+  Temp_Timing_Not_Ascending,
 
   Temp_Data_PerceptionModality_Invalid,
 
   Temp_Duration_Invalid,
+  Temp_Position_Invalid,
+  Temp_BaseSignal_Invalid,
 
-  Spat_Data_PerceptionModality_Invalid
+  Spat_Data_PerceptionModality_Invalid,
+  Spat_Duration_Invalid,
+  Spat_No_Packets,
+  Spat_UnitSync_Invalid,
+
+  Silent_Duration_Invalid
 };
 
 static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
@@ -220,9 +232,15 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::TempSpat_Data_EffectID_Unknown,
      "MIHSUnit_Temporal MIHSPacket_Data error: Effect ID does not exist. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectID_Unknown))},
+    {hmpgErrorCode::TempSpat_Data_EffectType_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Effect Type does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectType_Unknown))},
     {hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange,
      "MIHSUnit_Temporal MIHSPacket_Data error: Effect type is out of range. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange))},
+    {hmpgErrorCode::TempSpat_Data_Semantic_Unknown,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Semantic does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_Semantic_Unknown))},
 
     // NonTempSpat_*
     {hmpgErrorCode::NonTempSpat_Data_InvalidNumber,
@@ -231,6 +249,9 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
          std::to_string(static_cast<int>(hmpgErrorCode::NonTempSpat_Data_InvalidNumber))},
 
     // Temp_Data_*
+    {hmpgErrorCode::Temp_Timing_Not_Ascending,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Effect ID does not exist. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Timing_Not_Ascending))},
     {hmpgErrorCode::Temp_Data_PerceptionModality_Invalid,
      "MIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. "
      "Error code: " +
@@ -240,12 +261,31 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Temp_Duration_Invalid,
      "MIHSUnit_Temporal error: Duration invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Temp_Duration_Invalid))},
+    {hmpgErrorCode::Temp_Position_Invalid,
+     "MIHSUnit_Temporal error: Position invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Position_Invalid))},
+    {hmpgErrorCode::Temp_BaseSignal_Invalid,
+     "MIHSUnit_Temporal error: baseSignal invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_BaseSignal_Invalid))},
 
     // Spat_Data_*
     {hmpgErrorCode::Spat_Data_PerceptionModality_Invalid,
      "MIHSUnit_Spatial MIHSPacket_Data error: Perception modality invalid for spatial MIHSUnit. "
      "Error code: " +
-         std::to_string(static_cast<int>(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid))}};
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid))},
+    {hmpgErrorCode::Spat_Duration_Invalid,
+     "MIHSUnit_Spatial error: Duration invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_Duration_Invalid))},
+    {hmpgErrorCode::Spat_No_Packets,
+     "MIHSUnit_Spatial error: No packets in unit. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_No_Packets))},
+    {hmpgErrorCode::Spat_UnitSync_Invalid,
+     "MIHSUnit_Spatial error: UnitSync value invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_UnitSync_Invalid))},
+
+    {hmpgErrorCode::Silent_Duration_Invalid,
+     "MIHSUnit_Silent error: Duration invalid. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Silent_Duration_Invalid))}};
 
 class IOConformance {
 public:
@@ -289,9 +329,32 @@ public:
     }
   }
 
-  static auto checkMIHSUnitTemporalDuraction(IOStream::StreamReader &sreader) -> void {
+  static auto checkMIHSUnitDuration(IOStream::StreamReader &sreader) -> void {
     if (sreader.packetDuration <= 0) {
-      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Invalid));
+      if (sreader.currentUnitType == MIHSUnitType::Spatial) {
+        if (sreader.packetDuration != 0) {
+          sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_Duration_Invalid));
+        }
+      } else if (sreader.currentUnitType == MIHSUnitType::Silent) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Silent_Duration_Invalid));
+      } else {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Invalid));
+      }
+    }
+  }
+
+  static auto checkEffectPosition(IOStream::StreamReader &sreader, int effectPos) -> void {
+    if (effectPos < 0 && (!sreader.waitSync || !(sreader.auType == AUType::DAU))) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
+    }
+    if (effectPos >= sreader.packetDuration) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
+    }
+  }
+
+  static auto checkBaseSignal(IOStream::StreamReader &sreader, int baseSignal) -> void {
+    if (!(baseSignal >= 0 && baseSignal < 5)) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_BaseSignal_Invalid));
     }
   }
 
@@ -330,6 +393,42 @@ public:
       }
     }
     sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectID_Unknown));
+  }
+
+  static auto checkEffectTypeUnknown(IOStream::StreamReader &sreader, int effectType) -> void {
+    if (effectType < 0 || effectType > 1) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_Unknown));
+    }
+  }
+
+  static auto checkSemanticUnknown(IOStream::StreamReader &sreader, std::string semantic) -> void {
+    if (types::stringToEffectSemantic.find(semantic) == types::stringToEffectSemantic.end()) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_Semantic_Unknown));
+    }
+  }
+
+  static auto checkEffectOrder(IOStream::StreamReader &sreader, std::vector<types::Effect> &effects)
+      -> void {
+    int pos = -INFINITY;
+    for (const auto effect : effects) {
+      if (effect.getPosition() < pos) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Timing_Not_Ascending));
+      }
+      pos = effect.getPosition();
+    }
+  }
+
+  static auto checkMIHSUnitSpatialPackets(IOStream::StreamReader &sreader,
+                                          const std::vector<bool> &packets) -> void {
+    if (packets.size() == 0) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_No_Packets));
+    }
+
+    if (sreader.waitSync == 1) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_UnitSync_Invalid));
+    }
   }
 };
 } // namespace haptics::io
