@@ -2680,7 +2680,8 @@ auto IOStream::readWaveletEffect(std::vector<bool> &bitstream, StreamReader &sre
     effect.setSemantic(semantic);
   }
 
-  int effectPos = static_cast<int>(sreader.timescale) * sreader.bandStream.band.getBlockLength().value() *
+  int effectPos = static_cast<int>(sreader.timescale) *
+                  sreader.bandStream.band.getBlockLength().value() *
                   static_cast<int>(sreader.bandStream.band.getEffectsSize()) /
                   sreader.bandStream.band.getUpperFrequencyLimit();
   effect.setPosition(effectPos);
