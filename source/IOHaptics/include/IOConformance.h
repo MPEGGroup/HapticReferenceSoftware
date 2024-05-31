@@ -347,7 +347,7 @@ public:
     if (effectPos < 0 && (!sreader.waitSync || !(sreader.auType == AUType::DAU))) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
     }
-    if (effectPos >= sreader.packetDuration) {
+    if (effectPos >= static_cast<int>(sreader.packetDuration)) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
     }
   }
@@ -411,7 +411,7 @@ public:
 
   static auto checkEffectOrder(IOStream::StreamReader &sreader, std::vector<types::Effect> &effects)
       -> void {
-    int pos = -INFINITY;
+    int pos = INT_MIN;
     for (const auto effect : effects) {
       if (effect.getPosition() < pos) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Timing_Not_Ascending));
