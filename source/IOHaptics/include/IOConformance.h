@@ -353,7 +353,7 @@ public:
   }
 
   static auto checkBaseSignal(IOStream::StreamReader &sreader, int baseSignal) -> void {
-    if (!(baseSignal >= 0 && baseSignal < 5)) {
+    if (!(baseSignal >= 0 && baseSignal <= static_cast<int>(types::BaseSignal::SawToothDown))) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_BaseSignal_Invalid));
     }
   }
@@ -402,7 +402,8 @@ public:
     }
   }
 
-  static auto checkSemanticUnknown(IOStream::StreamReader &sreader, std::string semantic) -> void {
+  static auto checkSemanticUnknown(IOStream::StreamReader &sreader, const std::string &semantic)
+      -> void {
     if (types::stringToEffectSemantic.find(semantic) == types::stringToEffectSemantic.end()) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_Semantic_Unknown));
@@ -412,7 +413,7 @@ public:
   static auto checkEffectOrder(IOStream::StreamReader &sreader, std::vector<types::Effect> &effects)
       -> void {
     int pos = INT_MIN;
-    for (const auto effect : effects) {
+    for (const auto &effect : effects) {
       if (effect.getPosition() < pos) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Timing_Not_Ascending));
       }
@@ -422,11 +423,11 @@ public:
 
   static auto checkMIHSUnitSpatialPackets(IOStream::StreamReader &sreader,
                                           const std::vector<bool> &packets) -> void {
-    if (packets.size() == 0) {
+    if (packets.empty()) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_No_Packets));
     }
 
-    if (sreader.waitSync == 1) {
+    if (sreader.waitSync) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_UnitSync_Invalid));
     }
   }
