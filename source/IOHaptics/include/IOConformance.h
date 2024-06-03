@@ -384,7 +384,7 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
      "MIHSUnit_Spatial error: UnitSync value invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Spat_UnitSync_Invalid))},
 
-         // Sile_Data_*
+    // Sile_Data_*
     {hmpgErrorCode::Sile_InitDuration_Invalid,
      "MIHSUnit_Silent MIHSPacket_Data error: The duration of a silent MIHS unit shall be a "
      "positive number. Error code: " +
@@ -422,8 +422,8 @@ public:
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutOfRange));
     }
   };
-  
-  static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> void {
+
+   static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> void {
     auto btype = sreader.bandStream.band.getBandType();
     if (strcmp(sreader.haptic.getProfile().c_str(), MAIN_PROFILE) == 0 &&
         btype == types::BandType::WaveletWave) {
