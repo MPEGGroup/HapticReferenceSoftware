@@ -3,6 +3,7 @@
 
 #include <IOHaptics/include/IOStream.h>
 #include <Types/include/EffectSemantic.h>
+#include <limits.h>
 #include <string>
 
 namespace haptics::io {
