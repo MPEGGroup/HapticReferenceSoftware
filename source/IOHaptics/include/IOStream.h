@@ -47,9 +47,23 @@ namespace haptics::io {
 
 class IOConformance;
 
+static constexpr const char *MAIN_PROFILE = "Main";
+static constexpr const char *SIMPLE_PARAMETRIC_PROFILE = "Simple Parametric";
+static constexpr const char *DATE_FORMAT = R"((\d{4})-(\d{2})-(\d{2}))";
+static constexpr const char *VERSION_FORMAT = R"((\w{4})|(\w{4}-\w))";
 static constexpr int TIME_TO_MS = 1000;
 static constexpr int DEFAULT_PACKET_DURATION = 128;
 static constexpr int DEFAULT_DURATION_DEVIATION = 0;
+
+static constexpr int MIN_BAND_LEVEL1 = 1;
+static constexpr int MIN_BAND_LEVEL2 = 1;
+static constexpr int MAX_BAND_LEVEL1 = 7;
+static constexpr int MAX_BAND_LEVEL2 = 63;
+
+static constexpr int MIN_CHANNEL_LEVEL1 = 1;
+static constexpr int MIN_CHANNEL_LEVEL2 = 1;
+static constexpr int MAX_CHANNEL_LEVEL1 = 127;
+static constexpr int MAX_CHANNEL_LEVEL2 = 65535;
 
 static constexpr uint32_t CRC32_POLYNOMIAL = 2187366103;
 static constexpr uint16_t CRC16_POLYNOMIAL = 49185;
@@ -232,6 +246,7 @@ private:
   static auto readPacketTS(std::vector<bool> bitstream) -> int;
   static auto readPacketLength(std::vector<bool> &bitstream) -> int;
 
+  static auto readMIHSPacketTypeInt(std::vector<bool> &packet) -> int;
   static auto readMIHSPacketType(std::vector<bool> &packet) -> MIHSPacketType;
   static auto readMIHSPacketHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;

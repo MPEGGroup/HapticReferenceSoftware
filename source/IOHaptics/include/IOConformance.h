@@ -14,11 +14,23 @@ class StreamReader;
 enum class MIHSUnitType;
 
 enum class hmpgErrorCode {
+  Init_Experience_UnitType_Invalid,
+  Init_Experience_FirstUnitType_Invalid,
+  Init_Experience_UnitSync_Invalid,
+  Init_Experience_InitUnitSync_Invalid,
+  Init_Experience_InitUnitTiming_Invalid,
+  Init_Experience_Profile_Invalid,
+  Init_Experience_Level_Invalid,
+  Init_Experience_Version_Invalid,
+  Init_Experience_Date_Invalid,
   Init_Experience_Avatar_ID_OutOfRange,
   Init_Experience_Avatar_MeshURI_Invalid,
 
+  Init_Packet_Type_Invalid,
+
   Init_Perception_ID_NotUnique,
   Init_Perception_Modality_OutOfRange,
+  Init_Perception_Modality_NotSupportedByLevelProfile,
   Init_Perception_AvatarID_Unkown,
   Init_Perception_SchemeURN_Invalid,
   Init_Perception_ReferenceDevice_ID_OutOfRange,
@@ -26,6 +38,7 @@ enum class hmpgErrorCode {
   Init_Perception_ReferenceDevice_Type_OutOfRange,
 
   Init_Channel_ID_NotUnique,
+  Init_Channel_OutOfRange,
   Init_Channel_PerceptionID_Unknown,
   Init_Channel_ReferenceDeviceID_Unknown,
   Init_Channel_ActuatorResolution_OutOfRange,
@@ -36,8 +49,11 @@ enum class hmpgErrorCode {
   Init_Band_ID_NotUnique,
   Init_Band_PerceptionID_Unknown,
   Init_Band_ChannelID_Unknown,
+  Init_Band_OutOfRange,
   Init_Band_BandType_OutOfRange,
+  Init_Band_BandType_NotSupportedByLevelProfile,
   Init_Band_CurveType_OutOfRange,
+  Init_Band_TimescaleInvalidWithLevelProfile,
 
   Init_EffectLibrary_ID_NotUnique,
   Init_EffectLibrary_PerceptionID_Unknown,
@@ -62,11 +78,14 @@ enum class hmpgErrorCode {
   TempSpat_Data_EffectType_Unknown,
   TempSpat_Data_EffectType_OutOfRange,
   TempSpat_Data_Semantic_Unknown,
+  TempSpat_Data_EffectType_CompositeNotSupportedByProfile,
 
   Temp_Timing_Not_Ascending,
 
+  Temp_Data_MIHSPacket_Invalid,
   Temp_Data_PerceptionModality_Invalid,
 
+  Temp_InitDuration_Invalid,
   Temp_Duration_Invalid,
   Temp_Position_Invalid,
   Temp_BaseSignal_Invalid,
@@ -75,12 +94,52 @@ enum class hmpgErrorCode {
   Spat_Duration_Invalid,
   Spat_No_Packets,
   Spat_UnitSync_Invalid,
+  Spat_Data_MIHSPacket_Invalid,
+  Spat_Data_PerceptionModality_Invalid,
 
+  Sile_InitDuration_Invalid,
+  Sile_Data_Invalid,
   Silent_Duration_Invalid
 };
 
 static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     // Init_Experience_*
+    {hmpgErrorCode::Init_Experience_UnitType_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Invalid MIHS unit type. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_UnitType_Invalid))},
+    {hmpgErrorCode::Init_Experience_FirstUnitType_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: The first MIHS unit in a haptic stream "
+     "shall be an initialization unit. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_FirstUnitType_Invalid))},
+    {hmpgErrorCode::Init_Experience_UnitSync_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Invalid MIHS unit sync value. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_UnitSync_Invalid))},
+    {hmpgErrorCode::Init_Experience_InitUnitSync_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit is a sync unit. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_InitUnitSync_Invalid))},
+    {hmpgErrorCode::Init_Experience_InitUnitTiming_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain "
+     "one timing MIHS packet. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_InitUnitTiming_Invalid))},
+    {hmpgErrorCode::Init_Experience_Profile_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Profile not defined in the "
+     "specifications. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Profile_Invalid))},
+    {hmpgErrorCode::Init_Experience_Level_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Level not defined in the "
+     "specifications. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Level_Invalid))},
+    {hmpgErrorCode::Init_Experience_Date_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Date shall follow the ISO 8601 "
+     "standard. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Date_Invalid))},
+    {hmpgErrorCode::Init_Experience_Version_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Experience error: Version should follow the format: XXXX "
+     "or XXXX-Y. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Version_Invalid))},
     {hmpgErrorCode::Init_Experience_Avatar_ID_OutOfRange,
      "MIHSUnit_Initialization MIHSPacket_Experience error: Avatar id is out of range. Error "
      "code: " +
@@ -88,6 +147,12 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Init_Experience_Avatar_MeshURI_Invalid,
      "MIHSUnit_Initialization MIHSPacket_Experience error: Mesh URI is invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_Avatar_MeshURI_Invalid))},
+
+    // Init_Packet_*
+    {hmpgErrorCode::Init_Packet_Type_Invalid,
+     "MIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Packet_Type_Invalid))},
 
     // Init_Perception_*
     {hmpgErrorCode::Init_Perception_ID_NotUnique,
@@ -97,6 +162,11 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Init_Perception_Modality_OutOfRange,
      "MIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Perception_Modality_OutOfRange))},
+    {hmpgErrorCode::Init_Perception_Modality_NotSupportedByLevelProfile,
+     "MIHSUnit_Initialization MIHSPacket_Perception error: Modality is not supported by the "
+     "level/profile used. Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Perception_Modality_NotSupportedByLevelProfile))},
     {hmpgErrorCode::Init_Perception_AvatarID_Unkown,
      "MIHSUnit_Initialization MIHSPacket_Perception error: Avatar ID does not exist. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Perception_AvatarID_Unkown))},
@@ -123,6 +193,10 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Init_Channel_ID_NotUnique,
      "MIHSUnit_Initialization MIHSPacket_Channel error: Channel ID is not unique. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_ID_NotUnique))},
+    {hmpgErrorCode::Init_Channel_OutOfRange,
+     "MIHSUnit_Initialization MIHSPacket_Channel error: The Channel count is out of range. Error "
+     "code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Init_Channel_OutOfRange))},
     {hmpgErrorCode::Init_Channel_PerceptionID_Unknown,
      "MIHSUnit_Initialization MIHSPacket_Channel error: Perception ID does not exist. Error "
      "code: " +
@@ -162,9 +236,19 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::Init_Band_BandType_OutOfRange,
      "MIHSUnit_Initialization MIHSPacket_Band error: Band type is out of range. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_BandType_OutOfRange))},
+    {hmpgErrorCode::Init_Band_BandType_NotSupportedByLevelProfile,
+     "MIHSUnit_Initialization MIHSPacket_Band error: Band type is not supported by the "
+     "level/profile used. Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Band_BandType_NotSupportedByLevelProfile))},
     {hmpgErrorCode::Init_Band_CurveType_OutOfRange,
      "MIHSUnit_Initialization MIHSPacket_Band error: Curve type is out of range. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Band_CurveType_OutOfRange))},
+    {hmpgErrorCode::Init_Band_TimescaleInvalidWithLevelProfile,
+     "MIHSUnit_Initialization MIHSPacket_Band error: Timescale is not supported by the bandtype "
+     "and level/profile used. Error code: " +
+         std::to_string(
+             static_cast<int>(hmpgErrorCode::Init_Band_TimescaleInvalidWithLevelProfile))},
 
     // Init_EffectLibrary_*
     {hmpgErrorCode::Init_EffectLibrary_PerceptionID_Unknown,
@@ -238,6 +322,11 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
     {hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange,
      "MIHSUnit_Temporal MIHSPacket_Data error: Effect type is out of range. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_EffectType_OutOfRange))},
+    {hmpgErrorCode::TempSpat_Data_EffectType_CompositeNotSupportedByProfile,
+     "MIHSUnit_Temporal MIHSPacket_Data error: Composite effects are not supported with the "
+     "profile used. Error code: " +
+         std::to_string(static_cast<int>(
+             hmpgErrorCode::TempSpat_Data_EffectType_CompositeNotSupportedByProfile))},
     {hmpgErrorCode::TempSpat_Data_Semantic_Unknown,
      "MIHSUnit_Temporal MIHSPacket_Data error: Semantic does not exist. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::TempSpat_Data_Semantic_Unknown))},
@@ -249,6 +338,10 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
          std::to_string(static_cast<int>(hmpgErrorCode::NonTempSpat_Data_InvalidNumber))},
 
     // Temp_Data_*
+    {hmpgErrorCode::Temp_Data_MIHSPacket_Invalid,
+     "MIHSUnit_Temporal MIHSPacket_Data error: A spatial unit shall contain one or more MIHS "
+     "packets. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_Data_MIHSPacket_Invalid))},
     {hmpgErrorCode::Temp_Timing_Not_Ascending,
      "MIHSUnit_Temporal MIHSPacket_Data error: Effect ID does not exist. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Temp_Timing_Not_Ascending))},
@@ -258,6 +351,10 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
          std::to_string(static_cast<int>(hmpgErrorCode::Temp_Data_PerceptionModality_Invalid))},
 
     // Other Temp_*
+    {hmpgErrorCode::Temp_InitDuration_Invalid,
+     "MIHSUnit_Temporal error: The duration of an initialization unit duration shall be zero. "
+     "Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Temp_InitDuration_Invalid))},
     {hmpgErrorCode::Temp_Duration_Invalid,
      "MIHSUnit_Temporal error: Duration invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Temp_Duration_Invalid))},
@@ -269,6 +366,10 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
          std::to_string(static_cast<int>(hmpgErrorCode::Temp_BaseSignal_Invalid))},
 
     // Spat_Data_*
+    {hmpgErrorCode::Spat_Data_MIHSPacket_Invalid,
+     "MIHSUnit_Spatial MIHSPacket_Data error: A spatial unit shall contain one or more MIHS "
+     "packets. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Spat_Data_MIHSPacket_Invalid))},
     {hmpgErrorCode::Spat_Data_PerceptionModality_Invalid,
      "MIHSUnit_Spatial MIHSPacket_Data error: Perception modality invalid for spatial MIHSUnit. "
      "Error code: " +
@@ -283,6 +384,15 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
      "MIHSUnit_Spatial error: UnitSync value invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Spat_UnitSync_Invalid))},
 
+         // Sile_Data_*
+    {hmpgErrorCode::Sile_InitDuration_Invalid,
+     "MIHSUnit_Silent MIHSPacket_Data error: The duration of a silent MIHS unit shall be a "
+     "positive number. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Sile_InitDuration_Invalid))},
+    {hmpgErrorCode::Sile_Data_Invalid,
+     "MIHSUnit_Silent MIHSPacket_Data error: A Silent MIHS unit shall not include any MIHS packets "
+     "other than MIHS packets of type PACTYPE_TIMING. Error code: " +
+         std::to_string(static_cast<int>(hmpgErrorCode::Sile_InitDuration_Invalid))},
     {hmpgErrorCode::Silent_Duration_Invalid,
      "MIHSUnit_Silent error: Duration invalid. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Silent_Duration_Invalid))}};
@@ -295,6 +405,14 @@ public:
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_OutOfRange));
     }
+
+    if (strcmp(sreader.haptic.getProfile().c_str(), SIMPLE_PARAMETRIC_PROFILE) == 0) {
+      if (btype != types::BandType::Transient && btype != types::BandType::Curve &&
+          btype != types::BandType::VectorialWave) {
+        sreader.logs.push_back(
+            hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_NotSupportedByLevelProfile));
+      }
+    }
   };
 
   static auto checkCurveTypeRange(IOStream::StreamReader &sreader) -> void {
@@ -302,6 +420,19 @@ public:
     if (ctype < types::CurveType::Unknown || ctype > types::CurveType::Bspline) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutOfRange));
+    }
+  };
+  
+  static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> void {
+    auto btype = sreader.bandStream.band.getBandType();
+    if (strcmp(sreader.haptic.getProfile().c_str(), MAIN_PROFILE) == 0 &&
+        btype == types::BandType::WaveletWave) {
+      return;
+    }
+
+    if (sreader.timescale != haptics::types::Haptics::DEFAULT_TIMESCALE) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_TimescaleInvalidWithLevelProfile));
     }
   };
 
@@ -326,6 +457,80 @@ public:
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_InvalidNumber));
       }
+    } else if (sreader.currentUnitType == MIHSUnitType::Silent) {
+      if (sreader.MIHSData) {
+        sreader.logs.push_back(
+            hmpgErrorCodeToString.at(hmpgErrorCode::NonTempSpat_Data_InvalidNumber));
+      }
+    }
+  }
+
+  static auto checkFirstMIHSUnitType(IOStream::StreamReader &sreader, std::vector<bool> &mihsunit)
+      -> void {
+    int index = 0;
+    int unitType = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
+    if (unitType == static_cast<int>(MIHSUnitType::Initialization)) {
+      return;
+    }
+
+    sreader.logs.push_back(
+        hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_FirstUnitType_Invalid));
+  }
+
+  static auto checkMIHSUnitType(IOStream::StreamReader &sreader, const int unitType) -> bool {
+    if (unitType == static_cast<int>(MIHSUnitType::Initialization) ||
+        unitType == static_cast<int>(MIHSUnitType::Temporal) ||
+        unitType == static_cast<int>(MIHSUnitType::Spatial) ||
+        unitType == static_cast<int>(MIHSUnitType::Silent)) {
+      return true;
+    }
+
+    if (sreader.conformance) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_UnitType_Invalid));
+    }
+    return false;
+  }
+
+  static auto checkNALuType(IOStream::StreamReader &sreader, const int naluType) -> void {
+    if (naluType == static_cast<int>(MIHSPacketType::Timing) ||
+        naluType == static_cast<int>(MIHSPacketType::InitializationTiming) ||
+        naluType == static_cast<int>(MIHSPacketType::MetadataHaptics) ||
+        naluType == static_cast<int>(MIHSPacketType::MetadataPerception) ||
+        naluType == static_cast<int>(MIHSPacketType::MetadataChannel) ||
+        naluType == static_cast<int>(MIHSPacketType::MetadataBand) ||
+        naluType == static_cast<int>(MIHSPacketType::Data) ||
+        naluType == static_cast<int>(MIHSPacketType::EffectLibrary) ||
+        naluType == static_cast<int>(MIHSPacketType::CRC32) ||
+        naluType == static_cast<int>(MIHSPacketType::CRC16) ||
+        naluType == static_cast<int>(MIHSPacketType::GlobalCRC32) ||
+        naluType == static_cast<int>(MIHSPacketType::GlobalCRC16)) {
+      return;
+    }
+
+    sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Packet_Type_Invalid));
+  }
+
+  static auto checkMIHSUnitSync(IOStream::StreamReader &sreader, const int unitSync) -> void {
+    if (unitSync == 0 || unitSync == 1) {
+      return;
+    }
+
+    sreader.logs.push_back(
+        hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_UnitSync_Invalid));
+  }
+
+  static auto checkMIHSUnitSyncWhenInit(IOStream::StreamReader &sreader, const bool unitSync)
+      -> void {
+    if (sreader.currentUnitType == MIHSUnitType::Initialization && !unitSync) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_InitUnitSync_Invalid));
+    }
+  }
+
+  static auto checkMIHSUnitInitializationDuraction(IOStream::StreamReader &sreader) -> void {
+    if (sreader.packetDuration != 0) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_InitDuration_Invalid));
     }
   }
 

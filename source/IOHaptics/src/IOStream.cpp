@@ -71,6 +71,9 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic) -> 
   CRC crc;
   int index = 0;
   for (auto &packet : bitstream) {
+    if (sreader.conformance && index == 0) {
+      IOConformance::checkFirstMIHSUnitType(sreader, packet);
+    }
     if (!readMIHSUnit(packet, sreader, crc)) {
       return EXIT_FAILURE;
     }
@@ -264,10 +267,20 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   int index = 0;
   int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
   auto unitType = static_cast<MIHSUnitType>(unitTypeInt);
+  if (!IOConformance::checkMIHSUnitType(sreader, unitTypeInt)) {
+    crc.nbPackets = 0;
+    return true;
+  }
   sreader.currentUnitType = unitType;
   sreader.MIHSData = false;
   int syncInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_SYNC);
+  if (sreader.conformance) {
+    IOConformance::checkMIHSUnitSync(sreader, syncInt);
+  }
   bool sync = syncInt == 0;
+  if (sreader.conformance) {
+    IOConformance::checkMIHSUnitSyncWhenInit(sreader, sync);
+  }
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
@@ -275,6 +288,28 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
 
   sreader.packetDuration = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_DURATION);
   if (sreader.conformance) {
+    switch (unitType) {
+    case MIHSUnitType::Initialization:
+      IOConformance::checkMIHSUnitInitializationDuraction(sreader);
+      break;
+    case MIHSUnitType::Spatial:
+      if (sreader.packetDuration != 0) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_InitDuration_Invalid));
+      }
+      break;
+    case MIHSUnitType::Temporal:
+      if (sreader.packetDuration < 0) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_InitDuration_Invalid));
+      }
+      break;
+    case MIHSUnitType::Silent:
+      if (sreader.packetDuration < 0) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Sile_InitDuration_Invalid));
+      }
+      break;
+    default:
+      break;
+    }
     IOConformance::checkMIHSUnitDuration(sreader);
   }
   int unitLength = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_LENGTH) * BYTE_SIZE;
@@ -284,12 +319,32 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   if (sreader.conformance && unitType == MIHSUnitType::Spatial) {
     IOConformance::checkMIHSUnitSpatialPackets(sreader, packets);
   }
+  if (sreader.conformance) {
+    if (unitType == MIHSUnitType::Temporal && packets.empty()) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Data_MIHSPacket_Invalid));
+    }
+    if (unitType == MIHSUnitType::Spatial && packets.empty()) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_Data_MIHSPacket_Invalid));
+    }
+  }
+  bool isContainingTimingPacket = false;
   while (index < unitLength) {
+    if (!isContainingTimingPacket) {
+      MIHSPacketType packetType = readMIHSPacketType(packets);
+      isContainingTimingPacket = packetType == MIHSPacketType::Timing;
+    }
+
     if (!readMIHSPacket(packets, sreader, crc)) {
       return EXIT_FAILURE;
     }
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
+  }
+  if (sreader.conformance) {
+    if (unitType == MIHSUnitType::Initialization && !isContainingTimingPacket) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_InitUnitTiming_Invalid));
+    }
   }
   IOConformance::checkMIHSUnitDataPacket(sreader);
   sreader.time += sreader.packetDuration;
@@ -701,7 +756,17 @@ auto IOStream::writeMIHSPacketHeader(MIHSPacketType mihsPacketType, int payloadS
   return true;
 }
 auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
+  if (sreader.conformance) {
+    int mihsPacketTypeInt = readMIHSPacketTypeInt(packet);
+    IOConformance::checkMIHSPacketType(sreader, mihsPacketTypeInt);
+  }
   MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
+  if (sreader.conformance) {
+    if (sreader.currentUnitType == MIHSUnitType::Silent &&
+        mihsPacketType != MIHSPacketType::Timing) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Sile_Data_Invalid));
+    }
+  }
   int index = H_MIHS_PACKET_TYPE;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   index += H_RESERVED;
@@ -852,6 +917,10 @@ auto IOStream::readPacketTS(std::vector<bool> bitstream) -> int {
   return std::stoi(tsBits, nullptr, 2);
 }
 
+auto IOStream::readMIHSPacketTypeInt(std::vector<bool> &packet) -> int {
+  int idx = 0;
+  return IOBinaryPrimitives::readUInt(packet, idx, H_MIHS_PACKET_TYPE);
+}
 auto IOStream::readMIHSPacketType(std::vector<bool> &packet) -> MIHSPacketType {
   int idx = 0;
   int typeInt = IOBinaryPrimitives::readUInt(packet, idx, H_MIHS_PACKET_TYPE);
@@ -996,17 +1065,40 @@ auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bit
   int versionLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_VERSION);
   std::string version = IOBinaryPrimitives::readString(bitstream, index, versionLength);
   sreader.haptic.setVersion(version);
+  if (sreader.conformance) {
+    if (std::regex_match(version, std::regex(VERSION_FORMAT))) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Version_Invalid));
+    }
+  }
 
   int profileLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_PROFILE_SIZE);
   std::string profile = IOBinaryPrimitives::readString(bitstream, index, profileLength);
   sreader.haptic.setProfile(profile);
+  if (sreader.conformance) {
+    if (profile != MAIN_PROFILE || profile != SIMPLE_PARAMETRIC_PROFILE) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Profile_Invalid));
+    }
+  }
 
   int level = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_LEVEL);
   sreader.haptic.setLevel(level);
+  if (sreader.conformance) {
+    if (level <= 0 || level > 2) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Level_Invalid));
+    }
+  }
 
   int dateLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_DATE);
   std::string date = IOBinaryPrimitives::readString(bitstream, index, dateLength);
   sreader.haptic.setDate(date);
+  if (sreader.conformance) {
+    if (std::regex_match(date, std::regex(DATE_FORMAT))) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Date_Invalid));
+    }
+  }
 
   int descLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_DESC_SIZE);
   std::string description = IOBinaryPrimitives::readString(bitstream, index, descLength);
@@ -1185,6 +1277,17 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Perception_Modality_OutOfRange));
     }
+
+    if (sreader.haptic.getLevel() == 1 &&
+        strcmp(sreader.haptic.getProfile().c_str(), SIMPLE_PARAMETRIC_PROFILE) == 0) {
+      if (modal != static_cast<int>(types::PerceptionModality::Force) &&
+          modal != static_cast<int>(types::PerceptionModality::Vibrotactile) &&
+          modal != static_cast<int>(types::PerceptionModality::Stiffness) &&
+          modal != static_cast<int>(types::PerceptionModality::VibrotactileTexture)) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(
+            hmpgErrorCode::Init_Perception_Modality_NotSupportedByLevelProfile));
+      }
+    }
   }
   sreader.perception.setPerceptionModality(static_cast<types::PerceptionModality>(modal));
 
@@ -1231,7 +1334,21 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
     sreader.perception.addReferenceDevice(refDev);
   }
   // read channel count, unused but could be used for check
-  IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_CHANNEL_COUNT);
+  int channelCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_CHANNEL_COUNT);
+  if (sreader.conformance) {
+    switch (sreader.haptic.getLevel()) {
+    case 1:
+      if (channelCount < MIN_CHANNEL_LEVEL1 || channelCount > MAX_CHANNEL_LEVEL1) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Channel_OutOfRange));
+      }
+      break;
+    case 2:
+      if (channelCount < MIN_CHANNEL_LEVEL2 || channelCount > MAX_CHANNEL_LEVEL2) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Channel_OutOfRange));
+      }
+      break;
+    }
+  }
 
   return true;
 }
@@ -1979,7 +2096,21 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
   }
 
   // read band count, unused but could be used for check
-  IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
+  int bandCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
+  if (sreader.conformance) {
+    switch (sreader.haptic.getLevel()) {
+    case 1:
+      if (bandCount < MIN_BAND_LEVEL1 || bandCount > MAX_BAND_LEVEL1) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
+      }
+      break;
+    case 2:
+      if (bandCount < MIN_BAND_LEVEL2 || bandCount > MAX_BAND_LEVEL2) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
+      }
+      break;
+    }
+  }
 
   return true;
 }
@@ -2079,6 +2210,7 @@ auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstr
   if (sreader.conformance) {
     IOConformance::checkBandTypeRange(sreader);
     IOConformance::checkCurveTypeRange(sreader);
+    IOConformance::checkTimescaleForBandType(sreader);
   }
   //=============================================================================
   return true;
@@ -2700,6 +2832,11 @@ auto IOStream::readEffect(std::vector<bool> &bitstream, StreamReader &sreader,
   int effectTypeInt = IOBinaryPrimitives::readUInt(bitstream, idx, EFFECT_TYPE);
   if (sreader.conformance) {
     IOConformance::checkEffectTypeUnknown(sreader, effectTypeInt);
+    if (strcmp(sreader.haptic.getProfile().c_str(), SIMPLE_PARAMETRIC_PROFILE) == 0 &&
+        effectTypeInt == static_cast<int>(types::EffectType::Composite)) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(
+          hmpgErrorCode::TempSpat_Data_EffectType_CompositeNotSupportedByProfile));
+    }
   }
   if (effectTypeInt < static_cast<int>(types::EffectType::Basis) ||
       effectTypeInt > static_cast<int>(types::EffectType::Composite)) {
