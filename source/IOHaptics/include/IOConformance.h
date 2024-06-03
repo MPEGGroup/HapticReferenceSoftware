@@ -423,7 +423,7 @@ public:
     }
   };
 
-   static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> void {
+  static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> void {
     auto btype = sreader.bandStream.band.getBandType();
     if (strcmp(sreader.haptic.getProfile().c_str(), MAIN_PROFILE) == 0 &&
         btype == types::BandType::WaveletWave) {
