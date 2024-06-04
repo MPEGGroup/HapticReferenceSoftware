@@ -627,8 +627,8 @@ public:
     }
   }
 
-  static auto checkMIHSUnitSpatialPackets(IOStream::StreamReader &sreader,
-                                          const std::vector<bool> &packets) -> void {
+  static auto checkMIHSUnitSpatialPackets(IOStream::StreamReader &sreader, const std::vector<bool> &packets)
+      -> void {
     if (packets.empty()) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_No_Packets));
     }
