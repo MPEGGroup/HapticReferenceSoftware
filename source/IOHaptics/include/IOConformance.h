@@ -92,11 +92,11 @@ enum class hmpgErrorCode {
   Temp_BaseSignal_Invalid,
 
   Spat_Data_PerceptionModality_Invalid,
+  Spat_InitDuration_Invalid,
   Spat_Duration_Invalid,
   Spat_No_Packets,
   Spat_UnitSync_Invalid,
   Spat_Data_MIHSPacket_Invalid,
-  Spat_Data_PerceptionModality_Invalid,
 
   Sile_InitDuration_Invalid,
   Sile_Data_Invalid,
@@ -493,7 +493,7 @@ public:
     return false;
   }
 
-  static auto checkNALuType(IOStream::StreamReader &sreader, const int naluType) -> void {
+  static auto checkMIHSPacketType(IOStream::StreamReader &sreader, const int naluType) -> void {
     if (naluType == static_cast<int>(MIHSPacketType::Timing) ||
         naluType == static_cast<int>(MIHSPacketType::InitializationTiming) ||
         naluType == static_cast<int>(MIHSPacketType::MetadataHaptics) ||
@@ -635,6 +635,50 @@ public:
 
     if (sreader.waitSync) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_UnitSync_Invalid));
+    }
+  }
+
+  static auto checkMIHSUnitSpatialPackets(IOStream::StreamReader &sreader,
+                                          const int bandCount) -> void {
+    if (!sreader.conformance) {
+      return;
+    }
+
+    switch (sreader.haptic.getLevel()) {
+    case 1:
+      if (bandCount < MIN_BAND_LEVEL1 || bandCount > MAX_BAND_LEVEL1) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
+      }
+      break;
+    case 2:
+      if (bandCount < MIN_BAND_LEVEL2 || bandCount > MAX_BAND_LEVEL2) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
+      }
+      break;
+    }
+  }
+
+  static auto checkMIHSUnitPerceptionModality(IOStream::StreamReader &sreader, const int modal)
+      -> void {
+    if (!sreader.conformance) {
+      return;
+    }
+
+    if ((modal < static_cast<int>(types::PerceptionModality::Other)) ||
+        (modal > static_cast<int>(types::PerceptionModality::Electrotactile))) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Perception_Modality_OutOfRange));
+    }
+
+    if (sreader.haptic.getLevel() == 1 &&
+        strcmp(sreader.haptic.getProfile().c_str(), SIMPLE_PARAMETRIC_PROFILE) == 0) {
+      if (modal != static_cast<int>(types::PerceptionModality::Force) &&
+          modal != static_cast<int>(types::PerceptionModality::Vibrotactile) &&
+          modal != static_cast<int>(types::PerceptionModality::Stiffness) &&
+          modal != static_cast<int>(types::PerceptionModality::VibrotactileTexture)) {
+        sreader.logs.push_back(hmpgErrorCodeToString.at(
+            hmpgErrorCode::Init_Perception_Modality_NotSupportedByLevelProfile));
+      }
     }
   }
 };

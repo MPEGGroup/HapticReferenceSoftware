@@ -1271,24 +1271,7 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
   sreader.perception.setDescription(desc);
 
   int modal = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_MODALITY);
-  if (sreader.conformance) {
-    if ((modal < static_cast<int>(types::PerceptionModality::Other)) ||
-        (modal > static_cast<int>(types::PerceptionModality::Electrotactile))) {
-      sreader.logs.push_back(
-          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Perception_Modality_OutOfRange));
-    }
-
-    if (sreader.haptic.getLevel() == 1 &&
-        strcmp(sreader.haptic.getProfile().c_str(), SIMPLE_PARAMETRIC_PROFILE) == 0) {
-      if (modal != static_cast<int>(types::PerceptionModality::Force) &&
-          modal != static_cast<int>(types::PerceptionModality::Vibrotactile) &&
-          modal != static_cast<int>(types::PerceptionModality::Stiffness) &&
-          modal != static_cast<int>(types::PerceptionModality::VibrotactileTexture)) {
-        sreader.logs.push_back(hmpgErrorCodeToString.at(
-            hmpgErrorCode::Init_Perception_Modality_NotSupportedByLevelProfile));
-      }
-    }
-  }
+  IOConformance::checkMIHSUnitPerceptionModality(sreader, modal);
   sreader.perception.setPerceptionModality(static_cast<types::PerceptionModality>(modal));
 
   int avatarId = IOBinaryPrimitives::readUInt(bitstream, idx, AVATAR_ID);
@@ -2097,20 +2080,7 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
 
   // read band count, unused but could be used for check
   int bandCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
-  if (sreader.conformance) {
-    switch (sreader.haptic.getLevel()) {
-    case 1:
-      if (bandCount < MIN_BAND_LEVEL1 || bandCount > MAX_BAND_LEVEL1) {
-        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
-      }
-      break;
-    case 2:
-      if (bandCount < MIN_BAND_LEVEL2 || bandCount > MAX_BAND_LEVEL2) {
-        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
-      }
-      break;
-    }
-  }
+  IOConformance::checkMIHSUnitSpatialPackets(sreader, bandCount);
 
   return true;
 }
