@@ -1218,7 +1218,7 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
           hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Perception_InvalidNumber));
     }
   }
-  
+
   int idx = 0;
 
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
