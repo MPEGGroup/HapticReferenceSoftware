@@ -2080,7 +2080,7 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
 
   // read band count, unused but could be used for check
   int bandCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
-  IOConformance::checkMIHSUnitSpatialPackets(sreader, bandCount);
+  IOConformance::checkMIHSUnitBandCount(sreader, bandCount);
 
   return true;
 }
