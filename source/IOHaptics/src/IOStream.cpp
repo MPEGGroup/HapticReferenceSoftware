@@ -759,14 +759,12 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
   if (sreader.conformance) {
     int mihsPacketTypeInt = readMIHSPacketTypeInt(packet);
     IOConformance::checkMIHSPacketType(sreader, mihsPacketTypeInt);
-  }
-  MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
-  if (sreader.conformance) {
     if (sreader.currentUnitType == MIHSUnitType::Silent &&
-        mihsPacketType != MIHSPacketType::Timing) {
+        mihsPacketTypeInt != static_cast<int>(MIHSPacketType::Timing)) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Sile_Data_Invalid));
     }
   }
+  MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
   int index = H_MIHS_PACKET_TYPE;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   index += H_RESERVED;
@@ -784,21 +782,9 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
     return true;
   }
   case (MIHSPacketType::MetadataHaptics): {
-    if (sreader.conformance) {
-      if (sreader.currentUnitType != MIHSUnitType::Initialization) {
-        sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Experience_InvalidNumber));
-      }
-    }
     return readMetadataHaptics(sreader, payload);
   }
   case (MIHSPacketType::MetadataPerception): {
-    if (sreader.conformance) {
-      if (sreader.currentUnitType != MIHSUnitType::Initialization) {
-        sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Perception_InvalidNumber));
-      }
-    }
     if (!readMetadataPerception(sreader, payload)) {
       return false;
     }
@@ -815,21 +801,9 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
     return true;
   }
   case (MIHSPacketType::EffectLibrary): {
-    if (sreader.conformance) {
-      if (sreader.currentUnitType != MIHSUnitType::Initialization) {
-        sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_EffectLibrary_InvalidNumber));
-      }
-    }
     return readLibrary(sreader, payload);
   }
   case (MIHSPacketType::MetadataChannel): {
-    if (sreader.conformance) {
-      if (sreader.currentUnitType != MIHSUnitType::Initialization) {
-        sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Channel_InvalidNumber));
-      }
-    }
     if (!readMetadataChannel(sreader, payload)) {
       return false;
     }
@@ -847,49 +821,27 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
     return true;
   }
   case (MIHSPacketType::MetadataBand): {
-    if (sreader.conformance) {
-      if (sreader.currentUnitType != MIHSUnitType::Initialization) {
-        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Band_InvalidNumber));
-      }
-    }
     if (!readMetadataBand(sreader, payload)) {
       return false;
     }
     int perceIndex = searchPerceptionInHaptic(sreader.haptic, sreader.perception.getId());
     int channelIndex = searchChannelInHaptic(sreader.haptic, sreader.channel.getId());
+    types::Channel &channel = sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex);
     int bandIndex = searchBandInHaptic(sreader, sreader.bandStream.id);
-    if (bandIndex == -1 ||
-        sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize() == 0 ||
-        static_cast<int>(
-            sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize()) <
-            bandIndex) {
-      sreader.haptic.getPerceptionAt(perceIndex)
-          .getChannelAt(channelIndex)
-          .addBand(sreader.bandStream.band);
-      sreader.bandStream.index = static_cast<int>(sreader.haptic.getPerceptionAt(perceIndex)
-                                                      .getChannelAt(channelIndex)
-                                                      .getBandsSize()) -
-                                 1;
+    int bandSize = static_cast<int>(channel.getBandsSize());
+    if (bandIndex == -1 || bandSize == 0 || bandSize < bandIndex) {
+      channel.addBand(sreader.bandStream.band);
+      sreader.bandStream.index = bandSize - 1;
       sreader.bandStreamsHaptic.push_back(sreader.bandStream);
     } else {
       if (sreader.conformance) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_ID_NotUnique));
       }
-      sreader.haptic.getPerceptionAt(perceIndex)
-          .getChannelAt(channelIndex)
-          .replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
+      channel.replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
     }
     return true;
   }
   case (MIHSPacketType::Data): {
-    if (sreader.conformance) {
-      if ((sreader.currentUnitType != MIHSUnitType::Temporal) &&
-          (sreader.currentUnitType != MIHSUnitType::Spatial)) {
-        sreader.logs.push_back(
-            hmpgErrorCodeToString.at(hmpgErrorCode::NonTempSpat_Data_InvalidNumber));
-      }
-      return false;
-    }
     return readData(sreader, payload);
   }
   case (MIHSPacketType::CRC16):
@@ -1060,6 +1012,13 @@ auto IOStream::writeMetadataHaptics(types::Haptics &haptic, std::vector<bool> &b
   return true;
 }
 auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  if (sreader.conformance) {
+    if (sreader.currentUnitType != MIHSUnitType::Initialization) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Experience_InvalidNumber));
+    }
+  }
+
   int index = 0;
 
   int versionLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_VERSION);
@@ -1253,6 +1212,13 @@ auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> 
   return true;
 }
 auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  if (sreader.conformance) {
+    if (sreader.currentUnitType != MIHSUnitType::Initialization) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Perception_InvalidNumber));
+    }
+  }
+  
   int idx = 0;
 
   int id = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
@@ -1354,6 +1320,13 @@ auto IOStream::writeLibrary(types::Perception &perception, std::vector<bool> &bi
   return success;
 }
 auto IOStream::readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  if (sreader.conformance) {
+    if (sreader.currentUnitType != MIHSUnitType::Initialization) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_EffectLibrary_InvalidNumber));
+    }
+  }
+
   int idx = 0;
   auto perceId = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_ID);
   int perceIndex = searchPerceptionInHaptic(sreader.haptic, perceId);
@@ -1920,6 +1893,12 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
   return true;
 }
 auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  if (sreader.conformance) {
+    if (sreader.currentUnitType != MIHSUnitType::Initialization) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Channel_InvalidNumber));
+    }
+  }
 
   sreader.channel = types::Channel();
   int idx = 0;
@@ -2129,6 +2108,12 @@ auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitst
   return true;
 }
 auto IOStream::readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  if (sreader.conformance) {
+    if (sreader.currentUnitType != MIHSUnitType::Initialization) {
+      sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::NonInit_Band_InvalidNumber));
+    }
+  }
+
   sreader.bandStream = BandStream();
   int idx = 0;
   sreader.bandStream.id = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_ID);
@@ -2548,6 +2533,15 @@ auto IOStream::writeData(StreamWriter &swriter, std::vector<std::vector<bool>> &
 }
 
 auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> bool {
+  if (sreader.conformance) {
+    if ((sreader.currentUnitType != MIHSUnitType::Temporal) &&
+        (sreader.currentUnitType != MIHSUnitType::Spatial)) {
+      sreader.logs.push_back(
+          hmpgErrorCodeToString.at(hmpgErrorCode::NonTempSpat_Data_InvalidNumber));
+    }
+    return false;
+  }
+
   int idx = 0;
   sreader.auType = static_cast<AUType>(IOBinaryPrimitives::readUInt(bitstream, idx, DB_AU_TYPE));
 
