@@ -297,16 +297,6 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_InitDuration_Invalid));
       }
       break;
-    case MIHSUnitType::Temporal:
-      if (sreader.packetDuration < 0) {
-        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_InitDuration_Invalid));
-      }
-      break;
-    case MIHSUnitType::Silent:
-      if (sreader.packetDuration < 0) {
-        sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Sile_InitDuration_Invalid));
-      }
-      break;
     default:
       break;
     }
@@ -756,15 +746,15 @@ auto IOStream::writeMIHSPacketHeader(MIHSPacketType mihsPacketType, int payloadS
   return true;
 }
 auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool {
+
+  MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
   if (sreader.conformance) {
-    int mihsPacketTypeInt = readMIHSPacketTypeInt(packet);
-    IOConformance::checkMIHSPacketType(sreader, mihsPacketTypeInt);
+    IOConformance::checkMIHSPacketType(sreader, static_cast<int>(mihsPacketType));
     if (sreader.currentUnitType == MIHSUnitType::Silent &&
-        mihsPacketTypeInt != static_cast<int>(MIHSPacketType::Timing)) {
+        mihsPacketType != MIHSPacketType::Timing) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Sile_Data_Invalid));
     }
   }
-  MIHSPacketType mihsPacketType = readMIHSPacketType(packet);
   int index = H_MIHS_PACKET_TYPE;
   sreader.packetLength = IOBinaryPrimitives::readUInt(packet, index, H_PAYLOAD_LENGTH) * BYTE_SIZE;
   index += H_RESERVED;
@@ -869,10 +859,6 @@ auto IOStream::readPacketTS(std::vector<bool> bitstream) -> int {
   return std::stoi(tsBits, nullptr, 2);
 }
 
-auto IOStream::readMIHSPacketTypeInt(std::vector<bool> &packet) -> int {
-  int idx = 0;
-  return IOBinaryPrimitives::readUInt(packet, idx, H_MIHS_PACKET_TYPE);
-}
 auto IOStream::readMIHSPacketType(std::vector<bool> &packet) -> MIHSPacketType {
   int idx = 0;
   int typeInt = IOBinaryPrimitives::readUInt(packet, idx, H_MIHS_PACKET_TYPE);
@@ -1282,7 +1268,7 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
   for (auto refDev : referenceDeviceList) {
     sreader.perception.addReferenceDevice(refDev);
   }
-  // read channel count, unused but could be used for check
+
   int channelCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_CHANNEL_COUNT);
   if (sreader.conformance) {
     switch (sreader.haptic.getLevel()) {
