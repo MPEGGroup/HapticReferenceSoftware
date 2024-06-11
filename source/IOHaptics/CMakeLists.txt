@@ -1,7 +1,7 @@
 project(iohaptics)
 
 
-add_library(iohaptics src/IOJson.cpp include/IOJson.h src/IOJsonPrimitives.cpp include/IOJsonPrimitives.h src/IOBinary.cpp include/IOBinary.h src/IOBinaryPrimitives.cpp include/IOBinaryPrimitives.h src/IOBinaryBands.cpp include/IOBinaryBands.h include/IOBinaryFields.h include/IOStream.h src/IOStream.cpp)
+add_library(iohaptics src/IOJson.cpp include/IOJson.h src/IOJsonPrimitives.cpp include/IOJsonPrimitives.h src/IOBinary.cpp include/IOBinary.h src/IOBinaryPrimitives.cpp include/IOBinaryPrimitives.h src/IOBinaryBands.cpp include/IOBinaryBands.h include/IOBinaryFields.h include/IOStream.h src/IOStream.cpp include/IOCompatibility.h)
 target_link_libraries(iohaptics PRIVATE types spiht)
 
 if(BUILD_CATCH2)
