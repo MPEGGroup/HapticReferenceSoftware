@@ -13,6 +13,7 @@ using namespace haptics::types;
 static constexpr int MAX_8_BITS = 255;
 static constexpr int MAX_7_BITS = 127;
 static constexpr int MAX_15_BITS = 65635;
+static constexpr int MAX_23_BITS = 16777215;
 static constexpr int MAX_31_BITS = 4294967295;
 static constexpr float TEN_K = 10000;
 
@@ -47,6 +48,21 @@ enum class hjifErrorCode {
   ReferenceDevice_Weight_OutOfRange,
   ReferenceDevice_Size_OutOfRange,
   ReferenceDevice_Custom_OutOfRange,
+  Channel_ID_OutOfRange,
+  Channel_Description_Size_OutOfRange,
+  Channel_Gain_OutOfRange,
+  Channel_MixingWeight_OutOfRange,
+  Channel_BodyPartMask_OutOfRange,
+  Channel_FrequencySampling_OutOfRange,
+  Channel_SampleCount_OutOfRange,
+  Channel_Vertices_Size_OutOfRange,
+  Channel_Bands_Size_OutOfRange,
+  Band_Effects_Size_OutOfRange,
+  Effect_ID_OutOfRange,
+  Effect_Position_OutOfRange,
+  Effect_Composition_Size_OutOfRange,
+  Effect_Keyframes_Size_OutOfRange,
+  Keyframe_RelativePosition_OutOfRange
 };
 
 static const std::map<hjifErrorCode, std::string> hjifErrorCodeToString = {
@@ -153,7 +169,52 @@ static const std::map<hjifErrorCode, std::string> hjifErrorCodeToString = {
          std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Size_OutOfRange))},
     {hjifErrorCode::ReferenceDevice_Custom_OutOfRange,
      "ReferenceDevice Error: custom out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Custom_OutOfRange))}};
+         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Custom_OutOfRange))},
+    {hjifErrorCode::Channel_ID_OutOfRange,
+     "Channel Error: ID out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_ID_OutOfRange))},
+    {hjifErrorCode::Channel_Description_Size_OutOfRange,
+     "Channel Error: description size out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_Description_Size_OutOfRange))},
+    {hjifErrorCode::Channel_Gain_OutOfRange,
+     "Channel Error: gain out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_Gain_OutOfRange))},
+    {hjifErrorCode::Channel_MixingWeight_OutOfRange,
+     "Channel Error: mixingWeight out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_MixingWeight_OutOfRange))},
+    {hjifErrorCode::Channel_BodyPartMask_OutOfRange,
+     "Channel Error: bodyPartMask out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_BodyPartMask_OutOfRange))},
+    {hjifErrorCode::Channel_FrequencySampling_OutOfRange,
+     "Channel Error: frequencySampling out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_FrequencySampling_OutOfRange))},
+    {hjifErrorCode::Channel_SampleCount_OutOfRange,
+     "Channel Error: sampleCount out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_SampleCount_OutOfRange))},
+    {hjifErrorCode::Channel_Vertices_Size_OutOfRange,
+     "Channel Error: vertices size out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_Vertices_Size_OutOfRange))},
+    {hjifErrorCode::Channel_Bands_Size_OutOfRange,
+     "Channel Error: bands size out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Channel_Bands_Size_OutOfRange))},
+    {hjifErrorCode::Band_Effects_Size_OutOfRange,
+     "Band Error: effects size out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Band_Effects_Size_OutOfRange))},
+    {hjifErrorCode::Effect_ID_OutOfRange,
+     "Band Error: effect ID out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Effect_ID_OutOfRange))},
+    {hjifErrorCode::Effect_Position_OutOfRange,
+     "Band Error: effect position out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Effect_Position_OutOfRange))},
+    {hjifErrorCode::Effect_Composition_Size_OutOfRange,
+     "Band Error: effect composition size out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Effect_Composition_Size_OutOfRange))},
+    {hjifErrorCode::Effect_Keyframes_Size_OutOfRange,
+     "Band Error: effect keyframes size out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Effect_Keyframes_Size_OutOfRange))},
+    {hjifErrorCode::Keyframe_RelativePosition_OutOfRange,
+     "Band Error: keyframe relative position out of range. Error code: " +
+         std::to_string(static_cast<int>(hjifErrorCode::Keyframe_RelativePosition_OutOfRange))}};
 
 class IOCompatibility {
 public:
@@ -339,6 +400,76 @@ public:
     if (custom.has_value()) {
       if (custom.value() > TEN_K || custom.value() < -TEN_K) {
         logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Custom_OutOfRange));
+      }
+    }
+  }
+
+  static auto checkChannel(types::Channel &channel, std::vector<std::string> &logs) -> void {
+    if (channel.getId() > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_ID_OutOfRange));
+    }
+
+    if (channel.getDescription().size() > MAX_8_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Description_Size_OutOfRange));
+    }
+
+    auto gain = channel.getGain();
+    if (gain > TEN_K || gain < TEN_K) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Gain_OutOfRange));
+    }
+
+    if (channel.getMixingWeight() > TEN_K) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_MixingWeight_OutOfRange));
+    }
+
+    if (channel.getBodyPartMask() > MAX_31_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_BodyPartMask_OutOfRange));
+    }
+
+    if (channel.getFrequencySampling() > MAX_31_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_FrequencySampling_OutOfRange));
+    }
+
+    if (channel.getSampleCount() > MAX_31_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_SampleCount_OutOfRange));
+    }
+
+    if (channel.getVerticesSize() > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Vertices_Size_OutOfRange));
+    }
+
+    if (channel.getBandsSize() > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Bands_Size_OutOfRange));
+    }
+  }
+
+  static auto checkBand(types::Band &band, std::vector<std::string> &logs) -> void {
+    if (band.getEffectsSize() > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Band_Effects_Size_OutOfRange));
+    }
+  }
+
+  static auto checkEffect(types::Effect &effect, std::vector<std::string> &logs) -> void {
+    if (effect.getId() > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_ID_OutOfRange));
+    }
+
+    auto position = effect.getPosition();
+    if (position > MAX_23_BITS || position < -MAX_23_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Position_OutOfRange));
+    }
+
+    if (effect.getKeyframesSize() > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Keyframes_Size_OutOfRange));
+    }
+  }
+
+  static auto checkKeyframe(types::Keyframe &keyframe, std::vector<std::string> &logs) -> void {
+    auto position = keyframe.getRelativePosition();
+    if (position.has_value()) {
+      if (position.value() > MAX_15_BITS) {
+        logs.push_back(
+            hjifErrorCodeToString.at(hjifErrorCode::Keyframe_RelativePosition_OutOfRange));
       }
     }
   }
