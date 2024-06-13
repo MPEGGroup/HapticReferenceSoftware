@@ -816,18 +816,27 @@ auto IOStream::readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, C
     }
     int perceIndex = searchPerceptionInHaptic(sreader.haptic, sreader.perception.getId());
     int channelIndex = searchChannelInHaptic(sreader.haptic, sreader.channel.getId());
-    types::Channel &channel = sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex);
     int bandIndex = searchBandInHaptic(sreader, sreader.bandStream.id);
-    int bandSize = static_cast<int>(channel.getBandsSize());
-    if (bandIndex == -1 || bandSize == 0 || bandSize < bandIndex) {
-      channel.addBand(sreader.bandStream.band);
-      sreader.bandStream.index = bandSize - 1;
+    if (bandIndex == -1 ||
+        sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize() == 0 ||
+        static_cast<int>(
+            sreader.haptic.getPerceptionAt(perceIndex).getChannelAt(channelIndex).getBandsSize()) <
+            bandIndex) {
+      sreader.haptic.getPerceptionAt(perceIndex)
+          .getChannelAt(channelIndex)
+          .addBand(sreader.bandStream.band);
+      sreader.bandStream.index = static_cast<int>(sreader.haptic.getPerceptionAt(perceIndex)
+                                                      .getChannelAt(channelIndex)
+                                                      .getBandsSize()) -
+                                 1;
       sreader.bandStreamsHaptic.push_back(sreader.bandStream);
     } else {
       if (sreader.conformance) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_ID_NotUnique));
       }
-      channel.replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
+      sreader.haptic.getPerceptionAt(perceIndex)
+          .getChannelAt(channelIndex)
+          .replaceBandMetadataAt(bandIndex, sreader.bandStream.band);
     }
     return true;
   }
