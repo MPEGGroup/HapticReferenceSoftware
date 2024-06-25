@@ -267,9 +267,9 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   int index = 0;
   int unitTypeInt = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
   auto unitType = static_cast<MIHSUnitType>(unitTypeInt);
-  if (!IOConformance::checkMIHSUnitType(sreader, unitTypeInt)) {
+  if (sreader.conformance && !IOConformance::checkMIHSUnitType(sreader, unitTypeInt)) {
     crc.nbPackets = 0;
-    return true;
+    return false;
   }
   sreader.currentUnitType = unitType;
   sreader.MIHSData = false;
@@ -321,7 +321,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   while (index < unitLength) {
     if (!isContainingTimingPacket) {
       MIHSPacketType packetType = readMIHSPacketType(packets);
-      isContainingTimingPacket = packetType == MIHSPacketType::Timing;
+      isContainingTimingPacket = packetType == MIHSPacketType::InitializationTiming;
     }
 
     if (!readMIHSPacket(packets, sreader, crc)) {
@@ -1030,7 +1030,7 @@ auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bit
   std::string profile = IOBinaryPrimitives::readString(bitstream, index, profileLength);
   sreader.haptic.setProfile(profile);
   if (sreader.conformance) {
-    if (profile != MAIN_PROFILE || profile != SIMPLE_PARAMETRIC_PROFILE) {
+    if (profile != MAIN_PROFILE && profile != SIMPLE_PARAMETRIC_PROFILE) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Profile_Invalid));
     }

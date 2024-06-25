@@ -138,7 +138,7 @@ public:
     unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
     unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
     unsigned int layer = 0;
-    bool conformance = false;
+    bool conformance = true;
     std::vector<std::string> logs;
     MIHSUnitType currentUnitType = MIHSUnitType::Initialization;
     bool MIHSData = false;

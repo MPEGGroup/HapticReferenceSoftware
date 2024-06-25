@@ -123,7 +123,7 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_InitUnitSync_Invalid))},
     {hmpgErrorCode::Init_Experience_InitUnitTiming_Invalid,
      "MIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain "
-     "one timing MIHS packet. Error code: " +
+     "one initialization timing MIHS packet. Error code: " +
          std::to_string(static_cast<int>(hmpgErrorCode::Init_Experience_InitUnitTiming_Invalid))},
     {hmpgErrorCode::Init_Experience_Profile_Invalid,
      "MIHSUnit_Initialization MIHSPacket_Experience error: Profile not defined in the "
@@ -543,7 +543,7 @@ public:
         }
       } else if (sreader.currentUnitType == MIHSUnitType::Silent) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Silent_Duration_Invalid));
-      } else {
+      } else if (sreader.currentUnitType == MIHSUnitType::Temporal) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Invalid));
       }
     }
