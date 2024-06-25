@@ -550,7 +550,7 @@ public:
   }
 
   static auto checkEffectPosition(IOStream::StreamReader &sreader, int effectPos) -> void {
-    if (effectPos < 0 && (!sreader.waitSync || !(sreader.auType == AUType::DAU))) {
+    if (effectPos < 0 && !(sreader.waitSync || (sreader.auType == AUType::DAU))) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
     }
     if (effectPos >= static_cast<int>(sreader.packetDuration)) {

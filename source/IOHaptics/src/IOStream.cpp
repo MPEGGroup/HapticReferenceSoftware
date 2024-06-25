@@ -2533,8 +2533,8 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
         (sreader.currentUnitType != MIHSUnitType::Spatial)) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::NonTempSpat_Data_InvalidNumber));
+      return false;
     }
-    return false;
   }
 
   int idx = 0;
