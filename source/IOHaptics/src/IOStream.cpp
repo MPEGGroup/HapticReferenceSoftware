@@ -3224,7 +3224,7 @@ auto IOStream::getNextSync(types::Haptics &haptic, types::Sync &sync, int &idx) 
 
 auto IOStream::checkURIFormat(const ::std::string &uri) -> bool {
   // This regular expression to check the URI format comes from Appendix B of RFC3986.
-  const ::std::regex regex("([^:/?#]+:)?(//[^/?#]*)?[^?#]*(\?[^#]*)?(#.*)?");
+  const ::std::regex regex(R"(^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?)");
   return ::std::regex_match(uri, regex);
 }
 
