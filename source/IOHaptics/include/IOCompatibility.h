@@ -12,7 +12,7 @@ using namespace haptics::types;
 
 static constexpr int MAX_8_BITS = 255;
 static constexpr int MAX_7_BITS = 127;
-static constexpr int MAX_15_BITS = 65635;
+static constexpr int MAX_15_BITS = 65535;
 static constexpr int MAX_23_BITS = 16777215;
 static constexpr int MAX_31_BITS = 4294967295;
 static constexpr float TEN_K = 10000;
@@ -279,7 +279,7 @@ public:
     }
 
     auto unitExponent = perception.getUnitExponentOrDefault();
-    if (unitExponent > MAX_7_BITS || unitExponent < -MAX_7_BITS) {
+    if (unitExponent > MAX_7_BITS || unitExponent < -MAX_7_BITS - 1) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Perception_UnitExponent_OutOfRange));
     }
 
@@ -455,12 +455,16 @@ public:
     }
 
     auto position = effect.getPosition();
-    if (position > MAX_23_BITS || position < -MAX_23_BITS) {
+    if (position > MAX_23_BITS || position < -MAX_23_BITS-1) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Position_OutOfRange));
     }
 
     if (effect.getKeyframesSize() > MAX_15_BITS) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Keyframes_Size_OutOfRange));
+    }
+
+    if (effect.getTimelineSize()  > MAX_15_BITS) {
+      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Composition_Size_OutOfRange));
     }
   }
 
