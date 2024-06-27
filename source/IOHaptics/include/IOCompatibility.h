@@ -218,6 +218,53 @@ static const std::map<hjifErrorCode, std::string> hjifErrorCodeToString = {
 
 class IOCompatibility {
 public:
+  static auto checkHaptics(types::Haptics &haptic) -> std::vector<std::string> {
+    std::vector<std::string> logs;
+    checkExperience(haptic, logs);
+    for (int a = 0; a < haptic.getAvatarsSize(); a++) {
+      auto avatar = haptic.getAvatarAt(a);
+      checkAvatar(avatar, logs);
+    }
+    for (int s = 0; s < haptic.getSyncsSize(); s++) {
+      auto sync = haptic.getSyncsAt(s);
+      checkSync(sync, logs);
+    }
+    for (int p = 0; p < haptic.getPerceptionsSize(); p++) {
+      auto perception = haptic.getPerceptionAt(p);
+      checkPerception(perception, logs);
+      for (int l = 0; l < perception.getEffectLibrarySize(); l++) {
+        auto effect = perception.getBasisEffectAt(l);
+        checkEffect(effect, logs);
+        checkEffectKeyframes(effect, logs);
+      }
+      for (int d = 0; d < perception.getReferenceDevicesSize(); d++) {
+        auto device = perception.getReferenceDeviceAt(d);
+        checkHapticDevice(device, logs);
+      }
+      for (int c = 0; c < perception.getChannelsSize(); c++) {
+        auto channel = perception.getChannelAt(c);
+        checkChannel(channel, logs);
+        for (int b = 0; b < channel.getBandsSize(); b++) {
+          auto band = channel.getBandAt(b);
+          checkBand(band, logs);
+          for (int e = 0; e < band.getEffectsSize(); e++) {
+            auto effect = band.getEffectAt(e);
+            checkEffect(effect, logs);
+            checkEffectKeyframes(effect, logs);
+          }
+        }
+      }
+    }
+    return logs;
+  }
+
+  static auto checkEffectKeyframes(types::Effect &effect, std::vector<std::string> &logs) -> void {
+    for (int k = 0; k < effect.getKeyframesSize(); k++) {
+      auto keyframe = effect.getKeyframeAt(k);
+      checkKeyframe(keyframe, logs);
+    }
+  }
+
   static auto checkExperience(types::Haptics &haptic, std::vector<std::string> &logs) -> void {
 
     if (haptic.getDescription().size() > MAX_8_BITS) {
@@ -455,7 +502,7 @@ public:
     }
 
     auto position = effect.getPosition();
-    if (position > MAX_23_BITS || position < -MAX_23_BITS-1) {
+    if (position > MAX_23_BITS || position < -MAX_23_BITS - 1) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Position_OutOfRange));
     }
 
@@ -463,7 +510,7 @@ public:
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Keyframes_Size_OutOfRange));
     }
 
-    if (effect.getTimelineSize()  > MAX_15_BITS) {
+    if (effect.getTimelineSize() > MAX_15_BITS) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Composition_Size_OutOfRange));
     }
   }
