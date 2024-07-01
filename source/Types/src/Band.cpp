@@ -132,12 +132,14 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
     return 0;
   }
 
-  for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-    if (it->getPosition() <= position) {
-      return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
-    }
-    if (it == effects.begin()) {
-      break;
+  if (!effects.empty()) {
+    for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+      if (it->getPosition() <= position) {
+        return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
+      }
+      if (it == effects.begin()) {
+        break;
+      }
     }
   }
 
@@ -241,13 +243,15 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
         bandAmp[ti] = 0;
       } // TODO: TRANSIENT_DURATION_MS: should it be transformed to ticks?
 
-      for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-        if (it->getPosition() <= position) {
-          bandAmp[ti] +=
-              EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit, timescale);
-        }
-        if (it == effects.begin()) {
-          break;
+      if (!effects.empty()) {
+        for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+          if (it->getPosition() <= position) {
+            bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit,
+                                            upperFrequencyLimit, timescale);
+          }
+          if (it == effects.begin()) {
+            break;
+          }
         }
       }
     }

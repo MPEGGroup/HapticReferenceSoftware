@@ -2302,57 +2302,45 @@ auto IOStream::createWaveletPayload(StreamWriter &swriter,
 }
 auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream)
     -> bool {
+
+  swriter.auType = AUType::RAU;
+  bool unfinishedEffect = false;
+  bool effectRemaining = false;
   // Exit this function only when 1 packet is full or last keyframes of the band is reached
   for (auto i = 0; i < static_cast<int>(swriter.bandStream.band.getEffectsSize()); i++) {
-    bool endEffect = false;
     types::Effect &effect = swriter.bandStream.band.getEffectAt(i);
     if (effect.getId() == -1) {
-      int nextId = 0;
-      if (!swriter.effectsId.empty()) {
-        nextId = *max_element(swriter.effectsId.begin(), swriter.effectsId.end()) + 1;
-      }
+      int nextId = getNextEffectId(swriter.effectsId);
       effect.setId(nextId);
-      swriter.effectsId.push_back(nextId);
     }
-
-    std::vector<bool> bufEffect = std::vector<bool>();
-    if (effect.getEffectType() == types::EffectType::Basis) {
-      int bufKFCount = 0;
-      bool isRAU = true;
-      bool endPacket = false;
-      if (writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect)) {
-        endEffect = true;
-      } else {
-        endPacket = true;
+    if (effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
+      std::vector<bool> bufEffect = std::vector<bool>();
+      if (effect.getEffectType() == types::EffectType::Basis) {
+        int bufKFCount = 0;
+        bool isRAU = true;
+        if (!writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect)) {
+          unfinishedEffect = true;
+        }
+        if (bufKFCount > 0) {
+          swriter.keyframesCount.push_back(bufKFCount);
+          bitstream.push_back(bufEffect);
+          swriter.effects.push_back(effect);
+          if (!isRAU) {
+            swriter.auType = AUType::DAU;
+          }
+        }
+      } else if (effect.getEffectType() == types::EffectType::Reference) {
+        if (effect.getPosition() >= swriter.time) {
+          bitstream.push_back(bufEffect);
+          swriter.effects.push_back(effect);
+          swriter.keyframesCount.push_back(0);
+        }
       }
-      if (bufKFCount > 0) {
-        swriter.keyframesCount.push_back(bufKFCount);
-        bitstream.push_back(bufEffect);
-        swriter.effects.push_back(effect);
-        swriter.auType = isRAU ? AUType::RAU : AUType::DAU;
-      }
-      if (endEffect && i == static_cast<int>(swriter.bandStream.band.getEffectsSize()) - 1) {
-        return true;
-      }
-      if (endPacket) {
-        return false;
-      }
-    } else if (effect.getEffectType() == types::EffectType::Reference) {
-      if (effect.getPosition() >= swriter.time &&
-          effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
-        bitstream.push_back(bufEffect);
-        swriter.effects.push_back(effect);
-        swriter.auType = AUType::RAU;
-        swriter.keyframesCount.push_back(0);
-      } else if (effect.getPosition() > swriter.time + static_cast<int>(swriter.packetDuration)) {
-        return false;
-      }
-      if (i == static_cast<int>(swriter.bandStream.band.getEffectsSize()) - 1) {
-        return true;
-      }
+    } else {
+      effectRemaining = true;
     }
   }
-  return true;
+  return !effectRemaining && !unfinishedEffect;
 }
 
 auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
