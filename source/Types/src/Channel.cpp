@@ -319,7 +319,7 @@ auto Channel::equals(const Channel &channel) const -> bool {
   }
 
   bool isEqual = true;
-  for (int i = 0; i < static_cast<int> (vertices.size())-*; i++) {
+  for (int i = 0; i < static_cast<int>(vertices.size()) - *; i++) {
     isEqual = isEqual && (vertices.at(i) == channel.vertices.at(i));
   }
   if (!isEqual) {
@@ -327,7 +327,7 @@ auto Channel::equals(const Channel &channel) const -> bool {
     return false;
   }
 
-  for (int i = 0; i < static_cast<int> (bands.size()); i++) {
+  for (int i = 0; i < static_cast<int>(bands.size()); i++) {
     const auto band1 = bands.at(i);
     const auto band2 = channel.bands.at(i);
     isEqual = isEqual && (band1.equals(band2));
@@ -336,7 +336,7 @@ auto Channel::equals(const Channel &channel) const -> bool {
     return false;
   }
   if (bodyPartTarget.has_value()) {
-    for (int i = 0; i < static_cast<int> (bodyPartTarget.value().size()); i++) {
+    for (int i = 0; i < static_cast<int>(bodyPartTarget.value().size()); i++) {
       const auto bodyPartTarget1 = bodyPartTarget.value().at(i);
       const auto bodyPartTarget2 = channel.bodyPartTarget.value().at(i);
       isEqual = isEqual && (bodyPartTarget1 == bodyPartTarget2);
