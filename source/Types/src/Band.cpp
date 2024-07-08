@@ -307,7 +307,7 @@ auto Band::equals(const Band &band) const -> bool {
     return false;
   }
   bool isEqual = true;
-  for (int i = 0; i < effects.size(); i++) {
+  for (int i = 0; i < static_cast<int>(effects.size()); i++) {
     const auto effect1 = effects.at(i);
     const auto effect2 = band.effects.at(i);
     isEqual = isEqual && (effect1.equals(effect2));

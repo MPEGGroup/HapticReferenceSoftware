@@ -431,21 +431,21 @@ auto Perception::equals(const Perception &perception) const -> bool {
 
   bool isEqual = true;
   if (isEqual) {
-    for (int i = 0; i < channels.size(); i++) {
+    for (int i = 0; i < static_cast<int>(channels.size()); i++) {
       const auto channel1 = channels.at(i);
       const auto channel2 = perception.channels.at(i);
       isEqual = isEqual && channel1.equals(channel2);
     }
   }
   if (isEqual) {
-    for (int i = 0; i < referenceDevices.size(); i++) {
+    for (int i = 0; i < static_cast<int>(referenceDevices.size()); i++) {
       const auto device1 = referenceDevices.at(i);
       const auto device2 = perception.referenceDevices.at(i);
       isEqual = isEqual && device1.equals(device2);
     }
   }
   if (isEqual) {
-    for (int i = 0; i < effectLibrary.size(); i++) {
+    for (int i = 0; i < static_cast<int>(effectLibrary.size()); i++) {
       const auto effect1 = effectLibrary.at(i);
       const auto effect2 = perception.effectLibrary.at(i);
       isEqual = isEqual && effect1.equals(effect2);

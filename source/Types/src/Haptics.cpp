@@ -232,21 +232,21 @@ auto Haptics::equals(const Haptics &haptic) const -> bool {
   }
   bool isEqual = true;
   if (isEqual) {
-    for (int i = 0; i < perceptions.size(); i++) {
+    for (int i = 0; i < static_cast<int>(perceptions.size()); i++) {
       const auto perception1 = perceptions.at(i);
       const auto perception2 = haptic.perceptions.at(i);
       isEqual = isEqual && perception1.equals(perception2);
     }
   }
   if (isEqual) {
-    for (int i = 0; i < avatars.size(); i++) {
+    for (int i = 0; i < static_cast<int>(avatars.size()); i++) {
       const auto avatar1 = avatars.at(i);
       const auto avatar2 = haptic.avatars.at(i);
       isEqual = isEqual && avatar1.equals(avatar2);
     }
   }
   if (isEqual) {
-    for (int i = 0; i < syncs.size(); i++) {
+    for (int i = 0; i < static_cast<int>(syncs.size()); i++) {
       const auto sync1 = syncs.at(i);
       const auto sync2 = haptic.syncs.at(i);
       isEqual = isEqual && sync1.equals(sync2);

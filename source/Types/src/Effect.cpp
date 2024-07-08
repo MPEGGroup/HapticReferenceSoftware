@@ -492,7 +492,7 @@ auto Effect::equals(const Effect &effect) const -> bool {
   }
 
   bool isEqual = true;
-  for (int i = 0; i < keyframes.size(); i++) {
+  for (int i = 0; i < static_cast<int>(keyframes.size()); i++) {
     const auto keyframe1 = keyframes.at(i);
     const auto keyframe2 = effect.keyframes.at(i);
     isEqual = isEqual && (keyframe1.equals(keyframe2));
@@ -500,7 +500,7 @@ auto Effect::equals(const Effect &effect) const -> bool {
   if (!isEqual) {
     return false;
   }
-  for (int i = 0; i < timeline.size(); i++) {
+  for (int i = 0; i < static_cast<int>(timeline.size()); i++) {
     const auto effect1 = timeline.at(i);
     const auto effect2 = effect.timeline.at(i);
     isEqual = isEqual && (effect1.equals(effect2));
@@ -510,7 +510,7 @@ auto Effect::equals(const Effect &effect) const -> bool {
     return false;
   }
 
-  for (int i = 0; i < waveletSamples.size(); i++) {
+  for (int i = 0; i < static_cast<int>(waveletSamples.size()); i++) {
     isEqual = isEqual && (waveletSamples.at(i) == effect.waveletSamples.at(i));
   }
   if (!isEqual) {
@@ -518,7 +518,7 @@ auto Effect::equals(const Effect &effect) const -> bool {
     return false;
   }
 
-  for (int i = 0; i < waveletBitstream.size(); i++) {
+  for (int i = 0; i < static_cast<int>(waveletBitstream.size()); i++) {
     isEqual = isEqual && (waveletBitstream.at(i) == effect.waveletBitstream.at(i));
   }
   if (!isEqual) {
