@@ -435,4 +435,10 @@ auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, dou
 
 [[nodiscard]] auto isPowerOfTwo(const int n) -> bool { return (n != 0) && ((n & (n - 1)) == 0); }
 
+[[nodiscard]] auto almostEquals(float val1, float val2, unsigned int nbBytes, float range) -> bool {
+  float threshold = range / (std::powf(2, nbBytes) - 1);
+  auto diff = std::abs(val1 - val2);
+  return threshold - diff >= 0;
+}
+
 } // namespace haptics::tools

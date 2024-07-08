@@ -56,6 +56,8 @@ public:
   [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
   auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
+  auto equals(const Keyframe &keyframe) const -> bool;
+
   auto operator==(const Keyframe &keyframe) -> bool;
   auto operator!=(const Keyframe &keyframe) -> bool;
 

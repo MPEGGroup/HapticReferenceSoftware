@@ -277,4 +277,43 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
   return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);
 }
 
+auto Band::equals(const Band &band) const -> bool {
+  if (bandType != band.getBandType()) {
+    std::cerr << "bandType fields are different" << std::endl;
+    return false;
+  }
+  if (curveType != band.getCurveType()) {
+    std::cerr << "curveType fields are different" << std::endl;
+    return false;
+  }
+  if (blockLength != band.getBlockLength()) {
+    std::cerr << "blockLength fields are different" << std::endl;
+    return false;
+  }
+  if (lowerFrequencyLimit != band.getLowerFrequencyLimit()) {
+    std::cerr << "lowerFrequencyLimit fields are different" << std::endl;
+    return false;
+  }
+  if (upperFrequencyLimit != band.getUpperFrequencyLimit()) {
+    std::cerr << "upperFrequencyLimit fields are different" << std::endl;
+    return false;
+  }
+  if (priority != band.getPriority()) {
+    std::cerr << "priority fields are different" << std::endl;
+    return false;
+  }
+  if (effects.size() != band.effects.size()) {
+    std::cerr << "Number of effects are different" << std::endl;
+    return false;
+  }
+  bool isEqual = true;
+  for (int i = 0; i < effects.size(); i++) {
+    const auto effect1 = effects.at(i);
+    const auto effect2 = band.effects.at(i);
+    isEqual = isEqual && (effect1.equals(effect2));
+  }
+
+  return isEqual;
+}
+
 } // namespace haptics::types

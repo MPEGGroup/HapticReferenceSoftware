@@ -90,6 +90,7 @@ public:
   auto setCustom(float newCustom) -> void;
   [[nodiscard]] auto getType() const -> std::optional<ActuatorType>;
   auto setType(ActuatorType newType) -> void;
+  auto equals(const ReferenceDevice &device) const -> bool;
 
 private:
   int id = -1;

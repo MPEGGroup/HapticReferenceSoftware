@@ -96,6 +96,7 @@ public:
   auto getBandTimeLength(unsigned int timescale) -> double;
   //[[nodiscard]] auto getTimescale() const -> int;
   // auto setTimescale(int newTimescale) -> void;
+  auto equals(const Band &band) const -> bool;
 
   static constexpr double TRANSIENT_DURATION_MS = 22;
 
