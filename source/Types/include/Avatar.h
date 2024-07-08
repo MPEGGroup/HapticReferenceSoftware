@@ -71,7 +71,7 @@ public:
   auto setType(AvatarType newType) -> void;
   [[nodiscard]] auto getMesh() const -> std::optional<std::string>;
   auto setMesh(const std::string &newMesh) -> void;
-  auto equals(const Avatar &avatar) const -> bool;
+  [[nodiscard]] auto equals(const Avatar &avatar) const -> bool;
 
 private:
   int id = -1;

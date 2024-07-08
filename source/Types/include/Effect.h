@@ -130,7 +130,7 @@ public:
   void setWaveletBitstream(std::vector<unsigned char> stream);
   auto getWaveletSamples() -> std::vector<double> &;
   void setWaveletSamples(std::vector<double> samples);
-  auto equals(const Effect &effect) const -> bool;
+  [[nodiscard]] auto equals(const Effect &effect) const -> bool;
 
 private:
   static constexpr float DEFAULT_PHASE = 0;

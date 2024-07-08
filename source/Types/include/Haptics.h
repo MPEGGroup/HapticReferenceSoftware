@@ -88,7 +88,7 @@ public:
   auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
   auto linearize() -> void;
   auto refactor() -> void;
-  auto equals(const Haptics &haptic) const -> bool;
+  [[nodiscard]] auto equals(const Haptics &haptic) const -> bool;
 
 private:
   std::string version;

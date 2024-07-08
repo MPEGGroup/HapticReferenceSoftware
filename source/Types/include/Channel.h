@@ -123,7 +123,7 @@ public:
   auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
   [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
   auto setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void;
-  auto equals(const Channel &channel) const -> bool;
+  [[nodiscard]] auto equals(const Channel &channel) const -> bool;
 
 private:
   int id = -1;
