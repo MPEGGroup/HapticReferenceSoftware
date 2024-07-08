@@ -319,7 +319,7 @@ auto Channel::equals(const Channel &channel) const -> bool {
   }
 
   bool isEqual = true;
-  for (int i = 0; i < static_cast<int>(vertices.size()) - *; i++) {
+  for (int i = 0; i < static_cast<int>(vertices.size()); i++) {
     isEqual = isEqual && (vertices.at(i) == channel.vertices.at(i));
   }
   if (!isEqual) {
