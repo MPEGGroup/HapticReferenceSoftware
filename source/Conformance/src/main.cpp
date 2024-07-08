@@ -62,7 +62,8 @@ auto help() -> void {
       << "optional arguments:" << std::endl
       << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
       << std::endl
-      << "\t-c, --comparison\t\t\tthe input file will be compared to the file provided for comparison."
+      << "\t-c, --comparison\t\t\tthe input file will be compared to the file provided for "
+         "comparison."
       << std::endl;
 }
 
@@ -122,7 +123,8 @@ auto main(int argc, char *argv[]) -> int {
     if (codeExit == EXIT_SUCCESS) {
       bool equals = hapticFile.equals(comparisonHapticFile);
       if (equals) {
-        std::cerr << filename << " and " << comparisonFilename << " contain the same data." << std::endl;
+        std::cerr << filename << " and " << comparisonFilename << " contain the same data."
+                  << std::endl;
       } else {
         std::cerr << filename << " and " << comparisonFilename << " do not contain the same data."
                   << std::endl;
