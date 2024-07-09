@@ -10,11 +10,13 @@ namespace haptics::io {
 
 using namespace haptics::types;
 
-static constexpr int MAX_8_BITS = 255;
-static constexpr int MAX_7_BITS = 127;
-static constexpr int MAX_15_BITS = 65535;
-static constexpr int MAX_23_BITS = 16777215;
-static constexpr int MAX_31_BITS = 4294967295;
+static constexpr int MAX_8_BITS_SIGNED = 127;
+static constexpr int MIN_8_BITS_SIGNED = -128;
+static constexpr unsigned int MAX_8_BITS_UNSIGNED = 255;
+static constexpr unsigned int MAX_16_BITS_UNSIGNED = 65535;
+static constexpr int MAX_25_BITS_SIGNED = 16777215;
+static constexpr int MIN_25_BITS_SIGNED = -16777216;
+static constexpr unsigned int MAX_32_BITS_UNSIGNED = 4294967295;
 static constexpr float TEN_K = 10000;
 
 enum class hjifErrorCode {
@@ -267,33 +269,33 @@ public:
 
   static auto checkExperience(types::Haptics &haptic, std::vector<std::string> &logs) -> void {
 
-    if (haptic.getDescription().size() > MAX_8_BITS) {
+    if (haptic.getDescription().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Experience_Description_Size_OutOfRange));
     }
 
-    if (haptic.getTimescaleOrDefault() > MAX_31_BITS) {
+    if (haptic.getTimescaleOrDefault() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Experience_Timescale_OutOfRange));
     }
 
-    if (haptic.getAvatarsSize() > MAX_8_BITS) {
+    if (haptic.getAvatarsSize() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Experience_Avatars_Size_OutOfRange));
     }
 
-    if (haptic.getPerceptionsSize() > MAX_8_BITS) {
+    if (haptic.getPerceptionsSize() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Experience_Perceptions_Size_OutOfRange));
     }
   };
 
   static auto checkAvatar(types::Avatar &avatar, std::vector<std::string> &logs) -> void {
-    if (avatar.getId() > MAX_8_BITS) {
+    if (avatar.getId() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Avatar_ID_OutOfRange));
     }
 
     auto mesh = avatar.getMesh();
     if (mesh.has_value()) {
-      if (mesh.value().size() > MAX_8_BITS) {
+      if (mesh.value().size() > MAX_8_BITS_UNSIGNED) {
         logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Avatar_ID_OutOfRange));
       }
     }
@@ -301,65 +303,65 @@ public:
 
   static auto checkPerception(types::Perception &perception, std::vector<std::string> &logs)
       -> void {
-    if (perception.getId() > MAX_8_BITS) {
+    if (perception.getId() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Perception_ID_OutOfRange));
     }
 
-    if (perception.getDescription().size() > MAX_8_BITS) {
+    if (perception.getDescription().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Perception_Description_Size_OutOfRange));
     }
 
-    if (perception.getEffectLibrarySize() > MAX_15_BITS) {
+    if (perception.getEffectLibrarySize() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Perception_EffectLibrary_Size_OutOfRange));
     }
 
-    if (perception.getEffectSemanticSchemeOrDefault().size() > MAX_8_BITS) {
+    if (perception.getEffectSemanticSchemeOrDefault().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Perception_SemanticScheme_Size_OutOfRange));
     }
 
-    if (perception.getReferenceDevicesSize() > MAX_8_BITS) {
+    if (perception.getReferenceDevicesSize() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Perception_ReferenceDevices_Size_OutOfRange));
     }
 
     auto unitExponent = perception.getUnitExponentOrDefault();
-    if (unitExponent > MAX_7_BITS || unitExponent < -MAX_7_BITS - 1) {
+    if (unitExponent > MAX_8_BITS_SIGNED || unitExponent < MIN_8_BITS_SIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Perception_UnitExponent_OutOfRange));
     }
 
     auto perceptionUnitExponent = perception.getPerceptionUnitExponentOrDefault();
-    if (perceptionUnitExponent > MAX_7_BITS || perceptionUnitExponent < -MAX_7_BITS) {
+    if (perceptionUnitExponent > MAX_8_BITS_SIGNED || perceptionUnitExponent < MIN_8_BITS_SIGNED) {
       logs.push_back(
           hjifErrorCodeToString.at(hjifErrorCode::Perception_PerceptionUnitExponent_OutOfRange));
     }
   };
 
   static auto checkSync(types::Sync &sync, std::vector<std::string> &logs) -> void {
-    if (sync.getTimestamp() > MAX_31_BITS) {
+    if (sync.getTimestamp() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Sync_Timestamp_OutOfRange));
     }
 
-    if (sync.getTimescaleOrDefault() > MAX_31_BITS) {
+    if (sync.getTimescaleOrDefault() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Sync_Timescale_OutOfRange));
     }
   }
 
   static auto checkHapticDevice(types::ReferenceDevice &device, std::vector<std::string> &logs)
       -> void {
-    if (device.getId() > MAX_8_BITS) {
+    if (device.getId() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_ID_OutOfRange));
     }
 
-    if (device.getName().size() > MAX_8_BITS) {
+    if (device.getName().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Name_Size_OutOfRange));
     }
 
     auto bodyPartMask = device.getBodyPartMask();
     if (bodyPartMask.has_value()) {
-      if (bodyPartMask.value() > MAX_31_BITS) {
+      if (bodyPartMask.value() > MAX_32_BITS_UNSIGNED) {
         logs.push_back(
             hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Name_Size_OutOfRange));
       }
@@ -452,16 +454,16 @@ public:
   }
 
   static auto checkChannel(types::Channel &channel, std::vector<std::string> &logs) -> void {
-    if (channel.getId() > MAX_15_BITS) {
+    if (channel.getId() > MAX_16_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_ID_OutOfRange));
     }
 
-    if (channel.getDescription().size() > MAX_8_BITS) {
+    if (channel.getDescription().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Description_Size_OutOfRange));
     }
 
     auto gain = channel.getGain();
-    if (gain > TEN_K || gain < TEN_K) {
+    if (gain > TEN_K || gain < -TEN_K) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Gain_OutOfRange));
     }
 
@@ -469,48 +471,48 @@ public:
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_MixingWeight_OutOfRange));
     }
 
-    if (channel.getBodyPartMask() > MAX_31_BITS) {
+    if (channel.getBodyPartMask() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_BodyPartMask_OutOfRange));
     }
 
-    if (channel.getFrequencySampling() > MAX_31_BITS) {
+    if (channel.getFrequencySampling() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_FrequencySampling_OutOfRange));
     }
 
-    if (channel.getSampleCount() > MAX_31_BITS) {
+    if (channel.getSampleCount() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_SampleCount_OutOfRange));
     }
 
-    if (channel.getVerticesSize() > MAX_15_BITS) {
+    if (channel.getVerticesSize() > MAX_16_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Vertices_Size_OutOfRange));
     }
 
-    if (channel.getBandsSize() > MAX_15_BITS) {
+    if (channel.getBandsSize() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Bands_Size_OutOfRange));
     }
   }
 
   static auto checkBand(types::Band &band, std::vector<std::string> &logs) -> void {
-    if (band.getEffectsSize() > MAX_15_BITS) {
+    if (band.getEffectsSize() > MAX_16_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Band_Effects_Size_OutOfRange));
     }
   }
 
   static auto checkEffect(types::Effect &effect, std::vector<std::string> &logs) -> void {
-    if (effect.getId() > MAX_15_BITS) {
+    if (effect.getId() > 0 && effect.getId() > MAX_16_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_ID_OutOfRange));
     }
 
     auto position = effect.getPosition();
-    if (position > MAX_23_BITS || position < -MAX_23_BITS - 1) {
+    if (position > MAX_25_BITS_SIGNED || position < MIN_25_BITS_SIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Position_OutOfRange));
     }
 
-    if (effect.getKeyframesSize() > MAX_15_BITS) {
+    if (effect.getKeyframesSize() > MAX_16_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Keyframes_Size_OutOfRange));
     }
 
-    if (effect.getTimelineSize() > MAX_15_BITS) {
+    if (effect.getTimelineSize() > MAX_16_BITS_UNSIGNED) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Composition_Size_OutOfRange));
     }
   }
@@ -518,7 +520,7 @@ public:
   static auto checkKeyframe(types::Keyframe &keyframe, std::vector<std::string> &logs) -> void {
     auto position = keyframe.getRelativePosition();
     if (position.has_value()) {
-      if (position.value() > MAX_15_BITS) {
+      if (position.value() > MAX_16_BITS_UNSIGNED) {
         logs.push_back(
             hjifErrorCodeToString.at(hjifErrorCode::Keyframe_RelativePosition_OutOfRange));
       }
