@@ -32,9 +32,9 @@
  */
 
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
-#include <IOHaptics/include/IOCompatibility.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
