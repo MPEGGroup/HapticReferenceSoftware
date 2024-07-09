@@ -34,6 +34,7 @@
 #include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
+#include <IOHaptics/include/IOCompatibility.h>
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
@@ -97,10 +98,22 @@ auto main(int argc, char *argv[]) -> int {
   if (ext == "hjif") {
     std::cout << "The HJIF file to check: " << filename << std::endl;
     IOJson::loadFile(filename, hapticFile);
+    auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
+    if (logs.size() > 0) {
+      for (auto &l : logs) {
+        std::cerr << l << std::endl;
+      }
+    }
     codeExit = EXIT_SUCCESS;
   } else if (ext == "hmpg") {
     std::cout << "The HMPG file to check: " << filename << std::endl;
     IOStream::readFile(filename, hapticFile);
+    auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
+    if (logs.size() > 0) {
+      for (auto &l : logs) {
+        std::cerr << l << std::endl;
+      }
+    }
     codeExit = EXIT_SUCCESS;
   } else {
     codeExit = EXIT_FAILURE;
