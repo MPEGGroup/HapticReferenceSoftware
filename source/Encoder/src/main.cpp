@@ -290,7 +290,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
-  if (logs.size() > 0) {
+  if (!logs.empty()) {
     for (auto &l : logs) {
       std::cerr << l << std::endl;
     }

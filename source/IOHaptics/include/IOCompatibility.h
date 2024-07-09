@@ -8,8 +8,6 @@
 
 namespace haptics::io {
 
-using namespace haptics::types;
-
 static constexpr int MAX_8_BITS_SIGNED = 127;
 static constexpr int MIN_8_BITS_SIGNED = -128;
 static constexpr unsigned int MAX_8_BITS_UNSIGNED = 255;
@@ -223,33 +221,33 @@ public:
   static auto checkHaptics(types::Haptics &haptic) -> std::vector<std::string> {
     std::vector<std::string> logs;
     checkExperience(haptic, logs);
-    for (int a = 0; a < haptic.getAvatarsSize(); a++) {
+    for (int a = 0; a < static_cast<int>(haptic.getAvatarsSize()); a++) {
       auto avatar = haptic.getAvatarAt(a);
       checkAvatar(avatar, logs);
     }
-    for (int s = 0; s < haptic.getSyncsSize(); s++) {
+    for (int s = 0; s < static_cast<int>(haptic.getSyncsSize()); s++) {
       auto sync = haptic.getSyncsAt(s);
       checkSync(sync, logs);
     }
-    for (int p = 0; p < haptic.getPerceptionsSize(); p++) {
+    for (int p = 0; p < static_cast<int>(haptic.getPerceptionsSize()); p++) {
       auto perception = haptic.getPerceptionAt(p);
       checkPerception(perception, logs);
-      for (int l = 0; l < perception.getEffectLibrarySize(); l++) {
+      for (int l = 0; l < static_cast<int>(perception.getEffectLibrarySize()); l++) {
         auto effect = perception.getBasisEffectAt(l);
         checkEffect(effect, logs);
         checkEffectKeyframes(effect, logs);
       }
-      for (int d = 0; d < perception.getReferenceDevicesSize(); d++) {
+      for (int d = 0; d < static_cast<int>(perception.getReferenceDevicesSize()); d++) {
         auto device = perception.getReferenceDeviceAt(d);
         checkHapticDevice(device, logs);
       }
-      for (int c = 0; c < perception.getChannelsSize(); c++) {
+      for (int c = 0; c < static_cast<int>(perception.getChannelsSize()); c++) {
         auto channel = perception.getChannelAt(c);
         checkChannel(channel, logs);
-        for (int b = 0; b < channel.getBandsSize(); b++) {
+        for (int b = 0; b < static_cast<int>(channel.getBandsSize()); b++) {
           auto band = channel.getBandAt(b);
           checkBand(band, logs);
-          for (int e = 0; e < band.getEffectsSize(); e++) {
+          for (int e = 0; e < static_cast<int>(band.getEffectsSize()); e++) {
             auto effect = band.getEffectAt(e);
             checkEffect(effect, logs);
             checkEffectKeyframes(effect, logs);
@@ -261,7 +259,7 @@ public:
   }
 
   static auto checkEffectKeyframes(types::Effect &effect, std::vector<std::string> &logs) -> void {
-    for (int k = 0; k < effect.getKeyframesSize(); k++) {
+    for (int k = 0; k < static_cast<int>(effect.getKeyframesSize()); k++) {
       auto keyframe = effect.getKeyframeAt(k);
       checkKeyframe(keyframe, logs);
     }
@@ -289,7 +287,7 @@ public:
   };
 
   static auto checkAvatar(types::Avatar &avatar, std::vector<std::string> &logs) -> void {
-    if (avatar.getId() > MAX_8_BITS_UNSIGNED) {
+    if (avatar.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Avatar_ID_OutOfRange));
     }
 
@@ -303,7 +301,7 @@ public:
 
   static auto checkPerception(types::Perception &perception, std::vector<std::string> &logs)
       -> void {
-    if (perception.getId() > MAX_8_BITS_UNSIGNED) {
+    if (perception.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Perception_ID_OutOfRange));
     }
 
@@ -351,7 +349,7 @@ public:
 
   static auto checkHapticDevice(types::ReferenceDevice &device, std::vector<std::string> &logs)
       -> void {
-    if (device.getId() > MAX_8_BITS_UNSIGNED) {
+    if (device.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_ID_OutOfRange));
     }
 
@@ -454,7 +452,7 @@ public:
   }
 
   static auto checkChannel(types::Channel &channel, std::vector<std::string> &logs) -> void {
-    if (channel.getId() > MAX_16_BITS_UNSIGNED) {
+    if (channel.getId() > static_cast<int>(MAX_16_BITS_UNSIGNED)) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_ID_OutOfRange));
     }
 
@@ -499,7 +497,7 @@ public:
   }
 
   static auto checkEffect(types::Effect &effect, std::vector<std::string> &logs) -> void {
-    if (effect.getId() > 0 && effect.getId() > MAX_16_BITS_UNSIGNED) {
+    if (effect.getId() > 0 && effect.getId() > static_cast<int>(MAX_16_BITS_UNSIGNED)) {
       logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_ID_OutOfRange));
     }
 
@@ -520,7 +518,7 @@ public:
   static auto checkKeyframe(types::Keyframe &keyframe, std::vector<std::string> &logs) -> void {
     auto position = keyframe.getRelativePosition();
     if (position.has_value()) {
-      if (position.value() > MAX_16_BITS_UNSIGNED) {
+      if (position.value() > static_cast<int>(MAX_16_BITS_UNSIGNED)) {
         logs.push_back(
             hjifErrorCodeToString.at(hjifErrorCode::Keyframe_RelativePosition_OutOfRange));
       }

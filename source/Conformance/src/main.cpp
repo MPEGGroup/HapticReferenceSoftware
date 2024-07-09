@@ -109,7 +109,7 @@ auto main(int argc, char *argv[]) -> int {
     std::cout << "The HMPG file to check: " << filename << std::endl;
     IOStream::readFile(filename, hapticFile);
     auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
-    if (logs.size() > 0) {
+    if (!logs.empty()) {
       for (auto &l : logs) {
         std::cerr << l << std::endl;
       }
