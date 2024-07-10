@@ -138,12 +138,11 @@ public:
     unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
     unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
     unsigned int layer = 0;
-    bool conformance = true;
     std::vector<std::string> logs;
     MIHSUnitType currentUnitType = MIHSUnitType::Initialization;
     bool MIHSData = false;
   };
-  static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
+  static auto readFile(const std::string &filePath, types::Haptics &haptic, bool logFile) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;

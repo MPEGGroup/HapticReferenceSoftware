@@ -107,7 +107,7 @@ auto main(int argc, char *argv[]) -> int {
     codeExit = EXIT_SUCCESS;
   } else if (ext == "hmpg") {
     std::cout << "The HMPG file to check: " << filename << std::endl;
-    IOStream::readFile(filename, hapticFile);
+    IOStream::readFile(filename, hapticFile, false);
     auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
     if (!logs.empty()) {
       for (auto &l : logs) {
@@ -128,7 +128,7 @@ auto main(int argc, char *argv[]) -> int {
       codeExit = EXIT_SUCCESS;
     } else if (extComp == "hmpg") {
       std::cout << "The HMPG file used for comparison: " << comparisonFilename << std::endl;
-      IOStream::readFile(comparisonFilename, comparisonHapticFile);
+      IOStream::readFile(comparisonFilename, comparisonHapticFile, false);
       codeExit = EXIT_SUCCESS;
     } else {
       codeExit = EXIT_FAILURE;

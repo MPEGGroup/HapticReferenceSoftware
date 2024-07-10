@@ -89,18 +89,18 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
-          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
+          {0, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
            haptics::types::ActuatorType::LRA},
-          {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
+          {25, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
-          {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+          {2, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
   testingPerception0.addReferenceDevice(testingReferenceDeviceValue_perception0);
 
   const int testingId_perception1 = 255;
-  const int testingAvatarId_perception1 = 3;
+  const int testingAvatarId_perception1 = testingId_avatar1;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
   haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
@@ -473,7 +473,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::loadFile(filepath, readBitstream);
 
     haptics::types::Haptics readHaptic;
-    IOStream::readFile(filepath, readHaptic);
+    IOStream::readFile(filepath, readHaptic, false);
 
     REQUIRE(succeed);
   }

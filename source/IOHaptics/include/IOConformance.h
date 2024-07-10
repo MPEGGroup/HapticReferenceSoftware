@@ -400,11 +400,12 @@ static const std::map<hmpgErrorCode, std::string> hmpgErrorCodeToString = {
 
 class IOConformance {
 public:
-  static auto checkBandTypeRange(IOStream::StreamReader &sreader) -> void {
+  static auto checkBandTypeRange(IOStream::StreamReader &sreader) -> bool {
     auto btype = sreader.bandStream.band.getBandType();
     if (btype < types::BandType::Transient || btype > types::BandType::WaveletWave) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_OutOfRange));
+      return false;
     }
 
     if (strcmp(sreader.haptic.getProfile().c_str(), SIMPLE_PARAMETRIC_PROFILE) == 0) {
@@ -412,33 +413,39 @@ public:
           btype != types::BandType::VectorialWave) {
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_BandType_NotSupportedByLevelProfile));
+        return false;
       }
     }
+    return true;
   };
 
-  static auto checkCurveTypeRange(IOStream::StreamReader &sreader) -> void {
+  static auto checkCurveTypeRange(IOStream::StreamReader &sreader) -> bool {
     auto ctype = sreader.bandStream.band.getCurveTypeOrDefault();
     if (ctype < types::CurveType::Unknown || ctype > types::CurveType::Bspline) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_CurveType_OutOfRange));
+      return false;
     }
+    return true;
   };
 
-  static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> void {
+  static auto checkTimescaleForBandType(IOStream::StreamReader &sreader) -> bool {
     auto btype = sreader.bandStream.band.getBandType();
     if (strcmp(sreader.haptic.getProfile().c_str(), MAIN_PROFILE) == 0 &&
         btype == types::BandType::WaveletWave) {
-      return;
+      return true;
     }
 
     if (sreader.timescale != haptics::types::Haptics::DEFAULT_TIMESCALE) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_TimescaleInvalidWithLevelProfile));
+      return false;
     }
+    return true;
   };
 
   static auto checkEffectLibrary(IOStream::StreamReader &sreader, types::Perception &perce)
-      -> void {
+      -> bool {
     std::vector<int> effectsID = std::vector<int>();
     for (unsigned int i = 0; i < perce.getEffectLibrarySize(); i++) {
       auto e = perce.getBasisEffectAt(static_cast<int>(i));
@@ -446,36 +453,42 @@ public:
       if (std::find(effectsID.begin(), effectsID.end(), eId) != effectsID.end()) {
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::Init_EffectLibrary_ID_NotUnique));
+        return false;
       }
       effectsID.push_back(eId);
     }
+    return true;
   };
 
-  static auto checkMIHSUnitDataPacket(IOStream::StreamReader &sreader) -> void {
+  static auto checkMIHSUnitDataPacket(IOStream::StreamReader &sreader) -> bool {
     if (sreader.currentUnitType == MIHSUnitType::Spatial ||
         sreader.currentUnitType == MIHSUnitType::Temporal) {
       if (!sreader.MIHSData) {
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_InvalidNumber));
+        return false;
       }
     } else if (sreader.currentUnitType == MIHSUnitType::Silent) {
       if (sreader.MIHSData) {
         sreader.logs.push_back(
             hmpgErrorCodeToString.at(hmpgErrorCode::NonTempSpat_Data_InvalidNumber));
+        return false;
       }
     }
+    return true;
   }
 
   static auto checkFirstMIHSUnitType(IOStream::StreamReader &sreader, std::vector<bool> &mihsunit)
-      -> void {
+      -> bool {
     int index = 0;
     int unitType = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
     if (unitType == static_cast<int>(MIHSUnitType::Initialization)) {
-      return;
+      return true;
     }
 
     sreader.logs.push_back(
         hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_FirstUnitType_Invalid));
+    return false;
   }
 
   static auto checkMIHSUnitType(IOStream::StreamReader &sreader, const int unitType) -> bool {
@@ -486,14 +499,13 @@ public:
       return true;
     }
 
-    if (sreader.conformance) {
-      sreader.logs.push_back(
-          hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_UnitType_Invalid));
-    }
+    sreader.logs.push_back(
+        hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_UnitType_Invalid));
+
     return false;
   }
 
-  static auto checkMIHSPacketType(IOStream::StreamReader &sreader, const int naluType) -> void {
+  static auto checkMIHSPacketType(IOStream::StreamReader &sreader, const int naluType) -> bool {
     if (naluType == static_cast<int>(MIHSPacketType::Timing) ||
         naluType == static_cast<int>(MIHSPacketType::InitializationTiming) ||
         naluType == static_cast<int>(MIHSPacketType::MetadataHaptics) ||
@@ -506,75 +518,92 @@ public:
         naluType == static_cast<int>(MIHSPacketType::CRC16) ||
         naluType == static_cast<int>(MIHSPacketType::GlobalCRC32) ||
         naluType == static_cast<int>(MIHSPacketType::GlobalCRC16)) {
-      return;
+      return true;
     }
 
     sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Packet_Type_Invalid));
+    return false;
   }
 
-  static auto checkMIHSUnitSync(IOStream::StreamReader &sreader, const int unitSync) -> void {
+  static auto checkMIHSUnitSync(IOStream::StreamReader &sreader, const int unitSync) -> bool {
     if (unitSync == 0 || unitSync == 1) {
-      return;
+      return true;
     }
 
     sreader.logs.push_back(
         hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_UnitSync_Invalid));
+    return false;
   }
 
   static auto checkMIHSUnitSyncWhenInit(IOStream::StreamReader &sreader, const bool unitSync)
-      -> void {
+      -> bool {
     if (sreader.currentUnitType == MIHSUnitType::Initialization && !unitSync) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_InitUnitSync_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkMIHSUnitInitializationDuraction(IOStream::StreamReader &sreader) -> void {
+  static auto checkMIHSUnitInitializationDuraction(IOStream::StreamReader &sreader) -> bool {
     if (sreader.packetDuration != 0) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_InitDuration_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkMIHSUnitDuration(IOStream::StreamReader &sreader) -> void {
+  static auto checkMIHSUnitDuration(IOStream::StreamReader &sreader) -> bool {
     if (sreader.packetDuration <= 0) {
       if (sreader.currentUnitType == MIHSUnitType::Spatial) {
         if (sreader.packetDuration != 0) {
           sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_Duration_Invalid));
+          return false;
         }
       } else if (sreader.currentUnitType == MIHSUnitType::Silent) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Silent_Duration_Invalid));
+        return false;
       } else if (sreader.currentUnitType == MIHSUnitType::Temporal) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Duration_Invalid));
+        return false;
       }
     }
+    return true;
   }
 
-  static auto checkEffectPosition(IOStream::StreamReader &sreader, int effectPos) -> void {
+  static auto checkEffectPosition(IOStream::StreamReader &sreader, int effectPos) -> bool {
     if (effectPos < 0 && !(sreader.waitSync || (sreader.auType == AUType::DAU))) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
+      return false;
     }
     if (effectPos >= static_cast<int>(sreader.packetDuration)) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Position_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkBaseSignal(IOStream::StreamReader &sreader, int baseSignal) -> void {
+  static auto checkBaseSignal(IOStream::StreamReader &sreader, int baseSignal) -> bool {
     if (!(baseSignal >= 0 && baseSignal <= static_cast<int>(types::BaseSignal::SawToothDown))) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_BaseSignal_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkMIHSUnitTemporalPerceptionModality(IOStream::StreamReader &sreader) -> void {
+  static auto checkMIHSUnitTemporalPerceptionModality(IOStream::StreamReader &sreader) -> bool {
     types::PerceptionModality modality = sreader.perception.getPerceptionModality();
     if (modality == types::PerceptionModality::VibrotactileTexture ||
         modality == types::PerceptionModality::Stiffness ||
         modality == types::PerceptionModality::Friction) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Data_PerceptionModality_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkMIHSUnitSpatialPerceptionModality(IOStream::StreamReader &sreader) -> void {
+  static auto checkMIHSUnitSpatialPerceptionModality(IOStream::StreamReader &sreader) -> bool {
     types::PerceptionModality modality = sreader.perception.getPerceptionModality();
     if (modality == types::PerceptionModality::Pressure ||
         modality == types::PerceptionModality::Acceleration ||
@@ -589,84 +618,100 @@ public:
         modality == types::PerceptionModality::Other) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkEffectIDExists(IOStream::StreamReader &sreader, int effectId) -> void {
+  static auto checkEffectIDExists(IOStream::StreamReader &sreader, int effectId) -> bool {
     for (unsigned int i = 0; i < sreader.perception.getEffectLibrarySize(); i++) {
       if (sreader.perception.getBasisEffectAt(static_cast<int>(i)).getId() == effectId) {
-        return;
+        return true;
       }
     }
     sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectID_Unknown));
+    return false;
   }
 
-  static auto checkEffectTypeUnknown(IOStream::StreamReader &sreader, int effectType) -> void {
+  static auto checkEffectTypeUnknown(IOStream::StreamReader &sreader, int effectType) -> bool {
     if (effectType < 0 || effectType > 1) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_EffectType_Unknown));
+      return false;
     }
+    return true;
   }
 
   static auto checkSemanticUnknown(IOStream::StreamReader &sreader, const std::string &semantic)
-      -> void {
+      -> bool {
     if (types::stringToEffectSemantic.find(semantic) == types::stringToEffectSemantic.end()) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_Semantic_Unknown));
+      return false;
     }
+    return true;
   }
 
   static auto checkEffectOrder(IOStream::StreamReader &sreader, std::vector<types::Effect> &effects)
-      -> void {
+      -> bool {
     int pos = INT_MIN;
     for (const auto &effect : effects) {
       if (effect.getPosition() < pos) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Timing_Not_Ascending));
+        return false;
       }
       pos = effect.getPosition();
     }
+    return true;
   }
 
   static auto checkMIHSUnitSpatialPackets(IOStream::StreamReader &sreader,
-                                          const std::vector<bool> &packets) -> void {
+                                          const std::vector<bool> &packets) -> bool {
     if (packets.empty()) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_No_Packets));
+      return false;
     }
 
     if (sreader.waitSync) {
       sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Spat_UnitSync_Invalid));
+      return false;
     }
+    return true;
   }
 
-  static auto checkMIHSUnitBandCount(IOStream::StreamReader &sreader, const int bandCount) -> void {
-    if (!sreader.conformance) {
-      return;
-    }
+  static auto checkMIHSUnitBandCount(IOStream::StreamReader &sreader, const int bandCount) -> bool {
+    // if (!sreader.conformance) {
+    //   return;
+    // }
 
     switch (sreader.haptic.getLevel()) {
     case 1:
       if (bandCount < MIN_BAND_LEVEL1 || bandCount > MAX_BAND_LEVEL1) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
+        return false;
       }
       break;
     case 2:
       if (bandCount < MIN_BAND_LEVEL2 || bandCount > MAX_BAND_LEVEL2) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Band_OutOfRange));
+        return false;
       }
       break;
     }
+    return true;
   }
 
   static auto checkMIHSUnitPerceptionModality(IOStream::StreamReader &sreader, const int modal)
-      -> void {
-    if (!sreader.conformance) {
-      return;
-    }
+      -> bool {
+    // if (!sreader.conformance) {
+    //   return;
+    // }
 
     if ((modal < static_cast<int>(types::PerceptionModality::Other)) ||
         (modal > static_cast<int>(types::PerceptionModality::Electrotactile))) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Perception_Modality_OutOfRange));
+      return false;
     }
 
     if (sreader.haptic.getLevel() == 1 &&
@@ -677,8 +722,10 @@ public:
           modal != static_cast<int>(types::PerceptionModality::VibrotactileTexture)) {
         sreader.logs.push_back(hmpgErrorCodeToString.at(
             hmpgErrorCode::Init_Perception_Modality_NotSupportedByLevelProfile));
+        return false;
       }
     }
+    return true;
   }
 };
 } // namespace haptics::io
