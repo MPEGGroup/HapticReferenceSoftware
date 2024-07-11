@@ -133,7 +133,7 @@ auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
 auto Haptics::addSync(Sync &newSync) -> void { syncs.push_back(newSync); }
 
 auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
-  version = std::to_string(data.getVersion());
+  version = "2023";
   time_t now = time(nullptr);
   date = ctime(&now);
   description = data.getDescription();

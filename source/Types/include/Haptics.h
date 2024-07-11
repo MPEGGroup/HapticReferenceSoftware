@@ -91,7 +91,7 @@ public:
   [[nodiscard]] auto equals(const Haptics &haptic) const -> bool;
 
 private:
-  std::string version;
+  std::string version = "2023";
   std::string profile = "Main";
   uint8_t level = 1;
   std::string date;

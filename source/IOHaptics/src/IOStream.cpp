@@ -108,7 +108,7 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic, boo
         std::cerr << str << std::endl;
       }
     }
-    return EXIT_FAILURE;
+    return false;
   }
   sreader.haptic.setTimescale(sreader.timescale); // TODO: earlier?
   haptic = sreader.haptic;
@@ -341,7 +341,7 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
     }
 
     if (!readMIHSPacket(packets, sreader, crc)) {
-      return EXIT_FAILURE;
+      return false;
     }
     index += static_cast<int>(sreader.packetLength) + H_NBITS;
     packets = std::vector<bool>(mihsunit.begin() + index, mihsunit.end());
@@ -1032,7 +1032,7 @@ auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bit
   std::string version = IOBinaryPrimitives::readString(bitstream, index, versionLength);
   sreader.haptic.setVersion(version);
 
-  if (std::regex_match(version, std::regex(VERSION_FORMAT))) {
+  if (!std::regex_match(version, std::regex(VERSION_FORMAT))) {
     sreader.logs.push_back(
         hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Version_Invalid));
     return false;
@@ -1989,7 +1989,7 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
             hmpgErrorCodeToString.at(hmpgErrorCode::Init_Channel_BodyPartTarget_OutOfRange));
         return false;
         // Once is enough.
-        break;
+        // break;
       }
     }
     sreader.channel.setBodyPartTarget(bodyPartTarget);
@@ -2056,11 +2056,7 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
 
   // read band count, unused but could be used for check
   int bandCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
-  if (!IOConformance::checkMIHSUnitBandCount(sreader, bandCount)) {
-    return false;
-  }
-
-  return true;
+  return IOConformance::checkMIHSUnitBandCount(sreader, bandCount))
 }
 
 auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
@@ -2548,8 +2544,9 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
   if (sreader.currentUnitType == MIHSUnitType::Spatial &&
       !IOConformance::checkMIHSUnitSpatialPerceptionModality(sreader)) {
     return false;
-  } else if (sreader.currentUnitType == MIHSUnitType::Temporal &&
-             !IOConformance::checkMIHSUnitTemporalPerceptionModality(sreader)) {
+  }
+  if (sreader.currentUnitType == MIHSUnitType::Temporal &&
+      !IOConformance::checkMIHSUnitTemporalPerceptionModality(sreader)) {
     return false;
   }
   int channelId = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_ID);
@@ -2565,12 +2562,10 @@ auto IOStream::readData(StreamReader &sreader, std::vector<bool> &bitstream) -> 
   sreader.bandStream.id = IOBinaryPrimitives::readUInt(bitstream, idx, MDBAND_ID);
   sreader.bandStream.index = searchBandInHaptic(sreader, sreader.bandStream.id);
   if (sreader.bandStream.index == -1) {
-
     sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_BandID_Unknown));
     return false;
   }
   sreader.bandStream.band = sreader.channel.getBandAt(sreader.bandStream.index);
-
   int fxCount = IOBinaryPrimitives::readUInt(bitstream, idx, DB_EFFECT_COUNT);
   if (fxCount > 0) {
     std::vector<types::Effect> effects;
