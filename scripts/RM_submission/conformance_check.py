@@ -60,7 +60,9 @@ MAIN_FOLDER_KEY = "main_folder"
 CONFORMANCE_FILES_KEY = "conformance_files"
 CONFORMANCE_TEST_SET_KEYS = [
     "schemas_checks",
-    "semantic_checks"
+    "semantic_checks",
+    "hmpg_compatibility_checks",
+    "hmpg_conformance_checks"
 ]
 CONFORMANCE_TEST_SET_KEY = "conversion_checks"
 
@@ -110,11 +112,12 @@ def main():
                     test_number+=1
                     continue
             result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[CONFORMANCE_PATH_KEY])} -f {input_file_path}",shell=True, capture_output=True, text=True)
-            valid = result.stderr.splitlines()==conformance_check[EXPECTED_OUTPUT_KEY].splitlines()
+            expected_output = conformance_check[EXPECTED_OUTPUT_KEY].replace("{main_folder}",config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY])
+            valid = result.stderr.splitlines()==expected_output.splitlines()
             if(not valid):
-                check_fails.append("*********\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
+                check_fails.append("\n---------------------\n\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
                 check_fails.append("- Output : \n"+result.stderr)
-                check_fails.append("- Expected output: \n"+conformance_check[EXPECTED_OUTPUT_KEY])
+                check_fails.append("- Expected output: \n"+expected_output)
             print("Test #",test_number,":\t",valid,"\t|\t",conformance_check[NAME_KEY])
             nb_tests+=1
             test_number+=1
@@ -124,7 +127,7 @@ def main():
         print("\nSUCCESS: ",nb_success,"/",nb_tests," valid tests")
     else:
         print("\nFAIL: ",nb_success,"/",nb_tests," valid tests")
-        print("The following test failed:")
+        print("The following tests failed:")
         print("\n".join(check_fails))
 
     check_fails = []
@@ -147,11 +150,12 @@ def main():
         binary_encoding_result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hmpg -b",shell=True, capture_output=True, text=True)
         decoding_result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f test.hmpg -o testDecoded.hjif",shell=True, capture_output=True, text=True)
         comparison = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[CONFORMANCE_PATH_KEY])} -f {input_file_path} -c testDecoded.hjif",shell=True, capture_output=True, text=True)
-        valid = comparison.stderr.splitlines()==conversion_check[EXPECTED_OUTPUT_KEY].splitlines()
+        expected_output = conversion_check[EXPECTED_OUTPUT_KEY].replace("{main_folder}",config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY])
+        valid = comparison.stderr.splitlines()==expected_output.splitlines()
         if(not valid):
-            check_fails.append("*********\nConversion #"+str(test_number)+" failed: "+conversion_check[NAME_KEY]+"\n")
+            check_fails.append("\n---------------------\n\nConversion #"+str(test_number)+" failed: "+conversion_check[NAME_KEY]+"\n")
             check_fails.append("- Output : \n"+comparison.stderr)
-            check_fails.append("- Expected output: \n"+conversion_check[EXPECTED_OUTPUT_KEY])
+            check_fails.append("- Expected output: \n"+expected_output)
         else:
             nb_success+=1
         print("Test #",test_number,":\t",valid,"\t|\t",conversion_check[NAME_KEY])
