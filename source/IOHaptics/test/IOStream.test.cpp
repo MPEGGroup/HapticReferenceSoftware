@@ -56,7 +56,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   using haptics::spiht::Spiht_Enc;
   using haptics::types::Effect;
 
-  const std::string testingVersion = "RM1";
+  const std::string testingVersion = "2023";
   const std::string testingDate = "Today";
   const std::string testingDescription = "I'm a testing value";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
