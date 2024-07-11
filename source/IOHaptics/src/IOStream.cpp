@@ -2056,7 +2056,7 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
 
   // read band count, unused but could be used for check
   int bandCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BANDS_COUNT);
-  return IOConformance::checkMIHSUnitBandCount(sreader, bandCount))
+  return IOConformance::checkMIHSUnitBandCount(sreader, bandCount);
 }
 
 auto IOStream::writeMetadataBand(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool {
