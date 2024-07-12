@@ -510,7 +510,7 @@
       {
         "name": "Haptic: too many perceptions",
         "haptic_file_path": "HMPGCompatibilityConformance\\haptic-too_many_perceptions.hjif",
-        "expected_output": "Experience Warning: perceptions vector size out of range. Warning code: 3\nPerception Warning: ID out of range. Warning code: 6\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Experience Warning: perceptions vector size out of range. Warning code: 3\nPerception Warning: ID out of range. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: id too large",
@@ -518,24 +518,24 @@
         "expected_output": "Avatar Warning: ID out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
-        "name": "Avatar: type too large",
+        "name": "Avatar: lod too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\avatar-lod_too_large.hjif",
-        "expected_output": "Avatar Warning: lod out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Avatar Warning: LOD out of range. Warning code: 5\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: mesh too long",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\avatar-mesh_too_long.hjif",
+        "expected_output": "Avatar Warning: mesh vector size out of range. Warning code: 6\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: id too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\perception-id-too_large.hjif",
-        "expected_output": "Perception Warning: ID out of range. Warning code: 6\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Perception Warning: ID out of range. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: description too long",
         "haptic_file_path": "HMPGCompatibilityConformance\\perception-description-too_long.hjif",
-        "expected_output": "Perception Warning: description too long. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Perception Warning: description too long. Warning code: 8\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: semantic scheme too long",
@@ -645,21 +645,16 @@
       {
         "name": "Channel: description too long",
         "haptic_file_path": "HMPGCompatibilityConformance\\channel-description-too_long.hjif",
-        "expected_output": "Channel Warning: description size out of range. Warning code: 31\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Channel Warning: description size out of range. Warning code: 32\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: gain too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\channel-gain-too_large.hjif",
-        "expected_output": "Channel Warning: gain out of range. Warning code: 32\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Channel Warning: gain out of range. Warning code: 33\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: mixing_weight too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_weight-too_large.hjif",
-        "expected_output": ""
-      },
-      {
-        "name": "Channel: body_part_mask too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-body_part_mask-too_large.hjif",
         "expected_output": ""
       },
       {
@@ -680,12 +675,12 @@
       {
         "name": "Effect: position too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\effect-position-too_large.hjif",
-        "expected_output": "Band Warning: effect position out of range. Warning code: 41\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Band Warning: effect position out of range. Warning code: 42\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Keyframe: relative_position too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\keyframe-relative_position-too_large.hjif",
-        "expected_output": "Band Warning: keyframe relative position out of range. Warning code: 44\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "expected_output": "Band Warning: keyframe relative position out of range. Warning code: 45\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       }
     ],
     "hmpg_conformance_checks": [
