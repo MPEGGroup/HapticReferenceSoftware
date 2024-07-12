@@ -23,6 +23,7 @@ enum class hjifWarningCode {
   Experience_Avatars_Size_OutOfRange,
   Experience_Perceptions_Size_OutOfRange,
   Avatar_ID_OutOfRange,
+  Avatar_LOD_OutOfRange,
   Avatar_Mesh_Size_OutOfRange,
   Perception_ID_OutOfRange,
   Perception_Description_Size_OutOfRange,
@@ -82,6 +83,9 @@ static const std::map<hjifWarningCode, std::string> hjifWarningCodeToString = {
     {hjifWarningCode::Avatar_ID_OutOfRange,
      "Avatar Warning: ID out of range. Warning code: " +
          std::to_string(static_cast<int>(hjifWarningCode::Avatar_ID_OutOfRange))},
+    {hjifWarningCode::Avatar_LOD_OutOfRange,
+     "Avatar Warning: LOD out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Avatar_LOD_OutOfRange))},
     {hjifWarningCode::Avatar_Mesh_Size_OutOfRange,
      "Avatar Warning: mesh vector size out of range. Warning code: " +
          std::to_string(static_cast<int>(hjifWarningCode::Avatar_Mesh_Size_OutOfRange))},
@@ -93,7 +97,8 @@ static const std::map<hjifWarningCode, std::string> hjifWarningCodeToString = {
          std::to_string(static_cast<int>(hjifWarningCode::Perception_Description_Size_OutOfRange))},
     {hjifWarningCode::Perception_EffectLibrary_Size_OutOfRange,
      "Perception Warning: effect library size out of range. Warning code: " +
-         std::to_string(static_cast<int>(hjifWarningCode::Perception_EffectLibrary_Size_OutOfRange))},
+         std::to_string(
+             static_cast<int>(hjifWarningCode::Perception_EffectLibrary_Size_OutOfRange))},
     {hjifWarningCode::Perception_SemanticScheme_Size_OutOfRange,
      "Perception Warning: semantic scheme size out of range. Warning code: " +
          std::to_string(
@@ -129,7 +134,8 @@ static const std::map<hjifWarningCode, std::string> hjifWarningCodeToString = {
          std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange))},
     {hjifWarningCode::ReferenceDevice_BodyPartMask_OutOfRange,
      "ReferenceDevice Warning: bodyPartMask out of range. Warning code: " +
-         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_BodyPartMask_OutOfRange))},
+         std::to_string(
+             static_cast<int>(hjifWarningCode::ReferenceDevice_BodyPartMask_OutOfRange))},
     {hjifWarningCode::ReferenceDevice_MaximumFrequency_OutOfRange,
      "ReferenceDevice Warning: maximum frequency out of range. Warning code: " +
          std::to_string(
@@ -277,7 +283,8 @@ public:
     }
 
     if (haptic.getAvatarsSize() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Experience_Avatars_Size_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::Experience_Avatars_Size_OutOfRange));
     }
 
     if (haptic.getPerceptionsSize() > MAX_8_BITS_UNSIGNED) {
@@ -291,10 +298,14 @@ public:
       logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Avatar_ID_OutOfRange));
     }
 
+    if (avatar.getLod() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Avatar_LOD_OutOfRange));
+    }
+
     auto mesh = avatar.getMesh();
     if (mesh.has_value()) {
       if (mesh.value().size() > MAX_8_BITS_UNSIGNED) {
-        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Avatar_ID_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Avatar_Mesh_Size_OutOfRange));
       }
     }
   };
@@ -327,13 +338,14 @@ public:
 
     auto unitExponent = perception.getUnitExponentOrDefault();
     if (unitExponent > MAX_8_BITS_SIGNED || unitExponent < MIN_8_BITS_SIGNED) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Perception_UnitExponent_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::Perception_UnitExponent_OutOfRange));
     }
 
     auto perceptionUnitExponent = perception.getPerceptionUnitExponentOrDefault();
     if (perceptionUnitExponent > MAX_8_BITS_SIGNED || perceptionUnitExponent < MIN_8_BITS_SIGNED) {
-      logs.push_back(
-          hjifWarningCodeToString.at(hjifWarningCode::Perception_PerceptionUnitExponent_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(
+          hjifWarningCode::Perception_PerceptionUnitExponent_OutOfRange));
     }
   };
 
@@ -354,7 +366,8 @@ public:
     }
 
     if (device.getName().size() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange));
     }
 
     auto bodyPartMask = device.getBodyPartMask();
@@ -368,32 +381,32 @@ public:
     auto maximumFrequency = device.getMaximumFrequency();
     if (maximumFrequency.has_value()) {
       if (maximumFrequency.value() > TEN_K) {
-        logs.push_back(
-            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MaximumFrequency_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(
+            hjifWarningCode::ReferenceDevice_MaximumFrequency_OutOfRange));
       }
     }
 
     auto minimumFrequency = device.getMinimumFrequency();
     if (minimumFrequency.has_value()) {
       if (minimumFrequency.value() > TEN_K) {
-        logs.push_back(
-            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MinimumFrequency_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(
+            hjifWarningCode::ReferenceDevice_MinimumFrequency_OutOfRange));
       }
     }
 
     auto resonanceFrequency = device.getResonanceFrequency();
     if (resonanceFrequency.has_value()) {
       if (resonanceFrequency.value() > TEN_K) {
-        logs.push_back(
-            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_ResonanceFrequency_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(
+            hjifWarningCode::ReferenceDevice_ResonanceFrequency_OutOfRange));
       }
     }
 
     auto maximumAmplitude = device.getMaximumAmplitude();
     if (maximumAmplitude.has_value()) {
       if (maximumAmplitude.value() > TEN_K) {
-        logs.push_back(
-            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MaximumAmplitude_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(
+            hjifWarningCode::ReferenceDevice_MaximumAmplitude_OutOfRange));
       }
     }
 
@@ -432,21 +445,24 @@ public:
     auto weight = device.getWeight();
     if (weight.has_value()) {
       if (weight.value() > TEN_K) {
-        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Weight_OutOfRange));
+        logs.push_back(
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Weight_OutOfRange));
       }
     }
 
     auto size = device.getSize();
     if (size.has_value()) {
       if (size.value() > TEN_K) {
-        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Size_OutOfRange));
+        logs.push_back(
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Size_OutOfRange));
       }
     }
 
     auto custom = device.getCustom();
     if (custom.has_value()) {
       if (custom.value() > TEN_K || custom.value() < -TEN_K) {
-        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Custom_OutOfRange));
+        logs.push_back(
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Custom_OutOfRange));
       }
     }
   }
@@ -457,7 +473,8 @@ public:
     }
 
     if (channel.getDescription().size() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_Description_Size_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::Channel_Description_Size_OutOfRange));
     }
 
     auto gain = channel.getGain();
@@ -474,7 +491,8 @@ public:
     }
 
     if (channel.getFrequencySampling() > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_FrequencySampling_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::Channel_FrequencySampling_OutOfRange));
     }
 
     if (channel.getSampleCount() > MAX_32_BITS_UNSIGNED) {
@@ -511,7 +529,8 @@ public:
     }
 
     if (effect.getTimelineSize() > MAX_16_BITS_UNSIGNED) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Effect_Composition_Size_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::Effect_Composition_Size_OutOfRange));
     }
   }
 
