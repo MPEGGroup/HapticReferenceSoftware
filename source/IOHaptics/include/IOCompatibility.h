@@ -17,7 +17,7 @@ static constexpr int MIN_25_BITS_SIGNED = -16777216;
 static constexpr unsigned int MAX_32_BITS_UNSIGNED = 4294967295;
 static constexpr float TEN_K = 10000;
 
-enum class hjifErrorCode {
+enum class hjifWarningCode {
   Experience_Description_Size_OutOfRange,
   Experience_Timescale_OutOfRange,
   Experience_Avatars_Size_OutOfRange,
@@ -65,156 +65,156 @@ enum class hjifErrorCode {
   Keyframe_RelativePosition_OutOfRange
 };
 
-static const std::map<hjifErrorCode, std::string> hjifErrorCodeToString = {
+static const std::map<hjifWarningCode, std::string> hjifWarningCodeToString = {
     // Init_Experience_*
-    {hjifErrorCode::Experience_Description_Size_OutOfRange,
-     "Experience Error: description too long. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Experience_Description_Size_OutOfRange))},
-    {hjifErrorCode::Experience_Timescale_OutOfRange,
-     "Experience Error: timescale out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Experience_Timescale_OutOfRange))},
-    {hjifErrorCode::Experience_Avatars_Size_OutOfRange,
-     "Experience Error: avatars vector size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Experience_Avatars_Size_OutOfRange))},
-    {hjifErrorCode::Experience_Perceptions_Size_OutOfRange,
-     "Experience Error: perceptions vector size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Experience_Perceptions_Size_OutOfRange))},
-    {hjifErrorCode::Avatar_ID_OutOfRange,
-     "Avatar Error: ID out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Avatar_ID_OutOfRange))},
-    {hjifErrorCode::Avatar_Mesh_Size_OutOfRange,
-     "Avatar Error: mesh vector size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Avatar_Mesh_Size_OutOfRange))},
-    {hjifErrorCode::Perception_ID_OutOfRange,
-     "Perception Error: ID out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Perception_ID_OutOfRange))},
-    {hjifErrorCode::Perception_Description_Size_OutOfRange,
-     "Perception Error: description too long. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Perception_Description_Size_OutOfRange))},
-    {hjifErrorCode::Perception_EffectLibrary_Size_OutOfRange,
-     "Perception Error: effect library size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Perception_EffectLibrary_Size_OutOfRange))},
-    {hjifErrorCode::Perception_SemanticScheme_Size_OutOfRange,
-     "Perception Error: semantic scheme size out of range. Error code: " +
+    {hjifWarningCode::Experience_Description_Size_OutOfRange,
+     "Experience Warning: description too long. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Experience_Description_Size_OutOfRange))},
+    {hjifWarningCode::Experience_Timescale_OutOfRange,
+     "Experience Warning: timescale out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Experience_Timescale_OutOfRange))},
+    {hjifWarningCode::Experience_Avatars_Size_OutOfRange,
+     "Experience Warning: avatars vector size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Experience_Avatars_Size_OutOfRange))},
+    {hjifWarningCode::Experience_Perceptions_Size_OutOfRange,
+     "Experience Warning: perceptions vector size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Experience_Perceptions_Size_OutOfRange))},
+    {hjifWarningCode::Avatar_ID_OutOfRange,
+     "Avatar Warning: ID out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Avatar_ID_OutOfRange))},
+    {hjifWarningCode::Avatar_Mesh_Size_OutOfRange,
+     "Avatar Warning: mesh vector size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Avatar_Mesh_Size_OutOfRange))},
+    {hjifWarningCode::Perception_ID_OutOfRange,
+     "Perception Warning: ID out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Perception_ID_OutOfRange))},
+    {hjifWarningCode::Perception_Description_Size_OutOfRange,
+     "Perception Warning: description too long. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Perception_Description_Size_OutOfRange))},
+    {hjifWarningCode::Perception_EffectLibrary_Size_OutOfRange,
+     "Perception Warning: effect library size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Perception_EffectLibrary_Size_OutOfRange))},
+    {hjifWarningCode::Perception_SemanticScheme_Size_OutOfRange,
+     "Perception Warning: semantic scheme size out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::Perception_SemanticScheme_Size_OutOfRange))},
-    {hjifErrorCode::Perception_ReferenceDevices_Size_OutOfRange,
-     "Perception Error: reference devices vector size out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::Perception_SemanticScheme_Size_OutOfRange))},
+    {hjifWarningCode::Perception_ReferenceDevices_Size_OutOfRange,
+     "Perception Warning: reference devices vector size out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::Perception_ReferenceDevices_Size_OutOfRange))},
-    {hjifErrorCode::Perception_Channels_Size_OutOfRange,
-     "Perception Error: channels vector size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Perception_Channels_Size_OutOfRange))},
-    {hjifErrorCode::Perception_UnitExponent_OutOfRange,
-     "Perception Error: unit exponent out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Perception_UnitExponent_OutOfRange))},
-    {hjifErrorCode::Perception_PerceptionUnitExponent_OutOfRange,
-     "Perception Error: perception unit exponent out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::Perception_ReferenceDevices_Size_OutOfRange))},
+    {hjifWarningCode::Perception_Channels_Size_OutOfRange,
+     "Perception Warning: channels vector size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Perception_Channels_Size_OutOfRange))},
+    {hjifWarningCode::Perception_UnitExponent_OutOfRange,
+     "Perception Warning: unit exponent out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Perception_UnitExponent_OutOfRange))},
+    {hjifWarningCode::Perception_PerceptionUnitExponent_OutOfRange,
+     "Perception Warning: perception unit exponent out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::Perception_PerceptionUnitExponent_OutOfRange))},
-    {hjifErrorCode::Sync_Timestamp_OutOfRange,
-     "Sync Error: timestamp out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Sync_Timestamp_OutOfRange))},
-    {hjifErrorCode::Sync_Timescale_OutOfRange,
-     "Sync Error: timescale out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Sync_Timescale_OutOfRange))},
-    {hjifErrorCode::Sync_Timescale_OutOfRange,
-     "Sync Error: timescale out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Sync_Timescale_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_ID_OutOfRange,
-     "ReferenceDevice Error: ID out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_ID_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_Name_Size_OutOfRange,
-     "ReferenceDevice Error: name size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Name_Size_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_BodyPartMask_OutOfRange,
-     "ReferenceDevice Error: bodyPartMask out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_BodyPartMask_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_MaximumFrequency_OutOfRange,
-     "ReferenceDevice Error: maximum frequency out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::Perception_PerceptionUnitExponent_OutOfRange))},
+    {hjifWarningCode::Sync_Timestamp_OutOfRange,
+     "Sync Warning: timestamp out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Sync_Timestamp_OutOfRange))},
+    {hjifWarningCode::Sync_Timescale_OutOfRange,
+     "Sync Warning: timescale out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Sync_Timescale_OutOfRange))},
+    {hjifWarningCode::Sync_Timescale_OutOfRange,
+     "Sync Warning: timescale out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Sync_Timescale_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_ID_OutOfRange,
+     "ReferenceDevice Warning: ID out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_ID_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange,
+     "ReferenceDevice Warning: name size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_BodyPartMask_OutOfRange,
+     "ReferenceDevice Warning: bodyPartMask out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_BodyPartMask_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_MaximumFrequency_OutOfRange,
+     "ReferenceDevice Warning: maximum frequency out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_MaximumFrequency_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_MinimumFrequency_OutOfRange,
-     "ReferenceDevice Error: minimum frequency out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::ReferenceDevice_MaximumFrequency_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_MinimumFrequency_OutOfRange,
+     "ReferenceDevice Warning: minimum frequency out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_MinimumFrequency_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_ResonanceFrequency_OutOfRange,
-     "ReferenceDevice Error: resonance frequency out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::ReferenceDevice_MinimumFrequency_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_ResonanceFrequency_OutOfRange,
+     "ReferenceDevice Warning: resonance frequency out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_ResonanceFrequency_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_MaximumAmplitude_OutOfRange,
-     "ReferenceDevice Error: maximum amplitude out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::ReferenceDevice_ResonanceFrequency_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_MaximumAmplitude_OutOfRange,
+     "ReferenceDevice Warning: maximum amplitude out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_MaximumAmplitude_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_Impedance_OutOfRange,
-     "ReferenceDevice Error: impedance out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Impedance_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_MaximumVoltage_OutOfRange,
-     "ReferenceDevice Error: maximum voltage out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::ReferenceDevice_MaximumAmplitude_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_Impedance_OutOfRange,
+     "ReferenceDevice Warning: impedance out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_Impedance_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_MaximumVoltage_OutOfRange,
+     "ReferenceDevice Warning: maximum voltage out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_MaximumVoltage_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_MaximumCurrent_OutOfRange,
-     "ReferenceDevice Error: maximum current out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::ReferenceDevice_MaximumVoltage_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_MaximumCurrent_OutOfRange,
+     "ReferenceDevice Warning: maximum current out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_MaximumCurrent_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_MaximumDisplacement_OutOfRange,
-     "ReferenceDevice Error: maximum displacement out of range. Error code: " +
+             static_cast<int>(hjifWarningCode::ReferenceDevice_MaximumCurrent_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_MaximumDisplacement_OutOfRange,
+     "ReferenceDevice Warning: maximum displacement out of range. Warning code: " +
          std::to_string(
-             static_cast<int>(hjifErrorCode::ReferenceDevice_MaximumDisplacement_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_Weight_OutOfRange,
-     "ReferenceDevice Error: weight out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Weight_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_Size_OutOfRange,
-     "ReferenceDevice Error: size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Size_OutOfRange))},
-    {hjifErrorCode::ReferenceDevice_Custom_OutOfRange,
-     "ReferenceDevice Error: custom out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::ReferenceDevice_Custom_OutOfRange))},
-    {hjifErrorCode::Channel_ID_OutOfRange,
-     "Channel Error: ID out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_ID_OutOfRange))},
-    {hjifErrorCode::Channel_Description_Size_OutOfRange,
-     "Channel Error: description size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_Description_Size_OutOfRange))},
-    {hjifErrorCode::Channel_Gain_OutOfRange,
-     "Channel Error: gain out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_Gain_OutOfRange))},
-    {hjifErrorCode::Channel_MixingWeight_OutOfRange,
-     "Channel Error: mixingWeight out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_MixingWeight_OutOfRange))},
-    {hjifErrorCode::Channel_BodyPartMask_OutOfRange,
-     "Channel Error: bodyPartMask out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_BodyPartMask_OutOfRange))},
-    {hjifErrorCode::Channel_FrequencySampling_OutOfRange,
-     "Channel Error: frequencySampling out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_FrequencySampling_OutOfRange))},
-    {hjifErrorCode::Channel_SampleCount_OutOfRange,
-     "Channel Error: sampleCount out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_SampleCount_OutOfRange))},
-    {hjifErrorCode::Channel_Vertices_Size_OutOfRange,
-     "Channel Error: vertices size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_Vertices_Size_OutOfRange))},
-    {hjifErrorCode::Channel_Bands_Size_OutOfRange,
-     "Channel Error: bands size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Channel_Bands_Size_OutOfRange))},
-    {hjifErrorCode::Band_Effects_Size_OutOfRange,
-     "Band Error: effects size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Band_Effects_Size_OutOfRange))},
-    {hjifErrorCode::Effect_ID_OutOfRange,
-     "Band Error: effect ID out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Effect_ID_OutOfRange))},
-    {hjifErrorCode::Effect_Position_OutOfRange,
-     "Band Error: effect position out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Effect_Position_OutOfRange))},
-    {hjifErrorCode::Effect_Composition_Size_OutOfRange,
-     "Band Error: effect composition size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Effect_Composition_Size_OutOfRange))},
-    {hjifErrorCode::Effect_Keyframes_Size_OutOfRange,
-     "Band Error: effect keyframes size out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Effect_Keyframes_Size_OutOfRange))},
-    {hjifErrorCode::Keyframe_RelativePosition_OutOfRange,
-     "Band Error: keyframe relative position out of range. Error code: " +
-         std::to_string(static_cast<int>(hjifErrorCode::Keyframe_RelativePosition_OutOfRange))}};
+             static_cast<int>(hjifWarningCode::ReferenceDevice_MaximumDisplacement_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_Weight_OutOfRange,
+     "ReferenceDevice Warning: weight out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_Weight_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_Size_OutOfRange,
+     "ReferenceDevice Warning: size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_Size_OutOfRange))},
+    {hjifWarningCode::ReferenceDevice_Custom_OutOfRange,
+     "ReferenceDevice Warning: custom out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::ReferenceDevice_Custom_OutOfRange))},
+    {hjifWarningCode::Channel_ID_OutOfRange,
+     "Channel Warning: ID out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_ID_OutOfRange))},
+    {hjifWarningCode::Channel_Description_Size_OutOfRange,
+     "Channel Warning: description size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_Description_Size_OutOfRange))},
+    {hjifWarningCode::Channel_Gain_OutOfRange,
+     "Channel Warning: gain out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_Gain_OutOfRange))},
+    {hjifWarningCode::Channel_MixingWeight_OutOfRange,
+     "Channel Warning: mixingWeight out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_MixingWeight_OutOfRange))},
+    {hjifWarningCode::Channel_BodyPartMask_OutOfRange,
+     "Channel Warning: bodyPartMask out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_BodyPartMask_OutOfRange))},
+    {hjifWarningCode::Channel_FrequencySampling_OutOfRange,
+     "Channel Warning: frequencySampling out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_FrequencySampling_OutOfRange))},
+    {hjifWarningCode::Channel_SampleCount_OutOfRange,
+     "Channel Warning: sampleCount out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_SampleCount_OutOfRange))},
+    {hjifWarningCode::Channel_Vertices_Size_OutOfRange,
+     "Channel Warning: vertices size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_Vertices_Size_OutOfRange))},
+    {hjifWarningCode::Channel_Bands_Size_OutOfRange,
+     "Channel Warning: bands size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_Bands_Size_OutOfRange))},
+    {hjifWarningCode::Band_Effects_Size_OutOfRange,
+     "Band Warning: effects size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Band_Effects_Size_OutOfRange))},
+    {hjifWarningCode::Effect_ID_OutOfRange,
+     "Band Warning: effect ID out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Effect_ID_OutOfRange))},
+    {hjifWarningCode::Effect_Position_OutOfRange,
+     "Band Warning: effect position out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Effect_Position_OutOfRange))},
+    {hjifWarningCode::Effect_Composition_Size_OutOfRange,
+     "Band Warning: effect composition size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Effect_Composition_Size_OutOfRange))},
+    {hjifWarningCode::Effect_Keyframes_Size_OutOfRange,
+     "Band Warning: effect keyframes size out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Effect_Keyframes_Size_OutOfRange))},
+    {hjifWarningCode::Keyframe_RelativePosition_OutOfRange,
+     "Band Warning: keyframe relative position out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Keyframe_RelativePosition_OutOfRange))}};
 
 class IOCompatibility {
 public:
@@ -269,32 +269,32 @@ public:
 
     if (haptic.getDescription().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Experience_Description_Size_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Experience_Description_Size_OutOfRange));
     }
 
     if (haptic.getTimescaleOrDefault() > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Experience_Timescale_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Experience_Timescale_OutOfRange));
     }
 
     if (haptic.getAvatarsSize() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Experience_Avatars_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Experience_Avatars_Size_OutOfRange));
     }
 
     if (haptic.getPerceptionsSize() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Experience_Perceptions_Size_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Experience_Perceptions_Size_OutOfRange));
     }
   };
 
   static auto checkAvatar(types::Avatar &avatar, std::vector<std::string> &logs) -> void {
     if (avatar.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Avatar_ID_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Avatar_ID_OutOfRange));
     }
 
     auto mesh = avatar.getMesh();
     if (mesh.has_value()) {
       if (mesh.value().size() > MAX_8_BITS_UNSIGNED) {
-        logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Avatar_ID_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Avatar_ID_OutOfRange));
       }
     }
   };
@@ -302,66 +302,66 @@ public:
   static auto checkPerception(types::Perception &perception, std::vector<std::string> &logs)
       -> void {
     if (perception.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Perception_ID_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Perception_ID_OutOfRange));
     }
 
     if (perception.getDescription().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Perception_Description_Size_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Perception_Description_Size_OutOfRange));
     }
 
     if (perception.getEffectLibrarySize() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Perception_EffectLibrary_Size_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Perception_EffectLibrary_Size_OutOfRange));
     }
 
     if (perception.getEffectSemanticSchemeOrDefault().size() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Perception_SemanticScheme_Size_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Perception_SemanticScheme_Size_OutOfRange));
     }
 
     if (perception.getReferenceDevicesSize() > MAX_8_BITS_UNSIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Perception_ReferenceDevices_Size_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Perception_ReferenceDevices_Size_OutOfRange));
     }
 
     auto unitExponent = perception.getUnitExponentOrDefault();
     if (unitExponent > MAX_8_BITS_SIGNED || unitExponent < MIN_8_BITS_SIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Perception_UnitExponent_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Perception_UnitExponent_OutOfRange));
     }
 
     auto perceptionUnitExponent = perception.getPerceptionUnitExponentOrDefault();
     if (perceptionUnitExponent > MAX_8_BITS_SIGNED || perceptionUnitExponent < MIN_8_BITS_SIGNED) {
       logs.push_back(
-          hjifErrorCodeToString.at(hjifErrorCode::Perception_PerceptionUnitExponent_OutOfRange));
+          hjifWarningCodeToString.at(hjifWarningCode::Perception_PerceptionUnitExponent_OutOfRange));
     }
   };
 
   static auto checkSync(types::Sync &sync, std::vector<std::string> &logs) -> void {
     if (static_cast<unsigned int>(sync.getTimestamp()) > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Sync_Timestamp_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Sync_Timestamp_OutOfRange));
     }
 
     if (sync.getTimescaleOrDefault() > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Sync_Timescale_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Sync_Timescale_OutOfRange));
     }
   }
 
   static auto checkHapticDevice(types::ReferenceDevice &device, std::vector<std::string> &logs)
       -> void {
     if (device.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_ID_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_ID_OutOfRange));
     }
 
     if (device.getName().size() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Name_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange));
     }
 
     auto bodyPartMask = device.getBodyPartMask();
     if (bodyPartMask.has_value()) {
       if (bodyPartMask.value() > MAX_32_BITS_UNSIGNED) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Name_Size_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Name_Size_OutOfRange));
       }
     }
 
@@ -369,7 +369,7 @@ public:
     if (maximumFrequency.has_value()) {
       if (maximumFrequency.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_MaximumFrequency_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MaximumFrequency_OutOfRange));
       }
     }
 
@@ -377,7 +377,7 @@ public:
     if (minimumFrequency.has_value()) {
       if (minimumFrequency.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_MinimumFrequency_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MinimumFrequency_OutOfRange));
       }
     }
 
@@ -385,7 +385,7 @@ public:
     if (resonanceFrequency.has_value()) {
       if (resonanceFrequency.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_ResonanceFrequency_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_ResonanceFrequency_OutOfRange));
       }
     }
 
@@ -393,7 +393,7 @@ public:
     if (maximumAmplitude.has_value()) {
       if (maximumAmplitude.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_MaximumAmplitude_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MaximumAmplitude_OutOfRange));
       }
     }
 
@@ -401,7 +401,7 @@ public:
     if (impedance.has_value()) {
       if (impedance.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Impedance_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Impedance_OutOfRange));
       }
     }
 
@@ -409,7 +409,7 @@ public:
     if (maximumVoltage.has_value()) {
       if (maximumVoltage.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_MaximumVoltage_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MaximumVoltage_OutOfRange));
       }
     }
 
@@ -417,101 +417,101 @@ public:
     if (maximumCurrent.has_value()) {
       if (maximumCurrent.value() > TEN_K) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_MaximumCurrent_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_MaximumCurrent_OutOfRange));
       }
     }
 
     auto maximumDisplacement = device.getMaximumDisplacement();
     if (maximumDisplacement.has_value()) {
       if (maximumDisplacement.value() > TEN_K) {
-        logs.push_back(hjifErrorCodeToString.at(
-            hjifErrorCode::ReferenceDevice_MaximumDisplacement_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(
+            hjifWarningCode::ReferenceDevice_MaximumDisplacement_OutOfRange));
       }
     }
 
     auto weight = device.getWeight();
     if (weight.has_value()) {
       if (weight.value() > TEN_K) {
-        logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Weight_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Weight_OutOfRange));
       }
     }
 
     auto size = device.getSize();
     if (size.has_value()) {
       if (size.value() > TEN_K) {
-        logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Size_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Size_OutOfRange));
       }
     }
 
     auto custom = device.getCustom();
     if (custom.has_value()) {
       if (custom.value() > TEN_K || custom.value() < -TEN_K) {
-        logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::ReferenceDevice_Custom_OutOfRange));
+        logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_Custom_OutOfRange));
       }
     }
   }
 
   static auto checkChannel(types::Channel &channel, std::vector<std::string> &logs) -> void {
     if (channel.getId() > static_cast<int>(MAX_16_BITS_UNSIGNED)) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_ID_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_ID_OutOfRange));
     }
 
     if (channel.getDescription().size() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Description_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_Description_Size_OutOfRange));
     }
 
     auto gain = channel.getGain();
     if (gain > TEN_K || gain < -TEN_K) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Gain_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_Gain_OutOfRange));
     }
 
     if (channel.getMixingWeight() > TEN_K) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_MixingWeight_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_MixingWeight_OutOfRange));
     }
 
     if (channel.getBodyPartMask() > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_BodyPartMask_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_BodyPartMask_OutOfRange));
     }
 
     if (channel.getFrequencySampling() > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_FrequencySampling_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_FrequencySampling_OutOfRange));
     }
 
     if (channel.getSampleCount() > MAX_32_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_SampleCount_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_SampleCount_OutOfRange));
     }
 
     if (channel.getVerticesSize() > MAX_16_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Vertices_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_Vertices_Size_OutOfRange));
     }
 
     if (channel.getBandsSize() > MAX_8_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Channel_Bands_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_Bands_Size_OutOfRange));
     }
   }
 
   static auto checkBand(types::Band &band, std::vector<std::string> &logs) -> void {
     if (band.getEffectsSize() > MAX_16_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Band_Effects_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Band_Effects_Size_OutOfRange));
     }
   }
 
   static auto checkEffect(types::Effect &effect, std::vector<std::string> &logs) -> void {
     if (effect.getId() > 0 && effect.getId() > static_cast<int>(MAX_16_BITS_UNSIGNED)) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_ID_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Effect_ID_OutOfRange));
     }
 
     auto position = effect.getPosition();
     if (position > MAX_25_BITS_SIGNED || position < MIN_25_BITS_SIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Position_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Effect_Position_OutOfRange));
     }
 
     if (effect.getKeyframesSize() > MAX_16_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Keyframes_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Effect_Keyframes_Size_OutOfRange));
     }
 
     if (effect.getTimelineSize() > MAX_16_BITS_UNSIGNED) {
-      logs.push_back(hjifErrorCodeToString.at(hjifErrorCode::Effect_Composition_Size_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Effect_Composition_Size_OutOfRange));
     }
   }
 
@@ -520,7 +520,7 @@ public:
     if (position.has_value()) {
       if (position.value() > static_cast<int>(MAX_16_BITS_UNSIGNED)) {
         logs.push_back(
-            hjifErrorCodeToString.at(hjifErrorCode::Keyframe_RelativePosition_OutOfRange));
+            hjifWarningCodeToString.at(hjifWarningCode::Keyframe_RelativePosition_OutOfRange));
       }
     }
   }
