@@ -103,6 +103,9 @@ auto main(int argc, char *argv[]) -> int {
       for (auto &l : logs) {
         std::cerr << l << std::endl;
       }
+      std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                   "binary encoding may result in some information loss."
+                << std::endl;
     }
     codeExit = EXIT_SUCCESS;
   } else if (ext == "hmpg") {
@@ -113,6 +116,9 @@ auto main(int argc, char *argv[]) -> int {
       for (auto &l : logs) {
         std::cerr << l << std::endl;
       }
+      std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                   "binary encoding may result in some information loss."
+                << std::endl;
     }
     codeExit = EXIT_SUCCESS;
   } else {
