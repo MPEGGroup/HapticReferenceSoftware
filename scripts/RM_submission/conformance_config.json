@@ -695,77 +695,77 @@
         "expected_output": "{main_folder}\\HMPGConformance\\03_MIHSPacket-invalid_packet-type12.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error code: 11"
       },
       {
-        "name": "Invalid ...2",
+        "name": "MIHS Packet: Invalid packet type",
         "haptic_file_path": "HMPGConformance\\03_MIHSPacket-valid_packet-type00.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\03_MIHSPacket-valid_packet-type00.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain one initialization timing MIHS packet. Error code: 4"
       },
       {
-        "name": "Invalid ...3",
+        "name": "MIHS Unit: Invalid first MIHS unit type",
         "haptic_file_path": "HMPGConformance\\08_MIHSUnitType-invalid_first_MIHSUnitType01.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\08_MIHSUnitType-invalid_first_MIHSUnitType01.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: The first MIHS unit in a haptic stream shall be an initialization unit. Error code: 1"
       },
       {
-        "name": "Invalid ...4",
+        "name": "MIHS Unit: Invalid duration for initiarization unit",
         "haptic_file_path": "HMPGConformance\\09_MIHSUnit-initiarization-invalid_duration.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\09_MIHSUnit-initiarization-invalid_duration.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: The duration of an initialization unit duration shall be zero. Error code: 60"
       },
       {
-        "name": "Invalid ...5",
+        "name": "MIHS Unit: Invalid sync value for initiarization unit",
         "haptic_file_path": "HMPGConformance\\10_MIHSUnit-initiarization-non_sync.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\10_MIHSUnit-initiarization-non_sync.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit is a sync unit. Error code: 3"
       },
       {
-        "name": "Invalid ...6",
+        "name": "MIHS Packet: No INIT-TIMING in initialization unit",
         "haptic_file_path": "HMPGConformance\\11_non-MIHS-packet-type11_in_Initialization_MIHSUnit.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\11_non-MIHS-packet-type11_in_Initialization_MIHSUnit.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain one initialization timing MIHS packet. Error code: 4"
       },
       {
-        "name": "Invalid ...7",
+        "name": "Exprience: Invalid profile",
         "haptic_file_path": "HMPGConformance\\14_haptic-profile-invalid_profile.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\14_haptic-profile-invalid_profile.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Profile not defined in the specifications. Error code: 5"
       },
       {
-        "name": "Invalid ...8",
+        "name": "Exprience: Invalid level",
         "haptic_file_path": "HMPGConformance\\15_haptic-level-invalid_level.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\15_haptic-level-invalid_level.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Level not defined in the specifications. Error code: 6"
       },
       {
-        "name": "Invalid ...9",
+        "name": "Perception: Invalid perception modality",
         "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-invalid_perception_modality17.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-invalid_perception_modality17.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: 13"
       },
       {
-        "name": "Perception: invalid spatial perception modality in Temporal MIHS Unit",
+        "name": "Perception: Invalid spatial perception modality in Temporal MIHS Unit",
         "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. Error code: 59"
       },
       {
-        "name": "Invalid ...15",
+        "name": "Band: Invalid band type",
         "haptic_file_path": "HMPGConformance\\44_band-band_type-invalid_band_type.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\44_band-band_type-invalid_band_type.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Band error: Band type is out of range. Error code: 32"
       },
       {
-        "name": "Invalid ...16",
+        "name": "MIHS Packet: Invalid packet type for initialization unit",
         "haptic_file_path": "HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error code: 11"
       },
       {
-        "name": "Invalid ...17",
+        "name": "MIHS Unit: Invalid packet data for temporal unit",
         "haptic_file_path": "HMPGConformance\\55_TemporalUnit_have_no_MIHSPackets.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\55_TemporalUnit_have_no_MIHSPackets.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: A spatial unit shall contain one or more MIHS packets. Error code: 58"
       },
       {
-        "name": "Invalid ...18",
+        "name": "Effect: Invarid effect type",
         "haptic_file_path": "HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Effect Type does not exist. Error code: 53"
       },
       {
-        "name": "Invalid ...21",
+        "name": "Effect: Too long effect",
         "haptic_file_path": "HMPGConformance\\72_Too-long-effect.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\72_Too-long-effect.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: Position invalid. Error code: 62"
       },
       {
-        "name": "Invalid ...22",
+        "name": "Effect: Negative effect position",
         "haptic_file_path": "HMPGConformance\\73_negative-effect-position.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\73_negative-effect-position.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: Position invalid. Error code: 62"
       }
