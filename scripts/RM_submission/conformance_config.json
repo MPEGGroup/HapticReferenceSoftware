@@ -494,33 +494,33 @@
     "hmpg_compatibility_checks": [
       {
         "name": "Haptic: timescale too large",
-        "haptic_file_path": "HMPGConformance\\haptic-timescale-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-timescale-too_large.hjif",
+        "expected_output": "Invalid timescale. The main profile only supports a value lower than or equal to 48000\nThe HJIF input file is not conformant to the specification."
       },
       {
         "name": "Haptic: description too long",
-        "haptic_file_path": "HMPGConformance\\haptic-description-too_long.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-description-too_long.hjif",
+        "expected_output": "Experience Warning: description too long. Warning code: 0\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Haptic: too many avatars",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-too_many_avatars.hjif",
+        "expected_output": "Experience Warning: avatars vector size out of range. Warning code: 2\nAvatar Warning: ID out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Haptic: too many perceptions",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-too_many_perceptions.hjif",
+        "expected_output": "Experience Warning: perceptions vector size out of range. Warning code: 3\nPerception Warning: ID out of range. Warning code: 6\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\avatar-id_too_large.hjif",
+        "expected_output": "Avatar Warning: ID out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: type too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\avatar-lod_too_large.hjif",
+        "expected_output": "Avatar Warning: lod out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: mesh too long",
@@ -529,13 +529,13 @@
       },
       {
         "name": "Perception: id too large",
-        "haptic_file_path": "HMPGConformance\\perception-id-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-id-too_large.hjif",
+        "expected_output": "Perception Warning: ID out of range. Warning code: 6\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: description too long",
-        "haptic_file_path": "HMPGConformance\\perception-description-too_long.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-description-too_long.hjif",
+        "expected_output": "Perception Warning: description too long. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: semantic scheme too long",
@@ -644,33 +644,33 @@
       },
       {
         "name": "Channel: description too long",
-        "haptic_file_path": "HMPGConformance\\channel-description-too_long.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-description-too_long.hjif",
+        "expected_output": "Channel Warning: description size out of range. Warning code: 31\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: gain too large",
-        "haptic_file_path": "HMPGConformance\\channel-gain-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-gain-too_large.hjif",
+        "expected_output": "Channel Warning: gain out of range. Warning code: 32\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: mixing_weight too large",
-        "haptic_file_path": "HMPGConformance\\channel-mixing_weight-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_weight-too_large.hjif",
         "expected_output": ""
       },
       {
         "name": "Channel: body_part_mask too large",
-        "haptic_file_path": "HMPGConformance\\channel-body_part_mask-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-body_part_mask-too_large.hjif",
         "expected_output": ""
       },
       {
         "name": "Channel: frequency_sampling too large",
-        "haptic_file_path": "HMPGConformance\\channel-frequency_sampling-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-frequency_sampling-too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Channel: sample_count too large",
-        "haptic_file_path": "HMPGConformance\\channel-sample_count-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-sample_count-too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Effect: id too large",
@@ -679,128 +679,98 @@
       },
       {
         "name": "Effect: position too large",
-        "haptic_file_path": "HMPGConformance\\effect-position-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\effect-position-too_large.hjif",
+        "expected_output": "Band Warning: effect position out of range. Warning code: 41\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Keyframe: relative_position too large",
-        "haptic_file_path": "HMPGConformance\\keyframe-relative_position-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\keyframe-relative_position-too_large.hjif",
+        "expected_output": "Band Warning: keyframe relative position out of range. Warning code: 44\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       }
     ],
     "hmpg_conformance_checks": [
       {
-        "name": "Invalid ...",
+        "name": "MIHS Unit: Sync value is invalid",
         "haptic_file_path": "HMPGConformance\\02_MIHSUnitSync-invalid_MIHSUnitSync2.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\02_MIHSUnitSync-invalid_MIHSUnitSync2.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Invalid MIHS unit sync value. Error code: 2"
       },
       {
-        "name": "Invalid ...",
+        "name": "MIHS Packet: invalid packet type",
         "haptic_file_path": "HMPGConformance\\03_MIHSPacket-invalid_packet-type12.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\03_MIHSPacket-invalid_packet-type12.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error code: 11"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...2",
         "haptic_file_path": "HMPGConformance\\03_MIHSPacket-valid_packet-type00.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\03_MIHSPacket-valid_packet-type00.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain one initialization timing MIHS packet. Error code: 4"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...3",
         "haptic_file_path": "HMPGConformance\\08_MIHSUnitType-invalid_first_MIHSUnitType01.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\08_MIHSUnitType-invalid_first_MIHSUnitType01.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: The first MIHS unit in a haptic stream shall be an initialization unit. Error code: 1"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...4",
         "haptic_file_path": "HMPGConformance\\09_MIHSUnit-initiarization-invalid_duration.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\09_MIHSUnit-initiarization-invalid_duration.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: The duration of an initialization unit duration shall be zero. Error code: 60"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...5",
         "haptic_file_path": "HMPGConformance\\10_MIHSUnit-initiarization-non_sync.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\10_MIHSUnit-initiarization-non_sync.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit is a sync unit. Error code: 3"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...6",
         "haptic_file_path": "HMPGConformance\\11_non-MIHS-packet-type11_in_Initialization_MIHSUnit.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\11_non-MIHS-packet-type11_in_Initialization_MIHSUnit.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain one initialization timing MIHS packet. Error code: 4"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...7",
         "haptic_file_path": "HMPGConformance\\14_haptic-profile-invalid_profile.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\14_haptic-profile-invalid_profile.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Profile not defined in the specifications. Error code: 5"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...8",
         "haptic_file_path": "HMPGConformance\\15_haptic-level-invalid_level.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\15_haptic-level-invalid_level.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Level not defined in the specifications. Error code: 6"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...9",
         "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-invalid_perception_modality17.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-invalid_perception_modality17.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: 13"
       },
       {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality09.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\"
-      },
-      {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality10.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality10.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. Error code: 59"
-      },
-      {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality11.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality11.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. Error code: 59"
-      },
-      {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality15.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality15.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: 13"
-      },
-      {
-        "name": "Invalid ...",
+        "name": "Perception: invalid spatial perception modality in Temporal MIHS Unit",
         "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: 13"
+        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. Error code: 59"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...15",
         "haptic_file_path": "HMPGConformance\\44_band-band_type-invalid_band_type.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\44_band-band_type-invalid_band_type.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Band error: Band type is out of range. Error code: 32"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...16",
         "haptic_file_path": "HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_* MIHSPacket_Data error: MIHSPacket_Data allowed only in MIHSUnit_Temporal or MIHSUnit_Spatial. Error code: 41"
+        "expected_output": "{main_folder}\\HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error code: 11"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...17",
         "haptic_file_path": "HMPGConformance\\55_TemporalUnit_have_no_MIHSPackets.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\55_TemporalUnit_have_no_MIHSPackets.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: A spatial unit shall contain one or more MIHS packets. Error code: 58"
       },
       {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg_TO_FIX",
-        "expected_output": "{main_folder}\\HMPGConformance\\"
+        "name": "Invalid ...18",
+        "haptic_file_path": "HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Effect Type does not exist. Error code: 53"
       },
       {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\63_effect-effect_type-valid_effect_type0.hmpg",
-        "expected_output": "{main_folder}\\HMPGConformance\\"
-      },
-      {
-        "name": "Invalid ...",
-        "haptic_file_path": "HMPGConformance\\63_effect-effect_type-valid_effect_type1.hmpg_TO_FIX",
-        "expected_output": "{main_folder}\\HMPGConformance\\"
-      },
-      {
-        "name": "Invalid ...",
+        "name": "Invalid ...21",
         "haptic_file_path": "HMPGConformance\\72_Too-long-effect.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\72_Too-long-effect.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: Position invalid. Error code: 62"
       },
       {
-        "name": "Invalid ...",
+        "name": "Invalid ...22",
         "haptic_file_path": "HMPGConformance\\73_negative-effect-position.hmpg",
         "expected_output": "{main_folder}\\HMPGConformance\\73_negative-effect-position.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: Position invalid. Error code: 62"
       }
