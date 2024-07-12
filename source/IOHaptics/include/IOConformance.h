@@ -595,7 +595,8 @@ public:
     types::PerceptionModality modality = sreader.perception.getPerceptionModality();
     if (modality == types::PerceptionModality::VibrotactileTexture ||
         modality == types::PerceptionModality::Stiffness ||
-        modality == types::PerceptionModality::Friction) {
+        modality == types::PerceptionModality::Friction ||
+        modality == types::PerceptionModality::UserDefinedSpatial) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Temp_Data_PerceptionModality_Invalid));
       return false;
@@ -615,7 +616,8 @@ public:
         modality == types::PerceptionModality::Wind ||
         modality == types::PerceptionModality::Force ||
         modality == types::PerceptionModality::Electrotactile ||
-        modality == types::PerceptionModality::Other) {
+        modality == types::PerceptionModality::Other ||
+        modality == types::PerceptionModality::UserDefinedTemporal) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Spat_Data_PerceptionModality_Invalid));
       return false;
@@ -708,7 +710,7 @@ public:
     // }
 
     if ((modal < static_cast<int>(types::PerceptionModality::Other)) ||
-        (modal > static_cast<int>(types::PerceptionModality::Electrotactile))) {
+        (modal > static_cast<int>(types::PerceptionModality::UserDefinedSpatial))) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Perception_Modality_OutOfRange));
       return false;

@@ -55,9 +55,13 @@ enum class PerceptionModality {
   Wind = 8,
   Force = 9,
   VibrotactileTexture = 10,
-  Stiffness = 11,
-  Friction = 12,
-  Electrotactile = 13
+  Electrotactile = 11,
+  Stiffness = 12,
+  Friction = 13,
+  Humidity = 14,
+  UserDefinedTemporal = 15,
+  UserDefinedSpatial = 16
+
 };
 
 static const std::map<std::string, PerceptionModality> stringToPerceptionModality = {
