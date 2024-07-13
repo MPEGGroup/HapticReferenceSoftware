@@ -31,9 +31,9 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOJsonPrimitives.h>
-#include <IOHaptics/include/IOCompatibility.h>
 #include <Tools/include/Tools.h>
 #include <algorithm>
 #include <charconv>
@@ -281,7 +281,7 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
 
   // Check the URN
   auto semanticSchemeURN = perception.getEffectSemanticScheme();
-  if (semanticSchemeURN.has_value() && !URICheck(semanticSchemeURN.value(),false)) {
+  if (semanticSchemeURN.has_value() && !URICheck(semanticSchemeURN.value(), false)) {
     std::cerr << "The semantic scheme URN of perception " << id << " is invalid." << std::endl;
     conformant = false;
   }
