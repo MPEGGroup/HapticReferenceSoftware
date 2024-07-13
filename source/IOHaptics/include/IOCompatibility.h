@@ -483,7 +483,8 @@ public:
     }
 
     if (channel.getMixingWeight() > TEN_K) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_MixingCoefficient_OutOfRange));
+      logs.push_back(
+          hjifWarningCodeToString.at(hjifWarningCode::Channel_MixingCoefficient_OutOfRange));
     }
 
     if (channel.getBodyPartMask() > MAX_32_BITS_UNSIGNED) {
