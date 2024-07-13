@@ -539,108 +539,118 @@
       },
       {
         "name": "Perception: semantic scheme too long",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-semantic_scheme_too_long.hjif",
+        "expected_output": "Perception Warning: semantic scheme size out of range. Warning code: 10\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: too many reference devices",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-too_many_reference_devices.hjif",
+        "expected_output": "Perception Warning: reference devices vector size out of range. Warning code: 11\nReferenceDevice Warning: ID out of range. Warning code: 17\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: unit exponent too small",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-unit_exponent_too_small.hjif",
+        "expected_output": "Perception Warning: unit exponent out of range. Warning code: 13\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: unit_exponent too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-unit_exponent_too_large.hjif",
+        "expected_output": "Perception Warning: unit exponent out of range. Warning code: 13\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: perception_unit_exponent too_small",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-perception_unit_exponent_too_small.hjif",
+        "expected_output": "Perception Warning: perception unit exponent out of range. Warning code: 14\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: perception_unit_exponent too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-perception_unit_exponent_too_small.hjif",
+        "expected_output": "Perception Warning: perception unit exponent out of range. Warning code: 14\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Sync: timestamp too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\sync-timestamp_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Sync: timescale too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\sync-timescale_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Reference Device: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-id_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: ID out of range. Warning code: 17\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: name too_long",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-name_too_long.hjif",
+        "expected_output": "ReferenceDevice Warning: name size out of range. Warning code: 18\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: minimum_frequency too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-minimum_frequency_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: minimum frequency out of range. Warning code: 21\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_frequency too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_frequency_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum frequency out of range. Warning code: 20\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: resonance_frequency too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-resonance_frequency_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: resonance frequency out of range. Warning code: 22\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_amplitude too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_amplitude_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum amplitude out of range. Warning code: 23\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: impedance too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-impedance_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: impedance out of range. Warning code: 24\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_voltage too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_voltage_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum voltage out of range. Warning code: 25\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_current too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_current_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum current out of range. Warning code: 26\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_displacement too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_displacement_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum displacement out of range. Warning code: 27\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: weight too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-weight_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: weight out of range. Warning code: 28\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: size too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-size_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: size out of range. Warning code: 29\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+      },
+      {
+        "name": "Reference Device: custom too small",
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-custom_too_small.hjif",
+        "expected_output": "ReferenceDevice Warning: custom out of range. Warning code: 30\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+      },
+      {
+        "name": "Reference Device: custom too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-custom_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: custom out of range. Warning code: 30\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-id_too_large.hjif",
+        "expected_output": "Channel Warning: ID out of range. Warning code: 31\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: description too long",
@@ -653,9 +663,9 @@
         "expected_output": "Channel Warning: gain out of range. Warning code: 33\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
-        "name": "Channel: mixing_weight too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_weight-too_large.hjif",
-        "expected_output": ""
+        "name": "Channel: mixing_coefficient too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_coefficient-too_large.hjif",
+        "expected_output": "Channel Warning: mixingCoefficient out of range. Warning code: 34\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: frequency_sampling too large",
@@ -669,8 +679,8 @@
       },
       {
         "name": "Effect: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\effect-id_too_large.hjif",
+        "expected_output": "Band Warning: effect ID out of range. Warning code: 41\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Effect: position too large",
