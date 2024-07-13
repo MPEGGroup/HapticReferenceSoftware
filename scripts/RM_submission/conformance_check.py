@@ -115,7 +115,7 @@ def main():
             expected_output = conformance_check[EXPECTED_OUTPUT_KEY].replace("{main_folder}",config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY])
             valid = result.stderr.splitlines()==expected_output.splitlines()
             if(not valid):
-                check_fails.append("\n---------------------\n\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
+                check_fails.append("\n---------------------\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
                 check_fails.append("- Output : \n"+result.stderr)
                 check_fails.append("- Expected output: \n"+expected_output)
             print("Test #",test_number,":\t",valid,"\t|\t",conformance_check[NAME_KEY])
@@ -123,16 +123,17 @@ def main():
             test_number+=1
             if(valid):
                 nb_success+=1
-    if(nb_success == nb_tests):
-        print("\nSUCCESS: ",nb_success,"/",nb_tests," valid tests")
-    else:
-        print("\nFAIL: ",nb_success,"/",nb_tests," valid tests")
-        print("The following tests failed:")
-        print("\n".join(check_fails))
+        if(nb_success == nb_tests):
+            print("\nSUCCESS: ",nb_success,"/",nb_tests," valid tests")
+        else:
+            print("\nFAIL: ",nb_success,"/",nb_tests," valid tests")
+            print("The following tests failed:")
+            print("\n".join(check_fails))
 
-    check_fails = []
-    test_number = 1;
-    nb_success = 0;
+        check_fails = []
+        test_number = 1;
+        nb_success = 0;
+        nb_tests = 0;
     
     print("\n####### Conversion Conformance Tests\n")
     for conversion_check in config[CONFORMANCE_FILES_KEY][CONFORMANCE_TEST_SET_KEY]:
