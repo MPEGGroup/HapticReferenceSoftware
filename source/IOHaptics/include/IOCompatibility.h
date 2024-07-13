@@ -52,7 +52,7 @@ enum class hjifWarningCode {
   Channel_ID_OutOfRange,
   Channel_Description_Size_OutOfRange,
   Channel_Gain_OutOfRange,
-  Channel_MixingWeight_OutOfRange,
+  Channel_MixingCoefficient_OutOfRange,
   Channel_BodyPartMask_OutOfRange,
   Channel_FrequencySampling_OutOfRange,
   Channel_SampleCount_OutOfRange,
@@ -185,9 +185,9 @@ static const std::map<hjifWarningCode, std::string> hjifWarningCodeToString = {
     {hjifWarningCode::Channel_Gain_OutOfRange,
      "Channel Warning: gain out of range. Warning code: " +
          std::to_string(static_cast<int>(hjifWarningCode::Channel_Gain_OutOfRange))},
-    {hjifWarningCode::Channel_MixingWeight_OutOfRange,
-     "Channel Warning: mixingWeight out of range. Warning code: " +
-         std::to_string(static_cast<int>(hjifWarningCode::Channel_MixingWeight_OutOfRange))},
+    {hjifWarningCode::Channel_MixingCoefficient_OutOfRange,
+     "Channel Warning: mixingCoefficient out of range. Warning code: " +
+         std::to_string(static_cast<int>(hjifWarningCode::Channel_MixingCoefficient_OutOfRange))},
     {hjifWarningCode::Channel_BodyPartMask_OutOfRange,
      "Channel Warning: bodyPartMask out of range. Warning code: " +
          std::to_string(static_cast<int>(hjifWarningCode::Channel_BodyPartMask_OutOfRange))},
@@ -483,7 +483,7 @@ public:
     }
 
     if (channel.getMixingWeight() > TEN_K) {
-      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_MixingWeight_OutOfRange));
+      logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_MixingCoefficient_OutOfRange));
     }
 
     if (channel.getBodyPartMask() > MAX_32_BITS_UNSIGNED) {
