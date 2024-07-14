@@ -368,7 +368,7 @@
       {
         "name": "Haptic: invalid timescale",
         "haptic_file_path": "SemanticConformance\\haptic-timescale-invalid_timescale.hjif",
-        "expected_output": "Invalid timescale. The main profile only supports a value lower than or equal to 48000\nThe HJIF input file is not conformant to the specification."
+        "expected_output": "Invalid timescale. The simple parametric profile only supports a value of 1000.\nThe HJIF input file is not conformant to the specification."
       },
       {
         "name": "Avatar: duplicate id",
@@ -493,14 +493,14 @@
     ],
     "hmpg_compatibility_checks": [
       {
-        "name": "Haptic: timescale too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-timescale-too_large.hjif",
-        "expected_output": "Invalid timescale. The main profile only supports a value lower than or equal to 48000\nThe HJIF input file is not conformant to the specification."
+        "name": "Haptic: description too long",
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-description_too_long.hjif",
+        "expected_output": "Experience Warning: description too long. Warning code: 0\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
-        "name": "Haptic: description too long",
-        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-description-too_long.hjif",
-        "expected_output": "Experience Warning: description too long. Warning code: 0\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+        "name": "Haptic: timescale too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-timescale_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Haptic: too many avatars",
@@ -529,12 +529,12 @@
       },
       {
         "name": "Perception: id too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\perception-id-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-id_too_large.hjif",
         "expected_output": "Perception Warning: ID out of range. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: description too long",
-        "haptic_file_path": "HMPGCompatibilityConformance\\perception-description-too_long.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-description_too_long.hjif",
         "expected_output": "Perception Warning: description too long. Warning code: 8\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
@@ -654,27 +654,27 @@
       },
       {
         "name": "Channel: description too long",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-description-too_long.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-description_too_long.hjif",
         "expected_output": "Channel Warning: description size out of range. Warning code: 32\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: gain too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-gain-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-gain_too_large.hjif",
         "expected_output": "Channel Warning: gain out of range. Warning code: 33\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: mixing_coefficient too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_coefficient-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_coefficient_too_large.hjif",
         "expected_output": "Channel Warning: mixingCoefficient out of range. Warning code: 34\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: frequency_sampling too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-frequency_sampling-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-frequency_sampling_too_large.hjif",
         "expected_output": "TODO"
       },
       {
         "name": "Channel: sample_count too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\channel-sample_count-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-sample_count_too_large.hjif",
         "expected_output": "TODO"
       },
       {
@@ -684,12 +684,12 @@
       },
       {
         "name": "Effect: position too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\effect-position-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\effect-position_too_large.hjif",
         "expected_output": "Band Warning: effect position out of range. Warning code: 42\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Keyframe: relative_position too large",
-        "haptic_file_path": "HMPGCompatibilityConformance\\keyframe-relative_position-too_large.hjif",
+        "haptic_file_path": "HMPGCompatibilityConformance\\keyframe-relative_position_too_large.hjif",
         "expected_output": "Band Warning: keyframe relative position out of range. Warning code: 45\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       }
     ],
