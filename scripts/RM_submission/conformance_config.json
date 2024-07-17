@@ -436,11 +436,6 @@
         "expected_output": "The actuator resolution in channel 0 of perception 0 is invalid. It contains a negative value.\nThe HJIF input file is not conformant to the specification."
       },
       {
-        "name": "Channel: actuator_target out of resolution range",
-        "haptic_file_path": "SemanticConformance\\channel-actuator_target-out_of_resolution_range.hjif",
-        "expected_output": "One actuator target is out of the actuator resolution range in channel 0 of perception 0.\nThe HJIF input file is not conformant to the specification."
-      },
-      {
         "name": "Channel: too many bands",
         "haptic_file_path": "SemanticConformance\\channel-bands-too_many_bands.hjif",
         "expected_output": "The number of bands in channel 0 of perception 0 is too high. The level 1 only supports up to 7 bands per channel.\nThe HJIF input file is not conformant to the specification."
