@@ -50,4 +50,10 @@ auto Sync::setTimescale(std::optional<unsigned int> newTimescale) -> void {
   this->timescale = newTimescale;
 }
 
+auto Sync::equals(const Sync &sync) const -> bool {
+  bool isEqual = timestamp == sync.getTimestamp();
+  isEqual = isEqual && (timescale == sync.getTimescale());
+  return isEqual;
+}
+
 } // namespace haptics::types

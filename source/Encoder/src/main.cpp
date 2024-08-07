@@ -35,6 +35,7 @@
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
 #include <Tools/include/InputParser.h>
@@ -286,6 +287,16 @@ auto main(int argc, char *argv[]) -> int {
   }
   if (inputParser.cmdOptionExists("-l") || inputParser.cmdOptionExists("--linearize")) {
     hapticFile.linearize();
+  }
+
+  auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
+  if (!logs.empty()) {
+    for (auto &l : logs) {
+      std::cerr << l << std::endl;
+    }
+    std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                 "binary encoding may result in some information loss."
+              << std::endl;
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {

@@ -40,7 +40,7 @@ using haptics::types::Haptics;
 
 TEST_CASE("haptics::types::Haptics") {
 
-  Haptics h("1", "02/04/2022", "test content");
+  Haptics h("2023", "02/04/2022", "test content");
   haptics::types::Avatar avatar(0, 0, haptics::types::AvatarType::Vibration);
   haptics::types::Perception perception(0, 0, "Vibration effect",
                                         haptics::types::PerceptionModality::Vibrotactile);
@@ -75,7 +75,7 @@ TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
     haptics::tools::OHMData ohmData;
     const std::string header = "OHM ";
     const std::string description = "Test description";
-    const int version = 1;
+    const int version = 2023;
     const std::string elementDescription = "Element description";
     const std::string channelDescription = "Channel description";
     const haptics::tools::OHMData::Body bodyPartMask = haptics::tools::OHMData::Body::UNSPECIFIED;

@@ -31,6 +31,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOJsonPrimitives.h>
 #include <Tools/include/Tools.h>
@@ -187,12 +188,12 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
       std::cerr << "Invalid timescale. The simple parametric profile only supports a value of 1000."
                 << std::endl;
       conformant = false;
-    } else if (profile == "Main" && timescale > MAX_TIMESCALE_MAIN) {
+    } /*else if (profile == "Main" && timescale > MAX_TIMESCALE_MAIN) {
       std::cerr << "Invalid timescale. The main profile only supports a value lower than or equal "
                    "to 48000"
                 << std::endl;
       conformant = false;
-    }
+    }*/
   }
   for (unsigned int i = 0; i < haptic.getAvatarsSize(); i++) {
     conformant &= semanticConformanceCheckAvatar(haptic.getAvatarAt(static_cast<int>(i)), haptic);
@@ -279,9 +280,8 @@ auto IOJson::semanticConformanceCheckPerception(types::Perception &perception,
   }
 
   // Check the URN
-  // TODO
   auto semanticSchemeURN = perception.getEffectSemanticScheme();
-  if (semanticSchemeURN) {
+  if (semanticSchemeURN.has_value() && !URICheck(semanticSchemeURN.value(), false)) {
     std::cerr << "The semantic scheme URN of perception " << id << " is invalid." << std::endl;
     conformant = false;
   }
@@ -416,17 +416,15 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   if (haptic.getLevel() == 1) {
     if (channel.getBandsSize() > MAX_BANDS_LEVEL1) {
       std::cerr << "The number of bands in channel " << id << " of perception "
-                << perception.getId()
-                << " is too high. The level 1 only supports up to 7 bands per channel."
-                << std::endl;
+                << perception.getId() << " is too high. The level 1 only supports up to "
+                << MAX_BANDS_LEVEL1 << " bands per channel." << std::endl;
       conformant = false;
     }
   } else if (haptic.getLevel() == 2) {
     if (channel.getBandsSize() > MAX_BANDS_LEVEL2) {
-      std::cerr << "The number of channels in channel " << id << " of perception "
-                << perception.getId()
-                << " is too high. The level 2 only supports up to 65536 bands per channel."
-                << std::endl;
+      std::cerr << "The number of bands in channel " << id << " of perception "
+                << perception.getId() << " is too high. The level 2 only supports up to "
+                << MAX_BANDS_LEVEL2 << " bands per channel." << std::endl;
       conformant = false;
     }
   }
@@ -666,6 +664,15 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   if (!semanticConformanceCheckExperience(haptic)) {
     std::cerr << "The HJIF input file is not conformant to the specification." << std::endl;
     return false;
+  }
+  auto logs = haptics::io::IOCompatibility::checkHaptics(haptic);
+  if (!logs.empty()) {
+    for (auto &l : logs) {
+      std::cerr << l << std::endl;
+    }
+    std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                 "binary encoding may result in some information loss."
+              << std::endl;
   }
   return loadingSuccess;
 }

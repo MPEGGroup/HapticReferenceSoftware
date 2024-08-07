@@ -31,6 +31,9 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOBinaryFields.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
+#include <Tools/include/Tools.h>
 #include <Types/include/Keyframe.h>
 
 namespace haptics::types {
@@ -63,6 +66,28 @@ auto Keyframe::operator==(const Keyframe &keyframe) -> bool {
   return (relativePosition == keyframe.getRelativePosition() &&
           amplitudeModulation == keyframe.getAmplitudeModulation() &&
           frequencyModulation == keyframe.getFrequencyModulation());
+}
+
+auto Keyframe::equals(const Keyframe &keyframe) const -> bool {
+  if (relativePosition != keyframe.getRelativePosition()) {
+    std::cerr << "Keyframe - relative positions are different" << std::endl;
+    return false;
+  }
+  if (amplitudeModulation.has_value() != keyframe.getAmplitudeModulation().has_value()) {
+    std::cerr << "Keyframe - amplitude modulations are different" << std::endl;
+    return false;
+  }
+  if (amplitudeModulation.has_value() &&
+      !tools::almostEquals(amplitudeModulation.value(), keyframe.getAmplitudeModulation().value(),
+                           haptics::io::KEYFRAME_AMPLITUDE, 2 * haptics::io::MAX_AMPLITUDE)) {
+    std::cerr << "Keyframe - amplitude modulations are different" << std::endl;
+    return false;
+  }
+  if (frequencyModulation != keyframe.getFrequencyModulation()) {
+    std::cerr << "Keyframe - frequency modulations are different" << std::endl;
+    return false;
+  }
+  return true;
 }
 
 auto Keyframe::operator!=(const Keyframe &keyframe) -> bool { return !(*this == keyframe); }

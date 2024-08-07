@@ -125,4 +125,23 @@ auto ReferenceDevice::setCustom(float newCustom) -> void { custom = newCustom; }
 
 auto ReferenceDevice::setType(ActuatorType newType) -> void { type = newType; }
 
+auto ReferenceDevice::equals(const ReferenceDevice &device) const -> bool {
+  bool isEqual = id == device.getId();
+  isEqual = isEqual && (name == device.getName());
+  isEqual = isEqual && (bodyPartMask == device.getBodyPartMask());
+  isEqual = isEqual && (maximumFrequency == device.getMaximumFrequency());
+  isEqual = isEqual && (minimumFrequency == device.getMinimumFrequency());
+  isEqual = isEqual && (resonanceFrequency == device.getResonanceFrequency());
+  isEqual = isEqual && (maximumAmplitude == device.getMaximumAmplitude());
+  isEqual = isEqual && (impedance == device.getImpedance());
+  isEqual = isEqual && (maximumVoltage == device.getMaximumVoltage());
+  isEqual = isEqual && (maximumCurrent == device.getMaximumCurrent());
+  isEqual = isEqual && (maximumDisplacement == device.getMaximumDisplacement());
+  isEqual = isEqual && (weight == device.getWeight());
+  isEqual = isEqual && (size == device.getSize());
+  isEqual = isEqual && (custom == device.getCustom());
+  isEqual = isEqual && (type == device.getType());
+  return isEqual;
+}
+
 } // namespace haptics::types

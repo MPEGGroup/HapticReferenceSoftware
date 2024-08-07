@@ -44,6 +44,7 @@ import matplotlib.pyplot as plt
 from soundfile import read, write
 
 RM_INSTALL_DIR = "RM_install_dir"
+CONFORMANCE_PATH_KEY = "conformance_path"
 ENCODER_PATH_KEY = "encoder_path"
 DECODER_PATH_KEY = "decoder_path"
 SYNTHESIZER_PATH_KEY = "synthesizer_path"
@@ -59,8 +60,11 @@ MAIN_FOLDER_KEY = "main_folder"
 CONFORMANCE_FILES_KEY = "conformance_files"
 CONFORMANCE_TEST_SET_KEYS = [
     "schemas_checks",
-    "semantic_checks"
+    "semantic_checks",
+    "hmpg_compatibility_checks",
+    "hmpg_conformance_checks"
 ]
+CONFORMANCE_TEST_SET_KEY = "conversion_checks"
 
 def checkSoftwarePath(config: dict):
     def _check_software(dir_key: str,path_key: str):
@@ -71,6 +75,7 @@ def checkSoftwarePath(config: dict):
         assert os.path.exists(config_file), f"{path_key} should be an existing file"
         assert os.access(config_file, os.X_OK), f"{path_key} should be executable"
 
+    _check_software(RM_INSTALL_DIR, CONFORMANCE_PATH_KEY)
     _check_software(RM_INSTALL_DIR, ENCODER_PATH_KEY)
     _check_software(RM_INSTALL_DIR, DECODER_PATH_KEY)
     _check_software(RM_INSTALL_DIR, SYNTHESIZER_PATH_KEY)
@@ -85,15 +90,13 @@ def main():
     if os.path.exists(output_folder):
         shutil.rmtree(output_folder)
 
-
-    #text_file = open("testlog.txt", "w")
+    print("####### HJIF Conformance Tests")
     nb_tests = 0
     nb_success = 0
     check_fails = []
     for conformance_check_type in CONFORMANCE_TEST_SET_KEYS:
         print("\n****** ",conformance_check_type," ******")
         test_number = 1;
-        #text_file.write("****** "+conformance_check_type+" ******\n")
         for conformance_check in config[CONFORMANCE_FILES_KEY][conformance_check_type]:
             input_file_path = conformance_check[HAPTIC_FILE_PATH_KEY]
             if MAIN_FOLDER_KEY in config[CONFORMANCE_FILES_KEY]:
@@ -105,27 +108,64 @@ def main():
                 input_file_path = os.path.join(config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
                 if(not os.path.exists(input_file_path)):
                     print(f"FILE NOT FOUND: {input_file_path}")
+                    nb_tests+=1
+                    test_number+=1
                     continue
-            #print("\n",conformance_check[NAME_KEY])
-            #print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder on : {input_file_path}"))
-            result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hjif",shell=True, capture_output=True, text=True)
-            valid = result.stderr.splitlines()==conformance_check[EXPECTED_OUTPUT_KEY].splitlines()
+            result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[CONFORMANCE_PATH_KEY])} -f {input_file_path}",shell=True, capture_output=True, text=True)
+            expected_output = conformance_check[EXPECTED_OUTPUT_KEY].replace("{main_folder}",config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY])
+            valid = result.stderr.splitlines()==expected_output.splitlines()
             if(not valid):
-                check_fails.append("*********\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
+                check_fails.append("\n---------------------\n"+conformance_check_type +" #"+str(test_number)+" failed: "+conformance_check[NAME_KEY]+"\n")
                 check_fails.append("- Output : \n"+result.stderr)
-                check_fails.append("- Expected output: \n"+conformance_check[EXPECTED_OUTPUT_KEY])
+                check_fails.append("- Expected output: \n"+expected_output)
             print("Test #",test_number,":\t",valid,"\t|\t",conformance_check[NAME_KEY])
             nb_tests+=1
             test_number+=1
             if(valid):
                 nb_success+=1
-            #text_file.write('\\n'.join(result.stderr.replace("\\","\\\\").splitlines())+"\n\n")
-    #text_file.close()
-    print("####### Conformance Results")
-    if(nb_success == nb_tests):
-        print("SUCCESS: ",nb_success,"/",nb_tests," valid tests")
+        if(nb_success == nb_tests):
+            print("\nSUCCESS: ",nb_success,"/",nb_tests," valid tests")
+        else:
+            print("\nFAIL: ",nb_success,"/",nb_tests," valid tests")
+            print("The following tests failed:")
+            print("\n".join(check_fails))
+
+        check_fails = []
+        test_number = 1;
+        nb_success = 0;
+        nb_tests = 0;
+    
+    print("\n####### Conversion Conformance Tests\n")
+    for conversion_check in config[CONFORMANCE_FILES_KEY][CONFORMANCE_TEST_SET_KEY]:
+        input_file_path = conversion_check[HAPTIC_FILE_PATH_KEY]
+        if MAIN_FOLDER_KEY in config[CONFORMANCE_FILES_KEY]:
+            if(input_file_path == ""):
+                print("Conversion Test ",conversion_check[NAME_KEY],"TO DO\t")
+                test_number+=1
+                continue
+            input_file_path = os.path.join(config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY], input_file_path)
+            if(not os.path.exists(input_file_path)):
+                print(f"FILE NOT FOUND: {input_file_path}")
+                test_number+=1
+                continue
+        binary_encoding_result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o test.hmpg -b",shell=True, capture_output=True, text=True)
+        decoding_result = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f test.hmpg -o testDecoded.hjif",shell=True, capture_output=True, text=True)
+        comparison = subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[CONFORMANCE_PATH_KEY])} -f {input_file_path} -c testDecoded.hjif",shell=True, capture_output=True, text=True)
+        expected_output = conversion_check[EXPECTED_OUTPUT_KEY].replace("{main_folder}",config[CONFORMANCE_FILES_KEY][MAIN_FOLDER_KEY])
+        valid = comparison.stderr.splitlines()==expected_output.splitlines()
+        if(not valid):
+            check_fails.append("\n---------------------\n\nConversion #"+str(test_number)+" failed: "+conversion_check[NAME_KEY]+"\n")
+            check_fails.append("- Output : \n"+comparison.stderr)
+            check_fails.append("- Expected output: \n"+expected_output)
+        else:
+            nb_success+=1
+        print("Test #",test_number,":\t",valid,"\t|\t",conversion_check[NAME_KEY])
+        test_number+=1
+        
+    if(nb_success == test_number-1):
+        print("\nSUCCESS: ",nb_success,"/",test_number-1," valid tests")
     else:
-        print("FAIL: ",nb_success,"/",nb_tests," valid tests")
+        print("\nFAIL: ",nb_success,"/",test_number-1," valid tests")
         print("The following test failed:")
         print("\n".join(check_fails))
 

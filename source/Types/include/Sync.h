@@ -49,6 +49,7 @@ public:
   [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
   [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
   auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
+  [[nodiscard]] auto equals(const Sync &sync) const -> bool;
 
 private:
   static constexpr unsigned int DEFAULT_TIMESCALE = 1000;

@@ -52,6 +52,9 @@ struct Vector {
   auto operator==(const Vector &other) const -> bool {
     return X == other.X && Y == other.Y && Z == other.Z;
   };
+  auto operator!=(const Vector &other) const -> bool {
+    return X != other.X || Y != other.Y || Z != other.Z;
+  };
 };
 
 class Channel {
@@ -120,6 +123,7 @@ public:
   auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
   [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
   auto setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void;
+  [[nodiscard]] auto equals(const Channel &channel) const -> bool;
 
 private:
   int id = -1;

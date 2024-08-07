@@ -1,341 +1,342 @@
 {
   "RM_install_dir": "..\\..\\out\\build\\x64-Debug\\source\\",
+  "conformance_path": "Conformance\\Conformance.exe",
   "encoder_path": "Encoder\\Encoder.exe",
   "decoder_path": "Decoder\\Decoder.exe",
   "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "conformance_files": {
-    "main_folder": "..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance",
+    "main_folder": "..\\..\\..\\..\\..\\..\\..\\Data\\Conformance",
     "schemas_checks": [
       {
         "name": "Haptic: version year as number",
         "haptic_file_path": "SchemaConformance\\haptic-version-year_as_number.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-version-year_as_number.hjif\nInvalid schema: #/properties/version\nInvalid keyword: type\nInvalid document:#/version"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-version-year_as_number.hjif\nInvalid schema: #/properties/version\nInvalid keyword: type\nInvalid document:#/version"
       },
       {
         "name": "Haptic: invalid version",
         "haptic_file_path": "SchemaConformance\\haptic-version-invalid_version.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-version-invalid_version.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-version-invalid_version.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
       },
       {
         "name": "Haptic: version invalid amendment",
         "haptic_file_path": "SchemaConformance\\haptic-version-invalid_amendment.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-version-invalid_amendment.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-version-invalid_amendment.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
       },
       {
         "name": "Haptic: version invalid year",
         "haptic_file_path": "SchemaConformance\\haptic-version-invalid_year.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-version-invalid_year.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-version-invalid_year.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
       },
 	  {
         "name": "Haptic: timescale negative",
         "haptic_file_path": "SchemaConformance\\haptic-timescale-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-timescale-negative.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/timescale"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-timescale-negative.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/timescale"
       },
       {
         "name": "Haptic: timescale zero",
         "haptic_file_path": "SchemaConformance\\haptic-timescale-zero.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-timescale-zero.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/timescale"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-timescale-zero.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/timescale"
       },
       {
         "name": "Haptic: no perceptions",
         "haptic_file_path": "SchemaConformance\\haptic-perceptions-no_perception.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\haptic-perceptions-no_perception.hjif\nInvalid schema: #/properties/perceptions\nInvalid keyword: minItems\nInvalid document:#/perceptions"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\haptic-perceptions-no_perception.hjif\nInvalid schema: #/properties/perceptions\nInvalid keyword: minItems\nInvalid document:#/perceptions"
       },
       {
         "name": "Avatar: id negative",
         "haptic_file_path": "SchemaConformance\\avatar-id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\avatar-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/avatars/0/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\avatar-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/avatars/0/id"
       },
       {
         "name": "Avatar: id equals zero",
         "haptic_file_path": "SchemaConformance\\avatar-id-zero.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\avatar-id-zero.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/avatars/0/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\avatar-id-zero.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/avatars/0/id"
       },
       {
         "name": "Avatar: lod negative",
         "haptic_file_path": "SchemaConformance\\avatar-lod-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\avatar-lod-negative.hjif\nInvalid schema: #/properties/lod\nInvalid keyword: minimum\nInvalid document:#/avatars/0/lod"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\avatar-lod-negative.hjif\nInvalid schema: #/properties/lod\nInvalid keyword: minimum\nInvalid document:#/avatars/0/lod"
       },
       {
         "name": "Avatar: type invalid",
         "haptic_file_path": "SchemaConformance\\avatar-type-invalid.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\avatar-type-invalid.hjif\nInvalid schema: #/properties/type\nInvalid keyword: enum\nInvalid document:#/avatars/0/type"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\avatar-type-invalid.hjif\nInvalid schema: #/properties/type\nInvalid keyword: enum\nInvalid document:#/avatars/0/type"
       },
       {
         "name": "Perception: id negative",
         "haptic_file_path": "SchemaConformance\\perception-id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\perception-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\perception-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/id"
       },
       {
         "name": "Perception: invalid perception modality",
         "haptic_file_path": "SchemaConformance\\perception-perception_modality-invalid_perception_modality.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\perception-perception_modality-invalid_perception_modality.hjif\nInvalid schema: #/properties/perception_modality\nInvalid keyword: enum\nInvalid document:#/perceptions/0/perception_modality"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\perception-perception_modality-invalid_perception_modality.hjif\nInvalid schema: #/properties/perception_modality\nInvalid keyword: enum\nInvalid document:#/perceptions/0/perception_modality"
       },
       {
         "name": "Perception: priority negative",
         "haptic_file_path": "SchemaConformance\\perception-priority-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\perception-priority-negative.hjif\nInvalid schema: #/properties/priority\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/priority"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\perception-priority-negative.hjif\nInvalid schema: #/properties/priority\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/priority"
       },
       {
         "name": "Perception: avatar id negative",
         "haptic_file_path": "SchemaConformance\\perception-avatar-id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\perception-avatar-id-negative.hjif\nInvalid schema: #/properties/avatar_id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/avatar_id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\perception-avatar-id-negative.hjif\nInvalid schema: #/properties/avatar_id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/avatar_id"
       },
       {
         "name": "Perception: no channel",
         "haptic_file_path": "SchemaConformance\\perception-channels-no_channels.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\perception-channels-no_channels.hjif\nInvalid schema: #/properties/channels\nInvalid keyword: minItems\nInvalid document:#/perceptions/0/channels"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\perception-channels-no_channels.hjif\nInvalid schema: #/properties/channels\nInvalid keyword: minItems\nInvalid document:#/perceptions/0/channels"
       },
       {
         "name": "Sync: timestamp negative",
         "haptic_file_path": "SchemaConformance\\sync-timestamp-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\sync-timestamp-negative.hjif\nInvalid schema: #/properties/timestamp\nInvalid keyword: minimum\nInvalid document:#/syncs/0/timestamp"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\sync-timestamp-negative.hjif\nInvalid schema: #/properties/timestamp\nInvalid keyword: minimum\nInvalid document:#/syncs/0/timestamp"
       },
       {
         "name": "Sync: timescale negative",
         "haptic_file_path": "SchemaConformance\\sync-timescale-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\sync-timescale-negative.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/syncs/0/timescale"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\sync-timescale-negative.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/syncs/0/timescale"
       },
       {
         "name": "Sync: timescale zero",
         "haptic_file_path": "SchemaConformance\\sync-timescale-zero.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\sync-timescale-zero.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/syncs/0/timescale"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\sync-timescale-zero.hjif\nInvalid schema: #/properties/timescale\nInvalid keyword: minimum\nInvalid document:#/syncs/0/timescale"
       },
       {
         "name": "Reference Device: id negative",
         "haptic_file_path": "SchemaConformance\\refDevice-id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/id"
       },
       {
         "name": "Reference Device: id equals zero",
         "haptic_file_path": "SchemaConformance\\refDevice-id-zero.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-id-zero.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-id-zero.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/id"
       },
       {
         "name": "Reference Device: body_part_mask negative",
         "haptic_file_path": "SchemaConformance\\refDevice-body_part_mask-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-body_part_mask-negative.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/body_part_mask"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-body_part_mask-negative.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/body_part_mask"
       },
       {
         "name": "Reference Device: body_part_mask too large",
         "haptic_file_path": "SchemaConformance\\refDevice-body_part_mask-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-body_part_mask-too_large.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/reference_devices/0/body_part_mask"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-body_part_mask-too_large.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/reference_devices/0/body_part_mask"
       },
       {
         "name": "Reference Device: minimum_frequency negative",
         "haptic_file_path": "SchemaConformance\\refDevice-minimum_frequency-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-minimum_frequency-negative.hjif\nInvalid schema: #/properties/minimum_frequency\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/minimum_frequency"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-minimum_frequency-negative.hjif\nInvalid schema: #/properties/minimum_frequency\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/minimum_frequency"
       },
       {
         "name": "Reference Device: maximum_frequency negative",
         "haptic_file_path": "SchemaConformance\\refDevice-maximum_frequency-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-maximum_frequency-negative.hjif\nInvalid schema: #/properties/maximum_frequency\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_frequency"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-maximum_frequency-negative.hjif\nInvalid schema: #/properties/maximum_frequency\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_frequency"
       },
       {
         "name": "Reference Device: resonance_frequency negative",
         "haptic_file_path": "SchemaConformance\\refDevice-resonance_frequency-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-resonance_frequency-negative.hjif\nInvalid schema: #/properties/resonance_frequency\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/resonance_frequency"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-resonance_frequency-negative.hjif\nInvalid schema: #/properties/resonance_frequency\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/resonance_frequency"
       },
       {
         "name": "Reference Device: maximum_amplitude negative",
         "haptic_file_path": "SchemaConformance\\refDevice-maximum_amplitude-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-maximum_amplitude-negative.hjif\nInvalid schema: #/properties/maximum_amplitude\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_amplitude"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-maximum_amplitude-negative.hjif\nInvalid schema: #/properties/maximum_amplitude\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_amplitude"
       },
       {
         "name": "Reference Device: impedance negative",
         "haptic_file_path": "SchemaConformance\\refDevice-impedance-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-impedance-negative.hjif\nInvalid schema: #/properties/impedance\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/impedance"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-impedance-negative.hjif\nInvalid schema: #/properties/impedance\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/impedance"
       },
       {
         "name": "Reference Device: maximum_voltage negative",
         "haptic_file_path": "SchemaConformance\\refDevice-maximum_voltage-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-maximum_voltage-negative.hjif\nInvalid schema: #/properties/maximum_voltage\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_voltage"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-maximum_voltage-negative.hjif\nInvalid schema: #/properties/maximum_voltage\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_voltage"
       },
       {
         "name": "Reference Device: maximum_current negative",
         "haptic_file_path": "SchemaConformance\\refDevice-maximum_current-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-maximum_current-negative.hjif\nInvalid schema: #/properties/maximum_current\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_current"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-maximum_current-negative.hjif\nInvalid schema: #/properties/maximum_current\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_current"
       },
       {
         "name": "Reference Device: maximum_displacement negative",
         "haptic_file_path": "SchemaConformance\\refDevice-maximum_displacement-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-maximum_displacement-negative.hjif\nInvalid schema: #/properties/maximum_displacement\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_displacement"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-maximum_displacement-negative.hjif\nInvalid schema: #/properties/maximum_displacement\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/maximum_displacement"
       },
       {
         "name": "Reference Device: weight negative",
         "haptic_file_path": "SchemaConformance\\refDevice-weight-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-weight-negative.hjif\nInvalid schema: #/properties/weight\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/weight"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-weight-negative.hjif\nInvalid schema: #/properties/weight\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/weight"
       },
       {
         "name": "Reference Device: size negative",
         "haptic_file_path": "SchemaConformance\\refDevice-size-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-size-negative.hjif\nInvalid schema: #/properties/size\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/size"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-size-negative.hjif\nInvalid schema: #/properties/size\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/reference_devices/0/size"
       },
       {
         "name": "Reference Device: invalid type",
         "haptic_file_path": "SchemaConformance\\refDevice-type-invalid.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\refDevice-type-invalid.hjif\nInvalid schema: #/properties/type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/reference_devices/0/type"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\refDevice-type-invalid.hjif\nInvalid schema: #/properties/type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/reference_devices/0/type"
       },
       {
         "name": "Channel: id negative",
         "haptic_file_path": "SchemaConformance\\channel-id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/id"
       },
       {
         "name": "Channel: priority negative",
         "haptic_file_path": "SchemaConformance\\channel-priority-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-priority-negative.hjif\nInvalid schema: #/properties/priority\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/priority"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-priority-negative.hjif\nInvalid schema: #/properties/priority\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/priority"
       },
       {
         "name": "Channel: reference_device_id negative",
         "haptic_file_path": "SchemaConformance\\channel-reference_device_id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-reference_device_id-negative.hjif\nInvalid schema: #/properties/reference_device_id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/reference_device_id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-reference_device_id-negative.hjif\nInvalid schema: #/properties/reference_device_id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/reference_device_id"
       },
       {
         "name": "Channel: gain too_small",
         "haptic_file_path": "SchemaConformance\\channel-gain-too_small.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-gain-too_small.hjif\nInvalid schema: #/properties/gain\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/gain"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-gain-too_small.hjif\nInvalid schema: #/properties/gain\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/gain"
       },
       {
         "name": "Channel: mixing_weight negative",
         "haptic_file_path": "SchemaConformance\\channel-mixing_weight-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-mixing_weight-negative.hjif\nInvalid schema: #/properties/mixing_coefficient\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/mixing_coefficient"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-mixing_weight-negative.hjif\nInvalid schema: #/properties/mixing_coefficient\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/mixing_coefficient"
       },
       {
         "name": "Channel: body_part_mask negative",
         "haptic_file_path": "SchemaConformance\\channel-body_part_mask-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-body_part_mask-negative.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/body_part_mask"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-body_part_mask-negative.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/body_part_mask"
       },
       {
         "name": "Channel: body_part_mask too large",
         "haptic_file_path": "SchemaConformance\\channel-body_part_mask-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-body_part_mask-too_large.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/body_part_mask"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-body_part_mask-too_large.hjif\nInvalid schema: #/properties/body_part_mask\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/body_part_mask"
       },
       {
         "name": "Channel: invalid body_part_target",
         "haptic_file_path": "SchemaConformance\\channel-body_part_target-invalid_body_part_target.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-body_part_target-invalid_body_part_target.hjif\nInvalid schema: #/properties/body_part_target/items\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/body_part_target/0"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-body_part_target-invalid_body_part_target.hjif\nInvalid schema: #/properties/body_part_target/items\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/body_part_target/0"
       },
       {
         "name": "Channel: frequency_sampling negative",
         "haptic_file_path": "SchemaConformance\\channel-frequency_sampling-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-frequency_sampling-negative.hjif\nInvalid schema: #/properties/frequency_sampling\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/frequency_sampling"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-frequency_sampling-negative.hjif\nInvalid schema: #/properties/frequency_sampling\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/frequency_sampling"
       },
       {
         "name": "Channel: sample_count negative",
         "haptic_file_path": "SchemaConformance\\channel-sample_count-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\channel-sample_count-negative.hjif\nInvalid schema: #/properties/sample_count\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/sample_count"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\channel-sample_count-negative.hjif\nInvalid schema: #/properties/sample_count\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/sample_count"
       },
       {
         "name": "Vector: X value out of range",
         "haptic_file_path": "SchemaConformance\\vector-X-out_of_range.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\vector-X-out_of_range.hjif\nInvalid schema: #/properties/X\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/direction/X"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\vector-X-out_of_range.hjif\nInvalid schema: #/properties/X\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/direction/X"
       },
       {
         "name": "Vector: Y value out of range",
         "haptic_file_path": "SchemaConformance\\vector-Y-out_of_range.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\vector-Y-out_of_range.hjif\nInvalid schema: #/properties/Y\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/direction/Y"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\vector-Y-out_of_range.hjif\nInvalid schema: #/properties/Y\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/direction/Y"
       },
       {
         "name": "Vector: Z value out of range",
         "haptic_file_path": "SchemaConformance\\vector-Z-out_of_range.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\vector-Z-out_of_range.hjif\nInvalid schema: #/properties/Z\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/direction/Z"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\vector-Z-out_of_range.hjif\nInvalid schema: #/properties/Z\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/direction/Z"
       },
       {
         "name": "Band: invalid band_type",
         "haptic_file_path": "SchemaConformance\\band-band_type-invalid_band_type.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-band_type-invalid_band_type.hjif\nInvalid schema: #/properties/band_type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/band_type"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-band_type-invalid_band_type.hjif\nInvalid schema: #/properties/band_type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/band_type"
       },
       {
         "name": "Band: priority negative",
         "haptic_file_path": "SchemaConformance\\band-priority-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-priority-negative.hjif\nInvalid schema: #/properties/priority\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/priority"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-priority-negative.hjif\nInvalid schema: #/properties/priority\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/priority"
       },
       {
         "name": "Band: invalid curve_type",
         "haptic_file_path": "SchemaConformance\\band-curve_type-invalid_curve_type.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-curve_type-invalid_curve_type.hjif\nInvalid schema: #/properties/curve_type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/curve_type"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-curve_type-invalid_curve_type.hjif\nInvalid schema: #/properties/curve_type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/curve_type"
       },
       {
         "name": "Band: block_length too small",
         "haptic_file_path": "SchemaConformance\\band-block_length-too_small.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-block_length-too_small.hjif\nInvalid schema: #/properties/block_length\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/1/block_length"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-block_length-too_small.hjif\nInvalid schema: #/properties/block_length\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/1/block_length"
       },
       {
         "name": "Band: lower_frequency_limit negative",
         "haptic_file_path": "SchemaConformance\\band-lower_frequency_limit-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-lower_frequency_limit-negative.hjif\nInvalid schema: #/properties/lower_frequency_limit\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/lower_frequency_limit"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-lower_frequency_limit-negative.hjif\nInvalid schema: #/properties/lower_frequency_limit\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/lower_frequency_limit"
       },
       {
         "name": "Band: lower_frequency_limit too large",
         "haptic_file_path": "SchemaConformance\\band-lower_frequency_limit-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-lower_frequency_limit-too_large.hjif\nInvalid schema: #/properties/lower_frequency_limit\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/lower_frequency_limit"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-lower_frequency_limit-too_large.hjif\nInvalid schema: #/properties/lower_frequency_limit\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/lower_frequency_limit"
       },
       {
         "name": "Band: upper_frequency_limit negative",
         "haptic_file_path": "SchemaConformance\\band-upper_frequency_limit-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-upper_frequency_limit-negative.hjif\nInvalid schema: #/properties/upper_frequency_limit\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/upper_frequency_limit"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-upper_frequency_limit-negative.hjif\nInvalid schema: #/properties/upper_frequency_limit\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/upper_frequency_limit"
       },
       {
         "name": "Band: upper_frequency_limit too large",
         "haptic_file_path": "SchemaConformance\\band-upper_frequency_limit-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\band-upper_frequency_limit-too_large.hjif\nInvalid schema: #/properties/upper_frequency_limit\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/upper_frequency_limit"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\band-upper_frequency_limit-too_large.hjif\nInvalid schema: #/properties/upper_frequency_limit\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/upper_frequency_limit"
       },
       {
         "name": "Effect: id negative",
         "haptic_file_path": "SchemaConformance\\effect-id-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\effect-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/1/id"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\effect-id-negative.hjif\nInvalid schema: #/properties/id\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/1/id"
       },
       {
         "name": "Effect: invalid effect_type",
         "haptic_file_path": "SchemaConformance\\effect-effect_type-invalid_effect_type.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\effect-effect_type-invalid_effect_type.hjif\nInvalid schema: #/properties/effect_type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/effect_type"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\effect-effect_type-invalid_effect_type.hjif\nInvalid schema: #/properties/effect_type\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/effect_type"
       },
       {
         "name": "Effect: position negative",
         "haptic_file_path": "SchemaConformance\\effect-position-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\effect-position-negative.hjif\nInvalid schema: #/properties/position\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/position"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\effect-position-negative.hjif\nInvalid schema: #/properties/position\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/position"
       },
       {
         "name": "Effect: phase too_small",
         "haptic_file_path": "SchemaConformance\\effect-phase-too_small.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\effect-phase-too_small.hjif\nInvalid schema: #/properties/phase\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/phase"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\effect-phase-too_small.hjif\nInvalid schema: #/properties/phase\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/phase"
       },
       {
         "name": "Effect: phase too large",
         "haptic_file_path": "SchemaConformance\\effect-phase-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\effect-phase-too_large.hjif\nInvalid schema: #/properties/phase\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/phase"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\effect-phase-too_large.hjif\nInvalid schema: #/properties/phase\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/phase"
       },
       {
         "name": "Effect: invalid base_signal",
         "haptic_file_path": "SchemaConformance\\effect-base_signal-invalid_base_signal.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\effect-base_signal-invalid_base_signal.hjif\nInvalid schema: #/properties/base_signal\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/base_signal"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\effect-base_signal-invalid_base_signal.hjif\nInvalid schema: #/properties/base_signal\nInvalid keyword: enum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/base_signal"
       },
       {
         "name": "Keyframe: amplitude_modulation too_small",
         "haptic_file_path": "SchemaConformance\\keyframe-amplitude_modulation-too_small.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\keyframe-amplitude_modulation-too_small.hjif\nInvalid schema: #/properties/amplitude_modulation\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/amplitude_modulation"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-amplitude_modulation-too_small.hjif\nInvalid schema: #/properties/amplitude_modulation\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/amplitude_modulation"
       },
       {
         "name": "Keyframe: amplitude_modulation too large",
         "haptic_file_path": "SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
       },
       {
         "name": "Keyframe: frequency_modulation negative",
         "haptic_file_path": "SchemaConformance\\keyframe-frequency_modulation-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\keyframe-frequency_modulation-negative.hjif\nInvalid schema: #/properties/frequency_modulation\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/frequency_modulation"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-frequency_modulation-negative.hjif\nInvalid schema: #/properties/frequency_modulation\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/frequency_modulation"
       },
       {
         "name": "Keyframe: frequency_modulation too large",
         "haptic_file_path": "SchemaConformance\\keyframe-frequency_modulation-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\keyframe-frequency_modulation-too_large.hjif\nInvalid schema: #/properties/frequency_modulation\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/frequency_modulation"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-frequency_modulation-too_large.hjif\nInvalid schema: #/properties/frequency_modulation\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/frequency_modulation"
       },
       {
         "name": "Keyframe: relative_position negative",
         "haptic_file_path": "SchemaConformance\\keyframe-relative_position-negative.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: ..\\..\\..\\..\\..\\..\\..\\Data\\HJIFConformance\\SchemaConformance\\keyframe-relative_position-negative.hjif\nInvalid schema: #/properties/relative_position\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/relative_position"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-relative_position-negative.hjif\nInvalid schema: #/properties/relative_position\nInvalid keyword: minimum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/relative_position"
       }
     ],
     "semantic_checks": [
@@ -367,7 +368,7 @@
       {
         "name": "Haptic: invalid timescale",
         "haptic_file_path": "SemanticConformance\\haptic-timescale-invalid_timescale.hjif",
-        "expected_output": "Invalid timescale. The main profile only supports a value lower than or equal to 48000\nThe HJIF input file is not conformant to the specification."
+        "expected_output": "Invalid timescale. The simple parametric profile only supports a value of 1000.\nThe HJIF input file is not conformant to the specification."
       },
       {
         "name": "Avatar: duplicate id",
@@ -435,11 +436,6 @@
         "expected_output": "The actuator resolution in channel 0 of perception 0 is invalid. It contains a negative value.\nThe HJIF input file is not conformant to the specification."
       },
       {
-        "name": "Channel: actuator_target out of resolution range",
-        "haptic_file_path": "SemanticConformance\\channel-actuator_target-out_of_resolution_range.hjif",
-        "expected_output": "One actuator target is out of the actuator resolution range in channel 0 of perception 0.\nThe HJIF input file is not conformant to the specification."
-      },
-      {
         "name": "Channel: too many bands",
         "haptic_file_path": "SemanticConformance\\channel-bands-too_many_bands.hjif",
         "expected_output": "The number of bands in channel 0 of perception 0 is too high. The level 1 only supports up to 7 bands per channel.\nThe HJIF input file is not conformant to the specification."
@@ -490,202 +486,406 @@
         "expected_output": "Effects in wavelet bands sould not contain keyframes in channel 0 of perception 0.\nThe HJIF input file is not conformant to the specification."
       }
     ],
-    "hmpg_conformance": [
-      {
-        "name": "Haptic: timescale too large",
-        "haptic_file_path": "HMPGConformance\\haptic-timescale-too_large.hjif",
-        "expected_output": ""
-      },
+    "hmpg_compatibility_checks": [
       {
         "name": "Haptic: description too long",
-        "haptic_file_path": "HMPGConformance\\haptic-description-too_long.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-description_too_long.hjif",
+        "expected_output": "Experience Warning: description too long. Warning code: 0\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+      },
+      {
+        "name": "Haptic: timescale too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-timescale_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Haptic: too many avatars",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-too_many_avatars.hjif",
+        "expected_output": "Experience Warning: avatars vector size out of range. Warning code: 2\nAvatar Warning: ID out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Haptic: too many perceptions",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\haptic-too_many_perceptions.hjif",
+        "expected_output": "Experience Warning: perceptions vector size out of range. Warning code: 3\nPerception Warning: ID out of range. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\avatar-id_too_large.hjif",
+        "expected_output": "Avatar Warning: ID out of range. Warning code: 4\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
-        "name": "Avatar: type too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "name": "Avatar: lod too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\avatar-lod_too_large.hjif",
+        "expected_output": "Avatar Warning: LOD out of range. Warning code: 5\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Avatar: mesh too long",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\avatar-mesh_too_long.hjif",
+        "expected_output": "Avatar Warning: mesh vector size out of range. Warning code: 6\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: id too large",
-        "haptic_file_path": "HMPGConformance\\perception-id-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-id_too_large.hjif",
+        "expected_output": "Perception Warning: ID out of range. Warning code: 7\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: description too long",
-        "haptic_file_path": "HMPGConformance\\perception-description-too_long.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-description_too_long.hjif",
+        "expected_output": "Perception Warning: description too long. Warning code: 8\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: semantic scheme too long",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-semantic_scheme_too_long.hjif",
+        "expected_output": "Perception Warning: semantic scheme size out of range. Warning code: 10\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: too many reference devices",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-too_many_reference_devices.hjif",
+        "expected_output": "Perception Warning: reference devices vector size out of range. Warning code: 11\nReferenceDevice Warning: ID out of range. Warning code: 17\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: unit exponent too small",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-unit_exponent_too_small.hjif",
+        "expected_output": "Perception Warning: unit exponent out of range. Warning code: 13\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: unit_exponent too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-unit_exponent_too_large.hjif",
+        "expected_output": "Perception Warning: unit exponent out of range. Warning code: 13\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: perception_unit_exponent too_small",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-perception_unit_exponent_too_small.hjif",
+        "expected_output": "Perception Warning: perception unit exponent out of range. Warning code: 14\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Perception: perception_unit_exponent too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\perception-perception_unit_exponent_too_small.hjif",
+        "expected_output": "Perception Warning: perception unit exponent out of range. Warning code: 14\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Sync: timestamp too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\sync-timestamp_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Sync: timescale too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\sync-timescale_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Reference Device: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-id_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: ID out of range. Warning code: 17\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: name too_long",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-name_too_long.hjif",
+        "expected_output": "ReferenceDevice Warning: name size out of range. Warning code: 18\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: minimum_frequency too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-minimum_frequency_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: minimum frequency out of range. Warning code: 21\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_frequency too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_frequency_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum frequency out of range. Warning code: 20\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: resonance_frequency too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-resonance_frequency_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: resonance frequency out of range. Warning code: 22\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_amplitude too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_amplitude_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum amplitude out of range. Warning code: 23\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: impedance too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-impedance_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: impedance out of range. Warning code: 24\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_voltage too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_voltage_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum voltage out of range. Warning code: 25\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_current too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_current_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum current out of range. Warning code: 26\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: maximum_displacement too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-maximum_displacement_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: maximum displacement out of range. Warning code: 27\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: weight too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-weight_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: weight out of range. Warning code: 28\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: size too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-size_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: size out of range. Warning code: 29\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+      },
+      {
+        "name": "Reference Device: custom too small",
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-custom_too_small.hjif",
+        "expected_output": "ReferenceDevice Warning: custom out of range. Warning code: 30\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
+      },
+      {
+        "name": "Reference Device: custom too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\referenceDevice-custom_too_large.hjif",
+        "expected_output": "ReferenceDevice Warning: custom out of range. Warning code: 30\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-id_too_large.hjif",
+        "expected_output": "Channel Warning: ID out of range. Warning code: 31\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: description too long",
-        "haptic_file_path": "HMPGConformance\\channel-description-too_long.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-description_too_long.hjif",
+        "expected_output": "Channel Warning: description size out of range. Warning code: 32\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: gain too large",
-        "haptic_file_path": "HMPGConformance\\channel-gain-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-gain_too_large.hjif",
+        "expected_output": "Channel Warning: gain out of range. Warning code: 33\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
-        "name": "Channel: mixing_weight too large",
-        "haptic_file_path": "HMPGConformance\\channel-mixing_weight-too_large.hjif",
-        "expected_output": ""
-      },
-      {
-        "name": "Channel: body_part_mask too large",
-        "haptic_file_path": "HMPGConformance\\channel-body_part_mask-too_large.hjif",
-        "expected_output": ""
+        "name": "Channel: mixing_coefficient too large",
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-mixing_coefficient_too_large.hjif",
+        "expected_output": "Channel Warning: mixingCoefficient out of range. Warning code: 34\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: frequency_sampling too large",
-        "haptic_file_path": "HMPGConformance\\channel-frequency_sampling-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-frequency_sampling_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Channel: sample_count too large",
-        "haptic_file_path": "HMPGConformance\\channel-sample_count-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\channel-sample_count_too_large.hjif",
+        "expected_output": "TODO"
       },
       {
         "name": "Effect: id too large",
-        "haptic_file_path": "",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\effect-id_too_large.hjif",
+        "expected_output": "Band Warning: effect ID out of range. Warning code: 41\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Effect: position too large",
-        "haptic_file_path": "HMPGConformance\\effect-position-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\effect-position_too_large.hjif",
+        "expected_output": "Band Warning: effect position out of range. Warning code: 42\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Keyframe: relative_position too large",
-        "haptic_file_path": "HMPGConformance\\keyframe-relative_position-too_large.hjif",
-        "expected_output": ""
+        "haptic_file_path": "HMPGCompatibilityConformance\\keyframe-relative_position_too_large.hjif",
+        "expected_output": "Band Warning: keyframe relative position out of range. Warning code: 45\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       }
-    ]
+    ],
+    "hmpg_conformance_checks": [
+      {
+        "name": "MIHS Unit: Sync value is invalid",
+        "haptic_file_path": "HMPGConformance\\02_MIHSUnitSync-invalid_MIHSUnitSync2.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\02_MIHSUnitSync-invalid_MIHSUnitSync2.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Invalid MIHS unit sync value. Error code: 2"
+      },
+      {
+        "name": "MIHS Packet: invalid packet type",
+        "haptic_file_path": "HMPGConformance\\03_MIHSPacket-invalid_packet-type12.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\03_MIHSPacket-invalid_packet-type12.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error code: 11"
+      },
+      {
+        "name": "MIHS Packet: Invalid packet type",
+        "haptic_file_path": "HMPGConformance\\03_MIHSPacket-valid_packet-type00.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\03_MIHSPacket-valid_packet-type00.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain one initialization timing MIHS packet. Error code: 4"
+      },
+      {
+        "name": "MIHS Unit: Invalid first MIHS unit type",
+        "haptic_file_path": "HMPGConformance\\08_MIHSUnitType-invalid_first_MIHSUnitType01.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\08_MIHSUnitType-invalid_first_MIHSUnitType01.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: The first MIHS unit in a haptic stream shall be an initialization unit. Error code: 1"
+      },
+      {
+        "name": "MIHS Unit: Invalid duration for initiarization unit",
+        "haptic_file_path": "HMPGConformance\\09_MIHSUnit-initiarization-invalid_duration.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\09_MIHSUnit-initiarization-invalid_duration.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: The duration of an initialization unit duration shall be zero. Error code: 60"
+      },
+      {
+        "name": "MIHS Unit: Invalid sync value for initiarization unit",
+        "haptic_file_path": "HMPGConformance\\10_MIHSUnit-initiarization-non_sync.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\10_MIHSUnit-initiarization-non_sync.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit is a sync unit. Error code: 3"
+      },
+      {
+        "name": "MIHS Packet: No INIT-TIMING in initialization unit",
+        "haptic_file_path": "HMPGConformance\\11_non-MIHS-packet-type11_in_Initialization_MIHSUnit.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\11_non-MIHS-packet-type11_in_Initialization_MIHSUnit.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: An initialization unit shall contain one initialization timing MIHS packet. Error code: 4"
+      },
+      {
+        "name": "Exprience: Invalid profile",
+        "haptic_file_path": "HMPGConformance\\14_haptic-profile-invalid_profile.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\14_haptic-profile-invalid_profile.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Profile not defined in the specifications. Error code: 5"
+      },
+      {
+        "name": "Exprience: Invalid level",
+        "haptic_file_path": "HMPGConformance\\15_haptic-level-invalid_level.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\15_haptic-level-invalid_level.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Experience error: Level not defined in the specifications. Error code: 6"
+      },
+      {
+        "name": "Perception: Invalid perception modality",
+        "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-invalid_perception_modality17.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-invalid_perception_modality17.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Perception error: Modality is out of range. Error code: 13"
+      },
+      {
+        "name": "Perception: Invalid spatial perception modality in Temporal MIHS Unit",
+        "haptic_file_path": "HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\24_perception-perception_modality-valid_perception_modality16.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Perception modality invalid for temporal MIHSUnit. Error code: 59"
+      },
+      {
+        "name": "Band: Invalid band type",
+        "haptic_file_path": "HMPGConformance\\44_band-band_type-invalid_band_type.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\44_band-band_type-invalid_band_type.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Band error: Band type is out of range. Error code: 32"
+      },
+      {
+        "name": "MIHS Packet: Invalid packet type for initialization unit",
+        "haptic_file_path": "HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\54_InitializationUnit_have_invalid_PACTYPE_DATA.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Initialization MIHSPacket_Metadata error: Packet type is invalid. Error code: 11"
+      },
+      {
+        "name": "MIHS Unit: Invalid packet data for temporal unit",
+        "haptic_file_path": "HMPGConformance\\55_TemporalUnit_have_no_MIHSPackets.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\55_TemporalUnit_have_no_MIHSPackets.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: A spatial unit shall contain one or more MIHS packets. Error code: 58"
+      },
+      {
+        "name": "Effect: Invarid effect type",
+        "haptic_file_path": "HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\63_effect-effect_type-invalid_effect_type2.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal MIHSPacket_Data error: Effect Type does not exist. Error code: 53"
+      },
+      {
+        "name": "Effect: Too long effect",
+        "haptic_file_path": "HMPGConformance\\72_Too-long-effect.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\72_Too-long-effect.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: Position invalid. Error code: 62"
+      },
+      {
+        "name": "Effect: Negative effect position",
+        "haptic_file_path": "HMPGConformance\\73_negative-effect-position.hmpg",
+        "expected_output": "{main_folder}\\HMPGConformance\\73_negative-effect-position.hmpg: File does not comply with standard ISO/IEC 23090-31.\nMIHSUnit_Temporal error: Position invalid. Error code: 62"
+      }
+	],
+    "conversion_checks": [
+      {
+        "name": "Content1",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Content1.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Content1.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "heartbeats",
+        "haptic_file_path": "ConversionConformance\\Test1-2-heartbeats.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-heartbeats.hjif and testDecoded.hjif contain the same data."
+      },
+	  {
+        "name": "inflate",
+        "haptic_file_path": "ConversionConformance\\Test1-2-inflate.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-inflate.hjif and testDecoded.hjif contain the same data."
+      },
+	  {
+        "name": "oscillate",
+        "haptic_file_path": "ConversionConformance\\Test1-2-oscillate.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-oscillate.hjif and testDecoded.hjif contain the same data."
+      },
+	  {
+        "name": "Pantheongrandstarfall",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Pantheongrandstarfall.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Pantheongrandstarfall.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "PersTexture1",
+        "haptic_file_path": "ConversionConformance\\Test1-2-PersTexture1.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-PersTexture1.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "Rain",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Rain.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Rain.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "Rain_chan2",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Rain_chan2.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Rain_chan2.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "Ringtone1",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Ringtone1.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Ringtone1.hjif and testDecoded.hjif contain the same data."
+      },
+	  {
+        "name": "rumble",
+        "haptic_file_path": "ConversionConformance\\Test1-2-rumble.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-rumble.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "Weapon1",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Weapon1.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Weapon1.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "Towel",
+        "haptic_file_path": "ConversionConformance\\Test1-2-Towel.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-2-Towel.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "BigBuckBunny",
+        "haptic_file_path": "ConversionConformance\\Test1-3-BigBuckBunny.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-BigBuckBunny.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "BikeRiding",
+        "haptic_file_path": "ConversionConformance\\Test1-3-BikeRiding.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-BikeRiding.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "ForceXFast",
+        "haptic_file_path": "ConversionConformance\\Test1-3-ForceXFast.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-ForceXFast.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "ForceXSlow",
+        "haptic_file_path": "ConversionConformance\\Test1-3-ForceXSlow.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-ForceXSlow.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "ForceYFast",
+        "haptic_file_path": "ConversionConformance\\Test1-3-ForceYFast.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-ForceYFast.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "ForceYSlow",
+        "haptic_file_path": "ConversionConformance\\Test1-3-ForceYSlow.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-ForceYSlow.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "ForceZFast",
+        "haptic_file_path": "ConversionConformance\\Test1-3-ForceZFast.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-ForceZFast.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "ForceZSlow",
+        "haptic_file_path": "ConversionConformance\\Test1-3-ForceZSlow.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-ForceZSlow.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "HorseRiding",
+        "haptic_file_path": "ConversionConformance\\Test1-3-HorseRiding.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-HorseRiding.hjif and testDecoded.hjif contain the same data."
+      },
+      {
+        "name": "Rollercoaster",
+        "haptic_file_path": "ConversionConformance\\Test1-3-Rollercoaster.hjif",
+        "expected_output": "{main_folder}\\ConversionConformance\\Test1-3-Rollercoaster.hjif and testDecoded.hjif contain the same data."
+      }
+	]
   }
 }
