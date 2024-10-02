@@ -115,7 +115,7 @@ namespace haptics::synthesizer {
 }
 
 [[nodiscard]] auto Helper::getHapticDataFromFile(types::Haptics &haptic, const double timeLength,
-                                                 const int fs, const int pad, std::string &filename)
+                                                 const int fs, const int pad)
     -> std::vector<std::vector<double>> {
 
   // Apply preprocessing on wavelet bands
