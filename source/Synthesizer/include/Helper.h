@@ -46,6 +46,10 @@ public:
                                      std::string &filename) -> bool;
   [[nodiscard]] auto static playFile4Android(types::Haptics &haptic, double timeLength, int fs,
                                              int pad, std::string &filename) -> bool;
+  [[nodiscard]] auto static getHapticDataFromFile(types::Haptics &haptic, const double timeLength,
+                                                  const int fs, const int pad,
+                                                  std::string &filename)
+      -> std::vector<std::vector<double>>;
 
 private:
   [[nodiscard]] auto static getEffectTimeLength(types::Effect &effect, types::BandType bandType,
