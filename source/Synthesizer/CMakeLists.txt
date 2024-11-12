@@ -2,6 +2,8 @@ project(Synthesizer)
 
 add_executable(Synthesizer src/main.cpp src/Helper.cpp include/Helper.h)
 target_link_libraries(Synthesizer PUBLIC tools types waveletdecoder iohaptics)
+add_library(SynthesizerLib src/main.cpp src/Helper.cpp include/Helper.h)
+target_link_libraries(SynthesizerLib PUBLIC tools types waveletdecoder iohaptics)
 
 install(TARGETS Synthesizer DESTINATION bin)
 
