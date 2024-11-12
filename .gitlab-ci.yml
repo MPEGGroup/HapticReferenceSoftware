@@ -1,3 +1,9 @@
+variables:
+  JOB_TAG: "linux"
+  IMAGE_CBACHHUBER_CLANG_PREFIX: ""
+  IMAGE_CBACHHUBER_CLANG_TAG: "cbachhuber/clang:12"
+  GIT_MPEG_EXPERT_ACCESS_URL: "https://gitlab-ci-token:${CI_JOB_TOKEN}@git.mpeg.expert"
+
 stages:
   - check
   - build
@@ -5,6 +11,8 @@ stages:
 
 default:
   interruptible: true
+  tags:
+    - ${JOB_TAG}
 
 include:
   - /.gitlab/checks.yml

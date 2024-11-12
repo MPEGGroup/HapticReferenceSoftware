@@ -1,10 +1,9 @@
 Clang 12 Debug:
   stage: build
-  image: cbachhuber/clang:12
-  tags: [linux]
+  image: ${IMAGE_CBACHHUBER_CLANG_PREFIX}${IMAGE_CBACHHUBER_CLANG_TAG}
   script:
     - git config --global http.sslVerify "false"
-    - echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@git.mpeg.expert" > ~/git.store
+    - echo "${GIT_MPEG_EXPERT_ACCESS_URL}" > ~/git.store
     - git config --global credential.helper 'store --file ~/git.store'
     - mkdir -p build && cd build
     - > 
@@ -35,14 +34,15 @@ Clang 12 Debug:
 
 GCC 10 Release:
   stage: build
-  image: rikorose/gcc-cmake
-  tags: [linux]
+  variables:
+    IMAGE_RIKOROSE_GCC_CMAKE_PREFIX: ""
+  image: ${IMAGE_RIKOROSE_GCC_CMAKE_PREFIX}rikorose/gcc-cmake
   before_script:
     - export CXX=/usr/bin/g++-10
     - export CC=/usr/bin/gcc-10
   script:
     - git config --global http.sslVerify "false"
-    - echo "https://gitlab-ci-token:${CI_JOB_TOKEN}@git.mpeg.expert" > ~/git.store
+    - echo "${GIT_MPEG_EXPERT_ACCESS_URL}" > ~/git.store
     - git config --global credential.helper 'store --file ~/git.store'
     - mkdir -p build && cd build
     - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wpedantic -Werror" -DCMAKE_BUILD_TYPE=Release ..
