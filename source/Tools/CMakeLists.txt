@@ -1,6 +1,6 @@
 project(tools)
 
-add_library(tools src/InputParser.cpp include/InputParser.h src/WavParser.cpp include/WavParser.h src/OHMData.cpp include/OHMData.h src/Tools.cpp include/Tools.h)
+add_library(tools src/InputParser.cpp include/InputParser.h src/WavParser.cpp include/WavParser.h src/OHMData.cpp include/OHMData.h src/Tools.cpp include/Tools.h include/upfirdn.h include/resample.h)
 
 if(BUILD_CATCH2)
     add_executable(test_tools test/InputParser.test.cpp test/WavParser.test.cpp test/OHMData.test.cpp)

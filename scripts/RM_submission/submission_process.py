@@ -359,7 +359,8 @@ def main():
 
 if __name__ == "__main__":
     DEFAULT_OUTPUT = "./out"
-    DEFAULT_BITRATES = [2, 8, 16, 64]
+#    DEFAULT_BITRATES = [2, 8, 16, 64]
+    DEFAULT_BITRATES = [16]
     DEFAULT_PAD = 1
     DEFAULT_CUTOFF_FREQUENCY = 72.5
     DEFAULT_DISABLE_WAVELET = False
