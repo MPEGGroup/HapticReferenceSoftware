@@ -147,8 +147,8 @@ auto IOStream::readMemory(std::vector<uint8_t> &in, types::Haptics &haptic) -> b
   return true;
 }
 
-auto IOStream::loadFile(const std::string &filePath,
-                        std::vector<std::vector<bool>> &bitset) -> bool {
+auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset)
+    -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -188,9 +188,9 @@ auto IOStream::loadFile(const std::string &filePath,
   return true;
 }
 
-auto IOStream::loadMemory(std::vector<uint8_t> &in,
-                        std::vector<std::vector<bool>> &bitset) -> bool {
-  
+auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool>> &bitset)
+    -> bool {
+
   if (in.size() == 0) { // avoid undefined behavior
     return false;
   }
