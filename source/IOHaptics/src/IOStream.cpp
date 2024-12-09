@@ -191,7 +191,7 @@ auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<boo
 auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool>> &bitset)
     -> bool {
 
-  if (in.size() == 0) { // avoid undefined behavior
+  if (in.empty()) { // avoid undefined behavior
     return false;
   }
 
@@ -202,8 +202,8 @@ auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool
     // read packet header
     int unitNBits =
         UNIT_TYPE + UNIT_SYNC + UNIT_LAYER + UNIT_DURATION + UNIT_LENGTH + UNIT_RESERVED;
-    IOBinaryPrimitives::readNBytes(in, byteCount, static_cast<int>(unitNBits / BYTE_SIZE),
-                                   bufPacket);
+    IOBinaryPrimitives::readNBytes(in, static_cast<int>(byteCount),
+                                   static_cast<int>(unitNBits / BYTE_SIZE), bufPacket);
     byteCount += static_cast<int>(unitNBits / BYTE_SIZE);
     // read packet payload length
     int lengthIdx = unitNBits - (UNIT_LENGTH + UNIT_RESERVED);
@@ -211,7 +211,7 @@ auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool
 
     // int bytesToRead = readPacketLength(bufPacket);
     //  read paylaod
-    IOBinaryPrimitives::readNBytes(in, byteCount, bytesToRead, bufPacket);
+    IOBinaryPrimitives::readNBytes(in, static_cast<int>(byteCount), bytesToRead, bufPacket);
     byteCount += bytesToRead;
     bitset.push_back(bufPacket);
   }
