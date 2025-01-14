@@ -40,6 +40,7 @@ import shutil
 import subprocess
 import csv
 import matplotlib.pyplot as plt
+import time
 
 from soundfile import read, write
 
@@ -239,6 +240,7 @@ def main():
     if REFERENCE_FILES_KEY not in config:
         return
 
+    synTime = 0
     with open("logs.txt", 'w') as log_file:
         with open('bitratePSNR.csv', 'w', newline='') as csvFile:
             writer = csv.writer(csvFile)
@@ -282,7 +284,9 @@ def main():
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
+                        clock = time.time()
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} -fs 1000 -upfs 8000  --generate_ohm", stdout=log_file)
+                        synTime += (time.time()-clock)*1000
                         if padding:
                             print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                             addPadding(nopad_file_path, pad_file_path, padding)
@@ -291,7 +295,7 @@ def main():
                         csvRow.append(bitrate)
                         csvRow.append(psnr)
                     writer.writerow(csvRow)
-
+    print("Synthesizer total time: " + str(synTime) + "ms")
     
     if compute_bjontegaard:
         try:
