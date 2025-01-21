@@ -68,25 +68,9 @@ auto IOStream::readFile(const std::string &filePath, types::Haptics &haptic, boo
   std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
   loadFile(filePath, bitstream);
   StreamReader sreader = initializeStream();
-  CRC crc;
-  int index = 0;
-  bool conformant = true;
-  for (auto &packet : bitstream) {
-    if (index == 0 && !IOConformance::checkFirstMIHSUnitType(sreader, packet)) {
-      conformant = false;
-      break;
-    }
-    if (!readMIHSUnit(packet, sreader, crc)) {
-      conformant = false;
-      break;
-    }
-    if (crc.nbPackets != 0) {
-      if (!checkCRC(bitstream, crc)) {
-        sreader.waitSync = true;
-      }
-    }
-    index++;
-  }
+
+  bool conformant = readPackets(bitstream, sreader);
+
   if (!conformant || !sreader.logs.empty()) {
     std::cerr << filePath << ": File does not comply with standard ISO/IEC 23090-31." << std::endl;
     if (logFile) {
@@ -119,6 +103,18 @@ auto IOStream::readMemory(std::vector<uint8_t> &in, types::Haptics &haptic) -> b
   std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
   loadMemory(in, bitstream);
   StreamReader sreader = initializeStream();
+  bool conformant = readPackets(bitstream, sreader);
+  if (!conformant || !sreader.logs.empty()) {
+    std::cerr << "Buffer does not comply with standard ISO/IEC 23090-31." << std::endl;
+    return false;
+  }
+  sreader.haptic.setTimescale(sreader.timescale); // TODO: earlier?
+  haptic = sreader.haptic;
+  return true;
+}
+
+auto IOStream::readPackets(std::vector<std::vector<bool>> &bitstream,
+                           StreamReader &sreader) -> bool {
   CRC crc;
   int index = 0;
   bool conformant = true;
@@ -138,13 +134,7 @@ auto IOStream::readMemory(std::vector<uint8_t> &in, types::Haptics &haptic) -> b
     }
     index++;
   }
-  if (!conformant || !sreader.logs.empty()) {
-    std::cerr << "Buffer does not comply with standard ISO/IEC 23090-31." << std::endl;
-    return false;
-  }
-  sreader.haptic.setTimescale(sreader.timescale); // TODO: earlier?
-  haptic = sreader.haptic;
-  return true;
+  return conformant;
 }
 
 auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset)
