@@ -113,8 +113,8 @@ auto IOStream::readMemory(std::vector<uint8_t> &in, types::Haptics &haptic) -> b
   return true;
 }
 
-auto IOStream::readPackets(std::vector<std::vector<bool>> &bitstream,
-                           StreamReader &sreader) -> bool {
+auto IOStream::readPackets(std::vector<std::vector<bool>> &bitstream, StreamReader &sreader)
+    -> bool {
   CRC crc;
   int index = 0;
   bool conformant = true;
