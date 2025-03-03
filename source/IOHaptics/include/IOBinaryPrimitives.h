@@ -218,6 +218,17 @@ public:
     }
     return true;
   }
+
+  static auto readNBytes(std::vector<uint8_t> &in, int offset, int nbBytes,
+                         std::vector<bool> &bitstream) -> bool {
+    std::vector<char> bytes(in.begin() + offset, in.begin() + offset + nbBytes);
+    for (auto byte : bytes) {
+      for (uint8_t i = 0; i < BYTE_SIZE; i++) {
+        bitstream.push_back(((byte >> (BYTE_SIZE - i - 1)) & 1U) == 1);
+      }
+    }
+    return true;
+  }
 };
 
 } // namespace haptics::io

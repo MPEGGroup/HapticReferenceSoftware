@@ -143,7 +143,10 @@ public:
     bool MIHSData = false;
   };
   static auto readFile(const std::string &filePath, types::Haptics &haptic, bool logFile) -> bool;
+  static auto readMemory(std::vector<uint8_t> &in, types::Haptics &haptic) -> bool;
+  static auto readPackets(std::vector<std::vector<bool>> &bitstream, StreamReader &sreader) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
+  static auto loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool>> &bitset) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;
   static auto writeUnitFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
