@@ -47,7 +47,6 @@ using haptics::tools::InputParser;
 using haptics::types::Haptics;
 
 const int DEFAULT_FS = 8000;
-const int DEFAULT_UPFS = 48000;
 using namespace std;
 void help() {
   std::cout
