@@ -52,6 +52,9 @@ struct Vector {
   auto operator==(const Vector &other) const -> bool {
     return X == other.X && Y == other.Y && Z == other.Z;
   };
+  auto operator!=(const Vector &other) const -> bool {
+    return X != other.X || Y != other.Y || Z != other.Z;
+  };
 };
 
 class Channel {
@@ -74,6 +77,9 @@ public:
   auto setId(int newId) -> void;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
+  [[nodiscard]] auto getPriority() const -> std::optional<int>;
+  [[nodiscard]] auto getPriorityOrDefault() const -> int;
+  auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getGain() const -> float;
   auto setGain(float newGain) -> void;
   [[nodiscard]] auto getMixingWeight() const -> float;
@@ -94,8 +100,12 @@ public:
   auto addBand(haptics::types::Band &newBand) -> void;
   auto clearBands() -> void { bands.clear(); };
   auto generateBand() -> haptics::types::Band *;
-  auto generateBand(BandType bandType, CurveType curveType, double blockLength,
-                    int lowerFrequencyLimit, int upperFrequencyLimit) -> haptics::types::Band *;
+  auto generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
+      -> haptics::types::Band *;
+  auto generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+                    int upperFrequencyLimit) -> haptics::types::Band *;
+  auto generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+                    int upperFrequencyLimit) -> haptics::types::Band *;
   auto findBandAvailable(int position, int duration, types::BandType bandType)
       -> haptics::types::Band *;
   auto Evaluate(double position, unsigned int timescale) -> double;
@@ -113,6 +123,7 @@ public:
   auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
   [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
   auto setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void;
+  [[nodiscard]] auto equals(const Channel &channel) const -> bool;
 
 private:
   int id = -1;
@@ -122,6 +133,7 @@ private:
   uint32_t bodyPartMask = 0;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
+  std::optional<int> priority;
   std::optional<int> referenceDeviceId;
   std::optional<uint32_t> frequencySampling = std::nullopt;
   std::optional<uint32_t> sampleCount = std::nullopt;

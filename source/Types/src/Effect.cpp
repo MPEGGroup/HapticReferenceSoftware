@@ -31,6 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOBinaryFields.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <Tools/include/Tools.h>
 #include <Types/include/Effect.h>
 #include <algorithm>
@@ -50,11 +52,24 @@ auto Effect::setPosition(int newPosition) -> void { position = newPosition; }
 
 auto Effect::setSemantic(std::string &newSemantic) -> void { semantic = newSemantic; }
 
-[[nodiscard]] auto Effect::getPhase() const -> float { return phase; }
+[[nodiscard]] auto Effect::getPhaseOrDefault() const -> float {
+  if (phase.has_value()) {
+    return phase.value();
+  }
+  return DEFAULT_PHASE;
+}
+
+[[nodiscard]] auto Effect::getPhase() const -> std::optional<float> { return phase; }
 
 auto Effect::setPhase(float newPhase) -> void { phase = newPhase; }
 
-[[nodiscard]] auto Effect::getBaseSignal() const -> BaseSignal { return baseSignal; }
+[[nodiscard]] auto Effect::getBaseSignalOrDefault() const -> BaseSignal {
+  if (baseSignal.has_value()) {
+    return baseSignal.value();
+  }
+  return DEFAULT_BASE_SIGNAL;
+}
+[[nodiscard]] auto Effect::getBaseSignal() const -> std::optional<BaseSignal> { return baseSignal; }
 
 auto Effect::setBaseSignal(BaseSignal newBaseSignal) -> void { baseSignal = newBaseSignal; }
 
@@ -215,7 +230,7 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 
   // FREQUENCY MODULATION
   double freq_modulation = 0;
-  double phi = this->getPhase();
+  double phi = this->getPhaseOrDefault();
   // First frequency keyframe after the relative position
   // Find phase corresponding to this keyframe
   auto firstFrequencyKeyframeAfterPositionIt = keyframes.begin();
@@ -286,19 +301,15 @@ auto Effect::EvaluateVectorial(double position, int lowFrequencyLimit, int highF
 }
 
 auto Effect::EvaluateWavelet(double position, int fs, unsigned int timescale) -> double {
-  double relativePosition = (position - this->getPosition()) * (double)fs /
+  double relativePosition = (position - (double)this->getPosition()) * (double)fs /
                             (double)timescale; // relative position in samples rel. to fs
-  int index = std::floor(relativePosition);
+  int index = (int)std::round(relativePosition);
 
-  if (index >= (int)this->getKeyframesSize()) {
+  auto samples = this->getWaveletSamples();
+  if (index >= (int)samples.size()) {
     return 0;
   }
-  auto myKeyframe = keyframes.begin() + index;
-  if (!myKeyframe->getAmplitudeModulation().has_value()) {
-    return 0;
-  }
-
-  return myKeyframe->getAmplitudeModulation().value();
+  return samples[index];
 }
 
 auto Effect::EvaluateTransient(double position, double transientDuration) -> double {
@@ -375,7 +386,7 @@ auto Effect::EvaluateKeyframes(double position, types::CurveType curveType, unsi
   if (frequency != 0) {
     time += phase / (2 * M_PI * frequency);
   }
-  switch (this->getBaseSignal()) {
+  switch (this->getBaseSignalOrDefault()) {
   case BaseSignal::Sine:
     return std::sin(2 * M_PI * time * frequency);
   case BaseSignal::Square:
@@ -420,5 +431,102 @@ auto Effect::getTimelineEffectAt(int index) -> haptics::types::Effect & {
   return timeline.at(index);
 }
 auto Effect::addTimelineEffect(Effect &newEffect) -> void { timeline.push_back(newEffect); }
+
+auto Effect::getWaveletBitstream() -> std::vector<unsigned char> & { return waveletBitstream; }
+
+void Effect::setWaveletBitstream(std::vector<unsigned char> stream) {
+  waveletBitstream = std::move(stream);
+}
+
+auto Effect::getWaveletSamples() -> std::vector<double> & { return waveletSamples; }
+
+void Effect::setWaveletSamples(std::vector<double> samples) { waveletSamples = std::move(samples); }
+
+auto Effect::equals(const Effect &effect) const -> bool {
+
+  if (id != effect.getId()) {
+    std::cerr << "Effect - id fields are different" << std::endl;
+    return false;
+  }
+  if (position != effect.getPosition()) {
+    std::cerr << "Effect - position fields are different" << std::endl;
+    return false;
+  }
+  if (phase.has_value() != effect.getPhase().has_value()) {
+    std::cerr << "Effect - phase fields are different" << std::endl;
+    return false;
+  }
+  if (phase.has_value() &&
+      !tools::almostEquals(phase.value(), effect.getPhase().value(), haptics::io::EFFECT_PHASE,
+                           haptics::io::MAX_PHASE)) {
+    std::cerr << "Effect - phase fields are different" << std::endl;
+    return false;
+  }
+  if (semantic != effect.getSemantic()) {
+    std::cerr << "Effect - semantic fields are different" << std::endl;
+    return false;
+  }
+  if (baseSignal != effect.getBaseSignal()) {
+    std::cerr << "Effect - baseSignal fields are different" << std::endl;
+    return false;
+  }
+  if (effectType != effect.getEffectType()) {
+    std::cerr << "Effect - effectType fields are different" << std::endl;
+    return false;
+  }
+  if (keyframes.size() != effect.keyframes.size()) {
+    std::cerr << "Effect - Number of keyframes is different" << std::endl;
+    return false;
+  }
+  if (timeline.size() != effect.timeline.size()) {
+    std::cerr << "Effect - Number of composite effects is different" << std::endl;
+    return false;
+  }
+  if (waveletSamples.size() != effect.waveletSamples.size()) {
+    std::cerr << "Effect - Number of wavelet samples is different" << std::endl;
+    return false;
+  }
+  if (waveletBitstream.size() != effect.waveletBitstream.size()) {
+    std::cerr << "Effect - Wavelet bitstream size is different" << std::endl;
+    return false;
+  }
+
+  bool isEqual = true;
+  for (int i = 0; i < static_cast<int>(keyframes.size()); i++) {
+    const auto keyframe1 = keyframes.at(i);
+    const auto keyframe2 = effect.keyframes.at(i);
+    isEqual = isEqual && (keyframe1.equals(keyframe2));
+  }
+  if (!isEqual) {
+    return false;
+  }
+  for (int i = 0; i < static_cast<int>(timeline.size()); i++) {
+    const auto effect1 = timeline.at(i);
+    const auto effect2 = effect.timeline.at(i);
+    isEqual = isEqual && (effect1.equals(effect2));
+  }
+
+  if (!isEqual) {
+    return false;
+  }
+
+  for (int i = 0; i < static_cast<int>(waveletSamples.size()); i++) {
+    isEqual = isEqual && (waveletSamples.at(i) == effect.waveletSamples.at(i));
+  }
+  if (!isEqual) {
+    std::cerr << "Effect - Wavelet samples are different" << std::endl;
+    return false;
+  }
+
+  for (int i = 0; i < static_cast<int>(waveletBitstream.size()); i++) {
+    isEqual = isEqual && (waveletBitstream.at(i) == effect.waveletBitstream.at(i));
+  }
+  if (!isEqual) {
+    std::cerr << "Effect - Wavelet bitstreams are different" << std::endl;
+    return false;
+  }
+
+  return true;
+}
 
 } // namespace haptics::types

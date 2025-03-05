@@ -82,5 +82,11 @@ namespace haptics::tools {
 [[nodiscard]] auto interpolationCodec(const std::vector<std::pair<int, double>> &points,
                                       types::CurveType curveType) -> std::vector<double>;
 
+[[nodiscard]] auto isNumber(const std::string &s) -> bool;
+
+[[nodiscard]] auto isPowerOfTwo(int n) -> bool;
+
+[[nodiscard]] auto almostEquals(float val1, float val2, unsigned int nbBytes, float range) -> bool;
+
 } // namespace haptics::tools
 #endif

@@ -146,8 +146,7 @@ auto IvsEncoder::injectIntoBands(types::Effect &effect, types::Channel &channel,
       types::BandType::VectorialWave);
   if (myBand == nullptr) {
     myBand = channel.generateBand(haptics::types::BandType::VectorialWave,
-                                  haptics::types::CurveType::Unknown, 0, IvsEncoder::MIN_FREQUENCY,
-                                  IvsEncoder::MAX_FREQUENCY);
+                                  IvsEncoder::MIN_FREQUENCY, IvsEncoder::MAX_FREQUENCY);
   }
   myBand->addEffect(effect);
 }

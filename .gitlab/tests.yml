@@ -1,11 +1,15 @@
 Metrics:
   stage: test
-  image: gcc-cmake-python:RM0
-  tags: [linux]
+  variables:
+    IMAGE_GCC_CMAKE_PYTHON_PREFIX: ""
+  image: ${IMAGE_GCC_CMAKE_PYTHON_PREFIX}gcc-cmake-python:RM0
   before_script:
     - export CXX=/usr/bin/g++-10
     - export CC=/usr/bin/gcc-10
   script:
+    - git config --global http.sslVerify "false"
+    - echo "${GIT_MPEG_EXPERT_ACCESS_URL}" > ~/git.store
+    - git config --global credential.helper 'store --file ~/git.store'
     - mkdir -p build && cd build
     - cmake -DENABLE_CLANG_TIDY=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=~/install ..
     - make -j

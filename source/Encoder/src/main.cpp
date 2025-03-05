@@ -35,6 +35,7 @@
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
 #include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
 #include <Tools/include/InputParser.h>
@@ -88,7 +89,7 @@ auto help() -> void {
       << "\t-bu, \t\t\twavelet bitbudget, if custom setting needed" << std::endl
       << "\t-bl, \t\t\twavelet block length, if custom setting needed" << std::endl
       << "\t-cf, \t\t\tcutoff frequency used to split pcm signals in high and low frequencies. "
-         "Default value is 72 Hz. If the value is set to zero, the signal will not be split."
+         "Default value is 72.5 Hz. If the value is set to zero, the signal will not be split."
       << std::endl
       << "\t--disable-wavelet, \t\t\tthe encoder will encode the data using a single vectorial "
          "band for low frequencies. This argument will only affect PCM input content."
@@ -286,6 +287,16 @@ auto main(int argc, char *argv[]) -> int {
   }
   if (inputParser.cmdOptionExists("-l") || inputParser.cmdOptionExists("--linearize")) {
     hapticFile.linearize();
+  }
+
+  auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
+  if (!logs.empty()) {
+    for (auto &l : logs) {
+      std::cerr << l << std::endl;
+    }
+    std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                 "binary encoding may result in some information loss."
+              << std::endl;
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {

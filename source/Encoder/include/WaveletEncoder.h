@@ -39,21 +39,18 @@
 
 #include "FilterBank/include/Wavelet.h"
 #include "PsychohapticModel/include/PsychohapticModel.h"
+#include "Spiht/include/Spiht_Enc.h"
 #include "Types/include/Band.h"
 #include "Types/include/Effect.h"
 #include "Types/include/Keyframe.h"
 
-constexpr size_t WAVMAXLENGTH = 8;
-constexpr int MAXBITS = 15;
-constexpr int FRACTIONBITS_0 = 7;
-constexpr int FRACTIONBITS_1 = 3;
-constexpr int INTEGERBITS_1 = 4;
 constexpr double LOGFACTOR = 10;
 constexpr double MAXQUANTFACTOR = 0.999;
 constexpr double QUANT_ADD = 0.5;
 constexpr double S_2_MS_WAVELET = 1000;
 
 using haptics::filterbank::Wavelet;
+using haptics::spiht::Spiht_Enc;
 using haptics::tools::modelResult;
 using haptics::tools::PsychohapticModel;
 using haptics::types::Band;
@@ -62,19 +59,14 @@ using haptics::types::Effect;
 
 namespace haptics::encoder {
 
-struct quantMode {
-  int integerbits;
-  int fractionbits;
-};
-
 class WaveletEncoder {
 public:
   WaveletEncoder(int bl_new, int fs_new);
 
   auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band,
                     unsigned int timescale) -> bool;
-  auto encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits)
-      -> std::vector<double>;
+  void encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits,
+                   std::vector<unsigned char> &bitstream);
   static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
                                         std::vector<unsigned char> &bitwavmax);
   void static maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
@@ -83,7 +75,7 @@ public:
 
   static void uniformQuant(std::vector<double> &in, size_t start, double max, int bits,
                            size_t length, std::vector<double> &out);
-  static auto maxQuant(double in, quantMode m) -> double;
+  static auto maxQuant(double in, spiht::quantMode m) -> double;
   template <class T> static auto findMax(std::vector<T> &data) -> T;
   static auto findMinInd(std::vector<double> &data) -> size_t;
 
@@ -92,6 +84,7 @@ public:
 
 private:
   tools::PsychohapticModel pm;
+  Spiht_Enc spihtEnc;
   int bl;
   int fs;
   int dwtlevel;

@@ -56,7 +56,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   using haptics::spiht::Spiht_Enc;
   using haptics::types::Effect;
 
-  const std::string testingVersion = "RM1";
+  const std::string testingVersion = "2023";
   const std::string testingDate = "Today";
   const std::string testingDescription = "I'm a testing value";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
@@ -89,18 +89,18 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
                                std::optional<float>, std::optional<float>, std::optional<float>,
                                std::optional<float>, std::optional<haptics::types::ActuatorType>>>
       testingReferenceDeviceValue_perception0 = {
-          {-1, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
+          {0, "This is a name", std::nullopt, 0, 1000, std::nullopt, 1, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, 24.42F,
            haptics::types::ActuatorType::LRA},
-          {6534, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
+          {25, "MPEG actuator", ~(uint32_t)(0), 0, 1000, 650, 1.2F, 32, 3.5F, 1000, 0.0034,
            450.0001, 543.543, 0, haptics::types::ActuatorType::Unknown},
-          {0, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+          {2, "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
            std::nullopt, std::nullopt}};
   testingPerception0.addReferenceDevice(testingReferenceDeviceValue_perception0);
 
   const int testingId_perception1 = 255;
-  const int testingAvatarId_perception1 = 3;
+  const int testingAvatarId_perception1 = testingId_avatar1;
   const std::string testingDescription_perception1 = "This developer need an HAPTIC coffee !";
   const auto testingPerceptionModality_perception1 = haptics::types::PerceptionModality::Other;
   haptics::types::Perception testingPerception1(testingId_perception1, testingAvatarId_perception1,
@@ -144,29 +144,24 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   const auto testingBandType_band0 = haptics::types::BandType::Curve;
   const auto testingCurveType_band0 = haptics::types::CurveType::Cubic;
-  const int testingWindowLength_band0 = 0;
   const int testingLowerFrequencyLimit_band0 = 0;
   const int testingUpperFrequencyLimit_band0 = 75;
   haptics::types::Band testingBand0(testingBandType_band0, testingCurveType_band0,
-                                    testingWindowLength_band0, testingLowerFrequencyLimit_band0,
+                                    testingLowerFrequencyLimit_band0,
                                     testingUpperFrequencyLimit_band0);
 
   const auto testingBandType_band1 = haptics::types::BandType::Transient;
-  const auto testingCurveType_band1 = haptics::types::CurveType::Unknown;
-  const int testingWindowLength_band1 = 0;
   const int testingLowerFrequencyLimit_band1 = 65;
   const int testingUpperFrequencyLimit_band1 = 300;
-  haptics::types::Band testingBand1(testingBandType_band1, testingCurveType_band1,
-                                    testingWindowLength_band1, testingLowerFrequencyLimit_band1,
+  haptics::types::Band testingBand1(testingBandType_band1, testingLowerFrequencyLimit_band1,
                                     testingUpperFrequencyLimit_band1);
 
   const auto testingBandType_band2 = haptics::types::BandType::WaveletWave;
-  const auto testingCurveType_band2 = haptics::types::CurveType::Unknown;
   const int testingWindowLength_band2 = 128;
   const int testingLowerFrequencyLimit_band2 = 0;
   const int testingUpperFrequencyLimit_band2 = 1000;
-  haptics::types::Band testingBand2(testingBandType_band2, testingCurveType_band2,
-                                    testingWindowLength_band2, testingLowerFrequencyLimit_band2,
+  haptics::types::Band testingBand2(testingBandType_band2, testingWindowLength_band2,
+                                    testingLowerFrequencyLimit_band2,
                                     testingUpperFrequencyLimit_band2);
 
   const int testingPosition_effect0 = 63;
@@ -470,7 +465,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
 
   SECTION("Save/Read binary streaming file") {
     std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
-    bool succeed = IOStream::writePacket(testingHaptic, bitstream, PACKET_DURATION);
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
     std::string filepath = "test.impg";
     IOStream::writeFile(testingHaptic, filepath, PACKET_DURATION);
 
@@ -478,7 +473,7 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::loadFile(filepath, readBitstream);
 
     haptics::types::Haptics readHaptic;
-    IOStream::readFile(filepath, readHaptic);
+    IOStream::readFile(filepath, readHaptic, false);
 
     REQUIRE(succeed);
   }

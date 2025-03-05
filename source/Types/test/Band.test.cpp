@@ -39,7 +39,7 @@ using haptics::types::BandType;
 using haptics::types::CurveType;
 
 TEST_CASE("haptics::types::Band", "[placeholder]") {
-  const Band b(BandType::VectorialWave, CurveType::Cubic, 10, 70, 1000);
+  const Band b(BandType::VectorialWave, 70, 1000);
 
   CHECK(true);
 }

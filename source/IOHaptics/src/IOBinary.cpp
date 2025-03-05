@@ -320,9 +320,9 @@ auto IOBinary::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool
   auto effectType = static_cast<uint8_t>(libraryEffect.getEffectType());
   IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_TYPE>(effectType, output);
   if (effectType == 0) {
-    float phase = libraryEffect.getPhase();
+    float phase = libraryEffect.getPhaseOrDefault();
     IOBinaryPrimitives::writeFloatNBits<uint16_t, EFFECT_PHASE>(phase, output, 0, MAX_PHASE);
-    auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignal());
+    auto baseSignal = static_cast<uint8_t>(libraryEffect.getBaseSignalOrDefault());
     IOBinaryPrimitives::writeNBits<uint8_t, EFFECT_BASE_SIGNAL>(baseSignal, output);
   }
   auto keyframeCount = static_cast<uint16_t>(libraryEffect.getKeyframesSize());

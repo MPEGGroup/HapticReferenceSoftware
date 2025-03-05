@@ -36,23 +36,41 @@
 #include <IOHaptics/include/IOBinary.h>
 #include <Spiht/include/Spiht_Dec.h>
 #include <Spiht/include/Spiht_Enc.h>
+#include <Types/include/EffectSemantic.h>
 #include <Types/include/Haptics.h>
 #include <bitset>
+#include <map>
 #include <string>
 #include <tuple>
 #include <vector>
-
 namespace haptics::io {
 
+class IOConformance;
+
+static constexpr const char *MAIN_PROFILE = "Main";
+static constexpr const char *SIMPLE_PARAMETRIC_PROFILE = "Simple Parametric";
+static constexpr const char *DATE_FORMAT = R"((\d{4})-(\d{2})-(\d{2}))";
+static constexpr const char *VERSION_FORMAT = R"((\w{4})|(\w{4}-\w))";
 static constexpr int TIME_TO_MS = 1000;
 static constexpr int DEFAULT_PACKET_DURATION = 128;
+static constexpr int DEFAULT_DURATION_DEVIATION = 0;
+
+static constexpr int MIN_BAND_LEVEL1 = 1;
+static constexpr int MIN_BAND_LEVEL2 = 1;
+static constexpr int MAX_BAND_LEVEL1 = 7;
+static constexpr int MAX_BAND_LEVEL2 = 63;
+
+static constexpr int MIN_CHANNEL_LEVEL1 = 1;
+static constexpr int MIN_CHANNEL_LEVEL2 = 1;
+static constexpr int MAX_CHANNEL_LEVEL1 = 127;
+static constexpr int MAX_CHANNEL_LEVEL2 = 65535;
 
 static constexpr uint32_t CRC32_POLYNOMIAL = 2187366103;
 static constexpr uint16_t CRC16_POLYNOMIAL = 49185;
 
 enum class MIHSUnitType { Initialization, Temporal, Spatial, Silent };
 
-enum class NALuType {
+enum class MIHSPacketType {
   Timing,
   MetadataHaptics,
   MetadataPerception,
@@ -63,7 +81,8 @@ enum class NALuType {
   CRC32,
   CRC16,
   GlobalCRC16,
-  GlobalCRC32
+  GlobalCRC32,
+  InitializationTiming
 };
 
 enum class AUType { RAU, DAU };
@@ -88,6 +107,9 @@ public:
     int time = 0;
     unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE; // TODO: use this timescale
     unsigned int packetDuration = DEFAULT_PACKET_DURATION;
+    unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
+    unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
+    bool overlapping = false;
     types::Haptics haptic;
     types::Perception perception;
     types::Channel channel;
@@ -96,6 +118,7 @@ public:
     std::vector<int> keyframesCount;
     std::vector<int> effectsId;
     AUType auType = AUType::RAU;
+    unsigned int layer = 0;
   };
 
   struct StreamReader {
@@ -106,23 +129,29 @@ public:
     BandStream bandStream;
     std::vector<BandStream> bandStreamsHaptic;
     AUType auType = AUType::RAU;
-    int level = -1;
     unsigned int time = 0;
     unsigned int packetLength = 0;
     unsigned int packetDuration = 0;
     unsigned int timescale = haptics::types::Haptics::DEFAULT_TIMESCALE;
     bool waitSync = false;
+    bool overlapping = false;
+    unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
+    unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
+    unsigned int layer = 0;
+    std::vector<std::string> logs;
+    MIHSUnitType currentUnitType = MIHSUnitType::Initialization;
+    bool MIHSData = false;
   };
-  static auto readFile(const std::string &filePath, types::Haptics &haptic) -> bool;
+  static auto readFile(const std::string &filePath, types::Haptics &haptic, bool logFile) -> bool;
+  static auto readMemory(std::vector<uint8_t> &in, types::Haptics &haptic) -> bool;
+  static auto readPackets(std::vector<std::vector<bool>> &bitstream, StreamReader &sreader) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
+  static auto loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool>> &bitset) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;
   static auto writeUnitFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;
 
-  static auto writePacket(types::Haptics &haptic, std::ofstream &file) -> bool;
-  static auto writePacket(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-                          int packetDuration) -> bool;
   static auto writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
                          int packetDuration) -> bool;
 
@@ -130,12 +159,12 @@ public:
                             std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool;
   static auto readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, CRC &crc) -> bool;
 
-  static auto writeNALu(NALuType naluType, StreamWriter &swriter, int level,
-                        std::vector<std::vector<bool>> &bitstream) -> bool;
-  static auto writeAllBands(StreamWriter &swriter, NALuType naluType, int level,
-                            std::vector<bool> &naluHeader,
+  static auto writeMIHSPacket(MIHSPacketType mihsPacketType, StreamWriter &swriter,
+                              std::vector<std::vector<bool>> &bitstream) -> bool;
+  static auto writeAllBands(StreamWriter &swriter, MIHSPacketType mihsPacketType,
+                            std::vector<bool> &mihsPacketHeader,
                             std::vector<std::vector<bool>> &bitstream) -> bool;
-  static auto readNALu(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool;
+  static auto readMIHSPacket(std::vector<bool> packet, StreamReader &sreader, CRC &crc) -> bool;
   static auto initializeStream() -> StreamReader;
 
 private:
@@ -158,10 +187,12 @@ private:
   static auto readMIHSUnitInitialization(std::vector<bool> &mihsunit, StreamReader &sreader)
       -> bool;
 
-  static auto writeNALuHeader(NALuType naluType, int level, int payloadSize,
-                              std::vector<bool> &bitstream) -> bool;
-  static auto writeNALuPayload(NALuType naluType, types::Haptics &haptic,
-                               std::vector<bool> &bitstream) -> bool;
+  static auto writeMIHSPacketHeader(MIHSPacketType mihsPacketType, int payloadSize,
+                                    std::vector<bool> &bitstream) -> bool;
+  static auto writeMIHSPacketPayload(MIHSPacketType mihsPacketType, types::Haptics &haptic,
+                                     std::vector<bool> &bitstream) -> bool;
+  static auto writeInitializationTiming(StreamWriter &swriter, std::vector<bool> &bitstream)
+      -> bool;
   static auto writeTiming(StreamWriter &swriter, std::vector<bool> &bitstream) -> bool;
   static auto writeMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
   static auto writeAvatar(types::Avatar &avatar, std::vector<bool> &bitstream) -> bool;
@@ -194,8 +225,8 @@ private:
   static auto writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
                                         std::vector<bool> &packetBits, StreamWriter &swriter)
       -> std::vector<bool>;
-  static auto readWaveletEffect(std::vector<bool> &bitstream, types::Band &band,
-                                types::Effect &effect, int &length, unsigned int timescale) -> bool;
+  static auto readWaveletEffect(std::vector<bool> &bitstream, StreamReader &sreader,
+                                types::Effect &effect, int &length) -> bool;
   static auto writeEffectHeader(StreamWriter &swriter) -> std::vector<bool>;
   static auto writeEffectBasis(types::Effect effect, StreamWriter &swriter, int &kfCount, bool &rau,
                                std::vector<bool> &bitstream) -> bool;
@@ -217,32 +248,36 @@ private:
   static auto readPacketTS(std::vector<bool> bitstream) -> int;
   static auto readPacketLength(std::vector<bool> &bitstream) -> int;
 
-  static auto readNALuType(std::vector<bool> &packet) -> NALuType;
-  static auto readNALuHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
-  static auto readMetadataHaptics(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
-  static auto readAvatar(std::vector<bool> &bitstream, types::Avatar &avatar, int &length) -> bool;
+  static auto readMIHSPacketTypeInt(std::vector<bool> &packet) -> int;
+  static auto readMIHSPacketType(std::vector<bool> &packet) -> MIHSPacketType;
+  static auto readMIHSPacketHeader(types::Haptics &haptic, std::vector<bool> &bitstream) -> bool;
+  static auto readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
+  static auto readAvatar(StreamReader &sreader, std::vector<bool> &bitstream, types::Avatar &avatar,
+                         int &length) -> bool;
+  static auto readInitializationTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataPerception(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   // static auto readEffectsLibrary(std::vector<bool> &bitstream, std::vector<types::Effect>
   // &effects)
   //     -> bool;
-  static auto readReferenceDevice(std::vector<bool> &bitstream, types::ReferenceDevice &refDevice,
-                                  int &length) -> bool;
+  static auto readReferenceDevice(StreamReader &sreader, std::vector<bool> &bitstream,
+                                  types::ReferenceDevice &refDevice, int &length) -> bool;
   static auto readLibrary(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
-  static auto readLibraryEffect(types::Effect &libraryEffect, int &idx,
+  static auto readLibraryEffect(StreamReader &sreader, types::Effect &libraryEffect, int &idx,
                                 std::vector<bool> &bitstream) -> bool;
   static auto readMetadataChannel(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readMetadataBand(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readSpatialData(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readData(StreamReader &sreader, std::vector<bool> &bitstream) -> bool;
   static auto readEffect(types::Effect &effect, std::vector<bool> &bitstream) -> bool;
-  static auto readCRC(std::vector<bool> &bitstream, CRC &crc, NALuType naluType) -> bool;
+  static auto readCRC(std::vector<bool> &bitstream, CRC &crc, MIHSPacketType mihsPacketType)
+      -> bool;
 
   static auto getEffectsId(types::Haptics &haptic) -> std::vector<int>;
 
-  static auto readListObject(std::vector<bool> &bitstream, int avatarCount,
+  static auto readListObject(StreamReader &sreader, std::vector<bool> &bitstream, int avatarCount,
                              std::vector<types::Avatar> &avatarList) -> bool;
-  static auto readListObject(std::vector<bool> &bitstream, int refDevCount,
+  static auto readListObject(StreamReader &sreader, std::vector<bool> &bitstream, int refDevCount,
                              std::vector<types::ReferenceDevice> &refDevList, int &length) -> bool;
 
   static auto addEffectToHaptic(types::Haptics &haptic, int perceptionIndex, int channelIndex,
@@ -253,14 +288,14 @@ private:
   static auto searchChannelInHaptic(types::Haptics &haptic, int id) -> int;
   static auto searchBandInHaptic(StreamReader &sreader, int id) -> int;
 
-  static auto readListObject(std::vector<bool> &bitstream, int fxCount, types::Band &band,
+  static auto readListObject(std::vector<bool> &bitstream, StreamReader &sreader, int fxCount,
                              std::vector<types::Effect> &fxList, int &length) -> bool;
 
-  static auto readEffect(std::vector<bool> &bitstream, types::Effect &effect, types::Band &band,
+  static auto readEffect(std::vector<bool> &bitstream, StreamReader &sreader, types::Effect &effect,
                          int &length) -> bool;
 
-  static auto readEffectBasis(std::vector<bool> &bitstream, types::Effect &effect,
-                              types::BandType bandType, int &idx) -> bool;
+  static auto readEffectBasis(std::vector<bool> &bitstream, StreamReader &sreader,
+                              types::Effect &effect, int &idx) -> bool;
 
   static auto readListObject(std::vector<bool> &bitstream, int kfCount, types::BandType &bandType,
                              std::vector<types::Keyframe> &kfList, int &length) -> bool;
@@ -290,6 +325,10 @@ private:
   static auto silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void;
 
   static auto getNextSync(types::Haptics &haptic, types::Sync &sync, int &idxs) -> bool;
+
+  static auto checkURIFormat(const ::std::string &uri) -> bool;
+  static auto avatarExists(int avatarId, types::Haptics &haptics) -> bool;
+  static auto referenceDeviceExists(int refDevId, types::Perception &perception) -> bool;
 };
 } // namespace haptics::io
 #endif // IOSTREAM_H

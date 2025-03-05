@@ -148,7 +148,8 @@ auto main(int argc, char* argv[]) -> int {
 	Haptics hapticFile;
 	if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
 
-		if (!IOStream::readFile(filename, hapticFile)) {
+
+		if (!IOStream::readFile(filename, hapticFile, true)) {
 			return EXIT_FAILURE;
 		}
 	}

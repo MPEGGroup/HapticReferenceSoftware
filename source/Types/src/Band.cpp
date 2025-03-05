@@ -40,14 +40,35 @@ namespace haptics::types {
 [[nodiscard]] auto Band::getBandType() const -> BandType { return bandType; }
 
 auto Band::setBandType(BandType newBandType) -> void { bandType = newBandType; }
+auto Band::getPriority() const -> std::optional<int> { return priority; }
+auto Band::getPriorityOrDefault() const -> int {
+  if (priority.has_value()) {
+    return priority.value();
+  }
+  return 0;
+}
+auto Band::setPriority(int newPriority) -> void { priority = newPriority; }
 
-[[nodiscard]] auto Band::getCurveType() const -> CurveType { return curveType; }
+[[nodiscard]] auto Band::getCurveTypeOrDefault() const -> CurveType {
+  if (curveType.has_value()) {
+    return curveType.value();
+  }
+  return DEFAULT_CURVE_TYPE;
+}
+[[nodiscard]] auto Band::getCurveType() const -> std::optional<CurveType> { return curveType; }
 
 auto Band::setCurveType(CurveType newCurveType) -> void { curveType = newCurveType; }
 
-[[nodiscard]] auto Band::getBlockLength() const -> double { return blockLength; }
+[[nodiscard]] auto Band::getBlockLengthOrDefault() const -> int {
+  if (blockLength.has_value()) {
+    return blockLength.value();
+  }
+  return DEFAULT_BLOCK_LENGTH;
+}
 
-auto Band::setBlockLength(double newBlockLength) -> void { blockLength = newBlockLength; }
+[[nodiscard]] auto Band::getBlockLength() const -> std::optional<int> { return blockLength; }
+
+auto Band::setBlockLength(int newBlockLength) -> void { blockLength = newBlockLength; }
 
 [[nodiscard]] auto Band::getUpperFrequencyLimit() const -> int { return upperFrequencyLimit; }
 
@@ -111,12 +132,14 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
     return 0;
   }
 
-  for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-    if (it->getPosition() <= position) {
-      return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
-    }
-    if (it == effects.begin()) {
-      break;
+  if (!effects.empty()) {
+    for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+      if (it->getPosition() <= position) {
+        return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
+      }
+      if (it == effects.begin()) {
+        break;
+      }
     }
   }
 
@@ -128,7 +151,7 @@ auto Band::EvaluationSwitch(double position, haptics::types::Effect *effect, int
 
   switch (this->bandType) {
   case BandType::Curve:
-    return effect->EvaluateKeyframes(position, this->getCurveType(), timescale);
+    return effect->EvaluateKeyframes(position, this->getCurveTypeOrDefault(), timescale);
   case BandType::VectorialWave:
     return effect->EvaluateVectorial(position, lowFrequencyLimit, highFrequencyLimit, timescale);
   case BandType::WaveletWave:
@@ -170,7 +193,7 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
       if (keyframes.size() == 2) {
         effectAmp = haptics::tools::linearInterpolation2(keyframes);
       } else {
-        switch (this->curveType) {
+        switch (getCurveTypeOrDefault()) {
         case CurveType::Linear:
           effectAmp = haptics::tools::linearInterpolation2(keyframes);
           break;
@@ -209,8 +232,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
     break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double position = timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
-                                     (pad * MS_2_S)); // position in ticks needed
+      double position = (double)timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
+                                             (pad * MS_2_S)); // position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
                            effects.back().getEffectTimeLength(
@@ -220,13 +243,15 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
         bandAmp[ti] = 0;
       } // TODO: TRANSIENT_DURATION_MS: should it be transformed to ticks?
 
-      for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-        if (it->getPosition() <= position) {
-          bandAmp[ti] +=
-              EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit, timescale);
-        }
-        if (it == effects.begin()) {
-          break;
+      if (!effects.empty()) {
+        for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+          if (it->getPosition() <= position) {
+            bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit,
+                                            upperFrequencyLimit, timescale);
+          }
+          if (it == effects.begin()) {
+            break;
+          }
         }
       }
     }
@@ -244,12 +269,51 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
                                                   Band::getTransientDuration(timescale));
 }
 
-[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
+//[[nodiscard]] auto Band::getTimescale() const -> int { return this->timescale; }
 
-auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
+// auto Band::setTimescale(int newTimescale) -> void { timescale = newTimescale; }
 
 [[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
   return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);
+}
+
+auto Band::equals(const Band &band) const -> bool {
+  if (bandType != band.getBandType()) {
+    std::cerr << "bandType fields are different" << std::endl;
+    return false;
+  }
+  if (curveType != band.getCurveType()) {
+    std::cerr << "curveType fields are different" << std::endl;
+    return false;
+  }
+  if (blockLength != band.getBlockLength()) {
+    std::cerr << "blockLength fields are different" << std::endl;
+    return false;
+  }
+  if (lowerFrequencyLimit != band.getLowerFrequencyLimit()) {
+    std::cerr << "lowerFrequencyLimit fields are different" << std::endl;
+    return false;
+  }
+  if (upperFrequencyLimit != band.getUpperFrequencyLimit()) {
+    std::cerr << "upperFrequencyLimit fields are different" << std::endl;
+    return false;
+  }
+  if (priority != band.getPriority()) {
+    std::cerr << "priority fields are different" << std::endl;
+    return false;
+  }
+  if (effects.size() != band.effects.size()) {
+    std::cerr << "Number of effects are different" << std::endl;
+    return false;
+  }
+  bool isEqual = true;
+  for (int i = 0; i < static_cast<int>(effects.size()); i++) {
+    const auto effect1 = effects.at(i);
+    const auto effect2 = band.effects.at(i);
+    isEqual = isEqual && (effect1.equals(effect2));
+  }
+
+  return isEqual;
 }
 
 } // namespace haptics::types
