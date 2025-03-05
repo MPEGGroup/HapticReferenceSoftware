@@ -59,37 +59,37 @@ using haptics::types::Effect;
 
 namespace haptics::encoder {
 
-class WaveletEncoder {
-public:
-  WaveletEncoder(int bl_new, int fs_new);
+	class WaveletEncoder {
+	public:
+		WaveletEncoder(int bl_new, int fs_new);
 
-  auto encodeSignal(std::vector<double> &sig_time, int bitbudget, double f_cutoff, Band &band,
-                    unsigned int timescale) -> bool;
-  void encodeBlock(std::vector<double> &block_time, int bitbudget, double &scalar, int &maxbits,
-                   std::vector<unsigned char> &bitstream);
-  static void maximumWaveletCoefficient(std::vector<double> &sig, double &qwavmax,
-                                        std::vector<unsigned char> &bitwavmax);
-  void static maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
-  void updateNoise(std::vector<double> &bandenergy, std::vector<double> &noiseenergy,
-                   std::vector<double> &SNR, std::vector<double> &MNR, std::vector<double> &SMR);
+		auto encodeSignal(std::vector<double>& sig_time, int bitbudget, double f_cutoff, Band& band,
+			unsigned int timescale) -> bool;
+		void encodeBlock(std::vector<double>& block_time, int bitbudget, double& scalar, int& maxbits,
+			std::vector<unsigned char>& bitstream);
+		static void maximumWaveletCoefficient(std::vector<double>& sig, double& qwavmax,
+			std::vector<unsigned char>& bitwavmax);
+		void static maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char>& bitwavmax);
+		void updateNoise(std::vector<double>& bandenergy, std::vector<double>& noiseenergy,
+			std::vector<double>& SNR, std::vector<double>& MNR, std::vector<double>& SMR);
 
-  static void uniformQuant(std::vector<double> &in, size_t start, double max, int bits,
-                           size_t length, std::vector<double> &out);
-  static auto maxQuant(double in, spiht::quantMode m) -> double;
-  template <class T> static auto findMax(std::vector<T> &data) -> T;
-  static auto findMinInd(std::vector<double> &data) -> size_t;
+		static void uniformQuant(std::vector<double>& in, size_t start, double max, int bits,
+			size_t length, std::vector<double>& out);
+		static auto maxQuant(double in, spiht::quantMode m) -> double;
+		template <class T> static auto findMax(std::vector<T>& data)->T;
+		static auto findMinInd(std::vector<double>& data)->size_t;
 
-  static auto sgn(double val) -> double;
-  static void de2bi(int val, std::vector<unsigned char> &outstream, int length);
+		static auto sgn(double val) -> double;
+		static void de2bi(int val, std::vector<unsigned char>& outstream, int length);
 
-private:
-  tools::PsychohapticModel pm;
-  Spiht_Enc spihtEnc;
-  int bl;
-  int fs;
-  int dwtlevel;
-  std::vector<int> book;
-  std::vector<int> book_cumulative;
-};
+	private:
+		tools::PsychohapticModel pm;
+		Spiht_Enc spihtEnc;
+		int bl;
+		int fs;
+		int dwtlevel;
+		std::vector<int> book;
+		std::vector<int> book_cumulative;
+	};
 } // namespace haptics::encoder
 #endif // WAVELETENCODER_H

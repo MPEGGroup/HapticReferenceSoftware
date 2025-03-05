@@ -40,15 +40,15 @@
 
 namespace haptics::tools {
 
-class InputParser {
-public:
-  InputParser(const std::vector<const char *> &args);
-  [[nodiscard]] auto getCmdOption(const std::string &option) const -> const std::string &;
-  [[nodiscard]] auto cmdOptionExists(const std::string &option) const -> bool;
-  auto static getFileExt(std::string &filename) -> std::string;
+	class InputParser {
+	public:
+		InputParser(const std::vector<const char*>& args);
+		[[nodiscard]] auto getCmdOption(const std::string& option) const -> const std::string&;
+		[[nodiscard]] auto cmdOptionExists(const std::string& option) const -> bool;
+		auto static getFileExt(std::string& filename)->std::string;
 
-private:
-  std::vector<std::string> tokens;
-};
+	private:
+		std::vector<std::string> tokens;
+	};
 } // namespace haptics::tools
 #endif // INPUTPARSER_H

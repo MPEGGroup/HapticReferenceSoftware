@@ -35,113 +35,113 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto ReferenceDevice::getId() const -> int { return id; }
-auto ReferenceDevice::setId(int newId) -> void { id = newId; }
+	[[nodiscard]] auto ReferenceDevice::getId() const -> int { return id; }
+	auto ReferenceDevice::setId(int newId) -> void { id = newId; }
 
-[[nodiscard]] auto ReferenceDevice::getName() const -> std::string { return name; }
+	[[nodiscard]] auto ReferenceDevice::getName() const -> std::string { return name; }
 
-auto ReferenceDevice::setName(std::string &newName) -> void { name = newName; }
+	auto ReferenceDevice::setName(std::string& newName) -> void { name = newName; }
 
-[[nodiscard]] auto ReferenceDevice::getBodyPartMask() const -> std::optional<uint32_t> {
-  return bodyPartMask;
-}
+	[[nodiscard]] auto ReferenceDevice::getBodyPartMask() const -> std::optional<uint32_t> {
+		return bodyPartMask;
+	}
 
-auto ReferenceDevice::setBodyPartMask(uint32_t newBodyPartMask) -> void {
-  bodyPartMask = newBodyPartMask;
-}
+	auto ReferenceDevice::setBodyPartMask(uint32_t newBodyPartMask) -> void {
+		bodyPartMask = newBodyPartMask;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getMaximumFrequency() const -> std::optional<float> {
-  return maximumFrequency;
-}
+	[[nodiscard]] auto ReferenceDevice::getMaximumFrequency() const -> std::optional<float> {
+		return maximumFrequency;
+	}
 
-auto ReferenceDevice::setMaximumFrequency(float newMaximumFrequency) -> void {
-  maximumFrequency = newMaximumFrequency;
-}
+	auto ReferenceDevice::setMaximumFrequency(float newMaximumFrequency) -> void {
+		maximumFrequency = newMaximumFrequency;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getMinimumFrequency() const -> std::optional<float> {
-  return minimumFrequency;
-}
-auto ReferenceDevice::setMinimumFrequency(float newMinimumFrequency) -> void {
-  minimumFrequency = newMinimumFrequency;
-}
-[[nodiscard]] auto ReferenceDevice::getResonanceFrequency() const -> std::optional<float> {
-  return resonanceFrequency;
-}
-auto ReferenceDevice::setResonanceFrequency(float newResonanceFrequency) -> void {
-  resonanceFrequency = newResonanceFrequency;
-}
+	[[nodiscard]] auto ReferenceDevice::getMinimumFrequency() const -> std::optional<float> {
+		return minimumFrequency;
+	}
+	auto ReferenceDevice::setMinimumFrequency(float newMinimumFrequency) -> void {
+		minimumFrequency = newMinimumFrequency;
+	}
+	[[nodiscard]] auto ReferenceDevice::getResonanceFrequency() const -> std::optional<float> {
+		return resonanceFrequency;
+	}
+	auto ReferenceDevice::setResonanceFrequency(float newResonanceFrequency) -> void {
+		resonanceFrequency = newResonanceFrequency;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getMaximumAmplitude() const -> std::optional<float> {
-  return maximumAmplitude;
-}
+	[[nodiscard]] auto ReferenceDevice::getMaximumAmplitude() const -> std::optional<float> {
+		return maximumAmplitude;
+	}
 
-auto ReferenceDevice::setMaximumAmplitude(float newMaximumAmplitude) -> void {
-  maximumAmplitude = newMaximumAmplitude;
-}
+	auto ReferenceDevice::setMaximumAmplitude(float newMaximumAmplitude) -> void {
+		maximumAmplitude = newMaximumAmplitude;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getImpedance() const -> std::optional<float> {
-  return impedance;
-}
+	[[nodiscard]] auto ReferenceDevice::getImpedance() const -> std::optional<float> {
+		return impedance;
+	}
 
-auto ReferenceDevice::setImpedance(float newImpedance) -> void { impedance = newImpedance; }
+	auto ReferenceDevice::setImpedance(float newImpedance) -> void { impedance = newImpedance; }
 
-[[nodiscard]] auto ReferenceDevice::getMaximumVoltage() const -> std::optional<float> {
-  return maximumVoltage;
-}
+	[[nodiscard]] auto ReferenceDevice::getMaximumVoltage() const -> std::optional<float> {
+		return maximumVoltage;
+	}
 
-auto ReferenceDevice::setMaximumVoltage(float newMaximumVoltage) -> void {
-  maximumVoltage = newMaximumVoltage;
-}
+	auto ReferenceDevice::setMaximumVoltage(float newMaximumVoltage) -> void {
+		maximumVoltage = newMaximumVoltage;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getMaximumCurrent() const -> std::optional<float> {
-  return maximumCurrent;
-}
+	[[nodiscard]] auto ReferenceDevice::getMaximumCurrent() const -> std::optional<float> {
+		return maximumCurrent;
+	}
 
-auto ReferenceDevice::setMaximumCurrent(float newMaximumCurrent) -> void {
-  maximumCurrent = newMaximumCurrent;
-}
+	auto ReferenceDevice::setMaximumCurrent(float newMaximumCurrent) -> void {
+		maximumCurrent = newMaximumCurrent;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getMaximumDisplacement() const -> std::optional<float> {
-  return maximumDisplacement;
-}
+	[[nodiscard]] auto ReferenceDevice::getMaximumDisplacement() const -> std::optional<float> {
+		return maximumDisplacement;
+	}
 
-auto ReferenceDevice::setMaximumDisplacement(float newMaximumDisplacement) -> void {
-  maximumDisplacement = newMaximumDisplacement;
-}
+	auto ReferenceDevice::setMaximumDisplacement(float newMaximumDisplacement) -> void {
+		maximumDisplacement = newMaximumDisplacement;
+	}
 
-[[nodiscard]] auto ReferenceDevice::getWeight() const -> std::optional<float> { return weight; }
+	[[nodiscard]] auto ReferenceDevice::getWeight() const -> std::optional<float> { return weight; }
 
-auto ReferenceDevice::setWeight(float newWeight) -> void { weight = newWeight; }
+	auto ReferenceDevice::setWeight(float newWeight) -> void { weight = newWeight; }
 
-[[nodiscard]] auto ReferenceDevice::getSize() const -> std::optional<float> { return size; }
+	[[nodiscard]] auto ReferenceDevice::getSize() const -> std::optional<float> { return size; }
 
-auto ReferenceDevice::setSize(float newSize) -> void { size = newSize; }
+	auto ReferenceDevice::setSize(float newSize) -> void { size = newSize; }
 
-[[nodiscard]] auto ReferenceDevice::getCustom() const -> std::optional<float> { return custom; }
+	[[nodiscard]] auto ReferenceDevice::getCustom() const -> std::optional<float> { return custom; }
 
-auto ReferenceDevice::setCustom(float newCustom) -> void { custom = newCustom; }
+	auto ReferenceDevice::setCustom(float newCustom) -> void { custom = newCustom; }
 
-[[nodiscard]] auto ReferenceDevice::getType() const -> std::optional<ActuatorType> { return type; }
+	[[nodiscard]] auto ReferenceDevice::getType() const -> std::optional<ActuatorType> { return type; }
 
-auto ReferenceDevice::setType(ActuatorType newType) -> void { type = newType; }
+	auto ReferenceDevice::setType(ActuatorType newType) -> void { type = newType; }
 
-auto ReferenceDevice::equals(const ReferenceDevice &device) const -> bool {
-  bool isEqual = id == device.getId();
-  isEqual = isEqual && (name == device.getName());
-  isEqual = isEqual && (bodyPartMask == device.getBodyPartMask());
-  isEqual = isEqual && (maximumFrequency == device.getMaximumFrequency());
-  isEqual = isEqual && (minimumFrequency == device.getMinimumFrequency());
-  isEqual = isEqual && (resonanceFrequency == device.getResonanceFrequency());
-  isEqual = isEqual && (maximumAmplitude == device.getMaximumAmplitude());
-  isEqual = isEqual && (impedance == device.getImpedance());
-  isEqual = isEqual && (maximumVoltage == device.getMaximumVoltage());
-  isEqual = isEqual && (maximumCurrent == device.getMaximumCurrent());
-  isEqual = isEqual && (maximumDisplacement == device.getMaximumDisplacement());
-  isEqual = isEqual && (weight == device.getWeight());
-  isEqual = isEqual && (size == device.getSize());
-  isEqual = isEqual && (custom == device.getCustom());
-  isEqual = isEqual && (type == device.getType());
-  return isEqual;
-}
+	auto ReferenceDevice::equals(const ReferenceDevice& device) const -> bool {
+		bool isEqual = id == device.getId();
+		isEqual = isEqual && (name == device.getName());
+		isEqual = isEqual && (bodyPartMask == device.getBodyPartMask());
+		isEqual = isEqual && (maximumFrequency == device.getMaximumFrequency());
+		isEqual = isEqual && (minimumFrequency == device.getMinimumFrequency());
+		isEqual = isEqual && (resonanceFrequency == device.getResonanceFrequency());
+		isEqual = isEqual && (maximumAmplitude == device.getMaximumAmplitude());
+		isEqual = isEqual && (impedance == device.getImpedance());
+		isEqual = isEqual && (maximumVoltage == device.getMaximumVoltage());
+		isEqual = isEqual && (maximumCurrent == device.getMaximumCurrent());
+		isEqual = isEqual && (maximumDisplacement == device.getMaximumDisplacement());
+		isEqual = isEqual && (weight == device.getWeight());
+		isEqual = isEqual && (size == device.getSize());
+		isEqual = isEqual && (custom == device.getCustom());
+		isEqual = isEqual && (type == device.getType());
+		return isEqual;
+	}
 
 } // namespace haptics::types

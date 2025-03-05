@@ -58,44 +58,44 @@ constexpr double ZERO_COMP = 1e-35;
 
 namespace haptics::tools {
 
-struct peaks {
-  std::vector<size_t> locations;
-  std::vector<double> heights;
-};
+	struct peaks {
+		std::vector<size_t> locations;
+		std::vector<double> heights;
+	};
 
-struct modelResult {
-  std::vector<double> SMR;
-  std::vector<double> bandenergy;
-};
+	struct modelResult {
+		std::vector<double> SMR;
+		std::vector<double> bandenergy;
+	};
 
-class PsychohapticModel {
-public:
-  PsychohapticModel(size_t bl_new, int fs_new);
+	class PsychohapticModel {
+	public:
+		PsychohapticModel(size_t bl_new, int fs_new);
 
-  auto getSMR(std::vector<double> &block) -> modelResult;
+		auto getSMR(std::vector<double>& block)->modelResult;
 
-  static auto findPeaks(std::vector<double> &spectrum, double min_peak_prominence,
-                        double min_peak_height) -> peaks;
-  void peakMask(std::vector<double> &peaks_height, std::vector<size_t> &peaks_loc,
-                std::vector<double> &mask);
+		static auto findPeaks(std::vector<double>& spectrum, double min_peak_prominence,
+			double min_peak_height)->peaks;
+		void peakMask(std::vector<double>& peaks_height, std::vector<size_t>& peaks_loc,
+			std::vector<double>& mask);
 
-private:
-  auto globalMaskingThreshold(std::vector<double> &spect) -> std::vector<double>;
-  void perceptualThreshold();
+	private:
+		auto globalMaskingThreshold(std::vector<double>& spect)->std::vector<double>;
+		void perceptualThreshold();
 
-  static auto findAllPeakLocations(std::vector<double> &x) -> peaks;
-  static auto peakProminence(std::vector<double> &spectrum, peaks input) -> peaks;
-  static auto filterPeakCriterion(peaks &input, double min_peak_val) -> peaks;
+		static auto findAllPeakLocations(std::vector<double>& x)->peaks;
+		static auto peakProminence(std::vector<double>& spectrum, peaks input)->peaks;
+		static auto filterPeakCriterion(peaks& input, double min_peak_val)->peaks;
 
-  static auto max(double v1, double v2) -> double;
-  static auto findMaxVector(std::vector<double> &data) -> double;
+		static auto max(double v1, double v2) -> double;
+		static auto findMaxVector(std::vector<double>& data) -> double;
 
-  size_t bl;
-  int fs;
-  std::vector<double> freqs;
-  std::vector<double> percthres;
-  std::vector<int> book;
-  std::vector<int> book_cumulative;
-};
+		size_t bl;
+		int fs;
+		std::vector<double> freqs;
+		std::vector<double> percthres;
+		std::vector<int> book;
+		std::vector<int> book_cumulative;
+	};
 } // namespace haptics::tools
 #endif // PSYCHOHAPTICMODEL_H

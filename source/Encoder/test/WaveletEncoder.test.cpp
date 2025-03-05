@@ -74,126 +74,126 @@ constexpr double timescale = 1000;
 
 TEST_CASE("haptics::encoder::WaveletEncoder,1") {
 
-  using haptics::encoder::WaveletEncoder;
+	using haptics::encoder::WaveletEncoder;
 
-  SECTION("Encoder tools") {
+	SECTION("Encoder tools") {
 
-    std::vector<char> outstream(1, '0');
-    WaveletEncoder::de2bi(val, outstream, bits);
-    CHECK(outstream.size() == bits + 1);
-    CHECK(outstream[1] == 1);
-    CHECK(outstream[2] == 1);
-    CHECK(outstream[3] == 0);
+		std::vector<char> outstream(1, '0');
+		WaveletEncoder::de2bi(val, outstream, bits);
+		CHECK(outstream.size() == bits + 1);
+		CHECK(outstream[1] == 1);
+		CHECK(outstream[2] == 1);
+		CHECK(outstream[3] == 0);
 
-    auto sign = WaveletEncoder::sgn(positive);
-    CHECK(sign == 1);
-    sign = WaveletEncoder::sgn(negative);
-    CHECK(sign == -1);
-  }
+		auto sign = WaveletEncoder::sgn(positive);
+		CHECK(sign == 1);
+		sign = WaveletEncoder::sgn(negative);
+		CHECK(sign == -1);
+	}
 }
 
 TEST_CASE("haptics::encoder::WaveletEncoder,2") {
 
-  using haptics::encoder::quantMode;
-  using haptics::encoder::WaveletEncoder;
+	using haptics::encoder::quantMode;
+	using haptics::encoder::WaveletEncoder;
 
-  SECTION("Encoder tools") {
+	SECTION("Encoder tools") {
 
-    std::vector<double> data(size, 1);
-    data[pos] = negative;
-    size_t pos_found = WaveletEncoder::findMinInd(data);
-    CHECK(pos_found == pos);
+		std::vector<double> data(size, 1);
+		data[pos] = negative;
+		size_t pos_found = WaveletEncoder::findMinInd(data);
+		CHECK(pos_found == pos);
 
-    std::vector<double> data2(size, 1);
-    data2[pos] = positive;
-    double max = WaveletEncoder::findMax(data2);
-    CHECK(max == positive);
+		std::vector<double> data2(size, 1);
+		data2[pos] = positive;
+		double max = WaveletEncoder::findMax(data2);
+		CHECK(max == positive);
 
-    quantMode mode{0, FRACTIONBITS_0, 0};
-    double quant = WaveletEncoder::maxQuant(unquantized, mode);
-    CHECK(fabs(quant - quantized) < prec_comparison);
-    quantMode mode2{3, 4, 0};
-    quant = WaveletEncoder::maxQuant(unquantized + 1, mode2);
-    CHECK(quant == quantized + 1);
+		quantMode mode{ 0, FRACTIONBITS_0, 0 };
+		double quant = WaveletEncoder::maxQuant(unquantized, mode);
+		CHECK(fabs(quant - quantized) < prec_comparison);
+		quantMode mode2{ 3, 4, 0 };
+		quant = WaveletEncoder::maxQuant(unquantized + 1, mode2);
+		CHECK(quant == quantized + 1);
 
-    std::vector<double> v_unquantized(3, unquantized);
-    std::vector<double> v_quantized(3, 0);
-    WaveletEncoder::uniformQuant(v_unquantized, 1, 1, bits, 1, v_quantized);
-    CHECK(v_quantized[0] == 0);
-    CHECK(v_quantized[1] == quantized);
-    CHECK(v_quantized[2] == 0);
-  }
+		std::vector<double> v_unquantized(3, unquantized);
+		std::vector<double> v_quantized(3, 0);
+		WaveletEncoder::uniformQuant(v_unquantized, 1, 1, bits, 1, v_quantized);
+		CHECK(v_quantized[0] == 0);
+		CHECK(v_quantized[1] == quantized);
+		CHECK(v_quantized[2] == 0);
+	}
 }
 
 TEST_CASE("haptics::encoder::WaveletEncoder,3") {
 
-  using haptics::encoder::WaveletEncoder;
-  using haptics::types::Band;
+	using haptics::encoder::WaveletEncoder;
+	using haptics::types::Band;
 
-  SECTION("Encoder tools") {
-    std::vector<double> v_unquantized(3, unquantized);
-    double qwavmax = 0;
-    std::vector<char> bitwavmax;
-    std::vector<char> bitwavmax_compare = {0, 0, 0, 0, 0, 0, 1, 1};
-    WaveletEncoder::maximumWaveletCoefficient(v_unquantized, qwavmax, bitwavmax);
-    CHECK(fabs(qwavmax - quantized) < prec_comparison);
-  }
+	SECTION("Encoder tools") {
+		std::vector<double> v_unquantized(3, unquantized);
+		double qwavmax = 0;
+		std::vector<char> bitwavmax;
+		std::vector<char> bitwavmax_compare = { 0, 0, 0, 0, 0, 0, 1, 1 };
+		WaveletEncoder::maximumWaveletCoefficient(v_unquantized, qwavmax, bitwavmax);
+		CHECK(fabs(qwavmax - quantized) < prec_comparison);
+	}
 
-  SECTION("Encoder") {
-    std::vector<double> data_time(bl_test, 0);
-    data_time[0] = 1;
-    WaveletEncoder waveletEncoder(bl_test, fs_test, timescale);
-    double scalar = 0;
-    int maxbits = 0;
-    std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar, maxbits);
-  }
+	SECTION("Encoder") {
+		std::vector<double> data_time(bl_test, 0);
+		data_time[0] = 1;
+		WaveletEncoder waveletEncoder(bl_test, fs_test, timescale);
+		double scalar = 0;
+		int maxbits = 0;
+		std::vector<double> data_quant = waveletEncoder.encodeBlock(data_time, 1, scalar, maxbits);
+	}
 
-  SECTION("Encoder Integration") {
-    std::vector<double> data_time(bl_test, 0);
-    data_time[0] = 1;
-    WaveletEncoder waveletEncoder(bl_test / 2, fs_test);
-    Band band;
-    bool success = false;
-    success = waveletEncoder.encodeSignal(data_time, 1, 0, band);
-    CHECK(success);
-  }
+	SECTION("Encoder Integration") {
+		std::vector<double> data_time(bl_test, 0);
+		data_time[0] = 1;
+		WaveletEncoder waveletEncoder(bl_test / 2, fs_test);
+		Band band;
+		bool success = false;
+		success = waveletEncoder.encodeSignal(data_time, 1, 0, band);
+		CHECK(success);
+	}
 }
 
 TEST_CASE("Encoder/Decoder Integration") {
 
-  using haptics::encoder::WaveletEncoder;
-  using haptics::waveletdecoder::WaveletDecoder;
+	using haptics::encoder::WaveletEncoder;
+	using haptics::waveletdecoder::WaveletDecoder;
 
-  SECTION("Input/Output test") {
+	SECTION("Input/Output test") {
 
-    WaveletEncoder enc(BL, FS);
-    std::vector<double> sig_time(BL * 2, 0);
-    sig_time[0] = 1;
-    Band b;
-    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b, timescale);
+		WaveletEncoder enc(BL, FS);
+		std::vector<double> sig_time(BL * 2, 0);
+		sig_time[0] = 1;
+		Band b;
+		enc.encodeSignal(sig_time, BITS, F_CUTOFF, b, timescale);
 
-    std::vector<double> sig_rec = WaveletDecoder::decodeBand(b, timescale);
-    CHECK(sig_time.size() == sig_rec.size());
-  }
+		std::vector<double> sig_rec = WaveletDecoder::decodeBand(b, timescale);
+		CHECK(sig_time.size() == sig_rec.size());
+	}
 }
 
 TEST_CASE("Band transformation") {
 
-  using haptics::encoder::WaveletEncoder;
-  using haptics::waveletdecoder::WaveletDecoder;
+	using haptics::encoder::WaveletEncoder;
+	using haptics::waveletdecoder::WaveletDecoder;
 
-  SECTION("Input/Output test") {
+	SECTION("Input/Output test") {
 
-    WaveletEncoder enc(BL, FS);
-    std::vector<double> sig_time(BL * 2, 0);
-    sig_time[0] = 1;
-    Band b;
-    enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
+		WaveletEncoder enc(BL, FS);
+		std::vector<double> sig_time(BL * 2, 0);
+		sig_time[0] = 1;
+		Band b;
+		enc.encodeSignal(sig_time, BITS, F_CUTOFF, b);
 
-    WaveletDecoder::transformBand(b);
+		WaveletDecoder::transformBand(b);
 
-    for (double t = 0; t < 1.0 / FS * (BL * 2); t += 1.0 / FS) {
-      std::cout << b.Evaluate(t * S_2_MS_TEST, 0, FS) << std::endl;
-    }
-  }
+		for (double t = 0; t < 1.0 / FS * (BL * 2); t += 1.0 / FS) {
+			std::cout << b.Evaluate(t * S_2_MS_TEST, 0, FS) << std::endl;
+		}
+	}
 }

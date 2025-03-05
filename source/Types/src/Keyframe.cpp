@@ -38,57 +38,57 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Keyframe::getRelativePosition() const -> std::optional<int> {
-  return relativePosition;
-}
+	[[nodiscard]] auto Keyframe::getRelativePosition() const -> std::optional<int> {
+		return relativePosition;
+	}
 
-auto Keyframe::setRelativePosition(std::optional<int> newRelativePosition) -> void {
-  relativePosition = newRelativePosition;
-}
+	auto Keyframe::setRelativePosition(std::optional<int> newRelativePosition) -> void {
+		relativePosition = newRelativePosition;
+	}
 
-[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> std::optional<float> {
-  return amplitudeModulation;
-}
+	[[nodiscard]] auto Keyframe::getAmplitudeModulation() const -> std::optional<float> {
+		return amplitudeModulation;
+	}
 
-auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void {
-  amplitudeModulation = newAmplitudeModulation;
-}
+	auto Keyframe::setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void {
+		amplitudeModulation = newAmplitudeModulation;
+	}
 
-[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> std::optional<int> {
-  return frequencyModulation;
-}
+	[[nodiscard]] auto Keyframe::getFrequencyModulation() const -> std::optional<int> {
+		return frequencyModulation;
+	}
 
-auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void {
-  frequencyModulation = newFrequencyModulation;
-}
+	auto Keyframe::setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void {
+		frequencyModulation = newFrequencyModulation;
+	}
 
-auto Keyframe::operator==(const Keyframe &keyframe) -> bool {
-  return (relativePosition == keyframe.getRelativePosition() &&
-          amplitudeModulation == keyframe.getAmplitudeModulation() &&
-          frequencyModulation == keyframe.getFrequencyModulation());
-}
+	auto Keyframe::operator==(const Keyframe& keyframe) -> bool {
+		return (relativePosition == keyframe.getRelativePosition() &&
+			amplitudeModulation == keyframe.getAmplitudeModulation() &&
+			frequencyModulation == keyframe.getFrequencyModulation());
+	}
 
-auto Keyframe::equals(const Keyframe &keyframe) const -> bool {
-  if (relativePosition != keyframe.getRelativePosition()) {
-    std::cerr << "Keyframe - relative positions are different" << std::endl;
-    return false;
-  }
-  if (amplitudeModulation.has_value() != keyframe.getAmplitudeModulation().has_value()) {
-    std::cerr << "Keyframe - amplitude modulations are different" << std::endl;
-    return false;
-  }
-  if (amplitudeModulation.has_value() &&
-      !tools::almostEquals(amplitudeModulation.value(), keyframe.getAmplitudeModulation().value(),
-                           haptics::io::KEYFRAME_AMPLITUDE, 2 * haptics::io::MAX_AMPLITUDE)) {
-    std::cerr << "Keyframe - amplitude modulations are different" << std::endl;
-    return false;
-  }
-  if (frequencyModulation != keyframe.getFrequencyModulation()) {
-    std::cerr << "Keyframe - frequency modulations are different" << std::endl;
-    return false;
-  }
-  return true;
-}
+	auto Keyframe::equals(const Keyframe& keyframe) const -> bool {
+		if (relativePosition != keyframe.getRelativePosition()) {
+			std::cerr << "Keyframe - relative positions are different" << std::endl;
+			return false;
+		}
+		if (amplitudeModulation.has_value() != keyframe.getAmplitudeModulation().has_value()) {
+			std::cerr << "Keyframe - amplitude modulations are different" << std::endl;
+			return false;
+		}
+		if (amplitudeModulation.has_value() &&
+			!tools::almostEquals(amplitudeModulation.value(), keyframe.getAmplitudeModulation().value(),
+				haptics::io::KEYFRAME_AMPLITUDE, 2 * haptics::io::MAX_AMPLITUDE)) {
+			std::cerr << "Keyframe - amplitude modulations are different" << std::endl;
+			return false;
+		}
+		if (frequencyModulation != keyframe.getFrequencyModulation()) {
+			std::cerr << "Keyframe - frequency modulations are different" << std::endl;
+			return false;
+		}
+		return true;
+	}
 
-auto Keyframe::operator!=(const Keyframe &keyframe) -> bool { return !(*this == keyframe); }
+	auto Keyframe::operator!=(const Keyframe& keyframe) -> bool { return !(*this == keyframe); }
 } // namespace haptics::types

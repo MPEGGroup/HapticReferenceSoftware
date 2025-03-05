@@ -41,106 +41,106 @@
 
 namespace haptics::types {
 
-struct Vector {
-  int8_t X;
-  int8_t Y;
-  int8_t Z;
+	struct Vector {
+		int8_t X;
+		int8_t Y;
+		int8_t Z;
 
-  explicit Vector() = default;
-  explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+		explicit Vector() = default;
+		explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z) {};
 
-  auto operator==(const Vector &other) const -> bool {
-    return X == other.X && Y == other.Y && Z == other.Z;
-  };
-  auto operator!=(const Vector &other) const -> bool {
-    return X != other.X || Y != other.Y || Z != other.Z;
-  };
-};
+		auto operator==(const Vector& other) const -> bool {
+			return X == other.X && Y == other.Y && Z == other.Z;
+		};
+		auto operator!=(const Vector& other) const -> bool {
+			return X != other.X || Y != other.Y || Z != other.Z;
+		};
+	};
 
-class Channel {
-public:
-  explicit Channel() = default;
-  explicit Channel(int newId, std::string newDescription, float newGain, float newMixingWeight,
-                   uint32_t newBodyPartMask)
-      : id(newId)
-      , description(std::move(newDescription))
-      , gain(newGain)
-      , mixingWeight(newMixingWeight)
-      , bodyPartMask(newBodyPartMask)
-      , vertices({})
-      , bands({})
-      , frequencySampling(std::nullopt)
-      , sampleCount(std::nullopt)
-      , direction(std::nullopt){};
+	class Channel {
+	public:
+		explicit Channel() = default;
+		explicit Channel(int newId, std::string newDescription, float newGain, float newMixingWeight,
+			uint32_t newBodyPartMask)
+			: id(newId)
+			, description(std::move(newDescription))
+			, gain(newGain)
+			, mixingWeight(newMixingWeight)
+			, bodyPartMask(newBodyPartMask)
+			, vertices({})
+			, bands({})
+			, frequencySampling(std::nullopt)
+			, sampleCount(std::nullopt)
+			, direction(std::nullopt) {};
 
-  [[nodiscard]] auto getId() const -> int;
-  auto setId(int newId) -> void;
-  [[nodiscard]] auto getDescription() const -> std::string;
-  auto setDescription(std::string &newDescription) -> void;
-  [[nodiscard]] auto getPriority() const -> std::optional<int>;
-  [[nodiscard]] auto getPriorityOrDefault() const -> int;
-  auto setPriority(int newPriority) -> void;
-  [[nodiscard]] auto getGain() const -> float;
-  auto setGain(float newGain) -> void;
-  [[nodiscard]] auto getMixingWeight() const -> float;
-  auto setMixingWeight(float newMixingWeight) -> void;
-  [[nodiscard]] auto getBodyPartMask() const -> uint32_t;
-  auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
-  [[nodiscard]] auto getReferenceDeviceId() const -> std::optional<int>;
-  auto setReferenceDeviceId(int newReferenceDeviceId) -> void;
-  auto getVerticesSize() -> size_t;
-  auto getVertexAt(int index) -> int &;
-  auto addVertex(int &newVertice) -> void;
-  auto clearVertices() -> void { vertices.clear(); };
-  auto getBandsSize() -> size_t;
-  auto getBandAt(int index) -> haptics::types::Band &;
-  auto replaceBandAt(int index, haptics::types::Band &newBand) -> bool;
-  auto replaceBandMetadataAt(int index, haptics::types::Band &newBand) -> bool;
-  auto removeBandAt(int index) -> bool;
-  auto addBand(haptics::types::Band &newBand) -> void;
-  auto clearBands() -> void { bands.clear(); };
-  auto generateBand() -> haptics::types::Band *;
-  auto generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
-      -> haptics::types::Band *;
-  auto generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
-                    int upperFrequencyLimit) -> haptics::types::Band *;
-  auto generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
-                    int upperFrequencyLimit) -> haptics::types::Band *;
-  auto findBandAvailable(int position, int duration, types::BandType bandType)
-      -> haptics::types::Band *;
-  auto Evaluate(double position, unsigned int timescale) -> double;
-  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
-      -> std::vector<double>;
-  [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
-  auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
-  [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
-  auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
-  [[nodiscard]] auto getDirection() const -> std::optional<Vector>;
-  auto setDirection(std::optional<Vector> newDirection) -> void;
-  [[nodiscard]] auto getActuatorResolution() const -> std::optional<Vector>;
-  auto setActuatorResolution(std::optional<Vector> newChannelResolution) -> void;
-  [[nodiscard]] auto getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>>;
-  auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
-  [[nodiscard]] auto getActuatorTarget() const -> std::optional<std::vector<Vector>>;
-  auto setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void;
-  [[nodiscard]] auto equals(const Channel &channel) const -> bool;
+		[[nodiscard]] auto getId() const -> int;
+		auto setId(int newId) -> void;
+		[[nodiscard]] auto getDescription() const->std::string;
+		auto setDescription(std::string& newDescription) -> void;
+		[[nodiscard]] auto getPriority() const->std::optional<int>;
+		[[nodiscard]] auto getPriorityOrDefault() const -> int;
+		auto setPriority(int newPriority) -> void;
+		[[nodiscard]] auto getGain() const -> float;
+		auto setGain(float newGain) -> void;
+		[[nodiscard]] auto getMixingWeight() const -> float;
+		auto setMixingWeight(float newMixingWeight) -> void;
+		[[nodiscard]] auto getBodyPartMask() const->uint32_t;
+		auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
+		[[nodiscard]] auto getReferenceDeviceId() const->std::optional<int>;
+		auto setReferenceDeviceId(int newReferenceDeviceId) -> void;
+		auto getVerticesSize()->size_t;
+		auto getVertexAt(int index) -> int&;
+		auto addVertex(int& newVertice) -> void;
+		auto clearVertices() -> void { vertices.clear(); };
+		auto getBandsSize()->size_t;
+		auto getBandAt(int index)->haptics::types::Band&;
+		auto replaceBandAt(int index, haptics::types::Band& newBand) -> bool;
+		auto replaceBandMetadataAt(int index, haptics::types::Band& newBand) -> bool;
+		auto removeBandAt(int index) -> bool;
+		auto addBand(haptics::types::Band& newBand) -> void;
+		auto clearBands() -> void { bands.clear(); };
+		auto generateBand()->haptics::types::Band*;
+		auto generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
+			->haptics::types::Band*;
+		auto generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+			int upperFrequencyLimit)->haptics::types::Band*;
+		auto generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+			int upperFrequencyLimit)->haptics::types::Band*;
+		auto findBandAvailable(int position, int duration, types::BandType bandType)
+			->haptics::types::Band*;
+		auto Evaluate(double position, unsigned int timescale) -> double;
+		auto EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+			->std::vector<double>;
+		[[nodiscard]] auto getFrequencySampling() const->std::optional<uint32_t>;
+		auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
+		[[nodiscard]] auto getSampleCount() const->std::optional<uint32_t>;
+		auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
+		[[nodiscard]] auto getDirection() const->std::optional<Vector>;
+		auto setDirection(std::optional<Vector> newDirection) -> void;
+		[[nodiscard]] auto getActuatorResolution() const->std::optional<Vector>;
+		auto setActuatorResolution(std::optional<Vector> newChannelResolution) -> void;
+		[[nodiscard]] auto getBodyPartTarget() const->std::optional<std::vector<BodyPartTarget>>;
+		auto setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget) -> void;
+		[[nodiscard]] auto getActuatorTarget() const->std::optional<std::vector<Vector>>;
+		auto setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void;
+		[[nodiscard]] auto equals(const Channel& channel) const -> bool;
 
-private:
-  int id = -1;
-  std::string description;
-  float gain = 1;
-  float mixingWeight = 1;
-  uint32_t bodyPartMask = 0;
-  std::vector<int> vertices = {};
-  std::vector<Band> bands = {};
-  std::optional<int> priority;
-  std::optional<int> referenceDeviceId;
-  std::optional<uint32_t> frequencySampling = std::nullopt;
-  std::optional<uint32_t> sampleCount = std::nullopt;
-  std::optional<Vector> direction = std::nullopt;
-  std::optional<Vector> actuatorResolution = std::nullopt;
-  std::optional<std::vector<BodyPartTarget>> bodyPartTarget = std::nullopt;
-  std::optional<std::vector<Vector>> actuatorTarget = std::nullopt;
-};
+	private:
+		int id = -1;
+		std::string description;
+		float gain = 1;
+		float mixingWeight = 1;
+		uint32_t bodyPartMask = 0;
+		std::vector<int> vertices = {};
+		std::vector<Band> bands = {};
+		std::optional<int> priority;
+		std::optional<int> referenceDeviceId;
+		std::optional<uint32_t> frequencySampling = std::nullopt;
+		std::optional<uint32_t> sampleCount = std::nullopt;
+		std::optional<Vector> direction = std::nullopt;
+		std::optional<Vector> actuatorResolution = std::nullopt;
+		std::optional<std::vector<BodyPartTarget>> bodyPartTarget = std::nullopt;
+		std::optional<std::vector<Vector>> actuatorTarget = std::nullopt;
+	};
 } // namespace haptics::types
 #endif // CHANNEL_H

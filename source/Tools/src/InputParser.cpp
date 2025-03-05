@@ -35,34 +35,34 @@
 
 namespace haptics::tools {
 
-InputParser::InputParser(const std::vector<const char *> &args) {
-  for (const auto &a : args) {
-    tokens.emplace_back(a);
-  }
-}
+	InputParser::InputParser(const std::vector<const char*>& args) {
+		for (const auto& a : args) {
+			tokens.emplace_back(a);
+		}
+	}
 
-[[nodiscard]] auto InputParser::getCmdOption(const std::string &option) const
-    -> const std::string & {
-  std::vector<std::string>::const_iterator itr;
-  itr = std::find(this->tokens.begin(), this->tokens.end(), option);
-  if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
-    return *itr;
-  }
-  static const std::string empty_string;
-  return empty_string;
-}
+	[[nodiscard]] auto InputParser::getCmdOption(const std::string& option) const
+		-> const std::string& {
+		std::vector<std::string>::const_iterator itr;
+		itr = std::find(this->tokens.begin(), this->tokens.end(), option);
+		if (itr != this->tokens.end() && ++itr != this->tokens.end()) {
+			return *itr;
+		}
+		static const std::string empty_string;
+		return empty_string;
+	}
 
-[[nodiscard]] auto InputParser::cmdOptionExists(const std::string &option) const -> bool {
-  return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
-}
+	[[nodiscard]] auto InputParser::cmdOptionExists(const std::string& option) const -> bool {
+		return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
+	}
 
-auto InputParser::getFileExt(std::string &filename) -> std::string {
-  size_t i = filename.rfind('.', filename.length());
-  if (i != std::string::npos) {
-    return (filename.substr(i + 1, filename.length() - i));
-  }
+	auto InputParser::getFileExt(std::string& filename) -> std::string {
+		size_t i = filename.rfind('.', filename.length());
+		if (i != std::string::npos) {
+			return (filename.substr(i + 1, filename.length() - i));
+		}
 
-  return std::string{""};
-}
+		return std::string{ "" };
+	}
 
 } // namespace haptics::tools

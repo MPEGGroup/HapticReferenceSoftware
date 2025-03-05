@@ -44,58 +44,58 @@
 
 namespace haptics::spiht {
 
-using haptics::types::Effect;
+	using haptics::types::Effect;
 
-constexpr size_t WAVMAXLENGTH = 8;
-constexpr int MAXBITS = 15;
-constexpr int FRACTIONBITS_0 = 7;
-constexpr int FRACTIONBITS_1 = 3;
-constexpr int INTEGERBITS_1 = 4;
+	constexpr size_t WAVMAXLENGTH = 8;
+	constexpr int MAXBITS = 15;
+	constexpr int FRACTIONBITS_0 = 7;
+	constexpr int FRACTIONBITS_1 = 3;
+	constexpr int INTEGERBITS_1 = 4;
 
-constexpr size_t MAXALLOCBITS_SIZE = 4;
-constexpr int CONTEXT_0 = 0;
-constexpr int CONTEXT_1 = 1;
-constexpr int CONTEXT_2 = 2;
-constexpr int CONTEXT_3 = 3;
-constexpr int CONTEXT_4 = 4;
-constexpr int CONTEXT_5 = 5;
-constexpr int CONTEXT_6 = 6;
-constexpr size_t BUFFER_SIZE = 100000;
+	constexpr size_t MAXALLOCBITS_SIZE = 4;
+	constexpr int CONTEXT_0 = 0;
+	constexpr int CONTEXT_1 = 1;
+	constexpr int CONTEXT_2 = 2;
+	constexpr int CONTEXT_3 = 3;
+	constexpr int CONTEXT_4 = 4;
+	constexpr int CONTEXT_5 = 5;
+	constexpr int CONTEXT_6 = 6;
+	constexpr size_t BUFFER_SIZE = 100000;
 
-struct quantMode {
-  int integerbits;
-  int fractionbits;
-  char mode;
-};
+	struct quantMode {
+		int integerbits;
+		int fractionbits;
+		char mode;
+	};
 
-class Spiht_Enc {
-public:
-  void encodeEffect(std::vector<int> &block, int bits, double scalar,
-                    std::vector<unsigned char> &outstream);
-  void encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
-              int maxallocbits, std::vector<unsigned char> &outstream, std::vector<int> &context);
+	class Spiht_Enc {
+	public:
+		void encodeEffect(std::vector<int>& block, int bits, double scalar,
+			std::vector<unsigned char>& outstream);
+		void encode(std::vector<int>& instream, int level, std::vector<unsigned char>& bitwavmax,
+			int maxallocbits, std::vector<unsigned char>& outstream, std::vector<int>& context);
 
-  auto maxDescendant(int j, int type) -> int;
-  void initMaxDescendants(std::vector<int> &signal);
-  auto static getQuantMode(double wavmax) -> quantMode;
-  void static setBitwavmax(double qwavmax, int integerpart, quantMode m,
-                           std::vector<unsigned char> &bitwavmax);
-  static void maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax);
+		auto maxDescendant(int j, int type) -> int;
+		void initMaxDescendants(std::vector<int>& signal);
+		auto static getQuantMode(double wavmax)->quantMode;
+		void static setBitwavmax(double qwavmax, int integerpart, quantMode m,
+			std::vector<unsigned char>& bitwavmax);
+		static void maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char>& bitwavmax);
 
-private:
-  void static refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,
-                             std::vector<unsigned char> &outstream, std::vector<int> &context);
+	private:
+		void static refinementPass(std::vector<int>& data, std::list<int>& LSP, int LSP_index, int n,
+			std::vector<unsigned char>& outstream, std::vector<int>& context);
 
-  void static addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream,
-                          std::vector<int> &context);
+		void static addToOutput(unsigned char bit, int c, std::vector<unsigned char>& outstream,
+			std::vector<int>& context);
 
-  void static de2bi(int val, std::vector<unsigned char> &outstream, int length);
-  auto static bitget(int in, int bit) -> int;
+		void static de2bi(int val, std::vector<unsigned char>& outstream, int length);
+		auto static bitget(int in, int bit) -> int;
 
-  std::vector<int> maxDescendants;
-  std::vector<int> maxDescendants1;
+		std::vector<int> maxDescendants;
+		std::vector<int> maxDescendants1;
 
-  ArithEnc arithEnc;
-};
+		ArithEnc arithEnc;
+	};
 } // namespace haptics::spiht
 #endif // SPIHT_ENC_H

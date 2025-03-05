@@ -41,55 +41,55 @@ constexpr size_t streamsize = 10;
 
 TEST_CASE("haptics::spiht::ArithEnc") {
 
-  using haptics::spiht::ArithDec;
-  using haptics::spiht::ArithEnc;
+	using haptics::spiht::ArithDec;
+	using haptics::spiht::ArithEnc;
 
-  SECTION("Encoding") {
-    ArithEnc enc;
-    std::vector<unsigned char> in(streamsize, 0);
-    std::vector<int> context(streamsize, 0);
-    std::vector<unsigned char> out;
-    in[1] = 1;
-    enc.encode(in, context, out);
-  }
+	SECTION("Encoding") {
+		ArithEnc enc;
+		std::vector<unsigned char> in(streamsize, 0);
+		std::vector<int> context(streamsize, 0);
+		std::vector<unsigned char> out;
+		in[1] = 1;
+		enc.encode(in, context, out);
+	}
 
-  SECTION("Encoding & Decoding") {
-    ArithEnc enc;
-    std::vector<unsigned char> in(streamsize, 0);
-    std::vector<int> context(streamsize, 0);
-    std::vector<unsigned char> out;
-    in[1] = 1;
-    enc.encode(in, context, out);
+	SECTION("Encoding & Decoding") {
+		ArithEnc enc;
+		std::vector<unsigned char> in(streamsize, 0);
+		std::vector<int> context(streamsize, 0);
+		std::vector<unsigned char> out;
+		in[1] = 1;
+		enc.encode(in, context, out);
 
-    ArithDec dec;
-    dec.initDecoding(out);
-    bool equal = true;
-    for (size_t i = 0; i < streamsize; i++) {
-      if (dec.decode(context[i]) != in[i]) {
-        equal = false;
-      }
-    }
-    CHECK(equal);
-  }
+		ArithDec dec;
+		dec.initDecoding(out);
+		bool equal = true;
+		for (size_t i = 0; i < streamsize; i++) {
+			if (dec.decode(context[i]) != in[i]) {
+				equal = false;
+			}
+		}
+		CHECK(equal);
+	}
 
-  SECTION("convert to bytes") {
-    std::vector<unsigned char> in = {0, 1, 1, 1, 0, 1, 0, 1, 1, 1};
-    std::vector<unsigned char> converted;
-    std::vector<unsigned char> out;
-    ArithEnc::convert2bytes(in, converted);
-    ArithDec::convert2bits(converted, out);
-    bool equal = true;
-    for (size_t i = 0; i < in.size(); i++) {
-      if (out[i] != in[i]) {
-        equal = false;
-      }
-    }
-    CHECK(equal);
-    if (!equal) {
-      std::cout << "output in bits:" << std::endl;
-      for (auto v : out) {
-        std::cout << (int)v << std::endl;
-      }
-    }
-  }
+	SECTION("convert to bytes") {
+		std::vector<unsigned char> in = { 0, 1, 1, 1, 0, 1, 0, 1, 1, 1 };
+		std::vector<unsigned char> converted;
+		std::vector<unsigned char> out;
+		ArithEnc::convert2bytes(in, converted);
+		ArithDec::convert2bits(converted, out);
+		bool equal = true;
+		for (size_t i = 0; i < in.size(); i++) {
+			if (out[i] != in[i]) {
+				equal = false;
+			}
+		}
+		CHECK(equal);
+		if (!equal) {
+			std::cout << "output in bits:" << std::endl;
+			for (auto v : out) {
+				std::cout << (int)v << std::endl;
+			}
+		}
+	}
 }

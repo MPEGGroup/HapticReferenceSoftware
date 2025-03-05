@@ -35,132 +35,141 @@
 
 namespace haptics::spiht {
 
-void ArithDec::initDecoding(std::vector<unsigned char> &instream) {
-  this->instream = instream;
-  in_index = 0;
-  max_index = instream.size();
+	void ArithDec::initDecoding(std::vector<unsigned char>& instream) {
+		this->instream = instream;
+		in_index = 0;
+		max_index = instream.size();
 
-  // get first 10 digits
-  in_leading = 0;
-  int shift = SHIFT_START;
-  for (size_t i = 0; i < DIGITS; i++) {
-    if (i < instream.size()) {
-      in_leading += (int)instream.at(in_index) << shift;
-      in_index++;
-      shift--;
-    } else {
-      break;
-    }
-  }
+		// get first 10 digits
+		in_leading = 0;
+		int shift = SHIFT_START;
+		for (size_t i = 0; i < DIGITS; i++) {
+			if (i < instream.size()) {
+				in_leading += (int)instream.at(in_index) << shift;
+				in_index++;
+				shift--;
+			}
+			else {
+				break;
+			}
+		}
 
-  range_diff = RANGE_MAX;
-  range_lower = 0;
-  range_upper = RANGE_MAX;
-}
+		range_diff = RANGE_MAX;
+		range_lower = 0;
+		range_upper = RANGE_MAX;
+	}
 
-auto ArithDec::decode(int context) -> int {
+	auto ArithDec::decode(int context) -> int {
 
-  double p = round((double)counter.at(context) / (double)counter_total.at(context) *
-                   RANGE_MAX); // p scaled to full range
-  int compare = ((int)((double)range_diff * p)) / RANGE_MAX;
+		double p = round((double)counter.at(context) / (double)counter_total.at(context) *
+			RANGE_MAX); // p scaled to full range
+		int compare = ((int)((double)range_diff * p)) / RANGE_MAX;
 
-  // if p is close to 0 or maximum, value has to be adjusted
-  if (compare == 0) {
-    compare = 1;
-  } else if (compare == range_diff) {
-    compare = range_diff - 1;
-  }
+		// if p is close to 0 or maximum, value has to be adjusted
+		if (compare == 0) {
+			compare = 1;
+		}
+		else if (compare == range_diff) {
+			compare = range_diff - 1;
+		}
 
-  int value = in_leading - range_lower;
+		int value = in_leading - range_lower;
 
-  // determine decoded symbol; range is updated
-  int s = 0;
-  if (value < compare) {
-    range_upper = range_lower + compare;
-  } else {
-    s = 1;
-    range_lower = range_lower + compare;
-  }
+		// determine decoded symbol; range is updated
+		int s = 0;
+		if (value < compare) {
+			range_upper = range_lower + compare;
+		}
+		else {
+			s = 1;
+			range_lower = range_lower + compare;
+		}
 
-  // check, if range has to be adjusted
-  while (true) {
+		// check, if range has to be adjusted
+		while (true) {
 
-    if (range_upper <= HALF) {
-      range_lower = range_lower << 1;
-      range_upper = range_upper << 1;
-      if (in_index < max_index) {
-        in_leading = (in_leading << 1) + instream.at(in_index);
-        in_index++;
-      } else {
-        in_leading = in_leading << 1;
-      }
-    } else if (range_lower >= HALF) {
-      range_lower = (range_lower - HALF) << 1;
-      range_upper = (range_upper - HALF) << 1;
-      if (in_index < max_index) {
-        in_leading = ((in_leading - HALF) << 1) + instream.at(in_index);
-        in_index++;
-      } else {
-        in_leading = (in_leading - HALF) << 1;
-      }
-    } else if (range_lower >= FIRST_QTR && range_upper <= THIRD_QTR) {
-      range_lower = (range_lower - FIRST_QTR) << 1;
-      range_upper = (range_upper - FIRST_QTR) << 1;
-      if (in_index < max_index) {
-        in_leading = ((in_leading - FIRST_QTR) << 1) + instream.at(in_index);
-        in_index++;
-      } else {
-        in_leading = (in_leading - FIRST_QTR) << 1;
-      }
-    } else {
-      break;
-    }
-  }
+			if (range_upper <= HALF) {
+				range_lower = range_lower << 1;
+				range_upper = range_upper << 1;
+				if (in_index < max_index) {
+					in_leading = (in_leading << 1) + instream.at(in_index);
+					in_index++;
+				}
+				else {
+					in_leading = in_leading << 1;
+				}
+			}
+			else if (range_lower >= HALF) {
+				range_lower = (range_lower - HALF) << 1;
+				range_upper = (range_upper - HALF) << 1;
+				if (in_index < max_index) {
+					in_leading = ((in_leading - HALF) << 1) + instream.at(in_index);
+					in_index++;
+				}
+				else {
+					in_leading = (in_leading - HALF) << 1;
+				}
+			}
+			else if (range_lower >= FIRST_QTR && range_upper <= THIRD_QTR) {
+				range_lower = (range_lower - FIRST_QTR) << 1;
+				range_upper = (range_upper - FIRST_QTR) << 1;
+				if (in_index < max_index) {
+					in_leading = ((in_leading - FIRST_QTR) << 1) + instream.at(in_index);
+					in_index++;
+				}
+				else {
+					in_leading = (in_leading - FIRST_QTR) << 1;
+				}
+			}
+			else {
+				break;
+			}
+		}
 
-  range_diff = range_upper - range_lower;
+		range_diff = range_upper - range_lower;
 
-  // update counter for probabilities
-  if (s == 0) {
-    counter.at(context)++;
-  }
-  counter_total.at(context)++;
+		// update counter for probabilities
+		if (s == 0) {
+			counter.at(context)++;
+		}
+		counter_total.at(context)++;
 
-  return s;
-}
+		return s;
+	}
 
-void ArithDec::resetCounter() {
-  for (size_t i = 0; i < CONTEXT_SIZE; i++) {
-    counter.at(i) = RESET_TOTAL / 2;
-    counter_total.at(i) = RESET_TOTAL;
-  }
-}
+	void ArithDec::resetCounter() {
+		for (size_t i = 0; i < CONTEXT_SIZE; i++) {
+			counter.at(i) = RESET_TOTAL / 2;
+			counter_total.at(i) = RESET_TOTAL;
+		}
+	}
 
-void ArithDec::rescaleCounter() {
-  for (size_t i = 0; i < CONTEXT_SIZE; i++) {
-    counter.at(i) =
-        (int)((double)counter.at(i) / (double)(counter_total.at(i)) * (double)RESIZE_TOTAL);
-    if (counter.at(i) == 0) {
-      counter.at(i) = 1;
-    }
-    counter_total.at(i) = RESIZE_TOTAL;
-    if (counter.at(i) == counter_total.at(i)) {
-      counter.at(i) = counter_total.at(i) - 1;
-    }
-  }
-}
+	void ArithDec::rescaleCounter() {
+		for (size_t i = 0; i < CONTEXT_SIZE; i++) {
+			counter.at(i) =
+				(int)((double)counter.at(i) / (double)(counter_total.at(i)) * (double)RESIZE_TOTAL);
+			if (counter.at(i) == 0) {
+				counter.at(i) = 1;
+			}
+			counter_total.at(i) = RESIZE_TOTAL;
+			if (counter.at(i) == counter_total.at(i)) {
+				counter.at(i) = counter_total.at(i) - 1;
+			}
+		}
+	}
 
-void ArithDec::convert2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out) {
-  out.resize(in.size() * BYTE_SIZE);
-  int index = 0;
-  for (auto &v : in) {
-    std::bitset<BYTE_SIZE> temp((unsigned long)v);
-    for (int j = 0; j < BYTE_SIZE; j++) {
-      if (temp[j]) {
-        out.at(index) = 1;
-      }
-      index++;
-    }
-  }
-}
+	void ArithDec::convert2bits(std::vector<unsigned char>& in, std::vector<unsigned char>& out) {
+		out.resize(in.size() * BYTE_SIZE);
+		int index = 0;
+		for (auto& v : in) {
+			std::bitset<BYTE_SIZE> temp((unsigned long)v);
+			for (int j = 0; j < BYTE_SIZE; j++) {
+				if (temp[j]) {
+					out.at(index) = 1;
+				}
+				index++;
+			}
+		}
+	}
 
 } // namespace haptics::spiht

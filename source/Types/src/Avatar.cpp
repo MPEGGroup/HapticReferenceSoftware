@@ -35,28 +35,28 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Avatar::getId() const -> int { return id; }
+	[[nodiscard]] auto Avatar::getId() const -> int { return id; }
 
-auto Avatar::setId(int newId) -> void { id = newId; }
+	auto Avatar::setId(int newId) -> void { id = newId; }
 
-[[nodiscard]] auto Avatar::getLod() const -> int { return lod; }
+	[[nodiscard]] auto Avatar::getLod() const -> int { return lod; }
 
-auto Avatar::setLod(int newLod) -> void { lod = newLod; }
+	auto Avatar::setLod(int newLod) -> void { lod = newLod; }
 
-[[nodiscard]] auto Avatar::getType() const -> AvatarType { return type; }
+	[[nodiscard]] auto Avatar::getType() const -> AvatarType { return type; }
 
-auto Avatar::setType(AvatarType newType) -> void { type = newType; }
+	auto Avatar::setType(AvatarType newType) -> void { type = newType; }
 
-[[nodiscard]] auto Avatar::getMesh() const -> std::optional<std::string> { return mesh; }
+	[[nodiscard]] auto Avatar::getMesh() const -> std::optional<std::string> { return mesh; }
 
-auto Avatar::setMesh(const std::string &newMesh) -> void { mesh = newMesh; }
+	auto Avatar::setMesh(const std::string& newMesh) -> void { mesh = newMesh; }
 
-auto Avatar::equals(const Avatar &avatar) const -> bool {
-  bool isEqual = id == avatar.getId();
-  isEqual = isEqual && (lod == avatar.getLod());
-  isEqual = isEqual && (type == avatar.getType());
-  isEqual = isEqual && (mesh == avatar.getMesh());
-  return isEqual;
-}
+	auto Avatar::equals(const Avatar& avatar) const -> bool {
+		bool isEqual = id == avatar.getId();
+		isEqual = isEqual && (lod == avatar.getLod());
+		isEqual = isEqual && (type == avatar.getType());
+		isEqual = isEqual && (mesh == avatar.getMesh());
+		return isEqual;
+	}
 
 } // namespace haptics::types

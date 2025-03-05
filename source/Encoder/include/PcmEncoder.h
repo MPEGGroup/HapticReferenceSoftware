@@ -48,80 +48,81 @@
 
 namespace haptics::encoder {
 
-static constexpr int BITR_2 = 2;
-static constexpr int BITR_16 = 16;
-static constexpr int BITR_64 = 64;
-static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72.5;
-static constexpr int DEFAULT_BLOCK_LENGTH_SMP = 1024; // in samples
-static constexpr int DEFAULT_BIT_BUDGET = 16;
-static constexpr double PARAM_A = -6.506;
-static constexpr double PARAM_B = 3.433;
-static constexpr double PARAM_C = -0.04421;
-static constexpr double PARAM_D = 0.0002573;
+	static constexpr int BITR_2 = 2;
+	static constexpr int BITR_16 = 16;
+	static constexpr int BITR_64 = 64;
+	static constexpr double DEFAULT_CUTOFF_FREQUENCY = 72.5;
+	static constexpr int DEFAULT_BLOCK_LENGTH_SMP = 1024; // in samples
+	static constexpr int DEFAULT_BIT_BUDGET = 16;
+	static constexpr double PARAM_A = -6.506;
+	static constexpr double PARAM_B = 3.433;
+	static constexpr double PARAM_C = -0.04421;
+	static constexpr double PARAM_D = 0.0002573;
 
-struct EncodingConfig {
-  double curveFrequencyLimit = 0;
-  int wavelet_blockLength = 0;
-  int wavelet_bitbudget = 0;
-  bool wavelet_enabled = true;
-  bool vectorial_enabled = true;
+	struct EncodingConfig {
+		double curveFrequencyLimit = 0;
+		int wavelet_blockLength = 0;
+		int wavelet_bitbudget = 0;
+		bool wavelet_enabled = true;
+		bool vectorial_enabled = true;
 
-  explicit EncodingConfig() = default;
-  explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_blockLength,
-                          int _wavelet_bitbudget, bool _wavelet_enabled, bool _vectorial_enabled)
-      : curveFrequencyLimit(_curveFrequencyLimit)
-      , wavelet_blockLength(_wavelet_blockLength)
-      , wavelet_bitbudget(_wavelet_bitbudget)
-      , wavelet_enabled(_wavelet_enabled)
-      , vectorial_enabled(_vectorial_enabled){};
+		explicit EncodingConfig() = default;
+		explicit EncodingConfig(double _curveFrequencyLimit, int _wavelet_blockLength,
+			int _wavelet_bitbudget, bool _wavelet_enabled, bool _vectorial_enabled)
+			: curveFrequencyLimit(_curveFrequencyLimit)
+			, wavelet_blockLength(_wavelet_blockLength)
+			, wavelet_bitbudget(_wavelet_bitbudget)
+			, wavelet_enabled(_wavelet_enabled)
+			, vectorial_enabled(_vectorial_enabled) {};
 
-  auto static generateDefaultConfig(bool enable_wavelet, bool enable_vectorial) -> EncodingConfig {
+		auto static generateDefaultConfig(bool enable_wavelet, bool enable_vectorial) -> EncodingConfig {
 
-    int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP;
-    double curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
-    int wavelet_bitbudget = DEFAULT_BIT_BUDGET;
+			int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP;
+			double curveFrequencyLimit = DEFAULT_CUTOFF_FREQUENCY;
+			int wavelet_bitbudget = DEFAULT_BIT_BUDGET;
 
-    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
-                          enable_wavelet, enable_vectorial);
-  }
+			return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
+				enable_wavelet, enable_vectorial);
+		}
 
-  auto static generateConfigBudget(int budget, double curveFrequencyLimit, bool enable_wavelet,
-                                   bool enable_vectorial,
-                                   int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
-      -> EncodingConfig {
-    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, budget, enable_wavelet,
-                          enable_vectorial);
-  }
+		auto static generateConfigBudget(int budget, double curveFrequencyLimit, bool enable_wavelet,
+			bool enable_vectorial,
+			int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
+			-> EncodingConfig {
+			return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, budget, enable_wavelet,
+				enable_vectorial);
+		}
 
-  auto static generateConfigParam(int bitrate, double curveFrequencyLimit, bool enable_wavelet,
-                                  bool enable_vectorial,
-                                  int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
-      -> EncodingConfig {
+		auto static generateConfigParam(int bitrate, double curveFrequencyLimit, bool enable_wavelet,
+			bool enable_vectorial,
+			int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
+			-> EncodingConfig {
 
-    auto temp = (double)bitrate;
-    auto wavelet_bitbudget =
-        (int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
-    auto max_bitbudget = (int)(log2(wavelet_blockLength) - 1) * spiht::MAXBITS;
-    if (wavelet_bitbudget > max_bitbudget) {
-      wavelet_bitbudget = max_bitbudget;
-    } else if (wavelet_bitbudget < 1) {
-      wavelet_bitbudget = 1;
-    }
-    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
-                          enable_wavelet, enable_vectorial);
-  }
-};
+			auto temp = (double)bitrate;
+			auto wavelet_bitbudget =
+				(int)floor(PARAM_D * pow(temp, 3) + PARAM_C * pow(temp, 2) + PARAM_B * temp + PARAM_A);
+			auto max_bitbudget = (int)(log2(wavelet_blockLength) - 1) * spiht::MAXBITS;
+			if (wavelet_bitbudget > max_bitbudget) {
+				wavelet_bitbudget = max_bitbudget;
+			}
+			else if (wavelet_bitbudget < 1) {
+				wavelet_bitbudget = 1;
+			}
+			return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, wavelet_bitbudget,
+				enable_wavelet, enable_vectorial);
+		}
+	};
 
-class PcmEncoder {
-public:
-  auto static encode(std::string &filename, EncodingConfig &config, unsigned int timescale,
-                     types::Perception &out) -> int;
-  [[nodiscard]] auto static convertToCurveBand(std::vector<std::pair<int, double>> &points,
-                                               double samplerate, double curveFrequencyLimit,
-                                               unsigned int timescale, haptics::types::Band *out)
-      -> bool;
-  [[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
-      -> std::vector<std::pair<int, double>>;
-};
+	class PcmEncoder {
+	public:
+		auto static encode(std::string& filename, EncodingConfig& config, unsigned int timescale,
+			types::Perception& out) -> int;
+		[[nodiscard]] auto static convertToCurveBand(std::vector<std::pair<int, double>>& points,
+			double samplerate, double curveFrequencyLimit,
+			unsigned int timescale, haptics::types::Band* out)
+			-> bool;
+		[[nodiscard]] auto static localExtrema(std::vector<double> signal, bool includeBorder)
+			->std::vector<std::pair<int, double>>;
+	};
 } // namespace haptics::encoder
 #endif // PCMENCODER_H

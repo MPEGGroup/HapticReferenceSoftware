@@ -39,23 +39,23 @@
 
 namespace haptics::types {
 
-enum class BandType {
-  WaveletWave = 3,
-  VectorialWave = 2,
-  Curve = 1,
-  Transient = 0,
-};
+	enum class BandType {
+		WaveletWave = 3,
+		VectorialWave = 2,
+		Curve = 1,
+		Transient = 0,
+	};
 
-static const std::map<std::string, BandType> stringToBandType = {
-    {"WaveletWave", BandType::WaveletWave},
-    {"VectorialWave", BandType::VectorialWave},
-    {"Curve", BandType::Curve},
-    {"Transient", BandType::Transient}};
-static const std::map<BandType, std::string> bandTypeToString = {
-    {BandType::WaveletWave, "WaveletWave"},
-    {BandType::VectorialWave, "VectorialWave"},
-    {BandType::Curve, "Curve"},
-    {BandType::Transient, "Transient"}};
+	static const std::map<std::string, BandType> stringToBandType = {
+		{"WaveletWave", BandType::WaveletWave},
+		{"VectorialWave", BandType::VectorialWave},
+		{"Curve", BandType::Curve},
+		{"Transient", BandType::Transient} };
+	static const std::map<BandType, std::string> bandTypeToString = {
+		{BandType::WaveletWave, "WaveletWave"},
+		{BandType::VectorialWave, "VectorialWave"},
+		{BandType::Curve, "Curve"},
+		{BandType::Transient, "Transient"} };
 } // namespace haptics::types
 
 #endif // BANDTYPE_H

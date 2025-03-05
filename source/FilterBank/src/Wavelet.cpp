@@ -36,113 +36,113 @@
 
 namespace haptics::filterbank {
 
-void Wavelet::DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
+	void Wavelet::DWT(std::vector<double>& in, int levels, std::vector<double>& out) {
 
-  out.resize(in.size());
-  std::vector<double> x(in.begin(), in.end());
-  for (int i = 0; i < levels; i++) {
-    auto len = in.size() >> i;
-    std::vector<double> l(len, 0);
-    std::vector<double> h(len, 0);
+		out.resize(in.size());
+		std::vector<double> x(in.begin(), in.end());
+		for (int i = 0; i < levels; i++) {
+			auto len = in.size() >> i;
+			std::vector<double> l(len, 0);
+			std::vector<double> h(len, 0);
 
-    std::vector<double> x_temp(len, 0);
-    std::copy(x.begin(), x.begin() + (long long)len, x_temp.begin());
-    symconv1D(x_temp, hp, h);
-    symconv1D(x_temp, lp, l);
+			std::vector<double> x_temp(len, 0);
+			std::copy(x.begin(), x.begin() + (long long)len, x_temp.begin());
+			symconv1D(x_temp, hp, h);
+			symconv1D(x_temp, lp, l);
 
-    auto out_ind = 0;
-    auto out_add = len >> 1;
-    for (uint32_t j = 0; j < len; j += 2) {
-      out[out_ind] = l[j];
-      out[out_ind + out_add] = h[j + 1];
-      x[out_ind] = l[j];
-      out_ind++;
-    }
-  }
-}
+			auto out_ind = 0;
+			auto out_add = len >> 1;
+			for (uint32_t j = 0; j < len; j += 2) {
+				out[out_ind] = l[j];
+				out[out_ind + out_add] = h[j + 1];
+				x[out_ind] = l[j];
+				out_ind++;
+			}
+		}
+	}
 
-void Wavelet::inv_DWT(std::vector<double> &in, int levels, std::vector<double> &out) {
+	void Wavelet::inv_DWT(std::vector<double>& in, int levels, std::vector<double>& out) {
 
-  std::copy(in.begin(), in.end(), out.begin());
+		std::copy(in.begin(), in.end(), out.begin());
 
-  for (int i = levels - 1; i >= 0; i--) {
-    auto len = in.size() >> i;
-    std::vector<double> l(len, 0);
-    std::vector<double> h(len, 0);
-    for (uint32_t j = 0; j < len; j += 2) {
-      l[j] = out[j / 2];
-      h[j + 1] = out[j / 2 + (len / 2)];
-    }
-    symconv1D(h, hpr, out);
-    symconv1DAdd(l, lpr, out);
-  }
-}
+		for (int i = levels - 1; i >= 0; i--) {
+			auto len = in.size() >> i;
+			std::vector<double> l(len, 0);
+			std::vector<double> h(len, 0);
+			for (uint32_t j = 0; j < len; j += 2) {
+				l[j] = out[j / 2];
+				h[j + 1] = out[j / 2 + (len / 2)];
+			}
+			symconv1D(h, hpr, out);
+			symconv1DAdd(l, lpr, out);
+		}
+	}
 
-template <size_t hSize>
-void Wavelet::symconv1D(std::vector<double> &in, std::array<double, hSize> &h,
-                        std::vector<double> &out) {
+	template <size_t hSize>
+	void Wavelet::symconv1D(std::vector<double>& in, std::array<double, hSize>& h,
+		std::vector<double>& out) {
 
-  size_t inSize = in.size();
+		size_t inSize = in.size();
 
-  // symmetric extension
-  auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
-  std::vector<double> temp(in.begin(), in.end());
-  std::vector<double> temp_l(in.begin() + 1, in.begin() + lext + 1);
-  std::vector<double> temp_r(in.end() - lext - 1, in.end() - 1);
+		// symmetric extension
+		auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
+		std::vector<double> temp(in.begin(), in.end());
+		std::vector<double> temp_l(in.begin() + 1, in.begin() + lext + 1);
+		std::vector<double> temp_r(in.end() - lext - 1, in.end() - 1);
 
-  std::reverse(temp_l.begin(), temp_l.end());
-  std::reverse(temp_r.begin(), temp_r.end());
-  temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
-  temp.insert(temp.end(), temp_r.begin(), temp_r.end());
+		std::reverse(temp_l.begin(), temp_l.end());
+		std::reverse(temp_r.begin(), temp_r.end());
+		temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
+		temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-  auto extension = 2 * lext;
-  std::vector<double> conv(inSize + hSize - 1 + extension, 0);
-  conv1D(temp, h, conv);
-  std::copy(conv.begin() + extension, conv.end() - extension, out.begin());
-}
+		auto extension = 2 * lext;
+		std::vector<double> conv(inSize + hSize - 1 + extension, 0);
+		conv1D(temp, h, conv);
+		std::copy(conv.begin() + extension, conv.end() - extension, out.begin());
+	}
 
-template <size_t hSize>
-void Wavelet::symconv1DAdd(std::vector<double> &in, std::array<double, hSize> &h,
-                           std::vector<double> &out) {
+	template <size_t hSize>
+	void Wavelet::symconv1DAdd(std::vector<double>& in, std::array<double, hSize>& h,
+		std::vector<double>& out) {
 
-  size_t inSize = in.size();
+		size_t inSize = in.size();
 
-  // symmetric extension
-  auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
-  std::vector<double> temp(in.begin(), in.end());
-  std::vector<double> temp_l(in.begin() + 1, in.begin() + lext + 1);
-  std::vector<double> temp_r(in.end() - lext - 1, in.end() - 1);
+		// symmetric extension
+		auto lext = (long)floor((double)hSize / 2); // floor: if h has odd length
+		std::vector<double> temp(in.begin(), in.end());
+		std::vector<double> temp_l(in.begin() + 1, in.begin() + lext + 1);
+		std::vector<double> temp_r(in.end() - lext - 1, in.end() - 1);
 
-  std::reverse(temp_l.begin(), temp_l.end());
-  std::reverse(temp_r.begin(), temp_r.end());
-  temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
-  temp.insert(temp.end(), temp_r.begin(), temp_r.end());
+		std::reverse(temp_l.begin(), temp_l.end());
+		std::reverse(temp_r.begin(), temp_r.end());
+		temp.insert(temp.begin(), temp_l.begin(), temp_l.end());
+		temp.insert(temp.end(), temp_r.begin(), temp_r.end());
 
-  auto extension = 2 * lext;
-  std::vector<double> conv(inSize + hSize - 1 + extension, 0);
-  conv1D(temp, h, conv);
-  for (uint32_t i = 0; i < inSize; i++) {
-    out[i] += conv[i + hSize - 1];
-  }
-}
+		auto extension = 2 * lext;
+		std::vector<double> conv(inSize + hSize - 1 + extension, 0);
+		conv1D(temp, h, conv);
+		for (uint32_t i = 0; i < inSize; i++) {
+			out[i] += conv[i + hSize - 1];
+		}
+	}
 
-template <size_t hSize>
-void Wavelet::conv1D(std::vector<double> &in, std::array<double, hSize> &h,
-                     std::vector<double> &out) {
+	template <size_t hSize>
+	void Wavelet::conv1D(std::vector<double>& in, std::array<double, hSize>& h,
+		std::vector<double>& out) {
 
-  size_t j = 0;
-  size_t inSize = in.size();
-  for (j = 0; j < inSize; j++) {
-    out[j] = in[j] * h[0];
-  }
-  for (; j < inSize + hSize - 1; j++) {
-    out[j] = 0;
-  }
-  for (uint32_t i = 1; i < hSize; i++) {
-    for (j = i; j < inSize + i; j++) {
-      out[j] += in[j - i] * h.at(i);
-    }
-  }
-}
+		size_t j = 0;
+		size_t inSize = in.size();
+		for (j = 0; j < inSize; j++) {
+			out[j] = in[j] * h[0];
+		}
+		for (; j < inSize + hSize - 1; j++) {
+			out[j] = 0;
+		}
+		for (uint32_t i = 1; i < hSize; i++) {
+			for (j = i; j < inSize + i; j++) {
+				out[j] += in[j - i] * h.at(i);
+			}
+		}
+	}
 
 } // namespace haptics::filterbank

@@ -43,34 +43,34 @@
 
 namespace haptics::spiht {
 
-constexpr int SHIFT_START = 9;
-constexpr size_t DIGITS = 10;
+	constexpr int SHIFT_START = 9;
+	constexpr size_t DIGITS = 10;
 
-class ArithDec {
-public:
-  void initDecoding(std::vector<unsigned char> &instream);
-  auto decode(int context) -> int;
+	class ArithDec {
+	public:
+		void initDecoding(std::vector<unsigned char>& instream);
+		auto decode(int context) -> int;
 
-  void resetCounter();
-  void static convert2bits(std::vector<unsigned char> &in, std::vector<unsigned char> &out);
+		void resetCounter();
+		void static convert2bits(std::vector<unsigned char>& in, std::vector<unsigned char>& out);
 
-  void rescaleCounter();
+		void rescaleCounter();
 
-private:
-  std::array<int, CONTEXT_SIZE> counter = {RESET_HALF, RESET_HALF, RESET_HALF, RESET_HALF,
-                                           RESET_HALF, RESET_HALF, RESET_HALF};
-  std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
-                                                 RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
-  std::vector<unsigned char> instream;
+	private:
+		std::array<int, CONTEXT_SIZE> counter = { RESET_HALF, RESET_HALF, RESET_HALF, RESET_HALF,
+												 RESET_HALF, RESET_HALF, RESET_HALF };
+		std::array<int, CONTEXT_SIZE> counter_total = { RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
+													   RESET_TOTAL, RESET_TOTAL, RESET_TOTAL };
+		std::vector<unsigned char> instream;
 
-  size_t in_index = 0;
-  size_t max_index = 0;
+		size_t in_index = 0;
+		size_t max_index = 0;
 
-  int range_diff = 0;
-  int range_lower = 0;
-  int range_upper = 0;
+		int range_diff = 0;
+		int range_lower = 0;
+		int range_upper = 0;
 
-  int in_leading = 0;
-};
+		int in_leading = 0;
+	};
 } // namespace haptics::spiht
 #endif // ARITDEC_H

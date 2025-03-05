@@ -37,12 +37,12 @@
 
 TEST_CASE("haptics::spiht::ArithDec") {
 
-  using haptics::spiht::ArithDec;
+	using haptics::spiht::ArithDec;
 
-  SECTION("Decode empty stream") {
-    ArithDec dec;
-    std::vector<unsigned char> in;
-    dec.initDecoding(in);
-    CHECK(dec.decode(0) == 0);
-  }
+	SECTION("Decode empty stream") {
+		ArithDec dec;
+		std::vector<unsigned char> in;
+		dec.initDecoding(in);
+		CHECK(dec.decode(0) == 0);
+	}
 }

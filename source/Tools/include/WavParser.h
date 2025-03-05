@@ -40,30 +40,30 @@
 
 namespace haptics::tools {
 
-constexpr uint32_t BITS_PER_SAMPLE = 16;
-constexpr double SCALING = 32768;   // 2^15
-constexpr uint16_t NEG_MAX = 32768; // 2^15
+	constexpr uint32_t BITS_PER_SAMPLE = 16;
+	constexpr double SCALING = 32768;   // 2^15
+	constexpr uint16_t NEG_MAX = 32768; // 2^15
 
-class WavParser {
-public:
-  auto loadFile(const std::string &filename) -> bool;
-  static auto saveFile(const std::string &filename, const std::vector<double> &buff, int sampleRate)
-      -> bool;
-  static auto saveFile(const std::string &filename, const std::vector<std::vector<double>> &buff,
-                       int sampleRate) -> bool;
-  [[nodiscard]] auto getSamplerate() const -> uint32_t;
-  [[nodiscard]] auto getNumChannels() const -> size_t;
-  [[nodiscard]] auto getNumSamples() const -> size_t;
-  [[nodiscard]] auto getSamplesChannel(size_t channel = 0) const -> std::vector<double>;
-  [[nodiscard]] auto getAllSamples() const -> std::vector<std::vector<double>>;
+	class WavParser {
+	public:
+		auto loadFile(const std::string& filename) -> bool;
+		static auto saveFile(const std::string& filename, const std::vector<double>& buff, int sampleRate)
+			-> bool;
+		static auto saveFile(const std::string& filename, const std::vector<std::vector<double>>& buff,
+			int sampleRate) -> bool;
+		[[nodiscard]] auto getSamplerate() const->uint32_t;
+		[[nodiscard]] auto getNumChannels() const->size_t;
+		[[nodiscard]] auto getNumSamples() const->size_t;
+		[[nodiscard]] auto getSamplesChannel(size_t channel = 0) const->std::vector<double>;
+		[[nodiscard]] auto getAllSamples() const->std::vector<std::vector<double>>;
 
-private:
-  static auto sgn(double val) -> double;
+	private:
+		static auto sgn(double val) -> double;
 
-  int sampleRate = 0;
-  size_t numChannels = 0;
-  size_t numSamples = 0;
-  std::vector<std::vector<double>> buffer;
-};
+		int sampleRate = 0;
+		size_t numChannels = 0;
+		size_t numSamples = 0;
+		std::vector<std::vector<double>> buffer;
+	};
 } // namespace haptics::tools
 #endif // WAVPARSER_H

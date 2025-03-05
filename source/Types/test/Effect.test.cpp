@@ -41,65 +41,65 @@ using haptics::types::EffectType;
 using haptics::types::Keyframe;
 
 TEST_CASE("addKeyframe with only position", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
-  const size_t n = e.getKeyframesSize();
+	Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
+	const size_t n = e.getKeyframesSize();
 
-  const int testingPosition = 42;
-  e.addKeyframe(testingPosition, std::nullopt, std::nullopt);
+	const int testingPosition = 42;
+	e.addKeyframe(testingPosition, std::nullopt, std::nullopt);
 
-  REQUIRE(e.getKeyframesSize() == n + 1);
-  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
-  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
-  CHECK_FALSE(testedKeyframe.getAmplitudeModulation().has_value());
-  CHECK_FALSE(testedKeyframe.getFrequencyModulation().has_value());
+	REQUIRE(e.getKeyframesSize() == n + 1);
+	Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+	CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+	CHECK_FALSE(testedKeyframe.getAmplitudeModulation().has_value());
+	CHECK_FALSE(testedKeyframe.getFrequencyModulation().has_value());
 }
 
 TEST_CASE("addKeyframe with amplitude", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
-  const size_t n = e.getKeyframesSize();
+	Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
+	const size_t n = e.getKeyframesSize();
 
-  const int testingPosition = 42;
-  const double testingAmplitude = .7654;
-  e.addKeyframe(testingPosition, testingAmplitude, std::nullopt);
+	const int testingPosition = 42;
+	const double testingAmplitude = .7654;
+	e.addKeyframe(testingPosition, testingAmplitude, std::nullopt);
 
-  REQUIRE(e.getKeyframesSize() == n + 1);
-  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
-  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
-  CHECK_FALSE(testedKeyframe.getFrequencyModulation().has_value());
-  REQUIRE(testedKeyframe.getAmplitudeModulation().has_value());
-  CHECK(testedKeyframe.getAmplitudeModulation().value() == Approx(testingAmplitude));
+	REQUIRE(e.getKeyframesSize() == n + 1);
+	Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+	CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+	CHECK_FALSE(testedKeyframe.getFrequencyModulation().has_value());
+	REQUIRE(testedKeyframe.getAmplitudeModulation().has_value());
+	CHECK(testedKeyframe.getAmplitudeModulation().value() == Approx(testingAmplitude));
 }
 
 TEST_CASE("addKeyframe with frequency", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
-  const size_t n = e.getKeyframesSize();
+	Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
+	const size_t n = e.getKeyframesSize();
 
-  const int testingPosition = 42;
-  const double testingFrequency = 357;
-  e.addKeyframe(testingPosition, std::nullopt, testingFrequency);
+	const int testingPosition = 42;
+	const double testingFrequency = 357;
+	e.addKeyframe(testingPosition, std::nullopt, testingFrequency);
 
-  REQUIRE(e.getKeyframesSize() == n + 1);
-  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
-  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
-  CHECK_FALSE(testedKeyframe.getAmplitudeModulation().has_value());
-  REQUIRE(testedKeyframe.getFrequencyModulation().has_value());
-  CHECK(testedKeyframe.getFrequencyModulation().value() == testingFrequency);
+	REQUIRE(e.getKeyframesSize() == n + 1);
+	Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+	CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+	CHECK_FALSE(testedKeyframe.getAmplitudeModulation().has_value());
+	REQUIRE(testedKeyframe.getFrequencyModulation().has_value());
+	CHECK(testedKeyframe.getFrequencyModulation().value() == testingFrequency);
 }
 
 TEST_CASE("addKeyframe with amplitude and frequency", "[addKeyframe]") {
-  Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
-  const size_t n = e.getKeyframesSize();
+	Effect e(0, 1, BaseSignal::SawToothUp, EffectType::Basis);
+	const size_t n = e.getKeyframesSize();
 
-  const int testingPosition = 24;
-  const double testingAmplitude = .9543;
-  const int testingFrequency = 0;
-  e.addKeyframe(testingPosition, testingAmplitude, testingFrequency);
+	const int testingPosition = 24;
+	const double testingAmplitude = .9543;
+	const int testingFrequency = 0;
+	e.addKeyframe(testingPosition, testingAmplitude, testingFrequency);
 
-  REQUIRE(e.getKeyframesSize() == n + 1);
-  Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
-  CHECK(testedKeyframe.getRelativePosition() == testingPosition);
-  REQUIRE(testedKeyframe.getAmplitudeModulation().has_value());
-  CHECK(testedKeyframe.getAmplitudeModulation().value() == Approx(testingAmplitude));
-  REQUIRE(testedKeyframe.getFrequencyModulation().has_value());
-  CHECK(testedKeyframe.getFrequencyModulation().value() == Approx(testingFrequency));
+	REQUIRE(e.getKeyframesSize() == n + 1);
+	Keyframe testedKeyframe = e.getKeyframeAt(static_cast<int>(e.getKeyframesSize()) - 1);
+	CHECK(testedKeyframe.getRelativePosition() == testingPosition);
+	REQUIRE(testedKeyframe.getAmplitudeModulation().has_value());
+	CHECK(testedKeyframe.getAmplitudeModulation().value() == Approx(testingAmplitude));
+	REQUIRE(testedKeyframe.getFrequencyModulation().has_value());
+	CHECK(testedKeyframe.getFrequencyModulation().value() == Approx(testingFrequency));
 }

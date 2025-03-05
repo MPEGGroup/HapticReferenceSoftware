@@ -44,29 +44,29 @@ constexpr double prec_comparison = 0.00001;
 
 TEST_CASE("haptics::filterbank::Wavelet") {
 
-  using haptics::filterbank::Wavelet;
+	using haptics::filterbank::Wavelet;
 
-  SECTION("DWT") {
+	SECTION("DWT") {
 
-    Wavelet wavelet;
-    std::vector<double> in(bl, 0);
-    std::vector<double> out(bl, 0);
-    std::vector<double> in_rec(bl, 0);
-    for (size_t i = 0; i < bl; i++) {
-      in[i] = (double)i;
-    }
+		Wavelet wavelet;
+		std::vector<double> in(bl, 0);
+		std::vector<double> out(bl, 0);
+		std::vector<double> in_rec(bl, 0);
+		for (size_t i = 0; i < bl; i++) {
+			in[i] = (double)i;
+		}
 
-    wavelet.DWT(in, levels, out);
-    wavelet.inv_DWT(out, levels, in_rec);
+		wavelet.DWT(in, levels, out);
+		wavelet.inv_DWT(out, levels, in_rec);
 
-    bool equal = true;
-    for (size_t i = 0; i < bl; i++) {
-      if (fabs(in_rec[i] - in[i]) > prec_comparison) {
-        equal = false;
-        break;
-      }
-    }
+		bool equal = true;
+		for (size_t i = 0; i < bl; i++) {
+			if (fabs(in_rec[i] - in[i]) > prec_comparison) {
+				equal = false;
+				break;
+			}
+		}
 
-    CHECK(equal);
-  }
+		CHECK(equal);
+	}
 }
