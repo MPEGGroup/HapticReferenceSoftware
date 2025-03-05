@@ -37,7 +37,6 @@
 #include <Tools/include/InputParser.h>
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
-#include <chrono>
 #include <filesystem>
 #include <iostream>
 
@@ -156,7 +155,6 @@ auto main(int argc, char *argv[]) -> int {
   hapticFile.linearize();
   const double timeLength = Helper::getTimeLength(hapticFile);
 
-  auto start = std::chrono::high_resolution_clock::now();
   if (fs == upfs) {
     if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {
       return EXIT_FAILURE;
@@ -166,11 +164,6 @@ auto main(int argc, char *argv[]) -> int {
       return EXIT_FAILURE;
     }
   }
-
-  auto stop = std::chrono::high_resolution_clock::now();
-  auto dur_f = chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-  cout << "float  elapsed: " << dur_f.count() / 1e9l << " secs";
-  cout << endl << endl;
 
   if (inputParser.cmdOptionExists("--generate_ohm")) {
     std::filesystem::path outputPath(output);
