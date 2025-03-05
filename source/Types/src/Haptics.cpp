@@ -37,222 +37,222 @@
 
 namespace haptics::types {
 
-	[[nodiscard]] auto Haptics::getVersion() const -> std::string { return version; }
+[[nodiscard]] auto Haptics::getVersion() const -> std::string { return version; }
 
-	auto Haptics::setVersion(std::string& newVersion) -> void { version = newVersion; }
+auto Haptics::setVersion(std::string &newVersion) -> void { version = newVersion; }
 
-	[[nodiscard]] auto Haptics::getProfile() const -> std::string { return profile; }
+[[nodiscard]] auto Haptics::getProfile() const -> std::string { return profile; }
 
-	auto Haptics::setProfile(std::string& newProfile) -> void { profile = newProfile; }
+auto Haptics::setProfile(std::string &newProfile) -> void { profile = newProfile; }
 
-	[[nodiscard]] auto Haptics::getLevel() const -> uint8_t { return level; }
+[[nodiscard]] auto Haptics::getLevel() const -> uint8_t { return level; }
 
-	auto Haptics::setLevel(uint8_t newLevel) -> void { level = newLevel; }
+auto Haptics::setLevel(uint8_t newLevel) -> void { level = newLevel; }
 
-	[[nodiscard]] auto Haptics::getDate() const -> std::string { return date; }
-	auto Haptics::setDate(std::string& newDate) -> void { date = newDate; }
+[[nodiscard]] auto Haptics::getDate() const -> std::string { return date; }
+auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
 
-	[[nodiscard]] auto Haptics::getDescription() const -> std::string { return description; }
+[[nodiscard]] auto Haptics::getDescription() const -> std::string { return description; }
 
-	auto Haptics::setDescription(std::string& newDescription) -> void { description = newDescription; }
+auto Haptics::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
-	[[nodiscard]] auto Haptics::getPerceptionsSize() -> size_t { return perceptions.size(); }
+[[nodiscard]] auto Haptics::getPerceptionsSize() -> size_t { return perceptions.size(); }
 
-	[[nodiscard]] auto Haptics::getPerceptionAt(int index) -> Perception& {
-		return perceptions.at(index);
-	}
+[[nodiscard]] auto Haptics::getPerceptionAt(int index) -> Perception & {
+  return perceptions.at(index);
+}
 
-	auto Haptics::replacePerceptionAt(int index, Perception& newPerception) -> bool {
-		if (index < 0 || index >= (int)perceptions.size()) {
-			return false;
-		}
+auto Haptics::replacePerceptionAt(int index, Perception &newPerception) -> bool {
+  if (index < 0 || index >= (int)perceptions.size()) {
+    return false;
+  }
 
-		perceptions[index] = newPerception;
-		return true;
-	}
+  perceptions[index] = newPerception;
+  return true;
+}
 
-	auto Haptics::replacePerceptionMetadataAt(int index, Perception& newPerception) -> bool {
-		if (index < 0 || index >= (int)perceptions.size()) {
-			return false;
-		}
-		perceptions[index].setId(newPerception.getId());
-		perceptions[index].setAvatarId(newPerception.getId());
-		auto desc = newPerception.getDescription();
-		perceptions[index].setDescription(desc);
-		perceptions[index].setPerceptionModality(newPerception.getPerceptionModality());
-		perceptions[index].setUnitExponent(newPerception.getUnitExponentOrDefault());
-		perceptions[index].setPerceptionUnitExponent(newPerception.getPerceptionUnitExponentOrDefault());
-		auto semantic = newPerception.getEffectSemanticSchemeOrDefault();
-		perceptions[index].setEffectSemanticScheme(semantic);
-		perceptions[index].clearReferenceDevices();
-		for (auto i = 0; i < static_cast<int>(newPerception.getReferenceDevicesSize()); i++) {
-			perceptions[index].addReferenceDevice(newPerception.getReferenceDeviceAt(i));
-		}
-		perceptions[index].clearEffectLibrary();
-		for (auto i = 0; i < static_cast<int>(newPerception.getEffectLibrarySize()); i++) {
-			perceptions[index].addBasisEffect(newPerception.getBasisEffectAt(i));
-		}
-		return true;
-	}
+auto Haptics::replacePerceptionMetadataAt(int index, Perception &newPerception) -> bool {
+  if (index < 0 || index >= (int)perceptions.size()) {
+    return false;
+  }
+  perceptions[index].setId(newPerception.getId());
+  perceptions[index].setAvatarId(newPerception.getId());
+  auto desc = newPerception.getDescription();
+  perceptions[index].setDescription(desc);
+  perceptions[index].setPerceptionModality(newPerception.getPerceptionModality());
+  perceptions[index].setUnitExponent(newPerception.getUnitExponentOrDefault());
+  perceptions[index].setPerceptionUnitExponent(newPerception.getPerceptionUnitExponentOrDefault());
+  auto semantic = newPerception.getEffectSemanticSchemeOrDefault();
+  perceptions[index].setEffectSemanticScheme(semantic);
+  perceptions[index].clearReferenceDevices();
+  for (auto i = 0; i < static_cast<int>(newPerception.getReferenceDevicesSize()); i++) {
+    perceptions[index].addReferenceDevice(newPerception.getReferenceDeviceAt(i));
+  }
+  perceptions[index].clearEffectLibrary();
+  for (auto i = 0; i < static_cast<int>(newPerception.getEffectLibrarySize()); i++) {
+    perceptions[index].addBasisEffect(newPerception.getBasisEffectAt(i));
+  }
+  return true;
+}
 
-	auto Haptics::removePerceptionAt(int index) -> bool {
-		if (index < 0 || index >= (int)perceptions.size()) {
-			return false;
-		}
+auto Haptics::removePerceptionAt(int index) -> bool {
+  if (index < 0 || index >= (int)perceptions.size()) {
+    return false;
+  }
 
-		perceptions.erase(perceptions.begin() + index);
-		return true;
-	}
+  perceptions.erase(perceptions.begin() + index);
+  return true;
+}
 
-	auto Haptics::addPerception(Perception& newPerception) -> void {
-		perceptions.push_back(newPerception);
-	}
+auto Haptics::addPerception(Perception &newPerception) -> void {
+  perceptions.push_back(newPerception);
+}
 
-	[[nodiscard]] auto Haptics::getAvatarsSize() -> size_t { return avatars.size(); }
+[[nodiscard]] auto Haptics::getAvatarsSize() -> size_t { return avatars.size(); }
 
-	[[nodiscard]] auto Haptics::getAvatarAt(int index) -> Avatar& { return avatars.at(index); }
+[[nodiscard]] auto Haptics::getAvatarAt(int index) -> Avatar & { return avatars.at(index); }
 
-	auto Haptics::addAvatar(Avatar& newAvatar) -> void { avatars.push_back(newAvatar); }
+auto Haptics::addAvatar(Avatar &newAvatar) -> void { avatars.push_back(newAvatar); }
 
-	[[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> unsigned int {
-		return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
-	}
+[[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> unsigned int {
+  return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
+}
 
-	[[nodiscard]] auto Haptics::getTimescale() const -> std::optional<unsigned int> {
-		return this->timescale;
-	}
+[[nodiscard]] auto Haptics::getTimescale() const -> std::optional<unsigned int> {
+  return this->timescale;
+}
 
-	auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
-		this->timescale = newTimescale;
-	}
+auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
+  this->timescale = newTimescale;
+}
 
-	[[nodiscard]] auto Haptics::getSyncsSize() -> size_t { return syncs.size(); }
+[[nodiscard]] auto Haptics::getSyncsSize() -> size_t { return syncs.size(); }
 
-	[[nodiscard]] auto Haptics::getSyncsAt(int index) -> Sync& { return syncs.at(index); }
+[[nodiscard]] auto Haptics::getSyncsAt(int index) -> Sync & { return syncs.at(index); }
 
-	auto Haptics::addSync(Sync& newSync) -> void { syncs.push_back(newSync); }
+auto Haptics::addSync(Sync &newSync) -> void { syncs.push_back(newSync); }
 
-	auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
-		version = "2023";
-		time_t now = time(nullptr);
-		date = ctime(&now);
-		description = data.getDescription();
-		auto numElements = static_cast<int>(data.getHapticElementMetadataSize());
-		for (int i = 0; i < numElements; i++) {
-			auto element = data.getHapticElementMetadataAt(i);
-			std::string elemDescription = element.elementDescription;
-			PerceptionModality perceptionModality = Perception::convertToModality(elemDescription);
-			Perception perception(i, 0, elemDescription, perceptionModality);
-			short numChannels = element.numHapticChannels;
-			for (int j = 0; j < numChannels; j++) {
-				auto OHMChannel = element.channelsMetadata[j];
-				Channel channel(j, OHMChannel.channelDescription, OHMChannel.gain, 1,
-					static_cast<uint32_t>(OHMChannel.bodyPartMask));
-				perception.addChannel(channel);
-			}
-			perceptions.push_back(perception);
-		}
-	}
+auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
+  version = "2023";
+  time_t now = time(nullptr);
+  date = ctime(&now);
+  description = data.getDescription();
+  auto numElements = static_cast<int>(data.getHapticElementMetadataSize());
+  for (int i = 0; i < numElements; i++) {
+    auto element = data.getHapticElementMetadataAt(i);
+    std::string elemDescription = element.elementDescription;
+    PerceptionModality perceptionModality = Perception::convertToModality(elemDescription);
+    Perception perception(i, 0, elemDescription, perceptionModality);
+    short numChannels = element.numHapticChannels;
+    for (int j = 0; j < numChannels; j++) {
+      auto OHMChannel = element.channelsMetadata[j];
+      Channel channel(j, OHMChannel.channelDescription, OHMChannel.gain, 1,
+                      static_cast<uint32_t>(OHMChannel.bodyPartMask));
+      perception.addChannel(channel);
+    }
+    perceptions.push_back(perception);
+  }
+}
 
-	auto Haptics::extractMetadataToOHM(std::string& filename) -> haptics::tools::OHMData {
-		std::string header = std::string("OHM ");
-		auto v = static_cast<short>(version.empty() ? 0 : std::stoi(version));
-		std::string desc = description;
-		haptics::tools::OHMData res(header, v, desc);
-		tools::OHMData::HapticElementMetadata element;
-		tools::OHMData::HapticChannelMetadata channel;
-		for (types::Perception p : perceptions) {
-			element = tools::OHMData::HapticElementMetadata();
-			element.elementDescription = p.getDescription();
-			element.numHapticChannels = static_cast<short>(p.getChannelsSize());
-			element.elementFilename = filename;
-			element.channelsMetadata = {};
-			for (int i = 0; i < element.numHapticChannels; i++) {
-				channel = tools::OHMData::HapticChannelMetadata();
-				types::Channel t = p.getChannelAt(i);
-				channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMask();
-				channel.channelDescription = t.getDescription();
-				channel.gain = t.getGain();
+auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData {
+  std::string header = std::string("OHM ");
+  auto v = static_cast<short>(version.empty() ? 0 : std::stoi(version));
+  std::string desc = description;
+  haptics::tools::OHMData res(header, v, desc);
+  tools::OHMData::HapticElementMetadata element;
+  tools::OHMData::HapticChannelMetadata channel;
+  for (types::Perception p : perceptions) {
+    element = tools::OHMData::HapticElementMetadata();
+    element.elementDescription = p.getDescription();
+    element.numHapticChannels = static_cast<short>(p.getChannelsSize());
+    element.elementFilename = filename;
+    element.channelsMetadata = {};
+    for (int i = 0; i < element.numHapticChannels; i++) {
+      channel = tools::OHMData::HapticChannelMetadata();
+      types::Channel t = p.getChannelAt(i);
+      channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMask();
+      channel.channelDescription = t.getDescription();
+      channel.gain = t.getGain();
 
-				element.channelsMetadata.push_back(channel);
-			}
+      element.channelsMetadata.push_back(channel);
+    }
 
-			res.addHapticElementMetadata(element);
-		}
-		return res;
-	}
-	auto Haptics::linearize() -> void {
-		for (types::Perception& p : perceptions) {
-			p.linearizeLibrary();
-		}
-	}
+    res.addHapticElementMetadata(element);
+  }
+  return res;
+}
+auto Haptics::linearize() -> void {
+  for (types::Perception &p : perceptions) {
+    p.linearizeLibrary();
+  }
+}
 
-	auto Haptics::refactor() -> void {
-		for (types::Perception& p : perceptions) {
-			p.refactorEffects();
-		}
-	}
+auto Haptics::refactor() -> void {
+  for (types::Perception &p : perceptions) {
+    p.refactorEffects();
+  }
+}
 
-	auto Haptics::equals(const Haptics& haptic) const -> bool {
-		if (version != haptic.getVersion()) {
-			std::cerr << "Version fields are different" << std::endl;
-			return false;
-		}
-		if (profile != haptic.getProfile()) {
-			std::cerr << "Profile fields are different" << std::endl;
-			return false;
-		}
-		if (level != haptic.getLevel()) {
-			std::cerr << "Level fields are different" << std::endl;
-			return false;
-		}
-		if (date != haptic.getDate()) {
-			std::cerr << "Date fields are different" << std::endl;
-			return false;
-		}
-		if (description != haptic.getDescription()) {
-			std::cerr << "Description fields are different" << std::endl;
-			return false;
-		}
-		if (timescale != haptic.getTimescale()) {
-			std::cerr << "Timescale fields are different" << std::endl;
-			return false;
-		}
-		if (perceptions.size() != haptic.perceptions.size()) {
-			std::cerr << "The number of perceptions is different" << std::endl;
-			return false;
-		}
-		if (avatars.size() != haptic.avatars.size()) {
-			std::cerr << "The number of avatars is different" << std::endl;
-			return false;
-		}
-		if (syncs.size() != haptic.syncs.size()) {
-			std::cerr << "The number of Syncs is different" << std::endl;
-			return false;
-		}
-		bool isEqual = true;
-		if (isEqual) {
-			for (int i = 0; i < static_cast<int>(perceptions.size()); i++) {
-				const auto perception1 = perceptions.at(i);
-				const auto perception2 = haptic.perceptions.at(i);
-				isEqual = isEqual && perception1.equals(perception2);
-			}
-		}
-		if (isEqual) {
-			for (int i = 0; i < static_cast<int>(avatars.size()); i++) {
-				const auto avatar1 = avatars.at(i);
-				const auto avatar2 = haptic.avatars.at(i);
-				isEqual = isEqual && avatar1.equals(avatar2);
-			}
-		}
-		if (isEqual) {
-			for (int i = 0; i < static_cast<int>(syncs.size()); i++) {
-				const auto sync1 = syncs.at(i);
-				const auto sync2 = haptic.syncs.at(i);
-				isEqual = isEqual && sync1.equals(sync2);
-			}
-		}
-		return isEqual;
-	}
+auto Haptics::equals(const Haptics &haptic) const -> bool {
+  if (version != haptic.getVersion()) {
+    std::cerr << "Version fields are different" << std::endl;
+    return false;
+  }
+  if (profile != haptic.getProfile()) {
+    std::cerr << "Profile fields are different" << std::endl;
+    return false;
+  }
+  if (level != haptic.getLevel()) {
+    std::cerr << "Level fields are different" << std::endl;
+    return false;
+  }
+  if (date != haptic.getDate()) {
+    std::cerr << "Date fields are different" << std::endl;
+    return false;
+  }
+  if (description != haptic.getDescription()) {
+    std::cerr << "Description fields are different" << std::endl;
+    return false;
+  }
+  if (timescale != haptic.getTimescale()) {
+    std::cerr << "Timescale fields are different" << std::endl;
+    return false;
+  }
+  if (perceptions.size() != haptic.perceptions.size()) {
+    std::cerr << "The number of perceptions is different" << std::endl;
+    return false;
+  }
+  if (avatars.size() != haptic.avatars.size()) {
+    std::cerr << "The number of avatars is different" << std::endl;
+    return false;
+  }
+  if (syncs.size() != haptic.syncs.size()) {
+    std::cerr << "The number of Syncs is different" << std::endl;
+    return false;
+  }
+  bool isEqual = true;
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(perceptions.size()); i++) {
+      const auto perception1 = perceptions.at(i);
+      const auto perception2 = haptic.perceptions.at(i);
+      isEqual = isEqual && perception1.equals(perception2);
+    }
+  }
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(avatars.size()); i++) {
+      const auto avatar1 = avatars.at(i);
+      const auto avatar2 = haptic.avatars.at(i);
+      isEqual = isEqual && avatar1.equals(avatar2);
+    }
+  }
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(syncs.size()); i++) {
+      const auto sync1 = syncs.at(i);
+      const auto sync2 = haptic.syncs.at(i);
+      isEqual = isEqual && sync1.equals(sync2);
+    }
+  }
+  return isEqual;
+}
 
 } // namespace haptics::types

@@ -51,94 +51,89 @@ using haptics::types::Haptics;
 using haptics::types::Perception;
 
 auto help() -> void {
-	std::cout
-		<< "usages: Conformance [-h] -f <FILE>" << std::endl
-		<< std::endl
-		<< "This piece of software checks the conformance of an input file based on ISO/IEC 23090-31"
-		<< std::endl
-		<< "positional arguments:" << std::endl
-		<< "\t-f, --file <FILE>\t\tfile to convert" << std::endl
-		<< std::endl
-		<< "optional arguments:" << std::endl
-		<< "\t-h, --help\t\t\tshow this help message and exit" << std::endl
-		<< std::endl
-		<< "\t-c, --comparison\t\t\tthe input file will be compared to the file provided for "
-		"comparison."
-		<< std::endl;
+  std::cout
+      << "usages: Conformance [-h] -f <FILE>" << std::endl
+      << std::endl
+      << "This piece of software checks the conformance of an input file based on ISO/IEC 23090-31"
+      << std::endl
+      << "positional arguments:" << std::endl
+      << "\t-f, --file <FILE>\t\tfile to convert" << std::endl
+      << std::endl
+      << "optional arguments:" << std::endl
+      << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
+      << std::endl
+      << "\t-c, --comparison\t\t\tthe input file will be compared to the file provided for "
+         "comparison."
+      << std::endl;
 }
 
 // NOLINTNEXTLINE
-auto main(int argc, char* argv[]) -> int {
-	const auto args = std::vector<const char*>(argv, argv + argc);
-	InputParser inputParser(args);
-	if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-		help();
-		return EXIT_SUCCESS;
-	}
+auto main(int argc, char *argv[]) -> int {
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
+  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
+    help();
+    return EXIT_SUCCESS;
+  }
 
-	std::string filename = inputParser.getCmdOption("-f");
-	if (filename.empty()) {
-		filename = inputParser.getCmdOption("--file");
-	}
-	if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
-		help();
-		return EXIT_FAILURE;
-	}
+  std::string filename = inputParser.getCmdOption("-f");
+  if (filename.empty()) {
+    filename = inputParser.getCmdOption("--file");
+  }
+  if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
+    help();
+    return EXIT_FAILURE;
+  }
 
-	std::string comparisonFilename = inputParser.getCmdOption("-c");
-	if (comparisonFilename.empty()) {
-		comparisonFilename = inputParser.getCmdOption("--comparison");
-	}
+  std::string comparisonFilename = inputParser.getCmdOption("-c");
+  if (comparisonFilename.empty()) {
+    comparisonFilename = inputParser.getCmdOption("--comparison");
+  }
 
-	Haptics hapticFile;
-	Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
-	std::string ext = InputParser::getFileExt(filename);
-	int codeExit = -1;
-	if (ext == "hjif") {
-		std::cout << "The HJIF file to check: " << filename << std::endl;
-		IOJson::loadFile(filename, hapticFile);
-		codeExit = EXIT_SUCCESS;
-	}
-	else if (ext == "hmpg") {
-		std::cout << "The HMPG file to check: " << filename << std::endl;
-		IOStream::readFile(filename, hapticFile, false);
-		codeExit = EXIT_SUCCESS;
-	}
-	else {
-		codeExit = EXIT_FAILURE;
-	}
-	if (!comparisonFilename.empty()) {
-		Haptics comparisonHapticFile;
-		std::string extComp = InputParser::getFileExt(comparisonFilename);
-		int codeExit = -1;
-		if (extComp == "hjif") {
-			std::cout << "The HJIF file used for comparison: " << comparisonFilename << std::endl;
-			IOJson::loadFile(comparisonFilename, comparisonHapticFile);
-			codeExit = EXIT_SUCCESS;
-		}
-		else if (extComp == "hmpg") {
-			std::cout << "The HMPG file used for comparison: " << comparisonFilename << std::endl;
-			IOStream::readFile(comparisonFilename, comparisonHapticFile, false);
-			codeExit = EXIT_SUCCESS;
-		}
-		else {
-			codeExit = EXIT_FAILURE;
-		}
-		if (codeExit == EXIT_SUCCESS) {
-			bool equals = hapticFile.equals(comparisonHapticFile);
-			if (equals) {
-				std::cerr << filename << " and " << comparisonFilename << " contain the same data."
-					<< std::endl;
-			}
-			else {
-				std::cerr << filename << " and " << comparisonFilename << " do not contain the same data."
-					<< std::endl;
-			}
-		}
-	}
-	if (codeExit == EXIT_FAILURE) {
-		help();
-		return codeExit;
-	}
-	return codeExit;
+  Haptics hapticFile;
+  Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
+  std::string ext = InputParser::getFileExt(filename);
+  int codeExit = -1;
+  if (ext == "hjif") {
+    std::cout << "The HJIF file to check: " << filename << std::endl;
+    IOJson::loadFile(filename, hapticFile);
+    codeExit = EXIT_SUCCESS;
+  } else if (ext == "hmpg") {
+    std::cout << "The HMPG file to check: " << filename << std::endl;
+    IOStream::readFile(filename, hapticFile, false);
+    codeExit = EXIT_SUCCESS;
+  } else {
+    codeExit = EXIT_FAILURE;
+  }
+  if (!comparisonFilename.empty()) {
+    Haptics comparisonHapticFile;
+    std::string extComp = InputParser::getFileExt(comparisonFilename);
+    int codeExit = -1;
+    if (extComp == "hjif") {
+      std::cout << "The HJIF file used for comparison: " << comparisonFilename << std::endl;
+      IOJson::loadFile(comparisonFilename, comparisonHapticFile);
+      codeExit = EXIT_SUCCESS;
+    } else if (extComp == "hmpg") {
+      std::cout << "The HMPG file used for comparison: " << comparisonFilename << std::endl;
+      IOStream::readFile(comparisonFilename, comparisonHapticFile, false);
+      codeExit = EXIT_SUCCESS;
+    } else {
+      codeExit = EXIT_FAILURE;
+    }
+    if (codeExit == EXIT_SUCCESS) {
+      bool equals = hapticFile.equals(comparisonHapticFile);
+      if (equals) {
+        std::cerr << filename << " and " << comparisonFilename << " contain the same data."
+                  << std::endl;
+      } else {
+        std::cerr << filename << " and " << comparisonFilename << " do not contain the same data."
+                  << std::endl;
+      }
+    }
+  }
+  if (codeExit == EXIT_FAILURE) {
+    help();
+    return codeExit;
+  }
+  return codeExit;
 }

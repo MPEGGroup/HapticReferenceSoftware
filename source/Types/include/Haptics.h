@@ -44,62 +44,62 @@
 
 namespace haptics::types {
 
-	class Haptics {
-	public:
-		static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
+class Haptics {
+public:
+  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
 
-		explicit Haptics() = default;
-		explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
-			: version(std::move(newVersion))
-			, date(std::move(newDate))
-			, description(std::move(newDescription))
-			, perceptions({})
-			, avatars({})
-			, syncs({}) {};
+  explicit Haptics() = default;
+  explicit Haptics(std::string newVersion, std::string newDate, std::string newDescription)
+      : version(std::move(newVersion))
+      , date(std::move(newDate))
+      , description(std::move(newDescription))
+      , perceptions({})
+      , avatars({})
+      , syncs({}){};
 
-		[[nodiscard]] auto getVersion() const->std::string;
-		auto setVersion(std::string& newVersion) -> void;
+  [[nodiscard]] auto getVersion() const -> std::string;
+  auto setVersion(std::string &newVersion) -> void;
 
-		[[nodiscard]] auto getProfile() const->std::string;
-		auto setProfile(std::string& newProfile) -> void;
-		[[nodiscard]] auto getLevel() const->uint8_t;
-		auto setLevel(uint8_t newLevel) -> void;
+  [[nodiscard]] auto getProfile() const -> std::string;
+  auto setProfile(std::string &newProfile) -> void;
+  [[nodiscard]] auto getLevel() const -> uint8_t;
+  auto setLevel(uint8_t newLevel) -> void;
 
-		[[nodiscard]] auto getDate() const->std::string;
-		auto setDate(std::string& newDate) -> void;
-		[[nodiscard]] auto getDescription() const->std::string;
-		auto setDescription(std::string& newDescription) -> void;
-		[[nodiscard]] auto getPerceptionsSize()->size_t;
-		[[nodiscard]] auto getPerceptionAt(int index)->Perception&;
-		auto replacePerceptionAt(int index, Perception& newPerception) -> bool;
-		auto replacePerceptionMetadataAt(int index, Perception& newPerception) -> bool;
-		auto removePerceptionAt(int index) -> bool;
-		auto addPerception(Perception& newPerception) -> void;
-		[[nodiscard]] auto getAvatarsSize()->size_t;
-		[[nodiscard]] auto getAvatarAt(int index)->Avatar&;
-		auto addAvatar(Avatar& newAvatar) -> void;
-		[[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
-		[[nodiscard]] auto getTimescale() const->std::optional<unsigned int>;
-		auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
-		[[nodiscard]] auto getSyncsSize()->size_t;
-		[[nodiscard]] auto getSyncsAt(int index)->Sync&;
-		auto addSync(Sync& newSync) -> void;
-		auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
-		auto extractMetadataToOHM(std::string& filename)->haptics::tools::OHMData;
-		auto linearize() -> void;
-		auto refactor() -> void;
-		[[nodiscard]] auto equals(const Haptics& haptic) const -> bool;
+  [[nodiscard]] auto getDate() const -> std::string;
+  auto setDate(std::string &newDate) -> void;
+  [[nodiscard]] auto getDescription() const -> std::string;
+  auto setDescription(std::string &newDescription) -> void;
+  [[nodiscard]] auto getPerceptionsSize() -> size_t;
+  [[nodiscard]] auto getPerceptionAt(int index) -> Perception &;
+  auto replacePerceptionAt(int index, Perception &newPerception) -> bool;
+  auto replacePerceptionMetadataAt(int index, Perception &newPerception) -> bool;
+  auto removePerceptionAt(int index) -> bool;
+  auto addPerception(Perception &newPerception) -> void;
+  [[nodiscard]] auto getAvatarsSize() -> size_t;
+  [[nodiscard]] auto getAvatarAt(int index) -> Avatar &;
+  auto addAvatar(Avatar &newAvatar) -> void;
+  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
+  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
+  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
+  [[nodiscard]] auto getSyncsSize() -> size_t;
+  [[nodiscard]] auto getSyncsAt(int index) -> Sync &;
+  auto addSync(Sync &newSync) -> void;
+  auto loadMetadataFromOHM(haptics::tools::OHMData data) -> void;
+  auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
+  auto linearize() -> void;
+  auto refactor() -> void;
+  [[nodiscard]] auto equals(const Haptics &haptic) const -> bool;
 
-	private:
-		std::string version = "2023";
-		std::string profile = "Main";
-		uint8_t level = 1;
-		std::string date;
-		std::string description;
-		std::vector<Perception> perceptions = {};
-		std::vector<Avatar> avatars = {};
-		std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
-		std::vector<Sync> syncs = {};
-	};
+private:
+  std::string version = "2023";
+  std::string profile = "Main";
+  uint8_t level = 1;
+  std::string date;
+  std::string description;
+  std::vector<Perception> perceptions = {};
+  std::vector<Avatar> avatars = {};
+  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
+  std::vector<Sync> syncs = {};
+};
 } // namespace haptics::types
 #endif // HAPTICS_H

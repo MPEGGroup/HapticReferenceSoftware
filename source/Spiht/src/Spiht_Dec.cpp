@@ -35,195 +35,185 @@
 
 namespace haptics::spiht {
 
-	void Spiht_Dec::decodeEffect(std::vector<unsigned char>& in, std::vector<int>& out, int origlength,
-		double& wavmax, int& bits) {
-		std::vector<unsigned char> in_bits;
-		ArithDec::convert2bits(in, in_bits);
-		auto level = (int)(log2((double)origlength) - 2);
-		wavmax = 0;
-		bits = 0;
-		decode(in_bits, out, origlength, level, wavmax, bits);
-	}
+void Spiht_Dec::decodeEffect(std::vector<unsigned char> &in, std::vector<int> &out, int origlength,
+                             double &wavmax, int &bits) {
+  std::vector<unsigned char> in_bits;
+  ArithDec::convert2bits(in, in_bits);
+  auto level = (int)(log2((double)origlength) - 2);
+  wavmax = 0;
+  bits = 0;
+  decode(in_bits, out, origlength, level, wavmax, bits);
+}
 
-	void Spiht_Dec::decode(std::vector<unsigned char>& bitstream, std::vector<int>& out, int origlength,
-		int level, double& wavmax, int& n_real) {
+void Spiht_Dec::decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
+                       int level, double &wavmax, int &n_real) {
 
-		arithDec.initDecoding(bitstream);
-		out.resize(origlength, 0);
-		n_real = getMaxAllocBits();
-		wavmax = getWavmax();
-		initLists(origlength, level);
+  arithDec.initDecoding(bitstream);
+  out.resize(origlength, 0);
+  n_real = getMaxAllocBits();
+  wavmax = getWavmax();
+  initLists(origlength, level);
 
-		int n = n_real;
-		while (0 <= n) {
-			int compare = 1 << n; // 2^n
-			int LSP_index = (int)LSP.size();
+  int n = n_real;
+  while (0 <= n) {
+    int compare = 1 << n; // 2^n
+    int LSP_index = (int)LSP.size();
 
-			sortingPass(out, origlength, compare);
+    sortingPass(out, origlength, compare);
 
-			refinementPass(out, LSP_index, compare);
+    refinementPass(out, LSP_index, compare);
 
-			n--;
-		}
+    n--;
+  }
 
-		arithDec.resetCounter();
-	}
+  arithDec.resetCounter();
+}
 
-	void Spiht_Dec::initLists(int origlength, int level) {
-		int bandsize = 2 << ((int)log2((double)origlength) - level);
-		LIP.clear();
-		LIS1.clear();
-		LIS2.clear();
-		LSP.clear();
-		for (int i = 0; i < bandsize; i++) {
-			LIP.push_back(i);
-		}
-		for (int i = (bandsize / 2); i < bandsize; i++) {
-			LIS1.push_back(i);
-			LIS2.push_back(0);
-		}
-	}
+void Spiht_Dec::initLists(int origlength, int level) {
+  int bandsize = 2 << ((int)log2((double)origlength) - level);
+  LIP.clear();
+  LIS1.clear();
+  LIS2.clear();
+  LSP.clear();
+  for (int i = 0; i < bandsize; i++) {
+    LIP.push_back(i);
+  }
+  for (int i = (bandsize / 2); i < bandsize; i++) {
+    LIS1.push_back(i);
+    LIS2.push_back(0);
+  }
+}
 
-	auto Spiht_Dec::getMaxAllocBits() -> int {
-		std::vector<int> maxallocbitsArray(MAXALLOCBITS_SIZE, 0);
-		getBits(maxallocbitsArray, MAXALLOCBITS_SIZE, CONTEXT_0);
-		return bi2de(maxallocbitsArray, MAXALLOCBITS_SIZE);
-	}
+auto Spiht_Dec::getMaxAllocBits() -> int {
+  std::vector<int> maxallocbitsArray(MAXALLOCBITS_SIZE, 0);
+  getBits(maxallocbitsArray, MAXALLOCBITS_SIZE, CONTEXT_0);
+  return bi2de(maxallocbitsArray, MAXALLOCBITS_SIZE);
+}
 
-	auto Spiht_Dec::getWavmax() -> double {
-		int mode = getBit(CONTEXT_0);
-		std::vector<int> wavmaxArray(WAVMAXLENGTH - 1, 0);
-		getBits(wavmaxArray, WAVMAXLENGTH - 1, CONTEXT_0);
-		int temp = bi2de(wavmaxArray, WAVMAXLENGTH - 1);
-		double wavmax = 0;
-		if (mode == 0) {
-			wavmax = (double)temp * pow(2, -FRACTIONBITS_0);
-		}
-		else {
-			wavmax = (double)temp * pow(2, -FRACTIONBITS_1) + 1;
-		}
-		return wavmax;
-	}
+auto Spiht_Dec::getWavmax() -> double {
+  int mode = getBit(CONTEXT_0);
+  std::vector<int> wavmaxArray(WAVMAXLENGTH - 1, 0);
+  getBits(wavmaxArray, WAVMAXLENGTH - 1, CONTEXT_0);
+  int temp = bi2de(wavmaxArray, WAVMAXLENGTH - 1);
+  double wavmax = 0;
+  if (mode == 0) {
+    wavmax = (double)temp * pow(2, -FRACTIONBITS_0);
+  } else {
+    wavmax = (double)temp * pow(2, -FRACTIONBITS_1) + 1;
+  }
+  return wavmax;
+}
 
-	void Spiht_Dec::sortingPass(std::vector<int>& out, int origlength, int compare) {
-		std::list<int>::iterator it;
-		for (it = LIP.begin(); it != LIP.end();) {
-			if (getBit(CONTEXT_2) == 1) {
-				if (getBit(CONTEXT_1) == 1) {
-					out[*it] = compare;
-				}
-				else {
-					out[*it] = -compare;
-				}
-				LSP.push_back(*it);
-				it = LIP.erase(it);
-			}
-			else {
-				it++;
-			}
-		}
+void Spiht_Dec::sortingPass(std::vector<int> &out, int origlength, int compare) {
+  std::list<int>::iterator it;
+  for (it = LIP.begin(); it != LIP.end();) {
+    if (getBit(CONTEXT_2) == 1) {
+      if (getBit(CONTEXT_1) == 1) {
+        out[*it] = compare;
+      } else {
+        out[*it] = -compare;
+      }
+      LSP.push_back(*it);
+      it = LIP.erase(it);
+    } else {
+      it++;
+    }
+  }
 
-		auto it1 = LIS1.begin();
-		auto it2 = LIS2.begin();
-		int LISsize = (int)LIS1.size();
-		for (int i = 0; i < LISsize; i++) {
-			// type A
-			if (*it2 == 0) {
-				if (getBit(CONTEXT_3) == 1) {
-					int y = *it1;
-					// Children
-					int index = 2 * y;
-					if (getBit(CONTEXT_4) == 1) {
-						LSP.push_back(index);
-						if (getBit(CONTEXT_1) == 1) {
-							out[index] = compare;
-						}
-						else {
-							out[index] = -compare;
-						}
-					}
-					else {
-						LIP.push_back(index);
-					}
+  auto it1 = LIS1.begin();
+  auto it2 = LIS2.begin();
+  int LISsize = (int)LIS1.size();
+  for (int i = 0; i < LISsize; i++) {
+    // type A
+    if (*it2 == 0) {
+      if (getBit(CONTEXT_3) == 1) {
+        int y = *it1;
+        // Children
+        int index = 2 * y;
+        if (getBit(CONTEXT_4) == 1) {
+          LSP.push_back(index);
+          if (getBit(CONTEXT_1) == 1) {
+            out[index] = compare;
+          } else {
+            out[index] = -compare;
+          }
+        } else {
+          LIP.push_back(index);
+        }
 
-					index = 2 * y + 1;
-					if (getBit(CONTEXT_4) == 1) {
-						LSP.push_back(index);
-						if (getBit(CONTEXT_1) == 1) {
-							out[index] = compare;
-						}
-						else {
-							out[index] = -compare;
-						}
-					}
-					else {
-						LIP.push_back(index);
-					}
+        index = 2 * y + 1;
+        if (getBit(CONTEXT_4) == 1) {
+          LSP.push_back(index);
+          if (getBit(CONTEXT_1) == 1) {
+            out[index] = compare;
+          } else {
+            out[index] = -compare;
+          }
+        } else {
+          LIP.push_back(index);
+        }
 
-					// Grandchildren
-					if ((4 * y + 3) < origlength) {
-						LIS1.push_back(*it1);
-						LIS2.push_back(1);
-						LISsize++;
-					}
-					it1 = LIS1.erase(it1);
-					it2 = LIS2.erase(it2);
-				}
-				else {
-					it1++;
-					it2++;
-				}
+        // Grandchildren
+        if ((4 * y + 3) < origlength) {
+          LIS1.push_back(*it1);
+          LIS2.push_back(1);
+          LISsize++;
+        }
+        it1 = LIS1.erase(it1);
+        it2 = LIS2.erase(it2);
+      } else {
+        it1++;
+        it2++;
+      }
 
-				// type B
-			}
-			else {
-				if (getBit(CONTEXT_5) == 1) {
-					int y = *it1;
-					LIS1.push_back(2 * y);
-					LIS1.push_back(2 * y + 1);
-					LIS2.push_back(0);
-					LIS2.push_back(0);
-					LISsize += 2;
-					it1 = LIS1.erase(it1);
-					it2 = LIS2.erase(it2);
-				}
-				else {
-					it1++;
-					it2++;
-				}
-			}
-		}
-	}
+      // type B
+    } else {
+      if (getBit(CONTEXT_5) == 1) {
+        int y = *it1;
+        LIS1.push_back(2 * y);
+        LIS1.push_back(2 * y + 1);
+        LIS2.push_back(0);
+        LIS2.push_back(0);
+        LISsize += 2;
+        it1 = LIS1.erase(it1);
+        it2 = LIS2.erase(it2);
+      } else {
+        it1++;
+        it2++;
+      }
+    }
+  }
+}
 
-	void Spiht_Dec::refinementPass(std::vector<int>& out, int LSP_index, int compare) {
-		auto it = LSP.begin();
-		int temp = 0;
-		while (temp < LSP_index) {
-			if (getBit(CONTEXT_6) == 1) {
-				out[*it] += sgn(out[*it]) * compare;
-			}
-			temp++;
-			it++;
-		}
-	}
+void Spiht_Dec::refinementPass(std::vector<int> &out, int LSP_index, int compare) {
+  auto it = LSP.begin();
+  int temp = 0;
+  while (temp < LSP_index) {
+    if (getBit(CONTEXT_6) == 1) {
+      out[*it] += sgn(out[*it]) * compare;
+    }
+    temp++;
+    it++;
+  }
+}
 
-	auto Spiht_Dec::getBit(int context) -> int { return arithDec.decode(context); }
+auto Spiht_Dec::getBit(int context) -> int { return arithDec.decode(context); }
 
-	void Spiht_Dec::getBits(std::vector<int>& out, int length, int context) {
-		out.resize(length);
-		for (int i = 0; i < length; i++) {
-			out[i] = arithDec.decode(context);
-		}
-	}
+void Spiht_Dec::getBits(std::vector<int> &out, int length, int context) {
+  out.resize(length);
+  for (int i = 0; i < length; i++) {
+    out[i] = arithDec.decode(context);
+  }
+}
 
-	template <typename T> auto Spiht_Dec::bi2de(std::vector<T>& data, int length) -> T {
-		T val = 0;
-		for (int i = 0; i < length; i++) {
-			val += data.at(i) << i;
-		}
-		return val;
-	}
+template <typename T> auto Spiht_Dec::bi2de(std::vector<T> &data, int length) -> T {
+  T val = 0;
+  for (int i = 0; i < length; i++) {
+    val += data.at(i) << i;
+  }
+  return val;
+}
 
-	auto Spiht_Dec::sgn(int val) -> int { return (int)(0 < val) - (int)(val < 0); }
+auto Spiht_Dec::sgn(int val) -> int { return (int)(0 < val) - (int)(val < 0); }
 
 } // namespace haptics::spiht

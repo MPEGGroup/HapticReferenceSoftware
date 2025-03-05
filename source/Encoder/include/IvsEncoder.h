@@ -45,142 +45,141 @@
 
 namespace haptics::encoder {
 
-	class IvsEncoder {
-	public:
-		auto static encode(const std::string& filename, types::Perception& out, unsigned int timescale)
-			-> int;
-		[[nodiscard]] auto static getLastModified(const pugi::xml_document* doc)->std::string;
-		[[nodiscard]] auto static getBasisEffects(const pugi::xml_document* doc)
-			->pugi::xml_object_range<pugi::xml_named_node_iterator>;
-		[[nodiscard]] auto static getTimelineEffects(const pugi::xml_document* doc)
-			->pugi::xml_object_range<pugi::xml_named_node_iterator>;
-		[[nodiscard]] auto static getLaunchEvents(const pugi::xml_node* timeline)
-			->pugi::xml_object_range<pugi::xml_named_node_iterator>;
-		[[nodiscard]] auto static getRepeatEvents(const pugi::xml_node* timeline)
-			->pugi::xml_object_range<pugi::xml_named_node_iterator>;
-		[[nodiscard]] auto static getLaunchedEffect(
-			const pugi::xml_object_range<pugi::xml_named_node_iterator>* basisEffects,
-			const pugi::xml_node* launchEvent, pugi::xml_node& out) -> bool;
+class IvsEncoder {
+public:
+  auto static encode(const std::string &filename, types::Perception &out, unsigned int timescale)
+      -> int;
+  [[nodiscard]] auto static getLastModified(const pugi::xml_document *doc) -> std::string;
+  [[nodiscard]] auto static getBasisEffects(const pugi::xml_document *doc)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static getTimelineEffects(const pugi::xml_document *doc)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static getLaunchEvents(const pugi::xml_node *timeline)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static getRepeatEvents(const pugi::xml_node *timeline)
+      -> pugi::xml_object_range<pugi::xml_named_node_iterator>;
+  [[nodiscard]] auto static getLaunchedEffect(
+      const pugi::xml_object_range<pugi::xml_named_node_iterator> *basisEffects,
+      const pugi::xml_node *launchEvent, pugi::xml_node &out) -> bool;
 
-		[[nodiscard]] auto static convertToEffect(const pugi::xml_node* basisEffect,
-			const pugi::xml_node* launchEvent,
-			haptics::types::Effect* out, unsigned int timescale)
-			-> bool;
+  [[nodiscard]] auto static convertToEffect(const pugi::xml_node *basisEffect,
+                                            const pugi::xml_node *launchEvent,
+                                            haptics::types::Effect *out, unsigned int timescale)
+      -> bool;
 
-		[[nodiscard]] auto static getName(const pugi::xml_node* node)->std::string;
-		[[nodiscard]] auto static getTime(const pugi::xml_node* node) -> int;
-		[[nodiscard]] auto static getCount(const pugi::xml_node* node) -> int;
-		[[nodiscard]] auto static getDuration(const pugi::xml_node* node) -> int;
-		[[nodiscard]] auto static getDuration(const pugi::xml_node* basisEffect,
-			const pugi::xml_node* launchEvent) -> int;
-		[[nodiscard]] auto static getMagnitude(const pugi::xml_node* basisEffect,
-			const pugi::xml_node* launchEvent) -> int;
-		[[nodiscard]] auto static getPeriod(const pugi::xml_node* basisEffect,
-			const pugi::xml_node* launchEvent) -> int;
-		[[nodiscard]] auto static getWaveform(const pugi::xml_node* basisEffect)
-			->haptics::types::BaseSignal;
-		[[nodiscard]] auto static getAttackTime(const pugi::xml_node* basisEffect) -> int;
-		[[nodiscard]] auto static getAttackLevel(const pugi::xml_node* basisEffect) -> int;
-		[[nodiscard]] auto static getFadeTime(const pugi::xml_node* basisEffect) -> int;
-		[[nodiscard]] auto static getFadeLevel(const pugi::xml_node* basisEffect) -> int;
-		[[nodiscard]] auto static floatToInt(int f) -> int;
+  [[nodiscard]] auto static getName(const pugi::xml_node *node) -> std::string;
+  [[nodiscard]] auto static getTime(const pugi::xml_node *node) -> int;
+  [[nodiscard]] auto static getCount(const pugi::xml_node *node) -> int;
+  [[nodiscard]] auto static getDuration(const pugi::xml_node *node) -> int;
+  [[nodiscard]] auto static getDuration(const pugi::xml_node *basisEffect,
+                                        const pugi::xml_node *launchEvent) -> int;
+  [[nodiscard]] auto static getMagnitude(const pugi::xml_node *basisEffect,
+                                         const pugi::xml_node *launchEvent) -> int;
+  [[nodiscard]] auto static getPeriod(const pugi::xml_node *basisEffect,
+                                      const pugi::xml_node *launchEvent) -> int;
+  [[nodiscard]] auto static getWaveform(const pugi::xml_node *basisEffect)
+      -> haptics::types::BaseSignal;
+  [[nodiscard]] auto static getAttackTime(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static getAttackLevel(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static getFadeTime(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static getFadeLevel(const pugi::xml_node *basisEffect) -> int;
+  [[nodiscard]] auto static floatToInt(int f) -> int;
 
-	private:
-		auto static isRepeatNested(pugi::xml_node* parent, pugi::xml_node* child) -> bool;
-		auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
-		auto static injectIntoBands(types::Effect& effect, types::Channel& channel,
-			unsigned int timescale) -> void;
-		auto static millisecondsToTimeScale(int milliseconds, unsigned int timescale) -> int;
-		static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
-		static const int MIN_FREQUENCY = 0;
-		static const int MAX_FREQUENCY = 1000;
-		static const int MAGSWEEP_FREQUENCY = 170;
-		static const int MS_2_SEC = 1000;
+private:
+  auto static isRepeatNested(pugi::xml_node *parent, pugi::xml_node *child) -> bool;
+  auto static isRepeatNested(int parent_start, int parent_end, int child_start) -> bool;
+  auto static injectIntoBands(types::Effect &effect, types::Channel &channel,
+                              unsigned int timescale) -> void;
+  auto static millisecondsToTimeScale(int milliseconds, unsigned int timescale) -> int;
+  static constexpr float MAGNITUDE_2_AMPLITUDE = .0001F;
+  static const int MIN_FREQUENCY = 0;
+  static const int MAX_FREQUENCY = 1000;
+  static const int MAGSWEEP_FREQUENCY = 170;
+  static const int MS_2_SEC = 1000;
 
-		struct RepeatNode {
-			pugi::xml_node* value;
-			std::vector<types::Effect> myEffects;
-			std::vector<RepeatNode> children;
+  struct RepeatNode {
+    pugi::xml_node *value;
+    std::vector<types::Effect> myEffects;
+    std::vector<RepeatNode> children;
 
-			auto pushEffect(types::Effect& myEffect) -> bool {
-				if (value != nullptr) {
-					int start = IvsEncoder::getTime(value);
-					int end = start + IvsEncoder::getDuration(value);
-					int position = myEffect.getPosition();
-					if (start > position || position >= end) {
-						return false;
-					}
-				}
+    auto pushEffect(types::Effect &myEffect) -> bool {
+      if (value != nullptr) {
+        int start = IvsEncoder::getTime(value);
+        int end = start + IvsEncoder::getDuration(value);
+        int position = myEffect.getPosition();
+        if (start > position || position >= end) {
+          return false;
+        }
+      }
 
-				for (auto it = children.begin(); it < children.end(); it++) {
-					if (it->pushEffect(myEffect)) {
-						return true;
-					}
-				}
+      for (auto it = children.begin(); it < children.end(); it++) {
+        if (it->pushEffect(myEffect)) {
+          return true;
+        }
+      }
 
-				auto it = myEffects.end();
-				auto it_effects = myEffects.begin();
-				int effectPosition = myEffect.getPosition();
-				for (; it_effects < myEffects.end(); it_effects++) {
-					if (it_effects->getPosition() < effectPosition) {
-						it = it_effects + 1;
-					}
-				}
-				myEffects.insert(it, myEffect);
-				return true;
-			}
+      auto it = myEffects.end();
+      auto it_effects = myEffects.begin();
+      int effectPosition = myEffect.getPosition();
+      for (; it_effects < myEffects.end(); it_effects++) {
+        if (it_effects->getPosition() < effectPosition) {
+          it = it_effects + 1;
+        }
+      }
+      myEffects.insert(it, myEffect);
+      return true;
+    }
 
-			auto linearize(std::vector<types::Effect>& effectLibrary, int& delay) -> int {
-				int count = 0;
-				int duration = 0;
-				if (value != nullptr) {
-					count = IvsEncoder::getCount(value);
-					duration = IvsEncoder::getDuration(value);
-				}
-				auto myEffects_it = myEffects.begin();
-				auto children_it = children.begin();
-				int delay_tmp = 0;
-				std::vector<types::Effect> linearized_effects;
-				for (; myEffects_it < myEffects.end() && children_it < children.end();) {
-					int repeat_position =
-						children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value);
+    auto linearize(std::vector<types::Effect> &effectLibrary, int &delay) -> int {
+      int count = 0;
+      int duration = 0;
+      if (value != nullptr) {
+        count = IvsEncoder::getCount(value);
+        duration = IvsEncoder::getDuration(value);
+      }
+      auto myEffects_it = myEffects.begin();
+      auto children_it = children.begin();
+      int delay_tmp = 0;
+      std::vector<types::Effect> linearized_effects;
+      for (; myEffects_it < myEffects.end() && children_it < children.end();) {
+        int repeat_position =
+            children_it->value == nullptr ? 0 : IvsEncoder::getTime(children_it->value);
 
-					if (myEffects_it->getPosition() < repeat_position) {
-						types::Effect e = *myEffects_it;
-						int position = e.getPosition();
-						e.setPosition(delay + position);
-						linearized_effects.push_back(e);
-						myEffects_it++;
-					}
-					else {
-						delay_tmp = children_it->linearize(linearized_effects, delay);
-						duration += delay_tmp;
-						delay += delay_tmp;
-						children_it++;
-					}
-				}
-				for (; myEffects_it < myEffects.end(); myEffects_it++) {
-					types::Effect e = *myEffects_it;
-					int position = e.getPosition();
-					e.setPosition(delay + position);
-					linearized_effects.push_back(e);
-				}
-				for (; children_it < children.end(); children_it++) {
-					delay_tmp = children_it->linearize(linearized_effects, delay);
-					duration += delay_tmp;
-					delay += delay_tmp;
-				}
+        if (myEffects_it->getPosition() < repeat_position) {
+          types::Effect e = *myEffects_it;
+          int position = e.getPosition();
+          e.setPosition(delay + position);
+          linearized_effects.push_back(e);
+          myEffects_it++;
+        } else {
+          delay_tmp = children_it->linearize(linearized_effects, delay);
+          duration += delay_tmp;
+          delay += delay_tmp;
+          children_it++;
+        }
+      }
+      for (; myEffects_it < myEffects.end(); myEffects_it++) {
+        types::Effect e = *myEffects_it;
+        int position = e.getPosition();
+        e.setPosition(delay + position);
+        linearized_effects.push_back(e);
+      }
+      for (; children_it < children.end(); children_it++) {
+        delay_tmp = children_it->linearize(linearized_effects, delay);
+        duration += delay_tmp;
+        delay += delay_tmp;
+      }
 
-				for (int i = 0; i <= count; i++) {
-					for (types::Effect e : linearized_effects) {
-						e.setPosition(e.getPosition() + i * duration);
-						effectLibrary.push_back(e);
-					}
-				}
+      for (int i = 0; i <= count; i++) {
+        for (types::Effect e : linearized_effects) {
+          e.setPosition(e.getPosition() + i * duration);
+          effectLibrary.push_back(e);
+        }
+      }
 
-				return count * duration;
-			}
-		};
-	};
+      return count * duration;
+    }
+  };
+};
 } // namespace haptics::encoder
 #endif // IVSENCODER_H

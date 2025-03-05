@@ -40,74 +40,74 @@
 
 namespace haptics::types {
 
-	enum class ActuatorType { Unknown = 0, LRA = 1, VCA = 2, ERM = 3, Piezo = 4 };
+enum class ActuatorType { Unknown = 0, LRA = 1, VCA = 2, ERM = 3, Piezo = 4 };
 
-	static const std::map<std::string, ActuatorType> stringToActuatorType = {
-		{"Unknown", ActuatorType::Unknown},
-		{"LRA", ActuatorType::LRA},
-		{"VCA", ActuatorType::VCA},
-		{"ERM", ActuatorType::ERM},
-		{"Piezo", ActuatorType::Piezo} };
-	static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
-		{ActuatorType::Unknown, "Unknown"},
-		{ActuatorType::LRA, "LRA"},
-		{ActuatorType::VCA, "VCA"},
-		{ActuatorType::ERM, "ERM"},
-		{ActuatorType::Piezo, "Piezo"} };
+static const std::map<std::string, ActuatorType> stringToActuatorType = {
+    {"Unknown", ActuatorType::Unknown},
+    {"LRA", ActuatorType::LRA},
+    {"VCA", ActuatorType::VCA},
+    {"ERM", ActuatorType::ERM},
+    {"Piezo", ActuatorType::Piezo}};
+static const std::map<types::ActuatorType, std::string> actuatorTypeToString = {
+    {ActuatorType::Unknown, "Unknown"},
+    {ActuatorType::LRA, "LRA"},
+    {ActuatorType::VCA, "VCA"},
+    {ActuatorType::ERM, "ERM"},
+    {ActuatorType::Piezo, "Piezo"}};
 
-	class ReferenceDevice {
-	public:
-		explicit ReferenceDevice() = default;
-		explicit ReferenceDevice(int newId, std::string newName) : id(newId), name(std::move(newName)) {};
+class ReferenceDevice {
+public:
+  explicit ReferenceDevice() = default;
+  explicit ReferenceDevice(int newId, std::string newName) : id(newId), name(std::move(newName)){};
 
-		[[nodiscard]] auto getId() const -> int;
-		auto setId(int newId) -> void;
-		[[nodiscard]] auto getName() const->std::string;
-		auto setName(std::string& newName) -> void;
-		[[nodiscard]] auto getBodyPartMask() const->std::optional<uint32_t>;
-		auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
-		[[nodiscard]] auto getMaximumFrequency() const->std::optional<float>;
-		auto setMaximumFrequency(float newMaximumFrequency) -> void;
-		[[nodiscard]] auto getMinimumFrequency() const->std::optional<float>;
-		auto setMinimumFrequency(float newMinimumFrequency) -> void;
-		[[nodiscard]] auto getResonanceFrequency() const->std::optional<float>;
-		auto setResonanceFrequency(float newResonanceFrequency) -> void;
-		[[nodiscard]] auto getMaximumAmplitude() const->std::optional<float>;
-		auto setMaximumAmplitude(float newMaximumAmplitude) -> void;
-		[[nodiscard]] auto getImpedance() const->std::optional<float>;
-		auto setImpedance(float newImpedance) -> void;
-		[[nodiscard]] auto getMaximumVoltage() const->std::optional<float>;
-		auto setMaximumVoltage(float newMaximumVoltage) -> void;
-		[[nodiscard]] auto getMaximumCurrent() const->std::optional<float>;
-		auto setMaximumCurrent(float newMaximumCurrent) -> void;
-		[[nodiscard]] auto getMaximumDisplacement() const->std::optional<float>;
-		auto setMaximumDisplacement(float newMaximumDisplacement) -> void;
-		[[nodiscard]] auto getWeight() const->std::optional<float>;
-		auto setWeight(float newWeight) -> void;
-		[[nodiscard]] auto getSize() const->std::optional<float>;
-		auto setSize(float newSize) -> void;
-		[[nodiscard]] auto getCustom() const->std::optional<float>;
-		auto setCustom(float newCustom) -> void;
-		[[nodiscard]] auto getType() const->std::optional<ActuatorType>;
-		auto setType(ActuatorType newType) -> void;
-		[[nodiscard]] auto equals(const ReferenceDevice& device) const -> bool;
+  [[nodiscard]] auto getId() const -> int;
+  auto setId(int newId) -> void;
+  [[nodiscard]] auto getName() const -> std::string;
+  auto setName(std::string &newName) -> void;
+  [[nodiscard]] auto getBodyPartMask() const -> std::optional<uint32_t>;
+  auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
+  [[nodiscard]] auto getMaximumFrequency() const -> std::optional<float>;
+  auto setMaximumFrequency(float newMaximumFrequency) -> void;
+  [[nodiscard]] auto getMinimumFrequency() const -> std::optional<float>;
+  auto setMinimumFrequency(float newMinimumFrequency) -> void;
+  [[nodiscard]] auto getResonanceFrequency() const -> std::optional<float>;
+  auto setResonanceFrequency(float newResonanceFrequency) -> void;
+  [[nodiscard]] auto getMaximumAmplitude() const -> std::optional<float>;
+  auto setMaximumAmplitude(float newMaximumAmplitude) -> void;
+  [[nodiscard]] auto getImpedance() const -> std::optional<float>;
+  auto setImpedance(float newImpedance) -> void;
+  [[nodiscard]] auto getMaximumVoltage() const -> std::optional<float>;
+  auto setMaximumVoltage(float newMaximumVoltage) -> void;
+  [[nodiscard]] auto getMaximumCurrent() const -> std::optional<float>;
+  auto setMaximumCurrent(float newMaximumCurrent) -> void;
+  [[nodiscard]] auto getMaximumDisplacement() const -> std::optional<float>;
+  auto setMaximumDisplacement(float newMaximumDisplacement) -> void;
+  [[nodiscard]] auto getWeight() const -> std::optional<float>;
+  auto setWeight(float newWeight) -> void;
+  [[nodiscard]] auto getSize() const -> std::optional<float>;
+  auto setSize(float newSize) -> void;
+  [[nodiscard]] auto getCustom() const -> std::optional<float>;
+  auto setCustom(float newCustom) -> void;
+  [[nodiscard]] auto getType() const -> std::optional<ActuatorType>;
+  auto setType(ActuatorType newType) -> void;
+  [[nodiscard]] auto equals(const ReferenceDevice &device) const -> bool;
 
-	private:
-		int id = -1;
-		std::string name;
-		std::optional<uint32_t> bodyPartMask;
-		std::optional<float> maximumFrequency;
-		std::optional<float> minimumFrequency;
-		std::optional<float> resonanceFrequency;
-		std::optional<float> maximumAmplitude;
-		std::optional<float> impedance;
-		std::optional<float> maximumVoltage;
-		std::optional<float> maximumCurrent;
-		std::optional<float> maximumDisplacement;
-		std::optional<float> weight;
-		std::optional<float> size;
-		std::optional<float> custom;
-		std::optional<ActuatorType> type;
-	};
+private:
+  int id = -1;
+  std::string name;
+  std::optional<uint32_t> bodyPartMask;
+  std::optional<float> maximumFrequency;
+  std::optional<float> minimumFrequency;
+  std::optional<float> resonanceFrequency;
+  std::optional<float> maximumAmplitude;
+  std::optional<float> impedance;
+  std::optional<float> maximumVoltage;
+  std::optional<float> maximumCurrent;
+  std::optional<float> maximumDisplacement;
+  std::optional<float> weight;
+  std::optional<float> size;
+  std::optional<float> custom;
+  std::optional<ActuatorType> type;
+};
 } // namespace haptics::types
 #endif // REFERENCEDEVICE_H

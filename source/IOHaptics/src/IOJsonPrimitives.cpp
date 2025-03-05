@@ -46,92 +46,92 @@
 
 namespace haptics::io {
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::hasInt(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey) -> bool {
-		return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsInt();
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::hasInt(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                         const char *valueKey) -> bool {
+  return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsInt();
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::hasUint(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey) -> bool {
-		return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsUint();
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::hasUint(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                          const char *valueKey) -> bool {
+  return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsUint();
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::hasString(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey) -> bool {
-		return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsString();
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::hasString(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                            const char *valueKey) -> bool {
+  return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsString();
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::hasNumber(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey) -> bool {
-		return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsNumber();
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::hasNumber(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                            const char *valueKey) -> bool {
+  return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsNumber();
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::hasArray(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey) -> bool {
-		return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsArray();
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::hasArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                           const char *valueKey) -> bool {
+  return jsonObject.HasMember(valueKey) && jsonObject[valueKey].IsArray();
+}
 
-	[[nodiscard]] auto IOJsonPrimitives::getVector(const rapidjson::Value& jsonValue,
-		haptics::types::Vector& output) -> bool {
-		if (!(jsonValue.IsObject() && jsonValue.HasMember("X") && jsonValue["X"].IsInt() &&
-			jsonValue.HasMember("Y") && jsonValue["Y"].IsInt() && jsonValue.HasMember("Z") &&
-			jsonValue["Z"].IsInt())) {
-			return false;
-		}
+[[nodiscard]] auto IOJsonPrimitives::getVector(const rapidjson::Value &jsonValue,
+                                               haptics::types::Vector &output) -> bool {
+  if (!(jsonValue.IsObject() && jsonValue.HasMember("X") && jsonValue["X"].IsInt() &&
+        jsonValue.HasMember("Y") && jsonValue["Y"].IsInt() && jsonValue.HasMember("Z") &&
+        jsonValue["Z"].IsInt())) {
+    return false;
+  }
 
-		output.X = static_cast<int8_t>(jsonValue["X"].GetInt());
-		output.Y = static_cast<int8_t>(jsonValue["Y"].GetInt());
-		output.Z = static_cast<int8_t>(jsonValue["Z"].GetInt());
-		return true;
-	}
+  output.X = static_cast<int8_t>(jsonValue["X"].GetInt());
+  output.Y = static_cast<int8_t>(jsonValue["Y"].GetInt());
+  output.Z = static_cast<int8_t>(jsonValue["Z"].GetInt());
+  return true;
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::getIntArray(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey, std::vector<int>& output) -> bool {
-		if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
-			return false;
-		}
-		for (const auto& value : jsonObject[valueKey].GetArray()) {
-			if (value.IsInt()) {
-				output.push_back(value.GetInt());
-			}
-		}
-		return true;
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::getIntArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                              const char *valueKey, std::vector<int> &output) -> bool {
+  if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
+    return false;
+  }
+  for (const auto &value : jsonObject[valueKey].GetArray()) {
+    if (value.IsInt()) {
+      output.push_back(value.GetInt());
+    }
+  }
+  return true;
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::getStringArray(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey, std::vector<std::string>& output) -> bool {
-		if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
-			return false;
-		}
-		for (const auto& value : jsonObject[valueKey].GetArray()) {
-			if (value.IsString()) {
-				output.emplace_back(value.GetString());
-			}
-		}
-		return true;
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::getStringArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                                 const char *valueKey, std::vector<std::string> &output) -> bool {
+  if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
+    return false;
+  }
+  for (const auto &value : jsonObject[valueKey].GetArray()) {
+    if (value.IsString()) {
+      output.emplace_back(value.GetString());
+    }
+  }
+  return true;
+}
 
-	[[nodiscard]] auto
-		IOJsonPrimitives::getVectorArray(const rapidjson::GenericObject<true, rapidjson::Value>& jsonObject,
-			const char* valueKey, std::vector<haptics::types::Vector>& output)
-		-> bool {
-		if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
-			return false;
-		}
-		for (const auto& value : jsonObject[valueKey].GetArray()) {
-			types::Vector vec{};
-			if (IOJsonPrimitives::getVector(value, vec)) {
-				output.push_back(vec);
-			}
-		}
-		return true;
-	}
+[[nodiscard]] auto
+IOJsonPrimitives::getVectorArray(const rapidjson::GenericObject<true, rapidjson::Value> &jsonObject,
+                                 const char *valueKey, std::vector<haptics::types::Vector> &output)
+    -> bool {
+  if (!IOJsonPrimitives::hasArray(jsonObject, valueKey)) {
+    return false;
+  }
+  for (const auto &value : jsonObject[valueKey].GetArray()) {
+    types::Vector vec{};
+    if (IOJsonPrimitives::getVector(value, vec)) {
+      output.push_back(vec);
+    }
+  }
+  return true;
+}
 
 } // namespace haptics::io

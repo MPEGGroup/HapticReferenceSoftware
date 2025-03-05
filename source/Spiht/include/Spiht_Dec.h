@@ -45,30 +45,30 @@
 
 namespace haptics::spiht {
 
-	class Spiht_Dec {
-	public:
-		void decodeEffect(std::vector<unsigned char>& in, std::vector<int>& out, int origlength,
-			double& wavmax, int& bits);
-		void decode(std::vector<unsigned char>& bitstream, std::vector<int>& out, int origlength,
-			int level, double& wavmax, int& n_real);
+class Spiht_Dec {
+public:
+  void decodeEffect(std::vector<unsigned char> &in, std::vector<int> &out, int origlength,
+                    double &wavmax, int &bits);
+  void decode(std::vector<unsigned char> &bitstream, std::vector<int> &out, int origlength,
+              int level, double &wavmax, int &n_real);
 
-	private:
-		void initLists(int origlength, int level);
-		auto getMaxAllocBits() -> int;
-		auto getWavmax() -> double;
-		void sortingPass(std::vector<int>& out, int origlength, int compare);
-		void refinementPass(std::vector<int>& out, int LSP_index, int compare);
-		auto getBit(int context) -> int;
-		void getBits(std::vector<int>& out, int length, int context);
-		template <typename T> auto bi2de(std::vector<T>& data, int length)->T;
-		auto static sgn(int val) -> int;
+private:
+  void initLists(int origlength, int level);
+  auto getMaxAllocBits() -> int;
+  auto getWavmax() -> double;
+  void sortingPass(std::vector<int> &out, int origlength, int compare);
+  void refinementPass(std::vector<int> &out, int LSP_index, int compare);
+  auto getBit(int context) -> int;
+  void getBits(std::vector<int> &out, int length, int context);
+  template <typename T> auto bi2de(std::vector<T> &data, int length) -> T;
+  auto static sgn(int val) -> int;
 
-		std::list<int> LIP;
-		std::list<int> LIS1;
-		std::list<int> LIS2;
-		std::list<int> LSP;
+  std::list<int> LIP;
+  std::list<int> LIS1;
+  std::list<int> LIS2;
+  std::list<int> LSP;
 
-		ArithDec arithDec;
-	};
+  ArithDec arithDec;
+};
 } // namespace haptics::spiht
 #endif // SPIHT_DEC_H

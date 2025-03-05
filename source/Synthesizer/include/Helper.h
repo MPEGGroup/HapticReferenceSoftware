@@ -39,22 +39,22 @@
 
 namespace haptics::synthesizer {
 
-	class Helper {
-	public:
-		[[nodiscard]] auto static getTimeLength(types::Haptics& haptic) -> double;
-		[[nodiscard]] auto static playFile(types::Haptics& haptic, double timeLength, int fs, int pad,
-			std::string& filename) -> bool;
-		[[nodiscard]] auto static playFile4Android(types::Haptics& haptic, double timeLength, int fs,
-			int pad, std::string& filename) -> bool;
-		[[nodiscard]] auto static getHapticDataFromFile(types::Haptics& haptic, double timeLength, int fs,
-			int pad)->std::vector<std::vector<double>>;
+class Helper {
+public:
+  [[nodiscard]] auto static getTimeLength(types::Haptics &haptic) -> double;
+  [[nodiscard]] auto static playFile(types::Haptics &haptic, double timeLength, int fs, int pad,
+                                     std::string &filename) -> bool;
+  [[nodiscard]] auto static playFile4Android(types::Haptics &haptic, double timeLength, int fs,
+                                             int pad, std::string &filename) -> bool;
+  [[nodiscard]] auto static getHapticDataFromFile(types::Haptics &haptic, double timeLength, int fs,
+                                                  int pad) -> std::vector<std::vector<double>>;
 
-		[[nodiscard]] auto static playFileUpsampling(types::Haptics& haptic, double timeLength, int fs, int upfs, int pad,
-			std::string& filename) -> bool;
+  [[nodiscard]] auto static playFileUpsampling(types::Haptics &haptic, double timeLength, int fs,
+                                               int upfs, int pad, std::string &filename) -> bool;
 
-	private:
-		[[nodiscard]] auto static getEffectTimeLength(types::Effect& effect, types::BandType bandType,
-			int windowLength) -> double;
-	};
+private:
+  [[nodiscard]] auto static getEffectTimeLength(types::Effect &effect, types::BandType bandType,
+                                                int windowLength) -> double;
+};
 } // namespace haptics::synthesizer
 #endif // HELPER_H

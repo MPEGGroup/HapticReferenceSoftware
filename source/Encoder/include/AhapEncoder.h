@@ -51,32 +51,32 @@
 
 namespace haptics::encoder {
 
-	class AhapEncoder {
-	public:
-		[[nodiscard]] auto static encode(std::string& filename, types::Perception& out,
-			unsigned int timescale) -> int;
-		[[nodiscard]] auto static extractTransients(
-			const rapidjson::Value::Object& event, std::vector<haptics::types::Effect>* transients,
-			const std::vector<std::pair<int, double>>* amplitudes,
-			const std::vector<std::pair<int, double>>* frequencies, unsigned int timescale) -> int;
-		[[nodiscard]] auto static extractContinuous(
-			const rapidjson::Value::Object& event, std::vector<haptics::types::Effect>* continuous,
-			const std::vector<std::pair<int, double>>* amplitudes,
-			const std::vector<std::pair<int, double>>* frequencies, unsigned int timescale) -> int;
-		[[nodiscard]] auto static extractKeyframes(const rapidjson::Value::Object& parameterCurve,
-			std::vector<std::pair<int, double>>* keyframes,
-			unsigned int timescale) -> int;
+class AhapEncoder {
+public:
+  [[nodiscard]] auto static encode(std::string &filename, types::Perception &out,
+                                   unsigned int timescale) -> int;
+  [[nodiscard]] auto static extractTransients(
+      const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
+      const std::vector<std::pair<int, double>> *amplitudes,
+      const std::vector<std::pair<int, double>> *frequencies, unsigned int timescale) -> int;
+  [[nodiscard]] auto static extractContinuous(
+      const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *continuous,
+      const std::vector<std::pair<int, double>> *amplitudes,
+      const std::vector<std::pair<int, double>> *frequencies, unsigned int timescale) -> int;
+  [[nodiscard]] auto static extractKeyframes(const rapidjson::Value::Object &parameterCurve,
+                                             std::vector<std::pair<int, double>> *keyframes,
+                                             unsigned int timescale) -> int;
 
-	private:
-		auto static modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>>* amplitudes,
-			types::Effect& continuous,
-			const Keyframe& firstKeyframe, Keyframe& lastKeyframe)
-			-> void;
-		auto static modulateContinuousOnFrequency(const std::vector<std::pair<int, double>>* frequencies,
-			types::Effect& continuous, Keyframe& lastKeyframe,
-			double base_freq) -> void;
-		static const int MIN_AHAP_FREQUENCY = 65;
-		static const int MAX_AHAP_FREQUENCY = 300;
-	};
+private:
+  auto static modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>> *amplitudes,
+                                            types::Effect &continuous,
+                                            const Keyframe &firstKeyframe, Keyframe &lastKeyframe)
+      -> void;
+  auto static modulateContinuousOnFrequency(const std::vector<std::pair<int, double>> *frequencies,
+                                            types::Effect &continuous, Keyframe &lastKeyframe,
+                                            double base_freq) -> void;
+  static const int MIN_AHAP_FREQUENCY = 65;
+  static const int MAX_AHAP_FREQUENCY = 300;
+};
 } // namespace haptics::encoder
 #endif // AHAPENCODER_H

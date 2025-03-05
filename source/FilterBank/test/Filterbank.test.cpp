@@ -42,37 +42,37 @@ constexpr double FS = 8000;
 
 TEST_CASE("haptics::filterbank::Filterbank") {
 
-	using haptics::filterbank::Filterbank;
+  using haptics::filterbank::Filterbank;
 
-	SECTION("LP") {
+  SECTION("LP") {
 
-		std::vector<double> in(BL, 0);
-		in[(BL + 1) / 2 - 1] = 1;
-		Filterbank fb(FS);
-		std::vector<double> out = fb.LP(in, FS / 4);
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.LP(in, FS / 4);
 
-		CHECK(true);
-	}
+    CHECK(true);
+  }
 
-	SECTION("HP") {
+  SECTION("HP") {
 
-		std::vector<double> in(BL, 0);
-		in[(BL + 1) / 2 - 1] = 1;
-		Filterbank fb(FS);
-		std::vector<double> out = fb.HP(in, FS / 4);
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out = fb.HP(in, FS / 4);
 
-		CHECK(true);
-	}
+    CHECK(true);
+  }
 
-	SECTION("LP+HP") {
+  SECTION("LP+HP") {
 
-		std::vector<double> in(BL, 0);
-		in[(BL + 1) / 2 - 1] = 1;
-		Filterbank fb(FS);
-		std::vector<double> out1 = fb.HP(in, FS / 4);
+    std::vector<double> in(BL, 0);
+    in[(BL + 1) / 2 - 1] = 1;
+    Filterbank fb(FS);
+    std::vector<double> out1 = fb.HP(in, FS / 4);
 
-		std::vector<double> out2 = fb.LP(in, FS / 4);
+    std::vector<double> out2 = fb.LP(in, FS / 4);
 
-		CHECK(true);
-	}
+    CHECK(true);
+  }
 }

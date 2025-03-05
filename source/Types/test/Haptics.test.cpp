@@ -40,73 +40,73 @@ using haptics::types::Haptics;
 
 TEST_CASE("haptics::types::Haptics") {
 
-	Haptics h("2023", "02/04/2022", "test content");
-	haptics::types::Avatar avatar(0, 0, haptics::types::AvatarType::Vibration);
-	haptics::types::Perception perception(0, 0, "Vibration effect",
-		haptics::types::PerceptionModality::Vibrotactile);
+  Haptics h("2023", "02/04/2022", "test content");
+  haptics::types::Avatar avatar(0, 0, haptics::types::AvatarType::Vibration);
+  haptics::types::Perception perception(0, 0, "Vibration effect",
+                                        haptics::types::PerceptionModality::Vibrotactile);
 
-	SECTION("Checking avatars", "[addAvatar]") {
-		h.addAvatar(avatar);
-		CHECK(h.getAvatarsSize() == 1);
-		auto addedAvatar = h.getAvatarAt(0);
-		bool sameAvatar = (addedAvatar.getId() == avatar.getId()) &&
-			(addedAvatar.getLod() == avatar.getLod()) &&
-			(addedAvatar.getType() == avatar.getType());
-		CHECK(sameAvatar);
-	}
+  SECTION("Checking avatars", "[addAvatar]") {
+    h.addAvatar(avatar);
+    CHECK(h.getAvatarsSize() == 1);
+    auto addedAvatar = h.getAvatarAt(0);
+    bool sameAvatar = (addedAvatar.getId() == avatar.getId()) &&
+                      (addedAvatar.getLod() == avatar.getLod()) &&
+                      (addedAvatar.getType() == avatar.getType());
+    CHECK(sameAvatar);
+  }
 
-	SECTION("Checking perception", "[addPerception]") {
-		h.addPerception(perception);
-		CHECK(h.getPerceptionsSize() == 1);
-		auto addedPerception = h.getPerceptionAt(0);
-		bool samePerception =
-			(addedPerception.getId() == perception.getId()) &&
-			(addedPerception.getPerceptionModality() == perception.getPerceptionModality()) &&
-			(addedPerception.getAvatarId() == perception.getAvatarId()) &&
-			(addedPerception.getDescription() == perception.getDescription());
-		CHECK(samePerception);
-	}
+  SECTION("Checking perception", "[addPerception]") {
+    h.addPerception(perception);
+    CHECK(h.getPerceptionsSize() == 1);
+    auto addedPerception = h.getPerceptionAt(0);
+    bool samePerception =
+        (addedPerception.getId() == perception.getId()) &&
+        (addedPerception.getPerceptionModality() == perception.getPerceptionModality()) &&
+        (addedPerception.getAvatarId() == perception.getAvatarId()) &&
+        (addedPerception.getDescription() == perception.getDescription());
+    CHECK(samePerception);
+  }
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
 
-	SECTION("Test loading from OHM") {
-		haptics::tools::OHMData ohmData;
-		const std::string header = "OHM ";
-		const std::string description = "Test description";
-		const int version = 2023;
-		const std::string elementDescription = "Element description";
-		const std::string channelDescription = "Channel description";
-		const haptics::tools::OHMData::Body bodyPartMask = haptics::tools::OHMData::Body::UNSPECIFIED;
-		const float channelGain = 1.0;
+  SECTION("Test loading from OHM") {
+    haptics::tools::OHMData ohmData;
+    const std::string header = "OHM ";
+    const std::string description = "Test description";
+    const int version = 2023;
+    const std::string elementDescription = "Element description";
+    const std::string channelDescription = "Channel description";
+    const haptics::tools::OHMData::Body bodyPartMask = haptics::tools::OHMData::Body::UNSPECIFIED;
+    const float channelGain = 1.0;
 
-		// Setting the data
-		ohmData.setHeader(header);
-		ohmData.setDescription(description);
-		ohmData.setVersion(version);
-		haptics::tools::OHMData::HapticElementMetadata elementMetadata;
-		elementMetadata.elementDescription = elementDescription;
-		elementMetadata.numHapticChannels = 1;
-		haptics::tools::OHMData::HapticChannelMetadata channelMetadata;
-		channelMetadata.channelDescription = channelDescription;
-		channelMetadata.gain = channelGain;
-		channelMetadata.bodyPartMask = bodyPartMask;
-		elementMetadata.channelsMetadata.push_back(channelMetadata);
-		elementMetadata.numHapticChannels = static_cast<short>(elementMetadata.channelsMetadata.size());
-		ohmData.addHapticElementMetadata(elementMetadata);
+    // Setting the data
+    ohmData.setHeader(header);
+    ohmData.setDescription(description);
+    ohmData.setVersion(version);
+    haptics::tools::OHMData::HapticElementMetadata elementMetadata;
+    elementMetadata.elementDescription = elementDescription;
+    elementMetadata.numHapticChannels = 1;
+    haptics::tools::OHMData::HapticChannelMetadata channelMetadata;
+    channelMetadata.channelDescription = channelDescription;
+    channelMetadata.gain = channelGain;
+    channelMetadata.bodyPartMask = bodyPartMask;
+    elementMetadata.channelsMetadata.push_back(channelMetadata);
+    elementMetadata.numHapticChannels = static_cast<short>(elementMetadata.channelsMetadata.size());
+    ohmData.addHapticElementMetadata(elementMetadata);
 
-		Haptics h;
-		h.loadMetadataFromOHM(ohmData);
-		CHECK(h.getDescription() == description);
-		CHECK(h.getVersion() == std::to_string(version));
-		REQUIRE(h.getPerceptionsSize() == 1);
-		auto perception = h.getPerceptionAt(0);
-		CHECK(perception.getDescription() == elementDescription);
-		REQUIRE(perception.getChannelsSize() == 1);
-		auto channel = perception.getChannelAt(0);
-		CHECK(channel.getDescription() == channelDescription);
-		CHECK(channel.getGain() == channelGain);
-		CHECK(channel.getBodyPartMask() == static_cast<uint32_t>(bodyPartMask));
-	}
+    Haptics h;
+    h.loadMetadataFromOHM(ohmData);
+    CHECK(h.getDescription() == description);
+    CHECK(h.getVersion() == std::to_string(version));
+    REQUIRE(h.getPerceptionsSize() == 1);
+    auto perception = h.getPerceptionAt(0);
+    CHECK(perception.getDescription() == elementDescription);
+    REQUIRE(perception.getChannelsSize() == 1);
+    auto channel = perception.getChannelAt(0);
+    CHECK(channel.getDescription() == channelDescription);
+    CHECK(channel.getGain() == channelGain);
+    CHECK(channel.getBodyPartMask() == static_cast<uint32_t>(bodyPartMask));
+  }
 }

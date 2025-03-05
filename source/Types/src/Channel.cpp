@@ -36,329 +36,329 @@
 
 namespace haptics::types {
 
-	[[nodiscard]] auto Channel::getId() const -> int { return id; }
+[[nodiscard]] auto Channel::getId() const -> int { return id; }
 
-	auto Channel::setId(int newId) -> void { id = newId; }
+auto Channel::setId(int newId) -> void { id = newId; }
 
-	[[nodiscard]] auto Channel::getDescription() const -> std::string { return description; }
+[[nodiscard]] auto Channel::getDescription() const -> std::string { return description; }
 
-	auto Channel::setDescription(std::string& newDescription) -> void { description = newDescription; }
+auto Channel::setDescription(std::string &newDescription) -> void { description = newDescription; }
 
-	auto Channel::getPriority() const -> std::optional<int> { return priority; }
-	auto Channel::getPriorityOrDefault() const -> int {
-		if (priority.has_value()) {
-			return priority.value();
-		}
-		return 0;
-	}
-	auto Channel::setPriority(int newPriority) -> void { priority = newPriority; }
+auto Channel::getPriority() const -> std::optional<int> { return priority; }
+auto Channel::getPriorityOrDefault() const -> int {
+  if (priority.has_value()) {
+    return priority.value();
+  }
+  return 0;
+}
+auto Channel::setPriority(int newPriority) -> void { priority = newPriority; }
 
-	[[nodiscard]] auto Channel::getGain() const -> float { return gain; }
+[[nodiscard]] auto Channel::getGain() const -> float { return gain; }
 
-	auto Channel::setGain(float newGain) -> void { gain = newGain; }
+auto Channel::setGain(float newGain) -> void { gain = newGain; }
 
-	[[nodiscard]] auto Channel::getMixingWeight() const -> float { return mixingWeight; }
+[[nodiscard]] auto Channel::getMixingWeight() const -> float { return mixingWeight; }
 
-	auto Channel::setMixingWeight(float newMixingWeight) -> void { mixingWeight = newMixingWeight; }
+auto Channel::setMixingWeight(float newMixingWeight) -> void { mixingWeight = newMixingWeight; }
 
-	[[nodiscard]] auto Channel::getBodyPartMask() const -> uint32_t { return bodyPartMask; }
+[[nodiscard]] auto Channel::getBodyPartMask() const -> uint32_t { return bodyPartMask; }
 
-	auto Channel::setBodyPartMask(uint32_t newBodyPartMask) -> void { bodyPartMask = newBodyPartMask; }
+auto Channel::setBodyPartMask(uint32_t newBodyPartMask) -> void { bodyPartMask = newBodyPartMask; }
 
-	[[nodiscard]] auto Channel::getReferenceDeviceId() const -> std::optional<int> {
-		return referenceDeviceId;
-	}
-	auto Channel::setReferenceDeviceId(int newReferenceDeviceId) -> void {
-		referenceDeviceId = newReferenceDeviceId;
-	}
+[[nodiscard]] auto Channel::getReferenceDeviceId() const -> std::optional<int> {
+  return referenceDeviceId;
+}
+auto Channel::setReferenceDeviceId(int newReferenceDeviceId) -> void {
+  referenceDeviceId = newReferenceDeviceId;
+}
 
-	auto Channel::getVerticesSize() -> size_t { return vertices.size(); }
+auto Channel::getVerticesSize() -> size_t { return vertices.size(); }
 
-	auto Channel::getVertexAt(int index) -> int& { return vertices.at(index); }
+auto Channel::getVertexAt(int index) -> int & { return vertices.at(index); }
 
-	auto Channel::addVertex(int& newVertice) -> void { vertices.push_back(newVertice); }
+auto Channel::addVertex(int &newVertice) -> void { vertices.push_back(newVertice); }
 
-	auto Channel::getBandsSize() -> size_t { return bands.size(); }
+auto Channel::getBandsSize() -> size_t { return bands.size(); }
 
-	auto Channel::getBandAt(int index) -> haptics::types::Band& { return bands.at(index); }
+auto Channel::getBandAt(int index) -> haptics::types::Band & { return bands.at(index); }
 
-	auto Channel::addBand(haptics::types::Band& newBand) -> void { bands.push_back(newBand); }
+auto Channel::addBand(haptics::types::Band &newBand) -> void { bands.push_back(newBand); }
 
-	auto Channel::replaceBandAt(int index, haptics::types::Band& newBand) -> bool {
-		if (index < 0 || index >= (int)this->getBandsSize()) {
-			return false;
-		}
-		bands[index] = newBand;
-		return true;
-	}
+auto Channel::replaceBandAt(int index, haptics::types::Band &newBand) -> bool {
+  if (index < 0 || index >= (int)this->getBandsSize()) {
+    return false;
+  }
+  bands[index] = newBand;
+  return true;
+}
 
-	auto Channel::replaceBandMetadataAt(int index, haptics::types::Band& newBand) -> bool {
-		if (index < 0 || index >= (int)this->getBandsSize()) {
-			return false;
-		}
-		bands[index].setBandType(newBand.getBandType());
-		if (bands[index].getBandType() == BandType::Curve) {
-			bands[index].setCurveType(newBand.getCurveTypeOrDefault());
-		}
-		if (bands[index].getBandType() == BandType::WaveletWave) {
-			bands[index].setBlockLength(newBand.getBlockLengthOrDefault());
-		}
-		bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
-		bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
-		// bands[index].setTimescale(newBand.getTimescale());
-		return true;
-	}
+auto Channel::replaceBandMetadataAt(int index, haptics::types::Band &newBand) -> bool {
+  if (index < 0 || index >= (int)this->getBandsSize()) {
+    return false;
+  }
+  bands[index].setBandType(newBand.getBandType());
+  if (bands[index].getBandType() == BandType::Curve) {
+    bands[index].setCurveType(newBand.getCurveTypeOrDefault());
+  }
+  if (bands[index].getBandType() == BandType::WaveletWave) {
+    bands[index].setBlockLength(newBand.getBlockLengthOrDefault());
+  }
+  bands[index].setLowerFrequencyLimit(newBand.getLowerFrequencyLimit());
+  bands[index].setUpperFrequencyLimit(newBand.getUpperFrequencyLimit());
+  // bands[index].setTimescale(newBand.getTimescale());
+  return true;
+}
 
-	auto Channel::removeBandAt(int index) -> bool {
-		if (index < 0 || index >= (int)this->getBandsSize()) {
-			return false;
-		}
-		this->bands.erase(this->bands.begin() + index);
-		return true;
-	}
+auto Channel::removeBandAt(int index) -> bool {
+  if (index < 0 || index >= (int)this->getBandsSize()) {
+    return false;
+  }
+  this->bands.erase(this->bands.begin() + index);
+  return true;
+}
 
-	auto Channel::generateBand() -> haptics::types::Band* {
-		Band newBand;
-		this->bands.push_back(newBand);
-		return &this->bands.back();
-	}
+auto Channel::generateBand() -> haptics::types::Band * {
+  Band newBand;
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
 
-	auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
-		-> haptics::types::Band* {
-		Band newBand(bandType, lowerFrequencyLimit, upperFrequencyLimit);
-		this->bands.push_back(newBand);
-		return &this->bands.back();
-	}
+auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
+    -> haptics::types::Band * {
+  Band newBand(bandType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
 
-	auto Channel::generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
-		int upperFrequencyLimit) -> haptics::types::Band* {
-		Band newBand(bandType, curveType, lowerFrequencyLimit, upperFrequencyLimit);
-		this->bands.push_back(newBand);
-		return &this->bands.back();
-	}
+auto Channel::generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, curveType, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
 
-	auto Channel::generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
-		int upperFrequencyLimit) -> haptics::types::Band* {
-		Band newBand(bandType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
-		this->bands.push_back(newBand);
-		return &this->bands.back();
-	}
+auto Channel::generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
+  Band newBand(bandType, blockLength, lowerFrequencyLimit, upperFrequencyLimit);
+  this->bands.push_back(newBand);
+  return &this->bands.back();
+}
 
-	auto Channel::findBandAvailable(const int position, const int duration,
-		const types::BandType bandType) -> haptics::types::Band* {
-		haptics::types::Effect e;
-		bool bandIsAvailable = true;
-		for (haptics::types::Band& b : bands) {
-			if (b.getBandType() != bandType) {
-				continue;
-			}
+auto Channel::findBandAvailable(const int position, const int duration,
+                                const types::BandType bandType) -> haptics::types::Band * {
+  haptics::types::Effect e;
+  bool bandIsAvailable = true;
+  for (haptics::types::Band &b : bands) {
+    if (b.getBandType() != bandType) {
+      continue;
+    }
 
-			bandIsAvailable = true;
-			for (uint32_t i = 0; i < b.getEffectsSize(); i++) {
-				e = b.getEffectAt((int)i);
-				if (b.isOverlapping(e, position, position + duration)) {
-					bandIsAvailable = false;
-					break;
-				}
-			}
-			if (bandIsAvailable) {
-				return &b;
-			}
-		}
+    bandIsAvailable = true;
+    for (uint32_t i = 0; i < b.getEffectsSize(); i++) {
+      e = b.getEffectAt((int)i);
+      if (b.isOverlapping(e, position, position + duration)) {
+        bandIsAvailable = false;
+        break;
+      }
+    }
+    if (bandIsAvailable) {
+      return &b;
+    }
+  }
 
-		return nullptr;
-	}
+  return nullptr;
+}
 
-	auto Channel::Evaluate(double position, unsigned int timescale) -> double {
+auto Channel::Evaluate(double position, unsigned int timescale) -> double {
 
-		double res = 0;
+  double res = 0;
 
-		for (haptics::types::Band& b : bands) {
-			res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit(), timescale);
-		}
+  for (haptics::types::Band &b : bands) {
+    res += b.Evaluate(position, b.getLowerFrequencyLimit(), b.getUpperFrequencyLimit(), timescale);
+  }
 
-		if (res < -1) {
-			return -1;
-		}
-		if (res > 1) {
-			return 1;
-		}
-		return res;
-	}
+  if (res < -1) {
+    return -1;
+  }
+  if (res > 1) {
+    return 1;
+  }
+  return res;
+}
 
-	auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
-		-> std::vector<double> {
-		std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
-		for (haptics::types::Band& b : bands) {
-			std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, timescale);
-			for (uint32_t i = 0; i < bandAmp.size(); i++) {
-				channelAmp[i] += bandAmp[i];
-				if (channelAmp[i] < -1) {
-					channelAmp[i] = -1;
-				}
-				if (channelAmp[i] > 1) {
-					channelAmp[i] = 1;
-				}
-			}
-		}
-		return channelAmp;
-	}
+auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+    -> std::vector<double> {
+  std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
+  for (haptics::types::Band &b : bands) {
+    std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, timescale);
+    for (uint32_t i = 0; i < bandAmp.size(); i++) {
+      channelAmp[i] += bandAmp[i];
+      if (channelAmp[i] < -1) {
+        channelAmp[i] = -1;
+      }
+      if (channelAmp[i] > 1) {
+        channelAmp[i] = 1;
+      }
+    }
+  }
+  return channelAmp;
+}
 
-	[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint32_t> {
-		return frequencySampling;
-	}
+[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint32_t> {
+  return frequencySampling;
+}
 
-	auto Channel::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
-		frequencySampling = newFrequencySampling;
-	}
+auto Channel::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
+  frequencySampling = newFrequencySampling;
+}
 
-	[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint32_t> {
-		return sampleCount;
-	}
+[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint32_t> {
+  return sampleCount;
+}
 
-	auto Channel::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
-		sampleCount = newSampleCount;
-	}
+auto Channel::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
+  sampleCount = newSampleCount;
+}
 
-	[[nodiscard]] auto Channel::getDirection() const -> std::optional<Vector> { return direction; }
+[[nodiscard]] auto Channel::getDirection() const -> std::optional<Vector> { return direction; }
 
-	auto Channel::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
+auto Channel::setDirection(std::optional<Vector> newDirection) -> void { direction = newDirection; }
 
-	[[nodiscard]] auto Channel::getActuatorResolution() const -> std::optional<Vector> {
-		return actuatorResolution;
-	}
+[[nodiscard]] auto Channel::getActuatorResolution() const -> std::optional<Vector> {
+  return actuatorResolution;
+}
 
-	auto Channel::setActuatorResolution(std::optional<Vector> newChannelResolution) -> void {
-		actuatorResolution = newChannelResolution;
-	}
+auto Channel::setActuatorResolution(std::optional<Vector> newChannelResolution) -> void {
+  actuatorResolution = newChannelResolution;
+}
 
-	[[nodiscard]] auto Channel::getBodyPartTarget() const
-		-> std::optional<std::vector<BodyPartTarget>> {
-		return bodyPartTarget;
-	}
+[[nodiscard]] auto Channel::getBodyPartTarget() const
+    -> std::optional<std::vector<BodyPartTarget>> {
+  return bodyPartTarget;
+}
 
-	auto Channel::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget)
-		-> void {
-		bodyPartTarget = std::move(newBodyPartTarget);
-	}
+auto Channel::setBodyPartTarget(std::optional<std::vector<BodyPartTarget>> newBodyPartTarget)
+    -> void {
+  bodyPartTarget = std::move(newBodyPartTarget);
+}
 
-	[[nodiscard]] auto Channel::getActuatorTarget() const -> std::optional<std::vector<Vector>> {
-		return actuatorTarget;
-	}
+[[nodiscard]] auto Channel::getActuatorTarget() const -> std::optional<std::vector<Vector>> {
+  return actuatorTarget;
+}
 
-	auto Channel::setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void {
-		actuatorTarget = std::move(newActuatorTarget);
-	}
+auto Channel::setActuatorTarget(std::optional<std::vector<Vector>> newActuatorTarget) -> void {
+  actuatorTarget = std::move(newActuatorTarget);
+}
 
-	auto Channel::equals(const Channel& channel) const -> bool {
-		if (id != channel.getId()) {
-			std::cerr << "Channel id fields are different" << std::endl;
-			return false;
-		}
-		if (description != channel.getDescription()) {
-			std::cerr << "Description fields are different" << std::endl;
-			return false;
-		}
-		if (gain != channel.getGain()) {
-			std::cerr << "Gain fields are different" << std::endl;
-			return false;
-		}
-		if (bodyPartMask != channel.getBodyPartMask()) {
-			std::cerr << "channel id fields are different" << std::endl;
-			return false;
-		}
-		if (priority != channel.getPriority()) {
-			std::cerr << "bodyPartMask fields are different" << std::endl;
-			return false;
-		}
-		if (referenceDeviceId != channel.getReferenceDeviceId()) {
-			std::cerr << "Reference device id fields are different" << std::endl;
-			return false;
-		}
-		if (frequencySampling != channel.getFrequencySampling()) {
-			std::cerr << "Frequency Sampling fields are different" << std::endl;
-			return false;
-		}
-		if (sampleCount != channel.getSampleCount()) {
-			std::cerr << "Sample Count fields are different" << std::endl;
-			return false;
-		}
-		if (direction != channel.getDirection()) {
-			std::cerr << "Direction fields are different" << std::endl;
-			return false;
-		}
-		if (actuatorResolution != channel.getActuatorResolution()) {
-			std::cerr << "Actuator Resolution fields are different" << std::endl;
-			return false;
-		}
-		if (vertices.size() != channel.vertices.size()) {
-			std::cerr << "The number of vertices in channel " << id << " is different" << std::endl;
-			return false;
-		}
-		if (bands.size() != channel.bands.size()) {
-			std::cerr << "The number of bands in channel " << id << " is different" << std::endl;
-			return false;
-		}
-		if (bodyPartTarget.has_value() != channel.bodyPartTarget.has_value()) {
-			std::cerr << "bodyPartTarget fields are different" << std::endl;
-			return false;
-		}
-		if (bodyPartTarget.has_value() &&
-			(bodyPartTarget.value().size() != channel.bodyPartTarget.value().size())) {
-			std::cerr << "bodyPartTarget fields are different" << std::endl;
-			return false;
-		}
-		if (actuatorTarget.has_value() != channel.actuatorTarget.has_value()) {
-			std::cerr << "actuatorTarget fields are different" << std::endl;
-			return false;
-		}
-		if (actuatorTarget.has_value() &&
-			(actuatorTarget.value().size() != channel.actuatorTarget.value().size())) {
-			std::cerr << "actuatorTarget fields are different" << std::endl;
-			return false;
-		}
+auto Channel::equals(const Channel &channel) const -> bool {
+  if (id != channel.getId()) {
+    std::cerr << "Channel id fields are different" << std::endl;
+    return false;
+  }
+  if (description != channel.getDescription()) {
+    std::cerr << "Description fields are different" << std::endl;
+    return false;
+  }
+  if (gain != channel.getGain()) {
+    std::cerr << "Gain fields are different" << std::endl;
+    return false;
+  }
+  if (bodyPartMask != channel.getBodyPartMask()) {
+    std::cerr << "channel id fields are different" << std::endl;
+    return false;
+  }
+  if (priority != channel.getPriority()) {
+    std::cerr << "bodyPartMask fields are different" << std::endl;
+    return false;
+  }
+  if (referenceDeviceId != channel.getReferenceDeviceId()) {
+    std::cerr << "Reference device id fields are different" << std::endl;
+    return false;
+  }
+  if (frequencySampling != channel.getFrequencySampling()) {
+    std::cerr << "Frequency Sampling fields are different" << std::endl;
+    return false;
+  }
+  if (sampleCount != channel.getSampleCount()) {
+    std::cerr << "Sample Count fields are different" << std::endl;
+    return false;
+  }
+  if (direction != channel.getDirection()) {
+    std::cerr << "Direction fields are different" << std::endl;
+    return false;
+  }
+  if (actuatorResolution != channel.getActuatorResolution()) {
+    std::cerr << "Actuator Resolution fields are different" << std::endl;
+    return false;
+  }
+  if (vertices.size() != channel.vertices.size()) {
+    std::cerr << "The number of vertices in channel " << id << " is different" << std::endl;
+    return false;
+  }
+  if (bands.size() != channel.bands.size()) {
+    std::cerr << "The number of bands in channel " << id << " is different" << std::endl;
+    return false;
+  }
+  if (bodyPartTarget.has_value() != channel.bodyPartTarget.has_value()) {
+    std::cerr << "bodyPartTarget fields are different" << std::endl;
+    return false;
+  }
+  if (bodyPartTarget.has_value() &&
+      (bodyPartTarget.value().size() != channel.bodyPartTarget.value().size())) {
+    std::cerr << "bodyPartTarget fields are different" << std::endl;
+    return false;
+  }
+  if (actuatorTarget.has_value() != channel.actuatorTarget.has_value()) {
+    std::cerr << "actuatorTarget fields are different" << std::endl;
+    return false;
+  }
+  if (actuatorTarget.has_value() &&
+      (actuatorTarget.value().size() != channel.actuatorTarget.value().size())) {
+    std::cerr << "actuatorTarget fields are different" << std::endl;
+    return false;
+  }
 
-		bool isEqual = true;
-		for (int i = 0; i < static_cast<int>(vertices.size()); i++) {
-			isEqual = isEqual && (vertices.at(i) == channel.vertices.at(i));
-		}
-		if (!isEqual) {
-			std::cerr << "vertices fields are different" << std::endl;
-			return false;
-		}
+  bool isEqual = true;
+  for (int i = 0; i < static_cast<int>(vertices.size()); i++) {
+    isEqual = isEqual && (vertices.at(i) == channel.vertices.at(i));
+  }
+  if (!isEqual) {
+    std::cerr << "vertices fields are different" << std::endl;
+    return false;
+  }
 
-		for (int i = 0; i < static_cast<int>(bands.size()); i++) {
-			const auto band1 = bands.at(i);
-			const auto band2 = channel.bands.at(i);
-			isEqual = isEqual && (band1.equals(band2));
-		}
-		if (!isEqual) {
-			return false;
-		}
-		if (bodyPartTarget.has_value()) {
-			for (int i = 0; i < static_cast<int>(bodyPartTarget.value().size()); i++) {
-				const auto bodyPartTarget1 = bodyPartTarget.value().at(i);
-				const auto bodyPartTarget2 = channel.bodyPartTarget.value().at(i);
-				isEqual = isEqual && (bodyPartTarget1 == bodyPartTarget2);
-			}
-			if (!isEqual) {
-				std::cerr << "bodyPartTarget fields are different" << std::endl;
-				return false;
-			}
-		}
+  for (int i = 0; i < static_cast<int>(bands.size()); i++) {
+    const auto band1 = bands.at(i);
+    const auto band2 = channel.bands.at(i);
+    isEqual = isEqual && (band1.equals(band2));
+  }
+  if (!isEqual) {
+    return false;
+  }
+  if (bodyPartTarget.has_value()) {
+    for (int i = 0; i < static_cast<int>(bodyPartTarget.value().size()); i++) {
+      const auto bodyPartTarget1 = bodyPartTarget.value().at(i);
+      const auto bodyPartTarget2 = channel.bodyPartTarget.value().at(i);
+      isEqual = isEqual && (bodyPartTarget1 == bodyPartTarget2);
+    }
+    if (!isEqual) {
+      std::cerr << "bodyPartTarget fields are different" << std::endl;
+      return false;
+    }
+  }
 
-		if (actuatorTarget.has_value()) {
-			for (int i = 0; i < static_cast<int>(actuatorTarget.value().size()); i++) {
-				const auto actuatorTarget1 = actuatorTarget.value().at(i);
-				const auto actuatorTarget2 = channel.actuatorTarget.value().at(i);
-				isEqual = isEqual && (actuatorTarget1 == actuatorTarget2);
-			}
-			if (!isEqual) {
-				std::cerr << "actuatorTarget fields are different" << std::endl;
-				return false;
-			}
-		}
-		return true;
-	}
+  if (actuatorTarget.has_value()) {
+    for (int i = 0; i < static_cast<int>(actuatorTarget.value().size()); i++) {
+      const auto actuatorTarget1 = actuatorTarget.value().at(i);
+      const auto actuatorTarget2 = channel.actuatorTarget.value().at(i);
+      isEqual = isEqual && (actuatorTarget1 == actuatorTarget2);
+    }
+    if (!isEqual) {
+      std::cerr << "actuatorTarget fields are different" << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
 
 } // namespace haptics::types

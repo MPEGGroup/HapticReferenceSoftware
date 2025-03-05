@@ -41,81 +41,81 @@
 
 namespace haptics::types {
 
-	static constexpr int TIMESCALE = 1000;
+static constexpr int TIMESCALE = 1000;
 
-	class Band {
-	public:
-		explicit Band() = default;
-		explicit Band(BandType newBandType, CurveType newCurveType, int newLowerFrequencyLimit,
-			int newUpperFrequencyLimit)
-			: bandType(newBandType)
-			, curveType(newCurveType)
-			, lowerFrequencyLimit(newLowerFrequencyLimit)
-			, upperFrequencyLimit(newUpperFrequencyLimit)
-			, effects({}) {};
+class Band {
+public:
+  explicit Band() = default;
+  explicit Band(BandType newBandType, CurveType newCurveType, int newLowerFrequencyLimit,
+                int newUpperFrequencyLimit)
+      : bandType(newBandType)
+      , curveType(newCurveType)
+      , lowerFrequencyLimit(newLowerFrequencyLimit)
+      , upperFrequencyLimit(newUpperFrequencyLimit)
+      , effects({}){};
 
-		explicit Band(BandType newBandType, int newBlockLength, int newLowerFrequencyLimit,
-			int newUpperFrequencyLimit)
-			: bandType(newBandType)
-			, blockLength(newBlockLength)
-			, lowerFrequencyLimit(newLowerFrequencyLimit)
-			, upperFrequencyLimit(newUpperFrequencyLimit)
-			, effects({}) {};
+  explicit Band(BandType newBandType, int newBlockLength, int newLowerFrequencyLimit,
+                int newUpperFrequencyLimit)
+      : bandType(newBandType)
+      , blockLength(newBlockLength)
+      , lowerFrequencyLimit(newLowerFrequencyLimit)
+      , upperFrequencyLimit(newUpperFrequencyLimit)
+      , effects({}){};
 
-		explicit Band(BandType newBandType, int newLowerFrequencyLimit, int newUpperFrequencyLimit)
-			: bandType(newBandType)
-			, lowerFrequencyLimit(newLowerFrequencyLimit)
-			, upperFrequencyLimit(newUpperFrequencyLimit)
-			, effects({}) {};
+  explicit Band(BandType newBandType, int newLowerFrequencyLimit, int newUpperFrequencyLimit)
+      : bandType(newBandType)
+      , lowerFrequencyLimit(newLowerFrequencyLimit)
+      , upperFrequencyLimit(newUpperFrequencyLimit)
+      , effects({}){};
 
-		[[nodiscard]] auto getBandType() const->BandType;
-		auto setBandType(BandType newBandType) -> void;
-		[[nodiscard]] auto getPriority() const->std::optional<int>;
-		[[nodiscard]] auto getPriorityOrDefault() const -> int;
-		auto setPriority(int newPriority) -> void;
-		[[nodiscard]] auto getCurveTypeOrDefault() const->CurveType;
-		[[nodiscard]] auto getCurveType() const->std::optional<CurveType>;
-		auto setCurveType(CurveType newCurveType) -> void;
-		[[nodiscard]] auto getBlockLengthOrDefault() const -> int;
-		[[nodiscard]] auto getBlockLength() const->std::optional<int>;
-		auto setBlockLength(int newBlockLength) -> void;
-		[[nodiscard]] auto getUpperFrequencyLimit() const -> int;
-		auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
-		[[nodiscard]] auto getLowerFrequencyLimit() const -> int;
-		auto setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void;
-		auto getEffectsSize()->size_t;
-		auto getEffectAt(int index)->haptics::types::Effect&;
-		auto addEffect(haptics::types::Effect& newEffect) -> void;
-		auto replaceEffectAt(int index, haptics::types::Effect& newEffect) -> bool;
-		auto removeEffectAt(int index) -> bool;
-		[[nodiscard]] auto isOverlapping(haptics::types::Effect& effect, int start, int stop) -> bool;
-		auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit,
-			unsigned int timescale) -> double;
-		auto EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
-			->std::vector<double>;
-		auto getBandTimeLength(unsigned int timescale) -> double;
-		//[[nodiscard]] auto getTimescale() const -> int;
-		// auto setTimescale(int newTimescale) -> void;
-		[[nodiscard]] auto equals(const Band& band) const -> bool;
+  [[nodiscard]] auto getBandType() const -> BandType;
+  auto setBandType(BandType newBandType) -> void;
+  [[nodiscard]] auto getPriority() const -> std::optional<int>;
+  [[nodiscard]] auto getPriorityOrDefault() const -> int;
+  auto setPriority(int newPriority) -> void;
+  [[nodiscard]] auto getCurveTypeOrDefault() const -> CurveType;
+  [[nodiscard]] auto getCurveType() const -> std::optional<CurveType>;
+  auto setCurveType(CurveType newCurveType) -> void;
+  [[nodiscard]] auto getBlockLengthOrDefault() const -> int;
+  [[nodiscard]] auto getBlockLength() const -> std::optional<int>;
+  auto setBlockLength(int newBlockLength) -> void;
+  [[nodiscard]] auto getUpperFrequencyLimit() const -> int;
+  auto setUpperFrequencyLimit(int newUpperFrequencyLimit) -> void;
+  [[nodiscard]] auto getLowerFrequencyLimit() const -> int;
+  auto setLowerFrequencyLimit(int newLowerFrequencyLimit) -> void;
+  auto getEffectsSize() -> size_t;
+  auto getEffectAt(int index) -> haptics::types::Effect &;
+  auto addEffect(haptics::types::Effect &newEffect) -> void;
+  auto replaceEffectAt(int index, haptics::types::Effect &newEffect) -> bool;
+  auto removeEffectAt(int index) -> bool;
+  [[nodiscard]] auto isOverlapping(haptics::types::Effect &effect, int start, int stop) -> bool;
+  auto Evaluate(double position, int lowFrequencyLimit, int highFrequencyLimit,
+                unsigned int timescale) -> double;
+  auto EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
+      -> std::vector<double>;
+  auto getBandTimeLength(unsigned int timescale) -> double;
+  //[[nodiscard]] auto getTimescale() const -> int;
+  // auto setTimescale(int newTimescale) -> void;
+  [[nodiscard]] auto equals(const Band &band) const -> bool;
 
-		static constexpr double TRANSIENT_DURATION_MS = 22;
+  static constexpr double TRANSIENT_DURATION_MS = 22;
 
-	private:
-		[[nodiscard]] auto static getTransientDuration(unsigned int timescale) -> double;
-		static constexpr CurveType DEFAULT_CURVE_TYPE = CurveType::Unknown;
-		static constexpr int DEFAULT_BLOCK_LENGTH = 0;
-		auto EvaluationSwitch(double position, haptics::types::Effect* effect, int lowFrequencyLimit,
-			int highFrequencyLimit, unsigned int timescale) -> double;
+private:
+  [[nodiscard]] auto static getTransientDuration(unsigned int timescale) -> double;
+  static constexpr CurveType DEFAULT_CURVE_TYPE = CurveType::Unknown;
+  static constexpr int DEFAULT_BLOCK_LENGTH = 0;
+  auto EvaluationSwitch(double position, haptics::types::Effect *effect, int lowFrequencyLimit,
+                        int highFrequencyLimit, unsigned int timescale) -> double;
 
-		BandType bandType = BandType::VectorialWave;
-		std::optional<CurveType> curveType;
-		std::optional<int> blockLength = 0;
-		int lowerFrequencyLimit = 0;
-		int upperFrequencyLimit = 0;
-		std::vector<Effect> effects = std::vector<Effect>{};
-		// int timescale = TIMESCALE;
-		std::optional<int> priority;
-	};
+  BandType bandType = BandType::VectorialWave;
+  std::optional<CurveType> curveType;
+  std::optional<int> blockLength = 0;
+  int lowerFrequencyLimit = 0;
+  int upperFrequencyLimit = 0;
+  std::vector<Effect> effects = std::vector<Effect>{};
+  // int timescale = TIMESCALE;
+  std::optional<int> priority;
+};
 } // namespace haptics::types
 
 #endif // BAND_H

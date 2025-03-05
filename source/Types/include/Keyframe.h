@@ -38,33 +38,33 @@
 
 namespace haptics::types {
 
-	class Keyframe {
-	public:
-		explicit Keyframe() = default;
+class Keyframe {
+public:
+  explicit Keyframe() = default;
 
-		explicit Keyframe(std::optional<int> newRelativePosition,
-			std::optional<float> newAmplitudeModulation,
-			std::optional<int> newFrequencyModulation)
-			: relativePosition(newRelativePosition)
-			, amplitudeModulation(newAmplitudeModulation)
-			, frequencyModulation(newFrequencyModulation) {};
+  explicit Keyframe(std::optional<int> newRelativePosition,
+                    std::optional<float> newAmplitudeModulation,
+                    std::optional<int> newFrequencyModulation)
+      : relativePosition(newRelativePosition)
+      , amplitudeModulation(newAmplitudeModulation)
+      , frequencyModulation(newFrequencyModulation){};
 
-		[[nodiscard]] auto getRelativePosition() const->std::optional<int>;
-		auto setRelativePosition(std::optional<int> newRelativePosition) -> void;
-		[[nodiscard]] auto getAmplitudeModulation() const->std::optional<float>;
-		auto setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void;
-		[[nodiscard]] auto getFrequencyModulation() const->std::optional<int>;
-		auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
+  [[nodiscard]] auto getRelativePosition() const -> std::optional<int>;
+  auto setRelativePosition(std::optional<int> newRelativePosition) -> void;
+  [[nodiscard]] auto getAmplitudeModulation() const -> std::optional<float>;
+  auto setAmplitudeModulation(std::optional<float> newAmplitudeModulation) -> void;
+  [[nodiscard]] auto getFrequencyModulation() const -> std::optional<int>;
+  auto setFrequencyModulation(std::optional<int> newFrequencyModulation) -> void;
 
-		[[nodiscard]] auto equals(const Keyframe& keyframe) const -> bool;
+  [[nodiscard]] auto equals(const Keyframe &keyframe) const -> bool;
 
-		auto operator==(const Keyframe& keyframe) -> bool;
-		auto operator!=(const Keyframe& keyframe) -> bool;
+  auto operator==(const Keyframe &keyframe) -> bool;
+  auto operator!=(const Keyframe &keyframe) -> bool;
 
-	private:
-		std::optional<int> relativePosition = 0;
-		std::optional<float> amplitudeModulation;
-		std::optional<int> frequencyModulation;
-	};
+private:
+  std::optional<int> relativePosition = 0;
+  std::optional<float> amplitudeModulation;
+  std::optional<int> frequencyModulation;
+};
 } // namespace haptics::types
 #endif // KEYFRAME_H

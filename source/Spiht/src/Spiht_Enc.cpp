@@ -35,308 +35,298 @@
 
 namespace haptics::spiht {
 
-	void Spiht_Enc::encodeEffect(std::vector<int>& block, const int bits, const double scalar,
-		std::vector<unsigned char>& outstream) {
-		int bl = (int)block.size();
-		if (bits == 0) {
-			return;
-		}
-		bool zeros = true;
-		for (auto& v : block) {
-			if (v != 0) {
-				zeros = false;
-				break;
-			}
-		}
-		if (zeros) {
-			return;
-		}
-		std::vector<unsigned char> bitwavmax;
-		maximumWaveletCoefficient(scalar, bitwavmax);
-		auto level = (int)(log2((double)bl) - 2);
-		std::vector<int> context;
-		std::vector<unsigned char> stream_spiht;
-		encode(block, level, bitwavmax, bits, stream_spiht, context);
-		std::vector<unsigned char> stream_arithmetic;
-		arithEnc.encode(stream_spiht, context, stream_arithmetic);
-		arithEnc.resetCounter();
-		ArithEnc::convert2bytes(stream_arithmetic, outstream);
-	}
+void Spiht_Enc::encodeEffect(std::vector<int> &block, const int bits, const double scalar,
+                             std::vector<unsigned char> &outstream) {
+  int bl = (int)block.size();
+  if (bits == 0) {
+    return;
+  }
+  bool zeros = true;
+  for (auto &v : block) {
+    if (v != 0) {
+      zeros = false;
+      break;
+    }
+  }
+  if (zeros) {
+    return;
+  }
+  std::vector<unsigned char> bitwavmax;
+  maximumWaveletCoefficient(scalar, bitwavmax);
+  auto level = (int)(log2((double)bl) - 2);
+  std::vector<int> context;
+  std::vector<unsigned char> stream_spiht;
+  encode(block, level, bitwavmax, bits, stream_spiht, context);
+  std::vector<unsigned char> stream_arithmetic;
+  arithEnc.encode(stream_spiht, context, stream_arithmetic);
+  arithEnc.resetCounter();
+  ArithEnc::convert2bytes(stream_arithmetic, outstream);
+}
 
-	void Spiht_Enc::encode(std::vector<int>& instream, int level, std::vector<unsigned char>& bitwavmax,
-		int maxallocbits, std::vector<unsigned char>& outstream,
-		std::vector<int>& context) {
+void Spiht_Enc::encode(std::vector<int> &instream, int level, std::vector<unsigned char> &bitwavmax,
+                       int maxallocbits, std::vector<unsigned char> &outstream,
+                       std::vector<int> &context) {
 
-		outstream.reserve(outstream.size() + BUFFER_SIZE);
-		context.reserve(context.size() + BUFFER_SIZE);
-		size_t length = instream.size();
-		// add maxallocbits to stream
-		de2bi(maxallocbits, outstream, MAXALLOCBITS_SIZE);
-		// add bitwavmax to stream
-		outstream.insert(outstream.end(), bitwavmax.begin(), bitwavmax.end());
+  outstream.reserve(outstream.size() + BUFFER_SIZE);
+  context.reserve(context.size() + BUFFER_SIZE);
+  size_t length = instream.size();
+  // add maxallocbits to stream
+  de2bi(maxallocbits, outstream, MAXALLOCBITS_SIZE);
+  // add bitwavmax to stream
+  outstream.insert(outstream.end(), bitwavmax.begin(), bitwavmax.end());
 
-		// context
-		std::vector<int> c(MAXALLOCBITS_SIZE + bitwavmax.size(), CONTEXT_0);
-		context.insert(context.end(), c.begin(), c.end());
+  // context
+  std::vector<int> c(MAXALLOCBITS_SIZE + bitwavmax.size(), CONTEXT_0);
+  context.insert(context.end(), c.begin(), c.end());
 
-		// init LIP, LSP, LIS
-		int bandsize = 2 << ((int)log2((double)length) - level);
-		std::list<int> LIP;
-		for (int i = 0; i < bandsize; i++) {
-			LIP.push_back(i);
-		}
-		std::list<int> LIS1;
-		std::list<int> LIS2;
-		for (int i = (bandsize / 2); i < bandsize; i++) {
-			LIS1.push_back(i);
-			LIS2.push_back(0);
-		}
-		std::list<int> LSP;
+  // init LIP, LSP, LIS
+  int bandsize = 2 << ((int)log2((double)length) - level);
+  std::list<int> LIP;
+  for (int i = 0; i < bandsize; i++) {
+    LIP.push_back(i);
+  }
+  std::list<int> LIS1;
+  std::list<int> LIS2;
+  for (int i = (bandsize / 2); i < bandsize; i++) {
+    LIS1.push_back(i);
+    LIS2.push_back(0);
+  }
+  std::list<int> LSP;
 
-		initMaxDescendants(instream);
+  initMaxDescendants(instream);
 
-		int n = maxallocbits;
-		while (0 <= n) {
-			int compare = 1 << n; // 2^n
-			int LSP_index = (int)LSP.size();
-			// sorting pass
-			std::list<int>::iterator it;
-			for (it = LIP.begin(); it != LIP.end();) {
-				if (abs(instream[*it]) >= compare) {
-					addToOutput(1, CONTEXT_2, outstream, context);
-					addToOutput((char)(instream[*it] >= 0), CONTEXT_1, outstream, context);
-					LSP.push_back(*it);
-					it = LIP.erase(it);
-				}
-				else {
-					addToOutput(0, CONTEXT_2, outstream, context);
-					it++;
-				}
-			}
+  int n = maxallocbits;
+  while (0 <= n) {
+    int compare = 1 << n; // 2^n
+    int LSP_index = (int)LSP.size();
+    // sorting pass
+    std::list<int>::iterator it;
+    for (it = LIP.begin(); it != LIP.end();) {
+      if (abs(instream[*it]) >= compare) {
+        addToOutput(1, CONTEXT_2, outstream, context);
+        addToOutput((char)(instream[*it] >= 0), CONTEXT_1, outstream, context);
+        LSP.push_back(*it);
+        it = LIP.erase(it);
+      } else {
+        addToOutput(0, CONTEXT_2, outstream, context);
+        it++;
+      }
+    }
 
-			auto it1 = LIS1.begin();
-			auto it2 = LIS2.begin();
-			int LISsize = (int)LIS1.size();
-			for (int i = 0; i < LISsize; i++) {
-				// Type A
-				if (*it2 == 0) {
-					int max_d = maxDescendant(*it1, *it2);
-					if (max_d >= compare) {
-						addToOutput(1, CONTEXT_3, outstream, context);
-						size_t y = *it1;
-						// Children
-						int index = 2 * (int)y;
-						if (abs(instream[index]) >= compare) {
-							LSP.push_back(index);
-							addToOutput(1, CONTEXT_4, outstream, context);
-							addToOutput((char)(instream[index] >= 0), CONTEXT_1, outstream, context);
-						}
-						else {
-							addToOutput(0, CONTEXT_4, outstream, context);
-							LIP.push_back(index);
-						}
-						index = 2 * (int)y + 1;
-						if (abs(instream[index]) >= compare) {
-							LSP.push_back(index);
-							addToOutput(1, CONTEXT_4, outstream, context);
-							addToOutput((char)(instream[index] >= 0), CONTEXT_1, outstream, context);
-						}
-						else {
-							addToOutput(0, CONTEXT_4, outstream, context);
-							LIP.push_back(index);
-						}
-						// Grandchildren
-						if ((4 * y + 3) < length) {
-							LIS1.push_back(*it1);
-							LIS2.push_back(1);
-							LISsize++;
-						}
-						it1 = LIS1.erase(it1);
-						it2 = LIS2.erase(it2);
-					}
-					else {
-						addToOutput(0, CONTEXT_3, outstream, context);
-						it1++;
-						it2++;
-					}
-					// type B
-				}
-				else {
-					int max_d = maxDescendant(*it1, *it2);
-					if (max_d >= compare) {
-						addToOutput(1, CONTEXT_5, outstream, context);
-						int y = *it1;
-						LIS1.push_back(2 * y);
-						LIS1.push_back(2 * y + 1);
-						LIS2.push_back(0);
-						LIS2.push_back(0);
-						LISsize += 2;
-						it1 = LIS1.erase(it1);
-						it2 = LIS2.erase(it2);
-					}
-					else {
-						addToOutput(0, CONTEXT_5, outstream, context);
-						it1++;
-						it2++;
-					}
-				}
-			}
+    auto it1 = LIS1.begin();
+    auto it2 = LIS2.begin();
+    int LISsize = (int)LIS1.size();
+    for (int i = 0; i < LISsize; i++) {
+      // Type A
+      if (*it2 == 0) {
+        int max_d = maxDescendant(*it1, *it2);
+        if (max_d >= compare) {
+          addToOutput(1, CONTEXT_3, outstream, context);
+          size_t y = *it1;
+          // Children
+          int index = 2 * (int)y;
+          if (abs(instream[index]) >= compare) {
+            LSP.push_back(index);
+            addToOutput(1, CONTEXT_4, outstream, context);
+            addToOutput((char)(instream[index] >= 0), CONTEXT_1, outstream, context);
+          } else {
+            addToOutput(0, CONTEXT_4, outstream, context);
+            LIP.push_back(index);
+          }
+          index = 2 * (int)y + 1;
+          if (abs(instream[index]) >= compare) {
+            LSP.push_back(index);
+            addToOutput(1, CONTEXT_4, outstream, context);
+            addToOutput((char)(instream[index] >= 0), CONTEXT_1, outstream, context);
+          } else {
+            addToOutput(0, CONTEXT_4, outstream, context);
+            LIP.push_back(index);
+          }
+          // Grandchildren
+          if ((4 * y + 3) < length) {
+            LIS1.push_back(*it1);
+            LIS2.push_back(1);
+            LISsize++;
+          }
+          it1 = LIS1.erase(it1);
+          it2 = LIS2.erase(it2);
+        } else {
+          addToOutput(0, CONTEXT_3, outstream, context);
+          it1++;
+          it2++;
+        }
+        // type B
+      } else {
+        int max_d = maxDescendant(*it1, *it2);
+        if (max_d >= compare) {
+          addToOutput(1, CONTEXT_5, outstream, context);
+          int y = *it1;
+          LIS1.push_back(2 * y);
+          LIS1.push_back(2 * y + 1);
+          LIS2.push_back(0);
+          LIS2.push_back(0);
+          LISsize += 2;
+          it1 = LIS1.erase(it1);
+          it2 = LIS2.erase(it2);
+        } else {
+          addToOutput(0, CONTEXT_5, outstream, context);
+          it1++;
+          it2++;
+        }
+      }
+    }
 
-			refinementPass(instream, LSP, LSP_index, n, outstream, context);
-			n--;
-		}
-	}
+    refinementPass(instream, LSP, LSP_index, n, outstream, context);
+    n--;
+  }
+}
 
-	void Spiht_Enc::refinementPass(std::vector<int>& data, std::list<int>& LSP, int LSP_index, int n,
-		std::vector<unsigned char>& outstream, std::vector<int>& context) {
-		auto it = LSP.begin();
-		int temp = 0;
-		while (temp < LSP_index) {
+void Spiht_Enc::refinementPass(std::vector<int> &data, std::list<int> &LSP, int LSP_index, int n,
+                               std::vector<unsigned char> &outstream, std::vector<int> &context) {
+  auto it = LSP.begin();
+  int temp = 0;
+  while (temp < LSP_index) {
 
-			int s = bitget((int)floor(abs(data[*it])), n + 1);
-			outstream.push_back((unsigned char)s);
-			context.push_back(CONTEXT_6);
-			temp++;
-			it++;
-		}
-	}
+    int s = bitget((int)floor(abs(data[*it])), n + 1);
+    outstream.push_back((unsigned char)s);
+    context.push_back(CONTEXT_6);
+    temp++;
+    it++;
+  }
+}
 
-	void Spiht_Enc::addToOutput(unsigned char bit, int c, std::vector<unsigned char>& outstream,
-		std::vector<int>& context) {
-		outstream.push_back(bit);
-		context.push_back(c);
-	}
+void Spiht_Enc::addToOutput(unsigned char bit, int c, std::vector<unsigned char> &outstream,
+                            std::vector<int> &context) {
+  outstream.push_back(bit);
+  context.push_back(c);
+}
 
-	auto Spiht_Enc::maxDescendant(int j, int type) -> int {
-		if (type == 1) {
-			if (j >= (int)maxDescendants1.size()) {
-				std::cerr << "maxDescendants1 out of bounds" << std::endl;
-				return 0;
-			}
-			return maxDescendants1[j];
-		}
-		if (j >= (int)maxDescendants.size()) {
-			std::cerr << "maxDescendants out of bounds" << std::endl;
-			return 0;
-		}
-		return maxDescendants[j];
-	}
+auto Spiht_Enc::maxDescendant(int j, int type) -> int {
+  if (type == 1) {
+    if (j >= (int)maxDescendants1.size()) {
+      std::cerr << "maxDescendants1 out of bounds" << std::endl;
+      return 0;
+    }
+    return maxDescendants1[j];
+  }
+  if (j >= (int)maxDescendants.size()) {
+    std::cerr << "maxDescendants out of bounds" << std::endl;
+    return 0;
+  }
+  return maxDescendants[j];
+}
 
-	void Spiht_Enc::initMaxDescendants(std::vector<int>& signal) {
+void Spiht_Enc::initMaxDescendants(std::vector<int> &signal) {
 
-		size_t length = signal.size();
-		size_t start = length >> 1;
+  size_t length = signal.size();
+  size_t start = length >> 1;
 
-		maxDescendants.resize(start);
-		maxDescendants1.resize(start >> 1);
+  maxDescendants.resize(start);
+  maxDescendants1.resize(start >> 1);
 
-		size_t p1 = start;
-		size_t p2 = p1 + 1;
-		size_t target = start >> 1;
+  size_t p1 = start;
+  size_t p2 = p1 + 1;
+  size_t target = start >> 1;
 
-		for (size_t i = 0; i < (start >> 1); i++) {
-			int v1 = abs(signal[p1]);
-			int v2 = abs(signal[p2]);
-			if (v1 > v2) {
-				maxDescendants[target] = v1;
-			}
-			else {
-				maxDescendants[target] = v2;
-			}
+  for (size_t i = 0; i < (start >> 1); i++) {
+    int v1 = abs(signal[p1]);
+    int v2 = abs(signal[p2]);
+    if (v1 > v2) {
+      maxDescendants[target] = v1;
+    } else {
+      maxDescendants[target] = v2;
+    }
 
-			p1 += 2;
-			p2 += 2;
-			target++;
-		}
+    p1 += 2;
+    p2 += 2;
+    target++;
+  }
 
-		size_t width = start >> 1;
-		p1 = width;
-		p2 = p1 + 1;
-		target = width >> 1;
+  size_t width = start >> 1;
+  p1 = width;
+  p2 = p1 + 1;
+  target = width >> 1;
 
-		while (target > 1) {
-			for (size_t i = 0; i < (width >> 1); i++) {
-				int v1 = maxDescendants[p1];
-				int v2 = maxDescendants[p2];
-				if (v1 > v2) {
-					maxDescendants1[target] = v1;
-				}
-				else {
-					maxDescendants1[target] = v2;
-				}
-				v1 = abs(signal[p1]);
-				if (v1 > maxDescendants1[target]) {
-					maxDescendants[target] = v1;
-				}
-				else {
-					maxDescendants[target] = maxDescendants1[target];
-				}
-				v2 = abs(signal[p2]);
-				if (v2 > maxDescendants[target]) {
-					maxDescendants[target] = v2;
-				}
-				p1 += 2;
-				p2 += 2;
-				target++;
-			}
-			width = width >> 1;
-			p1 = width;
-			p2 = p1 + 1;
-			target = width >> 1;
-		}
-	}
+  while (target > 1) {
+    for (size_t i = 0; i < (width >> 1); i++) {
+      int v1 = maxDescendants[p1];
+      int v2 = maxDescendants[p2];
+      if (v1 > v2) {
+        maxDescendants1[target] = v1;
+      } else {
+        maxDescendants1[target] = v2;
+      }
+      v1 = abs(signal[p1]);
+      if (v1 > maxDescendants1[target]) {
+        maxDescendants[target] = v1;
+      } else {
+        maxDescendants[target] = maxDescendants1[target];
+      }
+      v2 = abs(signal[p2]);
+      if (v2 > maxDescendants[target]) {
+        maxDescendants[target] = v2;
+      }
+      p1 += 2;
+      p2 += 2;
+      target++;
+    }
+    width = width >> 1;
+    p1 = width;
+    p2 = p1 + 1;
+    target = width >> 1;
+  }
+}
 
-	void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char>& bitwavmax) {
+void Spiht_Enc::maximumWaveletCoefficient(double qwavmax, std::vector<unsigned char> &bitwavmax) {
 
-		auto m = getQuantMode(qwavmax);
-		int integerpart = 0;
-		if (m.mode == 1) {
-			integerpart = 1;
-		}
+  auto m = getQuantMode(qwavmax);
+  int integerpart = 0;
+  if (m.mode == 1) {
+    integerpart = 1;
+  }
 
-		setBitwavmax(qwavmax, integerpart, m, bitwavmax);
-	}
+  setBitwavmax(qwavmax, integerpart, m, bitwavmax);
+}
 
-	void Spiht_Enc::de2bi(int val, std::vector<unsigned char>& outstream, int length) {
-		int n = length;
-		while (n > 0) {
-			outstream.push_back((char)(val % 2));
-			val = val >> 1;
-			n--;
-		}
-	}
+void Spiht_Enc::de2bi(int val, std::vector<unsigned char> &outstream, int length) {
+  int n = length;
+  while (n > 0) {
+    outstream.push_back((char)(val % 2));
+    val = val >> 1;
+    n--;
+  }
+}
 
-	auto Spiht_Enc::bitget(int in, int bit) -> int {
-		int mask = 1 << (bit - 1);
+auto Spiht_Enc::bitget(int in, int bit) -> int {
+  int mask = 1 << (bit - 1);
 
-		if ((in & mask) > 0) {
-			return 1;
-		}
-		return 0;
-	}
+  if ((in & mask) > 0) {
+    return 1;
+  }
+  return 0;
+}
 
-	auto Spiht_Enc::getQuantMode(double wavmax) -> quantMode {
-		quantMode m = { 0, 0, 0 };
-		m.mode = 0;
-		if (wavmax < 1) {
-			m.integerbits = 0;
-			m.fractionbits = FRACTIONBITS_0;
-		}
-		else {
-			m.integerbits = INTEGERBITS_1;
-			m.fractionbits = FRACTIONBITS_1;
-			m.mode = 1;
-		}
-		return m;
-	}
+auto Spiht_Enc::getQuantMode(double wavmax) -> quantMode {
+  quantMode m = {0, 0, 0};
+  m.mode = 0;
+  if (wavmax < 1) {
+    m.integerbits = 0;
+    m.fractionbits = FRACTIONBITS_0;
+  } else {
+    m.integerbits = INTEGERBITS_1;
+    m.fractionbits = FRACTIONBITS_1;
+    m.mode = 1;
+  }
+  return m;
+}
 
-	void Spiht_Enc::setBitwavmax(double qwavmax, int integerpart, quantMode m,
-		std::vector<unsigned char>& bitwavmax) {
-		bitwavmax.clear();
-		bitwavmax.reserve(spiht::WAVMAXLENGTH);
-		bitwavmax.push_back(m.mode);
-		de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
-			m.integerbits + m.fractionbits);
-	}
+void Spiht_Enc::setBitwavmax(double qwavmax, int integerpart, quantMode m,
+                             std::vector<unsigned char> &bitwavmax) {
+  bitwavmax.clear();
+  bitwavmax.reserve(spiht::WAVMAXLENGTH);
+  bitwavmax.push_back(m.mode);
+  de2bi((int)((qwavmax - (double)integerpart) * pow(2, (double)m.fractionbits)), bitwavmax,
+        m.integerbits + m.fractionbits);
+}
 
 } // namespace haptics::spiht

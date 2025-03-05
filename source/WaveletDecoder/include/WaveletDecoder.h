@@ -53,18 +53,18 @@ using haptics::types::Effect;
 
 namespace haptics::waveletdecoder {
 
-	constexpr double MS_2_S_WAVELET = 0.001;
+constexpr double MS_2_S_WAVELET = 0.001;
 
-	class WaveletDecoder {
-	public:
-		auto decodeBand(Band& band, int timescale)->std::vector<double>;
-		void transformBand(Band& band, unsigned int timescale);
-		void static decodeBlock(std::vector<int>& block_dwt, std::vector<double>& block_time,
-			double scalar, int dwtl);
+class WaveletDecoder {
+public:
+  auto decodeBand(Band &band, int timescale) -> std::vector<double>;
+  void transformBand(Band &band, unsigned int timescale);
+  void static decodeBlock(std::vector<int> &block_dwt, std::vector<double> &block_time,
+                          double scalar, int dwtl);
 
-	private:
-		std::vector<double> sig_rec;
-		Spiht_Dec spihtDec = Spiht_Dec();
-	};
+private:
+  std::vector<double> sig_rec;
+  Spiht_Dec spihtDec = Spiht_Dec();
+};
 } // namespace haptics::waveletdecoder
 #endif // WAVELETDECODER_H

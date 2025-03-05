@@ -50,43 +50,43 @@ constexpr auto CUBIC_COEFFICIENT = 6;
 
 namespace haptics::tools {
 
-	[[nodiscard]] auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, double x)
-		-> double;
+[[nodiscard]] auto linearInterpolation(std::pair<int, double> a, std::pair<int, double> b, double x)
+    -> double;
 
-	[[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency,
-		double end_frequency, double position) -> double;
+[[nodiscard]] auto chirpInterpolation(int start_time, int end_time, double start_frequency,
+                                      double end_frequency, double position) -> double;
 
-	[[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out,
-		double end_out, double x_in) -> double;
+[[nodiscard]] auto genericNormalization(double start_in, double end_in, double start_out,
+                                        double end_out, double x_in) -> double;
 
-	[[nodiscard]] auto is_eq(double a, double b) -> bool;
+[[nodiscard]] auto is_eq(double a, double b) -> bool;
 
-	[[nodiscard]] auto linearInterpolation2(const std::vector<std::pair<int, double>>& points)
-		->std::vector<double>;
+[[nodiscard]] auto linearInterpolation2(const std::vector<std::pair<int, double>> &points)
+    -> std::vector<double>;
 
-	[[nodiscard]] auto cubicInterpolation2(const std::vector<std::pair<int, double>>& points)
-		->std::vector<double>;
+[[nodiscard]] auto cubicInterpolation2(const std::vector<std::pair<int, double>> &points)
+    -> std::vector<double>;
 
-	[[nodiscard]] auto cubicInterpolation(const std::vector<std::pair<int, double>>& points)
-		->std::vector<double>;
+[[nodiscard]] auto cubicInterpolation(const std::vector<std::pair<int, double>> &points)
+    -> std::vector<double>;
 
-	[[nodiscard]] auto akimaInterpolation(const std::vector<std::pair<int, double>>& points)
-		->std::vector<double>;
+[[nodiscard]] auto akimaInterpolation(const std::vector<std::pair<int, double>> &points)
+    -> std::vector<double>;
 
-	[[nodiscard]] auto bezierInterpolation(const std::vector<std::pair<int, double>>& points)
-		->std::vector<double>;
+[[nodiscard]] auto bezierInterpolation(const std::vector<std::pair<int, double>> &points)
+    -> std::vector<double>;
 
-	[[nodiscard]] auto bsplineInterpolation(const std::vector<std::pair<int, double>>& points)
-		->std::vector<double>;
+[[nodiscard]] auto bsplineInterpolation(const std::vector<std::pair<int, double>> &points)
+    -> std::vector<double>;
 
-	[[nodiscard]] auto interpolationCodec(const std::vector<std::pair<int, double>>& points,
-		types::CurveType curveType)->std::vector<double>;
+[[nodiscard]] auto interpolationCodec(const std::vector<std::pair<int, double>> &points,
+                                      types::CurveType curveType) -> std::vector<double>;
 
-	[[nodiscard]] auto isNumber(const std::string& s) -> bool;
+[[nodiscard]] auto isNumber(const std::string &s) -> bool;
 
-	[[nodiscard]] auto isPowerOfTwo(int n) -> bool;
+[[nodiscard]] auto isPowerOfTwo(int n) -> bool;
 
-	[[nodiscard]] auto almostEquals(float val1, float val2, unsigned int nbBytes, float range) -> bool;
+[[nodiscard]] auto almostEquals(float val1, float val2, unsigned int nbBytes, float range) -> bool;
 
 } // namespace haptics::tools
 #endif

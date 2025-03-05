@@ -42,34 +42,34 @@
 
 namespace haptics::spiht {
 
-	constexpr int RANGE_MAX = 1024;
-	constexpr int HALF = 512;
-	constexpr int FIRST_QTR = 256;
-	constexpr int THIRD_QTR = 768;
-	constexpr size_t CONTEXT_SIZE = 7;
-	constexpr int RESET_HALF = 8;
-	constexpr int RESET_TOTAL = 16;
-	constexpr int RESIZE_TOTAL = 32;
-	constexpr int BYTE_SIZE = 8;
+constexpr int RANGE_MAX = 1024;
+constexpr int HALF = 512;
+constexpr int FIRST_QTR = 256;
+constexpr int THIRD_QTR = 768;
+constexpr size_t CONTEXT_SIZE = 7;
+constexpr int RESET_HALF = 8;
+constexpr int RESET_TOTAL = 16;
+constexpr int RESIZE_TOTAL = 32;
+constexpr int BYTE_SIZE = 8;
 
-	class ArithEnc {
-	public:
-		void encode(std::vector<unsigned char>& instream, std::vector<int>& context,
-			std::vector<unsigned char>& outstream);
+class ArithEnc {
+public:
+  void encode(std::vector<unsigned char> &instream, std::vector<int> &context,
+              std::vector<unsigned char> &outstream);
 
-		void resetCounter();
-		void static convert2bytes(std::vector<unsigned char>& in, std::vector<unsigned char>& out);
+  void resetCounter();
+  void static convert2bytes(std::vector<unsigned char> &in, std::vector<unsigned char> &out);
 
-	private:
-		void static remainder(int bits_to_follow, std::vector<unsigned char>& outstream, int range_lower,
-			int range_upper);
+private:
+  void static remainder(int bits_to_follow, std::vector<unsigned char> &outstream, int range_lower,
+                        int range_upper);
 
-		void rescaleCounter();
+  void rescaleCounter();
 
-		std::array<int, CONTEXT_SIZE> counter = { RESET_HALF, RESET_HALF, RESET_HALF, RESET_HALF,
-												 RESET_HALF, RESET_HALF, RESET_HALF };
-		std::array<int, CONTEXT_SIZE> counter_total = { RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
-													   RESET_TOTAL, RESET_TOTAL, RESET_TOTAL };
-	};
+  std::array<int, CONTEXT_SIZE> counter = {RESET_HALF, RESET_HALF, RESET_HALF, RESET_HALF,
+                                           RESET_HALF, RESET_HALF, RESET_HALF};
+  std::array<int, CONTEXT_SIZE> counter_total = {RESET_TOTAL, RESET_TOTAL, RESET_TOTAL, RESET_TOTAL,
+                                                 RESET_TOTAL, RESET_TOTAL, RESET_TOTAL};
+};
 } // namespace haptics::spiht
 #endif // ARITHENC_H

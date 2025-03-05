@@ -36,422 +36,422 @@
 
 namespace haptics::types {
 
-	[[nodiscard]] auto Perception::getId() const -> int { return id; }
+[[nodiscard]] auto Perception::getId() const -> int { return id; }
 
-	auto Perception::setId(int newId) -> void { id = newId; }
+auto Perception::setId(int newId) -> void { id = newId; }
 
-	[[nodiscard]] auto Perception::getAvatarId() const -> int { return avatarId; }
+[[nodiscard]] auto Perception::getAvatarId() const -> int { return avatarId; }
 
-	auto Perception::setAvatarId(int newAvatarId) -> void { avatarId = newAvatarId; }
+auto Perception::setAvatarId(int newAvatarId) -> void { avatarId = newAvatarId; }
 
-	[[nodiscard]] auto Perception::getEffectSemanticSchemeOrDefault() const -> std::string {
-		if (effectSemanticScheme.has_value()) {
-			return effectSemanticScheme.value();
-		}
-		return DEFAULT_SEMANTIC_SCHEME;
-	}
+[[nodiscard]] auto Perception::getEffectSemanticSchemeOrDefault() const -> std::string {
+  if (effectSemanticScheme.has_value()) {
+    return effectSemanticScheme.value();
+  }
+  return DEFAULT_SEMANTIC_SCHEME;
+}
 
-	[[nodiscard]] auto Perception::getEffectSemanticScheme() const -> std::optional<std::string> {
-		return effectSemanticScheme;
-	}
-	auto Perception::setEffectSemanticScheme(std::string& newEffectSemantic) -> void {
-		effectSemanticScheme = newEffectSemantic;
-	}
+[[nodiscard]] auto Perception::getEffectSemanticScheme() const -> std::optional<std::string> {
+  return effectSemanticScheme;
+}
+auto Perception::setEffectSemanticScheme(std::string &newEffectSemantic) -> void {
+  effectSemanticScheme = newEffectSemantic;
+}
 
-	[[nodiscard]] auto Perception::getDescription() const -> std::string { return description; }
+[[nodiscard]] auto Perception::getDescription() const -> std::string { return description; }
 
-	auto Perception::setDescription(std::string& newDescription) -> void {
-		description = newDescription;
-	}
+auto Perception::setDescription(std::string &newDescription) -> void {
+  description = newDescription;
+}
 
-	auto Perception::getPriority() const -> std::optional<int> { return priority; }
-	auto Perception::getPriorityOrDefault() const -> int {
-		if (priority.has_value()) {
-			return priority.value();
-		}
-		return 0;
-	}
+auto Perception::getPriority() const -> std::optional<int> { return priority; }
+auto Perception::getPriorityOrDefault() const -> int {
+  if (priority.has_value()) {
+    return priority.value();
+  }
+  return 0;
+}
 
-	auto Perception::setPriority(int newPriority) -> void { priority = newPriority; }
+auto Perception::setPriority(int newPriority) -> void { priority = newPriority; }
 
-	[[nodiscard]] auto Perception::getPerceptionModality() const -> PerceptionModality {
-		return perceptionModality;
-	}
+[[nodiscard]] auto Perception::getPerceptionModality() const -> PerceptionModality {
+  return perceptionModality;
+}
 
-	auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality) -> void {
-		perceptionModality = newPerceptionModality;
-	}
+auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality) -> void {
+  perceptionModality = newPerceptionModality;
+}
 
-	[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int8_t> {
-		return this->unitExponent;
-	}
+[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int8_t> {
+  return this->unitExponent;
+}
 
-	[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int8_t {
-		return this->getUnitExponent().value_or(Perception::DEFAULT_UNIT_EXPONENT);
-	}
+[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int8_t {
+  return this->getUnitExponent().value_or(Perception::DEFAULT_UNIT_EXPONENT);
+}
 
-	auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void {
-		this->unitExponent = newUnitExponent;
-	}
+auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void {
+  this->unitExponent = newUnitExponent;
+}
 
-	[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int8_t> {
-		return this->perceptionUnitExponent;
-	}
+[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int8_t> {
+  return this->perceptionUnitExponent;
+}
 
-	[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int8_t {
-		return this->getPerceptionUnitExponent().value_or(Perception::DEFAULT_PERCEPTION_UNIT_EXPONENT);
-	}
+[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int8_t {
+  return this->getPerceptionUnitExponent().value_or(Perception::DEFAULT_PERCEPTION_UNIT_EXPONENT);
+}
 
-	auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
-		-> void {
-		this->perceptionUnitExponent = newPerceptionUnitExponent;
-	}
+auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
+    -> void {
+  this->perceptionUnitExponent = newPerceptionUnitExponent;
+}
 
-	auto Perception::getChannelsSize() -> size_t { return channels.size(); }
+auto Perception::getChannelsSize() -> size_t { return channels.size(); }
 
-	auto Perception::getChannelAt(int index) -> haptics::types::Channel& { return channels.at(index); }
+auto Perception::getChannelAt(int index) -> haptics::types::Channel & { return channels.at(index); }
 
-	auto Perception::replaceChannelAt(int index, haptics::types::Channel& newChannel) -> bool {
-		if (index < 0 || index >= (int)channels.size()) {
-			return false;
-		}
-		channels[index] = newChannel;
-		return true;
-	}
+auto Perception::replaceChannelAt(int index, haptics::types::Channel &newChannel) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
+    return false;
+  }
+  channels[index] = newChannel;
+  return true;
+}
 
-	auto Perception::replaceChannelMetadataAt(int index, haptics::types::Channel& newChannel) -> bool {
-		if (index < 0 || index >= (int)channels.size()) {
-			return false;
-		}
-		channels[index].setId(newChannel.getId());
-		auto desc = newChannel.getDescription();
-		channels[index].setDescription(desc);
-		channels[index].setGain(newChannel.getGain());
-		channels[index].setMixingWeight(newChannel.getMixingWeight());
-		channels[index].setBodyPartMask(newChannel.getBodyPartMask());
-		channels[index].clearVertices();
-		for (auto i = 0; i < static_cast<int>(newChannel.getVerticesSize()); i++) {
-			channels[index].addVertex((newChannel.getVertexAt(i)));
-		}
-		if (newChannel.getReferenceDeviceId().has_value()) {
-			channels[index].setReferenceDeviceId(newChannel.getReferenceDeviceId().value());
-		}
-		channels[index].setFrequencySampling(newChannel.getFrequencySampling());
-		channels[index].setSampleCount(newChannel.getSampleCount());
-		channels[index].setDirection(newChannel.getDirection());
-		channels[index].setActuatorResolution(newChannel.getActuatorResolution());
-		channels[index].setBodyPartTarget(newChannel.getBodyPartTarget());
-		channels[index].setActuatorTarget(newChannel.getActuatorTarget());
-		return true;
-	}
+auto Perception::replaceChannelMetadataAt(int index, haptics::types::Channel &newChannel) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
+    return false;
+  }
+  channels[index].setId(newChannel.getId());
+  auto desc = newChannel.getDescription();
+  channels[index].setDescription(desc);
+  channels[index].setGain(newChannel.getGain());
+  channels[index].setMixingWeight(newChannel.getMixingWeight());
+  channels[index].setBodyPartMask(newChannel.getBodyPartMask());
+  channels[index].clearVertices();
+  for (auto i = 0; i < static_cast<int>(newChannel.getVerticesSize()); i++) {
+    channels[index].addVertex((newChannel.getVertexAt(i)));
+  }
+  if (newChannel.getReferenceDeviceId().has_value()) {
+    channels[index].setReferenceDeviceId(newChannel.getReferenceDeviceId().value());
+  }
+  channels[index].setFrequencySampling(newChannel.getFrequencySampling());
+  channels[index].setSampleCount(newChannel.getSampleCount());
+  channels[index].setDirection(newChannel.getDirection());
+  channels[index].setActuatorResolution(newChannel.getActuatorResolution());
+  channels[index].setBodyPartTarget(newChannel.getBodyPartTarget());
+  channels[index].setActuatorTarget(newChannel.getActuatorTarget());
+  return true;
+}
 
-	auto Perception::removeChannelAt(int index) -> bool {
-		if (index < 0 || index >= (int)channels.size()) {
-			return false;
-		}
-		channels.erase(channels.begin() + index);
-		return true;
-	}
+auto Perception::removeChannelAt(int index) -> bool {
+  if (index < 0 || index >= (int)channels.size()) {
+    return false;
+  }
+  channels.erase(channels.begin() + index);
+  return true;
+}
 
-	auto Perception::addChannel(haptics::types::Channel& newChannel) -> void {
-		channels.push_back(newChannel);
-	}
+auto Perception::addChannel(haptics::types::Channel &newChannel) -> void {
+  channels.push_back(newChannel);
+}
 
-	auto Perception::getReferenceDevicesSize() -> size_t { return referenceDevices.size(); }
+auto Perception::getReferenceDevicesSize() -> size_t { return referenceDevices.size(); }
 
-	auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice& {
-		return referenceDevices.at(index);
-	}
-	auto Perception::addReferenceDevice(haptics::types::ReferenceDevice& newReferenceDevice) -> void {
-		referenceDevices.push_back(newReferenceDevice);
-	}
+auto Perception::getReferenceDeviceAt(int index) -> ReferenceDevice & {
+  return referenceDevices.at(index);
+}
+auto Perception::addReferenceDevice(haptics::types::ReferenceDevice &newReferenceDevice) -> void {
+  referenceDevices.push_back(newReferenceDevice);
+}
 
-	auto Perception::addReferenceDevice(
-		const std::vector<std::tuple<
-		int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
-		std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
-		std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
-		std::optional<float>, std::optional<haptics::types::ActuatorType>>>& referenceDeviceValues)
-		-> void {
-		const size_t idIndex = 0;
-		const size_t nameIndex = 1;
-		const size_t bodyPartIndex = 2;
-		const size_t maximumFrequencyIndex = 3;
-		const size_t minimumFrequencyIndex = 4;
-		const size_t resonanceFrequencyIndex = 5;
-		const size_t maximumAmplitudeIndex = 6;
-		const size_t impedanceIndex = 7;
-		const size_t maximumVoltageIndex = 8;
-		const size_t maximumCurrentIndex = 9;
-		const size_t maximumDisplacementIndex = 10;
-		const size_t weightIndex = 11;
-		const size_t sizeIndex = 12;
-		const size_t customIndex = 13;
-		const size_t typeIndex = 14;
-		for (auto values : referenceDeviceValues) {
+auto Perception::addReferenceDevice(
+    const std::vector<std::tuple<
+        int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
+    -> void {
+  const size_t idIndex = 0;
+  const size_t nameIndex = 1;
+  const size_t bodyPartIndex = 2;
+  const size_t maximumFrequencyIndex = 3;
+  const size_t minimumFrequencyIndex = 4;
+  const size_t resonanceFrequencyIndex = 5;
+  const size_t maximumAmplitudeIndex = 6;
+  const size_t impedanceIndex = 7;
+  const size_t maximumVoltageIndex = 8;
+  const size_t maximumCurrentIndex = 9;
+  const size_t maximumDisplacementIndex = 10;
+  const size_t weightIndex = 11;
+  const size_t sizeIndex = 12;
+  const size_t customIndex = 13;
+  const size_t typeIndex = 14;
+  for (auto values : referenceDeviceValues) {
 
-			haptics::types::ReferenceDevice myDevice(std::get<idIndex>(values),
-				std::get<nameIndex>(values));
+    haptics::types::ReferenceDevice myDevice(std::get<idIndex>(values),
+                                             std::get<nameIndex>(values));
 
-			if (std::get<bodyPartIndex>(values).has_value()) {
-				myDevice.setBodyPartMask(std::get<bodyPartIndex>(values).value());
-			}
-			if (std::get<maximumFrequencyIndex>(values).has_value()) {
-				myDevice.setMaximumFrequency(std::get<maximumFrequencyIndex>(values).value());
-			}
-			if (std::get<minimumFrequencyIndex>(values).has_value()) {
-				myDevice.setMinimumFrequency(std::get<minimumFrequencyIndex>(values).value());
-			}
-			if (std::get<resonanceFrequencyIndex>(values).has_value()) {
-				myDevice.setResonanceFrequency(std::get<resonanceFrequencyIndex>(values).value());
-			}
-			if (std::get<maximumAmplitudeIndex>(values).has_value()) {
-				myDevice.setMaximumAmplitude(std::get<maximumAmplitudeIndex>(values).value());
-			}
-			if (std::get<impedanceIndex>(values).has_value()) {
-				myDevice.setImpedance(std::get<impedanceIndex>(values).value());
-			}
-			if (std::get<maximumVoltageIndex>(values).has_value()) {
-				myDevice.setMaximumVoltage(std::get<maximumVoltageIndex>(values).value());
-			}
-			if (std::get<maximumCurrentIndex>(values).has_value()) {
-				myDevice.setMaximumCurrent(std::get<maximumCurrentIndex>(values).value());
-			}
-			if (std::get<maximumDisplacementIndex>(values).has_value()) {
-				myDevice.setMaximumDisplacement(std::get<maximumDisplacementIndex>(values).value());
-			}
-			if (std::get<weightIndex>(values).has_value()) {
-				myDevice.setWeight(std::get<weightIndex>(values).value());
-			}
-			if (std::get<sizeIndex>(values).has_value()) {
-				myDevice.setSize(std::get<sizeIndex>(values).value());
-			}
-			if (std::get<customIndex>(values).has_value()) {
-				myDevice.setCustom(std::get<customIndex>(values).value());
-			}
-			if (std::get<typeIndex>(values).has_value()) {
-				myDevice.setType(std::get<typeIndex>(values).value());
-			}
+    if (std::get<bodyPartIndex>(values).has_value()) {
+      myDevice.setBodyPartMask(std::get<bodyPartIndex>(values).value());
+    }
+    if (std::get<maximumFrequencyIndex>(values).has_value()) {
+      myDevice.setMaximumFrequency(std::get<maximumFrequencyIndex>(values).value());
+    }
+    if (std::get<minimumFrequencyIndex>(values).has_value()) {
+      myDevice.setMinimumFrequency(std::get<minimumFrequencyIndex>(values).value());
+    }
+    if (std::get<resonanceFrequencyIndex>(values).has_value()) {
+      myDevice.setResonanceFrequency(std::get<resonanceFrequencyIndex>(values).value());
+    }
+    if (std::get<maximumAmplitudeIndex>(values).has_value()) {
+      myDevice.setMaximumAmplitude(std::get<maximumAmplitudeIndex>(values).value());
+    }
+    if (std::get<impedanceIndex>(values).has_value()) {
+      myDevice.setImpedance(std::get<impedanceIndex>(values).value());
+    }
+    if (std::get<maximumVoltageIndex>(values).has_value()) {
+      myDevice.setMaximumVoltage(std::get<maximumVoltageIndex>(values).value());
+    }
+    if (std::get<maximumCurrentIndex>(values).has_value()) {
+      myDevice.setMaximumCurrent(std::get<maximumCurrentIndex>(values).value());
+    }
+    if (std::get<maximumDisplacementIndex>(values).has_value()) {
+      myDevice.setMaximumDisplacement(std::get<maximumDisplacementIndex>(values).value());
+    }
+    if (std::get<weightIndex>(values).has_value()) {
+      myDevice.setWeight(std::get<weightIndex>(values).value());
+    }
+    if (std::get<sizeIndex>(values).has_value()) {
+      myDevice.setSize(std::get<sizeIndex>(values).value());
+    }
+    if (std::get<customIndex>(values).has_value()) {
+      myDevice.setCustom(std::get<customIndex>(values).value());
+    }
+    if (std::get<typeIndex>(values).has_value()) {
+      myDevice.setType(std::get<typeIndex>(values).value());
+    }
 
-			addReferenceDevice(myDevice);
-		}
-	}
+    addReferenceDevice(myDevice);
+  }
+}
 
-	auto Perception::getEffectLibrarySize() -> size_t { return effectLibrary.size(); }
+auto Perception::getEffectLibrarySize() -> size_t { return effectLibrary.size(); }
 
-	auto Perception::getBasisEffectAt(int index) -> haptics::types::Effect& {
-		return effectLibrary.at(index);
-	}
+auto Perception::getBasisEffectAt(int index) -> haptics::types::Effect & {
+  return effectLibrary.at(index);
+}
 
-	auto Perception::addBasisEffect(haptics::types::Effect& newEffect) -> void {
-		effectLibrary.push_back(newEffect);
-	}
+auto Perception::addBasisEffect(haptics::types::Effect &newEffect) -> void {
+  effectLibrary.push_back(newEffect);
+}
 
-	auto Perception::convertToModality(const std::string& modalityString) -> PerceptionModality {
-		if (stringToPerceptionModality.count(modalityString) != 0) {
-			return stringToPerceptionModality.at(modalityString);
-		}
-		if (modalityString == "Pressure effect") {
-			return PerceptionModality::Pressure;
-		}
-		if (modalityString == "Acceleration effect") {
-			return PerceptionModality::Acceleration;
-		}
-		if (modalityString == "Velocity effect") {
-			return PerceptionModality::Velocity;
-		}
-		if (modalityString == "Position effect") {
-			return PerceptionModality::Position;
-		}
-		if (modalityString == "Temperature effect") {
-			return PerceptionModality::Temperature;
-		}
-		if (modalityString == "Vibration effect" || modalityString == "Vibrotactile effect") {
-			return PerceptionModality::Vibrotactile;
-		}
-		if (modalityString == "Water effect") {
-			return PerceptionModality::Water;
-		}
-		if (modalityString == "Wind effect") {
-			return PerceptionModality::Wind;
-		}
-		if (modalityString == "Velocity effect") {
-			return PerceptionModality::Velocity;
-		}
-		if (modalityString == "Kinesthetic effect" || modalityString == "Force effect") {
-			return PerceptionModality::Force;
-		}
-		if (modalityString == "Vibrotactile Texture effect" || modalityString == "Texture effect") {
-			return PerceptionModality::VibrotactileTexture;
-		}
-		if (modalityString == "Stiffness effect") {
-			return PerceptionModality::Stiffness;
-		}
-		if (modalityString == "Friction effect") {
-			return PerceptionModality::Friction;
-		}
+auto Perception::convertToModality(const std::string &modalityString) -> PerceptionModality {
+  if (stringToPerceptionModality.count(modalityString) != 0) {
+    return stringToPerceptionModality.at(modalityString);
+  }
+  if (modalityString == "Pressure effect") {
+    return PerceptionModality::Pressure;
+  }
+  if (modalityString == "Acceleration effect") {
+    return PerceptionModality::Acceleration;
+  }
+  if (modalityString == "Velocity effect") {
+    return PerceptionModality::Velocity;
+  }
+  if (modalityString == "Position effect") {
+    return PerceptionModality::Position;
+  }
+  if (modalityString == "Temperature effect") {
+    return PerceptionModality::Temperature;
+  }
+  if (modalityString == "Vibration effect" || modalityString == "Vibrotactile effect") {
+    return PerceptionModality::Vibrotactile;
+  }
+  if (modalityString == "Water effect") {
+    return PerceptionModality::Water;
+  }
+  if (modalityString == "Wind effect") {
+    return PerceptionModality::Wind;
+  }
+  if (modalityString == "Velocity effect") {
+    return PerceptionModality::Velocity;
+  }
+  if (modalityString == "Kinesthetic effect" || modalityString == "Force effect") {
+    return PerceptionModality::Force;
+  }
+  if (modalityString == "Vibrotactile Texture effect" || modalityString == "Texture effect") {
+    return PerceptionModality::VibrotactileTexture;
+  }
+  if (modalityString == "Stiffness effect") {
+    return PerceptionModality::Stiffness;
+  }
+  if (modalityString == "Friction effect") {
+    return PerceptionModality::Friction;
+  }
 
-		return PerceptionModality::Other;
-	}
+  return PerceptionModality::Other;
+}
 
-	auto Perception::getEffectById(int id) -> std::optional<Effect> {
-		for (auto effect : effectLibrary) {
-			if (effect.getId() == id) {
-				return effect;
-			}
-		}
-		return {};
-	}
+auto Perception::getEffectById(int id) -> std::optional<Effect> {
+  for (auto effect : effectLibrary) {
+    if (effect.getId() == id) {
+      return effect;
+    }
+  }
+  return {};
+}
 
-	auto Perception::linearizeLibrary() -> void {
-		for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
-			auto channel = getChannelAt(i);
-			auto numBands = static_cast<int>(channel.getBandsSize());
-			for (int j = 0; j < numBands; j++) {
-				auto band = channel.getBandAt(j);
-				auto numEffects = static_cast<int>(band.getEffectsSize());
-				for (int k = 0; k < numEffects; k++) {
-					auto effect = band.getEffectAt(k);
-					if (effect.getEffectType() == EffectType::Reference) {
-						auto refEffect = getEffectById(effect.getId());
-						if (refEffect.has_value()) {
-							Effect basisEffect(refEffect.value());
-							basisEffect.setPosition(effect.getPosition());
-							basisEffect.setId(-1);
-							getChannelAt(i).getBandAt(j).replaceEffectAt(k, basisEffect);
-						}
-					}
-				}
-			}
-		}
-		effectLibrary.clear();
-	}
+auto Perception::linearizeLibrary() -> void {
+  for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
+    auto channel = getChannelAt(i);
+    auto numBands = static_cast<int>(channel.getBandsSize());
+    for (int j = 0; j < numBands; j++) {
+      auto band = channel.getBandAt(j);
+      auto numEffects = static_cast<int>(band.getEffectsSize());
+      for (int k = 0; k < numEffects; k++) {
+        auto effect = band.getEffectAt(k);
+        if (effect.getEffectType() == EffectType::Reference) {
+          auto refEffect = getEffectById(effect.getId());
+          if (refEffect.has_value()) {
+            Effect basisEffect(refEffect.value());
+            basisEffect.setPosition(effect.getPosition());
+            basisEffect.setId(-1);
+            getChannelAt(i).getBandAt(j).replaceEffectAt(k, basisEffect);
+          }
+        }
+      }
+    }
+  }
+  effectLibrary.clear();
+}
 
-	auto Perception::refactorEffects() -> void {
-		for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
-			auto channel = getChannelAt(i);
-			auto numBands = static_cast<int>(channel.getBandsSize());
-			for (int j = 0; j < numBands; j++) {
-				auto band = channel.getBandAt(j);
-				if (band.getBandType() == BandType::WaveletWave) {
-					continue;
-				}
-				auto numEffects = static_cast<int>(band.getEffectsSize());
-				for (int k = 0; k < numEffects; k++) {
-					auto refEffect = band.getEffectAt(k);
-					auto sameEffects = searchForEquivalentEffects(refEffect, i);
-					if (sameEffects.size() > 1) {
-						Effect basisEffect(refEffect);
-						auto newId = static_cast<int>(getEffectLibrarySize());
-						basisEffect.setId(newId);
-						basisEffect.setPosition(0);
-						for (const auto& t : sameEffects) {
-							auto [l, m, n] = t;
-							// if (i != l || j != m || k != n) {
-							Effect libEffect;
-							libEffect.setId(newId);
-							libEffect.setPosition(getChannelAt(l).getBandAt(m).getEffectAt(n).getPosition());
-							libEffect.setEffectType(EffectType::Reference);
-							getChannelAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
-							//}
-						}
-						addBasisEffect(basisEffect);
-					}
-				}
-			}
-		}
-	}
+auto Perception::refactorEffects() -> void {
+  for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
+    auto channel = getChannelAt(i);
+    auto numBands = static_cast<int>(channel.getBandsSize());
+    for (int j = 0; j < numBands; j++) {
+      auto band = channel.getBandAt(j);
+      if (band.getBandType() == BandType::WaveletWave) {
+        continue;
+      }
+      auto numEffects = static_cast<int>(band.getEffectsSize());
+      for (int k = 0; k < numEffects; k++) {
+        auto refEffect = band.getEffectAt(k);
+        auto sameEffects = searchForEquivalentEffects(refEffect, i);
+        if (sameEffects.size() > 1) {
+          Effect basisEffect(refEffect);
+          auto newId = static_cast<int>(getEffectLibrarySize());
+          basisEffect.setId(newId);
+          basisEffect.setPosition(0);
+          for (const auto &t : sameEffects) {
+            auto [l, m, n] = t;
+            // if (i != l || j != m || k != n) {
+            Effect libEffect;
+            libEffect.setId(newId);
+            libEffect.setPosition(getChannelAt(l).getBandAt(m).getEffectAt(n).getPosition());
+            libEffect.setEffectType(EffectType::Reference);
+            getChannelAt(l).getBandAt(m).replaceEffectAt(n, libEffect);
+            //}
+          }
+          addBasisEffect(basisEffect);
+        }
+      }
+    }
+  }
+}
 
-	auto Perception::searchForEquivalentEffects(Effect& effect, int startingChannel)
-		-> std::vector<std::tuple<int, int, int>> {
-		std::vector<std::tuple<int, int, int>> sameEffects;
-		for (int l = startingChannel; l < static_cast<int>(getChannelsSize()); l++) {
-			auto channel2 = getChannelAt(l);
-			auto numBands2 = static_cast<int>(channel2.getBandsSize());
-			for (int m = 0; m < numBands2; m++) {
-				auto band2 = channel2.getBandAt(m);
-				auto numEffects2 = static_cast<int>(band2.getEffectsSize());
-				for (int n = 0; n < numEffects2; n++) {
-					if (effect.isEquivalent(band2.getEffectAt(n))) {
-						sameEffects.emplace_back(l, m, n);
-					}
-				}
-			}
-		}
-		return sameEffects;
-	}
+auto Perception::searchForEquivalentEffects(Effect &effect, int startingChannel)
+    -> std::vector<std::tuple<int, int, int>> {
+  std::vector<std::tuple<int, int, int>> sameEffects;
+  for (int l = startingChannel; l < static_cast<int>(getChannelsSize()); l++) {
+    auto channel2 = getChannelAt(l);
+    auto numBands2 = static_cast<int>(channel2.getBandsSize());
+    for (int m = 0; m < numBands2; m++) {
+      auto band2 = channel2.getBandAt(m);
+      auto numEffects2 = static_cast<int>(band2.getEffectsSize());
+      for (int n = 0; n < numEffects2; n++) {
+        if (effect.isEquivalent(band2.getEffectAt(n))) {
+          sameEffects.emplace_back(l, m, n);
+        }
+      }
+    }
+  }
+  return sameEffects;
+}
 
-	auto Perception::equals(const Perception& perception) const -> bool {
-		if (id != perception.getId()) {
-			std::cerr << "Perception id fields are different" << std::endl;
-			return false;
-		}
-		if (avatarId != perception.getAvatarId()) {
-			std::cerr << "avatarId fields are different" << std::endl;
-			return false;
-		}
-		if (description != perception.getDescription()) {
-			std::cerr << "Description fields are different" << std::endl;
-			return false;
-		}
-		if (priority != perception.getPriority()) {
-			std::cerr << "Priority fields are different" << std::endl;
-			return false;
-		}
-		if (effectSemanticScheme != perception.getEffectSemanticScheme()) {
-			std::cerr << "effectSemanticScheme fields are different" << std::endl;
-			return false;
-		}
-		if (perceptionModality != perception.getPerceptionModality()) {
-			std::cerr << "Perception modality fields are different" << std::endl;
-			return false;
-		}
-		if (unitExponent != perception.getUnitExponent()) {
-			std::cerr << "Unit Exponent fields are different" << std::endl;
-			return false;
-		}
-		if (perceptionUnitExponent != perception.getPerceptionUnitExponent()) {
-			std::cerr << "Perception Unit Exponent fields are different" << std::endl;
-			return false;
-		}
-		if (channels.size() != perception.channels.size()) {
-			std::cerr << "The number of channels in perception " << id << " is different" << std::endl;
-			return false;
-		}
-		if (referenceDevices.size() != perception.referenceDevices.size()) {
-			std::cerr << "The number of referenceDevices in perception " << id << " is different"
-				<< std::endl;
-			return false;
-		}
-		if (effectLibrary.size() != perception.effectLibrary.size()) {
-			std::cerr << "The number of effect in the library of perception " << id << " is different"
-				<< std::endl;
-			return false;
-		}
+auto Perception::equals(const Perception &perception) const -> bool {
+  if (id != perception.getId()) {
+    std::cerr << "Perception id fields are different" << std::endl;
+    return false;
+  }
+  if (avatarId != perception.getAvatarId()) {
+    std::cerr << "avatarId fields are different" << std::endl;
+    return false;
+  }
+  if (description != perception.getDescription()) {
+    std::cerr << "Description fields are different" << std::endl;
+    return false;
+  }
+  if (priority != perception.getPriority()) {
+    std::cerr << "Priority fields are different" << std::endl;
+    return false;
+  }
+  if (effectSemanticScheme != perception.getEffectSemanticScheme()) {
+    std::cerr << "effectSemanticScheme fields are different" << std::endl;
+    return false;
+  }
+  if (perceptionModality != perception.getPerceptionModality()) {
+    std::cerr << "Perception modality fields are different" << std::endl;
+    return false;
+  }
+  if (unitExponent != perception.getUnitExponent()) {
+    std::cerr << "Unit Exponent fields are different" << std::endl;
+    return false;
+  }
+  if (perceptionUnitExponent != perception.getPerceptionUnitExponent()) {
+    std::cerr << "Perception Unit Exponent fields are different" << std::endl;
+    return false;
+  }
+  if (channels.size() != perception.channels.size()) {
+    std::cerr << "The number of channels in perception " << id << " is different" << std::endl;
+    return false;
+  }
+  if (referenceDevices.size() != perception.referenceDevices.size()) {
+    std::cerr << "The number of referenceDevices in perception " << id << " is different"
+              << std::endl;
+    return false;
+  }
+  if (effectLibrary.size() != perception.effectLibrary.size()) {
+    std::cerr << "The number of effect in the library of perception " << id << " is different"
+              << std::endl;
+    return false;
+  }
 
-		bool isEqual = true;
-		if (isEqual) {
-			for (int i = 0; i < static_cast<int>(channels.size()); i++) {
-				const auto channel1 = channels.at(i);
-				const auto channel2 = perception.channels.at(i);
-				isEqual = isEqual && channel1.equals(channel2);
-			}
-		}
-		if (isEqual) {
-			for (int i = 0; i < static_cast<int>(referenceDevices.size()); i++) {
-				const auto device1 = referenceDevices.at(i);
-				const auto device2 = perception.referenceDevices.at(i);
-				isEqual = isEqual && device1.equals(device2);
-			}
-		}
-		if (isEqual) {
-			for (int i = 0; i < static_cast<int>(effectLibrary.size()); i++) {
-				const auto effect1 = effectLibrary.at(i);
-				const auto effect2 = perception.effectLibrary.at(i);
-				isEqual = isEqual && effect1.equals(effect2);
-			}
-		}
-		return isEqual;
-	}
+  bool isEqual = true;
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(channels.size()); i++) {
+      const auto channel1 = channels.at(i);
+      const auto channel2 = perception.channels.at(i);
+      isEqual = isEqual && channel1.equals(channel2);
+    }
+  }
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(referenceDevices.size()); i++) {
+      const auto device1 = referenceDevices.at(i);
+      const auto device2 = perception.referenceDevices.at(i);
+      isEqual = isEqual && device1.equals(device2);
+    }
+  }
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(effectLibrary.size()); i++) {
+      const auto effect1 = effectLibrary.at(i);
+      const auto effect2 = perception.effectLibrary.at(i);
+      isEqual = isEqual && effect1.equals(effect2);
+    }
+  }
+  return isEqual;
+}
 
 } // namespace haptics::types

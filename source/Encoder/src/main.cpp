@@ -58,277 +58,258 @@ using haptics::types::Haptics;
 using haptics::types::Perception;
 
 auto help() -> void {
-	std::cout
-		<< "usages: Encoder [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-kin]" << std::endl
-		<< std::endl
-		<< "This piece of software encodes an input file into a MPEG Haptics RM1 file" << std::endl
-		<< "positional arguments:" << std::endl
-		<< "\t-f, --file <FILE>\t\tfile to convert" << std::endl
-		<< "\t-o, --output <OUTPUT_FILE>\toutput file" << std::endl
-		<< std::endl
-		<< "optional arguments:" << std::endl
-		<< "\t-h, --help\t\t\tshow this help message and exit" << std::endl
-		<< "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
-		"the encoder will output a file in a human-readable format"
-		<< std::endl
-		//<< "\t-s, --streaming\t\t\tthe file will be encoded into its binary packetized format. If
-		// not "
-		//   "provided "
-		//   "the encoder will output a file in a human-readable format"
-		//<< std::endl
-		<< "--packet_duration\t\t\t The duration of the packets for the binary packetized format."
-		"If the streaming format is choosen and this value is not "
-		"provided, the default value is 128ms."
-		<< std::endl
-		<< "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
-		"be placed in the library and replaced by a reference"
-		<< "\t-l, --linearize\t\t\tthe file will be linearized. Every referenced effect from the "
-		"library will be copied into the main timeline."
-		<< std::endl
-		<< "\t-kb, --bitrate\t\t\ttarget bitrate of the encoded file" << std::endl
-		<< "\t-bu, \t\t\twavelet bitbudget, if custom setting needed" << std::endl
-		<< "\t-bl, \t\t\twavelet block length, if custom setting needed" << std::endl
-		<< "\t-cf, \t\t\tcutoff frequency used to split pcm signals in high and low frequencies. "
-		"Default value is 72.5 Hz. If the value is set to zero, the signal will not be split."
-		<< std::endl
-		<< "\t--disable-wavelet, \t\t\tthe encoder will encode the data using a single vectorial "
-		"band for low frequencies. This argument will only affect PCM input content."
-		<< std::endl
-		<< "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
-		"band for the whole frequency spectrum. This argument will only affect PCM input content."
-		<< std::endl
-		<< "\t-ts, \t\t\tspecify the timescale" << std::endl
-		<< std::endl;
+  std::cout
+      << "usages: Encoder [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-kin]" << std::endl
+      << std::endl
+      << "This piece of software encodes an input file into a MPEG Haptics RM1 file" << std::endl
+      << "positional arguments:" << std::endl
+      << "\t-f, --file <FILE>\t\tfile to convert" << std::endl
+      << "\t-o, --output <OUTPUT_FILE>\toutput file" << std::endl
+      << std::endl
+      << "optional arguments:" << std::endl
+      << "\t-h, --help\t\t\tshow this help message and exit" << std::endl
+      << "\t-b, --binary\t\t\tthe file will be encoded into its binary format. If not provided "
+         "the encoder will output a file in a human-readable format"
+      << std::endl
+      //<< "\t-s, --streaming\t\t\tthe file will be encoded into its binary packetized format. If
+      // not "
+      //   "provided "
+      //   "the encoder will output a file in a human-readable format"
+      //<< std::endl
+      << "--packet_duration\t\t\t The duration of the packets for the binary packetized format."
+         "If the streaming format is choosen and this value is not "
+         "provided, the default value is 128ms."
+      << std::endl
+      << "\t-r, --refactor\t\t\tthe file will be refactored. Every effect used multiple times will "
+         "be placed in the library and replaced by a reference"
+      << "\t-l, --linearize\t\t\tthe file will be linearized. Every referenced effect from the "
+         "library will be copied into the main timeline."
+      << std::endl
+      << "\t-kb, --bitrate\t\t\ttarget bitrate of the encoded file" << std::endl
+      << "\t-bu, \t\t\twavelet bitbudget, if custom setting needed" << std::endl
+      << "\t-bl, \t\t\twavelet block length, if custom setting needed" << std::endl
+      << "\t-cf, \t\t\tcutoff frequency used to split pcm signals in high and low frequencies. "
+         "Default value is 72.5 Hz. If the value is set to zero, the signal will not be split."
+      << std::endl
+      << "\t--disable-wavelet, \t\t\tthe encoder will encode the data using a single vectorial "
+         "band for low frequencies. This argument will only affect PCM input content."
+      << std::endl
+      << "\t--disable-vectorial, \t\t\tthe encoder will encode the data using a single wavelet "
+         "band for the whole frequency spectrum. This argument will only affect PCM input content."
+      << std::endl
+      << "\t-ts, \t\t\tspecify the timescale" << std::endl
+      << std::endl;
 }
 
 // NOLINTNEXTLINE
-auto main(int argc, char* argv[]) -> int {
-	const auto args = std::vector<const char*>(argv, argv + argc);
-	InputParser inputParser(args);
-	if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
-		help();
-		return EXIT_SUCCESS;
-	}
+auto main(int argc, char *argv[]) -> int {
+  const auto args = std::vector<const char *>(argv, argv + argc);
+  InputParser inputParser(args);
+  if (inputParser.cmdOptionExists("-h") || inputParser.cmdOptionExists("--help")) {
+    help();
+    return EXIT_SUCCESS;
+  }
 
-	std::string filename = inputParser.getCmdOption("-f");
-	if (filename.empty()) {
-		filename = inputParser.getCmdOption("--file");
-	}
-	if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
-		help();
-		return EXIT_FAILURE;
-	}
+  std::string filename = inputParser.getCmdOption("-f");
+  if (filename.empty()) {
+    filename = inputParser.getCmdOption("--file");
+  }
+  if (filename.empty() || !std::filesystem::is_regular_file(filename)) {
+    help();
+    return EXIT_FAILURE;
+  }
 
-	std::string output = inputParser.getCmdOption("-o");
-	if (output.empty()) {
-		output = inputParser.getCmdOption("--output");
-	}
-	if (output.empty()) {
-		if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
-			output = "out.hmpg";
-		}
-		else {
-			output = "out.hjif";
-		}
-	}
-	std::cout << "The generated file will be : " << output << "\n";
+  std::string output = inputParser.getCmdOption("-o");
+  if (output.empty()) {
+    output = inputParser.getCmdOption("--output");
+  }
+  if (output.empty()) {
+    if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+      output = "out.hmpg";
+    } else {
+      output = "out.hjif";
+    }
+  }
+  std::cout << "The generated file will be : " << output << "\n";
 
-	std::optional<int> bitrate = std::nullopt;
-	if (inputParser.cmdOptionExists("-kb")) {
-		bitrate = std::stoi(inputParser.getCmdOption("-kb"));
-	}
+  std::optional<int> bitrate = std::nullopt;
+  if (inputParser.cmdOptionExists("-kb")) {
+    bitrate = std::stoi(inputParser.getCmdOption("-kb"));
+  }
 
-	std::optional<int> budget = std::nullopt;
-	if (inputParser.cmdOptionExists("-bu")) {
-		budget = std::stoi(inputParser.getCmdOption("-bu"));
-	}
+  std::optional<int> budget = std::nullopt;
+  if (inputParser.cmdOptionExists("-bu")) {
+    budget = std::stoi(inputParser.getCmdOption("-bu"));
+  }
 
-	std::optional<int> blocklength = std::nullopt;
-	if (inputParser.cmdOptionExists("-bl")) {
-		blocklength = std::stoi(inputParser.getCmdOption("-bl"));
-	}
+  std::optional<int> blocklength = std::nullopt;
+  if (inputParser.cmdOptionExists("-bl")) {
+    blocklength = std::stoi(inputParser.getCmdOption("-bl"));
+  }
 
-	std::optional<double> cutoff = std::nullopt;
-	if (inputParser.cmdOptionExists("-cf")) {
-		cutoff = std::stod(inputParser.getCmdOption("-cf"));
-	}
-	else {
-		cutoff = haptics::encoder::DEFAULT_CUTOFF_FREQUENCY;
-	}
+  std::optional<double> cutoff = std::nullopt;
+  if (inputParser.cmdOptionExists("-cf")) {
+    cutoff = std::stod(inputParser.getCmdOption("-cf"));
+  } else {
+    cutoff = haptics::encoder::DEFAULT_CUTOFF_FREQUENCY;
+  }
 
-	bool enable_wavelet = !inputParser.cmdOptionExists("--disable-wavelet");
-	bool enable_vectorial = !inputParser.cmdOptionExists("--disable-vectorial");
+  bool enable_wavelet = !inputParser.cmdOptionExists("--disable-wavelet");
+  bool enable_vectorial = !inputParser.cmdOptionExists("--disable-vectorial");
 
-	Haptics hapticFile;
-	if (inputParser.cmdOptionExists("-ts")) {
-		hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
-	}
-	else {
-		// NOLINTNEXTLINE
-		hapticFile.setTimescale(1000);
-	}
-	Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
-	std::string ext = InputParser::getFileExt(filename);
-	int codeExit = -1;
-	if (ext == "ohm") {
-		std::cout << "The OHM file to process : " << filename << std::endl;
-		OHMData ohmData;
-		if (!ohmData.loadFile(filename)) {
-			std::cerr << "ERROR : impossible to read the OHM file : " << std::endl
-				<< filename << std::endl;
-			return EXIT_FAILURE;
-		}
-		hapticFile.loadMetadataFromOHM(ohmData);
+  Haptics hapticFile;
+  if (inputParser.cmdOptionExists("-ts")) {
+    hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
+  } else {
+    // NOLINTNEXTLINE
+    hapticFile.setTimescale(1000);
+  }
+  Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
+  std::string ext = InputParser::getFileExt(filename);
+  int codeExit = -1;
+  if (ext == "ohm") {
+    std::cout << "The OHM file to process : " << filename << std::endl;
+    OHMData ohmData;
+    if (!ohmData.loadFile(filename)) {
+      std::cerr << "ERROR : impossible to read the OHM file : " << std::endl
+                << filename << std::endl;
+      return EXIT_FAILURE;
+    }
+    hapticFile.loadMetadataFromOHM(ohmData);
 
-		codeExit = EXIT_SUCCESS;
-		if (ohmData.getHapticElementMetadataSize() != hapticFile.getPerceptionsSize()) {
-			codeExit = EXIT_FAILURE;
-		}
-		std::filesystem::path folderPath = std::filesystem::path(filename);
-		folderPath = folderPath.parent_path();
-		for (uint32_t i = 0; i < ohmData.getHapticElementMetadataSize() && codeExit == EXIT_SUCCESS;
-			i++) {
-			OHMData::HapticElementMetadata metadata = ohmData.getHapticElementMetadataAt((int)i);
+    codeExit = EXIT_SUCCESS;
+    if (ohmData.getHapticElementMetadataSize() != hapticFile.getPerceptionsSize()) {
+      codeExit = EXIT_FAILURE;
+    }
+    std::filesystem::path folderPath = std::filesystem::path(filename);
+    folderPath = folderPath.parent_path();
+    for (uint32_t i = 0; i < ohmData.getHapticElementMetadataSize() && codeExit == EXIT_SUCCESS;
+         i++) {
+      OHMData::HapticElementMetadata metadata = ohmData.getHapticElementMetadataAt((int)i);
 
-			filename = (folderPath / metadata.elementFilename).string();
-			if (!std::filesystem::is_regular_file(filename)) {
-				codeExit = EXIT_FAILURE;
-				break;
-			}
+      filename = (folderPath / metadata.elementFilename).string();
+      if (!std::filesystem::is_regular_file(filename)) {
+        codeExit = EXIT_FAILURE;
+        break;
+      }
 
-			ext = InputParser::getFileExt(filename);
-			myPerception = hapticFile.getPerceptionAt((int)i);
-			if (ext == "json" || ext == "ahap") {
-				std::cout << "The AHAP file to encode : " << filename << std::endl;
-				codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
-			}
-			else if (ext == "xml" || ext == "ivs") {
-				std::cout << "The IVS file to encode : " << filename << std::endl;
-				codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
-			}
-			else if (ext == "wav") {
-				std::cout << "The WAV file to encode : " << filename << std::endl;
-				haptics::encoder::EncodingConfig config;
-				if (bitrate.has_value()) {
-					std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
-					if (blocklength.has_value()) {
-						config = haptics::encoder::EncodingConfig::generateConfigParam(
-							bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial,
-							blocklength.value());
-					}
-					else {
-						config = haptics::encoder::EncodingConfig::generateConfigParam(
-							bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial);
-					}
-				}
-				else if (budget.has_value()) {
-					if (blocklength.has_value()) {
-						config = haptics::encoder::EncodingConfig::generateConfigBudget(
-							budget.value(), cutoff.value(), enable_wavelet, enable_vectorial,
-							blocklength.value());
-					}
-					else {
-						config = haptics::encoder::EncodingConfig::generateConfigBudget(
-							budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
-					}
+      ext = InputParser::getFileExt(filename);
+      myPerception = hapticFile.getPerceptionAt((int)i);
+      if (ext == "json" || ext == "ahap") {
+        std::cout << "The AHAP file to encode : " << filename << std::endl;
+        codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+      } else if (ext == "xml" || ext == "ivs") {
+        std::cout << "The IVS file to encode : " << filename << std::endl;
+        codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+      } else if (ext == "wav") {
+        std::cout << "The WAV file to encode : " << filename << std::endl;
+        haptics::encoder::EncodingConfig config;
+        if (bitrate.has_value()) {
+          std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
+          if (blocklength.has_value()) {
+            config = haptics::encoder::EncodingConfig::generateConfigParam(
+                bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial,
+                blocklength.value());
+          } else {
+            config = haptics::encoder::EncodingConfig::generateConfigParam(
+                bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial);
+          }
+        } else if (budget.has_value()) {
+          if (blocklength.has_value()) {
+            config = haptics::encoder::EncodingConfig::generateConfigBudget(
+                budget.value(), cutoff.value(), enable_wavelet, enable_vectorial,
+                blocklength.value());
+          } else {
+            config = haptics::encoder::EncodingConfig::generateConfigBudget(
+                budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
+          }
 
-				}
-				else {
-					config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
-						enable_vectorial);
-				}
-				codeExit =
-					PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
-			}
+        } else {
+          config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
+                                                                           enable_vectorial);
+        }
+        codeExit =
+            PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
+      }
 
-			if (codeExit == EXIT_SUCCESS) {
-				hapticFile.replacePerceptionAt((int)i, myPerception);
-			}
-		}
-	}
-	else if (ext == "json" || ext == "ahap") {
-		std::cout << "The AHAP file to encode : " << filename << std::endl;
-		codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
-		hapticFile.addPerception(myPerception);
-	}
-	else if (ext == "xml" || ext == "ivs") {
-		std::cout << "The IVS file to encode : " << filename << std::endl;
-		codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
-		hapticFile.addPerception(myPerception);
-	}
-	else if (ext == "wav") {
-		std::cout << "The WAV file to encode : " << filename << std::endl;
-		haptics::encoder::EncodingConfig config;
-		if (bitrate.has_value()) {
-			std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
-			if (blocklength.has_value()) {
-				config = haptics::encoder::EncodingConfig::generateConfigParam(
-					bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
-			}
-			else {
-				config = haptics::encoder::EncodingConfig::generateConfigParam(
-					bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial);
-			}
-		}
-		else if (budget.has_value()) {
-			if (blocklength.has_value()) {
-				config = haptics::encoder::EncodingConfig::generateConfigBudget(
-					budget.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
-			}
-			else {
-				config = haptics::encoder::EncodingConfig::generateConfigBudget(
-					budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
-			}
-		}
-		else {
-			config =
-				haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
-		}
-		codeExit =
-			PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
-		hapticFile.addPerception(myPerception);
-	}
-	else if (ext == "hjif") {
-		std::cout << "The HJIF file to encode : " << filename << std::endl;
-		IOJson::loadFile(filename, hapticFile);
-	}
-	else {
-		codeExit = EXIT_FAILURE;
-	}
+      if (codeExit == EXIT_SUCCESS) {
+        hapticFile.replacePerceptionAt((int)i, myPerception);
+      }
+    }
+  } else if (ext == "json" || ext == "ahap") {
+    std::cout << "The AHAP file to encode : " << filename << std::endl;
+    codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+    hapticFile.addPerception(myPerception);
+  } else if (ext == "xml" || ext == "ivs") {
+    std::cout << "The IVS file to encode : " << filename << std::endl;
+    codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+    hapticFile.addPerception(myPerception);
+  } else if (ext == "wav") {
+    std::cout << "The WAV file to encode : " << filename << std::endl;
+    haptics::encoder::EncodingConfig config;
+    if (bitrate.has_value()) {
+      std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
+      if (blocklength.has_value()) {
+        config = haptics::encoder::EncodingConfig::generateConfigParam(
+            bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+      } else {
+        config = haptics::encoder::EncodingConfig::generateConfigParam(
+            bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial);
+      }
+    } else if (budget.has_value()) {
+      if (blocklength.has_value()) {
+        config = haptics::encoder::EncodingConfig::generateConfigBudget(
+            budget.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+      } else {
+        config = haptics::encoder::EncodingConfig::generateConfigBudget(
+            budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
+      }
+    } else {
+      config =
+          haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
+    }
+    codeExit =
+        PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
+    hapticFile.addPerception(myPerception);
+  } else if (ext == "hjif") {
+    std::cout << "The HJIF file to encode : " << filename << std::endl;
+    IOJson::loadFile(filename, hapticFile);
+  } else {
+    codeExit = EXIT_FAILURE;
+  }
 
-	if (codeExit == EXIT_FAILURE) {
-		help();
-		return codeExit;
-	}
-	if (inputParser.cmdOptionExists("-r") || inputParser.cmdOptionExists("--refactor")) {
-		hapticFile.refactor();
-	}
-	if (inputParser.cmdOptionExists("-l") || inputParser.cmdOptionExists("--linearize")) {
-		hapticFile.linearize();
-	}
+  if (codeExit == EXIT_FAILURE) {
+    help();
+    return codeExit;
+  }
+  if (inputParser.cmdOptionExists("-r") || inputParser.cmdOptionExists("--refactor")) {
+    hapticFile.refactor();
+  }
+  if (inputParser.cmdOptionExists("-l") || inputParser.cmdOptionExists("--linearize")) {
+    hapticFile.linearize();
+  }
 
-	auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
-	if (!logs.empty()) {
-		for (auto& l : logs) {
-			std::cerr << l << std::endl;
-		}
-		std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
-			"binary encoding may result in some information loss."
-			<< std::endl;
-	}
+  auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
+  if (!logs.empty()) {
+    for (auto &l : logs) {
+      std::cerr << l << std::endl;
+    }
+    std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                 "binary encoding may result in some information loss."
+              << std::endl;
+  }
 
-	if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
-		//  IOBinary::writeFile(hapticFile, output);
-		//} else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
-		int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
-		if (inputParser.cmdOptionExists("--packet_duration")) {
-			packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
-		}
-		IOStream::writeFile(hapticFile, output, packetDuration);
-	}
-	else {
-		IOJson::writeFile(hapticFile, output);
-	}
+  if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
+    //  IOBinary::writeFile(hapticFile, output);
+    //} else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
+    int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
+    if (inputParser.cmdOptionExists("--packet_duration")) {
+      packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
+    }
+    IOStream::writeFile(hapticFile, output, packetDuration);
+  } else {
+    IOJson::writeFile(hapticFile, output);
+  }
 
-	return codeExit;
+  return codeExit;
 }

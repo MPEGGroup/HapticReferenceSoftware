@@ -45,18 +45,18 @@ constexpr double peak = 20;
 
 TEST_CASE("haptics::tools::PsychohapticModel") {
 
-	using haptics::tools::PsychohapticModel;
+  using haptics::tools::PsychohapticModel;
 
-	SECTION("PsychohapticModel") {
+  SECTION("PsychohapticModel") {
 
-		PsychohapticModel pm(bl, fs);
+    PsychohapticModel pm(bl, fs);
 
-		std::vector<double> spectrum(bl, 0);
-		spectrum[pos] = peak;
+    std::vector<double> spectrum(bl, 0);
+    spectrum[pos] = peak;
 
-		haptics::tools::peaks p =
-			PsychohapticModel::findPeaks(spectrum, MIN_PEAK_PROMINENCE, peak - MIN_PEAK_HEIGHT_DIFF);
+    haptics::tools::peaks p =
+        PsychohapticModel::findPeaks(spectrum, MIN_PEAK_PROMINENCE, peak - MIN_PEAK_HEIGHT_DIFF);
 
-		CHECK(p.locations[0] == pos);
-	}
+    CHECK(p.locations[0] == pos);
+  }
 }

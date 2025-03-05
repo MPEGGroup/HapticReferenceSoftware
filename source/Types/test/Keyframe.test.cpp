@@ -37,7 +37,7 @@
 using haptics::types::Keyframe;
 
 TEST_CASE("haptics::types::Keyframe", "[placeholder]") {
-	const Keyframe kf(10, .8, 500);
+  const Keyframe kf(10, .8, 500);
 
-	CHECK(true);
+  CHECK(true);
 }
