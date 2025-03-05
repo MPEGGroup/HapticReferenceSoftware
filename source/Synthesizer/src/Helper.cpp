@@ -193,9 +193,9 @@ namespace haptics::synthesizer {
     upfsUse = fs;
   }
   std::vector<std::vector<double>> amplitudesUp;
-  for (uint32_t i = 0; i < amplitudes.size(); i++) {
+  for (auto &amplitude : amplitudes) {
     std::vector<double> bufChannel;
-    tools::resample<double>(upfsUse / fs, 1, amplitudes[i], bufChannel);
+    tools::resample<double>(upfsUse / fs, 1, amplitude, bufChannel);
     amplitudesUp.push_back(bufChannel);
   }
   return haptics::tools::WavParser::saveFile(filename, amplitudesUp, upfsUse);

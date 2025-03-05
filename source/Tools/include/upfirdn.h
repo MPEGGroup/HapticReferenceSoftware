@@ -31,32 +31,51 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
-
-using namespace std;
-
 #include <complex>
 #include <stdexcept>
 #include <vector>
 namespace haptics::tools {
 template <class S1, class S2, class C> class Resampler {
 public:
-  typedef S1 inputType;
-  typedef S2 outputType;
-  typedef C coefType;
+  using inputType = S1;
+  using outputType = S2;
+  using coefType = C;
 
-  Resampler(int upRate, int downRate, C *coefs, int coefCount);
-  virtual ~Resampler();
+  Resampler(int upRate, int downRate, const C *coefs, int coefCount);
+  Resampler(const Resampler &src) {
+    this._upRate = src._upRate;
+    this._downRate = src._downRate;
+  }
+  auto operator=(const Resampler &other) -> Resampler & {
+    if (this != &other) {
+      // Perform deep copy of other members
+      _upRate = other._upRate;
+      _downRate = other._downRate;
+      _paddedCoefCount = other._paddedCoefCount;
+      _coefsPerPhase = other._coefsPerPhase;
+      _t = other._t;
+      _xOffset = other._xOffset;
 
-  int apply(S1 *in, int inCount, S2 *out, int outCount);
-  int neededOutCount(int inCount);
-  int coefsPerPhase() { return _coefsPerPhase; }
+      // Allocate new memory for _transposedCoefs and copy the data
+      delete[] _transposedCoefs;
+      _transposedCoefs = new coefType[_paddedCoefCount];
+      std::copy(other._transposedCoefs.get(), other._transposedCoefs.get() + _paddedCoefCount,
+                _transposedCoefs.get());
+    }
+    return *this;
+  }
+  virtual ~Resampler() = default;
+
+  auto apply(S1 *in, int inCount, S2 *out, int outCount) -> int;
+  auto neededOutCount(int inCount) -> int;
+  auto coefsPerPhase() -> int { return _coefsPerPhase; }
 
 private:
   int _upRate;
   int _downRate;
 
-  coefType *_transposedCoefs;
-  inputType *_state;
+  std::unique_ptr<coefType[]> _transposedCoefs;
+  std::unique_ptr<inputType[]> _state;
   inputType *_stateEnd;
 
   int _paddedCoefCount; // ceil(len(coefs)/upRate)*upRate
@@ -69,18 +88,10 @@ private:
 #include <cmath>
 #include <iostream>
 
-/*
-using std::cout;
-using std::endl;
-
-using std::fill;
-using std::copy;
-*/
-
 using std::invalid_argument;
 
 template <class S1, class S2, class C>
-Resampler<S1, S2, C>::Resampler(int upRate, int downRate, C *coefs, int coefCount)
+Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const C *coefs, int coefCount)
     : _upRate(upRate)
     , _downRate(downRate)
     , _t(0)
@@ -96,17 +107,17 @@ Resampler<S1, S2, C>::Resampler(int upRate, int downRate, C *coefs, int coefCoun
 */
 {
   _paddedCoefCount = coefCount;
-  while (_paddedCoefCount % _upRate) {
+  while ((_paddedCoefCount % _upRate) != 0) {
     _paddedCoefCount++;
   }
   _coefsPerPhase = _paddedCoefCount / _upRate;
 
-  _transposedCoefs = new coefType[_paddedCoefCount];
-  fill(_transposedCoefs, _transposedCoefs + _paddedCoefCount, 0.);
+  _transposedCoefs = std::make_unique<coefType[]>(_paddedCoefCount);
+  std::fill(_transposedCoefs.get(), _transposedCoefs.get() + _paddedCoefCount, 0.);
 
-  _state = new inputType[_coefsPerPhase - 1];
-  _stateEnd = _state + _coefsPerPhase - 1;
-  fill(_state, _stateEnd, 0.);
+  _state = std::make_unique<inputType[]>(_coefsPerPhase - 1);
+  _stateEnd = _state.get() + (_coefsPerPhase - 1);
+  std::fill(_state.get(), _stateEnd, 0.);
 
   /* This both transposes, and "flips" each phase, while
    * copying the defined coefficients into local storage.
@@ -114,15 +125,11 @@ Resampler<S1, S2, C>::Resampler(int upRate, int downRate, C *coefs, int coefCoun
    */
   for (int i = 0; i < _upRate; ++i) {
     for (int j = 0; j < _coefsPerPhase; ++j) {
-      if (j * _upRate + i < coefCount)
+      if (j * _upRate + i < coefCount) {
         _transposedCoefs[(_coefsPerPhase - 1 - j) + i * _coefsPerPhase] = coefs[j * _upRate + i];
+      }
     }
   }
-}
-
-template <class S1, class S2, class C> Resampler<S1, S2, C>::~Resampler() {
-  delete[] _transposedCoefs;
-  delete[] _state;
 }
 
 template <class S1, class S2, class C>
@@ -147,7 +154,7 @@ int Resampler<S1, S2, C>::apply(S1 *in, int inCount, S2 *out, int outCount) {
   inputType *end = in + inCount;
   while (x < end) {
     outputType acc = 0.;
-    coefType *h = _transposedCoefs + _t * _coefsPerPhase;
+    coefType *h = _transposedCoefs.get() + _t * _coefsPerPhase;
     inputType *xPtr = x - _coefsPerPhase + 1;
     int offset = in - xPtr;
     if (offset > 0) {
@@ -178,12 +185,12 @@ int Resampler<S1, S2, C>::apply(S1 *in, int inCount, S2 *out, int outCount) {
   if (retain > 0) {
     // for inCount smaller than state buffer, copy end of buffer
     // to beginning:
-    copy(_stateEnd - retain, _stateEnd, _state);
+    std::copy(_stateEnd - retain, _stateEnd, _state.get());
     // Then, copy the entire (short) input to end of buffer
-    copy(in, end, _stateEnd - inCount);
+    std::copy(in, end, _stateEnd - inCount);
   } else {
     // just copy last input samples into state buffer
-    copy(end - (_coefsPerPhase - 1), end, _state);
+    std::copy(end - (_coefsPerPhase - 1), end, _state.get());
   }
   // number of samples computed
   return y - out;
@@ -191,7 +198,7 @@ int Resampler<S1, S2, C>::apply(S1 *in, int inCount, S2 *out, int outCount) {
 
 template <class S1, class S2, class C>
 void upfirdn(int upRate, int downRate, S1 *input, int inLength, C *filter, int filterLength,
-             vector<S2> &results)
+             std::vector<S2> &results)
 /*
 This template function provides a one-shot resampling.  Extra samples
 are padded to the end of the input in order to capture all of the non-zero
@@ -231,7 +238,8 @@ the original version of this function.
 }
 
 template <class S1, class S2, class C>
-void upfirdn(int upRate, int downRate, vector<S1> &input, vector<C> &filter, vector<S2> &results)
+void upfirdn(int upRate, int downRate, std::vector<S1> &input, std::vector<C> &filter,
+             std::vector<S2> &results)
 /*
 This template function provides a one-shot resampling.
 The output is in the "results" vector which is modified by the function.

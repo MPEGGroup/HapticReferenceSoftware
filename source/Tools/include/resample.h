@@ -10,28 +10,37 @@
 // Author: Haoqi Bai
 
 #pragma once
+#define __STDCPP_WANT_MATH_SPEC_FUNCS__ 201003L
 
 #include "upfirdn.h"
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include <numeric>
 #include <vector>
 
 using std::vector;
 namespace haptics::tools {
-template <typename T> T sinc(T x) {
-  if (std::abs(x - 0.0) < 0.000001)
+
+const double THRESHOLD_SIN = 0.000001;
+const double FILTER_DIV = 2.0;
+const double FILTER_INC = 0.5;
+
+template <typename T> auto sinc(T x) -> T {
+  if (std::abs(x - 0.0) < THRESHOLD_SIN) {
     return 1;
+  }
   return std::sin(M_PI * x) / (M_PI * x);
 }
 
-inline int quotientCeil(int num1, int num2) {
-  if (num1 % num2 != 0)
+inline auto quotientCeil(int num1, int num2) -> int {
+  if (num1 % num2 != 0) {
     return num1 / num2 + 1;
+  }
   return num1 / num2;
 }
 
-template <typename T> std::vector<T> firls(int length, vector<T> freq, const vector<T> &amplitude) {
+template <typename T>
+auto firls(int length, vector<T> freq, const vector<T> &amplitude) -> std::vector<T> {
   int freqSize = freq.size();
   int weightSize = freqSize / 2;
 
@@ -39,16 +48,18 @@ template <typename T> std::vector<T> firls(int length, vector<T> freq, const vec
 
   int filterLength = length + 1;
 
-  for (auto &it : freq)
-    it /= 2.0;
+  for (auto &it : freq) {
+    it /= FILTER_DIV;
+  }
 
   length = (filterLength - 1) / 2;
   bool Nodd = filterLength & 1;
   vector<T> k(length + 1);
   std::iota(k.begin(), k.end(), 0.0);
   if (!Nodd) {
-    for (auto &it : k)
-      it += 0.5;
+    for (auto &it : k) {
+      it += FILTER_INC;
+    }
   }
 
   T b0 = 0.0;
@@ -98,14 +109,15 @@ template <typename T> std::vector<T> firls(int length, vector<T> freq, const vec
   result.insert(result.end(), it, a.end());
 
   for (auto &it : result) {
-    it *= 0.5;
+    it *= FILTER_INC;
   }
 
   return result;
 }
 
-template <typename T> std::vector<T> kaiser(const int order, const T bta) {
-  T Numerator, Denominator;
+template <typename T> auto kaiser(const int order, const T bta) -> std::vector<T> {
+  T Numerator;
+  T Denominator;
   Denominator = std::cyl_bessel_i(0, bta);
   auto od2 = (static_cast<T>(order) - 1) / 2;
   std::vector<T> window;
@@ -119,11 +131,13 @@ template <typename T> std::vector<T> kaiser(const int order, const T bta) {
 }
 
 template <typename T>
-void resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &outputSignal) {
+auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &outputSignal)
+    -> void {
   const int n = 10;
   const T bta = 5.0;
-  if (upFactor <= 0 || downFactor <= 0)
+  if (upFactor <= 0 || downFactor <= 0) {
     throw std::runtime_error("factors must be positive integer");
+  }
   int gcd_o = std::gcd(upFactor, downFactor);
   upFactor /= gcd_o;
   downFactor /= gcd_o;
@@ -139,32 +153,37 @@ void resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
   outputSignal.reserve(outputSize);
 
   int maxFactor = std::max(upFactor, downFactor);
-  T firlsFreq = 1.0 / 2.0 / static_cast<T>(maxFactor);
+  T firlsFreq = 1.0 / FILTER_DIV / static_cast<T>(maxFactor);
   int length = 2 * n * maxFactor + 1;
   vector<T> firlsFreqsV = {0.0, 2 * firlsFreq, 2 * firlsFreq, 1.0};
   vector<T> firlsAmplitudeV = {1.0, 1.0, 0.0, 0.0};
   vector<T> coefficients = firls<T>(length - 1, firlsFreqsV, firlsAmplitudeV);
   vector<T> window = kaiser<T>(length, bta);
   int coefficientsSize = coefficients.size();
-  for (int i = 0; i < coefficientsSize; i++)
+  for (int i = 0; i < coefficientsSize; i++) {
     coefficients[i] *= upFactor * window[i];
+  }
 
   int lengthHalf = (length - 1) / 2;
   int nz = downFactor - lengthHalf % downFactor;
   vector<T> h;
   h.reserve(coefficientsSize + nz);
-  for (int i = 0; i < nz; i++)
+  for (int i = 0; i < nz; i++) {
     h.push_back(0.0);
-  for (int i = 0; i < coefficientsSize; i++)
+  }
+  for (int i = 0; i < coefficientsSize; i++) {
     h.push_back(coefficients[i]);
+  }
   int hSize = h.size();
   lengthHalf += nz;
   int delay = lengthHalf / downFactor;
   nz = 0;
-  while (quotientCeil((inputSize - 1) * upFactor + hSize + nz, downFactor) - delay < outputSize)
+  while (quotientCeil((inputSize - 1) * upFactor + hSize + nz, downFactor) - delay < outputSize) {
     nz++;
-  for (int i = 0; i < nz; i++)
+  }
+  for (int i = 0; i < nz; i++) {
     h.push_back(0.0);
+  }
   vector<T> y;
   upfirdn(upFactor, downFactor, inputSignal, h, y);
   for (int i = delay; i < outputSize + delay; i++) {
