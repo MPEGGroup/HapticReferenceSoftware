@@ -117,13 +117,15 @@ auto firls(int length, vector<T> freq, const vector<T> &amplitude) -> std::vecto
 template <typename T> auto kaiser(const int order, const T bta) -> std::vector<T> {
   T Numerator;
   T Denominator;
-  Denominator = std::cyl_bessel_i(0, bta);
+  Denominator = custom_cyl_bessel_i0(bta);
+  // Denominator = std::cyl_bessel_i(0, bta);
   auto od2 = (static_cast<T>(order) - 1) / 2;
   std::vector<T> window;
   window.reserve(order);
   for (int n = 0; n < order; n++) {
     auto x = bta * std::sqrt(1 - std::pow((n - od2) / od2, 2));
-    Numerator = std::cyl_bessel_i(0, x);
+    Numerator = custom_cyl_bessel_i0(x);
+    // Numerator = std::cyl_bessel_i(0, x);
     window.push_back(Numerator / Denominator);
   }
   return window;
@@ -188,5 +190,21 @@ auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
   for (int i = delay; i < outputSize + delay; i++) {
     outputSignal.push_back(y[i]);
   }
+}
+#include <cmath>
+#include <vector>
+
+template <typename T> T custom_cyl_bessel_i0(T x) {
+  T sum = 1.0;
+  T y = x / 2.0;
+  T t = y * y;
+  T term = t;
+  int k = 1;
+  while (term > 1e-10) {
+    sum += term;
+    k++;
+    term *= t / (k * k);
+  }
+  return sum;
 }
 } // namespace haptics::tools
