@@ -47,7 +47,6 @@ using haptics::tools::InputParser;
 using haptics::types::Haptics;
 
 const int DEFAULT_FS = 8000;
-using namespace std;
 void help() {
   std::cout
       << "usages: Synthesizer [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-fs <FREQUENCY_SAMPLING>] "

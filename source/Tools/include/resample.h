@@ -10,7 +10,6 @@
 // Author: Haoqi Bai
 
 #pragma once
-#define __STDCPP_WANT_MATH_SPEC_FUNCS__
 
 #include "upfirdn.h"
 #include <algorithm>
