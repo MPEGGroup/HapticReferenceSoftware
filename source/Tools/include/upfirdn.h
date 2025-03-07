@@ -41,10 +41,14 @@ public:
   using outputType = S2;
   using coefType = C;
 
-  Resampler(int upRate, int downRate, const C *coefs, int coefCount);
+  Resampler(int upRate, int downRate, const std::vector<C> coefs, int coefCount);
   Resampler(const Resampler &src) {
     _upRate = src._upRate;
     _downRate = src._downRate;
+    _paddedCoefCount = src._paddedCoefCount;
+    _coefsPerPhase = src._coefsPerPhase;
+    _t = src._t;
+    _xOffset = src._xOffset;
   }
   auto operator=(const Resampler &other) -> Resampler & {
     if (this != &other) {
@@ -79,7 +83,7 @@ public:
     other._stateEnd = nullptr;
   }
   // Move assignment operator
-  Resampler &operator=(Resampler &&other) noexcept {
+  auto operator=(Resampler &&other) noexcept -> Resampler & {
     if (this != &other) {
       _upRate = other._upRate;
       _downRate = other._downRate;
@@ -122,7 +126,7 @@ private:
 using std::invalid_argument;
 
 template <class S1, class S2, class C>
-Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const C *coefs, int coefCount)
+Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const std::vector<C> coefs, int coefCount)
     : _upRate(upRate)
     , _downRate(downRate)
     , _t(0)
@@ -144,11 +148,11 @@ Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const C *coefs, int co
   _coefsPerPhase = _paddedCoefCount / _upRate;
 
   _transposedCoefs.resize(_paddedCoefCount);
-  std::fill(_transposedCoefs.data(), _transposedCoefs.data() + _paddedCoefCount, 0.);
+  std::fill(_transposedCoefs.begin(), _transposedCoefs.begin() + _paddedCoefCount, 0.);
 
   _state.resize(_coefsPerPhase - 1);
-  _stateEnd = _state.data() + (_coefsPerPhase - 1);
-  std::fill(_state.data(), _stateEnd, 0.);
+  _stateEnd = &(*(_state.begin() + (_coefsPerPhase - 1)));
+  std::fill(_state.begin(), _state.begin() + (_coefsPerPhase - 1), 0.);
 
   /* This both transposes, and "flips" each phase, while
    * copying the defined coefficients into local storage.
@@ -189,14 +193,14 @@ auto Resampler<S1, S2, C>::apply(std::vector<S1> &in, int inCount, std::vector<S
 
   while (x < end) {
     outputType acc = 0.;
-    auto h = _transposedCoefs.data() + _t * _coefsPerPhase;
+    auto h = _transposedCoefs.begin() + _t * _coefsPerPhase;
     auto xPtr = x - _coefsPerPhase + 1;
     int offset = std::distance(in.begin(), xPtr);
 
     if (offset > 0) {
       // need to draw from the _state buffer
-      auto statePtr = _stateEnd - offset;
-      while (statePtr < _stateEnd) {
+      auto statePtr = _state.begin() + (_coefsPerPhase - 1) - offset;
+      while (statePtr < _state.begin() + (_coefsPerPhase - 1)) {
         acc += *statePtr++ * *h++;
       }
       xPtr += offset;
@@ -223,9 +227,10 @@ auto Resampler<S1, S2, C>::apply(std::vector<S1> &in, int inCount, std::vector<S
   int retain = (_coefsPerPhase - 1) - inCount;
   if (retain > 0) {
     // for inCount smaller than state buffer, copy end of buffer to beginning:
-    std::copy(_stateEnd - retain, _stateEnd, _state.data());
+    std::copy(_state.begin() + (_coefsPerPhase - 1) - retain, _state.begin() + (_coefsPerPhase - 1),
+              _state.data());
     // Then, copy the entire (short) input to end of buffer
-    std::copy(in.begin(), end, _stateEnd - inCount);
+    std::copy(in.begin(), end, _state.begin() + (_coefsPerPhase - 1) - inCount);
   } else {
     // just copy last input samples into state buffer
     std::copy(end - (_coefsPerPhase - 1), end, _state.data());
@@ -235,9 +240,6 @@ auto Resampler<S1, S2, C>::apply(std::vector<S1> &in, int inCount, std::vector<S
   return std::distance(out.begin(), y);
 }
 
-template <class S1, class S2, class C>
-auto upfirdn(int upRate, int downRate, S1 *input, int inLength, C *filter, int filterLength,
-             std::vector<S2> &results) -> void
 /*
 This template function provides a one-shot resampling.  Extra samples
 are padded to the end of the input in order to capture all of the non-zero
@@ -252,9 +254,12 @@ way we can let the compiler infer the template types).
 Thanks to Lewis Anderson (lkanders@ucsd.edu) at UCSD for
 the original version of this function.
 */
-{
+template <class S1, class S2, class C>
+auto upfirdn(std::tuple<int, int> upDownRate, S1 *input, int inLength, std::vector<C> filter,
+             int filterLength, std::vector<S2> &results) -> void {
   // Create the Resampler
-  Resampler<S1, S2, C> theResampler(upRate, downRate, filter, filterLength);
+  Resampler<S1, S2, C> theResampler(std::get<0>(upDownRate), std::get<1>(upDownRate), filter,
+                                    filterLength);
 
   // pad input by length of one polyphase of filter to flush all values out
   int padding = theResampler.coefsPerPhase() - 1;
@@ -290,6 +295,7 @@ In this version, the input and filter are vectors as opposed to
 pointer/count pairs.
 */
 {
-  upfirdn<S1, S2, C>(upRate, downRate, &input[0], input.size(), &filter[0], filter.size(), results);
+  upfirdn<S1, S2, C>(std::tuple<int, int>(upRate, downRate), &input[0], input.size(), filter,
+                     filter.size(), results);
 }
 } // namespace haptics::tools
