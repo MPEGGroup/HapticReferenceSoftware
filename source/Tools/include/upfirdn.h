@@ -43,8 +43,8 @@ public:
 
   Resampler(int upRate, int downRate, const C *coefs, int coefCount);
   Resampler(const Resampler &src) {
-    this._upRate = src._upRate;
-    this._downRate = src._downRate;
+    _upRate = src._upRate;
+    _downRate = src._downRate;
   }
   auto operator=(const Resampler &other) -> Resampler & {
     if (this != &other) {
@@ -58,15 +58,46 @@ public:
 
       // Allocate new memory for _transposedCoefs and copy the data
       delete[] _transposedCoefs;
-      _transposedCoefs = new coefType[_paddedCoefCount];
-      std::copy(other._transposedCoefs.get(), other._transposedCoefs.get() + _paddedCoefCount,
-                _transposedCoefs.get());
+      _transposedCoefs = std::move(other._transposedCoefs);
+      std::copy(other._transposedCoefs.data(), other._transposedCoefs.data() + _paddedCoefCount,
+                _transposedCoefs.data());
+    }
+    return *this;
+  }
+
+  // Move constructor
+  Resampler(Resampler &&other) noexcept
+      : _upRate(other._upRate)
+      , _downRate(other._downRate)
+      , _transposedCoefs(std::move(other._transposedCoefs))
+      , _state(std::move(other._state))
+      , _stateEnd(other._stateEnd)
+      , _paddedCoefCount(other._paddedCoefCount)
+      , _coefsPerPhase(other._coefsPerPhase)
+      , _t(other._t)
+      , _xOffset(other._xOffset) {
+    other._stateEnd = nullptr;
+  }
+  // Move assignment operator
+  Resampler &operator=(Resampler &&other) noexcept {
+    if (this != &other) {
+      _upRate = other._upRate;
+      _downRate = other._downRate;
+      _paddedCoefCount = other._paddedCoefCount;
+      _coefsPerPhase = other._coefsPerPhase;
+      _t = other._t;
+      _xOffset = other._xOffset;
+
+      _transposedCoefs = std::move(other._transposedCoefs);
+      _state = std::move(other._state);
+      _stateEnd = other._stateEnd;
+      other._stateEnd = nullptr;
     }
     return *this;
   }
   virtual ~Resampler() = default;
 
-  auto apply(S1 *in, int inCount, S2 *out, int outCount) -> int;
+  auto apply(std::vector<S1> &in, int inCount, std::vector<S2> &out, int outCount) -> int;
   auto neededOutCount(int inCount) -> int;
   auto coefsPerPhase() -> int { return _coefsPerPhase; }
 
@@ -74,8 +105,8 @@ private:
   int _upRate;
   int _downRate;
 
-  std::unique_ptr<coefType[]> _transposedCoefs;
-  std::unique_ptr<inputType[]> _state;
+  std::vector<coefType> _transposedCoefs;
+  std::vector<coefType> _state;
   inputType *_stateEnd;
 
   int _paddedCoefCount; // ceil(len(coefs)/upRate)*upRate
@@ -112,12 +143,12 @@ Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const C *coefs, int co
   }
   _coefsPerPhase = _paddedCoefCount / _upRate;
 
-  _transposedCoefs = std::make_unique<coefType[]>(_paddedCoefCount);
-  std::fill(_transposedCoefs.get(), _transposedCoefs.get() + _paddedCoefCount, 0.);
+  _transposedCoefs.resize(_paddedCoefCount);
+  std::fill(_transposedCoefs.data(), _transposedCoefs.data() + _paddedCoefCount, 0.);
 
-  _state = std::make_unique<inputType[]>(_coefsPerPhase - 1);
-  _stateEnd = _state.get() + (_coefsPerPhase - 1);
-  std::fill(_state.get(), _stateEnd, 0.);
+  _state.resize(_coefsPerPhase - 1);
+  _stateEnd = _state.data() + (_coefsPerPhase - 1);
+  std::fill(_state.data(), _stateEnd, 0.);
 
   /* This both transposes, and "flips" each phase, while
    * copying the defined coefficients into local storage.
@@ -126,79 +157,87 @@ Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const C *coefs, int co
   for (int i = 0; i < _upRate; ++i) {
     for (int j = 0; j < _coefsPerPhase; ++j) {
       if (j * _upRate + i < coefCount) {
-        _transposedCoefs[(_coefsPerPhase - 1 - j) + i * _coefsPerPhase] = coefs[j * _upRate + i];
+        _transposedCoefs.at((_coefsPerPhase - 1 - j) + i * _coefsPerPhase) = coefs[j * _upRate + i];
       }
     }
   }
 }
 
 template <class S1, class S2, class C>
-int Resampler<S1, S2, C>::neededOutCount(int inCount)
+auto Resampler<S1, S2, C>::neededOutCount(int inCount) -> int
 /* compute how many outputs will be generated for inCount inputs  */
 {
   int np = inCount * _upRate;
   int need = np / _downRate;
-  if ((_t + _upRate * _xOffset) < (np % _downRate))
+  if ((_t + _upRate * _xOffset) < (np % _downRate)) {
     need++;
+  }
   return need;
 }
 
 template <class S1, class S2, class C>
-int Resampler<S1, S2, C>::apply(S1 *in, int inCount, S2 *out, int outCount) {
-  if (outCount < neededOutCount(inCount))
-    throw invalid_argument("Not enough output samples");
+auto Resampler<S1, S2, C>::apply(std::vector<S1> &in, int inCount, std::vector<S2> &out,
+                                 int outCount) -> int {
+  if (outCount < neededOutCount(inCount)) {
+    throw std::invalid_argument("Not enough output samples");
+  }
 
   // x points to the latest processed input sample
-  inputType *x = in + _xOffset;
-  outputType *y = out;
-  inputType *end = in + inCount;
+  auto x = in.begin() + _xOffset;
+  auto y = out.begin();
+  auto end = in.begin() + inCount;
+
   while (x < end) {
     outputType acc = 0.;
-    coefType *h = _transposedCoefs.get() + _t * _coefsPerPhase;
-    inputType *xPtr = x - _coefsPerPhase + 1;
-    int offset = in - xPtr;
+    auto h = _transposedCoefs.data() + _t * _coefsPerPhase;
+    auto xPtr = x - _coefsPerPhase + 1;
+    int offset = std::distance(in.begin(), xPtr);
+
     if (offset > 0) {
       // need to draw from the _state buffer
-      inputType *statePtr = _stateEnd - offset;
+      auto statePtr = _stateEnd - offset;
       while (statePtr < _stateEnd) {
         acc += *statePtr++ * *h++;
       }
       xPtr += offset;
     }
+
     while (xPtr <= x) {
       acc += *xPtr++ * *h++;
     }
+
     *y++ = acc;
     _t += _downRate;
 
     int advanceAmount = _t / _upRate;
+    std::advance(x, advanceAmount);
 
-    x += advanceAmount;
     // which phase of the filter to use
     _t %= _upRate;
   }
-  _xOffset = x - end;
+
+  _xOffset = std::distance(end, x);
 
   // manage _state buffer
   // find number of samples retained in buffer:
   int retain = (_coefsPerPhase - 1) - inCount;
   if (retain > 0) {
-    // for inCount smaller than state buffer, copy end of buffer
-    // to beginning:
-    std::copy(_stateEnd - retain, _stateEnd, _state.get());
+    // for inCount smaller than state buffer, copy end of buffer to beginning:
+    std::copy(_stateEnd - retain, _stateEnd, _state.data());
     // Then, copy the entire (short) input to end of buffer
-    std::copy(in, end, _stateEnd - inCount);
+    std::copy(in.begin(), end, _stateEnd - inCount);
   } else {
     // just copy last input samples into state buffer
-    std::copy(end - (_coefsPerPhase - 1), end, _state.get());
+    std::copy(end - (_coefsPerPhase - 1), end, _state.data());
   }
+
   // number of samples computed
-  return y - out;
+  return std::distance(out.begin(), y);
 }
 
 template <class S1, class S2, class C>
-void upfirdn(int upRate, int downRate, S1 *input, int inLength, C *filter, int filterLength,
-             std::vector<S2> &results)
+auto upfirdn(int upRate, int downRate, S1 *input, int inLength, C *filter, int filterLength,
+             std::vector<S2> &results) -> void
 /*
 This template function provides a one-shot resampling.  Extra samples
 are padded to the end of the input in order to capture all of the non-zero
@@ -219,12 +258,13 @@ the original version of this function.
 
   // pad input by length of one polyphase of filter to flush all values out
   int padding = theResampler.coefsPerPhase() - 1;
-  S1 *inputPadded = new S1[inLength + padding];
+  std::vector<S1> inputPadded;
   for (int i = 0; i < inLength + padding; i++) {
-    if (i < inLength)
-      inputPadded[i] = input[i];
-    else
-      inputPadded[i] = 0;
+    if (i < inLength) {
+      inputPadded.push_back(input[i]);
+    } else {
+      inputPadded.push_back(0);
+    }
   }
 
   // calc size of output
@@ -233,13 +273,16 @@ the original version of this function.
   results.resize(resultsCount);
 
   // run filtering
-  theResampler.apply(inputPadded, inLength + padding, &results[0], resultsCount);
-  delete[] inputPadded;
+  std::vector<S2> resultsVector(resultsCount);
+  theResampler.apply(inputPadded, inLength + padding, resultsVector, resultsCount);
+
+  // Copy results back to the original results vector
+  std::copy(resultsVector.begin(), resultsVector.end(), results.begin());
 }
 
 template <class S1, class S2, class C>
-void upfirdn(int upRate, int downRate, std::vector<S1> &input, std::vector<C> &filter,
-             std::vector<S2> &results)
+auto upfirdn(int upRate, int downRate, std::vector<S1> &input, std::vector<C> &filter,
+             std::vector<S2> &results) -> void
 /*
 This template function provides a one-shot resampling.
 The output is in the "results" vector which is modified by the function.
