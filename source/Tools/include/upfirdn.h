@@ -255,22 +255,22 @@ Thanks to Lewis Anderson (lkanders@ucsd.edu) at UCSD for
 the original version of this function.
 */
 template <class S1, class S2, class C>
-auto upfirdn(std::tuple<int, int> upDownRate, std::vector<S1> input, int inLength, std::vector<C> filter,
-             int filterLength, std::vector<S2> &results) -> void {
+auto upfirdn(std::tuple<int, int> upDownRate, std::vector<S1> input, int inLength,
+             std::vector<C> filter, int filterLength, std::vector<S2> &results) -> void {
   // Create the Resampler
   Resampler<S1, S2, C> theResampler(std::get<0>(upDownRate), std::get<1>(upDownRate), filter,
                                     filterLength);
 
   // pad input by length of one polyphase of filter to flush all values out
   int padding = theResampler.coefsPerPhase() - 1;
-  //std::vector<S1> inputPadded;
-  //for (int i = 0; i < inLength + padding; i++) {
-  //  if (i < inLength) {
-  //    inputPadded.push_back(input[i]);
-  //  } else {
-  //    inputPadded.push_back(0);
-  //  }
-  //}
+  // std::vector<S1> inputPadded;
+  // for (int i = 0; i < inLength + padding; i++) {
+  //   if (i < inLength) {
+  //     inputPadded.push_back(input[i]);
+  //   } else {
+  //     inputPadded.push_back(0);
+  //   }
+  // }
   std::vector<S1> inputPadded(input.size() + padding, 0);
   std::copy(input.begin(), input.end(), inputPadded.begin());
 
