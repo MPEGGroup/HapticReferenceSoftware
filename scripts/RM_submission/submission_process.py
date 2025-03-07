@@ -285,7 +285,8 @@ def main():
                         subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         clock = time.time()
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} -fs 1000 -upfs 8000  --generate_ohm", stdout=log_file)
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], 
+                                                       config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} -fs 1000 -upfs 8000  --generate_ohm", stdout=log_file)
                         synTime += (time.time()-clock)*1000
                         if padding:
                             print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
