@@ -70,52 +70,46 @@ int Resampler<S1, S2, C>::apply(const std::vector<S1> &in, std::vector<S2> &out)
     throw std::invalid_argument("Not enough output samples");
   }
 
-  auto x = in.begin() + _xOffset;
-  auto y = out.begin();
-  auto end = in.end();
+  auto idxIn = _xOffset; // in
+  auto idxOut = 0;       // out
+  // auto end = in.end();
 
-  while (x < end) {
+  while (idxIn < in.size()) {
     outputType acc = 0.0;
-    auto h = _transposedCoefs.begin() + _t * _coefsPerPhase;
-    auto xPtr = x;
-    if (std::distance(in.begin(), x) >= _coefsPerPhase - 1) {
-      std::advance(xPtr, -_coefsPerPhase + 1);
-    } else {
-      xPtr = in.begin();
-    }
-    int offset = in.begin() - xPtr;
+    int idxCoef = _t * _coefsPerPhase; // _transposedCoefs
+    int xPtr = idxIn - _coefsPerPhase + 1;
+    int offset = -xPtr;
 
     if (offset > 0) {
-      auto statePtr = _state.end() - offset;
-      while (statePtr < _state.end()) {
-        acc += *statePtr++ * *h++;
+      auto idxState = _state.size() - offset;
+      while (idxState < _state.size()) {
+        acc += _state[idxState++] * _transposedCoefs[idxCoef++];
       }
       xPtr += offset;
     }
 
-    while (xPtr <= x) {
-      acc += *xPtr++ * *h++;
+    while (xPtr <= idxIn) {
+      acc += in[xPtr++] * _transposedCoefs[idxCoef++];
     }
-
-    *y++ = acc;
+    out[idxOut++] = acc;
     _t += _downRate;
 
     int advanceAmount = _t / _upRate;
-    x += advanceAmount;
+    idxIn += advanceAmount;
     _t %= _upRate;
   }
 
-  _xOffset = x - end;
+  _xOffset = idxIn - in.size();
 
   int retain = (_coefsPerPhase - 1) - inCount;
   if (retain > 0) {
     std::copy(_state.end() - retain, _state.end(), _state.begin());
-    std::copy(in.begin(), end, _state.end() - inCount);
+    std::copy(in.begin(), in.end(), _state.end() - inCount);
   } else {
-    std::copy(end - (_coefsPerPhase - 1), end, _state.begin());
+    std::copy(in.end() - (_coefsPerPhase - 1), in.end(), _state.begin());
   }
 
-  return y - out.begin();
+  return idxOut;
 }
 
 template <class S1, class S2, class C>

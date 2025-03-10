@@ -168,13 +168,12 @@ auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
   int lengthHalf = (length - 1) / 2;
   int nz = downFactor - lengthHalf % downFactor;
   vector<T> h;
-  h.reserve(coefficientsSize + nz);
-  for (int i = 0; i < nz; i++) {
-    h.push_back(0.0);
-  }
-  for (int i = 0; i < coefficientsSize; i++) {
-    h.push_back(coefficients[i]);
-  }
+  h.reserve(coefficients.size() + nz);
+  // Insert nz zeros
+  h.insert(h.end(), nz, 0.0);
+  // Insert coefficients
+  h.insert(h.end(), coefficients.begin(), coefficients.end());
+
   int hSize = h.size();
   lengthHalf += nz;
   int delay = lengthHalf / downFactor;
@@ -182,14 +181,14 @@ auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
   while (quotientCeil((inputSize - 1) * upFactor + hSize + nz, downFactor) - delay < outputSize) {
     nz++;
   }
-  for (int i = 0; i < nz; i++) {
-    h.push_back(0.0);
-  }
+  h.insert(h.end(), nz, 0.0);
+
   vector<T> y;
   upfirdn(upFactor, downFactor, inputSignal, h, y);
   for (int i = delay; i < outputSize + delay; i++) {
     outputSignal.push_back(y[i]);
   }
+  return;
 }
 #include <cmath>
 #include <vector>
