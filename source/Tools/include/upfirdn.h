@@ -8,6 +8,59 @@ namespace haptics::tools {
 class Resampler {
 public:
   Resampler(int upRate, int downRate, const std::vector<double> &coefs);
+  Resampler(const Resampler &src) {
+    _upRate = src._upRate;
+    _downRate = src._downRate;
+    _paddedCoefCount = src._paddedCoefCount;
+    _coefsPerPhase = src._coefsPerPhase;
+    _t = src._t;
+    _xOffset = src._xOffset;
+  }
+  auto operator=(const Resampler &other) -> Resampler & {
+    if (this != &other) {
+      // Perform deep copy of other members
+      _upRate = other._upRate;
+      _downRate = other._downRate;
+      _paddedCoefCount = other._paddedCoefCount;
+      _coefsPerPhase = other._coefsPerPhase;
+      _t = other._t;
+      _xOffset = other._xOffset;
+
+      // Allocate new memory for _transposedCoefs and copy the data
+      _transposedCoefs.clear();
+      _transposedCoefs = std::move(other._transposedCoefs);
+      std::copy(other._transposedCoefs.data(), other._transposedCoefs.data() + _paddedCoefCount,
+                _transposedCoefs.data());
+    }
+    return *this;
+  }
+
+  // Move constructor
+  Resampler(Resampler &&other) noexcept
+      : _upRate(other._upRate)
+      , _downRate(other._downRate)
+      , _transposedCoefs(std::move(other._transposedCoefs))
+      , _state(std::move(other._state))
+      , _paddedCoefCount(other._paddedCoefCount)
+      , _coefsPerPhase(other._coefsPerPhase)
+      , _t(other._t)
+      , _xOffset(other._xOffset) {}
+  // Move assignment operator
+  auto operator=(Resampler &&other) noexcept -> Resampler & {
+    if (this != &other) {
+      _upRate = other._upRate;
+      _downRate = other._downRate;
+      _paddedCoefCount = other._paddedCoefCount;
+      _coefsPerPhase = other._coefsPerPhase;
+      _t = other._t;
+      _xOffset = other._xOffset;
+
+      _transposedCoefs = std::move(other._transposedCoefs);
+      _state = std::move(other._state);
+    }
+    return *this;
+  }
+
   virtual ~Resampler() = default;
 
   auto apply(const std::vector<double> &in, std::vector<double> &out) -> int;
@@ -30,7 +83,7 @@ private:
 
 Resampler::Resampler(int upRate, int downRate, const std::vector<double> &coefs)
     : _upRate(upRate), _downRate(downRate), _t(0), _xOffset(0) {
-  _paddedCoefCount = coefs.size();
+  _paddedCoefCount = static_cast<int>(coefs.size());
   while ((_paddedCoefCount % _upRate) != 0) {
     _paddedCoefCount++;
   }
@@ -58,9 +111,9 @@ auto Resampler::neededOutCount(int inCount) const -> int {
 }
 
 auto Resampler::apply(const std::vector<double> &in, std::vector<double> &out) -> int {
-  int inCount = in.size();
+  int inCount = static_cast<int>(in.size());
   int outCount = neededOutCount(inCount);
-  if (out.size() < outCount) {
+  if (static_cast<int>(out.size()) < outCount) {
     throw std::invalid_argument("Not enough output samples");
   }
 
@@ -68,15 +121,15 @@ auto Resampler::apply(const std::vector<double> &in, std::vector<double> &out) -
   auto idxOut = 0;       // out
   // auto end = in.end();
 
-  while (idxIn < in.size()) {
+  while (idxIn < static_cast<int>(in.size())) {
     double acc = 0.0;
     int idxCoef = _t * _coefsPerPhase; // _transposedCoefs
     int xPtr = idxIn - _coefsPerPhase + 1;
     int offset = -xPtr;
 
     if (offset > 0) {
-      auto idxState = _state.size() - offset;
-      while (idxState < _state.size()) {
+      auto idxState = static_cast<int>(_state.size()) - offset;
+      while (idxState < static_cast<int>(_state.size())) {
         acc += _state[idxState++] * _transposedCoefs[idxCoef++];
       }
       xPtr += offset;
@@ -93,7 +146,7 @@ auto Resampler::apply(const std::vector<double> &in, std::vector<double> &out) -
     _t %= _upRate;
   }
 
-  _xOffset = idxIn - in.size();
+  _xOffset = idxIn - static_cast<int>(in.size());
 
   int retain = (_coefsPerPhase - 1) - inCount;
   if (retain > 0) {
@@ -111,10 +164,10 @@ auto upfirdn(int upRate, int downRate, const std::vector<double> &input,
   Resampler theResampler(upRate, downRate, filter);
 
   int padding = theResampler.coefsPerPhase() - 1;
-  std::vector<double> inputPadded(input.size() + padding, 0);
+  std::vector<double> inputPadded(static_cast<int>(input.size()) + padding, 0);
   std::copy(input.begin(), input.end(), inputPadded.begin());
 
-  int resultsCount = theResampler.neededOutCount(input.size() + padding);
+  int resultsCount = theResampler.neededOutCount(static_cast<int>(input.size()) + padding);
   results.resize(resultsCount);
 
   theResampler.apply(inputPadded, results);

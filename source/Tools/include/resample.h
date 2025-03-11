@@ -23,6 +23,7 @@ namespace haptics::tools {
 const double THRESHOLD_SIN = 0.000001;
 const double THRESHOLD_BESSEL = 1e-10;
 const double FILTER_TWO = 2.0;
+const double FILTER_INC = 0.5;
 
 template <typename T> auto sinc(T x) -> T {
   if (std::abs(x - 0.0) < THRESHOLD_SIN) {
@@ -129,8 +130,8 @@ auto custom_cyl_bessel_i0(double x) -> double {
 }
 
 auto kaiser(const int order, const double bta) -> std::vector<double> {
-  double Numerator;
-  double Denominator;
+  double Numerator = 0.0;
+  double Denominator = 1.0;
   Denominator = tools::custom_cyl_bessel_i0(bta);
   // Denominator = std::cyl_bessel_i(0, bta);
   auto od2 = (static_cast<double>(order) - 1) / 2;
@@ -152,16 +153,17 @@ auto resample(int upFactor, int downFactor, vector<double> &inputSignal,
   if (upFactor <= 0 || downFactor <= 0) {
     throw std::runtime_error("factors must be positive integer");
   }
-  int gcd_o = std::gcd(upFactor, downFactor);
-  upFactor /= gcd_o;
-  downFactor /= gcd_o;
 
   if (upFactor == downFactor) {
     outputSignal = inputSignal;
     return;
   }
 
-  int inputSize = inputSignal.size();
+  int gcd_o = std::gcd(upFactor, downFactor);
+  upFactor /= gcd_o;
+  downFactor /= gcd_o;
+
+  int inputSize = static_cast<int>(inputSignal.size());
   outputSignal.clear();
   int outputSize = quotientCeil(inputSize * upFactor, downFactor);
   outputSignal.reserve(outputSize);
@@ -173,7 +175,7 @@ auto resample(int upFactor, int downFactor, vector<double> &inputSignal,
   vector<double> firlsAmplitudeV = {1.0, 1.0, 0.0, 0.0};
   vector<double> coefficients = tools::firls<double>(length - 1, firlsFreqsV, firlsAmplitudeV);
   vector<double> window = tools::kaiser(length, bta);
-  int coefficientsSize = coefficients.size();
+  int coefficientsSize = static_cast<int>(coefficients.size());
   for (int i = 0; i < coefficientsSize; i++) {
     coefficients[i] *= upFactor * window[i];
   }
@@ -187,7 +189,7 @@ auto resample(int upFactor, int downFactor, vector<double> &inputSignal,
   // Insert coefficients
   h.insert(h.end(), coefficients.begin(), coefficients.end());
 
-  int hSize = h.size();
+  int hSize = static_cast<int>(h.size());
   lengthHalf += nz;
   int delay = lengthHalf / downFactor;
   nz = 0;
