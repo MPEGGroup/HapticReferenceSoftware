@@ -21,8 +21,8 @@ using std::vector;
 namespace haptics::tools {
 
 const double THRESHOLD_SIN = 0.000001;
-const double FILTER_DIV = 2.0;
-const double FILTER_INC = 0.5;
+const double THRESHOLD_BESSEL = 1e-10;
+const double FILTER_TWO = 2.0;
 
 template <typename T> auto sinc(T x) -> T {
   if (std::abs(x - 0.0) < THRESHOLD_SIN) {
@@ -48,7 +48,7 @@ auto firls(int length, vector<T> freq, const vector<T> &amplitude) -> std::vecto
   int filterLength = length + 1;
 
   for (auto &it : freq) {
-    it /= FILTER_DIV;
+    it /= FILTER_TWO;
   }
 
   length = (filterLength - 1) / 2;
@@ -114,28 +114,41 @@ auto firls(int length, vector<T> freq, const vector<T> &amplitude) -> std::vecto
   return result;
 }
 
-template <typename T> auto kaiser(const int order, const T bta) -> std::vector<T> {
-  T Numerator;
-  T Denominator;
-  Denominator = custom_cyl_bessel_i0(bta);
+auto custom_cyl_bessel_i0(double x) -> double {
+  double sum = 1.0;
+  double y = x / FILTER_TWO;
+  double t = y * y;
+  double term = t;
+  int k = 1;
+  while (term > THRESHOLD_BESSEL) {
+    sum += term;
+    k++;
+    term *= t / (k * k);
+  }
+  return sum;
+}
+
+auto kaiser(const int order, const double bta) -> std::vector<double> {
+  double Numerator;
+  double Denominator;
+  Denominator = tools::custom_cyl_bessel_i0(bta);
   // Denominator = std::cyl_bessel_i(0, bta);
-  auto od2 = (static_cast<T>(order) - 1) / 2;
-  std::vector<T> window;
+  auto od2 = (static_cast<double>(order) - 1) / 2;
+  std::vector<double> window;
   window.reserve(order);
   for (int n = 0; n < order; n++) {
     auto x = bta * std::sqrt(1 - std::pow((n - od2) / od2, 2));
-    Numerator = custom_cyl_bessel_i0(x);
+    Numerator = tools::custom_cyl_bessel_i0(x);
     // Numerator = std::cyl_bessel_i(0, x);
     window.push_back(Numerator / Denominator);
   }
   return window;
 }
 
-template <typename T>
-auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &outputSignal)
-    -> void {
+auto resample(int upFactor, int downFactor, vector<double> &inputSignal,
+              vector<double> &outputSignal) -> void {
   const int n = 10;
-  const T bta = 5.0;
+  const double bta = 5.0;
   if (upFactor <= 0 || downFactor <= 0) {
     throw std::runtime_error("factors must be positive integer");
   }
@@ -154,12 +167,12 @@ auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
   outputSignal.reserve(outputSize);
 
   int maxFactor = std::max(upFactor, downFactor);
-  T firlsFreq = 1.0 / FILTER_DIV / static_cast<T>(maxFactor);
+  double firlsFreq = 1.0 / FILTER_TWO / static_cast<double>(maxFactor);
   int length = 2 * n * maxFactor + 1;
-  vector<T> firlsFreqsV = {0.0, 2 * firlsFreq, 2 * firlsFreq, 1.0};
-  vector<T> firlsAmplitudeV = {1.0, 1.0, 0.0, 0.0};
-  vector<T> coefficients = firls<T>(length - 1, firlsFreqsV, firlsAmplitudeV);
-  vector<T> window = kaiser<T>(length, bta);
+  vector<double> firlsFreqsV = {0.0, 2 * firlsFreq, 2 * firlsFreq, 1.0};
+  vector<double> firlsAmplitudeV = {1.0, 1.0, 0.0, 0.0};
+  vector<double> coefficients = tools::firls<double>(length - 1, firlsFreqsV, firlsAmplitudeV);
+  vector<double> window = tools::kaiser(length, bta);
   int coefficientsSize = coefficients.size();
   for (int i = 0; i < coefficientsSize; i++) {
     coefficients[i] *= upFactor * window[i];
@@ -167,7 +180,7 @@ auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
 
   int lengthHalf = (length - 1) / 2;
   int nz = downFactor - lengthHalf % downFactor;
-  vector<T> h;
+  vector<double> h;
   h.reserve(coefficients.size() + nz);
   // Insert nz zeros
   h.insert(h.end(), nz, 0.0);
@@ -183,27 +196,10 @@ auto resample(int upFactor, int downFactor, vector<T> &inputSignal, vector<T> &o
   }
   h.insert(h.end(), nz, 0.0);
 
-  vector<T> y;
+  vector<double> y;
   upfirdn(upFactor, downFactor, inputSignal, h, y);
   for (int i = delay; i < outputSize + delay; i++) {
     outputSignal.push_back(y[i]);
   }
-  return;
-}
-#include <cmath>
-#include <vector>
-
-template <typename T> T custom_cyl_bessel_i0(T x) {
-  T sum = 1.0;
-  T y = x / 2.0;
-  T t = y * y;
-  T term = t;
-  int k = 1;
-  while (term > 1e-10) {
-    sum += term;
-    k++;
-    term *= t / (k * k);
-  }
-  return sum;
 }
 } // namespace haptics::tools

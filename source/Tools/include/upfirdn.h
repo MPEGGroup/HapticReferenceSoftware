@@ -5,25 +5,21 @@
 #include <vector>
 
 namespace haptics::tools {
-template <class S1, class S2, class C> class Resampler {
+class Resampler {
 public:
-  typedef S1 inputType;
-  typedef S2 outputType;
-  typedef C coefType;
-
-  Resampler(int upRate, int downRate, const std::vector<C> &coefs);
+  Resampler(int upRate, int downRate, const std::vector<double> &coefs);
   virtual ~Resampler() = default;
 
-  int apply(const std::vector<S1> &in, std::vector<S2> &out);
-  int neededOutCount(int inCount) const;
-  int coefsPerPhase() const { return _coefsPerPhase; }
+  auto apply(const std::vector<double> &in, std::vector<double> &out) -> int;
+  [[nodiscard]] auto neededOutCount(int inCount) const -> int;
+  [[nodiscard]] auto coefsPerPhase() const -> int { return _coefsPerPhase; }
 
 private:
   int _upRate;
   int _downRate;
 
-  std::vector<coefType> _transposedCoefs;
-  std::vector<inputType> _state;
+  std::vector<double> _transposedCoefs;
+  std::vector<double> _state;
 
   int _paddedCoefCount; // ceil(len(coefs)/upRate)*upRate
   int _coefsPerPhase;   // _paddedCoefCount / upRate
@@ -32,11 +28,10 @@ private:
   int _xOffset;
 };
 
-template <class S1, class S2, class C>
-Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const std::vector<C> &coefs)
+Resampler::Resampler(int upRate, int downRate, const std::vector<double> &coefs)
     : _upRate(upRate), _downRate(downRate), _t(0), _xOffset(0) {
   _paddedCoefCount = coefs.size();
-  while (_paddedCoefCount % _upRate) {
+  while ((_paddedCoefCount % _upRate) != 0) {
     _paddedCoefCount++;
   }
   _coefsPerPhase = _paddedCoefCount / _upRate;
@@ -46,14 +41,14 @@ Resampler<S1, S2, C>::Resampler(int upRate, int downRate, const std::vector<C> &
 
   for (int i = 0; i < _upRate; ++i) {
     for (int j = 0; j < _coefsPerPhase; ++j) {
-      if (j * _upRate + i < coefs.size()) {
+      if (j * _upRate + i < static_cast<int>(coefs.size())) {
         _transposedCoefs[(_coefsPerPhase - 1 - j) + i * _coefsPerPhase] = coefs[j * _upRate + i];
       }
     }
   }
 }
 
-template <class S1, class S2, class C> int Resampler<S1, S2, C>::neededOutCount(int inCount) const {
+auto Resampler::neededOutCount(int inCount) const -> int {
   int np = inCount * _upRate;
   int need = np / _downRate;
   if ((_t + _upRate * _xOffset) < (np % _downRate)) {
@@ -62,8 +57,7 @@ template <class S1, class S2, class C> int Resampler<S1, S2, C>::neededOutCount(
   return need;
 }
 
-template <class S1, class S2, class C>
-int Resampler<S1, S2, C>::apply(const std::vector<S1> &in, std::vector<S2> &out) {
+auto Resampler::apply(const std::vector<double> &in, std::vector<double> &out) -> int {
   int inCount = in.size();
   int outCount = neededOutCount(inCount);
   if (out.size() < outCount) {
@@ -75,7 +69,7 @@ int Resampler<S1, S2, C>::apply(const std::vector<S1> &in, std::vector<S2> &out)
   // auto end = in.end();
 
   while (idxIn < in.size()) {
-    outputType acc = 0.0;
+    double acc = 0.0;
     int idxCoef = _t * _coefsPerPhase; // _transposedCoefs
     int xPtr = idxIn - _coefsPerPhase + 1;
     int offset = -xPtr;
@@ -112,13 +106,12 @@ int Resampler<S1, S2, C>::apply(const std::vector<S1> &in, std::vector<S2> &out)
   return idxOut;
 }
 
-template <class S1, class S2, class C>
-void upfirdn(int upRate, int downRate, const std::vector<S1> &input, const std::vector<C> &filter,
-             std::vector<S2> &results) {
-  Resampler<S1, S2, C> theResampler(upRate, downRate, filter);
+auto upfirdn(int upRate, int downRate, const std::vector<double> &input,
+             const std::vector<double> &filter, std::vector<double> &results) -> void {
+  Resampler theResampler(upRate, downRate, filter);
 
   int padding = theResampler.coefsPerPhase() - 1;
-  std::vector<S1> inputPadded(input.size() + padding, 0);
+  std::vector<double> inputPadded(input.size() + padding, 0);
   std::copy(input.begin(), input.end(), inputPadded.begin());
 
   int resultsCount = theResampler.neededOutCount(input.size() + padding);
