@@ -28,9 +28,8 @@ public:
 
       // Allocate new memory for _transposedCoefs and copy the data
       _transposedCoefs.clear();
-      _transposedCoefs = std::move(other._transposedCoefs);
-      std::copy(other._transposedCoefs.data(), other._transposedCoefs.data() + _paddedCoefCount,
-                _transposedCoefs.data());
+      std::copy(other._transposedCoefs.begin(), other._transposedCoefs.end(),
+                _transposedCoefs.begin());
     }
     return *this;
   }
