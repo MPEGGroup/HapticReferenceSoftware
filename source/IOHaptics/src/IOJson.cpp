@@ -37,11 +37,8 @@
 #include <Tools/include/Tools.h>
 #include <algorithm>
 #include <charconv>
-#include <chrono>
-#include <iomanip>
 #include <iostream>
 #include <regex>
-#include <sstream>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -93,19 +90,6 @@ auto IOJson::URICheck(const std::string &uri, bool log) -> bool {
   return true;
 }
 
-auto IOJson::dateCheck(const std::string &date, bool log) -> bool {
-  const std::regex txt_regex("[+-]?[0-9]{4}(-[01][0-9](-[0-3][0-9](T[0-2][0-9]:[0-5][0-9]:?([0-5]["
-                             "0-9](.[0-9]+)?)?[+-][0-2][0-9]:[0-5][0-9]Z?)?)?)?");
-  std::smatch pieces_match;
-  if (!regex_search(date, pieces_match, txt_regex)) {
-    if (log) {
-      std::cerr << "Invalid date, the date format shall conform to ISO 8601 series." << std::endl;
-    }
-    return false;
-  }
-  return true;
-}
-
 auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
   const std::regex txt_regex("^([0-9]{4})(-([0-9]))?$");
   std::smatch pieces_match;
@@ -117,7 +101,8 @@ auto IOJson::versionCheck(const std::string &version, bool log) -> bool {
       year = atoi(pieces_match[1].str().c_str());
       if (year < MIN_VERSION_YEAR) {
         if (log) {
-          std::cerr << "Invalid version, the year should be greater or equal to 2023." << std::endl;
+          std::cerr << "Invalid version, the year should be greater or equal to "
+                    << MIN_VERSION_YEAR << "." << std::endl;
         }
         return false;
       }
@@ -180,8 +165,11 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
   }
 
   // check date
-  auto date = haptic.getDate();
-  conformant &= dateCheck(date, true);
+  auto dateValid = haptic.checkDate();
+  if (!dateValid) {
+    std::cerr << "Invalid date, the date format shall conform to ISO 8601 series." << std::endl;
+  }
+  conformant &= dateValid;
   if (haptic.getTimescale().has_value()) {
     auto timescale = haptic.getTimescale().value();
     if (profile == "Simple Parametric" && timescale != MAX_TIMESCALE_PARAMETRIC) {
@@ -467,8 +455,8 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   return conformant;
 }
 auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &channel,
-                                          types::Perception &perception, types::Haptics &haptic)
-    -> bool {
+                                          types::Perception &perception,
+                                          types::Haptics &haptic) -> bool {
   bool conformant = true;
   // Check the absence of the curve type for bands that are not curve bands
   auto bandType = band.getBandType();
@@ -647,7 +635,7 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
 
   auto version = std::string(jsonTree["version"].GetString());
   auto profile = std::string(jsonTree["profile"].GetString());
-  auto level = static_cast<uint8_t>(jsonTree["level"].GetUint());
+  auto level = static_cast<unsigned int>(jsonTree["level"].GetUint());
   auto date = std::string(jsonTree["date"].GetString());
   auto description = std::string(jsonTree["description"].GetString());
   haptic.setVersion(version);
@@ -655,8 +643,8 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   haptic.setLevel(level);
   haptic.setDate(date);
   haptic.setDescription(description);
-  if (jsonTree.HasMember("timescale") && jsonTree["timescale"].IsUint()) {
-    haptic.setTimescale(jsonTree["timescale"].GetUint());
+  if (jsonTree.HasMember("timescale") && jsonTree["timescale"].IsUint64()) {
+    haptic.setTimescale(jsonTree["timescale"].GetUint64());
   }
   loadingSuccess = loadingSuccess && loadAvatars(jsonTree["avatars"], haptic);
   loadingSuccess = loadingSuccess && loadPerceptions(jsonTree["perceptions"], haptic);
@@ -677,8 +665,8 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   return loadingSuccess;
 }
 
-auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
-    -> bool {
+auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions,
+                             types::Haptics &haptic) -> bool {
   bool loadingSuccess = true;
   for (const auto &jpv : jsonPerceptions.GetArray()) {
     if (!jpv.IsObject()) {
@@ -759,16 +747,16 @@ auto IOJson::loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic
     }
     auto jsonSync = jsv.GetObject();
 
-    if (!jsonSync.HasMember("timestamp") || !jsonSync["timestamp"].IsInt()) {
+    if (!jsonSync.HasMember("timestamp") || !jsonSync["timestamp"].IsUint64()) {
       std::cerr << "Missing or invalid sync timestamp" << std::endl;
       continue;
     }
-    auto timestamp = jsonSync["timestamp"].GetInt();
+    auto timestamp = jsonSync["timestamp"].GetUint64();
     types::Sync sync(timestamp);
 
     if (jsonSync.HasMember("timescale")) {
-      if (jsonSync["timescale"].IsUint()) {
-        auto timescale = jsonSync["timescale"].GetUint();
+      if (jsonSync["timescale"].IsUint64()) {
+        auto timescale = jsonSync["timescale"].GetUint64();
         sync.setTimescale(timescale);
       } else {
         std::cerr << "Invalid sync timescale" << std::endl;
@@ -779,8 +767,8 @@ auto IOJson::loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic
   return loadingSuccess;
 }
 
-auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
-    -> bool {
+auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary,
+                         types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (const auto &jev : jsonLibrary.GetArray()) {
     if (!jev.IsObject()) {
@@ -837,8 +825,8 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception 
   return loadingSuccess;
 }
 
-auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perception &perception)
-    -> bool {
+auto IOJson::loadChannels(const rapidjson::Value &jsonChannels,
+                          types::Perception &perception) -> bool {
   bool loadingSuccess = true;
   for (const auto &jtv : jsonChannels.GetArray()) {
     if (!jtv.IsObject()) {
@@ -910,13 +898,14 @@ auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perceptio
       channel.setActuatorTarget(actuatorTarget);
     }
 
-    if (IOJsonPrimitives::hasUint(jsonChannel, "frequency_sampling")) {
-      auto frequencySampling = jsonChannel["frequency_sampling"].GetUint();
+    if (jsonChannel.HasMember("frequency_sampling") &&
+        jsonChannel["frequency_sampling"].IsUint64()) {
+      auto frequencySampling = jsonChannel["frequency_sampling"].GetUint64();
       channel.setFrequencySampling(frequencySampling);
     }
 
-    if (IOJsonPrimitives::hasUint(jsonChannel, "sample_count")) {
-      auto frequencySampling = jsonChannel["sample_count"].GetUint();
+    if (jsonChannel.HasMember("sample_count") && jsonChannel["sample_count"].IsUint64()) {
+      auto frequencySampling = jsonChannel["sample_count"].GetUint64();
       channel.setSampleCount(frequencySampling);
     }
 
@@ -1241,17 +1230,12 @@ auto IOJson::writeFile(haptics::types::Haptics &haptic, const std::string &fileP
                      jsonTree.GetAllocator());
   jsonTree.AddMember("level", haptic.getLevel(), jsonTree.GetAllocator());
 
-  if (dateCheck(haptic.getDate(), false)) {
-    jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
-                       jsonTree.GetAllocator());
-  } else {
-    auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
-    const std::string currentDate = ss.str();
-    jsonTree.AddMember("date", rapidjson::Value(currentDate.c_str(), jsonTree.GetAllocator()),
-                       jsonTree.GetAllocator());
+  if (!haptic.checkDate()) {
+    haptic.setCurrentDate();
   }
+  jsonTree.AddMember("date", rapidjson::Value(haptic.getDate().c_str(), jsonTree.GetAllocator()),
+                     jsonTree.GetAllocator());
+
   jsonTree.AddMember("description",
                      rapidjson::Value(haptic.getDescription().c_str(), jsonTree.GetAllocator()),
                      jsonTree.GetAllocator());

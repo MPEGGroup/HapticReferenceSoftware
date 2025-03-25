@@ -310,8 +310,8 @@ public:
     }
   };
 
-  static auto checkPerception(types::Perception &perception, std::vector<std::string> &logs)
-      -> void {
+  static auto checkPerception(types::Perception &perception,
+                              std::vector<std::string> &logs) -> void {
     if (perception.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
       logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Perception_ID_OutOfRange));
     }
@@ -350,7 +350,7 @@ public:
   };
 
   static auto checkSync(types::Sync &sync, std::vector<std::string> &logs) -> void {
-    if (static_cast<unsigned int>(sync.getTimestamp()) > MAX_32_BITS_UNSIGNED) {
+    if (sync.getTimestamp() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Sync_Timestamp_OutOfRange));
     }
 
@@ -359,8 +359,8 @@ public:
     }
   }
 
-  static auto checkHapticDevice(types::ReferenceDevice &device, std::vector<std::string> &logs)
-      -> void {
+  static auto checkHapticDevice(types::ReferenceDevice &device,
+                                std::vector<std::string> &logs) -> void {
     if (device.getId() > static_cast<int>(MAX_8_BITS_UNSIGNED)) {
       logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::ReferenceDevice_ID_OutOfRange));
     }

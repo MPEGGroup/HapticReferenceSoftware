@@ -444,8 +444,8 @@ public:
     return true;
   };
 
-  static auto checkEffectLibrary(IOStream::StreamReader &sreader, types::Perception &perce)
-      -> bool {
+  static auto checkEffectLibrary(IOStream::StreamReader &sreader,
+                                 types::Perception &perce) -> bool {
     std::vector<int> effectsID = std::vector<int>();
     for (unsigned int i = 0; i < perce.getEffectLibrarySize(); i++) {
       auto e = perce.getBasisEffectAt(static_cast<int>(i));
@@ -478,8 +478,8 @@ public:
     return true;
   }
 
-  static auto checkFirstMIHSUnitType(IOStream::StreamReader &sreader, std::vector<bool> &mihsunit)
-      -> bool {
+  static auto checkFirstMIHSUnitType(IOStream::StreamReader &sreader,
+                                     std::vector<bool> &mihsunit) -> bool {
     int index = 0;
     int unitType = IOBinaryPrimitives::readUInt(mihsunit, index, UNIT_TYPE);
     if (unitType == static_cast<int>(MIHSUnitType::Initialization)) {
@@ -535,8 +535,8 @@ public:
     return false;
   }
 
-  static auto checkMIHSUnitSyncWhenInit(IOStream::StreamReader &sreader, const bool unitSync)
-      -> bool {
+  static auto checkMIHSUnitSyncWhenInit(IOStream::StreamReader &sreader,
+                                        const bool unitSync) -> bool {
     if (sreader.currentUnitType == MIHSUnitType::Initialization && !unitSync) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_InitUnitSync_Invalid));
@@ -644,8 +644,8 @@ public:
     return true;
   }
 
-  static auto checkSemanticUnknown(IOStream::StreamReader &sreader, const std::string &semantic)
-      -> bool {
+  static auto checkSemanticUnknown(IOStream::StreamReader &sreader,
+                                   const std::string &semantic) -> bool {
     if (types::stringToEffectSemantic.find(semantic) == types::stringToEffectSemantic.end()) {
       sreader.logs.push_back(
           hmpgErrorCodeToString.at(hmpgErrorCode::TempSpat_Data_Semantic_Unknown));
@@ -654,8 +654,8 @@ public:
     return true;
   }
 
-  static auto checkEffectOrder(IOStream::StreamReader &sreader, std::vector<types::Effect> &effects)
-      -> bool {
+  static auto checkEffectOrder(IOStream::StreamReader &sreader,
+                               std::vector<types::Effect> &effects) -> bool {
     int pos = INT_MIN;
     for (const auto &effect : effects) {
       if (effect.getPosition() < pos) {
@@ -703,8 +703,8 @@ public:
     return true;
   }
 
-  static auto checkMIHSUnitPerceptionModality(IOStream::StreamReader &sreader, const int modal)
-      -> bool {
+  static auto checkMIHSUnitPerceptionModality(IOStream::StreamReader &sreader,
+                                              const int modal) -> bool {
     // if (!sreader.conformance) {
     //   return;
     // }

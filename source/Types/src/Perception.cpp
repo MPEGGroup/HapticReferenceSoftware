@@ -82,28 +82,27 @@ auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality)
   perceptionModality = newPerceptionModality;
 }
 
-[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int8_t> {
+[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int> {
   return this->unitExponent;
 }
 
-[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int8_t {
+[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int {
   return this->getUnitExponent().value_or(Perception::DEFAULT_UNIT_EXPONENT);
 }
 
-auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void {
+auto Perception::setUnitExponent(std::optional<int> newUnitExponent) -> void {
   this->unitExponent = newUnitExponent;
 }
 
-[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int8_t> {
+[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int> {
   return this->perceptionUnitExponent;
 }
 
-[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int8_t {
+[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int {
   return this->getPerceptionUnitExponent().value_or(Perception::DEFAULT_PERCEPTION_UNIT_EXPONENT);
 }
 
-auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
-    -> void {
+auto Perception::setPerceptionUnitExponent(std::optional<int> newPerceptionUnitExponent) -> void {
   this->perceptionUnitExponent = newPerceptionUnitExponent;
 }
 
@@ -167,12 +166,12 @@ auto Perception::addReferenceDevice(haptics::types::ReferenceDevice &newReferenc
 }
 
 auto Perception::addReferenceDevice(
-    const std::vector<std::tuple<
-        int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
-        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
-        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
-        std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
-    -> void {
+    const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
+                                 std::optional<float>, std::optional<float>, std::optional<float>,
+                                 std::optional<float>, std::optional<float>, std::optional<float>,
+                                 std::optional<float>, std::optional<float>, std::optional<float>,
+                                 std::optional<float>, std::optional<haptics::types::ActuatorType>>>
+        &referenceDeviceValues) -> void {
   const size_t idIndex = 0;
   const size_t nameIndex = 1;
   const size_t bodyPartIndex = 2;

@@ -40,21 +40,21 @@ namespace haptics::types {
 class Sync {
 public:
   explicit Sync() = default;
-  explicit Sync(int newTimestamp) : timestamp(newTimestamp), timescale(DEFAULT_TIMESCALE){};
-  explicit Sync(int newTimestamp, std::optional<unsigned int> newTimescale)
-      : timestamp(newTimestamp), timescale(newTimescale){};
+  explicit Sync(uint64_t newTimestamp) : timestamp(newTimestamp), timescale(DEFAULT_TIMESCALE) {};
+  explicit Sync(uint64_t newTimestamp, std::optional<uint64_t> newTimescale)
+      : timestamp(newTimestamp), timescale(newTimescale) {};
 
-  [[nodiscard]] auto getTimestamp() const -> int;
-  auto setTimestamp(int newTimestamp) -> void;
-  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
-  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
-  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
+  [[nodiscard]] auto getTimestamp() const -> uint64_t;
+  auto setTimestamp(uint64_t newTimestamp) -> void;
+  [[nodiscard]] auto getTimescaleOrDefault() const -> uint64_t;
+  [[nodiscard]] auto getTimescale() const -> std::optional<uint64_t>;
+  auto setTimescale(std::optional<uint64_t> newTimescale) -> void;
   [[nodiscard]] auto equals(const Sync &sync) const -> bool;
 
 private:
-  static constexpr unsigned int DEFAULT_TIMESCALE = 1000;
-  int timestamp = -1;
-  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
+  static constexpr uint64_t DEFAULT_TIMESCALE = 1000;
+  uint64_t timestamp = 0;
+  std::optional<uint64_t> timescale = DEFAULT_TIMESCALE;
 };
 } // namespace haptics::types
 

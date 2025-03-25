@@ -123,8 +123,8 @@ auto Channel::generateBand() -> haptics::types::Band * {
   return &this->bands.back();
 }
 
-auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
-    -> haptics::types::Band * {
+auto Channel::generateBand(BandType bandType, int lowerFrequencyLimit,
+                           int upperFrequencyLimit) -> haptics::types::Band * {
   Band newBand(bandType, lowerFrequencyLimit, upperFrequencyLimit);
   this->bands.push_back(newBand);
   return &this->bands.back();
@@ -186,8 +186,8 @@ auto Channel::Evaluate(double position, unsigned int timescale) -> double {
   return res;
 }
 
-auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
-    -> std::vector<double> {
+auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad,
+                              unsigned int timescale) -> std::vector<double> {
   std::vector<double> channelAmp(sampleCount, 0); // intialiser � 0?
   for (haptics::types::Band &b : bands) {
     std::vector<double> bandAmp = b.EvaluationBand(sampleCount, fs, pad, timescale);
@@ -204,19 +204,19 @@ auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned in
   return channelAmp;
 }
 
-[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint32_t> {
+[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint64_t> {
   return frequencySampling;
 }
 
-auto Channel::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
+auto Channel::setFrequencySampling(std::optional<uint64_t> newFrequencySampling) -> void {
   frequencySampling = newFrequencySampling;
 }
 
-[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint32_t> {
+[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint64_t> {
   return sampleCount;
 }
 
-auto Channel::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
+auto Channel::setSampleCount(std::optional<uint64_t> newSampleCount) -> void {
   sampleCount = newSampleCount;
 }
 
@@ -232,8 +232,8 @@ auto Channel::setActuatorResolution(std::optional<Vector> newChannelResolution) 
   actuatorResolution = newChannelResolution;
 }
 
-[[nodiscard]] auto Channel::getBodyPartTarget() const
-    -> std::optional<std::vector<BodyPartTarget>> {
+[[nodiscard]] auto
+Channel::getBodyPartTarget() const -> std::optional<std::vector<BodyPartTarget>> {
   return bodyPartTarget;
 }
 

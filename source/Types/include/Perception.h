@@ -112,7 +112,7 @@ public:
       , perceptionModality(newPerceptionModality)
       , channels({})
       , unitExponent(std::nullopt)
-      , perceptionUnitExponent(std::nullopt){};
+      , perceptionUnitExponent(std::nullopt) {};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
@@ -128,12 +128,12 @@ public:
   auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
-  [[nodiscard]] auto getUnitExponent() const -> std::optional<int8_t>;
-  [[nodiscard]] auto getUnitExponentOrDefault() const -> int8_t;
-  auto setUnitExponent(std::optional<int8_t> newUnitExponent) -> void;
-  [[nodiscard]] auto getPerceptionUnitExponent() const -> std::optional<int8_t>;
-  [[nodiscard]] auto getPerceptionUnitExponentOrDefault() const -> int8_t;
-  auto setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent) -> void;
+  [[nodiscard]] auto getUnitExponent() const -> std::optional<int>;
+  [[nodiscard]] auto getUnitExponentOrDefault() const -> int;
+  auto setUnitExponent(std::optional<int> newUnitExponent) -> void;
+  [[nodiscard]] auto getPerceptionUnitExponent() const -> std::optional<int>;
+  [[nodiscard]] auto getPerceptionUnitExponentOrDefault() const -> int;
+  auto setPerceptionUnitExponent(std::optional<int> newPerceptionUnitExponent) -> void;
   auto getChannelsSize() -> size_t;
   auto getChannelAt(int index) -> Channel &;
   auto addChannel(haptics::types::Channel &newChannel) -> void;
@@ -159,8 +159,8 @@ public:
   auto addBasisEffect(haptics::types::Effect &newEffect) -> void;
   auto clearEffectLibrary() -> void { effectLibrary.clear(); };
   auto refactorEffects() -> void;
-  auto searchForEquivalentEffects(Effect &effect, int startingChannel)
-      -> std::vector<std::tuple<int, int, int>>;
+  auto searchForEquivalentEffects(Effect &effect,
+                                  int startingChannel) -> std::vector<std::tuple<int, int, int>>;
   auto linearizeLibrary() -> void;
   auto getEffectById(int id) -> std::optional<Effect>;
   [[nodiscard]] auto equals(const Perception &perception) const -> bool;
@@ -181,8 +181,8 @@ private:
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Channel> channels = {};
   std::vector<ReferenceDevice> referenceDevices;
-  std::optional<int8_t> unitExponent = std::nullopt;
-  std::optional<int8_t> perceptionUnitExponent = std::nullopt;
+  std::optional<int> unitExponent = std::nullopt;
+  std::optional<int> perceptionUnitExponent = std::nullopt;
   std::vector<Effect> effectLibrary = std::vector<Effect>{};
 };
 } // namespace haptics::types

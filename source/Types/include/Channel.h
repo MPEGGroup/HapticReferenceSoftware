@@ -47,7 +47,7 @@ struct Vector {
   int8_t Z;
 
   explicit Vector() = default;
-  explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+  explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z) {};
 
   auto operator==(const Vector &other) const -> bool {
     return X == other.X && Y == other.Y && Z == other.Z;
@@ -71,7 +71,7 @@ public:
       , bands({})
       , frequencySampling(std::nullopt)
       , sampleCount(std::nullopt)
-      , direction(std::nullopt){};
+      , direction(std::nullopt) {};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;
@@ -100,21 +100,21 @@ public:
   auto addBand(haptics::types::Band &newBand) -> void;
   auto clearBands() -> void { bands.clear(); };
   auto generateBand() -> haptics::types::Band *;
-  auto generateBand(BandType bandType, int lowerFrequencyLimit, int upperFrequencyLimit)
-      -> haptics::types::Band *;
+  auto generateBand(BandType bandType, int lowerFrequencyLimit,
+                    int upperFrequencyLimit) -> haptics::types::Band *;
   auto generateBand(BandType bandType, CurveType curveType, int lowerFrequencyLimit,
                     int upperFrequencyLimit) -> haptics::types::Band *;
   auto generateBand(BandType bandType, int blockLength, int lowerFrequencyLimit,
                     int upperFrequencyLimit) -> haptics::types::Band *;
-  auto findBandAvailable(int position, int duration, types::BandType bandType)
-      -> haptics::types::Band *;
+  auto findBandAvailable(int position, int duration,
+                         types::BandType bandType) -> haptics::types::Band *;
   auto Evaluate(double position, unsigned int timescale) -> double;
-  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
-      -> std::vector<double>;
-  [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint32_t>;
-  auto setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void;
-  [[nodiscard]] auto getSampleCount() const -> std::optional<uint32_t>;
-  auto setSampleCount(std::optional<uint32_t> newSampleCount) -> void;
+  auto EvaluateChannel(uint32_t sampleCount, int fs, int pad,
+                       unsigned int timescale) -> std::vector<double>;
+  [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint64_t>;
+  auto setFrequencySampling(std::optional<uint64_t> newFrequencySampling) -> void;
+  [[nodiscard]] auto getSampleCount() const -> std::optional<uint64_t>;
+  auto setSampleCount(std::optional<uint64_t> newSampleCount) -> void;
   [[nodiscard]] auto getDirection() const -> std::optional<Vector>;
   auto setDirection(std::optional<Vector> newDirection) -> void;
   [[nodiscard]] auto getActuatorResolution() const -> std::optional<Vector>;
@@ -135,8 +135,8 @@ private:
   std::vector<Band> bands = {};
   std::optional<int> priority;
   std::optional<int> referenceDeviceId;
-  std::optional<uint32_t> frequencySampling = std::nullopt;
-  std::optional<uint32_t> sampleCount = std::nullopt;
+  std::optional<uint64_t> frequencySampling = std::nullopt;
+  std::optional<uint64_t> sampleCount = std::nullopt;
   std::optional<Vector> direction = std::nullopt;
   std::optional<Vector> actuatorResolution = std::nullopt;
   std::optional<std::vector<BodyPartTarget>> bodyPartTarget = std::nullopt;
