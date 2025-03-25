@@ -31,7 +31,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
 #include <Tools/include/InputParser.h>
@@ -42,7 +41,6 @@
 #include <functional>
 #include <optional>
 
-using haptics::io::IOBinary;
 using haptics::io::IOJson;
 using haptics::io::IOStream;
 using haptics::tools::InputParser;

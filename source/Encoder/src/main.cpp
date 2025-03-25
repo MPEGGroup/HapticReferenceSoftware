@@ -34,7 +34,6 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
-#include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
@@ -49,7 +48,6 @@
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
-using haptics::io::IOBinary;
 using haptics::io::IOJson;
 using haptics::io::IOStream;
 using haptics::tools::InputParser;
