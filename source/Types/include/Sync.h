@@ -35,6 +35,7 @@
 #define SYNC_H
 
 #include <optional>
+#include <stdint.h>
 
 namespace haptics::types {
 class Sync {
