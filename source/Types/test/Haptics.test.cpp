@@ -75,7 +75,7 @@ TEST_CASE("haptics::types::Haptics loading ohm file", "[loadMetadataFromOHM]") {
     haptics::tools::OHMData ohmData;
     const std::string header = "OHM ";
     const std::string description = "Test description";
-    const int version = 2023;
+    const int version = 2025;
     const std::string elementDescription = "Element description";
     const std::string channelDescription = "Channel description";
     const haptics::tools::OHMData::Body bodyPartMask = haptics::tools::OHMData::Body::UNSPECIFIED;
