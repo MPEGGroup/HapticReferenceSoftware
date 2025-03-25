@@ -5,7 +5,7 @@
   "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "reference_files": {
-    "main_folder": "..\\..\\..\\..\\..\\..\\..\\Data\\Part40-HapticSupport",
+    "main_folder": "..\\..\\..\\..\\..\\..\\Data\\Part31-HapticSupport",
     "reference_bitratePSNR": "reference_bitratePSNR.csv",
     "short_effects": [
       {
