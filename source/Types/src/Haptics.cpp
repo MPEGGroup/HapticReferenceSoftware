@@ -32,8 +32,12 @@
  */
 
 #include <Types/include/Haptics.h>
+#include <chrono>
 #include <ctime>
+#include <iomanip>
 #include <iostream>
+#include <regex>
+#include <sstream>
 
 namespace haptics::types {
 
@@ -51,6 +55,19 @@ auto Haptics::setLevel(uint8_t newLevel) -> void { level = newLevel; }
 
 [[nodiscard]] auto Haptics::getDate() const -> std::string { return date; }
 auto Haptics::setDate(std::string &newDate) -> void { date = newDate; }
+
+auto Haptics::setCurrentDate() -> void {
+  auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::stringstream ss;
+  ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d");
+  date = ss.str();
+}
+
+auto Haptics::checkDate() -> bool {
+  const std::regex txt_regex("[+-]?[0-9]{4}(-[01][0-9](-[0-3][0-9](T[0-2][0-9]:[0-5][0-9]:?([0-5]["
+                             "0-9](.[0-9]+)?)?[+-][0-2][0-9]:[0-5][0-9]Z?)?)?)?");
+  return regex_match(date, txt_regex);
+}
 
 [[nodiscard]] auto Haptics::getDescription() const -> std::string { return description; }
 
@@ -114,15 +131,15 @@ auto Haptics::addPerception(Perception &newPerception) -> void {
 
 auto Haptics::addAvatar(Avatar &newAvatar) -> void { avatars.push_back(newAvatar); }
 
-[[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> unsigned int {
+[[nodiscard]] auto Haptics::getTimescaleOrDefault() const -> uint64_t {
   return this->getTimescale().value_or(Haptics::DEFAULT_TIMESCALE);
 }
 
-[[nodiscard]] auto Haptics::getTimescale() const -> std::optional<unsigned int> {
+[[nodiscard]] auto Haptics::getTimescale() const -> std::optional<uint64_t> {
   return this->timescale;
 }
 
-auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
+auto Haptics::setTimescale(std::optional<uint64_t> newTimescale) -> void {
   this->timescale = newTimescale;
 }
 
@@ -133,9 +150,8 @@ auto Haptics::setTimescale(std::optional<unsigned int> newTimescale) -> void {
 auto Haptics::addSync(Sync &newSync) -> void { syncs.push_back(newSync); }
 
 auto Haptics::loadMetadataFromOHM(haptics::tools::OHMData data) -> void {
-  version = "2023";
-  time_t now = time(nullptr);
-  date = ctime(&now);
+  version = "2025";
+  setCurrentDate();
   description = data.getDescription();
   auto numElements = static_cast<int>(data.getHapticElementMetadataSize());
   for (int i = 0; i < numElements; i++) {

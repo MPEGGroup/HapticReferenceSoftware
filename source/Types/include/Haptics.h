@@ -55,7 +55,7 @@ public:
       , description(std::move(newDescription))
       , perceptions({})
       , avatars({})
-      , syncs({}){};
+      , syncs({}) {};
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
@@ -67,6 +67,8 @@ public:
 
   [[nodiscard]] auto getDate() const -> std::string;
   auto setDate(std::string &newDate) -> void;
+  auto setCurrentDate() -> void;
+  auto checkDate() -> bool;
   [[nodiscard]] auto getDescription() const -> std::string;
   auto setDescription(std::string &newDescription) -> void;
   [[nodiscard]] auto getPerceptionsSize() -> size_t;
@@ -78,9 +80,9 @@ public:
   [[nodiscard]] auto getAvatarsSize() -> size_t;
   [[nodiscard]] auto getAvatarAt(int index) -> Avatar &;
   auto addAvatar(Avatar &newAvatar) -> void;
-  [[nodiscard]] auto getTimescaleOrDefault() const -> unsigned int;
-  [[nodiscard]] auto getTimescale() const -> std::optional<unsigned int>;
-  auto setTimescale(std::optional<unsigned int> newTimescale) -> void;
+  [[nodiscard]] auto getTimescaleOrDefault() const -> uint64_t;
+  [[nodiscard]] auto getTimescale() const -> std::optional<uint64_t>;
+  auto setTimescale(std::optional<uint64_t> newTimescale) -> void;
   [[nodiscard]] auto getSyncsSize() -> size_t;
   [[nodiscard]] auto getSyncsAt(int index) -> Sync &;
   auto addSync(Sync &newSync) -> void;
@@ -91,14 +93,14 @@ public:
   [[nodiscard]] auto equals(const Haptics &haptic) const -> bool;
 
 private:
-  std::string version = "2023";
+  std::string version = "2025";
   std::string profile = "Main";
-  uint8_t level = 1;
+  unsigned int level = 1;
   std::string date;
   std::string description;
   std::vector<Perception> perceptions = {};
   std::vector<Avatar> avatars = {};
-  std::optional<unsigned int> timescale = DEFAULT_TIMESCALE;
+  std::optional<uint64_t> timescale = DEFAULT_TIMESCALE;
   std::vector<Sync> syncs = {};
 };
 } // namespace haptics::types

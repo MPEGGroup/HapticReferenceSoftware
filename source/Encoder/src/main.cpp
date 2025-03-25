@@ -158,6 +158,7 @@ auto main(int argc, char *argv[]) -> int {
   bool enable_vectorial = !inputParser.cmdOptionExists("--disable-vectorial");
 
   Haptics hapticFile;
+  hapticFile.setCurrentDate();
   if (inputParser.cmdOptionExists("-ts")) {
     hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
   } else {
