@@ -239,10 +239,10 @@ auto IOBinary::writePerceptionsHeader(types::Haptics &haptic, std::vector<bool> 
     int avatarId = myPerception.getAvatarId();
     IOBinaryPrimitives::writeNBits<int, AVATAR_ID>(avatarId, output);
 
-    int8_t unitExponent = myPerception.getUnitExponentOrDefault();
+    auto unitExponent = myPerception.getUnitExponentOrDefault();
     IOBinaryPrimitives::writeNBits<int8_t, MDPERCE_UNIT_EXP>(unitExponent, output);
 
-    int8_t perceptionUnitExponent = myPerception.getPerceptionUnitExponentOrDefault();
+    auto perceptionUnitExponent = myPerception.getPerceptionUnitExponentOrDefault();
     IOBinaryPrimitives::writeNBits<int8_t, MDPERCE_PERCE_UNIT_EXP>(perceptionUnitExponent, output);
 
     if (!IOBinary::writeLibrary(myPerception, output)) {
