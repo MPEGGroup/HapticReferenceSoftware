@@ -67,12 +67,12 @@ static constexpr uint32_t CRC32_POLYNOMIAL = 2187366103;
 static constexpr uint16_t CRC16_POLYNOMIAL = 49185;
 
 
-enum class KeyframeMask:uint8_t {
+enum class KeyframeMask : uint8_t {
   RELATIVE_POSITION = 0b0000'0001,
   AMPLITUDE_MODULATION = 0b0000'0010,
   FREQUENCY_MODULATION = 0b0000'0100,
   NOTHING = 0b0000'0000,
-  ALL = 0b0000'0111 
+  ALL = 0b0000'0111
 };
 
 enum class MIHSUnitType { Initialization, Temporal, Spatial, Silent };
