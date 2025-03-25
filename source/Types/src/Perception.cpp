@@ -166,12 +166,12 @@ auto Perception::addReferenceDevice(haptics::types::ReferenceDevice &newReferenc
 }
 
 auto Perception::addReferenceDevice(
-    const std::vector<std::tuple<int, std::string, std::optional<uint32_t>, std::optional<float>,
-                                 std::optional<float>, std::optional<float>, std::optional<float>,
-                                 std::optional<float>, std::optional<float>, std::optional<float>,
-                                 std::optional<float>, std::optional<float>, std::optional<float>,
-                                 std::optional<float>, std::optional<haptics::types::ActuatorType>>>
-        &referenceDeviceValues) -> void {
+    const std::vector<std::tuple<
+        int, std::string, std::optional<uint32_t>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<float>, std::optional<float>, std::optional<float>,
+        std::optional<float>, std::optional<haptics::types::ActuatorType>>> &referenceDeviceValues)
+    -> void {
   const size_t idIndex = 0;
   const size_t nameIndex = 1;
   const size_t bodyPartIndex = 2;

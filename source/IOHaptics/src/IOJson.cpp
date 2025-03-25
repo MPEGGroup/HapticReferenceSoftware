@@ -455,8 +455,8 @@ auto IOJson::semanticConformanceCheckChannel(types::Channel &channel, types::Per
   return conformant;
 }
 auto IOJson::semanticConformanceCheckBand(types::Band &band, types::Channel &channel,
-                                          types::Perception &perception,
-                                          types::Haptics &haptic) -> bool {
+                                          types::Perception &perception, types::Haptics &haptic)
+    -> bool {
   bool conformant = true;
   // Check the absence of the curve type for bands that are not curve bands
   auto bandType = band.getBandType();
@@ -665,8 +665,8 @@ auto IOJson::loadFile(const std::string &filePath, types::Haptics &haptic) -> bo
   return loadingSuccess;
 }
 
-auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions,
-                             types::Haptics &haptic) -> bool {
+auto IOJson::loadPerceptions(const rapidjson::Value &jsonPerceptions, types::Haptics &haptic)
+    -> bool {
   bool loadingSuccess = true;
   for (const auto &jpv : jsonPerceptions.GetArray()) {
     if (!jpv.IsObject()) {
@@ -767,8 +767,8 @@ auto IOJson::loadSyncs(const rapidjson::Value &jsonSyncs, types::Haptics &haptic
   return loadingSuccess;
 }
 
-auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary,
-                         types::Perception &perception) -> bool {
+auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary, types::Perception &perception)
+    -> bool {
   bool loadingSuccess = true;
   for (const auto &jev : jsonLibrary.GetArray()) {
     if (!jev.IsObject()) {
@@ -825,8 +825,8 @@ auto IOJson::loadLibrary(const rapidjson::Value &jsonLibrary,
   return loadingSuccess;
 }
 
-auto IOJson::loadChannels(const rapidjson::Value &jsonChannels,
-                          types::Perception &perception) -> bool {
+auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perception &perception)
+    -> bool {
   bool loadingSuccess = true;
   for (const auto &jtv : jsonChannels.GetArray()) {
     if (!jtv.IsObject()) {

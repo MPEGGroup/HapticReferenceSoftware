@@ -112,7 +112,7 @@ public:
       , perceptionModality(newPerceptionModality)
       , channels({})
       , unitExponent(std::nullopt)
-      , perceptionUnitExponent(std::nullopt) {};
+      , perceptionUnitExponent(std::nullopt){};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;
@@ -159,8 +159,8 @@ public:
   auto addBasisEffect(haptics::types::Effect &newEffect) -> void;
   auto clearEffectLibrary() -> void { effectLibrary.clear(); };
   auto refactorEffects() -> void;
-  auto searchForEquivalentEffects(Effect &effect,
-                                  int startingChannel) -> std::vector<std::tuple<int, int, int>>;
+  auto searchForEquivalentEffects(Effect &effect, int startingChannel)
+      -> std::vector<std::tuple<int, int, int>>;
   auto linearizeLibrary() -> void;
   auto getEffectById(int id) -> std::optional<Effect>;
   [[nodiscard]] auto equals(const Perception &perception) const -> bool;

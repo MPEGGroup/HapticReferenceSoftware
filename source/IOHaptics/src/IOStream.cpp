@@ -42,8 +42,8 @@
 
 namespace haptics::io {
 
-auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath,
-                         int packetDuration) -> bool {
+auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
+    -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -137,8 +137,8 @@ auto IOStream::readPackets(std::vector<std::vector<bool>> &bitstream, StreamRead
   return conformant;
 }
 
-auto IOStream::loadFile(const std::string &filePath,
-                        std::vector<std::vector<bool>> &bitset) -> bool {
+auto IOStream::loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset)
+    -> bool {
   std::ifstream file(filePath, std::ios::binary | std::ifstream::in);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -433,8 +433,8 @@ auto IOStream::writeMIHSUnit(MIHSUnitType unitType, std::vector<std::vector<bool
   }
 }
 auto IOStream::writeMIHSUnitInitialization(std::vector<std::vector<bool>> &listPackets,
-                                           std::vector<bool> &mihsunit,
-                                           StreamWriter &swriter) -> bool {
+                                           std::vector<bool> &mihsunit, StreamWriter &swriter)
+    -> bool {
   std::bitset<UNIT_SYNC> syncBits(0);
   std::string syncStr = syncBits.to_string();
   IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
@@ -973,8 +973,8 @@ auto IOStream::readTiming(StreamReader &sreader, std::vector<bool> &bitstream) -
   return true;
 }
 
-auto IOStream::writeInitializationTiming(StreamWriter &swriter,
-                                         std::vector<bool> &bitstream) -> bool {
+auto IOStream::writeInitializationTiming(StreamWriter &swriter, std::vector<bool> &bitstream)
+    -> bool {
   std::bitset<TIMING_TIME> timestampBits = swriter.time;
   std::string timestampStr = timestampBits.to_string();
   IOBinaryPrimitives::writeStrBits(timestampStr, bitstream);
@@ -998,8 +998,8 @@ auto IOStream::writeInitializationTiming(StreamWriter &swriter,
   return true;
 }
 
-auto IOStream::readInitializationTiming(StreamReader &sreader,
-                                        std::vector<bool> &bitstream) -> bool {
+auto IOStream::readInitializationTiming(StreamReader &sreader, std::vector<bool> &bitstream)
+    -> bool {
   int index = 0;
   int timestamp = IOBinaryPrimitives::readUInt(bitstream, index, TIMING_TIME);
   int timescale = IOBinaryPrimitives::readUInt(bitstream, index, INITTIMING_TIMESCALE);
@@ -1191,8 +1191,8 @@ auto IOStream::readAvatar(StreamReader &sreader, std::vector<bool> &bitstream,
   return true;
 }
 
-auto IOStream::writeMetadataPerception(StreamWriter &swriter,
-                                       std::vector<bool> &bitstream) -> bool {
+auto IOStream::writeMetadataPerception(StreamWriter &swriter, std::vector<bool> &bitstream)
+    -> bool {
   std::bitset<MDPERCE_ID> perceIDBits(swriter.perception.getId());
   std::string perceIdStr = perceIDBits.to_string();
   IOBinaryPrimitives::writeStrBits(perceIdStr, bitstream);
@@ -1490,8 +1490,8 @@ auto IOStream::readLibraryEffect(StreamReader &sreader, types::Effect &libraryEf
   return success;
 }
 
-auto IOStream::writeLibraryEffect(types::Effect &libraryEffect,
-                                  std::vector<bool> &bitstream) -> bool {
+auto IOStream::writeLibraryEffect(types::Effect &libraryEffect, std::vector<bool> &bitstream)
+    -> bool {
   std::bitset<EFFECT_ID> idBits(libraryEffect.getId());
   std::string idStr = idBits.to_string();
   IOBinaryPrimitives::writeStrBits(idStr, bitstream);
@@ -1582,8 +1582,8 @@ auto IOStream::writeLibraryEffect(types::Effect &libraryEffect,
   return true;
 }
 
-auto IOStream::writeReferenceDevice(types::ReferenceDevice &refDevice,
-                                    std::vector<bool> &bitstream) -> bool {
+auto IOStream::writeReferenceDevice(types::ReferenceDevice &refDevice, std::vector<bool> &bitstream)
+    -> bool {
   std::vector<bool> vecBuf = std::vector<bool>();
   std::bitset<REFDEV_ID> idBits(refDevice.getId());
   std::string idStr = idBits.to_string();
@@ -2278,8 +2278,8 @@ auto IOStream::linearizeTimeline(types::Band &band) -> void {
     band.addEffect(e);
   }
 }
-auto IOStream::linearizeTimelineEffect(types::Effect &effect,
-                                       std::vector<types::Effect> &effects) -> void {
+auto IOStream::linearizeTimelineEffect(types::Effect &effect, std::vector<types::Effect> &effects)
+    -> void {
   for (int j = 0; j < static_cast<int>(effect.getTimelineSize()); j++) {
     auto effectTimeline = effect.getTimelineEffectAt(j);
     if (effectTimeline.getEffectType() == types::EffectType::Composite) {
@@ -2290,8 +2290,8 @@ auto IOStream::linearizeTimelineEffect(types::Effect &effect,
   }
 }
 
-auto IOStream::packetizeBand(StreamWriter &swriter,
-                             std::vector<std::vector<bool>> &bitstreams) -> bool {
+auto IOStream::packetizeBand(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstreams)
+    -> bool {
   // Exit this function when all the band is packetised
   std::vector<std::vector<bool>> bufPacketBitstream = std::vector<std::vector<bool>>();
   std::vector<bool> packetBits = std::vector<bool>();
@@ -2351,8 +2351,8 @@ auto IOStream::createWaveletPayload(StreamWriter &swriter,
   }
   return true;
 }
-auto IOStream::createPayloadPacket(StreamWriter &swriter,
-                                   std::vector<std::vector<bool>> &bitstream) -> bool {
+auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream)
+    -> bool {
 
   swriter.auType = AUType::RAU;
   bool unfinishedEffect = false;
@@ -2418,8 +2418,8 @@ auto IOStream::writeEffectHeader(StreamWriter &swriter) -> std::vector<bool> {
 }
 
 auto IOStream::writeWaveletPayloadPacket(std::vector<bool> bufPacketBitstream,
-                                         std::vector<bool> &packetBits,
-                                         StreamWriter &swriter) -> std::vector<bool> {
+                                         std::vector<bool> &packetBits, StreamWriter &swriter)
+    -> std::vector<bool> {
   std::bitset<DB_EFFECT_COUNT> fxCountBits(1);
   std::string fxCountStr = fxCountBits.to_string();
   IOBinaryPrimitives::writeStrBits(fxCountStr, packetBits);
@@ -2512,8 +2512,8 @@ auto IOStream::writePayloadPacket(StreamWriter &swriter,
   return packetBits;
 }
 
-auto IOStream::writeSpatialData(StreamWriter &swriter,
-                                std::vector<std::vector<bool>> &bitstream) -> bool {
+auto IOStream::writeSpatialData(StreamWriter &swriter, std::vector<std::vector<bool>> &bitstream)
+    -> bool {
   swriter.auType = AUType::RAU;
   swriter.time = 0;
 
@@ -2685,8 +2685,8 @@ auto IOStream::writeCRC(std::vector<std::vector<bool>> &bitstream, std::vector<b
   packetCRC.insert(packetCRC.end(), quotient.begin(), quotient.end());
   return true;
 }
-auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc,
-                       MIHSPacketType mihsPacketType) -> bool {
+auto IOStream::readCRC(std::vector<bool> &bitstream, CRC &crc, MIHSPacketType mihsPacketType)
+    -> bool {
   int idx = 0;
   if (mihsPacketType == MIHSPacketType::CRC16) {
     crc.nbPackets = 1;
@@ -2962,8 +2962,8 @@ auto IOStream::writeTransient(types::Keyframe &keyframe, std::vector<bool> &bits
   IOBinaryPrimitives::writeStrBits(freqStr, bitstream);
   return true;
 }
-auto IOStream::readTransient(std::vector<bool> &bitstream, types::Keyframe &keyframe,
-                             int &length) -> bool {
+auto IOStream::readTransient(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
+    -> bool {
   int idx = 0;
   float amplitude = IOBinaryPrimitives::readFloatNBits<KEYFRAME_AMPLITUDE>(
       bitstream, idx, -MAX_AMPLITUDE, MAX_AMPLITUDE);
@@ -2986,8 +2986,8 @@ auto IOStream::writeCurve(types::Keyframe &keyframe, std::vector<bool> &bitstrea
   IOBinaryPrimitives::writeStrBits(posStr, bitstream);
   return true;
 }
-auto IOStream::readCurve(std::vector<bool> &bitstream, types::Keyframe &keyframe,
-                         int &length) -> bool {
+auto IOStream::readCurve(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
+    -> bool {
   int idx = 0;
   float amplitude = IOBinaryPrimitives::readFloatNBits<KEYFRAME_AMPLITUDE>(
       bitstream, idx, -MAX_AMPLITUDE, MAX_AMPLITUDE);
@@ -3024,8 +3024,8 @@ auto IOStream::writeVectorial(types::Keyframe &keyframe, std::vector<bool> &bits
   return true;
 }
 
-auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe,
-                             int &length) -> bool {
+auto IOStream::readVectorial(std::vector<bool> &bitstream, types::Keyframe &keyframe, int &length)
+    -> bool {
   int idx = 0;
   std::bitset<KEYFRAME_VECTORIAL_MASK> informationMask(
       IOBinaryPrimitives::readUInt(bitstream, idx, KEYFRAME_VECTORIAL_MASK));
@@ -3096,8 +3096,8 @@ auto IOStream::searchInList(std::vector<BandStream> &list, BandStream &item, int
 }
 
 auto IOStream::readListObject(StreamReader &sreader, std::vector<bool> &bitstream, int refDevCount,
-                              std::vector<types::ReferenceDevice> &refDevList,
-                              int &length) -> bool {
+                              std::vector<types::ReferenceDevice> &refDevList, int &length)
+    -> bool {
   int idx = 0;
   for (int i = 0; i < refDevCount; i++) {
     std::vector<bool> refDevBits(bitstream.begin() + idx, bitstream.end());
