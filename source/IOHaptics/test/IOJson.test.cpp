@@ -43,7 +43,7 @@ const std::string filename = "testing_IOJson.hjif";
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file without avatar") {
-  const std::string testingVersion = "2023";
+  const std::string testingVersion = "2025";
   const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
@@ -75,7 +75,7 @@ TEST_CASE("write/read hjif haptic file without avatar") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for avatar testing") {
-  const std::string testingVersion = "2023";
+  const std::string testingVersion = "2025";
   const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
@@ -131,7 +131,7 @@ TEST_CASE("write/read hjif haptic file for avatar testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for reference device testing") {
-  const std::string testingVersion = "2023";
+  const std::string testingVersion = "2025";
   const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
@@ -226,7 +226,7 @@ TEST_CASE("write/read hjif haptic file for reference device testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for channel testing") {
-  const std::string testingVersion = "2023";
+  const std::string testingVersion = "2025";
   const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
@@ -381,7 +381,7 @@ TEST_CASE("write/read hjif haptic file for channel testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for body targetting testing") {
-  const std::string testingVersion = "2023";
+  const std::string testingVersion = "2025";
   const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);
@@ -471,7 +471,7 @@ TEST_CASE("write/read hjif haptic file for body targetting testing") {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity, readability-function-size)
 TEST_CASE("write/read hjif haptic file for signal testing") {
-  const std::string testingVersion = "2023";
+  const std::string testingVersion = "2025";
   const std::string testingDate = "2023-12-15";
   const std::string testingDescription = "Test Description";
   haptics::types::Haptics testingHaptic(testingVersion, testingDate, testingDescription);

@@ -1,13 +1,11 @@
 {
-  "RM_install_dir": "..\\..\\out\\install\\x64-Debug\\bin\\",
-  "encoder_path": "Encoder.exe",
-  "decoder_path": "Decoder.exe",
-  "synthesizer_path": "Synthesizer.exe",
+  "RM_install_dir": "..\\..\\out\\build\\x64-Debug\\source\\",
+  "encoder_path": "Encoder\\Encoder.exe",
+  "decoder_path": "Decoder\\Decoder.exe",
+  "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "reference_files": {
-
-    "main_folder": "..\\..\\..\\..\\..\\data\\MPEG\\Part40-HapticSupport",
-
+    "main_folder": "..\\..\\..\\..\\..\\..\\Data\\Part31-HapticSupport",
     "reference_bitratePSNR": "reference_bitratePSNR.csv",
     "short_effects": [
       {
@@ -301,6 +299,14 @@
         "reference_file": "Training\\Training1-2\\WAV_noPad\\APPL-vib-sparkle-8kHz-16-nopad.wav"
       },
       {
+        "name": "Carpet",
+        "type": "Training",
+        "modality": "vib",
+        "extension": "WAV",
+        "haptic_file_path": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Carpet-8kHz-16-nopad.ohm",
+        "reference_file": "Training\\Training1-2\\WAV_noPad\\IDCC-vib-Carpet-8kHz-16-nopad.wav"
+      },
+      {
         "name": "HeartBeat",
         "type": "Training",
         "modality": "vib",
@@ -565,6 +571,14 @@
         "extension": "WAV",
         "haptic_file_path": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.ohm",
         "reference_file": "Training\\Training1-3\\WAV_noPad\\IDCC-kin-Rollercoaster-training-8kHz-16-nopad.wav"
+      },
+      {
+        "name": "rollercoaster",
+        "type": "Evaluation",
+        "modality": "kin",
+        "extension": "WAV",
+        "haptic_file_path": "Evaluation\\Evaluation1-3\\WAV_noPad\\rollercoaster.wav",
+        "reference_file": "Evaluation\\Evaluation1-3\\WAV_noPad\\rollercoaster.wav"
       }
     ]
   }

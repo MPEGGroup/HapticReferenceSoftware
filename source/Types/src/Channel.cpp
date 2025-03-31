@@ -204,19 +204,19 @@ auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned in
   return channelAmp;
 }
 
-[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint32_t> {
+[[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint64_t> {
   return frequencySampling;
 }
 
-auto Channel::setFrequencySampling(std::optional<uint32_t> newFrequencySampling) -> void {
+auto Channel::setFrequencySampling(std::optional<uint64_t> newFrequencySampling) -> void {
   frequencySampling = newFrequencySampling;
 }
 
-[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint32_t> {
+[[nodiscard]] auto Channel::getSampleCount() const -> std::optional<uint64_t> {
   return sampleCount;
 }
 
-auto Channel::setSampleCount(std::optional<uint32_t> newSampleCount) -> void {
+auto Channel::setSampleCount(std::optional<uint64_t> newSampleCount) -> void {
   sampleCount = newSampleCount;
 }
 

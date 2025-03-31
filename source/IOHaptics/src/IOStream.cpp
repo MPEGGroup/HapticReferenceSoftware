@@ -256,7 +256,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
         std::vector<bool> temporalUnit = std::vector<bool>();
         writeMIHSUnit(MIHSUnitType::Temporal, bufUnit, temporalUnit, swriter);
         bitstream.push_back(temporalUnit);
-        if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+        if (syncIdx != -1 && swriter.time == static_cast<int>(nextSync.getTimestamp())) {
           std::vector<bool> syncUnit = std::vector<bool>();
           writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
           getNextSync(haptic, nextSync, syncIdx);
@@ -267,7 +267,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
           std::vector<bool> silentUnit = std::vector<bool>();
           if (writeMIHSUnit(MIHSUnitType::Silent, silentPackets, silentUnit, swriter)) {
             bitstream.push_back(silentUnit);
-            if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+            if (syncIdx != -1 && swriter.time == static_cast<int>(nextSync.getTimestamp())) {
               std::vector<bool> syncUnit = std::vector<bool>();
               writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
               getNextSync(haptic, nextSync, syncIdx);
@@ -285,7 +285,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     writeMIHSUnit(MIHSUnitType::Temporal, bufUnit, temporalUnit, swriter);
     bitstream.push_back(temporalUnit);
     bufUnit.clear();
-    if (syncIdx != -1 && swriter.time == nextSync.getTimestamp()) {
+    if (syncIdx != -1 && swriter.time == static_cast<int>(nextSync.getTimestamp())) {
       std::vector<bool> syncUnit = std::vector<bool>();
       writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
       getNextSync(haptic, nextSync, syncIdx);
@@ -1083,7 +1083,6 @@ auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bit
   int versionLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_VERSION);
   std::string version = IOBinaryPrimitives::readString(bitstream, index, versionLength);
   sreader.haptic.setVersion(version);
-
   if (!std::regex_match(version, std::regex(VERSION_FORMAT))) {
     sreader.logs.push_back(
         hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Version_Invalid));
@@ -1109,7 +1108,8 @@ auto IOStream::readMetadataHaptics(StreamReader &sreader, std::vector<bool> &bit
   int dateLength = IOBinaryPrimitives::readUInt(bitstream, index, MDEXP_DATE);
   std::string date = IOBinaryPrimitives::readString(bitstream, index, dateLength);
   sreader.haptic.setDate(date);
-  if (std::regex_match(date, std::regex(DATE_FORMAT))) {
+
+  if (!sreader.haptic.checkDate()) {
     sreader.logs.push_back(hmpgErrorCodeToString.at(hmpgErrorCode::Init_Experience_Date_Invalid));
     return false;
   }
@@ -1326,10 +1326,10 @@ auto IOStream::readMetadataPerception(StreamReader &sreader, std::vector<bool> &
     sreader.perception.setEffectSemanticScheme(schemeStr);
   }
 
-  int unitExp = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_UNIT_EXP);
+  int unitExp = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_UNIT_EXP);
   sreader.perception.setUnitExponent(unitExp);
 
-  int perceUnitExp = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_PERCE_UNIT_EXP);
+  int perceUnitExp = IOBinaryPrimitives::readInt(bitstream, idx, MDPERCE_PERCE_UNIT_EXP);
   sreader.perception.setPerceptionUnitExponent(perceUnitExp);
 
   int refDevCount = IOBinaryPrimitives::readUInt(bitstream, idx, MDPERCE_REFDEVICE_COUNT);
