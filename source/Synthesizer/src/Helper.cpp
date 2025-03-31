@@ -58,7 +58,7 @@ namespace haptics::synthesizer {
       if (channel.getFrequencySampling().has_value() && channel.getSampleCount().has_value()) {
         currentLength = static_cast<double>(timescale) *
                         (static_cast<double>(channel.getSampleCount().value()) /
-                         channel.getFrequencySampling().value());
+                         static_cast<double>(channel.getFrequencySampling().value()));
         if (currentLength > maxLength) {
           maxLength = currentLength;
         }

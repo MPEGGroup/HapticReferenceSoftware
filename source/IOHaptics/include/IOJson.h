@@ -101,10 +101,9 @@ public:
   static constexpr int VECTOR_RANGE = 127;
   static constexpr float MIN_UNIT_VECTOR_NORM = 0.99F;
   static constexpr float MAX_UNIT_VECTOR_NORM = 1.01F;
-  static constexpr int MIN_VERSION_YEAR = 2023;
+  static constexpr int MIN_VERSION_YEAR = 2025;
 
   static auto versionCheck(const std::string &version, bool log) -> bool;
-  static auto dateCheck(const std::string &date, bool log) -> bool;
   static auto URICheck(const std::string &uri, bool log) -> bool;
   static auto schemaConformanceCheck(const rapidjson::Document &hjifFile,
                                      const std::string &filePath) -> bool;

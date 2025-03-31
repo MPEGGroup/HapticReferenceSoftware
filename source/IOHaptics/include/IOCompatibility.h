@@ -350,7 +350,7 @@ public:
   };
 
   static auto checkSync(types::Sync &sync, std::vector<std::string> &logs) -> void {
-    if (static_cast<unsigned int>(sync.getTimestamp()) > MAX_32_BITS_UNSIGNED) {
+    if (sync.getTimestamp() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Sync_Timestamp_OutOfRange));
     }
 

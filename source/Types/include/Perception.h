@@ -128,12 +128,12 @@ public:
   auto setPriority(int newPriority) -> void;
   [[nodiscard]] auto getPerceptionModality() const -> PerceptionModality;
   auto setPerceptionModality(PerceptionModality newPerceptionModality) -> void;
-  [[nodiscard]] auto getUnitExponent() const -> std::optional<int8_t>;
-  [[nodiscard]] auto getUnitExponentOrDefault() const -> int8_t;
-  auto setUnitExponent(std::optional<int8_t> newUnitExponent) -> void;
-  [[nodiscard]] auto getPerceptionUnitExponent() const -> std::optional<int8_t>;
-  [[nodiscard]] auto getPerceptionUnitExponentOrDefault() const -> int8_t;
-  auto setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent) -> void;
+  [[nodiscard]] auto getUnitExponent() const -> std::optional<int>;
+  [[nodiscard]] auto getUnitExponentOrDefault() const -> int;
+  auto setUnitExponent(std::optional<int> newUnitExponent) -> void;
+  [[nodiscard]] auto getPerceptionUnitExponent() const -> std::optional<int>;
+  [[nodiscard]] auto getPerceptionUnitExponentOrDefault() const -> int;
+  auto setPerceptionUnitExponent(std::optional<int> newPerceptionUnitExponent) -> void;
   auto getChannelsSize() -> size_t;
   auto getChannelAt(int index) -> Channel &;
   auto addChannel(haptics::types::Channel &newChannel) -> void;
@@ -181,8 +181,8 @@ private:
   PerceptionModality perceptionModality = PerceptionModality::Other;
   std::vector<Channel> channels = {};
   std::vector<ReferenceDevice> referenceDevices;
-  std::optional<int8_t> unitExponent = std::nullopt;
-  std::optional<int8_t> perceptionUnitExponent = std::nullopt;
+  std::optional<int> unitExponent = std::nullopt;
+  std::optional<int> perceptionUnitExponent = std::nullopt;
   std::vector<Effect> effectLibrary = std::vector<Effect>{};
 };
 } // namespace haptics::types

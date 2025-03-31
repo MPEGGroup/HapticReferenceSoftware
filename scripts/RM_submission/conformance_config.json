@@ -6,7 +6,7 @@
   "synthesizer_path": "Synthesizer\\Synthesizer.exe",
 
   "conformance_files": {
-    "main_folder": "..\\..\\..\\..\\..\\..\\..\\Data\\Conformance",
+    "main_folder": "..\\..\\..\\..\\..\\..\\Data\\Conformance",
     "schemas_checks": [
       {
         "name": "Haptic: version year as number",
@@ -321,7 +321,7 @@
       {
         "name": "Keyframe: amplitude_modulation too large",
         "haptic_file_path": "SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif",
-        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif\nInvalid schema: #/properties/version\nInvalid keyword: pattern\nInvalid document:#/version"
+        "expected_output": "The following HJIF file does not match the MPEG specifications: {main_folder}\\SchemaConformance\\keyframe-amplitude_modulation-too_large.hjif\nInvalid schema: #/properties/amplitude_modulation\nInvalid keyword: maximum\nInvalid document:#/perceptions/0/channels/0/bands/0/effects/0/keyframes/0/amplitude_modulation"
       },
       {
         "name": "Keyframe: frequency_modulation negative",
@@ -343,7 +343,7 @@
       {
         "name": "Haptic: version year too small",
         "haptic_file_path": "SemanticConformance\\haptic-version-year_too_small.hjif",
-        "expected_output": "Invalid version, the year should be greater or equal to 2023.\nThe HJIF input file is not conformant to the specification."
+        "expected_output": "Invalid version, the year should be greater or equal to 2025.\nThe HJIF input file is not conformant to the specification."
       },
       {
         "name": "Haptic: version amendement equals zero",
@@ -495,7 +495,7 @@
       {
         "name": "Haptic: timescale too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\haptic-timescale_too_large.hjif",
-        "expected_output": "TODO"
+        "expected_output": "Experience Warning: timescale out of range. Warning code: 1\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Haptic: too many avatars",
@@ -565,12 +565,12 @@
       {
         "name": "Sync: timestamp too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\sync-timestamp_too_large.hjif",
-        "expected_output": "TODO"
+        "expected_output": "Sync Warning: timestamp out of range. Warning code: 15\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Sync: timescale too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\sync-timescale_too_large.hjif",
-        "expected_output": "TODO"
+        "expected_output": "Sync Warning: timescale out of range. Warning code: 16\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Reference Device: id too large",
@@ -665,12 +665,12 @@
       {
         "name": "Channel: frequency_sampling too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\channel-frequency_sampling_too_large.hjif",
-        "expected_output": "TODO"
+        "expected_output": "Channel Warning: frequencySampling out of range. Warning code: 36\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Channel: sample_count too large",
         "haptic_file_path": "HMPGCompatibilityConformance\\channel-sample_count_too_large.hjif",
-        "expected_output": "TODO"
+        "expected_output": "Channel Warning: sampleCount out of range. Warning code: 37\nThe HJIF input file is conformant to the ISO/IEC 23090-31 specification but binary encoding may result in some information loss."
       },
       {
         "name": "Effect: id too large",
