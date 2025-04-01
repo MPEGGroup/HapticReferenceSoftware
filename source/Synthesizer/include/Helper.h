@@ -49,6 +49,9 @@ public:
   [[nodiscard]] auto static getHapticDataFromFile(types::Haptics &haptic, double timeLength, int fs,
                                                   int pad) -> std::vector<std::vector<double>>;
 
+  [[nodiscard]] auto static playFileUpsampling(types::Haptics &haptic, double timeLength, int fs,
+                                               int upfs, int pad, std::string &filename) -> bool;
+
 private:
   [[nodiscard]] auto static getEffectTimeLength(types::Effect &effect, types::BandType bandType,
                                                 int windowLength) -> double;

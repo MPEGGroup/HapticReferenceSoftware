@@ -178,8 +178,8 @@ auto IOJson::semanticConformanceCheckExperience(types::Haptics &haptic) -> bool 
       conformant = false;
     } /*else if (profile == "Main" && timescale > MAX_TIMESCALE_MAIN) {
       std::cerr << "Invalid timescale. The main profile only supports a value lower than or equal "
-                   "to 48000"
-                << std::endl;
+                               "to 48000"
+                            << std::endl;
       conformant = false;
     }*/
   }
