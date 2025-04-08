@@ -34,6 +34,7 @@
 #include <Synthesizer/include/Helper.h>
 #include <Tools/include/Tools.h>
 #include <Tools/include/WavParser.h>
+#include <Tools/include/resample.h>
 #include <WaveletDecoder/include/WaveletDecoder.h>
 
 using haptics::synthesizer::Helper;
@@ -58,7 +59,7 @@ namespace haptics::synthesizer {
       if (channel.getFrequencySampling().has_value() && channel.getSampleCount().has_value()) {
         currentLength = static_cast<double>(timescale) *
                         (static_cast<double>(channel.getSampleCount().value()) /
-                         channel.getFrequencySampling().value());
+                         static_cast<double>(channel.getFrequencySampling().value()));
         if (currentLength > maxLength) {
           maxLength = currentLength;
         }
@@ -93,6 +94,7 @@ namespace haptics::synthesizer {
       }
     }
   }
+
   std::vector<std::vector<double>> amplitudes;
 
   unsigned int timescale = haptic.getTimescale().value();
@@ -112,4 +114,91 @@ namespace haptics::synthesizer {
   }
   return haptics::tools::WavParser::saveFile(filename, amplitudes, fs);
 }
+
+[[nodiscard]] auto Helper::getHapticDataFromFile(types::Haptics &haptic, const double timeLength,
+                                                 const int fs, const int pad)
+    -> std::vector<std::vector<double>> {
+
+  // Apply preprocessing on wavelet bands
+  WaveletDecoder waveletDecoder;
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
+      for (uint32_t k = 0; k < haptic.getPerceptionAt((int)i).getChannelAt((int)j).getBandsSize();
+           k++) {
+        types::Band band = haptic.getPerceptionAt((int)i).getChannelAt((int)j).getBandAt((int)k);
+        if (band.getBandType() == types::BandType::WaveletWave) {
+          waveletDecoder.transformBand(band, haptic.getTimescaleOrDefault());
+          haptic.getPerceptionAt((int)i).getChannelAt((int)j).replaceBandAt((int)k, band);
+        }
+      }
+    }
+  }
+
+  std::vector<std::vector<double>> amplitudes;
+
+  unsigned int timescale = haptic.getTimescale().value();
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
+      types::Channel myChannel;
+      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) / timescale));
+      myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
+      std::vector<double> channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
+      const double perceptionUnitFactor =
+          std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
+      for (uint32_t k = 0; k < sampleCount; k++) {
+        channelAmp[k] = channelAmp[k] * myChannel.getGain() * perceptionUnitFactor;
+      }
+      amplitudes.push_back(channelAmp);
+    }
+  }
+  return amplitudes;
+}
+
+[[nodiscard]] auto Helper::playFileUpsampling(types::Haptics &haptic, const double timeLength,
+                                              const int fs, const int upfs, const int pad,
+                                              std::string &filename) -> bool {
+  // Apply preprocessing on wavelet bands
+  WaveletDecoder waveletDecoder;
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
+      for (uint32_t k = 0; k < haptic.getPerceptionAt((int)i).getChannelAt((int)j).getBandsSize();
+           k++) {
+        types::Band band = haptic.getPerceptionAt((int)i).getChannelAt((int)j).getBandAt((int)k);
+        if (band.getBandType() == types::BandType::WaveletWave) {
+          waveletDecoder.transformBand(band, haptic.getTimescaleOrDefault());
+          haptic.getPerceptionAt((int)i).getChannelAt((int)j).replaceBandAt((int)k, band);
+        }
+      }
+    }
+  }
+  std::vector<std::vector<double>> amplitudes;
+
+  unsigned int timescale = haptic.getTimescale().value();
+  for (uint32_t i = 0; i < haptic.getPerceptionsSize(); i++) {
+    for (uint32_t j = 0; j < haptic.getPerceptionAt((int)i).getChannelsSize(); j++) {
+      types::Channel myChannel;
+      auto sampleCount = static_cast<uint32_t>(std::round(fs * (timeLength + 2 * pad) / timescale));
+      myChannel = haptic.getPerceptionAt((int)i).getChannelAt((int)j);
+      std::vector<double> channelAmp = myChannel.EvaluateChannel(sampleCount, fs, pad, timescale);
+      const double perceptionUnitFactor =
+          std::pow(10.0, haptic.getPerceptionAt((int)i).getPerceptionUnitExponentOrDefault());
+      for (uint32_t k = 0; k < sampleCount; k++) {
+        channelAmp[k] = channelAmp[k] * myChannel.getGain() * perceptionUnitFactor;
+      }
+      amplitudes.push_back(channelAmp);
+    }
+  }
+  int upfsUse = upfs;
+  if (upfs < fs) {
+    upfsUse = fs;
+  }
+  std::vector<std::vector<double>> amplitudesUp;
+  for (auto &amplitude : amplitudes) {
+    std::vector<double> bufChannel;
+    tools::resample(upfsUse / fs, 1, amplitude, bufChannel);
+    amplitudesUp.push_back(bufChannel);
+  }
+  return haptics::tools::WavParser::saveFile(filename, amplitudesUp, upfsUse);
+}
+
 } // namespace haptics::synthesizer

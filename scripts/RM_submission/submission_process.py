@@ -40,6 +40,7 @@ import shutil
 import subprocess
 import csv
 import matplotlib.pyplot as plt
+import time
 
 from soundfile import read, write
 
@@ -239,6 +240,7 @@ def main():
     if REFERENCE_FILES_KEY not in config:
         return
 
+    synTime = 0
     with open("logs.txt", 'w') as log_file:
         with open('bitratePSNR.csv', 'w', newline='') as csvFile:
             writer = csv.writer(csvFile)
@@ -273,7 +275,7 @@ def main():
                         pad_file_path = os.path.join(output_folder, rf"{my_effect[TYPE_KEY]}1_{testId}/WAV_pad/{formatted_output_name}_pad.wav")
 
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Encoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        encoding_command = f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} -cf {cutoff} --binary --refactor"
+                        encoding_command = f"{os.path.join(config[RM_INSTALL_DIR], config[ENCODER_PATH_KEY])} -f {input_file_path} -o {hmpg_file_path} -kb {current_bitrate} -cf {cutoff} --binary {refactor}"
                         if(disable_wavelet):
                             encoding_command += " --disable-wavelet"
                         elif(disable_vectorial):
@@ -282,7 +284,10 @@ def main():
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Decoder ({current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                         subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[DECODER_PATH_KEY])} -f {hmpg_file_path} -o {hjif_file_path}", stdout=log_file)
                         print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Synthesizer (nopad | {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
-                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} --generate_ohm", stdout=log_file)
+                        clock = time.time()
+                        subprocess.run(f"{os.path.join(config[RM_INSTALL_DIR], 
+                                                       config[SYNTHESIZER_PATH_KEY])} -f {hjif_file_path} -o {nopad_file_path} {upsamling_optim} --generate_ohm", stdout=log_file)
+                        synTime += (time.time()-clock)*1000
                         if padding:
                             print(datetime.now().strftime(f"[ %Hh : %Mm : %Ss ] => Padding (pad {padding}s| {current_bitrate}kbs) on : {my_effect[NAME_KEY]}"))
                             addPadding(nopad_file_path, pad_file_path, padding)
@@ -291,7 +296,7 @@ def main():
                         csvRow.append(bitrate)
                         csvRow.append(psnr)
                     writer.writerow(csvRow)
-
+    print("Synthesizer total time: " + str(synTime) + "ms")
     
     if compute_bjontegaard:
         try:
@@ -362,6 +367,8 @@ if __name__ == "__main__":
     DEFAULT_BITRATES = [2, 8, 16, 64]
     DEFAULT_PAD = 1
     DEFAULT_CUTOFF_FREQUENCY = 72.5
+    DEFAULT_UPSAMPLE_OPTIM = False
+    DEFAULT_REFACTOR = False
     DEFAULT_DISABLE_WAVELET = False
     DEFAULT_DISABLE_VECTORIAL = False
     DEFAULT_BJONTEGAARD = False
@@ -371,6 +378,8 @@ if __name__ == "__main__":
     parser.add_argument("config_file", type=str, help="input config file in JSON format")
     parser.add_argument("CRM_version", type=str, help="version of the CRM format")
     parser.add_argument("--cutoff", type=float, default=DEFAULT_CUTOFF_FREQUENCY, help="Cutoff frequency. Default is 72.5")
+    parser.add_argument("--refactor", type=bool, default=DEFAULT_REFACTOR, help=f"Refactor effect in the effect library")
+    parser.add_argument("--upsample_optim", type=bool, default=DEFAULT_UPSAMPLE_OPTIM, help="Enable upsampling ouptupt frequency optimization")
     parser.add_argument("-o", "--output", type=str, default=DEFAULT_OUTPUT, help=f"output folder (default is `{DEFAULT_OUTPUT}`)")
     parser.add_argument("-b", "--bitrates", type=check_positive, nargs='+', default=DEFAULT_BITRATES, help=f"bitrates used for the encoding (default is `[2, 16, 64]`)")
     parser.add_argument("--padding", type=check_positive, default=DEFAULT_PAD, help=f"pad in seconds used for the syntheziser")
@@ -383,6 +392,8 @@ if __name__ == "__main__":
     config_file = args.config_file
     CRM_version = args.CRM_version
     cutoff = args.cutoff
+    upsamling_optim = "-fs 1000 -upfs 8000" if args.upsample_optim else ""
+    refactor = "--refactor" if args.refactor else ""
     disable_wavelet = args.disable_wavelet
     disable_vectorial = args.disable_vectorial
     output_folder = args.output if args.output and not args.output.isspace() else DEFAULT_OUTPUT

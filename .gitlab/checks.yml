@@ -1,7 +1,6 @@
 clang-format:
   stage: check
-  image: cbachhuber/clang:12
-  tags: [ linux ]
+  image: ${IMAGE_CBACHHUBER_CLANG_PREFIX}${IMAGE_CBACHHUBER_CLANG_TAG}
   script:
     - python3 scripts/check/clang_format.py
     - git diff

@@ -51,4 +51,12 @@ auto Avatar::setType(AvatarType newType) -> void { type = newType; }
 
 auto Avatar::setMesh(const std::string &newMesh) -> void { mesh = newMesh; }
 
+auto Avatar::equals(const Avatar &avatar) const -> bool {
+  bool isEqual = id == avatar.getId();
+  isEqual = isEqual && (lod == avatar.getLod());
+  isEqual = isEqual && (type == avatar.getType());
+  isEqual = isEqual && (mesh == avatar.getMesh());
+  return isEqual;
+}
+
 } // namespace haptics::types

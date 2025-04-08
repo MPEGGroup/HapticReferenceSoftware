@@ -31,13 +31,11 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <IOHaptics/include/IOBinary.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
 #include <Tools/include/InputParser.h>
 #include <Types/include/Haptics.h>
 
-using haptics::io::IOBinary;
 using haptics::io::IOJson;
 using haptics::io::IOStream;
 using haptics::tools::InputParser;
@@ -91,7 +89,7 @@ auto main(int argc, char *argv[]) -> int {
   Haptics hapticFile;
   // if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
 
-  if (!IOStream::readFile(filename, hapticFile)) {
+  if (!IOStream::readFile(filename, hapticFile, true)) {
     return EXIT_FAILURE;
   }
   //} else {

@@ -34,7 +34,7 @@
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
-#include <IOHaptics/include/IOBinary.h>
+#include <IOHaptics/include/IOCompatibility.h>
 #include <IOHaptics/include/IOJson.h>
 #include <IOHaptics/include/IOStream.h>
 #include <Tools/include/InputParser.h>
@@ -48,7 +48,6 @@
 using haptics::encoder::AhapEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
-using haptics::io::IOBinary;
 using haptics::io::IOJson;
 using haptics::io::IOStream;
 using haptics::tools::InputParser;
@@ -157,6 +156,7 @@ auto main(int argc, char *argv[]) -> int {
   bool enable_vectorial = !inputParser.cmdOptionExists("--disable-vectorial");
 
   Haptics hapticFile;
+  hapticFile.setCurrentDate();
   if (inputParser.cmdOptionExists("-ts")) {
     hapticFile.setTimescale(std::stoi(inputParser.getCmdOption("-ts")));
   } else {
@@ -286,6 +286,16 @@ auto main(int argc, char *argv[]) -> int {
   }
   if (inputParser.cmdOptionExists("-l") || inputParser.cmdOptionExists("--linearize")) {
     hapticFile.linearize();
+  }
+
+  auto logs = haptics::io::IOCompatibility::checkHaptics(hapticFile);
+  if (!logs.empty()) {
+    for (auto &l : logs) {
+      std::cerr << l << std::endl;
+    }
+    std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
+                 "binary encoding may result in some information loss."
+              << std::endl;
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {

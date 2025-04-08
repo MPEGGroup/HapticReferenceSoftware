@@ -32,6 +32,7 @@
  */
 
 #include <Types/include/Perception.h>
+#include <iostream>
 
 namespace haptics::types {
 
@@ -81,28 +82,27 @@ auto Perception::setPerceptionModality(PerceptionModality newPerceptionModality)
   perceptionModality = newPerceptionModality;
 }
 
-[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int8_t> {
+[[nodiscard]] auto Perception::getUnitExponent() const -> std::optional<int> {
   return this->unitExponent;
 }
 
-[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int8_t {
+[[nodiscard]] auto Perception::getUnitExponentOrDefault() const -> int {
   return this->getUnitExponent().value_or(Perception::DEFAULT_UNIT_EXPONENT);
 }
 
-auto Perception::setUnitExponent(std::optional<int8_t> newUnitExponent) -> void {
+auto Perception::setUnitExponent(std::optional<int> newUnitExponent) -> void {
   this->unitExponent = newUnitExponent;
 }
 
-[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int8_t> {
+[[nodiscard]] auto Perception::getPerceptionUnitExponent() const -> std::optional<int> {
   return this->perceptionUnitExponent;
 }
 
-[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int8_t {
+[[nodiscard]] auto Perception::getPerceptionUnitExponentOrDefault() const -> int {
   return this->getPerceptionUnitExponent().value_or(Perception::DEFAULT_PERCEPTION_UNIT_EXPONENT);
 }
 
-auto Perception::setPerceptionUnitExponent(std::optional<int8_t> newPerceptionUnitExponent)
-    -> void {
+auto Perception::setPerceptionUnitExponent(std::optional<int> newPerceptionUnitExponent) -> void {
   this->perceptionUnitExponent = newPerceptionUnitExponent;
 }
 
@@ -378,6 +378,79 @@ auto Perception::searchForEquivalentEffects(Effect &effect, int startingChannel)
     }
   }
   return sameEffects;
+}
+
+auto Perception::equals(const Perception &perception) const -> bool {
+  if (id != perception.getId()) {
+    std::cerr << "Perception id fields are different" << std::endl;
+    return false;
+  }
+  if (avatarId != perception.getAvatarId()) {
+    std::cerr << "avatarId fields are different" << std::endl;
+    return false;
+  }
+  if (description != perception.getDescription()) {
+    std::cerr << "Description fields are different" << std::endl;
+    return false;
+  }
+  if (priority != perception.getPriority()) {
+    std::cerr << "Priority fields are different" << std::endl;
+    return false;
+  }
+  if (effectSemanticScheme != perception.getEffectSemanticScheme()) {
+    std::cerr << "effectSemanticScheme fields are different" << std::endl;
+    return false;
+  }
+  if (perceptionModality != perception.getPerceptionModality()) {
+    std::cerr << "Perception modality fields are different" << std::endl;
+    return false;
+  }
+  if (unitExponent != perception.getUnitExponent()) {
+    std::cerr << "Unit Exponent fields are different" << std::endl;
+    return false;
+  }
+  if (perceptionUnitExponent != perception.getPerceptionUnitExponent()) {
+    std::cerr << "Perception Unit Exponent fields are different" << std::endl;
+    return false;
+  }
+  if (channels.size() != perception.channels.size()) {
+    std::cerr << "The number of channels in perception " << id << " is different" << std::endl;
+    return false;
+  }
+  if (referenceDevices.size() != perception.referenceDevices.size()) {
+    std::cerr << "The number of referenceDevices in perception " << id << " is different"
+              << std::endl;
+    return false;
+  }
+  if (effectLibrary.size() != perception.effectLibrary.size()) {
+    std::cerr << "The number of effect in the library of perception " << id << " is different"
+              << std::endl;
+    return false;
+  }
+
+  bool isEqual = true;
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(channels.size()); i++) {
+      const auto channel1 = channels.at(i);
+      const auto channel2 = perception.channels.at(i);
+      isEqual = isEqual && channel1.equals(channel2);
+    }
+  }
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(referenceDevices.size()); i++) {
+      const auto device1 = referenceDevices.at(i);
+      const auto device2 = perception.referenceDevices.at(i);
+      isEqual = isEqual && device1.equals(device2);
+    }
+  }
+  if (isEqual) {
+    for (int i = 0; i < static_cast<int>(effectLibrary.size()); i++) {
+      const auto effect1 = effectLibrary.at(i);
+      const auto effect2 = perception.effectLibrary.at(i);
+      isEqual = isEqual && effect1.equals(effect2);
+    }
+  }
+  return isEqual;
 }
 
 } // namespace haptics::types

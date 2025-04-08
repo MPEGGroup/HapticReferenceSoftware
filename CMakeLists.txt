@@ -10,6 +10,7 @@ endif()
 option(BUILD_DECODER "Enable building Decoder" ON)
 option(BUILD_ENCODER "Enable building Encoder" ON)
 option(BUILD_SYNTHESIZER "Enable building Synthesizer" ON)
+option(BUILD_CONFORMANCE "Enable building Conformance" ON)
 
 option(NO_INTERNET "Use pre-downloaded source archives for external libraries, e.g. Catch2" OFF)
 

@@ -35,19 +35,23 @@
 
 namespace haptics::types {
 
-[[nodiscard]] auto Sync::getTimestamp() const -> int { return timestamp; }
-auto Sync::setTimestamp(int newTimestamp) -> void { timestamp = newTimestamp; }
+[[nodiscard]] auto Sync::getTimestamp() const -> uint64_t { return timestamp; }
+auto Sync::setTimestamp(uint64_t newTimestamp) -> void { timestamp = newTimestamp; }
 
-[[nodiscard]] auto Sync::getTimescaleOrDefault() const -> unsigned int {
+[[nodiscard]] auto Sync::getTimescaleOrDefault() const -> uint64_t {
   return this->getTimescale().value_or(Sync::DEFAULT_TIMESCALE);
 }
 
-[[nodiscard]] auto Sync::getTimescale() const -> std::optional<unsigned int> {
-  return this->timescale;
+[[nodiscard]] auto Sync::getTimescale() const -> std::optional<uint64_t> { return this->timescale; }
+
+auto Sync::setTimescale(std::optional<uint64_t> newTimescale) -> void {
+  this->timescale = newTimescale;
 }
 
-auto Sync::setTimescale(std::optional<unsigned int> newTimescale) -> void {
-  this->timescale = newTimescale;
+auto Sync::equals(const Sync &sync) const -> bool {
+  bool isEqual = timestamp == sync.getTimestamp();
+  isEqual = isEqual && (timescale == sync.getTimescale());
+  return isEqual;
 }
 
 } // namespace haptics::types

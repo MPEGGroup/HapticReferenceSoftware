@@ -38,6 +38,7 @@
 #include <Tools/include/OHMData.h>
 #include <Types/include/Haptics.h>
 #include <filesystem>
+#include <iostream>
 
 using haptics::io::IOJson;
 using haptics::io::IOStream;
@@ -46,7 +47,6 @@ using haptics::tools::InputParser;
 using haptics::types::Haptics;
 
 const int DEFAULT_FS = 8000;
-
 void help() {
   std::cout
       << "usages: Synthesizer [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-fs <FREQUENCY_SAMPLING>] "
@@ -116,6 +116,20 @@ auto main(int argc, char *argv[]) -> int {
       return EXIT_FAILURE;
     }
   }
+  std::string upfsStr = inputParser.getCmdOption("-upfs");
+  if (upfsStr.empty()) {
+    upfsStr = inputParser.getCmdOption("--upsampling_frequency");
+  }
+  int upfs = 0;
+  if (upfsStr.empty()) {
+    upfs = fs;
+  } else {
+    upfs = std::stoi(upfsStr);
+    if (upfs <= 0) {
+      help();
+      return EXIT_FAILURE;
+    }
+  }
 
   std::cout << "The sampling frequency used will be : " << fs << "\n";
 
@@ -129,7 +143,7 @@ auto main(int argc, char *argv[]) -> int {
   Haptics hapticFile;
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
 
-    if (!IOStream::readFile(filename, hapticFile)) {
+    if (!IOStream::readFile(filename, hapticFile, true)) {
       return EXIT_FAILURE;
     }
   } else {
@@ -139,8 +153,14 @@ auto main(int argc, char *argv[]) -> int {
   hapticFile.linearize();
   const double timeLength = Helper::getTimeLength(hapticFile);
 
-  if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {
-    return EXIT_FAILURE;
+  if (fs == upfs) {
+    if (!Helper::playFile(hapticFile, timeLength, fs, pad, output)) {
+      return EXIT_FAILURE;
+    }
+  } else {
+    if (!Helper::playFileUpsampling(hapticFile, timeLength, fs, upfs, pad, output)) {
+      return EXIT_FAILURE;
+    }
   }
 
   if (inputParser.cmdOptionExists("--generate_ohm")) {

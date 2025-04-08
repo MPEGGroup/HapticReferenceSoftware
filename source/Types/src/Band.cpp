@@ -132,12 +132,14 @@ auto Band::Evaluate(double position, int lowFrequencyLimit, int highFrequencyLim
     return 0;
   }
 
-  for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-    if (it->getPosition() <= position) {
-      return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
-    }
-    if (it == effects.begin()) {
-      break;
+  if (!effects.empty()) {
+    for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+      if (it->getPosition() <= position) {
+        return EvaluationSwitch(position, &*it, lowFrequencyLimit, highFrequencyLimit, timescale);
+      }
+      if (it == effects.begin()) {
+        break;
+      }
     }
   }
 
@@ -230,8 +232,8 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
     break;
   default:
     for (uint32_t ti = 0; ti < sampleCount; ti++) {
-      double position = timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
-                                     (pad * MS_2_S)); // position in ticks needed
+      double position = (double)timescale * (static_cast<double>(ti) / static_cast<double>(fs) -
+                                             (pad * MS_2_S)); // position in ticks needed
       if (effects.empty() ||
           ((position > effects.back().getPosition() +
                            effects.back().getEffectTimeLength(
@@ -241,13 +243,15 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
         bandAmp[ti] = 0;
       } // TODO: TRANSIENT_DURATION_MS: should it be transformed to ticks?
 
-      for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
-        if (it->getPosition() <= position) {
-          bandAmp[ti] +=
-              EvaluationSwitch(position, &*it, lowerFrequencyLimit, upperFrequencyLimit, timescale);
-        }
-        if (it == effects.begin()) {
-          break;
+      if (!effects.empty()) {
+        for (auto it = effects.end() - 1; it >= effects.begin(); it--) {
+          if (it->getPosition() <= position) {
+            bandAmp[ti] += EvaluationSwitch(position, &*it, lowerFrequencyLimit,
+                                            upperFrequencyLimit, timescale);
+          }
+          if (it == effects.begin()) {
+            break;
+          }
         }
       }
     }
@@ -271,6 +275,45 @@ auto Band::getBandTimeLength(unsigned int timescale) -> double {
 
 [[nodiscard]] auto Band::getTransientDuration(unsigned int timescale) -> double {
   return TRANSIENT_DURATION_MS / static_cast<double>((double)TIMESCALE / timescale);
+}
+
+auto Band::equals(const Band &band) const -> bool {
+  if (bandType != band.getBandType()) {
+    std::cerr << "bandType fields are different" << std::endl;
+    return false;
+  }
+  if (curveType != band.getCurveType()) {
+    std::cerr << "curveType fields are different" << std::endl;
+    return false;
+  }
+  if (blockLength != band.getBlockLength()) {
+    std::cerr << "blockLength fields are different" << std::endl;
+    return false;
+  }
+  if (lowerFrequencyLimit != band.getLowerFrequencyLimit()) {
+    std::cerr << "lowerFrequencyLimit fields are different" << std::endl;
+    return false;
+  }
+  if (upperFrequencyLimit != band.getUpperFrequencyLimit()) {
+    std::cerr << "upperFrequencyLimit fields are different" << std::endl;
+    return false;
+  }
+  if (priority != band.getPriority()) {
+    std::cerr << "priority fields are different" << std::endl;
+    return false;
+  }
+  if (effects.size() != band.effects.size()) {
+    std::cerr << "Number of effects are different" << std::endl;
+    return false;
+  }
+  bool isEqual = true;
+  for (int i = 0; i < static_cast<int>(effects.size()); i++) {
+    const auto effect1 = effects.at(i);
+    const auto effect2 = band.effects.at(i);
+    isEqual = isEqual && (effect1.equals(effect2));
+  }
+
+  return isEqual;
 }
 
 } // namespace haptics::types
