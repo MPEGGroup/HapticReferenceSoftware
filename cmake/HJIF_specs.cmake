@@ -8,8 +8,8 @@ if(NO_INTERNET)
     FetchContent_Declare(HJIF_SPECS URL ${LOCAL_HJIF_SPECS_DIR})
 else()
     FetchContent_Declare(HJIF_SPECS
-        GIT_REPOSITORY https://git.mpeg.expert/MPEG/3dgh/haptics/mpeg_haptics_json_specifications.git
-		GIT_TAG "0d6383841f6cdbad7ba3c526ff6661010be38f83"
+        GIT_REPOSITORY https://github.com/MPEGGroup/HapticJSONSchemas.git
+		GIT_TAG "e3b9aa6739f696af26c77c2b6385496dbf47212a"
   		CONFIGURE_COMMAND ""
   		BUILD_COMMAND "")
 endif()
