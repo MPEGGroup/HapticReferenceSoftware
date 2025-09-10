@@ -1,6 +1,6 @@
 project(Encoder)
 
-add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/AhapEncoder.cpp include/AhapEncoder.h src/IvsEncoder.cpp include/IvsEncoder.h src/WaveletEncoder.cpp include/WaveletEncoder.h)
+add_executable(Encoder src/main.cpp src/PcmEncoder.cpp include/PcmEncoder.h src/AhapEncoder.cpp include/AhapEncoder.h src/HapsEncoder.cpp include/HapsEncoder.h src/IvsEncoder.cpp include/IvsEncoder.h src/WaveletEncoder.cpp include/WaveletEncoder.h)
 target_link_libraries(Encoder PUBLIC tools types psychohapticModel filterbank iohaptics)
 target_link_libraries(Encoder PRIVATE pugixml::static iir::iir_static)
 
