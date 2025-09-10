@@ -76,8 +76,7 @@ namespace haptics::encoder {
   }
 
   float gain = 1;
-  if (json.HasMember("gain"))
-  {
+  if (json.HasMember("gain")) {
     if (!json["gain"].IsFloat()) {
       std::cerr << "Invalid HAPS input file: invalid gain" << std::endl;
       return EXIT_FAILURE;
@@ -105,7 +104,7 @@ namespace haptics::encoder {
       std::cerr << "Invalid HAPS input file: invalid vibration" << std::endl;
       return EXIT_FAILURE;
     }
-    
+
     if (extractVibration(json["vibration"].GetObject(), myChannel, timescale) == EXIT_FAILURE) {
       std::cerr << "Invalid HAPS input file: impossible to encode the vibration" << std::endl;
       return EXIT_FAILURE;
@@ -269,7 +268,7 @@ namespace haptics::encoder {
         std::cerr << "Invalid HAPS input file: invalid note" << std::endl;
         return EXIT_FAILURE;
       }
-      
+
       if (extractNote(n.GetObject(), band, amplitudeMultiplier, timescale) == EXIT_FAILURE) {
         std::cerr << "Invalid HAPS input file: impossible to encode a note" << std::endl;
         return EXIT_FAILURE;
@@ -300,13 +299,13 @@ namespace haptics::encoder {
       std::cerr << "Invalid HAPS input file: invalid note.gain" << std::endl;
       return EXIT_FAILURE;
     }
-    
+
     double gain = note["gain"].GetDouble();
     if (gain < 0.0) {
       std::cerr << "Invalid HAPS input file: note.gain is negative" << std::endl;
       return EXIT_FAILURE;
     }
-    
+
     amplitudeMultiplierWithGain *= gain;
   }
 
@@ -315,7 +314,7 @@ namespace haptics::encoder {
       std::cerr << "Invalid HAPS input file: invalid note.mute" << std::endl;
       return EXIT_FAILURE;
     }
-    
+
     if (note["gain"].GetBool()) {
       amplitudeMultiplierWithGain = 0;
     }
@@ -530,7 +529,7 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
     std::cerr << "Invalid HAPS input file: invalid note.amplitude" << std::endl;
     return EXIT_FAILURE;
   }
-  
+
   auto amplitudeModulation = note["amplitude"].GetObject();
   bool amplitudeMemberPresent = amplitudeModulation.HasMember("amplitude");
   bool periodLengthMemberPresent = amplitudeModulation.HasMember("period_length");
@@ -552,8 +551,8 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
     return EXIT_FAILURE;
   }
 
-  if (extractAmplitudeAsPeriodicSignal(amplitudeModulation, effect, timescale, timescaledLength, amplitudeMultiplier, modulationType) == EXIT_FAILURE)
-  {
+  if (extractAmplitudeAsPeriodicSignal(amplitudeModulation, effect, timescale, timescaledLength,
+                                       amplitudeMultiplier, modulationType) == EXIT_FAILURE) {
     std::cerr << "Invalid HAPS input file: invalid note.amplitude periodic signal" << std::endl;
     return EXIT_FAILURE;
   }
@@ -563,9 +562,8 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
 
 [[nodiscard]] auto HapsEncoder::extractAmplitudeAsPeriodicSignal(
     const rapidjson::Value::Object &amplitudeModulation, types::Effect &effect,
-    const unsigned int timescale,
-    std::optional<int> timescaledLength, const double amplitudeMultiplier,
-    ModulationType& modulationType) -> int {
+    const unsigned int timescale, std::optional<int> timescaledLength,
+    const double amplitudeMultiplier, ModulationType &modulationType) -> int {
   if (!amplitudeModulation["amplitude"].IsDouble()) {
     std::cerr << "Invalid HAPS input file: invalid note.amplitude.amplitude" << std::endl;
     return EXIT_FAILURE;
@@ -575,17 +573,17 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
     std::cerr << "Invalid HAPS input file: invalid note.amplitude.period_length" << std::endl;
     return EXIT_FAILURE;
   }
-  
+
   double amplitude = amplitudeModulation["amplitude"].GetDouble();
-  if (amplitude < 0 || amplitude > 1)
-  {
+  if (amplitude < 0 || amplitude > 1) {
     std::cerr << "Invalid HAPS input file: note.amplitude.amplitude is not normalized" << std::endl;
     return EXIT_FAILURE;
   }
 
   double periodLength = amplitudeModulation["period_length"].GetDouble();
   if (periodLength <= 0) {
-    std::cerr << "Invalid HAPS input file: note.amplitude.period_length lower than or equal 0" << std::endl;
+    std::cerr << "Invalid HAPS input file: note.amplitude.period_length lower than or equal 0"
+              << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -632,8 +630,7 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
   }
 
   storeAmplitudeAsPeriodicSignal(effect, timescale, amplitudeMultiplier, timescaledLength, waveform,
-                                 amplitude, verticalOffset,
-                                 periodLength, phase);
+                                 amplitude, verticalOffset, periodLength, phase);
   return EXIT_SUCCESS;
 }
 
@@ -660,15 +657,13 @@ auto HapsEncoder::storeAmplitudeAsPeriodicSignal(
 
   for (int t = 0; t <= duration; t += step) {
     storeApproximatedAmplitudeKeyframe(effect, timescale, amplitudeMultiplier, t, waveform,
-                                       amplitude, verticalOffset,
-                                       periodLength, phase);
+                                       amplitude, verticalOffset, periodLength, phase);
   }
 
   // Ensure the last keyframe is at the end
   if (duration % step != 0) {
     storeApproximatedAmplitudeKeyframe(effect, timescale, amplitudeMultiplier, duration, waveform,
-                                       amplitude,
-                                       verticalOffset, periodLength, phase);
+                                       amplitude, verticalOffset, periodLength, phase);
   }
 }
 
@@ -722,50 +717,43 @@ auto HapsEncoder::storeAmplitudeAsConstant(const double amplitude, types::Effect
   }
 }
 
-
-[[nodiscard]] auto HapsEncoder::extractFrequencyCurve(const rapidjson::Value::Object& curve,
-    types::Effect& effect,
-    const unsigned int timescale,
-    const int lowerFrequencyLimit,
-    const int upperFrequencyLimit,
-    int& lastValue, int& lastPosition) -> int
-{
+[[nodiscard]] auto
+HapsEncoder::extractFrequencyCurve(const rapidjson::Value::Object &curve, types::Effect &effect,
+                                   const unsigned int timescale, const int lowerFrequencyLimit,
+                                   const int upperFrequencyLimit, int &lastValue, int &lastPosition)
+    -> int {
   double lastFreq = 0;
   int result = extractCurve(curve, effect, timescale, false, 1, lowerFrequencyLimit,
                             upperFrequencyLimit, lastFreq, lastPosition);
-  if (result == EXIT_SUCCESS)
-  {
+  if (result == EXIT_SUCCESS) {
     lastValue = computeAbsoluteFreq(lowerFrequencyLimit, upperFrequencyLimit, lastFreq);
   }
   return result;
 }
 
-[[nodiscard]] auto HapsEncoder::extractFrequencyCurve(const rapidjson::Value::Object& curve,
-    types::Effect& effect,
-    const unsigned int timescale,
-    const int lowerFrequencyLimit,
-    const int upperFrequencyLimit) -> int
-{
-  return extractCurve(curve, effect, timescale, false, 1, lowerFrequencyLimit,
-                      upperFrequencyLimit);
+[[nodiscard]] auto HapsEncoder::extractFrequencyCurve(const rapidjson::Value::Object &curve,
+                                                      types::Effect &effect,
+                                                      const unsigned int timescale,
+                                                      const int lowerFrequencyLimit,
+                                                      const int upperFrequencyLimit) -> int {
+  return extractCurve(curve, effect, timescale, false, 1, lowerFrequencyLimit, upperFrequencyLimit);
 }
 
-[[nodiscard]] auto HapsEncoder::extractAmplitudeCurve(const rapidjson::Value::Object& curve,
-    types::Effect& effect,
-    const unsigned int timescale,
-    const double amplitudeModifier) -> int
-{
+[[nodiscard]] auto HapsEncoder::extractAmplitudeCurve(const rapidjson::Value::Object &curve,
+                                                      types::Effect &effect,
+                                                      const unsigned int timescale,
+                                                      const double amplitudeModifier) -> int {
   return extractCurve(curve, effect, timescale, true, amplitudeModifier, 0, 0);
 }
 
-[[nodiscard]] auto HapsEncoder::extractAmplitudeCurve(const rapidjson::Value::Object& curve,
-    types::Effect& effect,
-    const unsigned int timescale,
-    const double amplitudeModifier,
-    double& lastValue, int& lastPosition) -> int
-{
+[[nodiscard]] auto HapsEncoder::extractAmplitudeCurve(const rapidjson::Value::Object &curve,
+                                                      types::Effect &effect,
+                                                      const unsigned int timescale,
+                                                      const double amplitudeModifier,
+                                                      double &lastValue, int &lastPosition) -> int {
 
-  return extractCurve(curve, effect, timescale, true, amplitudeModifier, 0, 0, lastValue, lastPosition);
+  return extractCurve(curve, effect, timescale, true, amplitudeModifier, 0, 0, lastValue,
+                      lastPosition);
 }
 
 [[nodiscard]] auto HapsEncoder::extractCurve(const rapidjson::Value::Object &curve,
@@ -828,7 +816,8 @@ auto HapsEncoder::secondsToTimeScale(const double seconds, const unsigned int ti
   return static_cast<int>(std::round(seconds * static_cast<double>(timescale)));
 }
 
-auto HapsEncoder::millisecondsToTimeScale(const double milliseconds, const unsigned int timescale) -> int {
+auto HapsEncoder::millisecondsToTimeScale(const double milliseconds, const unsigned int timescale)
+    -> int {
   return secondsToTimeScale(milliseconds * MS_2_S, timescale);
 }
 

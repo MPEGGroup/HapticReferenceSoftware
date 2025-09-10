@@ -90,8 +90,7 @@ private:
                                                types::Effect &effect, const unsigned int timescale,
                                                const int lowerFrequencyLimit,
                                                const int upperFrequencyLimit,
-                                               int &lastFrequencyValue,
-                                               int &lastFrequencyTimestamp,
+                                               int &lastFrequencyValue, int &lastFrequencyTimestamp,
                                                ModulationType &modulationType) -> int;
   [[nodiscard]] auto static extractAmplitudeInNote(const rapidjson::Value::Object &note,
                                                    types::Effect &effect,
@@ -150,7 +149,8 @@ private:
                                          const int upperFrequencyLimit, double &lastValue,
                                          int &lastPosition) -> int;
   auto static secondsToTimeScale(const double seconds, const unsigned int timescale) -> int;
-  auto static millisecondsToTimeScale(const double milliseconds, const unsigned int timescale) -> int;
+  auto static millisecondsToTimeScale(const double milliseconds, const unsigned int timescale)
+      -> int;
   auto static computeAbsoluteFreq(int lowerFrequencyLimit, int upperFrequencyLimit, double freq)
       -> int;
 
