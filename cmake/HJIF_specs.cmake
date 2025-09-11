@@ -9,7 +9,7 @@ if(NO_INTERNET)
 else()
     FetchContent_Declare(HJIF_SPECS
         GIT_REPOSITORY https://github.com/MPEGGroup/HapticJSONSchemas.git
-		GIT_TAG "e3b9aa6739f696af26c77c2b6385496dbf47212a"
+		GIT_TAG "f01c7151a7573cba5c9c2492ef82f32ebf983462"
   		CONFIGURE_COMMAND ""
   		BUILD_COMMAND "")
 endif()
