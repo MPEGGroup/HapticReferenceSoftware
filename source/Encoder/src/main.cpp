@@ -32,6 +32,7 @@
  */
 
 #include <Encoder/include/AhapEncoder.h>
+#include <Encoder/include/HapsEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
 #include <IOHaptics/include/IOCompatibility.h>
@@ -46,6 +47,7 @@
 #include <optional>
 
 using haptics::encoder::AhapEncoder;
+using haptics::encoder::HapsEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
 using haptics::io::IOJson;
@@ -269,6 +271,10 @@ auto main(int argc, char *argv[]) -> int {
     }
     codeExit =
         PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
+    hapticFile.addPerception(myPerception);
+  } else if (ext == "haps") {
+    std::cout << "The HAPS file to encode : " << filename << std::endl;
+    codeExit = HapsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
     hapticFile.addPerception(myPerception);
   } else if (ext == "hjif") {
     std::cout << "The HJIF file to encode : " << filename << std::endl;
