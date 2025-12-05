@@ -98,6 +98,9 @@ auto help() -> void {
          "band for the whole frequency spectrum. This argument will only affect PCM input content."
       << std::endl
       << "\t-ts, \t\t\tspecify the timescale" << std::endl
+      << "\t-ssu, --split-silent-units\tSplit silent units into multiple units of packet duration "
+         "(default: 128ms) instead of one large unit spanning the whole silent period"
+      << std::endl
       << std::endl;
 }
 
@@ -311,7 +314,9 @@ auto main(int argc, char *argv[]) -> int {
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
     }
-    IOStream::writeFile(hapticFile, output, packetDuration);
+    bool splitSilentUnits = inputParser.cmdOptionExists("-ssu") ||
+                            inputParser.cmdOptionExists("--split-silent-units");
+    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits);
   } else {
     IOJson::writeFile(hapticFile, output);
   }
