@@ -43,7 +43,7 @@
 namespace haptics::io {
 
 auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration,
-                         bool splitSilentUnits) -> bool {
+                         bool splitSilentUnits, int minDuration) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -51,7 +51,7 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, in
   }
 
   std::vector<std::vector<bool>> packetsBytes = std::vector<std::vector<bool>>();
-  bool success = writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits);
+  bool success = writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration);
   std::vector<bool> binary = std::vector<bool>();
   if (success) {
     for (auto &packet : packetsBytes) {
@@ -209,12 +209,13 @@ auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool
 }
 
 auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-                          int packetDuration, bool splitSilentUnits) -> bool {
+                          int packetDuration, bool splitSilentUnits, int minDuration) -> bool {
   StreamWriter swriter;
   swriter.haptic = haptic;
   swriter.packetDuration = packetDuration;
   swriter.timescale = haptic.getTimescaleOrDefault();
   swriter.splitSilentUnits = splitSilentUnits;
+  swriter.minDuration = minDuration;
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
   writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, initPackets);
   writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, initPackets);
@@ -324,6 +325,25 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
       bitstream.push_back(syncUnit);
     }
   }
+
+  // Pad with silence to reach minimum duration if specified
+  if (swriter.minDuration > 0 && swriter.time < swriter.minDuration) {
+    int paddingDuration = swriter.minDuration - swriter.time;
+    // Round down to packet duration multiple
+    if (paddingDuration % swriter.packetDuration != 0) {
+      paddingDuration = paddingDuration - (paddingDuration % static_cast<int>(swriter.packetDuration));
+    }
+    if (paddingDuration > 0) {
+      if (swriter.splitSilentUnits) {
+        writeSplitSilentUnits(paddingDuration, bitstream, swriter);
+      } else {
+        std::vector<bool> silentUnit;
+        writeSingleSilentUnit(paddingDuration, silentUnit, swriter);
+        bitstream.push_back(silentUnit);
+      }
+    }
+  }
+
   silentUnitSyncFlag(bitstream);
   return true;
 }

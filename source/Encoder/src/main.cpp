@@ -101,6 +101,9 @@ auto help() -> void {
       << "\t-ssu, --split-silent-units\tSplit silent units into multiple units of packet duration "
          "(default: 128ms) instead of one large unit spanning the whole silent period"
       << std::endl
+      << "\t-md, --min-duration <MS>\tMinimum duration of the output file in milliseconds. "
+         "If the input is shorter, silence will be added at the end"
+      << std::endl
       << std::endl;
 }
 
@@ -316,7 +319,13 @@ auto main(int argc, char *argv[]) -> int {
     }
     bool splitSilentUnits = inputParser.cmdOptionExists("-ssu") ||
                             inputParser.cmdOptionExists("--split-silent-units");
-    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits);
+    int minDuration = 0;
+    if (inputParser.cmdOptionExists("-md")) {
+      minDuration = std::stoi(inputParser.getCmdOption("-md"));
+    } else if (inputParser.cmdOptionExists("--min-duration")) {
+      minDuration = std::stoi(inputParser.getCmdOption("--min-duration"));
+    }
+    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration);
   } else {
     IOJson::writeFile(hapticFile, output);
   }
