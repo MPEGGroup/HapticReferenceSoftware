@@ -43,7 +43,7 @@
 namespace haptics::io {
 
 auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration,
-                         bool splitSilentUnits, int minDuration) -> bool {
+                         bool splitSilentUnits, int minDuration, bool noSplitEffects) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -51,7 +51,8 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, in
   }
 
   std::vector<std::vector<bool>> packetsBytes = std::vector<std::vector<bool>>();
-  bool success = writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration);
+  bool success =
+      writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration, noSplitEffects);
   std::vector<bool> binary = std::vector<bool>();
   if (success) {
     for (auto &packet : packetsBytes) {
@@ -209,13 +210,15 @@ auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool
 }
 
 auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-                          int packetDuration, bool splitSilentUnits, int minDuration) -> bool {
+                          int packetDuration, bool splitSilentUnits, int minDuration,
+                          bool noSplitEffects) -> bool {
   StreamWriter swriter;
   swriter.haptic = haptic;
   swriter.packetDuration = packetDuration;
   swriter.timescale = haptic.getTimescaleOrDefault();
   swriter.splitSilentUnits = splitSilentUnits;
   swriter.minDuration = minDuration;
+  swriter.noSplitEffects = noSplitEffects;
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
   writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, initPackets);
   writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, initPackets);
@@ -2451,31 +2454,64 @@ auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vecto
       int nextId = getNextEffectId(swriter.effectsId);
       effect.setId(nextId);
     }
-    if (effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
-      std::vector<bool> bufEffect = std::vector<bool>();
-      if (effect.getEffectType() == types::EffectType::Basis) {
-        int bufKFCount = 0;
-        bool isRAU = true;
-        if (!writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect)) {
-          unfinishedEffect = true;
-        }
-        if (bufKFCount > 0) {
-          swriter.keyframesCount.push_back(bufKFCount);
-          bitstream.push_back(bufEffect);
-          swriter.effects.push_back(effect);
-          if (!isRAU) {
-            swriter.auType = AUType::DAU;
+
+    // When noSplitEffects is enabled, only process effects that START in this packet
+    // (not effects that started earlier but extend into this packet)
+    if (swriter.noSplitEffects) {
+      if (effect.getPosition() >= swriter.time &&
+          effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
+        // Effect starts in this packet - write it completely
+        std::vector<bool> bufEffect = std::vector<bool>();
+        if (effect.getEffectType() == types::EffectType::Basis) {
+          int bufKFCount = 0;
+          bool isRAU = true;
+          writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect);
+          if (bufKFCount > 0) {
+            swriter.keyframesCount.push_back(bufKFCount);
+            bitstream.push_back(bufEffect);
+            swriter.effects.push_back(effect);
+            if (!isRAU) {
+              swriter.auType = AUType::DAU;
+            }
           }
-        }
-      } else if (effect.getEffectType() == types::EffectType::Reference) {
-        if (effect.getPosition() >= swriter.time) {
+        } else if (effect.getEffectType() == types::EffectType::Reference) {
           bitstream.push_back(bufEffect);
           swriter.effects.push_back(effect);
           swriter.keyframesCount.push_back(0);
         }
+      } else if (effect.getPosition() >= swriter.time + static_cast<int>(swriter.packetDuration)) {
+        // Effect hasn't started yet
+        effectRemaining = true;
       }
+      // Effects that started before this packet are ignored (already written)
     } else {
-      effectRemaining = true;
+      // Normal behavior: split effects across packets
+      if (effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
+        std::vector<bool> bufEffect = std::vector<bool>();
+        if (effect.getEffectType() == types::EffectType::Basis) {
+          int bufKFCount = 0;
+          bool isRAU = true;
+          if (!writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect)) {
+            unfinishedEffect = true;
+          }
+          if (bufKFCount > 0) {
+            swriter.keyframesCount.push_back(bufKFCount);
+            bitstream.push_back(bufEffect);
+            swriter.effects.push_back(effect);
+            if (!isRAU) {
+              swriter.auType = AUType::DAU;
+            }
+          }
+        } else if (effect.getEffectType() == types::EffectType::Reference) {
+          if (effect.getPosition() >= swriter.time) {
+            bitstream.push_back(bufEffect);
+            swriter.effects.push_back(effect);
+            swriter.keyframesCount.push_back(0);
+          }
+        }
+      } else {
+        effectRemaining = true;
+      }
     }
   }
   return !effectRemaining && !unfinishedEffect;
@@ -2960,6 +2996,27 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   if (tsFX < swriter.time) {
     rau = false;
   }
+
+  // When noSplitEffects is enabled, write all keyframes in the first packet
+  if (swriter.noSplitEffects) {
+    for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
+      types::Keyframe kf = effect.getKeyframeAt(j);
+      int currentTime = kf.getRelativePosition().value() + tsFX;
+      if (currentTime >= swriter.time) {
+        if (firstKf) {
+          firstKf = false;
+          if (j != 0) {
+            rau = false;
+          }
+        }
+        writeKeyframe(swriter.bandStream.band.getBandType(), kf, bitstream);
+        kfCount++;
+      }
+    }
+    return true; // Always complete - don't split to next packet
+  }
+
+  // Normal behavior: split effects across packets
   for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;

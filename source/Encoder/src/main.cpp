@@ -104,6 +104,9 @@ auto help() -> void {
       << "\t-md, --min-duration <MS>\tMinimum duration of the output file in milliseconds. "
          "If the input is shorter, silence will be added at the end"
       << std::endl
+      << "\t-nse, --no-split-effects\tDo not split effects across packets. Each effect is written "
+         "entirely in its first packet, even if its keyframes extend beyond the packet duration"
+      << std::endl
       << std::endl;
 }
 
@@ -325,7 +328,10 @@ auto main(int argc, char *argv[]) -> int {
     } else if (inputParser.cmdOptionExists("--min-duration")) {
       minDuration = std::stoi(inputParser.getCmdOption("--min-duration"));
     }
-    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration);
+    bool noSplitEffects = inputParser.cmdOptionExists("-nse") ||
+                          inputParser.cmdOptionExists("--no-split-effects");
+    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration,
+                        noSplitEffects);
   } else {
     IOJson::writeFile(hapticFile, output);
   }
