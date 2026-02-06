@@ -2870,6 +2870,9 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
                                 bool &rau, std::vector<bool> &bitstream) -> bool {
   bool firstKf = true;
   int tsFX = effect.getPosition();
+  if (tsFX < swriter.time) {
+    rau = false;
+  }
   for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
