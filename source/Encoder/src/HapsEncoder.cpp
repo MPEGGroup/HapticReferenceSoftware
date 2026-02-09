@@ -175,7 +175,7 @@ namespace haptics::encoder {
   types::Effect transientEffect;
   for (auto &t : transients) {
     if (!t.HasMember("position") || !t["position"].IsDouble()) {
-      std::cerr << "Invalid HAPS input file: invalide transient position" << std::endl;
+      std::cerr << "Invalid HAPS input file: invalid transient position" << std::endl;
       return EXIT_FAILURE;
     }
 
@@ -283,7 +283,7 @@ namespace haptics::encoder {
                                             const double amplitudeMultiplier,
                                             const unsigned int timescale) -> int {
   if (!note.HasMember("position") || !note["position"].IsDouble()) {
-    std::cerr << "Invalid HAPS input file: invalide note.position" << std::endl;
+    std::cerr << "Invalid HAPS input file: invalid note.position" << std::endl;
     return EXIT_FAILURE;
   }
 
