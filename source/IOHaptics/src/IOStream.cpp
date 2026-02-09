@@ -51,8 +51,8 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, in
   }
 
   std::vector<std::vector<bool>> packetsBytes = std::vector<std::vector<bool>>();
-  bool success =
-      writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration, noSplitEffects);
+  bool success = writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration,
+                            noSplitEffects);
   std::vector<bool> binary = std::vector<bool>();
   if (success) {
     for (auto &packet : packetsBytes) {
@@ -240,8 +240,7 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   for (auto &packet : dataPackets) {
     if (first) {
       if (swriter.splitSilentUnits) {
-        int tFirst =
-            readPacketTS(std::vector<bool>(packet.begin() + H_NBITS, packet.end()));
+        int tFirst = readPacketTS(std::vector<bool>(packet.begin() + H_NBITS, packet.end()));
         if (tFirst >= static_cast<int>(swriter.packetDuration)) {
           int duration = tFirst;
           if (duration % swriter.packetDuration != 0) {
@@ -334,7 +333,8 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     int paddingDuration = swriter.minDuration - swriter.time;
     // Round down to packet duration multiple
     if (paddingDuration % swriter.packetDuration != 0) {
-      paddingDuration = paddingDuration - (paddingDuration % static_cast<int>(swriter.packetDuration));
+      paddingDuration =
+          paddingDuration - (paddingDuration % static_cast<int>(swriter.packetDuration));
     }
     if (paddingDuration > 0) {
       if (swriter.splitSilentUnits) {

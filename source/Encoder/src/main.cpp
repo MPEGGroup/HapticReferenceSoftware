@@ -320,16 +320,16 @@ auto main(int argc, char *argv[]) -> int {
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
     }
-    bool splitSilentUnits = inputParser.cmdOptionExists("-ssu") ||
-                            inputParser.cmdOptionExists("--split-silent-units");
+    bool splitSilentUnits =
+        inputParser.cmdOptionExists("-ssu") || inputParser.cmdOptionExists("--split-silent-units");
     int minDuration = 0;
     if (inputParser.cmdOptionExists("-md")) {
       minDuration = std::stoi(inputParser.getCmdOption("-md"));
     } else if (inputParser.cmdOptionExists("--min-duration")) {
       minDuration = std::stoi(inputParser.getCmdOption("--min-duration"));
     }
-    bool noSplitEffects = inputParser.cmdOptionExists("-nse") ||
-                          inputParser.cmdOptionExists("--no-split-effects");
+    bool noSplitEffects =
+        inputParser.cmdOptionExists("-nse") || inputParser.cmdOptionExists("--no-split-effects");
     IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration,
                         noSplitEffects);
   } else {
