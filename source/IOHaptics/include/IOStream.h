@@ -198,6 +198,8 @@ private:
                                     StreamWriter &swriter) -> void;
   static auto writeSplitSilentUnits(int totalDuration, std::vector<std::vector<bool>> &bitstream,
                                     StreamWriter &swriter) -> void;
+  static auto padToMinDuration(std::vector<std::vector<bool>> &bitstream, StreamWriter &swriter)
+      -> void;
 
   static auto readMIHSUnitInitialization(std::vector<bool> &mihsunit, StreamReader &sreader)
       -> bool;

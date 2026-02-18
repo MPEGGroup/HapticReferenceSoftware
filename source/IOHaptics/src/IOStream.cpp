@@ -328,6 +328,14 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
     }
   }
 
+  padToMinDuration(bitstream, swriter);
+
+  silentUnitSyncFlag(bitstream);
+  return true;
+}
+
+auto IOStream::padToMinDuration(std::vector<std::vector<bool>> &bitstream, StreamWriter &swriter)
+    -> void {
   // Pad with silence to reach minimum duration if specified
   if (swriter.minDuration > 0 && swriter.time < swriter.minDuration) {
     int paddingDuration = swriter.minDuration - swriter.time;
@@ -346,9 +354,6 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
       }
     }
   }
-
-  silentUnitSyncFlag(bitstream);
-  return true;
 }
 
 auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void {
