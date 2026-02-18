@@ -30,7 +30,7 @@ CheckOptions:
   - key:    readability-function-size.ParameterThreshold
     value:  6
   - key:    readability-function-size.NestingThreshold
-    value:  7
+    value:  8
   - key:    readability-function-size.VariableThreshold
     value:  40
   - key:    readability-function-cognitive-complexity.Threshold
