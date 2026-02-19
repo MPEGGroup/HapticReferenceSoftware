@@ -62,7 +62,7 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractVibration sets gain to 0 if mut
   doc.AddMember("mute", true, doc.GetAllocator());
   haptics::types::Channel channel;
   REQUIRE(HapsEncoder::extractVibration(doc.GetObject(), channel, timescale) == EXIT_SUCCESS);
-  REQUIRE(channel.getGain() == 0.0f);
+  REQUIRE(channel.getGain() == 0.0F);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractVibration fails if frequency_range is not object",
@@ -250,7 +250,7 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies succeeds on minimal va
   notes.PushBack(n, doc.GetAllocator());
   m.AddMember("notes", notes, doc.GetAllocator());
   doc.PushBack(m, doc.GetAllocator());
-  haptics::types::Channel channel(0, "", 1.0f, 1, 0);
+  haptics::types::Channel channel(0, "", 1.0F, 1, 0);
   REQUIRE(HapsEncoder::extractMelodies(doc.GetArray(), channel, 0, 100, timescale) == EXIT_SUCCESS);
 }
 
@@ -523,7 +523,7 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles all optional field
   doc.AddMember("position", 0.0, doc.GetAllocator());
   doc.AddMember("length", 0.8, doc.GetAllocator());
   doc.AddMember("gain", 1.0, doc.GetAllocator());
-  doc.AddMember("phase", 1.0f, doc.GetAllocator());
+  doc.AddMember("phase", 1.0F, doc.GetAllocator());
   doc.AddMember("waveform", "Triangle", doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_SUCCESS);
