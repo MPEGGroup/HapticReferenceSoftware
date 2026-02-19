@@ -340,7 +340,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange succeeds on vali
   freqRange.AddMember("min", 10.0, doc.GetAllocator());
   freqRange.AddMember("max", 100.0, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_SUCCESS);
 }
 
@@ -349,7 +350,8 @@ TEST_CASE(
     "[extractFrequencyRange]") {
   rapidjson::Document doc(rapidjson::kObjectType);
   doc.AddMember("frequency_range", 123, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_FAILURE);
 }
 
@@ -360,7 +362,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if min is 
   freqRange.AddMember("min", "not_double", doc.GetAllocator());
   freqRange.AddMember("max", 100.0, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_FAILURE);
 }
 
@@ -371,7 +374,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if min is 
   freqRange.AddMember("min", -1.0, doc.GetAllocator());
   freqRange.AddMember("max", 100.0, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_FAILURE);
 }
 
@@ -382,7 +386,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if max is 
   freqRange.AddMember("min", 10.0, doc.GetAllocator());
   freqRange.AddMember("max", "not_double", doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_FAILURE);
 }
 
@@ -393,7 +398,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if max < m
   freqRange.AddMember("min", 100.0, doc.GetAllocator());
   freqRange.AddMember("max", 50.0, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_FAILURE);
 }
 
@@ -547,7 +553,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange succeeds when mi
   freqRange.AddMember("min", 50.0, doc.GetAllocator());
   freqRange.AddMember("max", 50.0, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_SUCCESS);
 }
 
@@ -559,7 +566,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange ignores extra fi
   freqRange.AddMember("max", 100.0, doc.GetAllocator());
   freqRange.AddMember("extra", 999, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_SUCCESS);
 }
 
@@ -718,7 +726,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange handles floating
   freqRange.AddMember("min", 10.7, doc.GetAllocator());
   freqRange.AddMember("max", 99.3, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
-  int min = 0, max = 0;
+  int min = 0;
+  int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_SUCCESS);
   REQUIRE(min == 10);
   REQUIRE(max == 100);

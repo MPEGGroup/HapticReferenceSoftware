@@ -695,7 +695,7 @@ auto HapsEncoder::storeApproximatedAmplitudeKeyframe(
     return;
   }
 
-  float amplitudeValue =
+  auto amplitudeValue =
       static_cast<float>(amplitudeMultiplier * (amplitude * value + verticalOffset));
   amplitudeValue = std::max(-1.0F, std::min(1.0F, amplitudeValue));
   effect.addAmplitudeAt(amplitudeValue, t);
@@ -761,8 +761,8 @@ HapsEncoder::extractFrequencyCurve(const rapidjson::Value::Object &curve, types:
                                              const bool isAmplitude, const double amplitudeModifier,
                                              const int lowerFrequencyLimit,
                                              const int upperFrequencyLimit) -> int {
-  double lastValue;
-  int lastPosition;
+  double lastValue = 0.0;
+  int lastPosition = 0;
   return extractCurve(curve, effect, timescale, isAmplitude, amplitudeModifier, lowerFrequencyLimit,
                       upperFrequencyLimit, lastValue, lastPosition);
 }
