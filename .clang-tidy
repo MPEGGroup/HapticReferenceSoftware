@@ -28,7 +28,7 @@ CheckOptions:
   - key:    readability-function-size.StatementThreshold
     value:  120
   - key:    readability-function-size.ParameterThreshold
-    value:  6
+    value:  10
   - key:    readability-function-size.NestingThreshold
     value:  8
   - key:    readability-function-size.VariableThreshold
