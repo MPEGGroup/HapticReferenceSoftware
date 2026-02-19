@@ -617,8 +617,7 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
     }
 
     double verticalOffset = amplitudeModulation["vertical_offset"].GetDouble();
-    if (verticalOffset < -NORMALIZED_HALF_RANGE_MAX ||
-        verticalOffset > NORMALIZED_HALF_RANGE_MAX) {
+    if (verticalOffset < -NORMALIZED_HALF_RANGE_MAX || verticalOffset > NORMALIZED_HALF_RANGE_MAX) {
       std::cerr << "Invalid HAPS input file: note.amplitude.vertical_offset is not normalized"
                 << std::endl;
       return EXIT_FAILURE;
@@ -659,8 +658,7 @@ auto HapsEncoder::storeAmplitudeAsPeriodicSignal(
     return;
   }
 
-  int step =
-      std::max(1, millisecondsToTimeScale(AMPLITUDE_PERIODIC_SAMPLING_STEP_MS, timescale));
+  int step = std::max(1, millisecondsToTimeScale(AMPLITUDE_PERIODIC_SAMPLING_STEP_MS, timescale));
   if (step > duration) {
     step = duration;
   }
@@ -692,11 +690,11 @@ auto HapsEncoder::storeApproximatedAmplitudeKeyframe(
     value = std::sin(angle) >= 0.0 ? 1.0 : -1.0;
     break;
   case Waveform::Triangle:
-    value = WAVEFORM_SCALE_FACTOR *
-                std::abs(WAVEFORM_SCALE_FACTOR *
-                             (normalizedTime -
-                              std::floor(normalizedTime + WAVEFORM_HALF_CYCLE_OFFSET))) +
-            WAVEFORM_MIN_VALUE;
+    value =
+        WAVEFORM_SCALE_FACTOR *
+            std::abs(WAVEFORM_SCALE_FACTOR *
+                     (normalizedTime - std::floor(normalizedTime + WAVEFORM_HALF_CYCLE_OFFSET))) +
+        WAVEFORM_MIN_VALUE;
     break;
   case Waveform::SawToothUp:
     value = WAVEFORM_SCALE_FACTOR *
