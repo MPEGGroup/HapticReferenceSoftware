@@ -125,7 +125,7 @@ namespace haptics::encoder {
     }
 
     if (vibrationTrack["mute"].GetBool()) {
-      channel.setGain(0.0f);
+      channel.setGain(0.0F);
     }
   }
 
@@ -328,7 +328,7 @@ namespace haptics::encoder {
     }
 
     phase = note["phase"].GetFloat();
-    if (phase < -1.0f || phase > 1.0f) {
+    if (phase < -1.0F || phase > 1.0F) {
       std::cerr << "Invalid HAPS input file: note.phase is not normalized" << std::endl;
       return EXIT_FAILURE;
     }
@@ -697,7 +697,7 @@ auto HapsEncoder::storeApproximatedAmplitudeKeyframe(
 
   float amplitudeValue =
       static_cast<float>(amplitudeMultiplier * (amplitude * value + verticalOffset));
-  amplitudeValue = std::max(-1.0f, std::min(1.0f, amplitudeValue));
+  amplitudeValue = std::max(-1.0F, std::min(1.0F, amplitudeValue));
   effect.addAmplitudeAt(amplitudeValue, t);
 }
 
