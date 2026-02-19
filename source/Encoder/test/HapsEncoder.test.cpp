@@ -257,12 +257,13 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies fails if note is not o
 TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies succeeds on minimal valid input",
           "[extractMelodies]") {
   const double kPositionShort = 0.1;
+  const double kNoteLengthLong = 3.0;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value m(rapidjson::kObjectType);
   rapidjson::Value notes(rapidjson::kArrayType);
   rapidjson::Value n(rapidjson::kObjectType);
   n.AddMember("position", kPositionShort, doc.GetAllocator());
-  n.AddMember("length", 3.0, doc.GetAllocator());
+  n.AddMember("length", kNoteLengthLong, doc.GetAllocator());
   notes.PushBack(n, doc.GetAllocator());
   m.AddMember("notes", notes, doc.GetAllocator());
   doc.PushBack(m, doc.GetAllocator());
@@ -350,9 +351,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if waveform is unkno
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote succeeds on minimal valid input",
           "[extractNote]") {
   const double kPositionShort = 0.1;
+  const double kNoteLengthLong = 4.0;
   rapidjson::Document doc(rapidjson::kObjectType);
   doc.AddMember("position", kPositionShort, doc.GetAllocator());
-  doc.AddMember("length", 4.0, doc.GetAllocator());
+  doc.AddMember("length", kNoteLengthLong, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_SUCCESS);
 }

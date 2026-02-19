@@ -48,6 +48,14 @@
 
 namespace haptics::encoder {
 
+namespace {
+constexpr double NORMALIZED_HALF_RANGE_MAX = 0.5;
+constexpr int AMPLITUDE_PERIODIC_SAMPLING_STEP_MS = 10;
+constexpr double WAVEFORM_SCALE_FACTOR = 2.0;
+constexpr double WAVEFORM_HALF_CYCLE_OFFSET = 0.5;
+constexpr double WAVEFORM_MIN_VALUE = -1.0;
+} // namespace
+
 [[nodiscard]] auto HapsEncoder::encode(std::string &filename, haptics::types::Perception &out,
                                        const unsigned int timescale) -> int {
   if (out.getChannelsSize() > 1) {
@@ -609,7 +617,8 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
     }
 
     double verticalOffset = amplitudeModulation["vertical_offset"].GetDouble();
-    if (verticalOffset < -0.5 || verticalOffset > 0.5) {
+    if (verticalOffset < -NORMALIZED_HALF_RANGE_MAX ||
+        verticalOffset > NORMALIZED_HALF_RANGE_MAX) {
       std::cerr << "Invalid HAPS input file: note.amplitude.vertical_offset is not normalized"
                 << std::endl;
       return EXIT_FAILURE;
@@ -650,7 +659,8 @@ auto HapsEncoder::storeAmplitudeAsPeriodicSignal(
     return;
   }
 
-  int step = std::max(1, millisecondsToTimeScale(10, timescale));
+  int step =
+      std::max(1, millisecondsToTimeScale(AMPLITUDE_PERIODIC_SAMPLING_STEP_MS, timescale));
   if (step > duration) {
     step = duration;
   }
@@ -682,13 +692,19 @@ auto HapsEncoder::storeApproximatedAmplitudeKeyframe(
     value = std::sin(angle) >= 0.0 ? 1.0 : -1.0;
     break;
   case Waveform::Triangle:
-    value = 2.0 * std::abs(2.0 * (normalizedTime - std::floor(normalizedTime + 0.5))) - 1.0;
+    value = WAVEFORM_SCALE_FACTOR *
+                std::abs(WAVEFORM_SCALE_FACTOR *
+                             (normalizedTime -
+                              std::floor(normalizedTime + WAVEFORM_HALF_CYCLE_OFFSET))) +
+            WAVEFORM_MIN_VALUE;
     break;
   case Waveform::SawToothUp:
-    value = 2.0 * (normalizedTime - std::floor(normalizedTime + 0.5));
+    value = WAVEFORM_SCALE_FACTOR *
+            (normalizedTime - std::floor(normalizedTime + WAVEFORM_HALF_CYCLE_OFFSET));
     break;
   case Waveform::SawToothDown:
-    value = 2.0 * (std::floor(normalizedTime + 0.5) - normalizedTime);
+    value = WAVEFORM_SCALE_FACTOR *
+            (std::floor(normalizedTime + WAVEFORM_HALF_CYCLE_OFFSET) - normalizedTime);
     break;
   default:
     // Impossible to approximate the waveform
