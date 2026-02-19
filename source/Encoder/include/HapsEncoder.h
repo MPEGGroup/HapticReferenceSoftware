@@ -56,11 +56,11 @@ public:
   enum class Waveform : int {
     Unknown = -2,
     Constant = -1,
-    Sine = haptics::types::BaseSignal::Sine,
-    Square = haptics::types::BaseSignal::Square,
-    Triangle = haptics::types::BaseSignal::Triangle,
-    SawToothUp = haptics::types::BaseSignal::SawToothUp,
-    SawToothDown = haptics::types::BaseSignal::SawToothDown
+    Sine = static_cast<int>(haptics::types::BaseSignal::Sine),
+    Square = static_cast<int>(haptics::types::BaseSignal::Square),
+    Triangle = static_cast<int>(haptics::types::BaseSignal::Triangle),
+    SawToothUp = static_cast<int>(haptics::types::BaseSignal::SawToothUp),
+    SawToothDown = static_cast<int>(haptics::types::BaseSignal::SawToothDown)
   };
 
   [[nodiscard]] auto static encode(std::string &filename, types::Perception &out,
