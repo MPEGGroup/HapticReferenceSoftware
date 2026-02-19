@@ -116,6 +116,9 @@ public:
     unsigned int nominalDuration = DEFAULT_PACKET_DURATION;
     unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
     bool overlapping = false;
+    bool splitSilentUnits = false;
+    bool noSplitEffects = false;
+    int minDuration = 0;
     types::Haptics haptic;
     types::Perception perception;
     types::Channel channel;
@@ -153,13 +156,15 @@ public:
   static auto readPackets(std::vector<std::vector<bool>> &bitstream, StreamReader &sreader) -> bool;
   static auto loadFile(const std::string &filePath, std::vector<std::vector<bool>> &bitset) -> bool;
   static auto loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool>> &bitset) -> bool;
-  static auto writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
-      -> bool;
+  static auto writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration,
+                        bool splitSilentUnits = false, int minDuration = 0,
+                        bool noSplitEffects = false) -> bool;
   static auto writeUnitFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;
 
   static auto writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-                         int packetDuration) -> bool;
+                         int packetDuration, bool splitSilentUnits = false, int minDuration = 0,
+                         bool noSplitEffects = false) -> bool;
 
   static auto writeMIHSUnit(MIHSUnitType unitType, std::vector<std::vector<bool>> &listPackets,
                             std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool;
@@ -189,6 +194,12 @@ private:
                                    std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool;
   static auto writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
                                   std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool;
+  static auto writeSingleSilentUnit(int duration, std::vector<bool> &mihsunit,
+                                    StreamWriter &swriter) -> void;
+  static auto writeSplitSilentUnits(int totalDuration, std::vector<std::vector<bool>> &bitstream,
+                                    StreamWriter &swriter) -> void;
+  static auto padToMinDuration(std::vector<std::vector<bool>> &bitstream, StreamWriter &swriter)
+      -> void;
 
   static auto readMIHSUnitInitialization(std::vector<bool> &mihsunit, StreamReader &sreader)
       -> bool;

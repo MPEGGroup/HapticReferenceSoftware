@@ -32,6 +32,7 @@
  */
 
 #include <Encoder/include/AhapEncoder.h>
+#include <Encoder/include/HapsEncoder.h>
 #include <Encoder/include/IvsEncoder.h>
 #include <Encoder/include/PcmEncoder.h>
 #include <IOHaptics/include/IOCompatibility.h>
@@ -46,6 +47,7 @@
 #include <optional>
 
 using haptics::encoder::AhapEncoder;
+using haptics::encoder::HapsEncoder;
 using haptics::encoder::IvsEncoder;
 using haptics::encoder::PcmEncoder;
 using haptics::io::IOJson;
@@ -96,6 +98,15 @@ auto help() -> void {
          "band for the whole frequency spectrum. This argument will only affect PCM input content."
       << std::endl
       << "\t-ts, \t\t\tspecify the timescale" << std::endl
+      << "\t-ssu, --split-silent-units\tSplit silent units into multiple units of packet duration "
+         "(default: 128ms) instead of one large unit spanning the whole silent period"
+      << std::endl
+      << "\t-md, --min-duration <MS>\tMinimum duration of the output file in milliseconds. "
+         "If the input is shorter, silence will be added at the end"
+      << std::endl
+      << "\t-nse, --no-split-effects\tDo not split effects across packets. Each effect is written "
+         "entirely in its first packet, even if its keyframes extend beyond the packet duration"
+      << std::endl
       << std::endl;
 }
 
@@ -270,6 +281,10 @@ auto main(int argc, char *argv[]) -> int {
     codeExit =
         PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
     hapticFile.addPerception(myPerception);
+  } else if (ext == "haps") {
+    std::cout << "The HAPS file to encode : " << filename << std::endl;
+    codeExit = HapsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+    hapticFile.addPerception(myPerception);
   } else if (ext == "hjif") {
     std::cout << "The HJIF file to encode : " << filename << std::endl;
     IOJson::loadFile(filename, hapticFile);
@@ -305,7 +320,18 @@ auto main(int argc, char *argv[]) -> int {
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
     }
-    IOStream::writeFile(hapticFile, output, packetDuration);
+    bool splitSilentUnits =
+        inputParser.cmdOptionExists("-ssu") || inputParser.cmdOptionExists("--split-silent-units");
+    int minDuration = 0;
+    if (inputParser.cmdOptionExists("-md")) {
+      minDuration = std::stoi(inputParser.getCmdOption("-md"));
+    } else if (inputParser.cmdOptionExists("--min-duration")) {
+      minDuration = std::stoi(inputParser.getCmdOption("--min-duration"));
+    }
+    bool noSplitEffects =
+        inputParser.cmdOptionExists("-nse") || inputParser.cmdOptionExists("--no-split-effects");
+    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration,
+                        noSplitEffects);
   } else {
     IOJson::writeFile(hapticFile, output);
   }

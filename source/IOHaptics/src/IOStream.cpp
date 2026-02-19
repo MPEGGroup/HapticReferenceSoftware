@@ -42,8 +42,8 @@
 
 namespace haptics::io {
 
-auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
-    -> bool {
+auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration,
+                         bool splitSilentUnits, int minDuration, bool noSplitEffects) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -51,7 +51,8 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, in
   }
 
   std::vector<std::vector<bool>> packetsBytes = std::vector<std::vector<bool>>();
-  bool success = writeUnits(haptic, packetsBytes, packetDuration);
+  bool success = writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration,
+                            noSplitEffects);
   std::vector<bool> binary = std::vector<bool>();
   if (success) {
     for (auto &packet : packetsBytes) {
@@ -209,11 +210,15 @@ auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool
 }
 
 auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
-                          int packetDuration) -> bool {
+                          int packetDuration, bool splitSilentUnits, int minDuration,
+                          bool noSplitEffects) -> bool {
   StreamWriter swriter;
   swriter.haptic = haptic;
   swriter.packetDuration = packetDuration;
   swriter.timescale = haptic.getTimescaleOrDefault();
+  swriter.splitSilentUnits = splitSilentUnits;
+  swriter.minDuration = minDuration;
+  swriter.noSplitEffects = noSplitEffects;
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
   writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, initPackets);
   writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, initPackets);
@@ -234,11 +239,22 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
   bool first = true;
   for (auto &packet : dataPackets) {
     if (first) {
-      std::vector<std::vector<bool>> firstPacket = std::vector<std::vector<bool>>{packet};
-      std::vector<bool> silentUnit = std::vector<bool>();
-      writeMIHSUnit(MIHSUnitType::Silent, firstPacket, silentUnit, swriter);
-      if (silentUnit.size() > UNIT_TYPE) {
-        bitstream.push_back(silentUnit);
+      if (swriter.splitSilentUnits) {
+        int tFirst = readPacketTS(std::vector<bool>(packet.begin() + H_NBITS, packet.end()));
+        if (tFirst >= static_cast<int>(swriter.packetDuration)) {
+          int duration = tFirst;
+          if (duration % swriter.packetDuration != 0) {
+            duration = duration - (duration % static_cast<int>(swriter.packetDuration));
+          }
+          writeSplitSilentUnits(duration, bitstream, swriter);
+        }
+      } else {
+        std::vector<std::vector<bool>> firstPacket = std::vector<std::vector<bool>>{packet};
+        std::vector<bool> silentUnit = std::vector<bool>();
+        writeMIHSUnit(MIHSUnitType::Silent, firstPacket, silentUnit, swriter);
+        if (silentUnit.size() > UNIT_TYPE) {
+          bitstream.push_back(silentUnit);
+        }
       }
       first = false;
     }
@@ -263,15 +279,34 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
           bitstream.push_back(syncUnit);
         }
         if (swriter.time != packetTS) {
-          std::vector<std::vector<bool>> silentPackets{bufUnit[bufUnit.size() - 1], packet};
-          std::vector<bool> silentUnit = std::vector<bool>();
-          if (writeMIHSUnit(MIHSUnitType::Silent, silentPackets, silentUnit, swriter)) {
-            bitstream.push_back(silentUnit);
-            if (syncIdx != -1 && swriter.time == static_cast<int>(nextSync.getTimestamp())) {
-              std::vector<bool> syncUnit = std::vector<bool>();
-              writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
-              getNextSync(haptic, nextSync, syncIdx);
-              bitstream.push_back(syncUnit);
+          if (swriter.splitSilentUnits) {
+            int silentDuration = packetTS - swriter.time;
+            if (silentDuration % swriter.packetDuration != 0) {
+              silentDuration =
+                  silentDuration - (silentDuration % static_cast<int>(swriter.packetDuration));
+            }
+            if (silentDuration > 0) {
+              writeSplitSilentUnits(silentDuration, bitstream, swriter);
+              // Note: sync handling for split silent units would need to be handled per-unit
+              // For now, we check sync after all silent units are written
+              if (syncIdx != -1 && swriter.time == static_cast<int>(nextSync.getTimestamp())) {
+                std::vector<bool> syncUnit = std::vector<bool>();
+                writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
+                getNextSync(haptic, nextSync, syncIdx);
+                bitstream.push_back(syncUnit);
+              }
+            }
+          } else {
+            std::vector<std::vector<bool>> silentPackets{bufUnit[bufUnit.size() - 1], packet};
+            std::vector<bool> silentUnit = std::vector<bool>();
+            if (writeMIHSUnit(MIHSUnitType::Silent, silentPackets, silentUnit, swriter)) {
+              bitstream.push_back(silentUnit);
+              if (syncIdx != -1 && swriter.time == static_cast<int>(nextSync.getTimestamp())) {
+                std::vector<bool> syncUnit = std::vector<bool>();
+                writeMIHSUnit(MIHSUnitType::Initialization, initPackets, syncUnit, swriter);
+                getNextSync(haptic, nextSync, syncIdx);
+                bitstream.push_back(syncUnit);
+              }
             }
           }
         }
@@ -292,8 +327,33 @@ auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>>
       bitstream.push_back(syncUnit);
     }
   }
+
+  padToMinDuration(bitstream, swriter);
+
   silentUnitSyncFlag(bitstream);
   return true;
+}
+
+auto IOStream::padToMinDuration(std::vector<std::vector<bool>> &bitstream, StreamWriter &swriter)
+    -> void {
+  // Pad with silence to reach minimum duration if specified
+  if (swriter.minDuration > 0 && swriter.time < swriter.minDuration) {
+    int paddingDuration = swriter.minDuration - swriter.time;
+    // Round down to packet duration multiple
+    if (paddingDuration % swriter.packetDuration != 0) {
+      paddingDuration =
+          paddingDuration - (paddingDuration % static_cast<int>(swriter.packetDuration));
+    }
+    if (paddingDuration > 0) {
+      if (swriter.splitSilentUnits) {
+        writeSplitSilentUnits(paddingDuration, bitstream, swriter);
+      } else {
+        std::vector<bool> silentUnit;
+        writeSingleSilentUnit(paddingDuration, silentUnit, swriter);
+        bitstream.push_back(silentUnit);
+      }
+    }
+  }
 }
 
 auto IOStream::silentUnitSyncFlag(std::vector<std::vector<bool>> &bitstream) -> void {
@@ -542,6 +602,41 @@ auto IOStream::writeMIHSUnitSpatial(std::vector<std::vector<bool>> &listPackets,
   mihsunit.insert(mihsunit.end(), payload.begin(), payload.end());
   return true;
 }
+
+auto IOStream::writeSingleSilentUnit(int duration, std::vector<bool> &mihsunit,
+                                     StreamWriter &swriter) -> void {
+  std::bitset<UNIT_TYPE> unitTypeBits(static_cast<int>(MIHSUnitType::Silent));
+  std::string unitTypeStr = unitTypeBits.to_string();
+  IOBinaryPrimitives::writeStrBits(unitTypeStr, mihsunit);
+  std::bitset<UNIT_SYNC> syncBits(0);
+  std::string syncStr = syncBits.to_string();
+  IOBinaryPrimitives::writeStrBits(syncStr, mihsunit);
+  std::bitset<UNIT_LAYER> layerBits(swriter.layer);
+  std::string layerStr = layerBits.to_string();
+  IOBinaryPrimitives::writeStrBits(layerStr, mihsunit);
+  std::bitset<UNIT_DURATION> durationBits(duration);
+  std::string durationStr = durationBits.to_string();
+  IOBinaryPrimitives::writeStrBits(durationStr, mihsunit);
+  std::bitset<UNIT_LENGTH> lengthBits(0);
+  std::string lengthStr = lengthBits.to_string();
+  IOBinaryPrimitives::writeStrBits(lengthStr, mihsunit);
+  std::bitset<UNIT_RESERVED> reservedBits(0);
+  std::string reservedStr = reservedBits.to_string();
+  IOBinaryPrimitives::writeStrBits(reservedStr, mihsunit);
+  swriter.time += duration;
+}
+
+auto IOStream::writeSplitSilentUnits(int totalDuration, std::vector<std::vector<bool>> &bitstream,
+                                     StreamWriter &swriter) -> void {
+  int packetDur = static_cast<int>(swriter.packetDuration);
+  while (totalDuration >= packetDur) {
+    std::vector<bool> silentUnit;
+    writeSingleSilentUnit(packetDur, silentUnit, swriter);
+    bitstream.push_back(silentUnit);
+    totalDuration -= packetDur;
+  }
+}
+
 auto IOStream::writeMIHSUnitSilent(std::vector<std::vector<bool>> &listPackets,
                                    std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool {
   if (listPackets.size() == 1) {
@@ -2364,31 +2459,64 @@ auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vecto
       int nextId = getNextEffectId(swriter.effectsId);
       effect.setId(nextId);
     }
-    if (effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
-      std::vector<bool> bufEffect = std::vector<bool>();
-      if (effect.getEffectType() == types::EffectType::Basis) {
-        int bufKFCount = 0;
-        bool isRAU = true;
-        if (!writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect)) {
-          unfinishedEffect = true;
-        }
-        if (bufKFCount > 0) {
-          swriter.keyframesCount.push_back(bufKFCount);
-          bitstream.push_back(bufEffect);
-          swriter.effects.push_back(effect);
-          if (!isRAU) {
-            swriter.auType = AUType::DAU;
+
+    // When noSplitEffects is enabled, only process effects that START in this packet
+    // (not effects that started earlier but extend into this packet)
+    if (swriter.noSplitEffects) {
+      if (effect.getPosition() >= swriter.time &&
+          effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
+        // Effect starts in this packet - write it completely
+        std::vector<bool> bufEffect = std::vector<bool>();
+        if (effect.getEffectType() == types::EffectType::Basis) {
+          int bufKFCount = 0;
+          bool isRAU = true;
+          writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect);
+          if (bufKFCount > 0) {
+            swriter.keyframesCount.push_back(bufKFCount);
+            bitstream.push_back(bufEffect);
+            swriter.effects.push_back(effect);
+            if (!isRAU) {
+              swriter.auType = AUType::DAU;
+            }
           }
-        }
-      } else if (effect.getEffectType() == types::EffectType::Reference) {
-        if (effect.getPosition() >= swriter.time) {
+        } else if (effect.getEffectType() == types::EffectType::Reference) {
           bitstream.push_back(bufEffect);
           swriter.effects.push_back(effect);
           swriter.keyframesCount.push_back(0);
         }
+      } else if (effect.getPosition() >= swriter.time + static_cast<int>(swriter.packetDuration)) {
+        // Effect hasn't started yet
+        effectRemaining = true;
       }
+      // Effects that started before this packet are ignored (already written)
     } else {
-      effectRemaining = true;
+      // Normal behavior: split effects across packets
+      if (effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
+        std::vector<bool> bufEffect = std::vector<bool>();
+        if (effect.getEffectType() == types::EffectType::Basis) {
+          int bufKFCount = 0;
+          bool isRAU = true;
+          if (!writeEffectBasis(effect, swriter, bufKFCount, isRAU, bufEffect)) {
+            unfinishedEffect = true;
+          }
+          if (bufKFCount > 0) {
+            swriter.keyframesCount.push_back(bufKFCount);
+            bitstream.push_back(bufEffect);
+            swriter.effects.push_back(effect);
+            if (!isRAU) {
+              swriter.auType = AUType::DAU;
+            }
+          }
+        } else if (effect.getEffectType() == types::EffectType::Reference) {
+          if (effect.getPosition() >= swriter.time) {
+            bitstream.push_back(bufEffect);
+            swriter.effects.push_back(effect);
+            swriter.keyframesCount.push_back(0);
+          }
+        }
+      } else {
+        effectRemaining = true;
+      }
     }
   }
   return !effectRemaining && !unfinishedEffect;
@@ -2873,6 +3001,27 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
   if (tsFX < swriter.time) {
     rau = false;
   }
+
+  // When noSplitEffects is enabled, write all keyframes in the first packet
+  if (swriter.noSplitEffects) {
+    for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
+      types::Keyframe kf = effect.getKeyframeAt(j);
+      int currentTime = kf.getRelativePosition().value() + tsFX;
+      if (currentTime >= swriter.time) {
+        if (firstKf) {
+          firstKf = false;
+          if (j != 0) {
+            rau = false;
+          }
+        }
+        writeKeyframe(swriter.bandStream.band.getBandType(), kf, bitstream);
+        kfCount++;
+      }
+    }
+    return true; // Always complete - don't split to next packet
+  }
+
+  // Normal behavior: split effects across packets
   for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
     types::Keyframe kf = effect.getKeyframeAt(j);
     int currentTime = kf.getRelativePosition().value() + tsFX;
