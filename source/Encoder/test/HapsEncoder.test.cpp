@@ -682,7 +682,7 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as perio
   const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
   doc.AddMember("position", kPositionShort, doc.GetAllocator());
-  doc.AddMember("length", 1, doc.GetAllocator());
+  doc.AddMember("length", 1.0, doc.GetAllocator());
   rapidjson::Value amplitude(rapidjson::kObjectType);
   amplitude.AddMember("amplitude", kNormalizedMid, doc.GetAllocator());
   amplitude.AddMember("period_length", kPositionMedium, doc.GetAllocator());

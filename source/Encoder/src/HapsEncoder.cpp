@@ -641,7 +641,7 @@ auto HapsEncoder::storeAmplitudeAsPeriodicSignal(
   // Since the format doesn't allow a parametric representation of the modulation, an appromixation
   // of the amplitude modulation through a periodic signal is generated and keyframes are stored
   int duration = timescaledLength.value_or(0);
-  if (duration < 0) {
+  if (duration <= 0) {
     return;
   }
 
