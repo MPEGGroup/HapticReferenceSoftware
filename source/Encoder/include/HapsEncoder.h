@@ -66,18 +66,17 @@ public:
   [[nodiscard]] auto static encode(std::string &filename, types::Perception &out,
                                    unsigned int timescale) -> int;
   [[nodiscard]] auto static extractVibration(const rapidjson::Value::Object &vibrationTrack,
-                                             types::Channel &channel, const unsigned int timescale)
+                                             types::Channel &channel, unsigned int timescale)
       -> int;
   [[nodiscard]] auto static extractTransients(const rapidjson::Value::Array &transients,
                                               types::Band *transientBand,
-                                              const unsigned int timescale) -> int;
+                                              unsigned int timescale) -> int;
   [[nodiscard]] auto static extractMelodies(const rapidjson::Value::Array &melodies,
                                             types::Channel &channel, int lowerFrequencyLimit,
-                                            int upperFrequencyLimit, const unsigned int timescale)
+                                            int upperFrequencyLimit, unsigned int timescale)
       -> int;
   [[nodiscard]] auto static extractNote(const rapidjson::Value::Object &note, types::Band *band,
-                                        const double amplitudeMultiplier,
-                                        const unsigned int timescale) -> int;
+                                        double amplitudeMultiplier, unsigned int timescale) -> int;
   [[nodiscard]] auto static extractFrequencyRange(const rapidjson::Value::Object &vibrationTrack,
                                                   int &lowerFrequencyLimit,
                                                   int &upperFrequencyLimit) -> int;
@@ -87,69 +86,66 @@ private:
   enum class ModulationType : uint8_t { Constant = 0, PeriodicSignal = 1, InterpolationCurve = 2 };
 
   [[nodiscard]] auto static extractPitchInNote(const rapidjson::Value::Object &note,
-                                               types::Effect &effect, const unsigned int timescale,
-                                               const int lowerFrequencyLimit,
-                                               const int upperFrequencyLimit,
+                                               types::Effect &effect, unsigned int timescale,
+                                               int lowerFrequencyLimit, int upperFrequencyLimit,
                                                int &lastFrequencyValue, int &lastFrequencyTimestamp,
                                                ModulationType &modulationType) -> int;
   [[nodiscard]] auto static extractAmplitudeInNote(const rapidjson::Value::Object &note,
                                                    types::Effect &effect,
-                                                   const unsigned int timescale,
+                                                   unsigned int timescale,
                                                    std::optional<int> timescaledLength,
-                                                   const double amplitudeMultiplier,
+                                                   double amplitudeMultiplier,
                                                    ModulationType &modulationType) -> int;
   [[nodiscard]] auto static extractAmplitudeAsPeriodicSignal(
       const rapidjson::Value::Object &amplitudeModulation, types::Effect &effect,
-      const unsigned int timescale, std::optional<int> timescaledLength,
-      const double amplitudeMultiplier, ModulationType &modulationType) -> int;
-  auto static storeAmplitudeAsPeriodicSignal(types::Effect &effect, const unsigned timescale,
-                                             const double amplitudeMultiplier,
+      unsigned int timescale, std::optional<int> timescaledLength, double amplitudeMultiplier,
+      ModulationType &modulationType) -> int;
+  auto static storeAmplitudeAsPeriodicSignal(types::Effect &effect, unsigned timescale,
+                                             double amplitudeMultiplier,
                                              std::optional<int> timescaledLength,
-                                             const Waveform waveform, const double amplitude,
-                                             const double verticalOffset, const double periodLength,
-                                             const double phase) -> void;
+                                             Waveform waveform, double amplitude,
+                                             double verticalOffset, double periodLength,
+                                             double phase) -> void;
   auto static storeApproximatedAmplitudeKeyframe(
-      types::Effect &effect, const unsigned int timescale, const double amplitudeMultiplier,
-      const int t, const Waveform waveform, const double amplitude, const double verticalOffset,
-      const double periodLength, const double phase) -> void;
-  auto static storeAmplitudeAsConstant(const double amplitude, types::Effect &effect,
+      types::Effect &effect, unsigned int timescale, double amplitudeMultiplier, int t,
+      Waveform waveform, double amplitude, double verticalOffset, double periodLength,
+      double phase) -> void;
+  auto static storeAmplitudeAsConstant(double amplitude, types::Effect &effect,
                                        std::optional<int> timescaledLength) -> void;
-  auto static storeAmplitudeAsConstant(const double amplitude, types::Effect &effect,
+  auto static storeAmplitudeAsConstant(double amplitude, types::Effect &effect,
                                        std::optional<int> timescaledLength,
                                        ModulationType &modulationType) -> void;
   [[nodiscard]] auto static extractFrequencyCurve(const rapidjson::Value::Object &curve,
                                                   types::Effect &effect,
-                                                  const unsigned int timescale,
-                                                  const int lowerFrequencyLimit,
-                                                  const int upperFrequencyLimit, int &lastValue,
+                                                  unsigned int timescale, int lowerFrequencyLimit,
+                                                  int upperFrequencyLimit, int &lastValue,
                                                   int &lastPosition) -> int;
   [[nodiscard]] auto static extractFrequencyCurve(const rapidjson::Value::Object &curve,
                                                   types::Effect &effect,
-                                                  const unsigned int timescale,
-                                                  const int lowerFrequencyLimit,
-                                                  const int upperFrequencyLimit) -> int;
+                                                  unsigned int timescale,
+                                                  int lowerFrequencyLimit, int upperFrequencyLimit)
+      -> int;
   [[nodiscard]] auto static extractAmplitudeCurve(const rapidjson::Value::Object &curve,
                                                   types::Effect &effect,
-                                                  const unsigned int timescale,
-                                                  const double amplitudeModifier) -> int;
+                                                  unsigned int timescale,
+                                                  double amplitudeModifier) -> int;
   [[nodiscard]] auto static extractAmplitudeCurve(const rapidjson::Value::Object &curve,
                                                   types::Effect &effect,
-                                                  const unsigned int timescale,
-                                                  const double amplitudeModifier, double &lastValue,
+                                                  unsigned int timescale,
+                                                  double amplitudeModifier, double &lastValue,
                                                   int &lastPosition) -> int;
   [[nodiscard]] auto static extractCurve(const rapidjson::Value::Object &curve,
-                                         types::Effect &effect, const unsigned int timescale,
-                                         const bool isAmplitude, const double amplitudeModifier,
-                                         const int lowerFrequencyLimit,
-                                         const int upperFrequencyLimit) -> int;
+                                         types::Effect &effect, unsigned int timescale,
+                                         bool isAmplitude, double amplitudeModifier,
+                                         int lowerFrequencyLimit, int upperFrequencyLimit) -> int;
   [[nodiscard]] auto static extractCurve(const rapidjson::Value::Object &curve,
-                                         types::Effect &effect, const unsigned int timescale,
-                                         const bool isAmplitude, const double amplitudeModifier,
-                                         const int lowerFrequencyLimit,
-                                         const int upperFrequencyLimit, double &lastValue,
+                                         types::Effect &effect, unsigned int timescale,
+                                         bool isAmplitude, double amplitudeModifier,
+                                         int lowerFrequencyLimit, int upperFrequencyLimit,
+                                         double &lastValue,
                                          int &lastPosition) -> int;
-  auto static secondsToTimeScale(const double seconds, const unsigned int timescale) -> int;
-  auto static millisecondsToTimeScale(const double milliseconds, const unsigned int timescale)
+  auto static secondsToTimeScale(double seconds, unsigned int timescale) -> int;
+  auto static millisecondsToTimeScale(double milliseconds, unsigned int timescale)
       -> int;
   auto static computeAbsoluteFreq(int lowerFrequencyLimit, int upperFrequencyLimit, double freq)
       -> int;
