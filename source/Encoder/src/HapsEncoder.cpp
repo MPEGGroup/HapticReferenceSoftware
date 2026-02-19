@@ -571,7 +571,9 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
 [[nodiscard]] auto HapsEncoder::extractAmplitudeAsPeriodicSignal(
     const rapidjson::Value::Object &amplitudeModulation, types::Effect &effect,
     const unsigned int timescale, std::optional<int> timescaledLength,
-    const double amplitudeMultiplier, ModulationType &modulationType) -> int {
+    const double amplitudeMultiplier, ModulationType & /*modulationType*/) -> int {
+  // TODO: Verify whether modulationType should be updated in this function.
+
   if (!amplitudeModulation["amplitude"].IsDouble()) {
     std::cerr << "Invalid HAPS input file: invalid note.amplitude.amplitude" << std::endl;
     return EXIT_FAILURE;
@@ -676,9 +678,11 @@ auto HapsEncoder::storeAmplitudeAsPeriodicSignal(
 }
 
 auto HapsEncoder::storeApproximatedAmplitudeKeyframe(
-    types::Effect &effect, const unsigned int timescale, const double amplitudeMultiplier,
+    types::Effect &effect, const unsigned int /*timescale*/, const double amplitudeMultiplier,
     const int t, const Waveform waveform, const double amplitude, const double verticalOffset,
     const double periodLength, const double phase) -> void {
+  // TODO: Verify whether timescale should influence waveform keyframe approximation.
+
   double normalizedTime = (static_cast<double>(t) / periodLength);
   double angle = 2 * M_PI * normalizedTime + phase;
   double value = 0.0;
