@@ -67,24 +67,27 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractVibration sets gain to 0 if mut
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractVibration fails if frequency_range is not object",
           "[extractVibration]") {
+  const int kInvalidTypeValue = 123;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("frequency_range", 123, doc.GetAllocator());
+  doc.AddMember("frequency_range", kInvalidTypeValue, doc.GetAllocator());
   haptics::types::Channel channel;
   REQUIRE(HapsEncoder::extractVibration(doc.GetObject(), channel, timescale) == EXIT_FAILURE);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractVibration fails if transients is not array",
           "[extractVibration]") {
+  const int kInvalidTypeValue = 123;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("transients", 123, doc.GetAllocator());
+  doc.AddMember("transients", kInvalidTypeValue, doc.GetAllocator());
   haptics::types::Channel channel;
   REQUIRE(HapsEncoder::extractVibration(doc.GetObject(), channel, timescale) == EXIT_FAILURE);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractVibration fails if melodies is not array",
           "[extractVibration]") {
+  const int kInvalidTypeValue = 123;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("melodies", 123, doc.GetAllocator());
+  doc.AddMember("melodies", kInvalidTypeValue, doc.GetAllocator());
   haptics::types::Channel channel;
   REQUIRE(HapsEncoder::extractVibration(doc.GetObject(), channel, timescale) == EXIT_FAILURE);
 }
@@ -110,9 +113,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if position is
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude is not double",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
   t.AddMember("amplitude", "not_double", doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
@@ -121,10 +125,11 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude i
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude is < 0",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
-  t.AddMember("amplitude", -0.1, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
+  t.AddMember("amplitude", -kPositionShort, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
@@ -132,10 +137,12 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude i
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude is > 1",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
+  const double kNormalizedTooHigh = 1.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
-  t.AddMember("amplitude", 1.1, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
+  t.AddMember("amplitude", kNormalizedTooHigh, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
@@ -143,9 +150,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude i
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is not double",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
   t.AddMember("pitch", "not_double", doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
@@ -154,10 +162,11 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is no
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is < 0",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
-  t.AddMember("pitch", -0.1, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
+  t.AddMember("pitch", -kPositionShort, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
@@ -165,10 +174,12 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is < 
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is > 1",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
+  const double kNormalizedTooHigh = 1.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
-  t.AddMember("pitch", 1.1, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
+  t.AddMember("pitch", kNormalizedTooHigh, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
@@ -176,11 +187,13 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is > 
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients succeeds on minimal valid input",
           "[extractTransients]") {
+  const double kPositionShort = 0.1;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
-  t.AddMember("amplitude", 0.5, doc.GetAllocator());
-  t.AddMember("pitch", 0.5, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
+  t.AddMember("amplitude", kNormalizedMid, doc.GetAllocator());
+  t.AddMember("pitch", kNormalizedMid, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_SUCCESS);
@@ -219,9 +232,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies fails if mute is not b
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies fails if notes is not array",
           "[extractMelodies]") {
+  const int kInvalidTypeValue = 123;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value m(rapidjson::kObjectType);
-  m.AddMember("notes", 123, doc.GetAllocator());
+  m.AddMember("notes", kInvalidTypeValue, doc.GetAllocator());
   doc.PushBack(m, doc.GetAllocator());
   haptics::types::Channel channel;
   REQUIRE(HapsEncoder::extractMelodies(doc.GetArray(), channel, 0, 100, timescale) == EXIT_FAILURE);
@@ -229,10 +243,11 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies fails if notes is not 
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies fails if note is not object",
           "[extractMelodies]") {
+  const int kInvalidTypeValue = 123;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value m(rapidjson::kObjectType);
   rapidjson::Value notes(rapidjson::kArrayType);
-  notes.PushBack(123, doc.GetAllocator());
+  notes.PushBack(kInvalidTypeValue, doc.GetAllocator());
   m.AddMember("notes", notes, doc.GetAllocator());
   doc.PushBack(m, doc.GetAllocator());
   haptics::types::Channel channel;
@@ -241,12 +256,13 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies fails if note is not o
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies succeeds on minimal valid input",
           "[extractMelodies]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value m(rapidjson::kObjectType);
   rapidjson::Value notes(rapidjson::kArrayType);
   rapidjson::Value n(rapidjson::kObjectType);
-  n.AddMember("position", 0.1, doc.GetAllocator());
-  n.AddMember("length", 3, doc.GetAllocator());
+  n.AddMember("position", kPositionShort, doc.GetAllocator());
+  n.AddMember("length", 3.0, doc.GetAllocator());
   notes.PushBack(n, doc.GetAllocator());
   m.AddMember("notes", notes, doc.GetAllocator());
   doc.PushBack(m, doc.GetAllocator());
@@ -272,16 +288,18 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if position is negat
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if gain is not double",
           "[extractNote]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   doc.AddMember("gain", "not_double", doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_FAILURE);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if gain is negative", "[extractNote]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   doc.AddMember("gain", -1.0, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_FAILURE);
@@ -289,8 +307,9 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if gain is negative"
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if phase is not float",
           "[extractNote]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   doc.AddMember("phase", "not_float", doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_FAILURE);
@@ -298,26 +317,31 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if phase is not floa
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if phase is not normalized",
           "[extractNote]") {
+  const double kPositionShort = 0.1;
+  const double kInvalidPhaseValue = 2.0;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
-  doc.AddMember("phase", 2.0, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
+  doc.AddMember("phase", kInvalidPhaseValue, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_FAILURE);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if waveform is not string",
           "[extractNote]") {
+  const int kInvalidTypeValue = 123;
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
-  doc.AddMember("waveform", 123, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
+  doc.AddMember("waveform", kInvalidTypeValue, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_FAILURE);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if waveform is unknown",
           "[extractNote]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   doc.AddMember("waveform", "NotARealWaveform", doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_FAILURE);
@@ -325,9 +349,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote fails if waveform is unkno
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote succeeds on minimal valid input",
           "[extractNote]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
-  doc.AddMember("length", 4, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
+  doc.AddMember("length", 4.0, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_SUCCESS);
 }
@@ -335,9 +360,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote succeeds on minimal valid 
 // --- extractFrequencyRange ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange succeeds on valid frequency_range",
           "[extractFrequencyRange]") {
+  const double kFreqMinValid = 10.0;
   rapidjson::Document doc(rapidjson::kObjectType);
   rapidjson::Value freqRange(rapidjson::kObjectType);
-  freqRange.AddMember("min", 10.0, doc.GetAllocator());
+  freqRange.AddMember("min", kFreqMinValid, doc.GetAllocator());
   freqRange.AddMember("max", 100.0, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
   int min = 0;
@@ -348,8 +374,9 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange succeeds on vali
 TEST_CASE(
     "haptics::encoder::HapsEncoder::extractFrequencyRange fails if frequency_range is not object",
     "[extractFrequencyRange]") {
+  const int kInvalidTypeValue = 123;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("frequency_range", 123, doc.GetAllocator());
+  doc.AddMember("frequency_range", kInvalidTypeValue, doc.GetAllocator());
   int min = 0;
   int max = 0;
   REQUIRE(HapsEncoder::extractFrequencyRange(doc.GetObject(), min, max) == EXIT_FAILURE);
@@ -381,9 +408,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if min is 
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if max is not double",
           "[extractFrequencyRange]") {
+  const double kFreqMinValid = 10.0;
   rapidjson::Document doc(rapidjson::kObjectType);
   rapidjson::Value freqRange(rapidjson::kObjectType);
-  freqRange.AddMember("min", 10.0, doc.GetAllocator());
+  freqRange.AddMember("min", kFreqMinValid, doc.GetAllocator());
   freqRange.AddMember("max", "not_double", doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
   int min = 0;
@@ -393,10 +421,11 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if max is 
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange fails if max < min",
           "[extractFrequencyRange]") {
+  const double kFreqEqualBoundary = 50.0;
   rapidjson::Document doc(rapidjson::kObjectType);
   rapidjson::Value freqRange(rapidjson::kObjectType);
   freqRange.AddMember("min", 100.0, doc.GetAllocator());
-  freqRange.AddMember("max", 50.0, doc.GetAllocator());
+  freqRange.AddMember("max", kFreqEqualBoundary, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
   int min = 0;
   int max = 0;
@@ -461,8 +490,9 @@ TEST_CASE("haptics::encoder::HapsEncoder::getWaveform fails for invalid string",
 // --- extractTransients: multiple and boundary values ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients handles multiple valid transients",
           "[extractTransients]") {
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kArrayType);
-  for (double pos : {0.0, 0.5, 1.0}) {
+  for (double pos : {0.0, kNormalizedMid, 1.0}) {
     rapidjson::Value t(rapidjson::kObjectType);
     t.AddMember("position", pos, doc.GetAllocator());
     t.AddMember("amplitude", 1.0, doc.GetAllocator());
@@ -476,9 +506,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients handles multiple val
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients succeeds with missing optional "
           "amplitude and pitch",
           "[extractTransients]") {
+  const double kPositionMedium = 0.2;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.2, doc.GetAllocator());
+  t.AddMember("position", kPositionMedium, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_SUCCESS);
@@ -487,6 +518,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients succeeds with missin
 // --- extractMelodies: multiple melodies and notes, with mute/gain ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies handles multiple melodies and notes",
           "[extractMelodies]") {
+  const double kPositionShort = 0.1;
+  const double kLengthStep = 0.04;
   rapidjson::Document doc(rapidjson::kArrayType);
   for (int i = 0; i < 2; ++i) {
     rapidjson::Value melody(rapidjson::kObjectType);
@@ -495,8 +528,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies handles multiple melod
     rapidjson::Value notes(rapidjson::kArrayType);
     for (int j = 0; j < 2; ++j) {
       rapidjson::Value n(rapidjson::kObjectType);
-      n.AddMember("position", 0.1 * (j + 1), doc.GetAllocator());
-      n.AddMember("length", 0.04 * (j + 1), doc.GetAllocator());
+      n.AddMember("position", kPositionShort * (j + 1), doc.GetAllocator());
+      n.AddMember("length", kLengthStep * (j + 1), doc.GetAllocator());
       notes.PushBack(n, doc.GetAllocator());
     }
     melody.AddMember("notes", notes, doc.GetAllocator());
@@ -508,13 +541,15 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies handles multiple melod
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies handles melody with mute true",
           "[extractMelodies]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value melody(rapidjson::kObjectType);
   melody.AddMember("mute", true, doc.GetAllocator());
   rapidjson::Value notes(rapidjson::kArrayType);
   rapidjson::Value n(rapidjson::kObjectType);
-  n.AddMember("position", 0.1, doc.GetAllocator());
-  n.AddMember("length", 0.2, doc.GetAllocator());
+  n.AddMember("position", kPositionShort, doc.GetAllocator());
+  n.AddMember("length", kPositionMedium, doc.GetAllocator());
   notes.PushBack(n, doc.GetAllocator());
   melody.AddMember("notes", notes, doc.GetAllocator());
   doc.PushBack(melody, doc.GetAllocator());
@@ -525,9 +560,10 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies handles melody with mu
 // --- extractNote: all optional fields, boundary and compound values ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles all optional fields at boundaries",
           "[extractNote]") {
+  const double kLongLength = 0.8;
   rapidjson::Document doc(rapidjson::kObjectType);
   doc.AddMember("position", 0.0, doc.GetAllocator());
-  doc.AddMember("length", 0.8, doc.GetAllocator());
+  doc.AddMember("length", kLongLength, doc.GetAllocator());
   doc.AddMember("gain", 1.0, doc.GetAllocator());
   doc.AddMember("phase", 1.0F, doc.GetAllocator());
   doc.AddMember("waveform", "Triangle", doc.GetAllocator());
@@ -537,10 +573,12 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles all optional field
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles extra/unknown fields gracefully",
           "[extractNote]") {
+  const int kInvalidTypeValue = 123;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.5, doc.GetAllocator());
-  doc.AddMember("length", 0.5, doc.GetAllocator());
-  doc.AddMember("unknown_field", 123, doc.GetAllocator());
+  doc.AddMember("position", kNormalizedMid, doc.GetAllocator());
+  doc.AddMember("length", kNormalizedMid, doc.GetAllocator());
+  doc.AddMember("unknown_field", kInvalidTypeValue, doc.GetAllocator());
   haptics::types::Band band;
   REQUIRE(HapsEncoder::extractNote(doc.GetObject(), &band, 1.0, timescale) == EXIT_SUCCESS);
 }
@@ -548,10 +586,11 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles extra/unknown fiel
 // --- extractFrequencyRange: min == max, extra fields ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange succeeds when min equals max",
           "[extractFrequencyRange]") {
+  const double kFreqEqualBoundary = 50.0;
   rapidjson::Document doc(rapidjson::kObjectType);
   rapidjson::Value freqRange(rapidjson::kObjectType);
-  freqRange.AddMember("min", 50.0, doc.GetAllocator());
-  freqRange.AddMember("max", 50.0, doc.GetAllocator());
+  freqRange.AddMember("min", kFreqEqualBoundary, doc.GetAllocator());
+  freqRange.AddMember("max", kFreqEqualBoundary, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
   int min = 0;
   int max = 0;
@@ -560,11 +599,13 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange succeeds when mi
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange ignores extra fields",
           "[extractFrequencyRange]") {
+  const int kExtraFieldValue = 999;
+  const double kFreqMinValid = 10.0;
   rapidjson::Document doc(rapidjson::kObjectType);
   rapidjson::Value freqRange(rapidjson::kObjectType);
-  freqRange.AddMember("min", 10.0, doc.GetAllocator());
+  freqRange.AddMember("min", kFreqMinValid, doc.GetAllocator());
   freqRange.AddMember("max", 100.0, doc.GetAllocator());
-  freqRange.AddMember("extra", 999, doc.GetAllocator());
+  freqRange.AddMember("extra", kExtraFieldValue, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
   int min = 0;
   int max = 0;
@@ -586,13 +627,16 @@ TEST_CASE("haptics::encoder::HapsEncoder::getWaveform fails for string with whit
 // --- Integration: extractVibration with transients and melodies together ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractVibration handles both transients and melodies",
           "[extractVibration]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
 
   rapidjson::Value transients(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
-  t.AddMember("position", 0.1, doc.GetAllocator());
-  t.AddMember("amplitude", 0.5, doc.GetAllocator());
-  t.AddMember("pitch", 0.5, doc.GetAllocator());
+  t.AddMember("position", kPositionShort, doc.GetAllocator());
+  t.AddMember("amplitude", kNormalizedMid, doc.GetAllocator());
+  t.AddMember("pitch", kNormalizedMid, doc.GetAllocator());
   transients.PushBack(t, doc.GetAllocator());
   doc.AddMember("transients", transients, doc.GetAllocator());
 
@@ -600,8 +644,8 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractVibration handles both transien
   rapidjson::Value melody(rapidjson::kObjectType);
   rapidjson::Value notes(rapidjson::kArrayType);
   rapidjson::Value n(rapidjson::kObjectType);
-  n.AddMember("position", 0.2, doc.GetAllocator());
-  n.AddMember("length", 0.2, doc.GetAllocator());
+  n.AddMember("position", kPositionMedium, doc.GetAllocator());
+  n.AddMember("length", kPositionMedium, doc.GetAllocator());
   notes.PushBack(n, doc.GetAllocator());
   melody.AddMember("notes", notes, doc.GetAllocator());
   melodies.PushBack(melody, doc.GetAllocator());
@@ -615,11 +659,14 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractVibration handles both transien
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as periodic signal fails "
           "because no length is given",
           "[extractNote][periodic]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   rapidjson::Value amplitude(rapidjson::kObjectType);
-  amplitude.AddMember("amplitude", 0.5, doc.GetAllocator());
-  amplitude.AddMember("period_length", 0.2, doc.GetAllocator());
+  amplitude.AddMember("amplitude", kNormalizedMid, doc.GetAllocator());
+  amplitude.AddMember("period_length", kPositionMedium, doc.GetAllocator());
   amplitude.AddMember("phase", 0.0, doc.GetAllocator());
   amplitude.AddMember("vertical_offset", 0.0, doc.GetAllocator());
   amplitude.AddMember("waveform", "Sine", doc.GetAllocator());
@@ -630,12 +677,15 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as perio
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as periodic signal",
           "[extractNote][periodic]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   doc.AddMember("length", 1, doc.GetAllocator());
   rapidjson::Value amplitude(rapidjson::kObjectType);
-  amplitude.AddMember("amplitude", 0.5, doc.GetAllocator());
-  amplitude.AddMember("period_length", 0.2, doc.GetAllocator());
+  amplitude.AddMember("amplitude", kNormalizedMid, doc.GetAllocator());
+  amplitude.AddMember("period_length", kPositionMedium, doc.GetAllocator());
   amplitude.AddMember("phase", 0.0, doc.GetAllocator());
   amplitude.AddMember("vertical_offset", 0.0, doc.GetAllocator());
   amplitude.AddMember("waveform", "Sine", doc.GetAllocator());
@@ -646,14 +696,17 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as perio
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as interpolation curve",
           "[extractNote][curve]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   rapidjson::Value amplitude(rapidjson::kObjectType);
   rapidjson::Value keyframes(rapidjson::kArrayType);
-  for (double t : {0.0, 0.1, 0.2}) {
+  for (double t : {0.0, kPositionShort, kPositionMedium}) {
     rapidjson::Value kf(rapidjson::kObjectType);
     kf.AddMember("position", t, doc.GetAllocator());
-    kf.AddMember("value", 0.5, doc.GetAllocator());
+    kf.AddMember("value", kNormalizedMid, doc.GetAllocator());
     keyframes.PushBack(kf, doc.GetAllocator());
   }
   amplitude.AddMember("keyframes", keyframes, doc.GetAllocator());
@@ -664,14 +717,17 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles amplitude as inter
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles pitch as interpolation curve",
           "[extractNote][curve]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
+  const double kNormalizedMid = 0.5;
   rapidjson::Document doc(rapidjson::kObjectType);
-  doc.AddMember("position", 0.1, doc.GetAllocator());
+  doc.AddMember("position", kPositionShort, doc.GetAllocator());
   rapidjson::Value pitch(rapidjson::kObjectType);
   rapidjson::Value keyframes(rapidjson::kArrayType);
-  for (double t : {0.0, 0.1, 0.2}) {
+  for (double t : {0.0, kPositionShort, kPositionMedium}) {
     rapidjson::Value kf(rapidjson::kObjectType);
     kf.AddMember("position", t, doc.GetAllocator());
-    kf.AddMember("value", 0.5, doc.GetAllocator());
+    kf.AddMember("value", kNormalizedMid, doc.GetAllocator());
     keyframes.PushBack(kf, doc.GetAllocator());
   }
   pitch.AddMember("keyframes", keyframes, doc.GetAllocator());
@@ -684,12 +740,13 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractNote handles pitch as interpola
 TEST_CASE(
     "haptics::encoder::HapsEncoder::extractMelodies skips invalid notes but encodes valid ones",
     "[extractMelodies][mixed]") {
+  const double kPositionShort = 0.1;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value melody(rapidjson::kObjectType);
   rapidjson::Value notes(rapidjson::kArrayType);
 
   rapidjson::Value n1(rapidjson::kObjectType);
-  n1.AddMember("position", 0.1, doc.GetAllocator());
+  n1.AddMember("position", kPositionShort, doc.GetAllocator());
   notes.PushBack(n1, doc.GetAllocator());
 
   rapidjson::Value n2(rapidjson::kObjectType);
@@ -721,10 +778,12 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractMelodies succeeds on empty arra
 // --- extractFrequencyRange: floating-point boundaries ---
 TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange handles floating-point min/max",
           "[extractFrequencyRange][float]") {
+  const double kFreqMinFloatInput = 10.7;
+  const double kFreqMaxFloatInput = 99.3;
   rapidjson::Document doc(rapidjson::kObjectType);
   rapidjson::Value freqRange(rapidjson::kObjectType);
-  freqRange.AddMember("min", 10.7, doc.GetAllocator());
-  freqRange.AddMember("max", 99.3, doc.GetAllocator());
+  freqRange.AddMember("min", kFreqMinFloatInput, doc.GetAllocator());
+  freqRange.AddMember("max", kFreqMaxFloatInput, doc.GetAllocator());
   doc.AddMember("frequency_range", freqRange, doc.GetAllocator());
   int min = 0;
   int max = 0;
@@ -737,14 +796,18 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractFrequencyRange handles floating
 TEST_CASE(
     "haptics::encoder::HapsEncoder::extractVibration handles overlapping transients and melodies",
     "[extractVibration][overlap]") {
+  const double kPositionShort = 0.1;
+  const double kPositionMedium = 0.2;
+  const double kNormalizedMid = 0.5;
+  const double kLengthScaleDivisor = 5.0;
   rapidjson::Document doc(rapidjson::kObjectType);
 
   rapidjson::Value transients(rapidjson::kArrayType);
-  for (double pos : {0.1, 0.1, 0.2}) {
+  for (double pos : {kPositionShort, kPositionShort, kPositionMedium}) {
     rapidjson::Value t(rapidjson::kObjectType);
     t.AddMember("position", pos, doc.GetAllocator());
-    t.AddMember("amplitude", 0.5, doc.GetAllocator());
-    t.AddMember("pitch", 0.5, doc.GetAllocator());
+    t.AddMember("amplitude", kNormalizedMid, doc.GetAllocator());
+    t.AddMember("pitch", kNormalizedMid, doc.GetAllocator());
     transients.PushBack(t, doc.GetAllocator());
   }
   doc.AddMember("transients", transients, doc.GetAllocator());
@@ -753,10 +816,10 @@ TEST_CASE(
   for (int i = 0; i < 2; ++i) {
     rapidjson::Value melody(rapidjson::kObjectType);
     rapidjson::Value notes(rapidjson::kArrayType);
-    for (double pos : {0.1, 0.2}) {
+    for (double pos : {kPositionShort, kPositionMedium}) {
       rapidjson::Value n(rapidjson::kObjectType);
       n.AddMember("position", pos, doc.GetAllocator());
-      n.AddMember("length", pos / 5, doc.GetAllocator());
+      n.AddMember("length", pos / kLengthScaleDivisor, doc.GetAllocator());
       notes.PushBack(n, doc.GetAllocator());
     }
     melody.AddMember("notes", notes, doc.GetAllocator());
