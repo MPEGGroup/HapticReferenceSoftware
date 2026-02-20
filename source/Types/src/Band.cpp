@@ -34,6 +34,7 @@
 #include <Tools/include/Tools.h>
 #include <Types/include/Band.h>
 #include <algorithm>
+#include <cmath>
 
 namespace haptics::types {
 
@@ -386,8 +387,8 @@ auto Band::splitLongEffects(int maxEffectDuration) -> void {
   }
 
   std::vector<types::Effect> splitEffects;
-  for (int e = 0; e < static_cast<int>(effects.size()); e++) {
-    auto effect = effects.at(e);
+  for (const auto &effectSource : effects) {
+    auto effect = effectSource;
     std::vector<types::Keyframe> originalKeyframes;
     int maxRelPos = -1;
     for (int k = 0; k < static_cast<int>(effect.getKeyframesSize()); k++) {
