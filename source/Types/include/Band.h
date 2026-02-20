@@ -52,7 +52,7 @@ public:
       , curveType(newCurveType)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
-      , effects({}) {};
+      , effects({}){};
 
   explicit Band(BandType newBandType, int newBlockLength, int newLowerFrequencyLimit,
                 int newUpperFrequencyLimit)
@@ -60,13 +60,13 @@ public:
       , blockLength(newBlockLength)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
-      , effects({}) {};
+      , effects({}){};
 
   explicit Band(BandType newBandType, int newLowerFrequencyLimit, int newUpperFrequencyLimit)
       : bandType(newBandType)
       , lowerFrequencyLimit(newLowerFrequencyLimit)
       , upperFrequencyLimit(newUpperFrequencyLimit)
-      , effects({}) {};
+      , effects({}){};
 
   [[nodiscard]] auto getBandType() const -> BandType;
   auto setBandType(BandType newBandType) -> void;

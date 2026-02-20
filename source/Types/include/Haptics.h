@@ -55,7 +55,7 @@ public:
       , description(std::move(newDescription))
       , perceptions({})
       , avatars({})
-      , syncs({}) {};
+      , syncs({}){};
 
   [[nodiscard]] auto getVersion() const -> std::string;
   auto setVersion(std::string &newVersion) -> void;
