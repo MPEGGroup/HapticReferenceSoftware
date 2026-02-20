@@ -54,6 +54,70 @@ constexpr int AMPLITUDE_PERIODIC_SAMPLING_STEP_MS = 10;
 constexpr double WAVEFORM_SCALE_FACTOR = 2.0;
 constexpr double WAVEFORM_HALF_CYCLE_OFFSET = 0.5;
 constexpr double WAVEFORM_MIN_VALUE = -1.0;
+constexpr float MIN_AMPLITUDE_MODULATION = -1.0F;
+constexpr float MAX_AMPLITUDE_MODULATION = 1.0F;
+constexpr int MIN_FREQUENCY_MODULATION = 0;
+
+[[nodiscard]] auto clampAmplitudeModulation(const double value) -> float {
+  return std::clamp(static_cast<float>(value), MIN_AMPLITUDE_MODULATION, MAX_AMPLITUDE_MODULATION);
+}
+
+[[nodiscard]] auto clampNormalizedUnit(const double value) -> double {
+  return std::clamp(value, 0.0, 1.0);
+}
+
+[[nodiscard]] auto clampFrequencyModulation(const int value) -> int {
+  return std::max(value, MIN_FREQUENCY_MODULATION);
+}
+
+auto normalizeEffectForHjif(types::Effect &effect) -> void {
+  if (effect.getKeyframesSize() == 0) {
+    if (effect.getPosition() < 0) {
+      effect.setPosition(0);
+    }
+    return;
+  }
+
+  int minRelativePosition = 0;
+  bool hasRelativePosition = false;
+  for (int i = 0; i < static_cast<int>(effect.getKeyframesSize()); i++) {
+    const auto relativePosition = effect.getKeyframeAt(i).getRelativePosition();
+    if (!relativePosition.has_value()) {
+      continue;
+    }
+
+    if (!hasRelativePosition) {
+      minRelativePosition = relativePosition.value();
+      hasRelativePosition = true;
+      continue;
+    }
+    minRelativePosition = std::min(minRelativePosition, relativePosition.value());
+  }
+
+  if (hasRelativePosition && minRelativePosition < 0) {
+    effect.setPosition(effect.getPosition() + minRelativePosition);
+    for (int i = 0; i < static_cast<int>(effect.getKeyframesSize()); i++) {
+      auto &keyframe = effect.getKeyframeAt(i);
+      const auto relativePosition = keyframe.getRelativePosition();
+      if (relativePosition.has_value()) {
+        keyframe.setRelativePosition(relativePosition.value() - minRelativePosition);
+      }
+    }
+  }
+
+  if (effect.getPosition() < 0) {
+    const int shift = -effect.getPosition();
+    effect.setPosition(0);
+    for (int i = 0; i < static_cast<int>(effect.getKeyframesSize()); i++) {
+      auto &keyframe = effect.getKeyframeAt(i);
+      const auto relativePosition = keyframe.getRelativePosition();
+      if (relativePosition.has_value()) {
+        keyframe.setRelativePosition(relativePosition.value() + shift);
+      }
+    }
+  }
+
+}
 } // namespace
 
 [[nodiscard]] auto HapsEncoder::encode(std::string &filename, haptics::types::Perception &out,
@@ -202,11 +266,8 @@ constexpr double WAVEFORM_MIN_VALUE = -1.0;
       }
 
       amplitude = t["amplitude"].GetDouble();
-      if (amplitude < 0.0 || amplitude > 1.0) {
-        std::cerr << "Invalid HAPS input file: transient amplitude is not normalized" << std::endl;
-        return EXIT_FAILURE;
-      }
     }
+    amplitude = clampAmplitudeModulation(amplitude);
 
     double frequency = 0.0;
     if (t.HasMember("pitch")) {
@@ -216,16 +277,15 @@ constexpr double WAVEFORM_MIN_VALUE = -1.0;
       }
 
       frequency = t["pitch"].GetDouble();
-      if (frequency < 0.0 || frequency > 1.0) {
-        std::cerr << "Invalid HAPS input file: transient pitch is not normalized" << std::endl;
-        return EXIT_FAILURE;
-      }
     }
+    frequency = clampNormalizedUnit(frequency);
     int absoluteFreq = computeAbsoluteFreq(transientBand->getLowerFrequencyLimit(),
                                            transientBand->getUpperFrequencyLimit(), frequency);
+    absoluteFreq = clampFrequencyModulation(absoluteFreq);
     transientEffect.addKeyframe(timeScalledPosition, amplitude, absoluteFreq);
   }
 
+  normalizeEffectForHjif(transientEffect);
   transientBand->addEffect(transientEffect);
   return EXIT_SUCCESS;
 }
@@ -405,6 +465,7 @@ constexpr double WAVEFORM_MIN_VALUE = -1.0;
     effect.addFrequencyAt(lastFrequencyValue, timescaledLength.value());
   }
 
+  normalizeEffectForHjif(effect);
   band->addEffect(effect);
   return EXIT_SUCCESS;
 }
@@ -493,8 +554,9 @@ HapsEncoder::extractFrequencyRange(const rapidjson::Value::Object &vibrationTrac
 
   if (note["pitch"].IsDouble()) {
     modulationType = ModulationType::Constant;
-    int freq =
-        computeAbsoluteFreq(lowerFrequencyLimit, upperFrequencyLimit, note["pitch"].GetDouble());
+    int freq = computeAbsoluteFreq(lowerFrequencyLimit, upperFrequencyLimit,
+                                   clampNormalizedUnit(note["pitch"].GetDouble()));
+    freq = clampFrequencyModulation(freq);
     effect.addFrequencyAt(freq, 0);
     lastFrequencyValue = freq;
     lastFrequencyTimestamp = 0;
@@ -729,9 +791,9 @@ auto HapsEncoder::storeAmplitudeAsConstant(const double amplitude, types::Effect
                                            std::optional<int> timescaledLength,
                                            ModulationType &modulationType) -> void {
   modulationType = ModulationType::Constant;
-  effect.addAmplitudeAt(static_cast<float>(amplitude), 0);
+  effect.addAmplitudeAt(clampAmplitudeModulation(amplitude), 0);
   if (timescaledLength.has_value()) {
-    effect.addAmplitudeAt(static_cast<float>(amplitude), timescaledLength.value());
+    effect.addAmplitudeAt(clampAmplitudeModulation(amplitude), timescaledLength.value());
   }
 }
 
@@ -820,9 +882,11 @@ HapsEncoder::extractFrequencyCurve(const rapidjson::Value::Object &curve, types:
     lastPosition = secondsToTimeScale(position, timescale);
     lastValue = k["value"].GetDouble();
     if (isAmplitude) {
-      effect.addAmplitudeAt(static_cast<float>(lastValue * amplitudeModifier), lastPosition);
+      effect.addAmplitudeAt(clampAmplitudeModulation(lastValue * amplitudeModifier), lastPosition);
     } else {
-      int absoluteFreq = computeAbsoluteFreq(lowerFrequencyLimit, upperFrequencyLimit, lastValue);
+      int absoluteFreq = computeAbsoluteFreq(lowerFrequencyLimit, upperFrequencyLimit,
+                                             clampNormalizedUnit(lastValue));
+      absoluteFreq = clampFrequencyModulation(absoluteFreq);
       effect.addFrequencyAt(absoluteFreq, lastPosition);
     }
   }
