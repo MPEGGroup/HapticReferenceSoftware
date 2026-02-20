@@ -116,7 +116,6 @@ auto normalizeEffectForHjif(types::Effect &effect) -> void {
       }
     }
   }
-
 }
 } // namespace
 
