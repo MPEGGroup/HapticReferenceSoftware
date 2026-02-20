@@ -302,6 +302,12 @@ auto Perception::getEffectById(int id) -> std::optional<Effect> {
   return {};
 }
 
+auto Perception::splitLongEffects(int maxEffectDuration) -> void {
+  for (auto &channel : channels) {
+    channel.splitLongEffects(maxEffectDuration);
+  }
+}
+
 auto Perception::linearizeLibrary() -> void {
   for (int i = 0; i < static_cast<int>(getChannelsSize()); i++) {
     auto channel = getChannelAt(i);

@@ -209,6 +209,12 @@ auto Haptics::refactor() -> void {
   }
 }
 
+auto Haptics::splitLongEffects(int maxEffectDuration) -> void {
+  for (types::Perception &p : perceptions) {
+    p.splitLongEffects(maxEffectDuration);
+  }
+}
+
 auto Haptics::equals(const Haptics &haptic) const -> bool {
   if (version != haptic.getVersion()) {
     std::cerr << "Version fields are different" << std::endl;

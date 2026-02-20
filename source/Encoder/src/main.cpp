@@ -107,6 +107,9 @@ auto help() -> void {
       << "\t-spe, --single-packet-effect\tWrite each effect entirely in a single packet "
          "(its first packet), even if keyframes extend beyond packet duration"
       << std::endl
+      << "\t-sle, --split-long-effects <TICKS>\tSplit effects longer than <TICKS> into chunks "
+         "for keyframe relative_position limits"
+      << std::endl
       << std::endl;
 }
 
@@ -311,6 +314,40 @@ auto main(int argc, char *argv[]) -> int {
     std::cerr << "The HJIF input file is conformant to the ISO/IEC 23090-31 specification but "
                  "binary encoding may result in some information loss."
               << std::endl;
+  }
+
+  std::optional<int> maxEffectDuration = std::nullopt;
+  if (inputParser.cmdOptionExists("-sle")) {
+    const auto value = inputParser.getCmdOption("-sle");
+    if (value.empty()) {
+      std::cerr << "ERROR: -sle requires a <TICKS> argument" << std::endl;
+      return EXIT_FAILURE;
+    }
+    try {
+      maxEffectDuration = std::stoi(value);
+    } catch (...) {
+      std::cerr << "ERROR: -sle value must be an integer" << std::endl;
+      return EXIT_FAILURE;
+    }
+  } else if (inputParser.cmdOptionExists("--split-long-effects")) {
+    const auto value = inputParser.getCmdOption("--split-long-effects");
+    if (value.empty()) {
+      std::cerr << "ERROR: --split-long-effects requires a <TICKS> argument" << std::endl;
+      return EXIT_FAILURE;
+    }
+    try {
+      maxEffectDuration = std::stoi(value);
+    } catch (...) {
+      std::cerr << "ERROR: --split-long-effects value must be an integer" << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
+  if (maxEffectDuration.has_value()) {
+    if (maxEffectDuration.value() <= 0) {
+      std::cerr << "ERROR: split-long-effects value must be > 0" << std::endl;
+      return EXIT_FAILURE;
+    }
+    hapticFile.splitLongEffects(maxEffectDuration.value());
   }
 
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {

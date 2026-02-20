@@ -204,6 +204,12 @@ auto Channel::EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned in
   return channelAmp;
 }
 
+auto Channel::splitLongEffects(int maxEffectDuration) -> void {
+  for (auto &band : bands) {
+    band.splitLongEffects(maxEffectDuration);
+  }
+}
+
 [[nodiscard]] auto Channel::getFrequencySampling() const -> std::optional<uint64_t> {
   return frequencySampling;
 }

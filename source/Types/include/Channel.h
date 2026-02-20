@@ -111,6 +111,7 @@ public:
   auto Evaluate(double position, unsigned int timescale) -> double;
   auto EvaluateChannel(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
       -> std::vector<double>;
+  auto splitLongEffects(int maxEffectDuration) -> void;
   [[nodiscard]] auto getFrequencySampling() const -> std::optional<uint64_t>;
   auto setFrequencySampling(std::optional<uint64_t> newFrequencySampling) -> void;
   [[nodiscard]] auto getSampleCount() const -> std::optional<uint64_t>;
