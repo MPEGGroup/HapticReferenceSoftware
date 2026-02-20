@@ -112,7 +112,7 @@ public:
       , perceptionModality(newPerceptionModality)
       , channels({})
       , unitExponent(std::nullopt)
-      , perceptionUnitExponent(std::nullopt){};
+      , perceptionUnitExponent(std::nullopt) {};
 
   [[nodiscard]] auto getAvatarId() const -> int;
   auto setAvatarId(int newAvatarId) -> void;

@@ -437,7 +437,8 @@ auto Band::splitLongEffects(int maxEffectDuration) -> void {
           continue;
         }
         const int relPos = keyframe.getRelativePosition().value();
-        if (relPos < segmentStart || relPos > segmentEnd || (!isLastSegment && relPos == segmentEnd)) {
+        if (relPos < segmentStart || relPos > segmentEnd ||
+            (!isLastSegment && relPos == segmentEnd)) {
           continue;
         }
 
