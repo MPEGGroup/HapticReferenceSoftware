@@ -34,10 +34,12 @@
 #ifndef AHAPENCODER_H
 #define AHAPENCODER_H
 
+#include <Encoder/include/PcmEncoder.h>
 #include <Types/include/Band.h>
 #include <Types/include/Effect.h>
 #include <Types/include/Keyframe.h>
 #include <Types/include/Perception.h>
+#include <filesystem>
 #include <iostream>
 
 #if defined(_MSC_VER)
@@ -54,7 +56,7 @@ namespace haptics::encoder {
 class AhapEncoder {
 public:
   [[nodiscard]] auto static encode(std::string &filename, types::Perception &out,
-                                   unsigned int timescale) -> int;
+                                   const EncodingConfig &config, unsigned int timescale) -> int;
   [[nodiscard]] auto static extractTransients(
       const rapidjson::Value::Object &event, std::vector<haptics::types::Effect> *transients,
       const std::vector<std::pair<int, double>> *amplitudes,
@@ -68,6 +70,11 @@ public:
                                              unsigned int timescale) -> int;
 
 private:
+  [[nodiscard]] auto static extractAudioCustom(const rapidjson::Value::Object &event,
+                                               const std::filesystem::path &ahapDirectory,
+                                               types::Channel &channel,
+                                               const EncodingConfig &config,
+                                               unsigned int timescale) -> int;
   auto static modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>> *amplitudes,
                                             types::Effect &continuous,
                                             const Keyframe &firstKeyframe, Keyframe &lastKeyframe)

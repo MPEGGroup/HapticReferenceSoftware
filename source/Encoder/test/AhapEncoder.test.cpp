@@ -32,10 +32,16 @@
  */
 
 #include <Encoder/include/AhapEncoder.h>
+#include <Tools/include/WavParser.h>
+#include <Types/include/BandType.h>
+#include <Types/include/Perception.h>
 #include <catch2/catch.hpp>
+#include <filesystem>
+#include <fstream>
 #include <rapidjson/document.h>
 
 using haptics::encoder::AhapEncoder;
+using haptics::encoder::EncodingConfig;
 
 const unsigned int timescale = 1000;
 
@@ -813,4 +819,68 @@ TEST_CASE("extractTransients with modulation function", "[extractTransients]") {
   const int expectedFrequency = 90;
   CHECK(resKeyframe.getAmplitudeModulation().value() == Approx(expectedAmplitude));
   CHECK(resKeyframe.getFrequencyModulation().value() == expectedFrequency);
+}
+
+TEST_CASE("encode supports AudioCustom events with external WAV files", "[encode][AudioCustom]") {
+  const auto tempRoot =
+      std::filesystem::current_path() / "source" / "Encoder" / "test" / "tmp_audio_custom";
+  std::filesystem::create_directories(tempRoot / "AHAP");
+
+  const auto wavPath = tempRoot / "AHAP" / "drums.wav";
+  const auto ahapPath = tempRoot / "pattern.ahap";
+  const std::vector<double> waveform = {0.0, 0.5, -0.5, 0.25, -0.25, 0.0};
+  REQUIRE(haptics::tools::WavParser::saveFile(wavPath.string(), waveform, 1000));
+
+  std::ofstream ahapFile(ahapPath);
+  REQUIRE(ahapFile.good());
+  ahapFile << R"({
+  "Pattern": [
+    {
+      "Event": {
+        "Time": 0.25,
+        "EventType": "AudioCustom",
+        "EventWaveformPath": "AHAP/drums.wav",
+        "EventParameters": [
+          {"ParameterID": "AudioVolume", "ParameterValue": 0.75}
+        ]
+      }
+    }
+  ]
+})";
+  ahapFile.close();
+
+  std::string filename = ahapPath.string();
+  haptics::types::Perception perception(0, 0, std::string(),
+                                        haptics::types::PerceptionModality::Vibrotactile);
+  auto config = EncodingConfig::generateConfigBudget(8, 0, true, false, 32);
+
+  REQUIRE(AhapEncoder::encode(filename, perception, config, timescale) == EXIT_SUCCESS);
+  REQUIRE(perception.getChannelsSize() == 1);
+
+  auto &channel = perception.getChannelAt(0);
+  REQUIRE(channel.getBandsSize() >= 1);
+  haptics::types::Band *waveletBand = nullptr;
+  for (int bandIndex = 0; bandIndex < static_cast<int>(channel.getBandsSize()); bandIndex++) {
+    auto &candidate = channel.getBandAt(bandIndex);
+    if (candidate.getBandType() == haptics::types::BandType::WaveletWave) {
+      waveletBand = &candidate;
+      break;
+    }
+  }
+  REQUIRE(waveletBand != nullptr);
+  auto &band = *waveletBand;
+  CHECK(band.getBandType() == haptics::types::BandType::WaveletWave);
+  CHECK(band.getLowerFrequencyLimit() == 0);
+  CHECK(band.getUpperFrequencyLimit() == 1000);
+  CHECK(band.getBlockLengthOrDefault() == 32);
+
+  REQUIRE(band.getEffectsSize() == 1);
+  CHECK(band.getEffectAt(0).getPosition() == 250);
+  CHECK(channel.getFrequencySampling().value() == 1000);
+  CHECK(channel.getSampleCount().value() >= 282);
+
+  std::filesystem::remove(ahapPath);
+  std::filesystem::remove(wavPath);
+  std::filesystem::remove(tempRoot / "AHAP");
+  std::filesystem::remove(tempRoot);
 }

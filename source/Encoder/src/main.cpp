@@ -177,6 +177,27 @@ auto main(int argc, char *argv[]) -> int {
   Perception myPerception(0, 0, std::string(), haptics::types::PerceptionModality::Other);
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
+  haptics::encoder::EncodingConfig ahapConfig;
+  if (bitrate.has_value()) {
+    if (blocklength.has_value()) {
+      ahapConfig = haptics::encoder::EncodingConfig::generateConfigParam(
+          bitrate.value(), 0, enable_wavelet, false, blocklength.value());
+    } else {
+      ahapConfig = haptics::encoder::EncodingConfig::generateConfigParam(bitrate.value(), 0,
+                                                                         enable_wavelet, false);
+    }
+  } else if (budget.has_value()) {
+    if (blocklength.has_value()) {
+      ahapConfig = haptics::encoder::EncodingConfig::generateConfigBudget(
+          budget.value(), 0, enable_wavelet, false, blocklength.value());
+    } else {
+      ahapConfig = haptics::encoder::EncodingConfig::generateConfigBudget(budget.value(), 0,
+                                                                          enable_wavelet, false);
+    }
+  } else {
+    ahapConfig = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, false);
+    ahapConfig.curveFrequencyLimit = 0;
+  }
   if (ext == "ohm") {
     std::cout << "The OHM file to process : " << filename << std::endl;
     OHMData ohmData;
@@ -207,7 +228,8 @@ auto main(int argc, char *argv[]) -> int {
       myPerception = hapticFile.getPerceptionAt((int)i);
       if (ext == "json" || ext == "ahap") {
         std::cout << "The AHAP file to encode : " << filename << std::endl;
-        codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+        codeExit = AhapEncoder::encode(filename, myPerception, ahapConfig,
+                                       hapticFile.getTimescaleOrDefault());
       } else if (ext == "xml" || ext == "ivs") {
         std::cout << "The IVS file to encode : " << filename << std::endl;
         codeExit = IvsEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
@@ -248,7 +270,8 @@ auto main(int argc, char *argv[]) -> int {
     }
   } else if (ext == "json" || ext == "ahap") {
     std::cout << "The AHAP file to encode : " << filename << std::endl;
-    codeExit = AhapEncoder::encode(filename, myPerception, hapticFile.getTimescaleOrDefault());
+    codeExit =
+        AhapEncoder::encode(filename, myPerception, ahapConfig, hapticFile.getTimescaleOrDefault());
     hapticFile.addPerception(myPerception);
   } else if (ext == "xml" || ext == "ivs") {
     std::cout << "The IVS file to encode : " << filename << std::endl;
