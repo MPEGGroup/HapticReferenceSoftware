@@ -31,6 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOBinaryFields.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <IOHaptics/include/IOStream.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
@@ -500,5 +502,83 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::readFile(filepath, readHaptic, false);
 
     REQUIRE(succeed);
+  }
+
+  SECTION("Sync flags from temporal unit headers are preserved on decode") {
+    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
+    REQUIRE(succeed);
+    REQUIRE(bitstream.size() > 1);
+
+    auto decodeToHaptic = [](std::vector<std::vector<bool>> &stream, haptics::types::Haptics &out) {
+      bool decoded = true;
+      IOStream::StreamReader localBuffer = IOStream::initializeStream();
+      IOStream::CRC localCrc;
+      for (auto &packetBits : stream) {
+        decoded &= IOStream::readMIHSUnit(packetBits, localBuffer, localCrc);
+      }
+      out = localBuffer.haptic;
+      return decoded;
+    };
+
+    haptics::types::Haptics baselineHaptic;
+    REQUIRE(decodeToHaptic(bitstream, baselineHaptic));
+
+    size_t temporalUnitIdx = 0;
+    uint64_t expectedTimestamp = 0;
+    bool foundTemporalUnit = false;
+    uint64_t currentTimestamp = 0;
+    for (size_t i = 0; i < bitstream.size(); i++) {
+      int headerIndex = 0;
+      const auto unitType = haptics::io::IOBinaryPrimitives::readUInt(
+          bitstream[i], headerIndex, haptics::io::UNIT_TYPE);
+      const auto unitSync = haptics::io::IOBinaryPrimitives::readUInt(
+          bitstream[i], headerIndex, haptics::io::UNIT_SYNC);
+      headerIndex += haptics::io::UNIT_LAYER;
+      const auto unitDuration = haptics::io::IOBinaryPrimitives::readUInt(
+          bitstream[i], headerIndex, haptics::io::UNIT_DURATION);
+      if (unitType == static_cast<int>(haptics::io::MIHSUnitType::Temporal)) {
+        bool timestampAlreadyPresent = false;
+        for (size_t syncIdx = 0; syncIdx < baselineHaptic.getSyncsSize(); syncIdx++) {
+          if (baselineHaptic.getSyncsAt(static_cast<int>(syncIdx)).getTimestamp() ==
+              currentTimestamp) {
+            timestampAlreadyPresent = true;
+            break;
+          }
+        }
+        if (unitSync != 0 && !timestampAlreadyPresent) {
+          temporalUnitIdx = i;
+          expectedTimestamp = currentTimestamp;
+          foundTemporalUnit = true;
+          break;
+        }
+      }
+      currentTimestamp += static_cast<uint64_t>(unitDuration);
+    }
+
+    REQUIRE(foundTemporalUnit);
+    auto &temporalUnit = bitstream[temporalUnitIdx];
+    REQUIRE(temporalUnit.size() >=
+            static_cast<size_t>(haptics::io::UNIT_TYPE + haptics::io::UNIT_SYNC));
+    temporalUnit[haptics::io::UNIT_TYPE] = false;
+    temporalUnit[haptics::io::UNIT_TYPE + 1] = false;
+
+    haptics::types::Haptics readHaptic;
+    IOStream::StreamReader buffer = IOStream::initializeStream();
+    IOStream::CRC crc;
+    for (auto &packetBits : bitstream) {
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
+    }
+
+    REQUIRE(succeed);
+    readHaptic = buffer.haptic;
+    bool foundExpectedSync = false;
+    for (size_t syncIdx = 0; syncIdx < readHaptic.getSyncsSize(); syncIdx++) {
+      if (readHaptic.getSyncsAt(static_cast<int>(syncIdx)).getTimestamp() == expectedTimestamp) {
+        foundExpectedSync = true;
+        break;
+      }
+    }
+    CHECK(foundExpectedSync);
   }
 }

@@ -402,6 +402,16 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   if (!IOConformance::checkMIHSUnitSyncWhenInit(sreader, sync)) {
     return false;
   }
+  if (sync && unitType != MIHSUnitType::Initialization) {
+    const auto currentTimestamp = static_cast<uint64_t>(sreader.time);
+    const auto syncCount = sreader.haptic.getSyncsSize();
+    if (syncCount == 0 ||
+        sreader.haptic.getSyncsAt(static_cast<int>(syncCount) - 1).getTimestamp() !=
+            currentTimestamp) {
+      auto hapticSync = types::Sync(currentTimestamp, sreader.timescale);
+      sreader.haptic.addSync(hapticSync);
+    }
+  }
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
