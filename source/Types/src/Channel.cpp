@@ -61,9 +61,17 @@ auto Channel::setGain(float newGain) -> void { gain = newGain; }
 
 auto Channel::setMixingWeight(float newMixingWeight) -> void { mixingWeight = newMixingWeight; }
 
-[[nodiscard]] auto Channel::getBodyPartMask() const -> uint32_t { return bodyPartMask; }
+[[nodiscard]] auto Channel::getBodyPartMask() const -> std::optional<uint32_t> {
+  return bodyPartMask;
+}
 
-auto Channel::setBodyPartMask(uint32_t newBodyPartMask) -> void { bodyPartMask = newBodyPartMask; }
+[[nodiscard]] auto Channel::getBodyPartMaskOrDefault() const -> uint32_t {
+  return bodyPartMask.value_or(0);
+}
+
+auto Channel::setBodyPartMask(std::optional<uint32_t> newBodyPartMask) -> void {
+  bodyPartMask = newBodyPartMask;
+}
 
 [[nodiscard]] auto Channel::getReferenceDeviceId() const -> std::optional<int> {
   return referenceDeviceId;

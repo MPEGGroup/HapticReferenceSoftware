@@ -851,10 +851,6 @@ auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perceptio
       std::cerr << "Missing or invalid channel mixing coefficient" << std::endl;
       continue;
     }
-    if (!IOJsonPrimitives::hasNumber(jsonChannel, "body_part_mask")) {
-      std::cerr << "Missing or invalid channel body part mask" << std::endl;
-      continue;
-    }
     if (!IOJsonPrimitives::hasArray(jsonChannel, "bands")) {
       std::cerr << "Missing or invalid bands" << std::endl;
       continue;
@@ -864,10 +860,12 @@ auto IOJson::loadChannels(const rapidjson::Value &jsonChannels, types::Perceptio
     const auto *channelDescription = jsonChannel["description"].GetString();
     auto channelGain = jsonChannel["gain"].GetFloat();
     auto channelMixingWeight = jsonChannel["mixing_coefficient"].GetFloat();
-    auto channelBodyPart = jsonChannel["body_part_mask"].GetUint();
-
-    types::Channel channel(channelId, channelDescription, channelGain, channelMixingWeight,
-                           channelBodyPart);
+    types::Channel channel(channelId, channelDescription, channelGain, channelMixingWeight, 0);
+    if (IOJsonPrimitives::hasNumber(jsonChannel, "body_part_mask")) {
+      channel.setBodyPartMask(jsonChannel["body_part_mask"].GetUint());
+    } else {
+      channel.setBodyPartMask(std::nullopt);
+    }
 
     if (jsonChannel.HasMember("priority") && jsonChannel["priority"].IsInt()) {
       channel.setPriority(jsonChannel["priority"].GetInt());
@@ -1414,7 +1412,10 @@ auto IOJson::extractChannels(types::Perception &perception, rapidjson::Value &js
         jsonTree.GetAllocator());
     jsonChannel.AddMember("gain", channel.getGain(), jsonTree.GetAllocator());
     jsonChannel.AddMember("mixing_coefficient", channel.getMixingWeight(), jsonTree.GetAllocator());
-    jsonChannel.AddMember("body_part_mask", channel.getBodyPartMask(), jsonTree.GetAllocator());
+    if (channel.getBodyPartMask().has_value()) {
+      jsonChannel.AddMember("body_part_mask", channel.getBodyPartMask().value(),
+                            jsonTree.GetAllocator());
+    }
     if (channel.getPriority().has_value()) {
       jsonChannel.AddMember("priority", channel.getPriority().value(), jsonTree.GetAllocator());
     }

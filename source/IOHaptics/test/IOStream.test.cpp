@@ -116,6 +116,11 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   haptics::types::Channel testingChannel0(testingId_channel0, testingDescription_channel0,
                                           testingGain_channel0, testingMixingWeight_channel0,
                                           testingBodyPartMask_channel0);
+  testingChannel0.setActuatorResolution(haptics::types::Vector{2, 2, 2});
+  testingChannel0.setBodyPartTarget(
+      std::vector<haptics::types::BodyPartTarget>{haptics::types::BodyPartTarget::Unknown});
+  testingChannel0.setActuatorTarget(std::vector<haptics::types::Vector>{
+      haptics::types::Vector{0, 0, 0}, haptics::types::Vector{1, 1, 1}});
   for (auto vertex : testingVertices_channel0) {
     testingChannel0.addVertex(vertex);
   }
@@ -138,6 +143,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   haptics::types::Channel testingChannel2(testingId_channel2, testingDescription_channel2,
                                           testingGain_channel2, testingMixingWeight_channel2,
                                           testingBodyPartMask_channel2);
+  testingChannel2.setBodyPartMask(std::nullopt);
+  testingChannel2.setBodyPartTarget(
+      std::vector<haptics::types::BodyPartTarget>{haptics::types::BodyPartTarget::Unknown});
   for (auto vertex : testingVertices_channel2) {
     testingChannel2.addVertex(vertex);
   }
@@ -371,6 +379,16 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readChannel0.getGain() - testingChannel0.getGain() < floatPrecision);
     CHECK(readChannel0.getMixingWeight() - testingChannel0.getMixingWeight() < floatPrecision);
     CHECK(readChannel0.getBodyPartMask() == testingChannel0.getBodyPartMask());
+    REQUIRE(readChannel0.getActuatorResolution().has_value());
+    REQUIRE(testingChannel0.getActuatorResolution().has_value());
+    CHECK(readChannel0.getActuatorResolution().value() ==
+          testingChannel0.getActuatorResolution().value());
+    REQUIRE(readChannel0.getBodyPartTarget().has_value());
+    REQUIRE(testingChannel0.getBodyPartTarget().has_value());
+    CHECK(readChannel0.getBodyPartTarget().value() == testingChannel0.getBodyPartTarget().value());
+    REQUIRE(readChannel0.getActuatorTarget().has_value());
+    REQUIRE(testingChannel0.getActuatorTarget().has_value());
+    CHECK(readChannel0.getActuatorTarget().value() == testingChannel0.getActuatorTarget().value());
     CHECK(readChannel0.getFrequencySampling() == testingChannel0.getFrequencySampling());
     if (readChannel0.getFrequencySampling() > 0) {
       CHECK(readChannel0.getSampleCount() == testingChannel0.getSampleCount());
@@ -398,6 +416,12 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readChannel1.getGain() - testingChannel2.getGain() < floatPrecision);
     CHECK(readChannel1.getMixingWeight() - testingChannel2.getMixingWeight() < floatPrecision);
     CHECK(readChannel1.getBodyPartMask() == testingChannel2.getBodyPartMask());
+    REQUIRE(readChannel1.getActuatorResolution().has_value());
+    const haptics::types::Vector defaultSynthesizedResolution{1, 1, 1};
+    CHECK(readChannel1.getActuatorResolution().value() == defaultSynthesizedResolution);
+    REQUIRE(readChannel1.getBodyPartTarget().has_value());
+    REQUIRE(testingChannel2.getBodyPartTarget().has_value());
+    CHECK(readChannel1.getBodyPartTarget().value() == testingChannel2.getBodyPartTarget().value());
     CHECK(readChannel1.getFrequencySampling() == testingChannel2.getFrequencySampling());
     if (readChannel1.getFrequencySampling() > 0) {
       CHECK(readChannel1.getSampleCount() == testingChannel2.getSampleCount());

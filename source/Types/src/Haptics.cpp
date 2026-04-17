@@ -186,7 +186,7 @@ auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHM
     for (int i = 0; i < element.numHapticChannels; i++) {
       channel = tools::OHMData::HapticChannelMetadata();
       types::Channel t = p.getChannelAt(i);
-      channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMask();
+      channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMaskOrDefault();
       channel.channelDescription = t.getDescription();
       channel.gain = t.getGain();
 

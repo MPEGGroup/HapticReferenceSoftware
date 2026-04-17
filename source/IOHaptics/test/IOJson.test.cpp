@@ -649,7 +649,9 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
     REQUIRE(res.getPerceptionAt(0).getChannelsSize() == 2);
 
     // CHECK channel 0
-    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBodyPartMask() == testingBodyPartMask_channel0);
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(0).getBodyPartMask().has_value());
+    CHECK(res.getPerceptionAt(0).getChannelAt(0).getBodyPartMask().value() ==
+          testingBodyPartMask_channel0);
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getDescription() == testingDescription_channel0);
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getGain() == Approx(testingGain_channel0));
     CHECK(res.getPerceptionAt(0).getChannelAt(0).getId() == testingId_channel0);
@@ -692,7 +694,9 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
     }
 
     // CHECK channel 1
-    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBodyPartMask() == testingBodyPartMask_channel1);
+    REQUIRE(res.getPerceptionAt(0).getChannelAt(1).getBodyPartMask().has_value());
+    CHECK(res.getPerceptionAt(0).getChannelAt(1).getBodyPartMask().value() ==
+          testingBodyPartMask_channel1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getDescription() == testingDescription_channel1);
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getGain() == Approx(testingGain_channel1));
     CHECK(res.getPerceptionAt(0).getChannelAt(1).getId() == testingId_channel1);
@@ -737,7 +741,9 @@ TEST_CASE("write/read hjif haptic file for signal testing") {
     REQUIRE(res.getPerceptionAt(1).getChannelsSize() == 1);
 
     // CHECK channel
-    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBodyPartMask() == testingBodyPartMask_channel2);
+    REQUIRE(res.getPerceptionAt(1).getChannelAt(0).getBodyPartMask().has_value());
+    CHECK(res.getPerceptionAt(1).getChannelAt(0).getBodyPartMask().value() ==
+          testingBodyPartMask_channel2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getDescription() == testingDescription_channel2);
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getGain() == Approx(testingGain_channel2));
     CHECK(res.getPerceptionAt(1).getChannelAt(0).getId() == testingId_channel2);
