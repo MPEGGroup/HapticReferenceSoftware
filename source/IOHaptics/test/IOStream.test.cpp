@@ -530,10 +530,10 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     uint64_t currentTimestamp = 0;
     for (size_t i = 0; i < bitstream.size(); i++) {
       int headerIndex = 0;
-      const auto unitType = haptics::io::IOBinaryPrimitives::readUInt(
-          bitstream[i], headerIndex, haptics::io::UNIT_TYPE);
-      const auto unitSync = haptics::io::IOBinaryPrimitives::readUInt(
-          bitstream[i], headerIndex, haptics::io::UNIT_SYNC);
+      const auto unitType = haptics::io::IOBinaryPrimitives::readUInt(bitstream[i], headerIndex,
+                                                                      haptics::io::UNIT_TYPE);
+      const auto unitSync = haptics::io::IOBinaryPrimitives::readUInt(bitstream[i], headerIndex,
+                                                                      haptics::io::UNIT_SYNC);
       headerIndex += haptics::io::UNIT_LAYER;
       const auto unitDuration = haptics::io::IOBinaryPrimitives::readUInt(
           bitstream[i], headerIndex, haptics::io::UNIT_DURATION);
