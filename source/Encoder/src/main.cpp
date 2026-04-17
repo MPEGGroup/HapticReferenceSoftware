@@ -240,6 +240,8 @@ auto main(int argc, char *argv[]) -> int {
         }
         codeExit =
             PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
+      } else {
+        codeExit = EXIT_FAILURE;
       }
 
       if (codeExit == EXIT_SUCCESS) {
@@ -287,7 +289,7 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   } else if (ext == "hjif") {
     std::cout << "The HJIF file to encode : " << filename << std::endl;
-    IOJson::loadFile(filename, hapticFile);
+    codeExit = IOJson::loadFile(filename, hapticFile) ? EXIT_SUCCESS : EXIT_FAILURE;
   } else {
     codeExit = EXIT_FAILURE;
   }
@@ -330,8 +332,10 @@ auto main(int argc, char *argv[]) -> int {
     }
     bool noSplitEffects =
         inputParser.cmdOptionExists("-nse") || inputParser.cmdOptionExists("--no-split-effects");
-    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration,
-                        noSplitEffects);
+    codeExit = IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits,
+                                   minDuration, noSplitEffects)
+                   ? EXIT_SUCCESS
+                   : EXIT_FAILURE;
   } else {
     IOJson::writeFile(hapticFile, output);
   }
