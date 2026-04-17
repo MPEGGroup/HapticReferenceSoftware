@@ -73,8 +73,8 @@ private:
   [[nodiscard]] auto static extractAudioCustom(const rapidjson::Value::Object &event,
                                                const std::filesystem::path &ahapDirectory,
                                                types::Channel &channel,
-                                               const EncodingConfig &config,
-                                               unsigned int timescale) -> int;
+                                               const EncodingConfig &config, unsigned int timescale)
+      -> int;
   auto static modulateContinuousOnAmplitude(const std::vector<std::pair<int, double>> *amplitudes,
                                             types::Effect &continuous,
                                             const Keyframe &firstKeyframe, Keyframe &lastKeyframe)

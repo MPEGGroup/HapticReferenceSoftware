@@ -33,8 +33,8 @@
 
 #include <Encoder/include/AhapEncoder.h>
 #include <Encoder/include/WaveletEncoder.h>
-#include <Tools/include/WavParser.h>
 #include <Tools/include/Tools.h>
+#include <Tools/include/WavParser.h>
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -67,8 +67,8 @@ const int ACTUAL_FREQUENCY_MAX = 300;
 namespace haptics::encoder {
 
 [[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out,
-                                       const EncodingConfig &config,
-                                       const unsigned int timescale) -> int {
+                                       const EncodingConfig &config, const unsigned int timescale)
+    -> int {
   if (out.getChannelsSize() > 1) {
     return EXIT_FAILURE;
   }
@@ -216,8 +216,9 @@ namespace haptics::encoder {
   double audioVolume = 1.0;
   if (event.HasMember("EventParameters") && event["EventParameters"].IsArray()) {
     for (const auto &param : event["EventParameters"].GetArray()) {
-      if (!param.IsObject() || !param.HasMember("ParameterID") || !param["ParameterID"].IsString() ||
-          !param.HasMember("ParameterValue") || !param["ParameterValue"].IsNumber()) {
+      if (!param.IsObject() || !param.HasMember("ParameterID") ||
+          !param["ParameterID"].IsString() || !param.HasMember("ParameterValue") ||
+          !param["ParameterValue"].IsNumber()) {
         continue;
       }
       if (std::string(param["ParameterID"].GetString()) == "AudioVolume") {
@@ -262,7 +263,8 @@ namespace haptics::encoder {
   }
 
   types::Band waveletBand;
-  WaveletEncoder waveletEncoder(config.wavelet_blockLength, static_cast<int>(wavParser.getSamplerate()));
+  WaveletEncoder waveletEncoder(config.wavelet_blockLength,
+                                static_cast<int>(wavParser.getSamplerate()));
   if (!waveletEncoder.encodeSignal(signal, config.wavelet_bitbudget, 0, waveletBand, timescale)) {
     return EXIT_FAILURE;
   }
@@ -277,10 +279,11 @@ namespace haptics::encoder {
 
   channel.addBand(waveletBand);
   channel.setFrequencySampling(wavParser.getSamplerate());
-  const auto endPosition = eventPosition + static_cast<int>(waveletBand.getBandTimeLength(timescale));
-  const auto sampleCount = static_cast<uint64_t>(std::ceil(
-      static_cast<double>(endPosition) * static_cast<double>(wavParser.getSamplerate()) /
-      static_cast<double>(timescale)));
+  const auto endPosition =
+      eventPosition + static_cast<int>(waveletBand.getBandTimeLength(timescale));
+  const auto sampleCount = static_cast<uint64_t>(
+      std::ceil(static_cast<double>(endPosition) * static_cast<double>(wavParser.getSamplerate()) /
+                static_cast<double>(timescale)));
   if (!channel.getSampleCount().has_value() || sampleCount > channel.getSampleCount().value()) {
     channel.setSampleCount(sampleCount);
   }
