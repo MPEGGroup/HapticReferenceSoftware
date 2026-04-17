@@ -1981,8 +1981,8 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   }
   if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
-    auto channelResolution = swriter.channel.getActuatorResolution().value_or(types::Vector(
-        static_cast<int8_t>(1), static_cast<int8_t>(1), static_cast<int8_t>(1)));
+    auto channelResolution = swriter.channel.getActuatorResolution().value_or(
+        types::Vector(static_cast<int8_t>(1), static_cast<int8_t>(1), static_cast<int8_t>(1)));
     std::vector<types::Vector> actuatorTarget =
         swriter.channel.getActuatorTarget().value_or(std::vector<types::Vector>{});
     for (const auto &target : actuatorTarget) {
