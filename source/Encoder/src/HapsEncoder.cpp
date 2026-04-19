@@ -243,7 +243,6 @@ auto normalizeEffectForHjif(types::Effect &effect) -> void {
 [[nodiscard]] auto HapsEncoder::extractTransients(const rapidjson::Value::Array &transients,
                                                   types::Band *transientBand,
                                                   const unsigned int timescale) -> int {
-  types::Effect transientEffect;
   for (auto &t : transients) {
     if (!t.HasMember("position") || !t["position"].IsDouble()) {
       std::cerr << "Invalid HAPS input file: invalid transient position" << std::endl;
@@ -281,11 +280,14 @@ auto normalizeEffectForHjif(types::Effect &effect) -> void {
     int absoluteFreq = computeAbsoluteFreq(transientBand->getLowerFrequencyLimit(),
                                            transientBand->getUpperFrequencyLimit(), frequency);
     absoluteFreq = clampFrequencyModulation(absoluteFreq);
-    transientEffect.addKeyframe(timeScalledPosition, amplitude, absoluteFreq);
+
+    types::Effect transientEffect;
+    transientEffect.setPosition(timeScalledPosition);
+    transientEffect.addKeyframe(0, amplitude, absoluteFreq);
+    normalizeEffectForHjif(transientEffect);
+    transientBand->addEffect(transientEffect);
   }
 
-  normalizeEffectForHjif(transientEffect);
-  transientBand->addEffect(transientEffect);
   return EXIT_SUCCESS;
 }
 
