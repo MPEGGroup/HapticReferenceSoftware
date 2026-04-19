@@ -230,6 +230,13 @@ namespace haptics::encoder {
   auto waveformPath = ahapDirectory / std::filesystem::path(event["EventWaveformPath"].GetString());
   waveformPath = waveformPath.lexically_normal();
 
+  if (!std::filesystem::is_regular_file(waveformPath)) {
+    std::cerr << "External waveform file referenced by AHAP was not found, ignoring AudioCustom "
+                 "event: "
+              << waveformPath << std::endl;
+    return EXIT_SUCCESS;
+  }
+
   haptics::tools::WavParser wavParser;
   if (!wavParser.loadFile(waveformPath.string())) {
     std::cerr << "Unable to load external waveform file referenced by AHAP: " << waveformPath

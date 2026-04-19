@@ -109,6 +109,38 @@ auto removeAudioCustomFixture(const std::filesystem::path &tempRoot) -> void {
   std::filesystem::remove(tempRoot);
 }
 
+auto createMissingAudioCustomFixture(const std::filesystem::path &tempRoot) -> std::filesystem::path {
+  std::filesystem::create_directories(tempRoot);
+
+  auto ahapPath = tempRoot / "pattern.ahap";
+  std::ofstream ahapFile(ahapPath);
+  if (!ahapFile.good()) {
+    throw std::runtime_error("Failed to create missing AudioCustom AHAP fixture");
+  }
+
+  ahapFile << R"({
+  "Pattern": [
+    {
+      "Event": {
+        "Time": )"
+           << TEST_AUDIO_EVENT_TIME << R"(,
+        "EventType": "AudioCustom",
+        "EventWaveformPath": "AHAP/drums.wav",
+        "EventParameters": [
+          {"ParameterID": "AudioVolume", "ParameterValue": )"
+           << TEST_AUDIO_VOLUME << R"(}
+        ]
+      }
+    }
+  ]
+})";
+  ahapFile.close();
+
+  return ahapPath;
+}
+
+auto hasWaveletBand(haptics::types::Channel &channel) -> bool { return findWaveletBand(channel) != nullptr; }
+
 } // namespace
 
 TEST_CASE("extractKeyframes with ParameterCurveControlPoints not set", "[extractKeyframes]") {
@@ -916,4 +948,25 @@ TEST_CASE("encode supports AudioCustom events with external WAV files", "[encode
   CHECK(channel.getSampleCount().value() >= TEST_MIN_SAMPLE_COUNT);
 
   removeAudioCustomFixture(tempRoot);
+}
+
+TEST_CASE("encode ignores AudioCustom events when external WAV file is missing",
+          "[encode][AudioCustom][missingFile]") {
+  const auto tempRoot =
+      std::filesystem::current_path() / "source" / "Encoder" / "test" / "tmp_audio_custom_missing";
+  const auto ahapPath = createMissingAudioCustomFixture(tempRoot);
+  std::string filename = ahapPath.string();
+  haptics::types::Perception perception(0, 0, std::string(),
+                                        haptics::types::PerceptionModality::Vibrotactile);
+  auto config = EncodingConfig::generateConfigBudget(TEST_WAVELET_BIT_BUDGET, 0, true, false,
+                                                     TEST_WAVELET_BLOCK_LENGTH);
+
+  REQUIRE(AhapEncoder::encode(filename, perception, config, timescale) == EXIT_SUCCESS);
+  REQUIRE(perception.getChannelsSize() == 1);
+
+  auto &channel = perception.getChannelAt(0);
+  CHECK_FALSE(hasWaveletBand(channel));
+
+  std::filesystem::remove(ahapPath);
+  std::filesystem::remove(tempRoot);
 }
