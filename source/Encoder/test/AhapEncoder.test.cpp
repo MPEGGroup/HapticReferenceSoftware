@@ -109,7 +109,8 @@ auto removeAudioCustomFixture(const std::filesystem::path &tempRoot) -> void {
   std::filesystem::remove(tempRoot);
 }
 
-auto createMissingAudioCustomFixture(const std::filesystem::path &tempRoot) -> std::filesystem::path {
+auto createMissingAudioCustomFixture(const std::filesystem::path &tempRoot)
+    -> std::filesystem::path {
   std::filesystem::create_directories(tempRoot);
 
   auto ahapPath = tempRoot / "pattern.ahap";
@@ -139,7 +140,9 @@ auto createMissingAudioCustomFixture(const std::filesystem::path &tempRoot) -> s
   return ahapPath;
 }
 
-auto hasWaveletBand(haptics::types::Channel &channel) -> bool { return findWaveletBand(channel) != nullptr; }
+auto hasWaveletBand(haptics::types::Channel &channel) -> bool {
+  return findWaveletBand(channel) != nullptr;
+}
 
 } // namespace
 
