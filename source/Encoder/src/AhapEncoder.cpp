@@ -257,7 +257,7 @@ namespace haptics::encoder {
     }
   }
 
-  const double normalizationFactor = static_cast<double>(allChannels.size());
+  const auto normalizationFactor = static_cast<double>(allChannels.size());
   for (auto &sample : signal) {
     sample = std::clamp((sample / normalizationFactor) * audioVolume, -1.0, 1.0);
   }
