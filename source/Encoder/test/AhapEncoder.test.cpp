@@ -60,7 +60,7 @@ auto createAudioCustomFixture(const std::filesystem::path &tempRoot) -> std::fil
   std::filesystem::create_directories(tempRoot / "AHAP");
 
   const auto wavPath = tempRoot / "AHAP" / "drums.wav";
-  const auto ahapPath = tempRoot / "pattern.ahap";
+  auto ahapPath = tempRoot / "pattern.ahap";
   const std::vector<double> waveform = {0.0, 0.5, -0.5, 0.25, -0.25, 0.0};
   if (!haptics::tools::WavParser::saveFile(wavPath.string(), waveform, TEST_SAMPLE_RATE)) {
     throw std::runtime_error("Failed to create AudioCustom WAV fixture");
