@@ -225,7 +225,7 @@ auto main(int argc, char *argv[]) -> int {
         if (inputParser.cmdOptionExists("--packet_duration")) {
           packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
         }
-        if (((double)blocklength.value() / (double)DEFAULT_FS) >
+        if (((double)blocklength_chosen / (double)DEFAULT_FS) >
             ((double)packetDuration / (double)S2MS)) {
           std::cerr
               << "The chosen block length is too large for the chosen packet duration. Exiting."
@@ -288,7 +288,7 @@ auto main(int argc, char *argv[]) -> int {
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
     }
-    if (((double)blocklength.value() / (double)DEFAULT_FS) >
+    if (((double)blocklength_chosen / (double)DEFAULT_FS) >
         ((double)packetDuration / (double)S2MS)) {
       std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
                 << std::endl;
