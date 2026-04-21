@@ -225,9 +225,11 @@ auto main(int argc, char *argv[]) -> int {
         if (inputParser.cmdOptionExists("--packet_duration")) {
           packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
         }
-        if (((double) blocklength.value() / (double) DEFAULT_FS) > ((double) packetDuration / (double) S2MS)) {
-          std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
-            << std::endl;
+        if (((double) blocklength.value() / (double) DEFAULT_FS) >
+            ((double) packetDuration / (double) S2MS)) {
+          std::cerr
+              << "The chosen block length is too large for the chosen packet duration. Exiting."
+              << std::endl;
           return EXIT_FAILURE;
         }
         if (bitrate.has_value()) {
@@ -251,8 +253,8 @@ auto main(int argc, char *argv[]) -> int {
           }
 
         } else if (blocklength.has_value()) {
-            config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
-                cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+          config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
+              cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
         } else {
           config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
                                                                            enable_vectorial);
@@ -286,9 +288,10 @@ auto main(int argc, char *argv[]) -> int {
     if (inputParser.cmdOptionExists("--packet_duration")) {
       packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
     }
-    if (((double) blocklength.value() / (double) DEFAULT_FS) > ((double) packetDuration / (double) S2MS)) {
+    if (((double) blocklength.value() / (double) DEFAULT_FS) >
+        ((double) packetDuration / (double) S2MS)) {
       std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
-        << std::endl;
+                << std::endl;
       return EXIT_FAILURE;
     }
     if (bitrate.has_value()) {
@@ -309,8 +312,8 @@ auto main(int argc, char *argv[]) -> int {
             budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
       }
     } else if (blocklength.has_value()) {
-        config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
-            cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+      config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
+          cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
     } else {
       config =
           haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
