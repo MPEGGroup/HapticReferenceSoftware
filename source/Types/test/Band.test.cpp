@@ -32,14 +32,60 @@
  */
 
 #include <Types/include/Band.h>
+#include <Types/include/Effect.h>
 #include <catch2/catch.hpp>
 
 using haptics::types::Band;
 using haptics::types::BandType;
+using haptics::types::BaseSignal;
 using haptics::types::CurveType;
+using haptics::types::Effect;
+using haptics::types::EffectType;
+
+namespace {
+constexpr int kCurveLowerFrequencyLimit = 0;
+constexpr int kCurveUpperFrequencyLimit = 72;
+constexpr int kSamplingFrequency = 8000;
+constexpr int kTimescale = 1000;
+constexpr int kSampleCount = 20000;
+constexpr int kBoundarySampleBefore = 7999;
+constexpr int kBoundarySample = 8000;
+constexpr int kBoundarySampleAfter = 8001;
+constexpr float kZeroAmplitude = 0.0F;
+constexpr float kUnitAmplitude = 1.0F;
+constexpr float kExpectedAdjacentSampleAmplitude = 0.999875F;
+constexpr double kAmplitudeTolerance = 0.001;
+} // namespace
 
 TEST_CASE("haptics::types::Band", "[placeholder]") {
   const Band b(BandType::VectorialWave, 70, 1000);
 
   CHECK(true);
+}
+
+TEST_CASE("Curve band does not double-count contiguous split boundaries",
+          "[Band][EvaluationBand][Curve][Split]") {
+  Band band(BandType::Curve, CurveType::Linear, kCurveLowerFrequencyLimit,
+            kCurveUpperFrequencyLimit);
+
+  Effect firstEffect(kCurveLowerFrequencyLimit, kZeroAmplitude, BaseSignal::Sine,
+                     EffectType::Basis);
+  firstEffect.addAmplitudeAt(kZeroAmplitude, kCurveLowerFrequencyLimit);
+  firstEffect.addAmplitudeAt(kUnitAmplitude, kTimescale);
+  band.addEffect(firstEffect);
+
+  Effect secondEffect(kTimescale, kZeroAmplitude, BaseSignal::Sine, EffectType::Basis);
+  secondEffect.addAmplitudeAt(kUnitAmplitude, kCurveLowerFrequencyLimit);
+  secondEffect.addAmplitudeAt(kZeroAmplitude, kTimescale);
+  band.addEffect(secondEffect);
+
+  const auto samples =
+      band.EvaluationBand(kSampleCount, kSamplingFrequency, kCurveLowerFrequencyLimit, kTimescale);
+
+  REQUIRE(samples.size() == kSampleCount);
+  CHECK(samples[kBoundarySampleBefore] ==
+        Approx(kExpectedAdjacentSampleAmplitude).margin(kAmplitudeTolerance));
+  CHECK(samples[kBoundarySample] == Approx(kUnitAmplitude).margin(kAmplitudeTolerance));
+  CHECK(samples[kBoundarySampleAfter] ==
+        Approx(kExpectedAdjacentSampleAmplitude).margin(kAmplitudeTolerance));
 }

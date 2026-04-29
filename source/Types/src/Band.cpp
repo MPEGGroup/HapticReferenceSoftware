@@ -45,6 +45,29 @@ auto clearKeyframes(types::Effect &effect) -> void {
   }
 }
 
+auto hasContiguousCurveEffects(std::vector<types::Effect> &effects) -> bool {
+  for (size_t effectIndex = 0; effectIndex + 1 < effects.size(); effectIndex++) {
+    auto &effect = effects[effectIndex];
+    auto &nextEffect = effects[effectIndex + 1];
+    if (nextEffect.getPosition() ==
+        effect.getPosition() + effect.getEffectTimeLength(types::BandType::Curve, 0)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+auto hasContiguousNextCurveEffect(std::vector<types::Effect> &effects, size_t effectIndex) -> bool {
+  if (effectIndex + 1 >= effects.size()) {
+    return false;
+  }
+
+  auto &effect = effects[effectIndex];
+  auto &nextEffect = effects[effectIndex + 1];
+  return nextEffect.getPosition() ==
+         effect.getPosition() + effect.getEffectTimeLength(types::BandType::Curve, 0);
+}
+
 auto addKeyframeAt(types::Effect &effect, int relativePosition, std::optional<float> amplitude,
                    std::optional<int> frequency) -> void {
   if (amplitude.has_value()) {
@@ -287,6 +310,67 @@ auto Band::EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int ti
   std::vector<double> bandAmp(sampleCount, 0);
   switch (this->bandType) {
   case BandType::Curve:
+    if (hasContiguousCurveEffects(effects)) {
+      for (size_t effectIndex = 0; effectIndex < effects.size(); effectIndex++) {
+        auto &e = effects[effectIndex];
+        std::vector<std::pair<int, double>> keyframes(e.getKeyframesSize());
+        for (int i = 0; i < static_cast<int>(e.getKeyframesSize()); i++) {
+          types::Keyframe myKeyframe = e.getKeyframeAt(i);
+          keyframes[i].first =
+              static_cast<int>(myKeyframe.getRelativePosition().value() * fs / timescale);
+          if (i > 0) {
+            keyframes[i].first -= keyframes[0].first;
+          }
+          keyframes[i].second = myKeyframe.getAmplitudeModulation().value();
+        }
+        keyframes[0].first = 0;
+
+        std::vector<double> effectAmp(static_cast<::std::size_t>(keyframes.back().first) + 1, 0);
+        if (keyframes.size() == 2) {
+          effectAmp = haptics::tools::linearInterpolation2(keyframes);
+        } else {
+          switch (getCurveTypeOrDefault()) {
+          case CurveType::Linear:
+            effectAmp = haptics::tools::linearInterpolation2(keyframes);
+            break;
+          case CurveType::Cubic:
+            effectAmp = haptics::tools::cubicInterpolation2(keyframes);
+            break;
+          case CurveType::Akima:
+            effectAmp = haptics::tools::akimaInterpolation(keyframes);
+            break;
+          case CurveType::Bezier:
+            effectAmp = haptics::tools::bezierInterpolation(keyframes);
+            break;
+          case CurveType::Bspline:
+            effectAmp = haptics::tools::bsplineInterpolation(keyframes);
+            break;
+          default:
+            effectAmp = haptics::tools::cubicInterpolation2(keyframes);
+            break;
+          }
+        }
+
+        int count = 0;
+        int position = static_cast<int>((e.getPosition() + pad) * fs / timescale);
+        if (position < 0) {
+          count = -position;
+          position = 0;
+        }
+
+        int lastCount = keyframes.back().first;
+        if (hasContiguousNextCurveEffect(effects, effectIndex)) {
+          lastCount--;
+        }
+
+        for (int i = position; (i < static_cast<int>(sampleCount)) && (count <= lastCount); i++) {
+          bandAmp[i] += effectAmp[count];
+          count++;
+        }
+      }
+      break;
+    }
+
     for (auto e : effects) {
       std::vector<std::pair<int, double>> keyframes(
           e.getKeyframesSize()); // keyframes converted to position relative to fs
