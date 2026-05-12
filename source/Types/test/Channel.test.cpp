@@ -274,6 +274,25 @@ TEST_CASE("haptics::types::Channel testing bodypart target") {
   }
 }
 
+TEST_CASE("haptics::types::Channel testing bodypart mask") {
+  using haptics::types::Channel;
+  Channel channel(1, "I'm a placeholder", 0, 0, 1);
+
+  SECTION("checking channel bodypart mask") {
+    channel.setBodyPartMask(0);
+
+    REQUIRE(channel.getBodyPartMask().has_value());
+    CHECK(channel.getBodyPartMask().value() == 0);
+    CHECK(channel.getBodyPartMaskOrDefault() == 0);
+  }
+
+  SECTION("checking null channel bodypart mask") {
+    channel.setBodyPartMask(std::nullopt);
+    CHECK_FALSE(channel.getBodyPartMask().has_value());
+    CHECK(channel.getBodyPartMaskOrDefault() == 0);
+  }
+}
+
 TEST_CASE("haptics::types::Channel testing actuator target") {
   using haptics::types::Channel;
   using haptics::types::Vector;
