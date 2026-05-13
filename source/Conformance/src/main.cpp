@@ -40,6 +40,7 @@
 #include <filesystem>
 #include <functional>
 #include <optional>
+#include <vector>
 
 using haptics::io::IOJson;
 using haptics::io::IOStream;
@@ -47,6 +48,31 @@ using haptics::tools::InputParser;
 using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
+
+auto allExpectedSyncsFound(Haptics &expected, Haptics &decoded) -> bool {
+  size_t missingSyncs = 0;
+  std::vector<bool> matchedDecodedSyncs(decoded.getSyncsSize(), false);
+
+  for (size_t expectedIndex = 0; expectedIndex < expected.getSyncsSize(); expectedIndex++) {
+    const auto &expectedSync = expected.getSyncsAt(static_cast<int>(expectedIndex));
+    bool matchFound = false;
+    for (size_t decodedIndex = 0; decodedIndex < decoded.getSyncsSize(); decodedIndex++) {
+      if (matchedDecodedSyncs.at(decodedIndex)) {
+        continue;
+      }
+      const auto &decodedSync = decoded.getSyncsAt(static_cast<int>(decodedIndex));
+      if (expectedSync.equals(decodedSync)) {
+        matchedDecodedSyncs[decodedIndex] = true;
+        matchFound = true;
+        break;
+      }
+    }
+    if (!matchFound) {
+      missingSyncs++;
+    }
+  }
+  return missingSyncs == 0;
+}
 
 auto help() -> void {
   std::cout
@@ -119,7 +145,11 @@ auto main(int argc, char *argv[]) -> int {
       codeExit = EXIT_FAILURE;
     }
     if (codeExit == EXIT_SUCCESS) {
-      bool equals = hapticFile.equals(comparisonHapticFile);
+      bool equals = false;
+      if (hapticFile.equalsWithoutSyncs(comparisonHapticFile)) {
+        equals = allExpectedSyncsFound(hapticFile, comparisonHapticFile);
+      }
+
       if (equals) {
         std::cerr << filename << " and " << comparisonFilename << " contain the same data."
                   << std::endl;

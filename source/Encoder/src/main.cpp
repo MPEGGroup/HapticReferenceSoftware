@@ -57,6 +57,9 @@ using haptics::tools::OHMData;
 using haptics::types::Haptics;
 using haptics::types::Perception;
 
+const int DEFAULT_FS = 8000;
+constexpr int S2MS = 1000;
+
 auto help() -> void {
   std::cout
       << "usages: Encoder [-h] -f <FILE> -o <OUTPUT_FILE> [-b] [-kin]" << std::endl
@@ -236,6 +239,21 @@ auto main(int argc, char *argv[]) -> int {
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         haptics::encoder::EncodingConfig config;
+        int blocklength_chosen = haptics::encoder::DEFAULT_BLOCK_LENGTH_SMP;
+        if (blocklength.has_value()) {
+          blocklength_chosen = blocklength.value();
+        }
+        int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
+        if (inputParser.cmdOptionExists("--packet_duration")) {
+          packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
+        }
+        if (((double)blocklength_chosen / (double)DEFAULT_FS) >
+            ((double)packetDuration / (double)S2MS)) {
+          std::cerr
+              << "The chosen block length is too large for the chosen packet duration. Exiting."
+              << std::endl;
+          return EXIT_FAILURE;
+        }
         if (bitrate.has_value()) {
           std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
           if (blocklength.has_value()) {
@@ -256,12 +274,17 @@ auto main(int argc, char *argv[]) -> int {
                 budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
           }
 
+        } else if (blocklength.has_value()) {
+          config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
+              cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
         } else {
           config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
                                                                            enable_vectorial);
         }
         codeExit =
             PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
+      } else {
+        codeExit = EXIT_FAILURE;
       }
 
       if (codeExit == EXIT_SUCCESS) {
@@ -280,6 +303,20 @@ auto main(int argc, char *argv[]) -> int {
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
     haptics::encoder::EncodingConfig config;
+    int blocklength_chosen = haptics::encoder::DEFAULT_BLOCK_LENGTH_SMP;
+    if (blocklength.has_value()) {
+      blocklength_chosen = blocklength.value();
+    }
+    int packetDuration = haptics::io::DEFAULT_PACKET_DURATION;
+    if (inputParser.cmdOptionExists("--packet_duration")) {
+      packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
+    }
+    if (((double)blocklength_chosen / (double)DEFAULT_FS) >
+        ((double)packetDuration / (double)S2MS)) {
+      std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
+                << std::endl;
+      return EXIT_FAILURE;
+    }
     if (bitrate.has_value()) {
       std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
       if (blocklength.has_value()) {
@@ -297,6 +334,9 @@ auto main(int argc, char *argv[]) -> int {
         config = haptics::encoder::EncodingConfig::generateConfigBudget(
             budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
       }
+    } else if (blocklength.has_value()) {
+      config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
+          cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
     } else {
       config =
           haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
@@ -310,7 +350,7 @@ auto main(int argc, char *argv[]) -> int {
     hapticFile.addPerception(myPerception);
   } else if (ext == "hjif") {
     std::cout << "The HJIF file to encode : " << filename << std::endl;
-    IOJson::loadFile(filename, hapticFile);
+    codeExit = IOJson::loadFile(filename, hapticFile) ? EXIT_SUCCESS : EXIT_FAILURE;
   } else {
     codeExit = EXIT_FAILURE;
   }
@@ -353,8 +393,10 @@ auto main(int argc, char *argv[]) -> int {
     }
     bool noSplitEffects =
         inputParser.cmdOptionExists("-nse") || inputParser.cmdOptionExists("--no-split-effects");
-    IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits, minDuration,
-                        noSplitEffects);
+    codeExit = IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits,
+                                   minDuration, noSplitEffects)
+                   ? EXIT_SUCCESS
+                   : EXIT_FAILURE;
   } else {
     IOJson::writeFile(hapticFile, output);
   }

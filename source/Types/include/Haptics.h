@@ -91,8 +91,11 @@ public:
   auto linearize() -> void;
   auto refactor() -> void;
   [[nodiscard]] auto equals(const Haptics &haptic) const -> bool;
+  [[nodiscard]] auto equalsWithoutSyncs(const Haptics &haptic) const -> bool;
 
 private:
+  [[nodiscard]] auto equalsImpl(const Haptics &haptic, bool compareSyncs) const -> bool;
+
   std::string version = "2025";
   std::string profile = "Main";
   unsigned int level = 1;

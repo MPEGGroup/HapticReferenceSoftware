@@ -186,7 +186,7 @@ auto Haptics::extractMetadataToOHM(std::string &filename) -> haptics::tools::OHM
     for (int i = 0; i < element.numHapticChannels; i++) {
       channel = tools::OHMData::HapticChannelMetadata();
       types::Channel t = p.getChannelAt(i);
-      channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMask();
+      channel.bodyPartMask = (tools::OHMData::Body)t.getBodyPartMaskOrDefault();
       channel.channelDescription = t.getDescription();
       channel.gain = t.getGain();
 
@@ -209,7 +209,7 @@ auto Haptics::refactor() -> void {
   }
 }
 
-auto Haptics::equals(const Haptics &haptic) const -> bool {
+auto Haptics::equalsImpl(const Haptics &haptic, bool compareSyncs) const -> bool {
   if (version != haptic.getVersion()) {
     std::cerr << "Version fields are different" << std::endl;
     return false;
@@ -242,7 +242,7 @@ auto Haptics::equals(const Haptics &haptic) const -> bool {
     std::cerr << "The number of avatars is different" << std::endl;
     return false;
   }
-  if (syncs.size() != haptic.syncs.size()) {
+  if (compareSyncs && syncs.size() != haptic.syncs.size()) {
     std::cerr << "The number of Syncs is different" << std::endl;
     return false;
   }
@@ -261,7 +261,7 @@ auto Haptics::equals(const Haptics &haptic) const -> bool {
       isEqual = isEqual && avatar1.equals(avatar2);
     }
   }
-  if (isEqual) {
+  if (isEqual && compareSyncs) {
     for (int i = 0; i < static_cast<int>(syncs.size()); i++) {
       const auto sync1 = syncs.at(i);
       const auto sync2 = haptic.syncs.at(i);
@@ -269,6 +269,12 @@ auto Haptics::equals(const Haptics &haptic) const -> bool {
     }
   }
   return isEqual;
+}
+
+auto Haptics::equals(const Haptics &haptic) const -> bool { return equalsImpl(haptic, true); }
+
+auto Haptics::equalsWithoutSyncs(const Haptics &haptic) const -> bool {
+  return equalsImpl(haptic, false);
 }
 
 } // namespace haptics::types
