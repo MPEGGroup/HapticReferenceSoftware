@@ -122,10 +122,7 @@ auto isValidBlocklength(std::optional<int> &blocklength, InputParser &inputParse
   if (inputParser.cmdOptionExists("--packet_duration")) {
     packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
   }
-  if (((double)blocklength_chosen / (double)DEFAULT_FS) > ((double)packetDuration / (double)S2MS)) {
-    return false;
-  }
-  return true;
+  return !(((double)blocklength_chosen / (double)DEFAULT_FS) > ((double)packetDuration / (double)S2MS));
 }
 
 auto generateEncodingConfig(std::optional<int> bitrate, std::optional<int> budget,
