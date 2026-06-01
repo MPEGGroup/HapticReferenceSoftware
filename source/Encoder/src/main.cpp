@@ -122,21 +122,22 @@ auto isValidBlocklength(std::optional<int> &blocklength, InputParser &inputParse
   if (inputParser.cmdOptionExists("--packet_duration")) {
     packetDuration = std::stoi(inputParser.getCmdOption("--packet_duration"));
   }
-  if (((double)blocklength_chosen / (double)DEFAULT_FS) >
-      ((double)packetDuration / (double)S2MS)) {
+  if (((double)blocklength_chosen / (double)DEFAULT_FS) > ((double)packetDuration / (double)S2MS)) {
     return false;
   }
   return true;
 }
 
-auto generateEncodingConfig(std::optional<int> bitrate, std::optional<int> budget, std::optional<int> blocklength, std::optional<double> cutoff, bool enable_wavelet, bool enable_vectorial) -> haptics::encoder::EncodingConfig {
+auto generateEncodingConfig(std::optional<int> bitrate, std::optional<int> budget,
+                            std::optional<int> blocklength, std::optional<double> cutoff,
+                            bool enable_wavelet, bool enable_vectorial)
+    -> haptics::encoder::EncodingConfig {
   haptics::encoder::EncodingConfig config;
   if (bitrate.has_value()) {
     std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
     if (blocklength.has_value()) {
       config = haptics::encoder::EncodingConfig::generateConfigParam(
-          bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial,
-          blocklength.value());
+          bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
     } else {
       config = haptics::encoder::EncodingConfig::generateConfigParam(
           bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial);
@@ -144,8 +145,7 @@ auto generateEncodingConfig(std::optional<int> bitrate, std::optional<int> budge
   } else if (budget.has_value()) {
     if (blocklength.has_value()) {
       config = haptics::encoder::EncodingConfig::generateConfigBudget(
-          budget.value(), cutoff.value(), enable_wavelet, enable_vectorial,
-          blocklength.value());
+          budget.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
     } else {
       config = haptics::encoder::EncodingConfig::generateConfigBudget(
           budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
@@ -155,8 +155,8 @@ auto generateEncodingConfig(std::optional<int> bitrate, std::optional<int> budge
     config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
         cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
   } else {
-    config = haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet,
-                                                                      enable_vectorial);
+    config =
+        haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
   }
   return config;
 }
@@ -229,9 +229,8 @@ auto main(int argc, char *argv[]) -> int {
   std::string ext = InputParser::getFileExt(filename);
   int codeExit = -1;
   if (!isValidBlocklength(blocklength, inputParser)) {
-    std::cerr
-        << "The chosen block length is too large for the chosen packet duration. Exiting."
-        << std::endl;
+    std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
+              << std::endl;
     return EXIT_FAILURE;
   }
   auto ahapConfig = generateEncodingConfig(bitrate, budget, blocklength, 0, enable_wavelet, false);
@@ -276,13 +275,12 @@ auto main(int argc, char *argv[]) -> int {
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         if (!isValidBlocklength(blocklength, inputParser)) {
-          std::cerr
-              << "The chosen block length is too large for the chosen packet duration. Exiting."
-              << std::endl;
+          std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
+                    << std::endl;
           return EXIT_FAILURE;
         }
         auto config = generateEncodingConfig(bitrate, budget, blocklength, cutoff, enable_wavelet, 
-            enable_vectorial);
+                                             enable_vectorial);
         codeExit =
             PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
       } else {
@@ -305,13 +303,12 @@ auto main(int argc, char *argv[]) -> int {
   } else if (ext == "wav") {
     std::cout << "The WAV file to encode : " << filename << std::endl;
     if (!isValidBlocklength(blocklength, inputParser)) {
-      std::cerr
-          << "The chosen block length is too large for the chosen packet duration. Exiting."
-          << std::endl;
+      std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
+                << std::endl;
       return EXIT_FAILURE;
     }
     auto config = generateEncodingConfig(bitrate, budget, blocklength, cutoff, enable_wavelet, 
-        enable_vectorial);
+                                         enable_vectorial);
     codeExit =
         PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
     hapticFile.addPerception(myPerception);
