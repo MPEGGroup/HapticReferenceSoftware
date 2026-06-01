@@ -275,11 +275,12 @@ auto main(int argc, char *argv[]) -> int {
       } else if (ext == "wav") {
         std::cout << "The WAV file to encode : " << filename << std::endl;
         if (!isValidBlocklength(blocklength, inputParser)) {
-          std::cerr << "The chosen block length is too large for the chosen packet duration. Exiting."
-                    << std::endl;
+          std::cerr
+              << "The chosen block length is too large for the chosen packet duration. Exiting."
+              << std::endl;
           return EXIT_FAILURE;
         }
-        auto config = generateEncodingConfig(bitrate, budget, blocklength, cutoff, enable_wavelet, 
+        auto config = generateEncodingConfig(bitrate, budget, blocklength, cutoff, enable_wavelet,
                                              enable_vectorial);
         codeExit =
             PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
@@ -307,7 +308,7 @@ auto main(int argc, char *argv[]) -> int {
                 << std::endl;
       return EXIT_FAILURE;
     }
-    auto config = generateEncodingConfig(bitrate, budget, blocklength, cutoff, enable_wavelet, 
+    auto config = generateEncodingConfig(bitrate, budget, blocklength, cutoff, enable_wavelet,
                                          enable_vectorial);
     codeExit =
         PcmEncoder::encode(filename, config, hapticFile.getTimescaleOrDefault(), myPerception);
