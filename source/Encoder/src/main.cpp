@@ -127,34 +127,33 @@ auto isValidBlocklength(std::optional<int> &blocklength, InputParser &inputParse
 }
 
 auto generateEncodingConfig(std::optional<int> bitrate, std::optional<int> budget,
-                            std::optional<int> blocklength, std::optional<double> cutoff,
-                            bool enable_wavelet, bool enable_vectorial)
-    -> haptics::encoder::EncodingConfig {
+                            std::optional<int> blocklength, double cutoff, bool enable_wavelet,
+                            bool enable_vectorial) -> haptics::encoder::EncodingConfig {
   haptics::encoder::EncodingConfig config;
   if (bitrate.has_value()) {
     std::cout << "target bitrate: " << bitrate.value() << " kb/s" << std::endl;
     if (blocklength.has_value()) {
       config = haptics::encoder::EncodingConfig::generateConfigParam(
-          bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+          bitrate.value(), cutoff, enable_wavelet, enable_vectorial, blocklength.value());
     } else {
       config = haptics::encoder::EncodingConfig::generateConfigParam(
-          bitrate.value(), cutoff.value(), enable_wavelet, enable_vectorial);
+          bitrate.value(), cutoff, enable_wavelet, enable_vectorial);
     }
   } else if (budget.has_value()) {
     if (blocklength.has_value()) {
       config = haptics::encoder::EncodingConfig::generateConfigBudget(
-          budget.value(), cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+          budget.value(), cutoff, enable_wavelet, enable_vectorial, blocklength.value());
     } else {
       config = haptics::encoder::EncodingConfig::generateConfigBudget(
-          budget.value(), cutoff.value(), enable_wavelet, enable_vectorial);
+          budget.value(), cutoff, enable_wavelet, enable_vectorial);
     }
 
   } else if (blocklength.has_value()) {
     config = haptics::encoder::EncodingConfig::generateConfigBlockLength(
-        cutoff.value(), enable_wavelet, enable_vectorial, blocklength.value());
+        cutoff, enable_wavelet, enable_vectorial, blocklength.value());
   } else {
-    config =
-        haptics::encoder::EncodingConfig::generateDefaultConfig(enable_wavelet, enable_vectorial);
+    config = haptics::encoder::EncodingConfig::generateConfigBlockLength(cutoff, enable_wavelet,
+                                                                         enable_vectorial);
   }
   return config;
 }
@@ -205,11 +204,9 @@ auto main(int argc, char *argv[]) -> int {
     blocklength = std::stoi(inputParser.getCmdOption("-bl"));
   }
 
-  std::optional<double> cutoff = std::nullopt;
+  double cutoff = haptics::encoder::DEFAULT_CUTOFF_FREQUENCY;
   if (inputParser.cmdOptionExists("-cf")) {
     cutoff = std::stod(inputParser.getCmdOption("-cf"));
-  } else {
-    cutoff = haptics::encoder::DEFAULT_CUTOFF_FREQUENCY;
   }
 
   bool enable_wavelet = !inputParser.cmdOptionExists("--disable-wavelet");
@@ -232,9 +229,6 @@ auto main(int argc, char *argv[]) -> int {
     return EXIT_FAILURE;
   }
   auto ahapConfig = generateEncodingConfig(bitrate, budget, blocklength, 0, enable_wavelet, false);
-  if (!bitrate.has_value() && !budget.has_value()) {
-    ahapConfig.curveFrequencyLimit = 0;
-  }
   if (ext == "ohm") {
     std::cout << "The OHM file to process : " << filename << std::endl;
     OHMData ohmData;
