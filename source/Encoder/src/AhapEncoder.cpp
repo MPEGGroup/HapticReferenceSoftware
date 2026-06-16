@@ -32,9 +32,12 @@
  */
 
 #include <Encoder/include/AhapEncoder.h>
+#include <Encoder/include/WaveletEncoder.h>
 #include <Tools/include/Tools.h>
+#include <Tools/include/WavParser.h>
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 
 #if defined(_MSC_VER)
@@ -64,7 +67,8 @@ const int ACTUAL_FREQUENCY_MAX = 300;
 namespace haptics::encoder {
 
 [[nodiscard]] auto AhapEncoder::encode(std::string &filename, haptics::types::Perception &out,
-                                       const unsigned int timescale) -> int {
+                                       const EncodingConfig &config, const unsigned int timescale)
+    -> int {
   if (out.getChannelsSize() > 1) {
     return EXIT_FAILURE;
   }
@@ -86,6 +90,7 @@ namespace haptics::encoder {
   }
 
   auto pattern = json["Pattern"].GetArray();
+  const auto ahapDirectory = std::filesystem::path(filename).parent_path();
 
   std::vector<std::pair<int, double>> amplitudes;
   std::vector<std::pair<int, double>> frequencies;
@@ -175,7 +180,121 @@ namespace haptics::encoder {
     b->addEffect(e);
   }
 
+  for (auto &e : pattern) {
+    if (!e.HasMember("Event") || e["Event"]["EventType"] != "AudioCustom") {
+      continue;
+    }
+
+    ret = extractAudioCustom(e["Event"].GetObject(), ahapDirectory, myChannel, config, timescale);
+    if (ret != EXIT_SUCCESS) {
+      std::cerr << "ERROR IN AUDIO CUSTOM EXTRACTION" << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
+
   out.replaceChannelAt(0, myChannel);
+  return EXIT_SUCCESS;
+}
+
+[[nodiscard]] auto AhapEncoder::extractAudioCustom(const rapidjson::Value::Object &event,
+                                                   const std::filesystem::path &ahapDirectory,
+                                                   types::Channel &channel,
+                                                   const EncodingConfig &config,
+                                                   const unsigned int timescale) -> int {
+  if (!config.wavelet_enabled) {
+    std::cerr << "AudioCustom AHAP events require wavelet encoding to be enabled" << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  if (!event.HasMember("Time") || !event["Time"].IsNumber() || !event.HasMember("EventType") ||
+      !event["EventType"].IsString() ||
+      std::string(event["EventType"].GetString()) != "AudioCustom" ||
+      !event.HasMember("EventWaveformPath") || !event["EventWaveformPath"].IsString()) {
+    return EXIT_FAILURE;
+  }
+
+  double audioVolume = 1.0;
+  if (event.HasMember("EventParameters") && event["EventParameters"].IsArray()) {
+    for (const auto &param : event["EventParameters"].GetArray()) {
+      if (!param.IsObject() || !param.HasMember("ParameterID") ||
+          !param["ParameterID"].IsString() || !param.HasMember("ParameterValue") ||
+          !param["ParameterValue"].IsNumber()) {
+        continue;
+      }
+      if (std::string(param["ParameterID"].GetString()) == "AudioVolume") {
+        audioVolume = param["ParameterValue"].GetDouble();
+      }
+    }
+  }
+
+  auto waveformPath = ahapDirectory / std::filesystem::path(event["EventWaveformPath"].GetString());
+  waveformPath = waveformPath.lexically_normal();
+
+  if (!std::filesystem::is_regular_file(waveformPath)) {
+    std::cerr << "External waveform file referenced by AHAP was not found, ignoring AudioCustom "
+                 "event: "
+              << waveformPath << std::endl;
+    return EXIT_SUCCESS;
+  }
+
+  haptics::tools::WavParser wavParser;
+  if (!wavParser.loadFile(waveformPath.string())) {
+    std::cerr << "Unable to load external waveform file referenced by AHAP: " << waveformPath
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  std::vector<double> signal;
+  const auto allChannels = wavParser.getAllSamples();
+  if (allChannels.empty()) {
+    std::cerr << "External waveform file does not contain any channel: " << waveformPath
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  signal.resize(allChannels.front().size(), 0.0);
+  for (const auto &samples : allChannels) {
+    if (samples.size() != signal.size()) {
+      std::cerr << "External waveform file has inconsistent channel sizes: " << waveformPath
+                << std::endl;
+      return EXIT_FAILURE;
+    }
+    for (size_t i = 0; i < samples.size(); i++) {
+      signal[i] += samples[i];
+    }
+  }
+
+  const auto normalizationFactor = static_cast<double>(allChannels.size());
+  for (auto &sample : signal) {
+    sample = std::clamp((sample / normalizationFactor) * audioVolume, -1.0, 1.0);
+  }
+
+  types::Band waveletBand;
+  WaveletEncoder waveletEncoder(config.wavelet_blockLength,
+                                static_cast<int>(wavParser.getSamplerate()));
+  if (!waveletEncoder.encodeSignal(signal, config.wavelet_bitbudget, 0, waveletBand, timescale)) {
+    return EXIT_FAILURE;
+  }
+
+  const int eventPosition =
+      static_cast<int>(std::round(event["Time"].GetDouble() * static_cast<double>(timescale)));
+  for (int effectIndex = 0; effectIndex < static_cast<int>(waveletBand.getEffectsSize());
+       effectIndex++) {
+    auto &effect = waveletBand.getEffectAt(effectIndex);
+    effect.setPosition(effect.getPosition() + eventPosition);
+  }
+
+  channel.addBand(waveletBand);
+  channel.setFrequencySampling(wavParser.getSamplerate());
+  const auto endPosition =
+      eventPosition + static_cast<int>(waveletBand.getBandTimeLength(timescale));
+  const auto sampleCount = static_cast<uint64_t>(
+      std::ceil(static_cast<double>(endPosition) * static_cast<double>(wavParser.getSamplerate()) /
+                static_cast<double>(timescale)));
+  if (!channel.getSampleCount().has_value() || sampleCount > channel.getSampleCount().value()) {
+    channel.setSampleCount(sampleCount);
+  }
+
   return EXIT_SUCCESS;
 }
 
