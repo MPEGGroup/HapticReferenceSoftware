@@ -215,8 +215,7 @@ auto Haptics::splitLongEffects(int maxEffectDuration) -> void {
   }
 }
 
-auto Haptics::equalsImpl(const Haptics &haptic, bool compareSyncs) const
-    -> bool {
+auto Haptics::equalsImpl(const Haptics &haptic, bool compareSyncs) const -> bool {
   if (version != haptic.getVersion()) {
     std::cerr << "Version fields are different" << std::endl;
     return false;

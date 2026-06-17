@@ -47,7 +47,7 @@ struct Vector {
   int8_t Z;
 
   explicit Vector() = default;
-  explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z){};
+  explicit Vector(int8_t x, int8_t y, int8_t z) : X(x), Y(y), Z(z) {};
 
   auto operator==(const Vector &other) const -> bool {
     return X == other.X && Y == other.Y && Z == other.Z;
@@ -71,7 +71,7 @@ public:
       , bands({})
       , frequencySampling(std::nullopt)
       , sampleCount(std::nullopt)
-      , direction(std::nullopt){};
+      , direction(std::nullopt) {};
 
   [[nodiscard]] auto getId() const -> int;
   auto setId(int newId) -> void;

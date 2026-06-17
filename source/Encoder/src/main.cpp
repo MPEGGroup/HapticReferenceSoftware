@@ -391,11 +391,10 @@ auto main(int argc, char *argv[]) -> int {
     }
     bool singlePacketEffect = inputParser.cmdOptionExists("-spe") ||
                               inputParser.cmdOptionExists("--single-packet-effect");
-    codeExit =
-        IOStream::writeFile(hapticFile, output, packetDuration,
-                            splitSilentUnits, minDuration, singlePacketEffect)
-            ? EXIT_SUCCESS
-            : EXIT_FAILURE;
+    codeExit = IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits,
+                                   minDuration, singlePacketEffect)
+                   ? EXIT_SUCCESS
+                   : EXIT_FAILURE;
   } else {
     IOJson::writeFile(hapticFile, output);
   }
