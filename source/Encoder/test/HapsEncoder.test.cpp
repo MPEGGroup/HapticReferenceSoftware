@@ -123,29 +123,43 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude i
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
 }
 
-TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude is < 0",
+TEST_CASE("haptics::encoder::HapsEncoder::extractTransients accepts negative amplitude values",
           "[extractTransients]") {
   const double kPositionShort = 0.1;
+  const int kLowerFrequencyLimit = 0;
+  const int kUpperFrequencyLimit = 100;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
   t.AddMember("position", kPositionShort, doc.GetAllocator());
   t.AddMember("amplitude", -kPositionShort, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
-  haptics::types::Band band;
-  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
+  haptics::types::Band band(haptics::types::BandType::Transient, kLowerFrequencyLimit,
+                            kUpperFrequencyLimit);
+  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_SUCCESS);
+  REQUIRE(band.getEffectsSize() == 1);
+  auto &keyframe = band.getEffectAt(0).getKeyframeAt(0);
+  REQUIRE(keyframe.getAmplitudeModulation().has_value());
+  REQUIRE(keyframe.getAmplitudeModulation().value() == Approx(-kPositionShort));
 }
 
-TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if amplitude is > 1",
+TEST_CASE("haptics::encoder::HapsEncoder::extractTransients clamps amplitude values > 1",
           "[extractTransients]") {
   const double kPositionShort = 0.1;
   const double kNormalizedTooHigh = 1.1;
+  const int kLowerFrequencyLimit = 0;
+  const int kUpperFrequencyLimit = 100;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
   t.AddMember("position", kPositionShort, doc.GetAllocator());
   t.AddMember("amplitude", kNormalizedTooHigh, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
-  haptics::types::Band band;
-  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
+  haptics::types::Band band(haptics::types::BandType::Transient, kLowerFrequencyLimit,
+                            kUpperFrequencyLimit);
+  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_SUCCESS);
+  REQUIRE(band.getEffectsSize() == 1);
+  auto &keyframe = band.getEffectAt(0).getKeyframeAt(0);
+  REQUIRE(keyframe.getAmplitudeModulation().has_value());
+  REQUIRE(keyframe.getAmplitudeModulation().value() == Approx(1.0));
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is not double",
@@ -160,29 +174,43 @@ TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is no
   REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
 }
 
-TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is < 0",
+TEST_CASE("haptics::encoder::HapsEncoder::extractTransients clamps pitch values < 0",
           "[extractTransients]") {
   const double kPositionShort = 0.1;
+  const int kLowerFrequencyLimit = 0;
+  const int kUpperFrequencyLimit = 100;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
   t.AddMember("position", kPositionShort, doc.GetAllocator());
   t.AddMember("pitch", -kPositionShort, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
-  haptics::types::Band band;
-  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
+  haptics::types::Band band(haptics::types::BandType::Transient, kLowerFrequencyLimit,
+                            kUpperFrequencyLimit);
+  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_SUCCESS);
+  REQUIRE(band.getEffectsSize() == 1);
+  auto &keyframe = band.getEffectAt(0).getKeyframeAt(0);
+  REQUIRE(keyframe.getFrequencyModulation().has_value());
+  REQUIRE(keyframe.getFrequencyModulation().value() == kLowerFrequencyLimit);
 }
 
-TEST_CASE("haptics::encoder::HapsEncoder::extractTransients fails if pitch is > 1",
+TEST_CASE("haptics::encoder::HapsEncoder::extractTransients clamps pitch values > 1",
           "[extractTransients]") {
   const double kPositionShort = 0.1;
   const double kNormalizedTooHigh = 1.1;
+  const int kLowerFrequencyLimit = 0;
+  const int kUpperFrequencyLimit = 100;
   rapidjson::Document doc(rapidjson::kArrayType);
   rapidjson::Value t(rapidjson::kObjectType);
   t.AddMember("position", kPositionShort, doc.GetAllocator());
   t.AddMember("pitch", kNormalizedTooHigh, doc.GetAllocator());
   doc.PushBack(t, doc.GetAllocator());
-  haptics::types::Band band;
-  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_FAILURE);
+  haptics::types::Band band(haptics::types::BandType::Transient, kLowerFrequencyLimit,
+                            kUpperFrequencyLimit);
+  REQUIRE(HapsEncoder::extractTransients(doc.GetArray(), &band, timescale) == EXIT_SUCCESS);
+  REQUIRE(band.getEffectsSize() == 1);
+  auto &keyframe = band.getEffectAt(0).getKeyframeAt(0);
+  REQUIRE(keyframe.getFrequencyModulation().has_value());
+  REQUIRE(keyframe.getFrequencyModulation().value() == kUpperFrequencyLimit);
 }
 
 TEST_CASE("haptics::encoder::HapsEncoder::extractTransients succeeds on minimal valid input",

@@ -94,6 +94,7 @@ public:
   auto EvaluationBand(uint32_t sampleCount, int fs, int pad, unsigned int timescale)
       -> std::vector<double>;
   auto getBandTimeLength(unsigned int timescale) -> double;
+  auto splitLongEffects(int maxEffectDuration) -> void;
   //[[nodiscard]] auto getTimescale() const -> int;
   // auto setTimescale(int newTimescale) -> void;
   [[nodiscard]] auto equals(const Band &band) const -> bool;

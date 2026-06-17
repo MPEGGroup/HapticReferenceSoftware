@@ -107,8 +107,11 @@ auto help() -> void {
       << "\t-md, --min-duration <MS>\tMinimum duration of the output file in milliseconds. "
          "If the input is shorter, silence will be added at the end"
       << std::endl
-      << "\t-nse, --no-split-effects\tDo not split effects across packets. Each effect is written "
-         "entirely in its first packet, even if its keyframes extend beyond the packet duration"
+      << "\t-spe, --single-packet-effect\tWrite each effect entirely in a single packet "
+         "(its first packet), even if keyframes extend beyond packet duration"
+      << std::endl
+      << "\t-sle, --split-long-effects <TICKS>\tSplit effects longer than <TICKS> into chunks "
+         "for keyframe relative_position limits"
       << std::endl
       << std::endl;
 }
@@ -337,6 +340,40 @@ auto main(int argc, char *argv[]) -> int {
               << std::endl;
   }
 
+  std::optional<int> maxEffectDuration = std::nullopt;
+  if (inputParser.cmdOptionExists("-sle")) {
+    const auto value = inputParser.getCmdOption("-sle");
+    if (value.empty()) {
+      std::cerr << "ERROR: -sle requires a <TICKS> argument" << std::endl;
+      return EXIT_FAILURE;
+    }
+    try {
+      maxEffectDuration = std::stoi(value);
+    } catch (...) {
+      std::cerr << "ERROR: -sle value must be an integer" << std::endl;
+      return EXIT_FAILURE;
+    }
+  } else if (inputParser.cmdOptionExists("--split-long-effects")) {
+    const auto value = inputParser.getCmdOption("--split-long-effects");
+    if (value.empty()) {
+      std::cerr << "ERROR: --split-long-effects requires a <TICKS> argument" << std::endl;
+      return EXIT_FAILURE;
+    }
+    try {
+      maxEffectDuration = std::stoi(value);
+    } catch (...) {
+      std::cerr << "ERROR: --split-long-effects value must be an integer" << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
+  if (maxEffectDuration.has_value()) {
+    if (maxEffectDuration.value() <= 0) {
+      std::cerr << "ERROR: split-long-effects value must be > 0" << std::endl;
+      return EXIT_FAILURE;
+    }
+    hapticFile.splitLongEffects(maxEffectDuration.value());
+  }
+
   if (inputParser.cmdOptionExists("-b") || inputParser.cmdOptionExists("--binary")) {
     //  IOBinary::writeFile(hapticFile, output);
     //} else if (inputParser.cmdOptionExists("-s") || inputParser.cmdOptionExists("--streaming")) {
@@ -352,10 +389,10 @@ auto main(int argc, char *argv[]) -> int {
     } else if (inputParser.cmdOptionExists("--min-duration")) {
       minDuration = std::stoi(inputParser.getCmdOption("--min-duration"));
     }
-    bool noSplitEffects =
-        inputParser.cmdOptionExists("-nse") || inputParser.cmdOptionExists("--no-split-effects");
+    bool singlePacketEffect = inputParser.cmdOptionExists("-spe") ||
+                              inputParser.cmdOptionExists("--single-packet-effect");
     codeExit = IOStream::writeFile(hapticFile, output, packetDuration, splitSilentUnits,
-                                   minDuration, noSplitEffects)
+                                   minDuration, singlePacketEffect)
                    ? EXIT_SUCCESS
                    : EXIT_FAILURE;
   } else {

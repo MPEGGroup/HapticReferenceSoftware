@@ -117,7 +117,7 @@ public:
     unsigned int durationDeviation = DEFAULT_DURATION_DEVIATION;
     bool overlapping = false;
     bool splitSilentUnits = false;
-    bool noSplitEffects = false;
+    bool singlePacketEffect = false;
     int minDuration = 0;
     types::Haptics haptic;
     types::Perception perception;
@@ -158,13 +158,13 @@ public:
   static auto loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool>> &bitset) -> bool;
   static auto writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration,
                         bool splitSilentUnits = false, int minDuration = 0,
-                        bool noSplitEffects = false) -> bool;
+                        bool singlePacketEffect = false) -> bool;
   static auto writeUnitFile(types::Haptics &haptic, const std::string &filePath, int packetDuration)
       -> bool;
 
   static auto writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
                          int packetDuration, bool splitSilentUnits = false, int minDuration = 0,
-                         bool noSplitEffects = false) -> bool;
+                         bool singlePacketEffect = false) -> bool;
 
   static auto writeMIHSUnit(MIHSUnitType unitType, std::vector<std::vector<bool>> &listPackets,
                             std::vector<bool> &mihsunit, StreamWriter &swriter) -> bool;

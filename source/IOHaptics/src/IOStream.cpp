@@ -43,7 +43,7 @@
 namespace haptics::io {
 
 auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, int packetDuration,
-                         bool splitSilentUnits, int minDuration, bool noSplitEffects) -> bool {
+                         bool splitSilentUnits, int minDuration, bool singlePacketEffect) -> bool {
   std::ofstream file(filePath, std::ios::out | std::ios::binary);
   if (!file) {
     std::cerr << filePath << ": Cannot open file!" << std::endl;
@@ -52,7 +52,7 @@ auto IOStream::writeFile(types::Haptics &haptic, const std::string &filePath, in
 
   std::vector<std::vector<bool>> packetsBytes = std::vector<std::vector<bool>>();
   bool success = writeUnits(haptic, packetsBytes, packetDuration, splitSilentUnits, minDuration,
-                            noSplitEffects);
+                            singlePacketEffect);
   std::vector<bool> binary = std::vector<bool>();
   if (success) {
     for (auto &packet : packetsBytes) {
@@ -211,14 +211,14 @@ auto IOStream::loadMemory(std::vector<uint8_t> &in, std::vector<std::vector<bool
 
 auto IOStream::writeUnits(types::Haptics &haptic, std::vector<std::vector<bool>> &bitstream,
                           int packetDuration, bool splitSilentUnits, int minDuration,
-                          bool noSplitEffects) -> bool {
+                          bool singlePacketEffect) -> bool {
   StreamWriter swriter;
   swriter.haptic = haptic;
   swriter.packetDuration = packetDuration;
   swriter.timescale = haptic.getTimescaleOrDefault();
   swriter.splitSilentUnits = splitSilentUnits;
   swriter.minDuration = minDuration;
-  swriter.noSplitEffects = noSplitEffects;
+  swriter.singlePacketEffect = singlePacketEffect;
   std::vector<std::vector<bool>> initPackets = std::vector<std::vector<bool>>();
   writeMIHSPacket(MIHSPacketType::MetadataHaptics, swriter, initPackets);
   writeMIHSPacket(MIHSPacketType::MetadataPerception, swriter, initPackets);
@@ -2490,9 +2490,9 @@ auto IOStream::createPayloadPacket(StreamWriter &swriter, std::vector<std::vecto
       effect.setId(nextId);
     }
 
-    // When noSplitEffects is enabled, only process effects that START in this packet
+    // When singlePacketEffect is enabled, only process effects that START in this packet
     // (not effects that started earlier but extend into this packet)
-    if (swriter.noSplitEffects) {
+    if (swriter.singlePacketEffect) {
       if (effect.getPosition() >= swriter.time &&
           effect.getPosition() < swriter.time + static_cast<int>(swriter.packetDuration)) {
         // Effect starts in this packet - write it completely
@@ -3032,8 +3032,8 @@ auto IOStream::writeEffectBasis(types::Effect effect, StreamWriter &swriter, int
     rau = false;
   }
 
-  // When noSplitEffects is enabled, write all keyframes in the first packet
-  if (swriter.noSplitEffects) {
+  // When singlePacketEffect is enabled, write all keyframes in the first packet
+  if (swriter.singlePacketEffect) {
     for (auto j = 0; j < static_cast<int>(effect.getKeyframesSize()); j++) {
       types::Keyframe kf = effect.getKeyframeAt(j);
       int currentTime = kf.getRelativePosition().value() + tsFX;

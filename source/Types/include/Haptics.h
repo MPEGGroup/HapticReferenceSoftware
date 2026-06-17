@@ -90,6 +90,7 @@ public:
   auto extractMetadataToOHM(std::string &filename) -> haptics::tools::OHMData;
   auto linearize() -> void;
   auto refactor() -> void;
+  auto splitLongEffects(int maxEffectDuration) -> void;
   [[nodiscard]] auto equals(const Haptics &haptic) const -> bool;
   [[nodiscard]] auto equalsWithoutSyncs(const Haptics &haptic) const -> bool;
 
