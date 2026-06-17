@@ -487,7 +487,8 @@ public:
           hjifWarningCodeToString.at(hjifWarningCode::Channel_MixingCoefficient_OutOfRange));
     }
 
-    if (channel.getBodyPartMask() > MAX_32_BITS_UNSIGNED) {
+    auto bodyPartMask = channel.getBodyPartMask();
+    if (bodyPartMask.has_value() && bodyPartMask.value() > MAX_32_BITS_UNSIGNED) {
       logs.push_back(hjifWarningCodeToString.at(hjifWarningCode::Channel_BodyPartMask_OutOfRange));
     }
 

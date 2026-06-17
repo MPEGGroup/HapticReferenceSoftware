@@ -93,6 +93,14 @@ struct EncodingConfig {
                           enable_vectorial);
   }
 
+  auto static generateConfigBlockLength(double curveFrequencyLimit, bool enable_wavelet,
+                                        bool enable_vectorial,
+                                        int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)
+      -> EncodingConfig {
+    return EncodingConfig(curveFrequencyLimit, wavelet_blockLength, DEFAULT_BIT_BUDGET,
+                          enable_wavelet, enable_vectorial);
+  }
+
   auto static generateConfigParam(int bitrate, double curveFrequencyLimit, bool enable_wavelet,
                                   bool enable_vectorial,
                                   int wavelet_blockLength = DEFAULT_BLOCK_LENGTH_SMP)

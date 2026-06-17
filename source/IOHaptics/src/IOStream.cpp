@@ -402,6 +402,16 @@ auto IOStream::readMIHSUnit(std::vector<bool> &mihsunit, StreamReader &sreader, 
   if (!IOConformance::checkMIHSUnitSyncWhenInit(sreader, sync)) {
     return false;
   }
+  if (sync && unitType != MIHSUnitType::Initialization) {
+    const auto currentTimestamp = static_cast<uint64_t>(sreader.time);
+    const auto syncCount = sreader.haptic.getSyncsSize();
+    if (syncCount == 0 ||
+        sreader.haptic.getSyncsAt(static_cast<int>(syncCount) - 1).getTimestamp() !=
+            currentTimestamp) {
+      auto hapticSync = types::Sync(currentTimestamp, sreader.timescale);
+      sreader.haptic.addSync(hapticSync);
+    }
+  }
   if (sreader.waitSync && sync) {
     sreader.waitSync = false;
   }
@@ -1958,10 +1968,15 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
   bufBits.clear();
 
   auto optionalMetadataMask = (uint8_t)0b0000'0000;
-  if (swriter.channel.getActuatorResolution().has_value()) {
-    optionalMetadataMask |= (uint8_t)0b0000'0010;
-  } else {
+  const bool hasBodyPartMask = swriter.channel.getBodyPartMask().has_value();
+  const bool hasActuatorMetadata = swriter.channel.getActuatorResolution().has_value() ||
+                                   swriter.channel.getBodyPartTarget().has_value() ||
+                                   swriter.channel.getActuatorTarget().has_value();
+  if (hasBodyPartMask) {
     optionalMetadataMask |= (uint8_t)0b0000'0001;
+  }
+  if (hasActuatorMetadata) {
+    optionalMetadataMask |= (uint8_t)0b0000'0010;
   }
   if (swriter.channel.getDirection().has_value()) {
     optionalMetadataMask |= (uint8_t)0b0000'0100;
@@ -1970,11 +1985,27 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
   valueStr = optionalMetadataMaskBits.to_string();
   IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
   if ((optionalMetadataMask & (uint8_t)0b0000'0001) != 0) {
-    std::bitset<MDCHANNEL_BODY_PART_MASK> bodyPartMaskBits(swriter.channel.getBodyPartMask());
+    std::bitset<MDCHANNEL_BODY_PART_MASK> bodyPartMaskBits(
+        swriter.channel.getBodyPartMask().value_or(0));
     valueStr = bodyPartMaskBits.to_string();
     IOBinaryPrimitives::writeStrBits(valueStr, bitstream);
-  } else if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
-    types::Vector channelResolution = swriter.channel.getActuatorResolution().value();
+  }
+  if ((optionalMetadataMask & (uint8_t)0b0000'0010) != 0) {
+    auto channelResolution = swriter.channel.getActuatorResolution().value_or(
+        types::Vector(static_cast<int8_t>(1), static_cast<int8_t>(1), static_cast<int8_t>(1)));
+    std::vector<types::Vector> actuatorTarget =
+        swriter.channel.getActuatorTarget().value_or(std::vector<types::Vector>{});
+    for (const auto &target : actuatorTarget) {
+      if (target.X >= channelResolution.X) {
+        channelResolution.X = static_cast<int8_t>(target.X + 1);
+      }
+      if (target.Y >= channelResolution.Y) {
+        channelResolution.Y = static_cast<int8_t>(target.Y + 1);
+      }
+      if (target.Z >= channelResolution.Z) {
+        channelResolution.Z = static_cast<int8_t>(target.Z + 1);
+      }
+    }
     IOBinaryPrimitives::writeVector(channelResolution, bitstream);
 
     std::vector<types::BodyPartTarget> bodyPartTarget =
@@ -1987,8 +2018,6 @@ auto IOStream::writeMetadataChannel(StreamWriter &swriter, std::vector<bool> &bi
           static_cast<uint8_t>(bodyPartTarget[i]), bitstream);
     }
 
-    std::vector<types::Vector> actuatorTarget =
-        swriter.channel.getActuatorTarget().value_or(std::vector<types::Vector>{});
     auto actuatorTargetCount = static_cast<uint8_t>(actuatorTarget.size());
     IOBinaryPrimitives::writeNBits<uint8_t, MDCHANNEL_ACTUATOR_TARGET_COUNT>(actuatorTargetCount,
                                                                              bitstream);
@@ -2092,7 +2121,8 @@ auto IOStream::readMetadataChannel(StreamReader &sreader, std::vector<bool> &bit
   if ((optionalMetadataMask & 0b0000'0001) != 0) {
     uint32_t bodyPartMask = IOBinaryPrimitives::readUInt(bitstream, idx, MDCHANNEL_BODY_PART_MASK);
     sreader.channel.setBodyPartMask(bodyPartMask);
-  } else if ((optionalMetadataMask & 0b0000'0010) != 0) {
+  }
+  if ((optionalMetadataMask & 0b0000'0010) != 0) {
     auto Xr = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
     auto Yr = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));
     auto Zr = static_cast<int8_t>(IOBinaryPrimitives::readUInt(bitstream, idx, VECTOR_AXIS_SIZE));

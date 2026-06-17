@@ -31,6 +31,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <IOHaptics/include/IOBinaryFields.h>
+#include <IOHaptics/include/IOBinaryPrimitives.h>
 #include <IOHaptics/include/IOStream.h>
 #include <catch2/catch.hpp>
 #include <filesystem>
@@ -116,6 +118,11 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   haptics::types::Channel testingChannel0(testingId_channel0, testingDescription_channel0,
                                           testingGain_channel0, testingMixingWeight_channel0,
                                           testingBodyPartMask_channel0);
+  testingChannel0.setActuatorResolution(haptics::types::Vector{2, 2, 2});
+  testingChannel0.setBodyPartTarget(
+      std::vector<haptics::types::BodyPartTarget>{haptics::types::BodyPartTarget::Unknown});
+  testingChannel0.setActuatorTarget(std::vector<haptics::types::Vector>{
+      haptics::types::Vector{0, 0, 0}, haptics::types::Vector{1, 1, 1}});
   for (auto vertex : testingVertices_channel0) {
     testingChannel0.addVertex(vertex);
   }
@@ -138,6 +145,9 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
   haptics::types::Channel testingChannel2(testingId_channel2, testingDescription_channel2,
                                           testingGain_channel2, testingMixingWeight_channel2,
                                           testingBodyPartMask_channel2);
+  testingChannel2.setBodyPartMask(std::nullopt);
+  testingChannel2.setBodyPartTarget(
+      std::vector<haptics::types::BodyPartTarget>{haptics::types::BodyPartTarget::Unknown});
   for (auto vertex : testingVertices_channel2) {
     testingChannel2.addVertex(vertex);
   }
@@ -371,6 +381,16 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readChannel0.getGain() - testingChannel0.getGain() < floatPrecision);
     CHECK(readChannel0.getMixingWeight() - testingChannel0.getMixingWeight() < floatPrecision);
     CHECK(readChannel0.getBodyPartMask() == testingChannel0.getBodyPartMask());
+    REQUIRE(readChannel0.getActuatorResolution().has_value());
+    REQUIRE(testingChannel0.getActuatorResolution().has_value());
+    CHECK(readChannel0.getActuatorResolution().value() ==
+          testingChannel0.getActuatorResolution().value());
+    REQUIRE(readChannel0.getBodyPartTarget().has_value());
+    REQUIRE(testingChannel0.getBodyPartTarget().has_value());
+    CHECK(readChannel0.getBodyPartTarget().value() == testingChannel0.getBodyPartTarget().value());
+    REQUIRE(readChannel0.getActuatorTarget().has_value());
+    REQUIRE(testingChannel0.getActuatorTarget().has_value());
+    CHECK(readChannel0.getActuatorTarget().value() == testingChannel0.getActuatorTarget().value());
     CHECK(readChannel0.getFrequencySampling() == testingChannel0.getFrequencySampling());
     if (readChannel0.getFrequencySampling() > 0) {
       CHECK(readChannel0.getSampleCount() == testingChannel0.getSampleCount());
@@ -398,6 +418,12 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     CHECK(readChannel1.getGain() - testingChannel2.getGain() < floatPrecision);
     CHECK(readChannel1.getMixingWeight() - testingChannel2.getMixingWeight() < floatPrecision);
     CHECK(readChannel1.getBodyPartMask() == testingChannel2.getBodyPartMask());
+    REQUIRE(readChannel1.getActuatorResolution().has_value());
+    const haptics::types::Vector defaultSynthesizedResolution{1, 1, 1};
+    CHECK(readChannel1.getActuatorResolution().value() == defaultSynthesizedResolution);
+    REQUIRE(readChannel1.getBodyPartTarget().has_value());
+    REQUIRE(testingChannel2.getBodyPartTarget().has_value());
+    CHECK(readChannel1.getBodyPartTarget().value() == testingChannel2.getBodyPartTarget().value());
     CHECK(readChannel1.getFrequencySampling() == testingChannel2.getFrequencySampling());
     if (readChannel1.getFrequencySampling() > 0) {
       CHECK(readChannel1.getSampleCount() == testingChannel2.getSampleCount());
@@ -476,5 +502,83 @@ TEST_CASE("Write/Read Haptic databand as streamable packet") {
     IOStream::readFile(filepath, readHaptic, false);
 
     REQUIRE(succeed);
+  }
+
+  SECTION("Sync flags from temporal unit headers are preserved on decode") {
+    std::vector<std::vector<bool>> bitstream = std::vector<std::vector<bool>>();
+    bool succeed = IOStream::writeUnits(testingHaptic, bitstream, PACKET_DURATION);
+    REQUIRE(succeed);
+    REQUIRE(bitstream.size() > 1);
+
+    auto decodeToHaptic = [](std::vector<std::vector<bool>> &stream, haptics::types::Haptics &out) {
+      bool decoded = true;
+      IOStream::StreamReader localBuffer = IOStream::initializeStream();
+      IOStream::CRC localCrc;
+      for (auto &packetBits : stream) {
+        decoded &= IOStream::readMIHSUnit(packetBits, localBuffer, localCrc);
+      }
+      out = localBuffer.haptic;
+      return decoded;
+    };
+
+    haptics::types::Haptics baselineHaptic;
+    REQUIRE(decodeToHaptic(bitstream, baselineHaptic));
+
+    size_t temporalUnitIdx = 0;
+    uint64_t expectedTimestamp = 0;
+    bool foundTemporalUnit = false;
+    uint64_t currentTimestamp = 0;
+    for (size_t i = 0; i < bitstream.size(); i++) {
+      int headerIndex = 0;
+      const auto unitType = haptics::io::IOBinaryPrimitives::readUInt(bitstream[i], headerIndex,
+                                                                      haptics::io::UNIT_TYPE);
+      const auto unitSync = haptics::io::IOBinaryPrimitives::readUInt(bitstream[i], headerIndex,
+                                                                      haptics::io::UNIT_SYNC);
+      headerIndex += haptics::io::UNIT_LAYER;
+      const auto unitDuration = haptics::io::IOBinaryPrimitives::readUInt(
+          bitstream[i], headerIndex, haptics::io::UNIT_DURATION);
+      if (unitType == static_cast<int>(haptics::io::MIHSUnitType::Temporal)) {
+        bool timestampAlreadyPresent = false;
+        for (size_t syncIdx = 0; syncIdx < baselineHaptic.getSyncsSize(); syncIdx++) {
+          if (baselineHaptic.getSyncsAt(static_cast<int>(syncIdx)).getTimestamp() ==
+              currentTimestamp) {
+            timestampAlreadyPresent = true;
+            break;
+          }
+        }
+        if (unitSync != 0 && !timestampAlreadyPresent) {
+          temporalUnitIdx = i;
+          expectedTimestamp = currentTimestamp;
+          foundTemporalUnit = true;
+          break;
+        }
+      }
+      currentTimestamp += static_cast<uint64_t>(unitDuration);
+    }
+
+    REQUIRE(foundTemporalUnit);
+    auto &temporalUnit = bitstream[temporalUnitIdx];
+    REQUIRE(temporalUnit.size() >=
+            static_cast<size_t>(haptics::io::UNIT_TYPE + haptics::io::UNIT_SYNC));
+    temporalUnit[haptics::io::UNIT_TYPE] = false;
+    temporalUnit[haptics::io::UNIT_TYPE + 1] = false;
+
+    haptics::types::Haptics readHaptic;
+    IOStream::StreamReader buffer = IOStream::initializeStream();
+    IOStream::CRC crc;
+    for (auto &packetBits : bitstream) {
+      succeed &= IOStream::readMIHSUnit(packetBits, buffer, crc);
+    }
+
+    REQUIRE(succeed);
+    readHaptic = buffer.haptic;
+    bool foundExpectedSync = false;
+    for (size_t syncIdx = 0; syncIdx < readHaptic.getSyncsSize(); syncIdx++) {
+      if (readHaptic.getSyncsAt(static_cast<int>(syncIdx)).getTimestamp() == expectedTimestamp) {
+        foundExpectedSync = true;
+        break;
+      }
+    }
+    CHECK(foundExpectedSync);
   }
 }

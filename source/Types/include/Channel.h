@@ -84,8 +84,9 @@ public:
   auto setGain(float newGain) -> void;
   [[nodiscard]] auto getMixingWeight() const -> float;
   auto setMixingWeight(float newMixingWeight) -> void;
-  [[nodiscard]] auto getBodyPartMask() const -> uint32_t;
-  auto setBodyPartMask(uint32_t newBodyPartMask) -> void;
+  [[nodiscard]] auto getBodyPartMask() const -> std::optional<uint32_t>;
+  [[nodiscard]] auto getBodyPartMaskOrDefault() const -> uint32_t;
+  auto setBodyPartMask(std::optional<uint32_t> newBodyPartMask) -> void;
   [[nodiscard]] auto getReferenceDeviceId() const -> std::optional<int>;
   auto setReferenceDeviceId(int newReferenceDeviceId) -> void;
   auto getVerticesSize() -> size_t;
@@ -131,7 +132,7 @@ private:
   std::string description;
   float gain = 1;
   float mixingWeight = 1;
-  uint32_t bodyPartMask = 0;
+  std::optional<uint32_t> bodyPartMask = std::nullopt;
   std::vector<int> vertices = {};
   std::vector<Band> bands = {};
   std::optional<int> priority;
