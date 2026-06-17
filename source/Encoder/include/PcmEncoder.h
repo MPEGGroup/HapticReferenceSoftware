@@ -73,7 +73,7 @@ struct EncodingConfig {
       , wavelet_blockLength(_wavelet_blockLength)
       , wavelet_bitbudget(_wavelet_bitbudget)
       , wavelet_enabled(_wavelet_enabled)
-      , vectorial_enabled(_vectorial_enabled) {};
+      , vectorial_enabled(_vectorial_enabled){};
 
   auto static generateDefaultConfig(bool enable_wavelet, bool enable_vectorial) -> EncodingConfig {
 
